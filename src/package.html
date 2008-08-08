@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
-2008.07.01</h1>
+2008.08.08</h1>
 
 <p>This product is available via the <a href="#LicenseAgreement">open source
 license</a> described at the end of this document.</p>
@@ -342,22 +342,25 @@ license</a> described at the end of this document.</p>
       <li><a href="#recordType6">dbd/recordType/calc</a>
         <ul>
           <li><a href="#Overview7">Overview</a></li>
-          <li><a href="#calcDouble">calcDouble</a>
+          <li><a href="#calcArgArr">calcArgArray</a></li>
+          <li><a href="#Calculatio">Calculation Structures and Records</a>
             <ul>
-              <li><a href="#calcDouble1">calcDoubleCommon.xml</a></li>
-              <li><a href="#calcDouble2">calcDoubleRecord.xml</a></li>
-            </ul>
-          </li>
-          <li><a href="#calcDouble3">calcDoubleArray</a>
-            <ul>
-              <li><a href="#calcDouble4">calcDoubleArrayCommon.xml</a></li>
-              <li><a href="#calcDouble5">calcDoubleArrayRecord.xml</a></li>
-            </ul>
-          </li>
-          <li><a href="#calcBoolea">calcBooleanArray</a>
-            <ul>
-              <li><a href="#calcBoolea1">calcBooleanArrayCommon.xml</a></li>
-              <li><a href="#calcBoolea2">calcBooleanArrayRecord.xml</a></li>
+              <li><a href="#boolean2">boolean</a></li>
+              <li><a href="#byte1">byte</a></li>
+              <li><a href="#short1">short</a></li>
+              <li><a href="#int1">int</a></li>
+              <li><a href="#long1">long</a></li>
+              <li><a href="#float1">float</a></li>
+              <li><a href="#double1">double</a></li>
+              <li><a href="#string1">string</a></li>
+              <li><a href="#boolean3">boolean array</a></li>
+              <li><a href="#byte2">byte array</a></li>
+              <li><a href="#short2">short array</a></li>
+              <li><a href="#array">int array</a></li>
+              <li><a href="#long2">long array</a></li>
+              <li><a href="#float2">float array</a></li>
+              <li><a href="#double2">double array</a></li>
+              <li><a href="#string2">string array</a></li>
             </ul>
           </li>
         </ul>
@@ -2820,16 +2823,16 @@ org.epics.ioc.support for details.</p>
 &lt;structure name = "monitorType" createName = "enumerated" &gt;
   &lt;field name = "index" type = "int" /&gt;
   &lt;field name = "choice" type = "string" /&gt;
-  &lt;file name = "choices" type = "array" elementType = "string"
-   default = "put change absoluteChange percentageChange" /&gt;
+  &lt;field name = "choices" type = "array" elementType = "string"
+     default = "put change absoluteChange percentageChange" /&gt; 
 &lt;/structure&gt;
 
-&lt;structure name = "processSupport"&gt;
+&lt;structure name = "processSupport" supportName = "processSupport" &gt;
   &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "monitorSupport"&gt;
+&lt;structure name = "monitorSupport" supportName = "monitorSupport" &gt;
   &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "type" type = "structure" structureName = "monitorType"
@@ -2840,43 +2843,37 @@ org.epics.ioc.support for details.</p>
   &lt;field name = "process" type = "boolean"&gt;
       &lt;!-- process this record when monitor occurs --&gt;
   &lt;/field&gt;
-  &lt;field name = "propertyNames" type = "string" &gt;
-      &lt;!-- only applicable if process is true --&gt;
-  &lt;/field&gt;
+  &lt;field name = "propertyNames" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "monitorNotifySupport"&gt;
+&lt;structure name = "monitorNotifySupport" supportName = "monitorNotifySupport" &gt;
   &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
-  &lt;field name = "type" type = "structure" structureName = "monitorType"
-     default = "change" /&gt;
-  &lt;field name = "deadband" type = "double" /&gt;
-  &lt;field name = "onlyWhileProcessing" type = "boolean" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "inputSupport"&gt;
+&lt;structure name = "inputSupport" supportName = "inputSupport" &gt;
   &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "process" type = "boolean" /&gt;
   &lt;field name = "propertyNames" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "outputSupport"&gt;
+&lt;structure name = "outputSupport" supportName = "outputSupport" &gt;
   &lt;field name = "providerName" type = "string" default = "local" /&gt;
   &lt;field name = "pvname" type = "string" link = "true" /&gt;
   &lt;field name = "process" type = "boolean" /&gt;
 &lt;/structure&gt;
 
 &lt;support name = "processSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
 &lt;support name = "monitorSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
 &lt;support name = "monitorNotifySupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
 &lt;support name = "inputSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
 &lt;support name = "outputSupport"
-  factoryName = "org.epics.ioc.support.CASupportFactory" /&gt;
+  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 
@@ -3045,22 +3042,114 @@ details. Note that at the present time there is no support equivalent to
 EPICS calcPerform. </p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
+&lt;structure name = "calcBooleanArg" &gt;
+  &lt;field name = "value" type = "boolean" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcByteArg" &gt;
+  &lt;field name = "value" type = "byte" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcShortArg" &gt;
+  &lt;field name = "value" type = "short" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcIntArg" &gt;
+  &lt;field name = "value" type = "int" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcLongArg" &gt;
+  &lt;field name = "value" type = "long" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcFloatArg" &gt;
+  &lt;field name = "value" type = "float" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcDoubleArg" &gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcStringArg" &gt;
+  &lt;field name = "value" type = "string" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+
+
+&lt;structure name = "calcBooleanArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "boolean" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcByteArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "byte" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcShortArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "short" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcIntArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "int" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcLongArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "long" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcFloatArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "float" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcDoubleArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "double" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcStringArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "string" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
 
 &lt;support name = "calcArgArray"
-   factoryName = "org.epics.ioc.support.CalcArgArrayFactory" /&gt;
+ factoryName = "org.epics.ioc.support.calc.CalcArgArrayFactory" /&gt;
 
+&lt;structure name = "expressionCalculator" supportName = "expressionCalculator" &gt;
+  &lt;field name = "expression" type = "string" /&gt;
+&lt;/structure&gt;
 
-&lt;!-- example calculators --&gt;
-
-&lt;linkSupport name = "counterCalculator"
-   factoryName = "org.epics.ioc.support.CounterCalculatorFactory" /&gt;
-
-&lt;linkSupport name = "arrayIncrementCalculator"
-   factoryName = "org.epics.ioc.support.ArrayIncrementCalculatorFactory" /&gt;
-
-&lt;linkSupport name = "booleanArrayToggleCalculator"
-   factoryName = "org.epics.ioc.support.BooleanArrayToggleCalculatorFactory" /&gt;
-
+&lt;support name = "expressionCalculator"
+ factoryName = "org.epics.ioc.support.calc.ExpressionCalculatorFactory" /&gt;
 
 &lt;/DBDefinition&gt;</pre>
 <hr />
@@ -3958,25 +4047,19 @@ the is the event name.</p>
 <h4 id="Overview7">Overview</h4>
 
 <p>This defines recordTypes and structures for calculations. Definitions are
-available for calculating a double, an array of doubles, and an array of
-booleans. Other types can easily be defined. What the calculation doews is
-determined by the calculation field, which is a link. Currently only three
-test calculations are implemented: CounterCalculator implements a simple
-counter. ArrayIncrementCalculator increments element of an array.
-BooleanArrayToggleCalculator toggles each element of a booleran array between
-false and true.</p>
+available for all primitive types and arrays of primitive types. A general
+purpose expression calculator is available for scalar expressions. General
+purpose expression calculators for strings and arrays of scalars should also
+be provided. Special purpose calculation mopdules can be implemented. See
+package org.epics.iooc.support.calc for details about calculations.</p>
 
-<p>It is envisioned that general purpose calculators will be developed.
-Support equvalent to the EPICS calcPerform, stringCalc, and arrayCalc should
-be created.</p>
+<h4 id="calcArgArr">calcArgArray</h4>
 
-<p>The remaining fields should be usable by a wide variety of calculations.
-The most important field is calcArgArray, which is an array of structures.
-Each element of calcArgArray is an argument for the calculation. The exact
-type of structure for the elements of calcArgArray is determined by the
-calculation but if thye following fields appear than support calcArgArray
-will do the I/O and also provide an addition method getPVField, which returns
-a PV interface for reading an argument value.:</p>
+<p>Each calculation structure and record type has field named calcArgArray
+which is an array of structures. Each element of calcArgArray is an argument
+for the calculation. The exact type of structure for the elements of
+calcArgArray is determined by the calculation but every structure must
+contain the fields:</p>
 <dl>
   <dt>value</dt>
     <dd>A place to put the value for the argument.</dd>
@@ -3987,9 +4070,370 @@ a PV interface for reading an argument value.:</p>
       calcArgArray calls it and has the support put the result in value.</dd>
 </dl>
 
-<h4 id="calcDouble">calcDouble</h4>
+<p>The following is a set of definitions for all primitive types and arrays
+of primitive types:</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcBooleanArg" &gt;
+  &lt;field name = "value" type = "boolean" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "booleanAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcByteArg" &gt;
+  &lt;field name = "value" type = "byte" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "byteAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcShortArg" &gt;
+  &lt;field name = "value" type = "short" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "shortAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcIntArg" &gt;
+  &lt;field name = "value" type = "int" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "intAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcLongArg" &gt;
+  &lt;field name = "value" type = "long" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "longAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcFloatArg" &gt;
+  &lt;field name = "value" type = "float" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "floatAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcDoubleArg" &gt;
+  &lt;field name = "value" type = "double" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+  &lt;!-- instance can set structureName = "longAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcStringArg" &gt;
+  &lt;field name = "value" type = "string" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
 
-<h5 id="calcDouble1">calcDoubleCommon.xml</h5>
+&lt;structure name = "calcBooleanArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "boolean" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcByteArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "byte" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcShortArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "short" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcIntArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "int" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcLongArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "long" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcFloatArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "float" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcDoubleArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "double" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "calcStringArrayArg" &gt;
+  &lt;field name = "value" type = "array"  elementType = "string" /&gt;
+  &lt;field name = "name" type = "string" /&gt;
+  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure" structureName = "null" /&gt;
+&lt;/structure&gt;
+
+&lt;support name = "calcArgArray"
+ factoryName = "org.epics.ioc.support.calc.CalcArgArrayFactory" /&gt;
+
+&lt;structure name = "expressionCalculator" supportName = "expressionCalculator" &gt;
+  &lt;field name = "expression" type = "string" /&gt;
+&lt;/structure&gt;
+
+&lt;support name = "expressionCalculator"
+ factoryName = "org.epics.ioc.support.calc.ExpressionCalculatorFactory" /&gt;
+
+&lt;/DBDefinition&gt;</pre>
+
+<h4 id="Calculatio">Calculation Structures and Records</h4>
+
+<p>The following are calculation structure and record types for each
+primitive type and for arrays of primitive types. </p>
+
+<h5 id="boolean2">boolean</h5>
+<p><span style="font-family: courier;">calcBooleanCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "boolean" /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "booleanAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "booleanHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcBooleanRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcBoolean" supportName = "generic" &gt;
+  &lt;include href = "calcBooleanCommon.xml" /&gt;
+&lt;/structure&gt;
+
+&lt;recordType name = "calcBoolean" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcBooleanCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="byte1">byte</h5>
+<p><span style="font-family: courier;">calcByteCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "byte" /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "byteAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+  &lt;!-- instance can set structureName = "byteHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcByteRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcByte" supportName = "generic" &gt;
+  &lt;include href = "calcByteCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcByte" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcByteCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="short1">short</h5>
+<p><span style="font-family: courier;">calcShortCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "short" /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "shortAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+  &lt;!-- instance can set structureName = "shortHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcShortRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcShort" supportName = "generic" &gt;
+  &lt;include href = "calcShortCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcShort" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcShortCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;
+</pre>
+
+<h5 id="int1">int</h5>
+<p><span style="font-family: courier;">calcIntCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "int" /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "intAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+  &lt;!-- instance can set structureName = "intHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcIntRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcInt" supportName = "generic" &gt;
+  &lt;include href = "calcIntCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcInt" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcIntCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="long1">long</h5>
+<p><span style="font-family: courier;">calcLongCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "long" /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "longAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+  &lt;!-- instance can set structureName = "longHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcLongRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcLong" supportName = "generic" &gt;
+  &lt;include href = "calcLongCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcLong" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcLongCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="float1">float</h5>
+<p><span style="font-family: courier;">calcFloatCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "float" /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;!-- instance can set structureName = "floatAlarm" --&gt;
+  &lt;field name = "valueAlarm" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+  &lt;!-- instance can set structureName = "floatHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcFloatRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcFloat" supportName = "generic" &gt;
+  &lt;include href = "calcFloatCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcFloat" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcFloatCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="double1">double</h5>
+<p><span style="font-family: courier;">calcDoubleCommon</span></p>
+ 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
   &lt;field name = "value" type = "double" /&gt;
@@ -3997,78 +4441,66 @@ a PV interface for reading an argument value.:</p>
      elementType = "structure" supportName = "calcArgArray" /&gt;
   &lt;field name = "calculator" type = "structure" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
-  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
   &lt;field name = "input" type = "structure" /&gt;
   &lt;!-- instance can set structureName = "doubleAlarm" --&gt;
   &lt;field name = "valueAlarm" type = "structure" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "display" type = "structure" /&gt;
-  &lt;field name = "control" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
   &lt;!-- instance can set structureName = "doubleHistory" --&gt;
   &lt;field name = "history" type = "structure" /&gt;
-&lt;/DBDefinition&gt;</pre>
-
-<h5 id="calcDouble2">calcDoubleRecord.xml</h5>
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcDoubleRecord</span></p>
+ 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;structure name = "calcDoubleArg" &gt;
-  &lt;field name = "value" type = "double" /&gt;
-  &lt;field name = "name" type = "string" /&gt;
-  &lt;field name = "input" type = "structure" /&gt;
-&lt;/structure&gt;
-  
 &lt;structure name = "calcDouble" supportName = "generic" &gt;
   &lt;include href = "calcDoubleCommon.xml" /&gt;
 &lt;/structure&gt;
-  
 &lt;recordType name = "calcDouble" supportName = "generic" &gt;
   &lt;include href = "common.xml" /&gt;
   &lt;include href = "calcDoubleCommon.xml" /&gt;
-  &lt;field name = "supportArray" type = "array" 
+  &lt;field name = "supportArray" type = "array"
      elementType = "structure" supportName = "supportArray" /&gt;
 &lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4 id="calcDouble3">calcDoubleArray</h4>
-
-<h5 id="calcDouble4">calcDoubleArrayCommon.xml</h5>
+<h5 id="string1">string</h5>
+<p><span style="font-family: courier;">calcStringCommon</span></p>
+ 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-  &lt;field name = "value" type = "array" elementType = "double"  /&gt;
+  &lt;field name = "value" type = "string" /&gt;
   &lt;field name = "calcArgArray" type = "array"
      elementType = "structure" supportName = "calcArgArray" /&gt;
-  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "calculator" type = "structure" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
-  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
   &lt;field name = "input" type = "structure" /&gt;
-  &lt;field name = "output" type = "structure" /&gt;
-  &lt;field name = "display" type = "structure" /&gt;
-&lt;/DBDefinition&gt;</pre>
-
-<h5 id="calcDouble5">calcDoubleArrayRecord.xml</h5>
+  &lt;!-- instance can set structureName = "stringHistory" --&gt;
+  &lt;field name = "history" type = "structure" /&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcStringRecord</span></p>
+ 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;structure name = "calcDoubleArrayArg" &gt;
-  &lt;field name = "value" type = "array"  elementType = "double" /&gt; 
-  &lt;field name = "name" type = "string" /&gt;
-  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
+&lt;structure name = "calcString" supportName = "generic" &gt;
+  &lt;include href = "calcStringCommon.xml" /&gt;
 &lt;/structure&gt;
-  
-&lt;structure name = "calcDoubleArray" supportName = "generic" &gt;
-  &lt;include href = "calcDoubleArrayCommon.xml" /&gt;
-&lt;/structure&gt;
-  
-&lt;recordType name = "calcDoubleArray" supportName = "generic" &gt;
-  &lt;include href = "common.xml" /&gt;  
-  &lt;include href = "calcDoubleArrayCommon.xml" /&gt;
+&lt;recordType name = "calcString" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;
+  &lt;include href = "calcStringCommon.xml" /&gt;
   &lt;field name = "supportArray" type = "array"
      elementType = "structure" supportName = "supportArray" /&gt;
-&lt;/recordType&gt; 
+&lt;/recordType&gt;
 &lt;/DBDefinition&gt;</pre>
 
-<h4 id="calcBoolea">calcBooleanArray</h4>
-
-<h5 id="calcBoolea1">calcBooleanArrayCommon.xml</h5>
+<h5 id="boolean3">boolean array</h5>
+<p><span style="font-family: courier;">calcBooleanArrayCommon</span></p>
+ 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
   &lt;field name = "value" type = "array" elementType = "boolean"  /&gt;
@@ -4077,26 +4509,245 @@ a PV interface for reading an argument value.:</p>
   &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
   &lt;field name = "output" type = "structure" /&gt;
   &lt;field name = "alarm" type = "structure"/&gt;
-  &lt;field name = "timeStamp" type = "structure" /&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
   &lt;field name = "display" type = "structure" /&gt;
-&lt;/DBDefinition&gt;</pre>
-
-<h5 id="calcBoolea2">calcBooleanArrayRecord.xml</h5>
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcBooleanArrayRecord</span></p>
+ 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
-&lt;structure name = "calcBooleanArrayArg" &gt;
-  &lt;field name = "value" type = "array"  elementType = "boolean" /&gt;
-  &lt;field name = "name" type = "string" /&gt;
-  &lt;field name = "input" type = "structure" structureName = "null" /&gt;
-&lt;/structure&gt;
-  
 &lt;structure name = "calcBooleanArray" supportName = "generic" &gt;
   &lt;include href = "calcBooleanArrayCommon.xml" /&gt;
 &lt;/structure&gt;
-  
 &lt;recordType name = "calcBooleanArray" supportName = "generic" &gt;
   &lt;include href = "common.xml" /&gt;
   &lt;include href = "calcBooleanArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="byte2">byte array</h5>
+<p><span style="font-family: courier;">calcByteArrayCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "array" elementType = "byte"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcByteArrayRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcByteArray" supportName = "generic" &gt;
+  &lt;include href = "calcByteArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcByteArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;  
+  &lt;include href = "calcByteArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="short2">short array</h5>
+<p><span style="font-family: courier;">calcShortArrayCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "array" elementType = "short"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcShortArrayRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcShortArray" supportName = "generic" &gt;
+  &lt;include href = "calcShortArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcShortArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;  
+  &lt;include href = "calcShortArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="array">int array</h5>
+<p><span style="font-family: courier;">calcIntArrayCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "array" elementType = "int"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcIntArrayRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcIntArray" supportName = "generic" &gt;
+  &lt;include href = "calcIntArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcIntArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;  
+  &lt;include href = "calcIntArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="long2">long array</h5>
+<p><span style="font-family: courier;">calcLongArrayCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "array" elementType = "long"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcLongArrayRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcLongArray" supportName = "generic" &gt;
+  &lt;include href = "calcLongArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcLongArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;  
+  &lt;include href = "calcLongArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="float2">float array</h5>
+<p><span style="font-family: courier;">calcFloatArrayCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "array" elementType = "float"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcFloatArrayRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcFloatArray" supportName = "generic" &gt;
+  &lt;include href = "calcFloatArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcFloatArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;  
+  &lt;include href = "calcFloatArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="double2">double array</h5>
+<p><span style="font-family: courier;">calcDoubleArrayCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "array" elementType = "double"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcDoubleArrayRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcDoubleArray" supportName = "generic" &gt;
+  &lt;include href = "calcDoubleArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcDoubleArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;  
+  &lt;include href = "calcDoubleArrayCommon.xml" /&gt;
+  &lt;field name = "supportArray" type = "array"
+     elementType = "structure" supportName = "supportArray" /&gt;
+&lt;/recordType&gt;
+&lt;/DBDefinition&gt;</pre>
+
+<h5 id="string2">string array</h5>
+<p><span style="font-family: courier;">calcStringArrayCommon</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+  &lt;field name = "value" type = "array" elementType = "string"  /&gt;
+  &lt;field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "null" /&gt;
+  &lt;field name = "alarm" type = "structure"/&gt;
+  &lt;field name = "timeStamp" type = "structure" /&gt;  
+  &lt;field name = "input" type = "structure" /&gt;
+  &lt;field name = "output" type = "structure" /&gt;
+  &lt;field name = "display" type = "structure" /&gt;
+  &lt;field name = "control" type = "structure"/&gt;
+&lt;/DBDefinition&gt;
+</pre>
+<p><span style="font-family: courier;">calcStringArrayRecord</span></p>
+ 
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;DBDefinition&gt;
+&lt;structure name = "calcStringArray" supportName = "generic" &gt;
+  &lt;include href = "calcStringArrayCommon.xml" /&gt;
+&lt;/structure&gt;
+&lt;recordType name = "calcStringArray" supportName = "generic" &gt;
+  &lt;include href = "common.xml" /&gt;  
+  &lt;include href = "calcStringArrayCommon.xml" /&gt;
   &lt;field name = "supportArray" type = "array"
      elementType = "structure" supportName = "supportArray" /&gt;
 &lt;/recordType&gt;
