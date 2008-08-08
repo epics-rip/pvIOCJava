@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+  <field name = "value" type = "string" />
+  <field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" />
+  <field name = "calculator" type = "structure" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+  <field name = "input" type = "structure" />
+  <!-- instance can set structureName = "stringHistory" -->
+  <field name = "history" type = "structure" />
+</DBDefinition>

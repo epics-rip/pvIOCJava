@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+  <field name = "value" type = "array" elementType = "short"  />
+  <field name = "calcArgArray" type = "array"
+     elementType = "structure" supportName = "calcArgArray" />
+  <field name = "calculator" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure"/>
+  <field name = "timeStamp" type = "structure" />  
+  <field name = "input" type = "structure" />
+  <field name = "output" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure"/>
+</DBDefinition>

@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
-<structure name = "calcBooleanArray" supportName = "generic" >
-  <include href = "calcBooleanArrayCommon.xml" />
+<structure name = "calcByte" supportName = "generic" >
+  <include href = "calcByteCommon.xml" />
 </structure>
 
-<recordType name = "calcBooleanArray" supportName = "generic" >
+<recordType name = "calcByte" supportName = "generic" >
   <include href = "common.xml" />
-  <include href = "calcBooleanArrayCommon.xml" />
+  <include href = "calcByteCommon.xml" />
   <field name = "supportArray" type = "array"
      elementType = "structure" supportName = "supportArray" />
 </recordType>

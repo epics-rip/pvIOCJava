@@ -1,7 +1,139 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
+<structure name = "calcBooleanArg" >
+  <field name = "value" type = "boolean" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+  <!-- instance can set structureName = "booleanAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+</structure>
+<structure name = "calcByteArg" >
+  <field name = "value" type = "byte" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+  <!-- instance can set structureName = "byteAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+</structure>
+<structure name = "calcShortArg" >
+  <field name = "value" type = "short" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+  <!-- instance can set structureName = "shortAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+</structure>
+<structure name = "calcIntArg" >
+  <field name = "value" type = "int" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+  <!-- instance can set structureName = "intAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+</structure>
+<structure name = "calcLongArg" >
+  <field name = "value" type = "long" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+  <!-- instance can set structureName = "longAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+</structure>
+<structure name = "calcFloatArg" >
+  <field name = "value" type = "float" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+  <!-- instance can set structureName = "floatAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+</structure>
+<structure name = "calcDoubleArg" >
+  <field name = "value" type = "double" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+  <!-- instance can set structureName = "longAlarm" -->
+  <field name = "valueAlarm" type = "structure" />
+  <field name = "display" type = "structure" />
+  <field name = "control" type = "structure" />
+</structure>
+<structure name = "calcStringArg" >
+  <field name = "value" type = "string" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+
+
+<structure name = "calcBooleanArrayArg" >
+  <field name = "value" type = "array"  elementType = "boolean" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+<structure name = "calcByteArrayArg" >
+  <field name = "value" type = "array"  elementType = "byte" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+<structure name = "calcShortArrayArg" >
+  <field name = "value" type = "array"  elementType = "short" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+<structure name = "calcIntArrayArg" >
+  <field name = "value" type = "array"  elementType = "int" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+<structure name = "calcLongArrayArg" >
+  <field name = "value" type = "array"  elementType = "long" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+<structure name = "calcFloatArrayArg" >
+  <field name = "value" type = "array"  elementType = "float" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+<structure name = "calcDoubleArrayArg" >
+  <field name = "value" type = "array"  elementType = "double" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+<structure name = "calcStringArrayArg" >
+  <field name = "value" type = "array"  elementType = "string" />
+  <field name = "name" type = "string" />
+  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "alarm" type = "structure" structureName = "null" />
+</structure>
+
 <support name = "calcArgArray"
  factoryName = "org.epics.ioc.support.calc.CalcArgArrayFactory" />
+
+<structure name = "expressionCalculator" supportName = "expressionCalculator" >
+  <field name = "expression" type = "string" />
+</structure>
+
+<support name = "expressionCalculator"
+ factoryName = "org.epics.ioc.support.calc.ExpressionCalculatorFactory" />
 
 </DBDefinition>

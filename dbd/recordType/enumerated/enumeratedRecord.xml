@@ -2,7 +2,7 @@
 <DBDefinition>
 
 
-<structure name = "enumeratedStruvture" supportName = "generic" >
+<structure name = "enumeratedStructure" supportName = "generic" >
   <include href = "enumeratedCommon.xml" />
 </structure>
 

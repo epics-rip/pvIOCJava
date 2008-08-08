@@ -8,12 +8,12 @@
      default = "put change absoluteChange percentageChange" /> 
 </structure>
 
-<structure name = "processSupport">
+<structure name = "processSupport" supportName = "processSupport" >
   <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
 </structure>
 
-<structure name = "monitorSupport">
+<structure name = "monitorSupport" supportName = "monitorSupport" >
   <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
   <field name = "type" type = "structure" structureName = "monitorType"
@@ -27,19 +27,19 @@
   <field name = "propertyNames" type = "string" />
 </structure>
 
-<structure name = "monitorNotifySupport">
+<structure name = "monitorNotifySupport" supportName = "monitorNotifySupport" >
   <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
 </structure>
 
-<structure name = "inputSupport">
+<structure name = "inputSupport" supportName = "inputSupport" >
   <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
   <field name = "process" type = "boolean" />
   <field name = "propertyNames" type = "string" />
 </structure>
 
-<structure name = "outputSupport">
+<structure name = "outputSupport" supportName = "outputSupport" >
   <field name = "providerName" type = "string" default = "local" />
   <field name = "pvname" type = "string" link = "true" />
   <field name = "process" type = "boolean" />
