@@ -1,0 +1,218 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<substitute fromTo = "checkRecord=constant10,checkType=Int,checkValue=10" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>10</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<substitute fromTo = "checkRecord=constant10L,checkType=Long,checkValue=10" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>10L</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+
+
+
+<substitute fromTo = "checkRecord=constantMinus10,checkType=Int,checkValue=-10" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>-10</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+
+<substitute fromTo = "checkRecord=constantMinus10L,checkType=Long,checkValue=-10" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>-10L</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+
+<substitute fromTo = "checkRecord=constantHex,checkType=Int,checkValue=-1" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>0xFFFFFFFF</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+
+<substitute fromTo = "checkRecord=constantHexL,checkType=Long,checkValue=0xFFFFFFFF" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>0xFFFFFFFFL</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+
+<substitute fromTo = "checkRecord=constantFloat10,checkType=Float,checkValue=10.0" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>10.0F</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<substitute fromTo = "checkRecord=constantDouble10,checkType=Double,checkValue=10.0" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>10D</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<substitute fromTo = "checkRecord=constantFloatBig,checkType=Float,checkValue=-1E26F" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>-1E26F</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<substitute fromTo = "checkRecord=constantDoubleBig,checkType=Double,checkValue=-1e100D" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>-1e100D</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<substitute fromTo = "checkRecord=constantE,checkType=Double,checkValue=2.7182818" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>Math.E</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<substitute fromTo = "checkRecord=constantPI,checkType=Double,checkValue=3.1415927" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>Math.PI</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<substitute fromTo = "checkRecord=constantMinusE,checkType=Double,checkValue=-2.7182818" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>-Math.E</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<substitute fromTo = "checkRecord=constantMinusPI,checkType=Double,checkValue=-3.1415927" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calculator structureName = "expressionCalculator" >
+        <expression>-Math.PI</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkReal.xml" />
+
+
+<!--
+-->
+
+</IOCDatabase>

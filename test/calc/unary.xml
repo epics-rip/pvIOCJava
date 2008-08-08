@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<substitute fromTo = "checkRecord=unaryBoolean,checkType=Boolean,checkValue=true" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+     <calcArgArray>
+        <element structureName = "calcBooleanArg">
+            <value>false</value>
+            <name>a</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>!a</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkBoolean.xml" />
+
+<substitute fromTo = "checkRecord=unaryByte,checkType=Byte,checkValue=1" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+     <calcArgArray>
+        <element structureName = "calcByteArg">
+            <value>2</value>
+            <name>a</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>+~-a</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<substitute fromTo = "checkRecord=unaryByte1,checkType=Byte,checkValue=1" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+     <calcArgArray>
+        <element structureName = "calcByteArg">
+            <value>2</value>
+            <name>a</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>+(~(-a))</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<!--
+-->
+
+</IOCDatabase>

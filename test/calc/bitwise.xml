@@ -1,0 +1,128 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+
+<substitute fromTo = "checkRecord=bitwiseByte,checkType=Byte,checkValue=0x44" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calcArgArray>
+        <element structureName = "calcByteArg">
+            <value>0xff</value>
+            <name>a</name>
+        </element>
+        <element structureName = "calcByteArg">
+            <value>0xaa</value>
+            <name>b</name>
+        </element>
+        <element structureName = "calcByteArg">
+            <value>0x11</value>
+            <name>c</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>
+            ~(a&amp;b|c)
+        </expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<substitute fromTo = "checkRecord=bitwiseShort,checkType=Short,checkValue=0x4444" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calcArgArray>
+        <element structureName = "calcShortArg">
+            <value>0xffff</value>
+            <name>a</name>
+        </element>
+        <element structureName = "calcShortArg">
+            <value>0xaaaa</value>
+            <name>b</name>
+        </element>
+        <element structureName = "calcShortArg">
+            <value>0x1111</value>
+            <name>c</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>
+            ~(a&amp;b|c)
+        </expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<substitute fromTo = "checkRecord=bitwiseInt,checkType=Int,checkValue=0x44444444" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calcArgArray>
+        <element structureName = "calcIntArg">
+            <value>0xffffffff</value>
+            <name>a</name>
+        </element>
+        <element structureName = "calcIntArg">
+            <value>0xaaaaaaaa</value>
+            <name>b</name>
+        </element>
+        <element structureName = "calcIntArg">
+            <value>0x11111111</value>
+            <name>c</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>
+            ~(a&amp;b|c)
+        </expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<substitute fromTo = "checkRecord=bitwiseLong,checkType=Long,checkValue=0x4444444444444444" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <calcArgArray>
+        <element structureName = "calcLongArg">
+            <value>0x7fffffffffffffff</value>
+            <name>a</name>
+        </element>
+        <element structureName = "calcLongArg">
+            <value>0x2aaaaaaaaaaaaaaa</value>
+            <name>b</name>
+        </element>
+        <element structureName = "calcLongArg">
+            <value>0x1111111111111111</value>
+            <name>c</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>
+            (~(a&amp;b|c))&amp;0x7fffffffffffffffL
+        </expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<!--
+-->
+
+</IOCDatabase>

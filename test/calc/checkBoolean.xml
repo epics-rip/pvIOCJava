@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "${checkRecord}Check" type = "calcBoolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <calcArgArray>
+        <element structureName = "calcBooleanArg">
+            <name>a</name>
+        </element>
+        <element structureName = "calcBooleanArg">
+            <name>b</name>
+            <value>${checkValue}</value>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>
+            (a==b) ? true : false
+        </expression>
+    </calculator>
+    <valueAlarm structureName = "booleanAlarm" >
+       <active>true</active>
+       <falseMessage>checkExpression Failure</falseMessage>
+       <falseAlarm><choice>major</choice></falseAlarm>
+    </valueAlarm>
+</record>
+</IOCDatabase>

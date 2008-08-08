@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "test/calc" />
+
+<include href = "string.xml" />
+<include href = "ltgt.xml" />
+<include href = "bitwise.xml" />
+<include href = "basicMath.xml" />
+<include href = "math.xml" />
+<include href = "shift.xml" />
+<include href = "unary.xml" />
+<include href = "constants.xml" />
+<include href = "examples.xml" />
+<!--
+-->
+
+
+</IOCDatabase>

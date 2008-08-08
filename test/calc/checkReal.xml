@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "${checkRecord}Check" type = "calcBoolean">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <calcArgArray>
+        <element structureName = "calc${checkType}Arg">
+            <name>a</name>
+        </element>
+        <element structureName = "calc${checkType}Arg">
+            <name>b</name>
+            <value>${checkValue}</value>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>
+            (Math.abs(Math.max(a,b))>1e-5) ?
+            ((Math.abs(a-b)/Math.abs(Math.max(a,b)))&lt;1e-5 ? true : false)
+            : true
+        </expression>
+    </calculator>
+    <valueAlarm structureName = "booleanAlarm" >
+       <active>true</active>
+       <falseMessage>checkExpression Failure</falseMessage>
+       <falseAlarm><choice>major</choice></falseAlarm>
+    </valueAlarm>
+</record>
+</IOCDatabase>

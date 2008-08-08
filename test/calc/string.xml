@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<substitute fromTo = "checkRecord=string,checkType=String" />
+<substitute from = "checkValue" to = "This is 2 strings" />
+<record name = "${checkRecord}" type = "calc${checkType}">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan>
+        <processAfterStart>true</processAfterStart>
+    </scan>
+     <calcArgArray>
+        <element structureName = "calcStringArg">
+            <value>This is</value>
+            <name>a</name>
+        </element>
+        <element structureName = "calcIntArg">
+            <value>2</value>
+            <name>b</name>
+        </element>
+    </calcArgArray>
+    <calculator structureName = "expressionCalculator" >
+        <expression>a+" " + b+" strings"</expression>
+    </calculator>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkString.xml" />
+
+
+<!--
+-->
+
+</IOCDatabase>
