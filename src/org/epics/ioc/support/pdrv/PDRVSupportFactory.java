@@ -507,7 +507,8 @@ public class PDRVSupportFactory {
             deviceTrace.print(Trace.FLOW,
                     "%s:%s queueCallback calling write",
                     fullName,supportName);
-            status = octet.write(user, octetArray, size);
+            deviceTrace.printIO(Trace.SUPPORT, octetArray, nbytes, "%s", fullName);
+            status = octet.write(user, octetArray, nbytes);
             if(status!=Status.success) {
             	deviceTrace.print(Trace.ERROR,
                         "%s:%s octet.write failed", fullName,supportName);
