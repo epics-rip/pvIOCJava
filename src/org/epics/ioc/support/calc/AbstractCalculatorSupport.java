@@ -68,6 +68,10 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
         DBField dbParent = dbStructure.getParent();
         PVField pvParent = dbParent.getPVField();
         PVField pvField = pvParent.findProperty("value");
+        if(pvField==null) { // try parent of parent. 
+            pvField = pvParent.getParent();
+            if(pvField!=null) pvField = pvField.findProperty("value");
+        }
         if(pvField==null) {
             pvStructure.message("value field not found", MessageType.error);
             return;

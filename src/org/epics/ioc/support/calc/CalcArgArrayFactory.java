@@ -67,7 +67,6 @@ public class CalcArgArrayFactory {
         private DBField[] valueDBFields;
         private DBField[] nameDBFields;
         private Support[] supports = null;
-        private Support[] alarmSupports = null;
         private int numSupports = 0;
               
         private SupportProcessRequester supportProcessRequester;
@@ -114,7 +113,6 @@ public class CalcArgArrayFactory {
             valueDBFields = new DBField[length];
             nameDBFields = new DBField[length];
             supports = new Support[length];
-            alarmSupports = new Support[length];
             numSupports = 0;
             for(int i=0; i< length; i++) {
                 DBStructure elementDBStructure = dbFields[i];
@@ -134,13 +132,7 @@ public class CalcArgArrayFactory {
                     return;
                 }
                 nameDBFields[i] = elementDBFields[index];
-                index = elementStructure.getFieldIndex("input");
-                if(index<0) {
-                    elementPVStructure.message("input field not found", MessageType.error);
-                    return;
-                }
-                DBField dbField = elementDBFields[index];
-                Support support = dbField.getSupport();
+                Support support = elementDBStructure.getSupport();
                 supports[i] = support;
                 if(support==null) continue;
                 numSupports++;
@@ -151,24 +143,6 @@ public class CalcArgArrayFactory {
                         if(supports[j]!=null) supports[j].uninitialize();
                     }
                     return;
-                }
-                index = elementStructure.getFieldIndex("alarm");
-                if(index<0) {
-                    elementPVStructure.message("alarm field not found", MessageType.error);
-                    return;
-                }
-                dbField = elementDBFields[index];
-                support = dbField.getSupport();
-                alarmSupports[i] = support;
-                if(support!=null) {
-                    support.initialize();
-                    if(support.getSupportState()!=SupportState.readyForStart) {
-                        supportState = SupportState.readyForInitialize;
-                        for(int j=0; j<i; j++) {
-                            if(supports[j]!=null) supports[j].uninitialize();
-                        }
-                        return;
-                    }
                 }
             }
             setSupportState(supportState);
@@ -181,9 +155,6 @@ public class CalcArgArrayFactory {
             for(Support support: supports) {
                 if(support!=null) support.start();
             }
-            for(Support support: alarmSupports) {
-                if(support!=null) support.start();
-            }
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
@@ -192,9 +163,6 @@ public class CalcArgArrayFactory {
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
             for(Support support: supports) {
-                if(support!=null) support.stop();
-            }
-            for(Support support: alarmSupports) {
                 if(support!=null) support.stop();
             }
             setSupportState(SupportState.readyForStart);
@@ -208,9 +176,6 @@ public class CalcArgArrayFactory {
             }
             if(super.getSupportState()!=SupportState.readyForStart) return;
             for(Support support: supports) {
-                if(support!=null) support.stop();
-            }
-            for(Support support: alarmSupports) {
                 if(support!=null) support.stop();
             }
             setSupportState(SupportState.readyForInitialize);

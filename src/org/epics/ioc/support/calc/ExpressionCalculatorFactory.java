@@ -93,6 +93,10 @@ public abstract class ExpressionCalculatorFactory  {
             DBField dbParent = dbStructure.getParent();
             PVField pvParent = dbParent.getPVField();
             PVField pvValue = pvParent.findProperty("value");
+            if(pvValue==null) { // try parent of parent. 
+                pvValue = pvParent.getParent();
+                if(pvValue!=null) pvValue = pvValue.findProperty("value");
+            }
             if(pvValue==null) {
                 pvStructure.message("value field not found", MessageType.error);
                 return;
@@ -466,61 +470,66 @@ public abstract class ExpressionCalculatorFactory  {
                     if(next>=length) break;
                     Token token = new Token();
                     String value = null;
-                    if(expression.charAt(next)=='?') {
-                        token.type = TokenType.ternaryOperator;
-                        value = "?";
-                    } else if(expression.charAt(next)==':') {
-                        token.type = TokenType.ternaryOperator;
-                        value = ":";
-                    } else if(expression.charAt(next)==',') {
-                        token.type = TokenType.comma;
-                        value = ",";
-                    } else if(expression.charAt(next)=='(') {
-                        token.type = TokenType.leftParen;
-                        value = "(";
-                    } else if(expression.charAt(next)==')') {
+                    char nextChar = expression.charAt(next);
+                    if(nextChar==')') {
                         token.type = TokenType.rightParen;
                         value = ")";
-                    } else if ((value=getUnaryOp(expression,next))!=null) {
-                        token.type = TokenType.unaryOperator;
-                    } else if ((value=getBinaryOp(expression,next))!=null) {
-                        token.type = TokenType.binaryOperator;
-                    } else if ((value = getBooleanConstant(expression,next))!=null) {
-                        token.type = TokenType.booleanConstant;
-                    } else if ((value = getIntegerConstant(expression,next))!=null) {
-                        token.type = TokenType.integerConstant;
-                    } else if ((value = getRealConstant(expression,next))!=null) {
-                        token.type = TokenType.realConstant;
-                    } else if ((value = getStringConstant(expression,next))!=null) {
-                        token.type = TokenType.stringConstant;
-                    } else if ((value = getVar(expression,next))!=null) {
-                        int n = next + value.length();
-                        char nextChar = 0;
-                        if(n<length) nextChar = expression.charAt(n);
-                        if(nextChar!='.') {
-                            token.type = TokenType.variable;
-                        } else {
-                            next = n + 1;
-                            String functionName = null;
-                            if(next<length) {
-                                if(value.equals("Math")) {
-                                    token.type = TokenType.mathFunction;
-                                    functionName= getVar(expression,next);
-                                }
-                            }
-                            if(functionName==null) {
-                                pvExpression.message("parse failure unknown function " + expression.substring(next), MessageType.error);
-                                return false;
-                            }
-                            if(functionName.equals("PI") || functionName.equals("E")) {
-                                token.type = TokenType.mathConstant;
-                            }
-                            value = functionName;
-                        }
+                    } else if(nextChar=='(') {
+                        token.type = TokenType.leftParen;
+                        value = "(";
+                    } else if(nextChar==',') {
+                        token.type = TokenType.comma;
+                        value = ",";
+                    } else if(nextChar=='?' || nextChar==':') {
+                        token.type = TokenType.ternaryOperator;
+                        value = expression.substring(next, next+1);
                     } else {
-                        pvExpression.message("parse failure at " + expression.substring(next), MessageType.error);
-                        printTokenList("after parse failure");
-                        return false;
+                        if(isNumericConstant(expression,next)) {
+                            if ((value = getIntegerConstant(expression,next))!=null) {
+                                token.type = TokenType.integerConstant;
+                            } else if ((value = getRealConstant(expression,next))!=null) {
+                                token.type = TokenType.realConstant;
+                            } else {
+                                throw new IllegalStateException("logic error.");
+                            }
+                        } else if((value = getBooleanConstant(expression,next))!=null) {
+                            token.type = TokenType.booleanConstant;
+                        } else if ((value = getStringConstant(expression,next))!=null) {
+                            token.type = TokenType.stringConstant;
+                        } else if ((value = getVar(expression,next))!=null) {
+                            int n = next + value.length();
+                            nextChar = 0;
+                            if(n<length) nextChar = expression.charAt(n);
+                            if(nextChar!='.') {
+                                token.type = TokenType.variable;
+                            } else {
+                                next = n + 1;
+                                String functionName = null;
+                                if(next<length) {
+                                    if(value.equals("Math")) {
+                                        token.type = TokenType.mathFunction;
+                                        functionName= getVar(expression,next);
+                                    }
+                                }
+                                if(functionName==null) {
+                                    pvExpression.message("parse failure unknown function at " + expression.substring(next), MessageType.error);
+                                    return false;
+                                }
+                                if(functionName.equals("PI") || functionName.equals("E")) {
+                                    token.type = TokenType.mathConstant;
+                                }
+                                value = functionName;
+                            }
+                        } else if ((value=getUnaryOp(expression,next))!=null) {
+                            token.type = TokenType.unaryOperator;
+                        } else if ((value=getBinaryOp(expression,next))!=null) {
+                            token.type = TokenType.binaryOperator;
+
+                        } else {
+                            pvExpression.message("parse failure at " + expression.substring(next), MessageType.error);
+                            printTokenList("after parse failure");
+                            return false;
+                        }
                     }
                     if(value.length()==0) {
                         pvExpression.message("zero length string caused parse failure at " + expression.substring(next), MessageType.error);
@@ -531,105 +540,38 @@ public abstract class ExpressionCalculatorFactory  {
                     next += value.length();
                     if(token.type==TokenType.stringConstant) next+= 2;
                 }
-                
                 return true;
             }
             
-            private String getUnaryOp(String string, int offset) {
-                char offsetChar = string.charAt(offset);
-                if(offsetChar!='-' && offsetChar!='+' && offsetChar!='~' && offsetChar!='!') return null;
-                if(offset==0) return string.substring(offset, offset+1);
-                char prevChar = string.charAt(offset-1);
-                if(prevChar=='(' || prevChar=='-' || prevChar=='+' || prevChar=='~' || prevChar=='!') return string.substring(offset, offset+1);
-                return null;
-            }
-            
-            private String getBinaryOp(String string, int offset) {
-                char nextChar = string.charAt(offset);
-                char nextNextChar = ((offset+1)<string.length()) ? string.charAt(offset+1) : 0;
-                char nextNextNextChar = ((offset+2)<string.length()) ? string.charAt(offset+2) : 0;
-                if(nextChar=='+') {
-                    return new String("+");
-                }
-                if(nextChar=='-') {
-                    return new String("-");
-                }
-                if(nextChar=='*') {
-                    return new String("*");
-                }
-                if(nextChar=='/') {
-                    return new String("/");
-                }
-                if(nextChar=='%') {
-                    return new String("/");
-                }
-                if(nextChar=='^') {
-                    return new String("^");
-                }
-                if(nextChar=='<') {
-                    String value = "<";
-                    if(nextNextChar=='=') value += "=";
-                    if(nextNextChar=='<') value += "<";
-                    return value;
-                }
-                if(nextChar=='>') {
-                    String value = ">";
-                    if(nextNextChar=='=') value += "=";
-                    if(nextNextChar=='>') {
-                        value += ">";
-                        if(nextNextNextChar=='>') value+= ">";
-                    }
-                    return value;
-                }
-                if(nextChar=='=') {
-                    String value = "=";
-                    if(nextNextChar=='=') value += "=";
-                    return value;
-                }
-                if(nextChar=='!') {
-                    String value = "!";
-                    if(nextNextChar=='=') value += "=";
-                    return value;
-                }
-                if(nextChar=='|') {
-                    String value = "|";
-                    if(nextNextChar=='|') value += "|";
-                    return value;
-                }
-                if(nextChar=='&') {
-                    String value = "&";
-                    if(nextNextChar=='&') value += "&";
-                    return value;
-                }
-                return null;
-            }
-
-            private String getVar(String string, int offset) {
-                int codePoint = string.codePointAt(offset);
-                if(!Character.isJavaIdentifierStart(codePoint)) return null;
-                int len = Character.charCount(codePoint);
-                int next = offset + len;
-                while(next<string.length()) {
-                    codePoint = string.codePointAt(next);
-                    if(!Character.isJavaIdentifierPart(codePoint)) {
-                        String value = string.substring(offset, next);
-                        return value;
-                    }
-                    next += Character.charCount(codePoint);
-                }
-                String value = string.substring(offset);
-                return value;
-            }
-            
-            private String getBooleanConstant(String string, int offset) {
+            private boolean isNumericConstant(String string, int offset) {
                 int len = string.length();
-                if(len<offset+4) return null;
-                String str = string.substring(offset, offset+4);
-                if(str.equals("true")) return str;
-                if(len<offset+5) return null;
-                str = string.substring(offset, offset+5);
-                if(str.equals("false")) return str;
-                return null;
+                char firstChar = string.charAt(offset);
+                boolean isDigit = Character.isDigit(firstChar);
+                if(isDigit) return true;
+                boolean isPlusMinus = (firstChar=='+' || firstChar=='-') ? true : false;
+                boolean isPeriod = (firstChar=='.') ? true : false;
+                char nextChar = 0;
+                boolean nextCharIsDigit = false;
+                if(offset<len-1) {
+                    nextChar = string.charAt(offset+1);
+                    nextCharIsDigit = Character.isDigit(nextChar);
+                }
+                if(isPeriod && nextCharIsDigit) return true;
+                if(!isPlusMinus) return false;
+                if(!nextCharIsDigit && nextChar!='.') return false;
+                if(offset==0) {
+                    if(nextCharIsDigit||nextChar=='.') return true;
+                    return false;
+                }
+                Token token = tokenList.get(tokenList.size()-1);
+                TokenType type = token.type;
+                if(type.isOperator()) return true;
+                if(type.isConstant()) return false;
+                if(type==TokenType.comma || type==TokenType.leftParen) return true;
+                if(type!=TokenType.variable && type!=TokenType.rightParen) {
+                    throw new IllegalStateException("logic error.");
+                }
+                return false;
             }
             
             private String getIntegerConstant(String string, int offset) {
@@ -713,6 +655,17 @@ public abstract class ExpressionCalculatorFactory  {
                 return string.substring(offset, next);
             }
             
+            private String getBooleanConstant(String string, int offset) {
+                int len = string.length();
+                if(len<offset+4) return null;
+                String str = string.substring(offset, offset+4);
+                if(str.equals("true")) return str;
+                if(len<offset+5) return null;
+                str = string.substring(offset, offset+5);
+                if(str.equals("false")) return str;
+                return null;
+            }
+            
             private String getStringConstant(String string, int offset) {
                 int len = string.length();
                 char charNext = string.charAt(offset);
@@ -722,6 +675,92 @@ public abstract class ExpressionCalculatorFactory  {
                     charNext = string.charAt(next);
                     if(charNext=='"') return string.substring(offset+1, next);
                     if(charNext=='\\') next++;
+                }
+                return null;
+            }
+
+            private String getVar(String string, int offset) {
+                int codePoint = string.codePointAt(offset);
+                if(!Character.isJavaIdentifierStart(codePoint)) return null;
+                int len = Character.charCount(codePoint);
+                int next = offset + len;
+                while(next<string.length()) {
+                    codePoint = string.codePointAt(next);
+                    if(!Character.isJavaIdentifierPart(codePoint)) {
+                        String value = string.substring(offset, next);
+                        return value;
+                    }
+                    next += Character.charCount(codePoint);
+                }
+                String value = string.substring(offset);
+                return value;
+            }
+            
+            private String getUnaryOp(String string, int offset) {
+                char offsetChar = string.charAt(offset);
+                if(offsetChar!='-' && offsetChar!='+' && offsetChar!='~' && offsetChar!='!') return null;
+                if(offset==0) return string.substring(offset, offset+1);
+                char prevChar = string.charAt(offset-1);
+                if(prevChar=='(' || prevChar=='-' || prevChar=='+' || prevChar=='~' || prevChar=='!') return string.substring(offset, offset+1);
+                return null;
+            }
+            
+            private String getBinaryOp(String string, int offset) {
+                char nextChar = string.charAt(offset);
+                char nextNextChar = ((offset+1)<string.length()) ? string.charAt(offset+1) : 0;
+                char nextNextNextChar = ((offset+2)<string.length()) ? string.charAt(offset+2) : 0;
+                if(nextChar=='+') {
+                    return new String("+");
+                }
+                if(nextChar=='-') {
+                    return new String("-");
+                }
+                if(nextChar=='*') {
+                    return new String("*");
+                }
+                if(nextChar=='/') {
+                    return new String("/");
+                }
+                if(nextChar=='%') {
+                    return new String("/");
+                }
+                if(nextChar=='^') {
+                    return new String("^");
+                }
+                if(nextChar=='<') {
+                    String value = "<";
+                    if(nextNextChar=='=') value += "=";
+                    if(nextNextChar=='<') value += "<";
+                    return value;
+                }
+                if(nextChar=='>') {
+                    String value = ">";
+                    if(nextNextChar=='=') value += "=";
+                    if(nextNextChar=='>') {
+                        value += ">";
+                        if(nextNextNextChar=='>') value+= ">";
+                    }
+                    return value;
+                }
+                if(nextChar=='=') {
+                    String value = "=";
+                    if(nextNextChar=='=') value += "=";
+                    return value;
+                }
+                if(nextChar=='!') {
+                    String value = "!";
+                    if(nextNextChar=='=') value += "=";
+                    return value;
+                }
+                if(nextChar=='|') {
+                    String value = "|";
+                    if(nextNextChar=='|') value += "|";
+                    return value;
+                }
+                if(nextChar=='&') {
+                    String value = "&";
+                    if(nextNextChar=='&') value += "&";
+                    return value;
                 }
                 return null;
             }
