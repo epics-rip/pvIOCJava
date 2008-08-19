@@ -99,4 +99,9 @@ public interface PVStructure extends PVField {
      * @return The interface if the field of the correct type is found or null if not found.
      */
     PVArray getArrayField(String fieldName,Type elementType);
+    /**
+     * Append a new PVField to this structure.
+     * @param pvField The field to append.
+     */
+    void appendPVField(PVField pvField);
 }

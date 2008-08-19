@@ -253,6 +253,26 @@ public class BasePVStructure extends AbstractPVField implements PVStructure
         return (PVArray)pvField;
     }
     /* (non-Javadoc)
+     * @see org.epics.ioc.pv.PVStructure#appendField(org.epics.ioc.pv.PVField)
+     */
+    public void appendPVField(PVField pvField) {
+        Structure structure = (Structure)super.getField();
+        Field[] origFields = structure.getFields();
+        Field[] newFields = new Field[origFields.length + 1];
+        PVField[] newPVFields = new PVField[pvFields.length + 1];
+        for(int i=0; i<origFields.length; i++) {
+            newFields[i] = origFields[i];
+            newPVFields[i] = pvFields[i];
+        }
+        newFields[newFields.length-1] = pvField.getField();
+        Structure newStructure = fieldCreate.createStructure(structure.getFieldName(), structure.getStructureName(), newFields);
+        newPVFields[newPVFields.length-1] = pvField;
+        newStructure.setCreateName(structure.getCreateName());
+        newStructure.setSupportName( structure.getSupportName());
+        super.replaceField(newStructure);
+        pvFields = newPVFields;
+    }
+    /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     public String toString() { return toString(0);}

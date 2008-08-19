@@ -538,6 +538,7 @@ where
         PVString getStringField(String fieldName);
         PVStructure getStructureField(String fieldName,String structureName);
         PVArray getArrayField(String fieldName,Type elementType);
+        void appendPVField(PVField pvField);
     }</pre>
 
 <p>where</p>
@@ -582,6 +583,8 @@ where
   <dt>getArrayField</dt>
     <dd>Look for fieldName. If found and it has the correct type return the
       interface.</dd>
+  <dt>appendPVField</dt>
+    <dd>Append pvField to the end of this PVStructure.</dd>
 </dl>
 
 <h3 id="PVEnumerat">PVEnumerated</h3>
