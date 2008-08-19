@@ -92,20 +92,20 @@ public class XMLToIOCDBFactory {
      * The DBD database is named master.
      * Attempting to add definitions for a record instance that is already in master is an error.
      * @param fileName The file containing record instances definitions.
-     * @param messageListener A listener for error messages.
+     * @param requester A listener for error messages.
      * @return An IOC Database that has the newly created record instances.
      */
-    public static IOCDB convert(String iocdbName,String fileName,Requester messageListener) {
+    public static IOCDB convert(String iocdbName,String fileName,Requester requester) {
         boolean gotIt = isInUse.compareAndSet(false,true);
         if(!gotIt) {
-            messageListener.message("XMLToIOCDBFactory is already active", MessageType.error);
+            requester.message("XMLToIOCDBFactory is already active", MessageType.error);
             return null;
         }
         try {
             iocdb =IOCDBFactory.create(iocdbName);           
             dbd = DBDFactory.getMasterDBD();
             iocdbMaster = IOCDBFactory.getMaster();
-            requester = messageListener;
+            XMLToIOCDBFactory.requester = requester;
             IOCXMLListener listener = new Listener();
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("IOCDatabase",fileName,listener);
@@ -187,7 +187,7 @@ public class XMLToIOCDBFactory {
         private State state = State.idle;
         private StringBuilder stringBuilder = new StringBuilder();
         private PVRecord pvRecord = null;
-        private DBRecord dbRecord = null;
+        //private DBRecord dbRecord = null;
         
         private static class IdleState {
             private State prevState = null;
@@ -223,7 +223,7 @@ public class XMLToIOCDBFactory {
             private PVArray[] arrayData = null;
             private PVArrayArray pvArrayArray = null;
         }
-        private ArrayState arrayState = new ArrayState();
+        private ArrayState arrayState = null;
         private Stack<ArrayState> arrayStack = new Stack<ArrayState>();
         
         private RecordHandler(String qName, Map<String,String> attributes) {
@@ -236,13 +236,7 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
-            if(recordTypeName==null) {
-                iocxmlReader.message(
-                    "attribute type not specified",
-                    MessageType.error);
-                state = State.idle;
-                return;
-            }
+            if(recordTypeName==null) recordTypeName = "generic";
             DBDRecordType dbdRecordType = dbd.getRecordType(recordTypeName);
             if(dbdRecordType==null) {
                 iocxmlReader.message(
@@ -260,12 +254,12 @@ public class XMLToIOCDBFactory {
                     return;
                 }
             }
-            dbRecord = iocdb.findRecord(recordName);
+            DBRecord dbRecord = iocdb.findRecord(recordName);
             if(dbRecord==null) {              
                 Structure structure = dbd.getRecordType(recordTypeName);
                 pvRecord = pvDataCreate.createPVRecord(recordName, structure);
             } else {
-               pvRecord = dbRecord.getPVRecord();
+                pvRecord = dbRecord.getPVRecord();
             }
             String supportName = attributes.get("supportName");
             if(supportName==null) {
@@ -275,18 +269,17 @@ public class XMLToIOCDBFactory {
                 supportName = dbdRecordType.getSupportName();
             }
             if(supportName==null) {
-                iocxmlReader.message(
-                        "record  " + recordName + " has no record support",
-                        MessageType.error);
-            } else {
-                pvRecord.setSupportName(supportName);
+                supportName = "generic";
             }
+            pvRecord.setSupportName(supportName);
             structureState.pvStructure = pvRecord;
             state = State.structure;
         }
         
         private void endRecord() {
             if(state==State.idle) return;
+            DBRecord dbRecord = iocdb.findRecord(pvRecord.getRecordName());
+            if(dbRecord!=null) return;
             dbRecord = DBRecordFactory.create(pvRecord,iocdb,dbd);
             if(!iocdb.addRecord(dbRecord)) {
                 iocxmlReader.message(
@@ -370,19 +363,29 @@ public class XMLToIOCDBFactory {
                 }
                 break;
             case array:
-                if(arrayState.elementActive && qName.equals("element")) {
+                if(qName.equals("element")) {
+                    if(arrayState.elementActive) {
+                        endArrayElement(qName);
+                        break;
+                    }
+                    state = arrayState.prevState;
+                    if(state!=State.array) {
+                        iocxmlReader.message(
+                                "logic error ",
+                                MessageType.error);
+                        break;
+                    }
+                    arrayState = arrayStack.pop();
                     endArrayElement(qName);
                     break;
                 }
                 if(!arrayState.elementActive && qName.equals(arrayState.fieldName)) {
                     state = arrayState.prevState;
-                    if(state==State.array) {
-                        arrayState = arrayStack.pop();
-                    }
+                    if(!arrayStack.isEmpty()) arrayState = arrayStack.pop();
                     break;
                 }
                 iocxmlReader.message(
-                        "endElement error: expected value or " + arrayState.fieldName,
+                        "endElement error: expected element or " + arrayState.fieldName,
                         MessageType.error);
                 break;
             }
@@ -390,15 +393,19 @@ public class XMLToIOCDBFactory {
         
         private void startStructureElement(String qName, Map<String,String> attributes) {
             PVStructure pvStructure = structureState.pvStructure;
-            Structure structure = (Structure)pvStructure.getField();
+            Structure structure = pvStructure.getStructure();
             int fieldIndex = structure.getFieldIndex(qName);
             if(fieldIndex<0) {
-                iocxmlReader.message(
-                    "fieldName " + qName + " not found",
-                    MessageType.error);
-                idleState.prevState = state;
-                state = State.idle;
-                return;
+                String message = appendStructureElement(qName,attributes);
+                if(message!=null) {
+                    iocxmlReader.message("fieldName " + qName + " " + message,MessageType.error);
+                    idleState.prevState = state;
+                    state = State.idle;
+                    return;
+                }
+                pvStructure = structureState.pvStructure;
+                structure = pvStructure.getStructure();
+                fieldIndex = structure.getFieldIndex(qName);
             }
             PVField pvField = pvStructure.getPVFields()[fieldIndex];
             String supportName = attributes.get("supportName");
@@ -418,54 +425,32 @@ public class XMLToIOCDBFactory {
                 stringBuilder.setLength(0);
                 return;
             }
-            switch(type) {
-            case pvStructure: {
-                    String structureName = attributes.get("structureName");
-                    if(structureName!=null) {
-                        Structure replacement = dbd.getStructure(structureName);
-                        if(replacement==null) {
-                            iocxmlReader.message(
-                                    "structureName " + structureName + " not defined",
-                                    MessageType.error);
-                            idleState.prevState = state;
-                            state = State.idle;
-                            return;
-                        }
-                        if(!pvStructure.replaceStructureField(qName, replacement)) {
-                            iocxmlReader.message(
-                                    "structureName " + structureName + " not replaced",
-                                    MessageType.error);
-                            idleState.prevState = state;
-                            state = State.idle;
-                            return;
-                        }
-                        pvField = pvStructure.getPVFields()[fieldIndex];
+            if(type==Type.pvStructure) {
+                String structureName = attributes.get("structureName");
+                if(structureName!=null) {
+                    Structure replacement = dbd.getStructure(structureName);
+                    if(replacement==null) {
+                        iocxmlReader.message(
+                                "structureName " + structureName + " not defined",
+                                MessageType.error);
+                        idleState.prevState = state;
+                        state = State.idle;
+                        return;
                     }
-                }
-                structureStack.push(structureState);
-                structureState = new StructureState();
-                structureState.prevState = state;
-                structureState.pvStructure = (PVStructure)pvField;
-                structureState.fieldName = qName;
-                state = State.structure;
-                if(supportName==null) {
-                    Structure fieldStructure = (Structure)pvField.getField();
-                    DBDStructure dbdStructure = dbd.getStructure(
-                            fieldStructure.getStructureName());
-                    if(dbdStructure!=null) {
-                        supportName = dbdStructure.getSupportName();
+                    if(!pvStructure.replaceStructureField(qName, replacement)) {
+                        iocxmlReader.message(
+                                "structureName " + structureName + " not replaced",
+                                MessageType.error);
+                        idleState.prevState = state;
+                        state = State.idle;
+                        return;
                     }
+                    pvField = pvStructure.getPVFields()[fieldIndex];
                 }
-                if(supportName!=null) {
-                    pvField.setSupportName(supportName);
-                }
+                pushNewStructure((PVStructure)pvField,qName,attributes);
                 return;
-            case pvArray:
-                arrayState.pvArray = (PVArray)pvField;
-                arrayState.prevState = state;
-                arrayState.fieldName = qName;
-                state = State.array;
-                arrayStart(attributes);
+            } else if(type==Type.pvArray) {
+                pushNewArray((PVArray)pvField,qName,attributes);
                 return;
             }
             iocxmlReader.message(
@@ -474,6 +459,7 @@ public class XMLToIOCDBFactory {
             idleState.prevState = state;
             state = State.idle;
         }
+        
         private void endField()  {
             String value = stringBuilder.toString();
             stringBuilder.setLength(0);
@@ -482,157 +468,98 @@ public class XMLToIOCDBFactory {
             Field field = pvField.getField();
             Type type = field.getType();
             if(type.isScalar()) {
-                if(value!=null) {
-                    try {
-                        convert.fromString(pvField, value);
-                    } catch (NumberFormatException e) {
-                        iocxmlReader.message(e.toString(),
-                                MessageType.warning);
-                    }
+                try {
+                    convert.fromString(pvField, value);
+                } catch (NumberFormatException e) {
+                    iocxmlReader.message(e.toString(),
+                            MessageType.warning);
                 }
                 return;
             }
-            iocxmlReader.message(
-                "Logic error in endField",
-                MessageType.error);
+            iocxmlReader.message("Logic error in endField",MessageType.error);
         }
         
-        private void arrayStart(Map<String,String> attributes)  {
-            PVArray pvArray= arrayState.pvArray;
-            Array array = (Array)pvArray.getField();
-            Type arrayElementType = array.getElementType();
-            arrayState.arrayOffset = 0;
-            arrayState.arrayElementType = arrayElementType;
-            String supportName = attributes.get("supportName");
-            if(supportName!=null) pvArray.setSupportName(supportName);
-            String value = attributes.get("capacity");
-            if(value!=null) pvArray.setCapacity(Integer.parseInt(value));
-            value = attributes.get("capacityMutable");
-            if(value!=null) {
-                pvArray.setCapacityMutable(Boolean.parseBoolean(value));
-            }
-            value = attributes.get("length");
-            if(value!=null) pvArray.setLength(Integer.parseInt(value));
-            if (arrayElementType.isScalar()) return;
-            switch (arrayElementType) {
-            case pvStructure:
-                arrayState.structureData = new PVStructure[1];
-                arrayState.pvStructureArray = (PVStructureArray)pvArray;
-                return;
-            case pvArray:
-                arrayState.arrayData = new PVArray[1];
-                arrayState.pvArrayArray = (PVArrayArray)pvArray;
-                return;
-            }
-            iocxmlReader.message(" Logic error ArrayHandler",MessageType.error);
-        }
         
         private void startArrayElement(String qName, Map<String,String> attributes)  {
             if(!qName.equals("element")) {
                 iocxmlReader.message(
                         "arrayStartElement Logic error: expected element",
                         MessageType.error);
+                idleState.prevState = state;
+                state = State.idle;
+                return;
             }
             arrayState.elementActive = true;
             String offset = attributes.get("offset");
             if(offset!=null) arrayState.arrayOffset = Integer.parseInt(offset);
-            int arrayOffset = arrayState.arrayOffset;
-            PVArray pvArray = arrayState.pvArray;
-            String fieldName = "element";
-            String actualFieldName = "[" + String.format("%d",arrayOffset) + "]";
-            Field field;
             Type arrayElementType = arrayState.arrayElementType;
             if(arrayElementType.isScalar()) {
                 stringBuilder.setLength(0);
                 return;
             }
-            switch(arrayElementType) {
-            case pvStructure: {
-                    String structureName = attributes.get("structureName");
-                    if(structureName==null) {
-                        iocxmlReader.message(
-                                "structureName not given",
-                                MessageType.warning);
-                        idleState.prevState = state;
-                        state = State.idle;
-                    }
-                    DBDStructure structure = dbd.getStructure(structureName);
-                    if(structure==null) {
-                        iocxmlReader.message(
-                                "structureName not found",
-                                MessageType.warning);
-                        idleState.prevState = state;
-                        state = State.idle;
-                    }
-                    DBDStructure dbdStructure = dbd.getStructure(structureName);
-                    field = fieldCreate.createStructure(
+            int arrayOffset = arrayState.arrayOffset;
+            PVArray pvArray = arrayState.pvArray;
+            String actualFieldName = "[" + arrayOffset + "]";
+            Field field;
+            if(arrayElementType==Type.pvStructure) {
+                String structureName = attributes.get("structureName");
+                if(structureName==null) {
+                    iocxmlReader.message(
+                            "structureName not given",
+                            MessageType.warning);
+                    idleState.prevState = state;
+                    state = State.idle;
+                    return;
+                }
+                DBDStructure dbdStructure = dbd.getStructure(structureName);
+                if(dbdStructure==null) {
+                    iocxmlReader.message(
+                            "structureName not found",
+                            MessageType.warning);
+                    idleState.prevState = state;
+                    state = State.idle;
+                    return;
+                }
+                field = fieldCreate.createStructure(
                         actualFieldName,
                         dbdStructure.getStructureName(),
                         dbdStructure.getFields(),
                         dbdStructure.getFieldAttribute());
-                    PVStructureArray pvStructureArray = arrayState.pvStructureArray;
-                    PVStructure[] structureData = arrayState.structureData;
-                    structureData[0] = (PVStructure)pvDataCreate.createPVField(pvArray,field);
-                    pvStructureArray.put(arrayOffset,1,structureData,0);
-                    String supportName = attributes.get("supportName");
-                    if(supportName==null) {
-                        supportName = dbdStructure.getSupportName();
-                    }
-                    if(supportName!=null) {
-                        structureData[0].setSupportName(supportName);
-                    }
-                    String createName = attributes.get("createName");
-                    if(createName==null) {
-                        createName = dbdStructure.getCreateName();
-                    }
-                    if(createName!=null) {
-                        field.setCreateName(createName);
-                    }
-                    structureStack.push(structureState);
-                    structureState = new StructureState();
-                    structureState.prevState = state;
-                    structureState.pvStructure = structureData[0];
-                    structureState.fieldName = fieldName;
-                    state = State.structure;
-                    return;
-                }
-            case pvArray: {
-                    String elementType = attributes.get("elementType");
-                    if(elementType==null) {
-                        iocxmlReader.message(
-                                "elementType not given",
-                                MessageType.warning);
+                PVStructureArray pvStructureArray = arrayState.pvStructureArray;
+                PVStructure[] structureData = arrayState.structureData;
+                structureData[0] = (PVStructure)pvDataCreate.createPVField(pvArray,field);
+                pvStructureArray.put(arrayOffset,1,structureData,0);
+                pushNewStructure((PVStructure)structureData[0],qName,attributes);
+                return;
+            } else if(arrayElementType==Type.pvArray) {
+                String elementType = attributes.get("elementType");
+                String structureName = attributes.get("structureName");
+                if(elementType==null) {
+                    if(structureName==null) {
+                        iocxmlReader.message("elementType not given",MessageType.warning);
                         state = State.idle;
+                        return;
                     }
-                    field = fieldCreate.createArray(
-                        actualFieldName,fieldCreate.getType(elementType));
-                    PVArrayArray pvArrayArray = arrayState.pvArrayArray;
-                    PVArray[] arrayData = arrayState.arrayData;
-                    arrayData[0] = (PVArray)pvDataCreate.createPVField(pvArray,field);
-                    pvArrayArray.put(arrayOffset,1,arrayData,0);
-                    String value = attributes.get("capacity");
-                    if(value!=null) arrayData[0].setCapacity(Integer.parseInt(value));
-                    value = attributes.get("length");
-                    if(value!=null) arrayData[0].setLength(Integer.parseInt(value));
-                    String supportName = attributes.get("supportName");
-                    if(supportName!=null) {
-                        arrayData[0].setSupportName(supportName);
-                    }
-                    String createName = attributes.get("createName");
-                    if(createName!=null) {
-                        field.setCreateName(createName);
-                    }
-                    arrayState.elementActive = false;
-                    arrayStack.push(arrayState);
-                    arrayState = new ArrayState();
-                    arrayState.prevState = state;
-                    arrayState.pvArray = arrayData[0];
-                    arrayState.fieldName = fieldName;
-                    arrayState.elementActive = false;
-                    state = State.array;
-                    arrayStart(attributes);
-                    return;
+                    elementType = "structure";
                 }
+                field = fieldCreate.createArray(
+                        actualFieldName,fieldCreate.getType(elementType));
+                PVArrayArray pvArrayArray = arrayState.pvArrayArray;
+                PVArray[] arrayData = arrayState.arrayData;
+                int capacity = 0;
+                String capacityAttribute = attributes.get("capacity");
+                if(capacityAttribute!=null) {
+                    capacity = Integer.decode(capacityAttribute);
+                }
+                boolean capacityMutable = true;
+                String capacityMutableAttribute = attributes.get("capacityMutable");
+                if(capacityMutableAttribute!=null) {
+                    capacityMutable = Boolean.getBoolean(capacityMutableAttribute);
+                }
+                arrayData[0] = pvDataCreate.createPVArray(pvArrayArray, field, capacity, capacityMutable);
+                pvArrayArray.put(arrayOffset,1,arrayData,0);
+                pushNewArray((PVArray)arrayData[0],qName,attributes);
+                return;
             }
             iocxmlReader.message(
                     "fieldName " + qName + " illegal type ???",
@@ -646,12 +573,14 @@ public class XMLToIOCDBFactory {
                 iocxmlReader.message(
                         "arrayEndElement Logic error: expected element",
                         MessageType.error);
+                state = State.idle;
+                return;
             }
             arrayState.elementActive = false;
             int arrayOffset = arrayState.arrayOffset;
             PVArray pvArray = arrayState.pvArray;
             Type type = arrayState.arrayElementType;
-            if(type.isPrimitive() || type==Type.pvString) {
+            if(type.isScalar()) {
                 String value = stringBuilder.toString();
                 String[] values = null;
                 if(type.isPrimitive()) {
@@ -683,9 +612,150 @@ public class XMLToIOCDBFactory {
                 ++arrayState.arrayOffset;
                 return;
             }
-            
             ++arrayState.arrayOffset;
         }
-    }
         
+        private void pushNewStructure(PVStructure pvStructure,String fieldName, Map<String,String> attributes) {
+            structureStack.push(structureState);
+            structureState = new StructureState();
+            structureState.prevState = state;
+            structureState.pvStructure = pvStructure;
+            structureState.fieldName = fieldName;
+            state = State.structure;
+            DBDStructure dbdStructure = dbd.getStructure(pvStructure.getStructure().getStructureName());
+            String supportName = attributes.get("supportName");
+            if(supportName==null) {
+                if(pvStructure.getSupportName()==null && dbdStructure!=null) {
+                    supportName = dbdStructure.getSupportName();
+                }
+            }
+            if(supportName!=null) {
+                pvStructure.setSupportName(supportName);
+            }
+            String createName = attributes.get("createName");
+            if(createName==null) {
+                if(pvStructure.getCreateName()==null && dbdStructure!=null) {
+                    createName = dbdStructure.getCreateName();
+                }
+            }
+            if(createName!=null) {
+                pvStructure.setCreateName(createName);
+            }
+        }
+        
+        private String appendStructureElement(String qName, Map<String,String> attributes) {
+            PVStructure pvStructure = structureState.pvStructure;
+            String typeName =  attributes.get("type");   
+            String structureName =  attributes.get("structureName");
+            String elementTypeName =  attributes.get("elementType");
+            if(typeName==null) {
+                if(structureName!=null)  {
+                    typeName = "structure";
+                } else if(elementTypeName!=null) {
+                    typeName = "array";
+                }   
+            }
+            if(structureName!=null && !typeName.equals("structure")) {
+                iocxmlReader.message(
+                        "structureName specified but type is not structure",
+                        MessageType.warning);
+            }
+            if(elementTypeName!=null && !typeName.equals("array")) {
+                iocxmlReader.message(
+                        "elementTypeName specified but type is not array",
+                        MessageType.warning);
+            }
+            if(typeName==null) return "not found";
+            Field newField = null;
+            PVField newPVField = null;
+            if(structureName!=null) {
+                DBDStructure dbdStructure = dbd.getStructure(structureName);
+                if(dbdStructure==null) return "structureName not found";
+                newField = fieldCreate.createStructure(
+                        qName,
+                        dbdStructure.getStructureName(),
+                        dbdStructure.getFields(),
+                        dbdStructure.getFieldAttribute());
+                newPVField = pvDataCreate.createPVField(pvStructure, newField);  
+            } else if(elementTypeName!=null) {
+                Type type = fieldCreate.getType(elementTypeName);
+                if(type==null) return "illegal elementType";
+                int capacity = 0;
+                String capacityAttribute = attributes.get("capacity");
+                if(capacityAttribute!=null) capacity = Integer.decode(capacityAttribute);
+                boolean capacityMutable = true;
+                String capacityMutableAttribute = attributes.get("capacityMutable");
+                if(capacityMutableAttribute!=null) {
+                    capacityMutable = Boolean.getBoolean(capacityMutableAttribute);
+                }
+                Array array = fieldCreate.createArray(qName,type);
+                newField = array;
+                newPVField = pvDataCreate.createPVArray(pvStructure, array, capacity, capacityMutable);
+            } else {
+                Type type = fieldCreate.getType(typeName);
+                if(type==null) return "illegal type";
+                newField = fieldCreate.createField(qName, type);
+                newPVField = pvDataCreate.createPVField(pvStructure, newField);
+            }
+            pvStructure.appendPVField(newPVField);
+            return null;
+        }
+        
+        private void pushNewArray(PVArray pvArray,String fieldName, Map<String,String> attributes) {
+            if(arrayState!=null) arrayStack.push(arrayState);
+            arrayState = new ArrayState();
+            arrayState.prevState = state;
+            arrayState.pvArray = pvArray;
+            arrayState.fieldName = fieldName;
+            state = State.array;
+            String supportName = attributes.get("supportName");
+            if(supportName!=null) {
+                pvArray.setSupportName(supportName);
+            }
+            String createName = attributes.get("createName");
+            if(createName!=null) {
+                pvArray.setCreateName(createName);
+            }
+            String lengthAttribute = attributes.get("length");
+            if(lengthAttribute!=null) pvArray.setLength(Integer.parseInt(lengthAttribute));
+            Array array = pvArray.getArray();
+            Type arrayElementType = array.getElementType();
+            arrayState.arrayElementType = arrayElementType;
+            arrayState.arrayOffset = 0;
+            String capacityMutable = attributes.get("capacityMutable");
+            if(capacityMutable!=null && capacityMutable.equals("true")) {
+                pvArray.setCapacityMutable(true);
+            }
+            String value = attributes.get("capacity");
+            if(value!=null) {
+                int capacity = Integer.parseInt(value);
+                if(capacity!=pvArray.getCapacity()) {
+                    if(pvArray.isCapacityMutable()) {
+                        pvArray.setCapacity(capacity);
+                    } else {
+                        iocxmlReader.message(
+                                "capacityMutable is false",
+                                MessageType.error);
+                    }
+                }
+            }
+            if(capacityMutable!=null && capacityMutable.equals("false")) {
+                pvArray.setCapacityMutable(false);
+            }
+            value = attributes.get("length");
+            if(value!=null) pvArray.setLength(Integer.parseInt(value));
+            if (arrayElementType.isScalar()) return;
+            if(arrayElementType==Type.pvStructure) {
+                arrayState.structureData = new PVStructure[1];
+                arrayState.pvStructureArray = (PVStructureArray)pvArray;
+                return;
+            } else if(arrayElementType==Type.pvArray) {
+                arrayState.arrayData = new PVArray[1];
+                arrayState.pvArrayArray = (PVArrayArray)pvArray;
+                return;
+            }
+            iocxmlReader.message(" Logic error pushNewArray",MessageType.error);
+           
+        }
+    }  
 }

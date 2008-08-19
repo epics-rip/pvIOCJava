@@ -11,7 +11,7 @@
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
 package: org.epics.ioc.dbAcess <br />
-2008.06.10</h1>
+2008.08.19</h1>
 CONTENTS 
 
 <div class="toc">
@@ -111,7 +111,6 @@ At this time namespaces are not used.
 
 <h4 id="Include">Include</h4>
 The XML file can include other files also containing Record Instance
-Definitions. An included file must also be a valid XML Record Instance
 Definitions. Included files can also include other files. The syntax is: 
 <pre>    
 &lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
@@ -160,7 +159,10 @@ text. The syntax is:</p>
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;IOCDatabase&gt;
-&lt;record name = "ai${recordExtension}Record" type = "double"&gt;
+&lt;record name = "ai${recordExtension}Record"&gt;
+    &lt;value type = "double"/&gt;
+    &lt;timeStamp structureName = "timeStamp"&gt;
+    &lt;alarm structureName = "alarm" /&gt;
     &lt;input structureName = "linearConvertInput" &gt;
         &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
             &lt;pvname&gt;${pvname}&lt;/pvname&gt;
@@ -171,13 +173,13 @@ text. The syntax is:</p>
             &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
         &lt;/linearConvert&gt;
     &lt;/input&gt;
-    &lt;doubleDisplayCharacteristics&gt;
+    &lt;display structureName = "display" &gt;
         &lt;units&gt;volts&lt;/units&gt;
         &lt;limit&gt;
             &lt;low&gt;${displayLow}&lt;/low&gt;
             &lt;high&gt;${displayHigh}&lt;/high&gt;
         &lt;/limit&gt;
-    &lt;/doubleDisplayCharacteristics&gt;
+    &lt;/display&gt;
 &lt;/record&gt;
 &lt;/IOCDatabase&gt;</pre>
 
@@ -199,40 +201,70 @@ text. The syntax is:</p>
 <h3 id="record">record</h3>
 
 <p>The syntax for a record instance is:</p>
-<pre>&lt;record type = "recordType" name = "recordName" supportName = "supportName"&gt;
+<pre>&lt;record name = "recordName" type = "recordType"  supportName = "supportName"&gt;
     fieldAssignment
 &lt;/record&gt;</pre>
 
-<p><span style="font-family: courier;">recordName</span> is a string with a
-combination of the following characters:</p>
+<p><span style="font-family: courier;">recordName</span>, which must be
+specified,is a string with a combination of the following characters:</p>
 <ul>
   <li><span style="font-family: courier">0-9 A-Z a-z _ - : ; &lt; &gt; [
     ]</span></li>
   <li>Any Unicode/UTF-8 character outside of the Basic Latin set</li>
 </ul>
 
-<p>supportName is the name of support. If not given the supportName specified
-in the record type definition is used. In either case a support definition
-with the supportName must exist. Package org.epics.ioc.dbProcess provides
-support that creates support for each record instance. See that package for
-details. If the same record instance appears multiple times then then last
-supportName is used.</p>
+<p><span style="font-family: courier">recordType</span>, which is optional,
+is the name of a recordType Database Definition (DBD). If not given then the
+record is a record with no fields and generic support. Most record instances
+do not specify the recordType. Instead they add the fields desired.</p>
+
+<p><span style="font-family: courier">supportName</span>, which is optional,
+is the name of support. If not given the supportName is either the
+supportName specified in the recordType definition or else generic. A support
+definition with the supportName must be defined in a support DBD. If the same
+record instance appears multiple times then then last supportName is used.</p>
 
 <p>A <span style="font-family: courier">fieldAssignment</span> has the
 format:</p>
-<pre>    &lt;fieldName supportName = "supportName" &gt;
+<pre>    &lt;fieldName supportName = "supportName" type = "type" structureName = "structureName" elementType = "elementType"&gt;
         &lt;!-- initializer --&gt;
     &lt;/fieldName&gt;</pre>
 
-<p><span style="font-family: courier;">fieldName</span> must be a name
-definied in the record type definition.</p>
+<p><span style="font-family: courier;">fieldName</span> can be a name defined
+in the record type definition or in a previous instance definition. In this
+case <span style="font-family: courier">type</span>, <span
+style="font-family: courier">structureName</span>, and <span
+style="font-family: courier">elementType</span> are ignored. </p>
 
-<p>Any field can optionally have associated support. If a supportName is
-given with a field instance then it overides any support defined in the
-record type field definition. Thus support is only used if the record support
-for the record instance calls the support methods. If a field is initialized
-multiple times than the last supportName definition determines the
-support.</p>
+<p>Any field can optionally have associated support. If <span
+style="font-family: courier">supportName</span> is given with a field
+instance then it overides any support defined in the recordType field
+definition. Thus support is only used if the record support for the record
+instance calls the support methods. If a field is initialized multiple times
+than the last <span style="font-family: courier">supportName</span>
+definition determines the support.</p>
+
+<p>If the fieldName has not been defined then some combination of <span
+style="font-family: courier">type</span>, <span
+style="font-family: courier">structureName</span>, and <span
+style="font-family: courier">elementType</span> must be specified. In this
+case a new field will be appended to the end of the structure in which this
+field appears. <span style="font-family: courier">type</span> can be any of
+the supported types, i.e. <span style="font-family: courier">boolean</span>,
+<span style="font-family: courier">byte</span>, ..., <span
+style="font-family: courier">double</span>, <span
+style="font-family: courier">structure</span>, <span
+style="font-family: courier">array</span>. If <span
+style="font-family: courier">type</span> is <span
+style="font-family: courier">structure</span> then <span
+style="font-family: courier">structureName</span> must be specified and must
+be defined in the master DBD database. If the type is <span
+style="font-family: courier">array</span> then <span
+style="font-family: courier">elementType</span> must be defined and can be
+any of the supported types.</p>
+
+<p>For array fields additional XML attributes can appear, which are described
+below.</p>
 
 <p>If multiple field instance definitions appear then the last instance
 determines how the field is initialized.</p>
@@ -244,16 +276,15 @@ depends on the field type.</p>
 
 <p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
-<pre>    &lt;value supportName = "supportName" &gt;.98&lt;/value&gt;</pre>
-Notes: 
-<ul>
-  <li>supportName is optional</li>
-  <li>Byte.decode, Short.decode, Integer.decide, and Long.decode are used to
-    convert a string to an integer data type. Thus hex values are allowed but
-    the sign bit MUST not be set. This for byte data 0xff is not allowed but
-    -0x01 is allowed. Note for example that the byte value -128 can not be
-    specified in hex.</li>
-</ul>
+<pre>    &lt;value&gt;.98&lt;/value&gt;</pre>
+
+<p>Note: For integer data types <span
+style="font-family: courier">Long.decode</span> is used to convert a string
+to a long, which is then converted to the final integer data type . Thus hex
+values are allowed. Java does not allow the sign bit to be set. By converting
+first to a long all interger types except long can have the sign bit set.
+This for byte data 0xff is allowed even though Java would raise an exception
+if Byte.decode was used. The sign problem does exist for long values.</p>
 
 <h3 id="string">string</h3>
 
@@ -265,24 +296,26 @@ example:</p>
 
 <p>Structure fields are initialized via a recursive definition of field.</p>
 
-<p>Assume the following structure and recordType definitions:</p>
-<pre>    &lt;structure name = "limit"&gt;
+<p>Assume the following structure definitions:</p>
+<pre>    &lt;structure name = "doubleLimit"&gt;
         &lt;field name = "low"&gt;&lt;double/&gt;&lt;/field&gt;
         &lt;field name = "high"&gt;&lt;double /&gt;&lt;/field&gt;
    &lt;/structure&gt;
-   ...
-   &lt;recordType name = "double"&gt;
-   ...
-       &lt;field name = "limit" type = "structure"&gt;
-            &lt;structure name = "limit" /&gt;
-       &lt;field/&gt;
-   ...</pre>
+
+   &lt;structure name = "control"&gt;
+     &lt;field name = "limit" type = "structure" structureName = "doubleLimit" /&gt;
+     &lt;field name = "minStep" type = "double" /&gt;
+   &lt;/structure&gt;
+
+   </pre>
 
 <p>limit is initilized as follows:.</p>
-<pre>    &lt;limit&gt;
+<pre>    &lt;control structureName = "control"&gt;
+      &lt;limit&gt;
          &lt;low&gt;0.0&lt;/low&gt;
          &lt;high&gt;10.0&lt;/high&gt;
-    &lt;/limit&gt;</pre>
+      &lt;/limit&gt;
+   &lt;/control&gt;</pre>
 
 <p>It is permissible, in a database definition, to define a field to be a
 structure without providing a structure name. In this case the default is
@@ -294,7 +327,7 @@ instance is defined. The syntax is:</p>
 
 <h3 id="array">array</h3>
 The syntax for an array initializer is: 
-<pre>    &lt;fieldName capacity = "capacity" capacityMutable = "trueFalse" length = "length" supportName = "supportName" &gt;
+<pre>    &lt;fieldName capacity = "capacity" capacityMutable = "trueFalse" length = "length" &gt;
         &lt;element offset = "offset"&gt;value&lt;/element&gt;
         &lt;element offset = "offset"&gt;valueList&lt;/element&gt;
         ...
@@ -302,8 +335,6 @@ The syntax for an array initializer is:
 
 <p>where</p>
 <dl>
-  <dt style="font-family: courier;">supportName</dt>
-    <dd>Optional support.</dd>
   <dt style="font-family: courier;">capacity</dt>
     <dd>The amount of storage to allocate for the array. This is optional and
       the capacity will be equal to the number of elements initialized. If
@@ -324,20 +355,19 @@ The syntax for an array initializer is:
   <dt style="font-family: courier;">valueList</dt>
     <dd>A list of values, which is a comma separated set of values. This is
       only supported for primitive and string types.</dd>
+  <dt></dt>
+  <dt>NOTE: the fieldName cabn also have the xml attributes type,
+  elementType, and supportName.</dt>
 </dl>
 
-<p>Assume the following are part of a recordType definition:</p>
-<pre>    &lt;field name = "intArray" type = "int" /&gt;
-    &lt;field name = "structArray" type = "structure" structureName = "doubleDisplayLimits" /&gt;</pre>
-
-<p>Then the following all perform the same initialization:</p>
-<pre>    &lt;intArray capacity = "3" &gt;
+<p>The following all perform the same initialization:</p>
+<pre>    &lt;intArray elementType = "double" capacity = "3" &gt;
         &lt;element&gt;0.0, 1.0, 2.0&lt;/element&gt;
     &lt;/intArray&gt;
-    &lt;intArray capacity = "3" offset = "1"&gt;
+    &lt;intArray elementType = "double" capacity = "3" offset = "1"&gt;
         &lt;element&gt;1.0, 2.0&lt;/element&gt;
     &lt;/intArray&gt;
-    &lt;intArray&gt;
+    &lt;intArray elementType = "double"&gt;
         &lt;element&gt;0.0&lt;/element&gt;
         &lt;element&gt;1.0&lt;/element&gt;
         &lt;element&gt;2.0&lt;/element&gt;
@@ -346,12 +376,12 @@ The syntax for an array initializer is:
 
 <p>The following initializes a <span
 style="font-family: courier;">structArray</span></p>
-<pre>    &lt;structArray capacity = "2"&gt;
-        &lt;element&gt;
+<pre>    &lt;structArray elementType = "structure" capacity = "2"&gt;
+        &lt;element structureName = "doubleLimit" &gt;
             &lt;low&gt;0.0&lt;/low&gt;
             &lt;high&gt;10.0&lt;/high&gt;
         &lt;/element&gt;
-        &lt;element&gt;
+        &lt;element  structureName = "doubleLimit"&gt;
             &lt;low&gt;-10.0&lt;/low&gt;
             &lt;high&gt;10.0&lt;/high&gt;
         &lt;/element&gt;
@@ -1022,8 +1052,7 @@ all properties of the field.</p>
             }
         }
     }
-}
-</pre>
+}</pre>
 <hr />
 
 <h2 style="text-align: center" id="Thread">Thread Safety</h2>
