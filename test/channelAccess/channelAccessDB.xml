@@ -4,7 +4,7 @@
 <!--
 <include href = "caV3.xml" />
 -->
-<include href = "getPutDB.xml" />
-<include href = "monitorDB.xml" />
+<include href = "getPut.xml" />
+<include href = "monitor.xml" />
 </IOCDatabase>
 

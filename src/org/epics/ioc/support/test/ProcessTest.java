@@ -40,11 +40,11 @@ public class ProcessTest extends TestCase {
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
         Requester parsingRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "example/exampleDBD.xml",
+                 "dbd/dbd.xml",
                  parsingRequester);
         DBRecord[] dbRecords = null;
         boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/process/test/processTestDB.xml",parsingRequester);
+            "src/org/epics/ioc/support/test/processTestDB.xml",parsingRequester);
         if(!initOK) {
             System.out.printf("\nrecords\n");
             dbRecords = iocdbMaster.getDBRecords();
@@ -80,7 +80,7 @@ public class ProcessTest extends TestCase {
 //            System.out.print(record.toString());
 //        }
         initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/process/test/loopDB.xml",parsingRequester);
+            "src/org/epics/ioc/support/test/loopDB.xml",parsingRequester);
         if(!initOK) return;
         dbRecord = iocdbMaster.findRecord("root");
         assertNotNull(dbRecord);

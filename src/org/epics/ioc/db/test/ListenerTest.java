@@ -19,6 +19,8 @@ import org.epics.ioc.dbd.XMLToDBDFactory;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.Type;
@@ -31,6 +33,7 @@ import org.epics.ioc.util.Requester;
  *
  */
 public class ListenerTest extends TestCase {
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     private static Convert convert = ConvertFactory.getConvert();
     /**
      * test DBListener.
@@ -40,8 +43,7 @@ public class ListenerTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                 "example/exampleDBD.xml",iocRequester);
-        
+                "dbd/dbd.xml",iocRequester);
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
         //Set<String> keys = structureMap.keySet();
@@ -57,7 +59,9 @@ public class ListenerTest extends TestCase {
         //System.out.print(dbdRecordType.toString());
         //}
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                 "example/exampleDB.xml",iocRequester);
+                "test/analog/analogDB.xml",iocRequester);
+        XMLToIOCDBFactory.convert(dbd,iocdb,
+                  "test/powerSupply/powerSupplyDB.xml",iocRequester);
         
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
@@ -67,12 +71,12 @@ public class ListenerTest extends TestCase {
 //            System.out.print(record.toString());
 //        }
         System.out.printf("%ntest put and listen exampleAi%n");
-        new DBListenerForTesting(iocdb,"ai","scan",false,true);
+        new DBListenerForTesting(iocdb,"aiRawCounter","scan",false,true);
         new DBListenerForTesting(iocdb,"ai","value",true,true);
         new DBListenerForTesting(iocdb,"ai","alarm.severity",false,true);
         new DBListenerForTesting(iocdb,"ai","input.value",true,true);
         new DBListenerForTesting(iocdb,"ai",null,false,true);
-        testPut(iocdb,"ai","scan.priority.index",2.0);
+        testPut(iocdb,"aiRawCounter","scan.priority.index",2.0);
         testPut(iocdb,"ai","value",5.0);
         testPut(iocdb,"ai","input.value",2.0);
         testPut(iocdb,"ai","timeStamp.secondsPastEpoch",100.0);
@@ -107,7 +111,7 @@ public class ListenerTest extends TestCase {
             System.out.printf("%nrecord %s not found%n",recordName);
             return;
         }
-        PVField pvField = pvRecord.findProperty(fieldName);
+        PVField pvField = pvProperty.findProperty(pvRecord, fieldName);
         if(pvField==null){
             System.out.printf("%nfield %s not in record %s%n",fieldName,recordName);
             return;

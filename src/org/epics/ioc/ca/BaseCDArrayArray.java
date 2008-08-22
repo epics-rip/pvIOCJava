@@ -93,7 +93,7 @@ public class BaseCDArrayArray extends BaseCDArray implements CDArrayArray{
             CDArray cdArray = elementCDArrays[i];
             if(cdArray==null) continue;
             PVArray pvArray = cdArray.getPVArray();
-            Type elementType = pvArray.getArray().getType();
+            Type elementType = pvArray.getArray().getElementType();
             if(elementType==Type.pvArray) {
                 CDArrayArray elementCD = (CDArrayArray)cdArray;
                 CDField cdField = elementCD.findSourceCDField(pvField);

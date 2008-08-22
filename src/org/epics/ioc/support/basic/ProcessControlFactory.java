@@ -22,6 +22,8 @@ import org.epics.ioc.pv.PVDataCreate;
 import org.epics.ioc.pv.PVDataFactory;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
@@ -65,6 +67,7 @@ public class ProcessControlFactory {
     {
         private static final DBD dbd = DBDFactory.getMasterDBD();
         private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+        private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
         private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         private IOCExecutor iocExecutor = IOCExecutorFactory.create(supportName, ScanPriority.lowest);
         private IOCDB masterIOCDB = IOCDBFactory.getMaster();
@@ -388,7 +391,7 @@ public class ProcessControlFactory {
                         fieldDBField = recordDBRecord.getDBStructure();
                     } else {
                         PVRecord pvRecord = recordDBRecord.getPVRecord();
-                        PVField pvField = pvRecord.findProperty(fieldNameDesired);
+                        PVField pvField = pvProperty.findProperty(pvRecord,fieldNameDesired);
                         if(pvField==null) {
                             pvField = pvRecord.getSubField(fieldNameDesired);
                         }

@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "psSimple" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <voltage type = "structure">
+      <value type = "double">10.0</value>
+    </voltage>
+    <current type = "structure">
+        <value type = "double" />
+        <input structureName = "null" supportName = "powerSupplyCurrent" />
+    </current>
+    <power type = "structure">
+        <value type = "double" />
+    </power>
+    <scan structureName = "scan" >
+        <processAfterStart>true</processAfterStart>
+    </scan>
+</record>
+</IOCDatabase>

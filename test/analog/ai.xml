@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+
+<record name = "aiRawCounter">
+    <value type = "int" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
+        <expression>value+100&lt;=2047?value+100:-2048</expression>
+      </calculator>
+    </input>
+    <scan structureName = "scan">
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
+    </scan>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                    <pvname>aiRaw</pvname>
+                    <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+
+</record>
+
+<record name = "aiRaw">
+    <value type = "int"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                    <pvname>ai</pvname>
+            </link>
+        </element>
+   </supportArray>
+</record>
+
+<record name = "ai">
+    <value type = "double" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input structureName = "linearConvertInput">
+        <linearConvert>
+            <deviceHigh>2047</deviceHigh>
+            <deviceLow>-2048</deviceLow>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+        <input supportName = "inputSupport" structureName = "inputSupport">
+                <pvname>aiRaw</pvname>
+                <process>false</process>
+        </input>
+
+    </input>
+</record>
+
+
+</IOCDatabase>

@@ -45,15 +45,6 @@ public interface DBD {
     public DBDStructure createStructure(String name,
         Field[] field,FieldAttribute fieldAttribute);
     /**
-     * Create a DBDRecordType.
-     * @param name The recordType name.
-     * @param field An array of Field for the fields of the structure.
-     * @param fieldAttribute The fieldAttribute for the structure.
-     * @return interface The for the newly created structure.
-     */
-    public DBDRecordType createRecordType(String name,
-        Field[] field,FieldAttribute fieldAttribute);
-    /**
      * Create a DBDCreate.
      * @param createName The create name.
      * @param factoryName The name of the create factory.
@@ -86,25 +77,6 @@ public interface DBD {
      * @return The Map.
      */
     DBDStructure[] getDBDStructures();
-    /**
-     * Get a DBDRecordType that describes the recordType.
-     * It will be returned if it resides in this DBD or in the master DBD.
-     * @param recordTypeName The recordTypeName.
-     * @return The DBDRecordType or null if it does not exists.
-     */
-    DBDRecordType getRecordType(String recordTypeName);
-    /**
-     * Add a record type definition.
-     * @param recordType The DBDRecordType that describes the recordType.
-     * @return  (true,false) if the recordType (was not, was) added.
-     * If it is already present in either this DBD or in the master DBD it is not added.
-     */
-    boolean addRecordType(DBDRecordType recordType);
-    /**
-     * Get an array of all the recordTypes in this DBD.
-     * @return The Map
-     */
-    DBDRecordType[] getDBDRecordTypes();
     /**
      * Get a create.
      * It will be returned if it resides in this DBD or in the master DBD.
@@ -155,18 +127,6 @@ public interface DBD {
      * @return A string containing the dump.
      */
     String structureToString(String regularExpression);
-    /**
-     * Generate a list of recordType definitions with recordType names that match the regular expression.
-     * @param regularExpression The regular expression.
-     * @return A string array containing the list.
-     */
-    String[] recordTypeList(String regularExpression);
-    /**
-     * Dump all the recordType definitions with recordType names that match the regular expression.
-     * @param regularExpression The regular expression.
-     * @return A string containing the dump.
-     */
-    String recordTypeToString(String regularExpression);
     /**
      * Generate a list of support definitions with support names that match the regular expression.
      * @param regularExpression The regular expression.

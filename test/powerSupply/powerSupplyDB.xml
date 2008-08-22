@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<include addPath = "${JAVAIOC}/test/powerSupply" />
+<include href = "psAll.xml" />
+<include href = "psArray.xml" />
+<!--
+-->
+<include removePath = "${JAVAIOC}/test/powerSupply" />
+
+</IOCDatabase>

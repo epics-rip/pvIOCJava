@@ -14,6 +14,8 @@ import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.PVStructureArray;
@@ -49,6 +51,7 @@ public class DoubleAlarmFactory {
     }
     
     private static String supportName = "doubleAlarm";
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     
     private static class DoubleAlarmImpl extends AbstractSupport
     {
@@ -86,7 +89,7 @@ public class DoubleAlarmFactory {
             noop = false;
             DBField dbParent = dbStructure.getParent();
             PVField pvParent = dbParent.getPVField();
-            PVField pvField = pvParent.findProperty("value");
+            PVField pvField = pvProperty.findProperty(pvParent, "value");
             if(pvField==null) {
                 pvStructure.message("value field not found", MessageType.error);
                 return;

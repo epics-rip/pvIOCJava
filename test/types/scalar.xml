@@ -1,0 +1,248 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "scalarCounter">
+    <value type = "byte"/>
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
+        <expression>(value+1&lt;=10)?(value+1):0</expression>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
+        <type><choice>periodic</choice></type> 
+        <rate>1.0</rate>
+    </scan>
+    <supportArray elementType = "structure" supportName = "supportArray" >        
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>scalarByte1FromCounter</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>scalarByte2FromCounter</pvname>
+                <process>true</process>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>scalarShort1FromCounter</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>scalarShort2FromCounter</pvname>
+                <process>true</process>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>scalarInt1FromCounter</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>scalarInt2FromCounter</pvname>
+                <process>true</process>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>scalarLong1FromCounter</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>scalarLong2FromCounter</pvname>
+                <process>true</process>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>scalarFloat1FromCounter</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>scalarFloat2FromCounter</pvname>
+                <process>true</process>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>scalarDouble1FromCounter</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>scalarDouble2FromCounter</pvname>
+                <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+    <scan>
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "scalarByte1FromCounter">
+    <value type = "byte"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>scalarCounter</pvname>
+        <process>false</process>
+    </input>
+</record>
+<record name = "scalarByte2FromCounter">
+    <value type = "byte"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+<record name = "scalarByte3FromCounter">
+    <value type = "byte"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>scalarCounter</pvname>
+        <process>true</process>
+    </input>
+</record>
+
+<record name = "scalarShort1FromCounter">
+    <value type = "short"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>scalarCounter</pvname>
+        <process>false</process>
+    </input>
+</record>
+
+<record name = "scalarShort2FromCounter">
+    <value type = "short"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+<record name = "scalarShort3FromCounter">
+    <value type = "short"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>scalarCounter</pvname>
+        <process>true</process>
+    </input>
+</record>
+
+<record name = "scalarInt1FromCounter">
+    <value type = "int"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>scalarCounter</pvname>
+        <process>false</process>
+    </input>
+</record>
+<record name = "scalarInt2FromCounter">
+    <value type = "int"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+<record name = "scalarInt3FromCounter">
+    <value type = "int"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>scalarCounter</pvname>
+        <process>true</process>
+    </input>
+</record>
+
+<record name = "scalarLong1FromCounter">
+    <value type = "long"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>scalarCounter</pvname>
+        <process>false</process>
+    </input>
+</record>
+<record name = "scalarLong2FromCounter">
+    <value type = "long"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+<record name = "scalarLong3FromCounter">
+    <value type = "long"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>scalarCounter</pvname>
+        <process>true</process>
+    </input>
+</record>
+
+<record name = "scalarFloat1FromCounter">
+    <value type = "float"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>scalarCounter</pvname>
+        <process>false</process>
+    </input>
+</record>
+
+<record name = "scalarFloat2FromCounter">
+    <value type = "float"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+<record name = "scalarFloat3FromCounter">
+    <value type = "float"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "monitorSupport" structureName = "monitorSupport">
+        <pvname>scalarCounter</pvname>
+        <process>true</process>
+    </input>
+</record>
+
+<record name = "scalarDouble1FromCounter">
+    <value type = "double"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>scalarCounter</pvname>
+        <process>false</process>
+    </input>
+</record>
+<record name = "scalarDouble2FromCounter">
+    <value type = "double"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+<record name = "scalarDouble3FromCounter">
+    <value type = "double"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input supportName = "monitorSupport"  structureName = "monitorSupport">
+        <pvname>scalarCounter</pvname>
+        <process>true</process>
+    </input>
+</record>
+
+</IOCDatabase>

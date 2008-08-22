@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "ai${recordExtension}Record" type = "double">
-    <value>10.0</value>
+<record name = "ai${recordExtension}Record">
+    <value type = "double">10.0</value>
     <timeStamp structureName = "timeStamp" />
     <alarm structureName = "alarm" />
     <input structureName = "linearConvertInput">

@@ -1,22 +1,13 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "counter" type = "calcDouble">
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0</value>
-            <name>min</name>
-        </element>
-        <element structureName = "calcDoubleArg">
-            <value>1e9</value>
-            <name>max</name>
-        </element>
-        <element structureName = "calcDoubleArg">
-            <value>100.0</value>
-            <name>inc</name>
-        </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+<record name = "counter">
+    <value type = "double"/>
+    <input structureName = "calculation" >
+      <calculator>
+        <expression>value+100.0</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -32,13 +23,15 @@
         </element>
     </supportArray>
 </record>
-<record name = "double01" type = "double">
+<record name = "double01">
+    <value type = "double"/>
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>counter</pvname>
             <process>false</process>
     </input>
 </record>
-<record name = "double02" type = "double">
+<record name = "double02">
+  <value type = "double"/>
 </record>
 
 </IOCDatabase>

@@ -2,24 +2,59 @@
 <IOCDatabase>
 
 
-<substitute fromTo = "checkRecord=bitwiseByte,checkType=Byte,checkValue=0x44" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=bitwiseByte,checkType=byte,checkValue=0x44" />
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan">
         <processAfterStart>true</processAfterStart>
     </scan>
-    <calcArgArray>
-        <element structureName = "calcByteArg">
-            <value>0xff</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "byte" >0xff</value>
             <name>a</name>
         </element>
-        <element structureName = "calcByteArg">
-            <value>0xaa</value>
+        <element structureName = "calcArg">
+            <value type = "byte" >0xaa</value>
             <name>b</name>
         </element>
-        <element structureName = "calcByteArg">
-            <value>0x11</value>
+        <element structureName = "calcArg">
+            <value type = "byte" >0x11</value>
+            <name>c</name>
+        </element>
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
+        <expression>
+            ~(a&amp;b|c)
+        </expression>
+      </calculator>
+    </input>
+<include href = "checkLink.xml" />
+</record>
+<include href = "checkInteger.xml" />
+
+<substitute fromTo = "checkRecord=bitwiseShort,checkType=short,checkValue=0x4444" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <scan structureName = "scan">
+        <processAfterStart>true</processAfterStart>
+    </scan>
+    <input structureName = "calculation" >
+    <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "short" >0xffff</value>
+            <name>a</name>
+        </element>
+        <element structureName = "calcArg">
+            <value type = "short" >0xaaaa</value>
+            <name>b</name>
+        </element>
+        <element structureName = "calcArg">
+            <value type = "short" >0x1111</value>
             <name>c</name>
         </element>
     </calcArgArray>
@@ -28,96 +63,73 @@
             ~(a&amp;b|c)
         </expression>
     </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
-<substitute fromTo = "checkRecord=bitwiseShort,checkType=Short,checkValue=0x4444" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=bitwiseInt,checkType=int,checkValue=0x44444444" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan">
         <processAfterStart>true</processAfterStart>
     </scan>
-    <calcArgArray>
-        <element structureName = "calcShortArg">
-            <value>0xffff</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "int" >0xffffffff</value>
             <name>a</name>
         </element>
-        <element structureName = "calcShortArg">
-            <value>0xaaaa</value>
+        <element structureName = "calcArg">
+            <value type = "int" >0xaaaaaaaa</value>
             <name>b</name>
         </element>
-        <element structureName = "calcShortArg">
-            <value>0x1111</value>
+        <element structureName = "calcArg">
+            <value type = "int" >0x11111111</value>
             <name>c</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
             ~(a&amp;b|c)
         </expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
-<substitute fromTo = "checkRecord=bitwiseInt,checkType=Int,checkValue=0x44444444" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=bitwiseLong,checkType=long,checkValue=0x4444444444444444" />
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan">
         <processAfterStart>true</processAfterStart>
     </scan>
-    <calcArgArray>
-        <element structureName = "calcIntArg">
-            <value>0xffffffff</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "long" >0x7fffffffffffffff</value>
             <name>a</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>0xaaaaaaaa</value>
+        <element structureName = "calcArg">
+            <value type = "long" >0x2aaaaaaaaaaaaaaa</value>
             <name>b</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>0x11111111</value>
+        <element structureName = "calcArg">
+            <value type = "long" >0x1111111111111111</value>
             <name>c</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
-        <expression>
-            ~(a&amp;b|c)
-        </expression>
-    </calculator>
-<include href = "checkLink.xml" />
-</record>
-<include href = "checkInteger.xml" />
-
-<substitute fromTo = "checkRecord=bitwiseLong,checkType=Long,checkValue=0x4444444444444444" />
-<record name = "${checkRecord}" type = "calc${checkType}">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan>
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <calcArgArray>
-        <element structureName = "calcLongArg">
-            <value>0x7fffffffffffffff</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcLongArg">
-            <value>0x2aaaaaaaaaaaaaaa</value>
-            <name>b</name>
-        </element>
-        <element structureName = "calcLongArg">
-            <value>0x1111111111111111</value>
-            <name>c</name>
-        </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
             (~(a&amp;b|c))&amp;0x7fffffffffffffffL
         </expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />

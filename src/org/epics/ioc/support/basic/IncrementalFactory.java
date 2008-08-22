@@ -13,6 +13,8 @@ import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.support.AbstractSupport;
@@ -57,6 +59,7 @@ public class IncrementalFactory {
     static private class IncrementalImpl extends AbstractSupport
     {
         private static String supportName = "incremental";
+        private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
         private DBStructure dbStructure;
         private PVStructure pvStructure;
         private DBField dbValue = null;
@@ -85,7 +88,7 @@ public class IncrementalFactory {
             DBRecord dbRecord = dbStructure.getDBRecord();
             DBField parentDBField = dbStructure;
             PVField parentPVField = parentDBField.getPVField();
-            PVField pvField = parentPVField.findProperty("value");
+            PVField pvField = pvProperty.findProperty(parentPVField, "value");
             if(pvField==null) {
                 super.message("parent does not have a value field", MessageType.error);
                 return;
@@ -97,7 +100,7 @@ public class IncrementalFactory {
             pvDesiredValue = (PVDouble)pvField;
             parentDBField = parentDBField.getParent();
             parentPVField = parentDBField.getPVField();
-            pvField = parentPVField.findProperty("value");
+            pvField = pvProperty.findProperty(parentPVField, "value");
             if(pvField==null) {
                 super.message("parent of parent does not have a value field", MessageType.error);
                 return;
@@ -108,7 +111,7 @@ public class IncrementalFactory {
             }
             pvValue = (PVDouble)pvField;
             dbValue = dbRecord.findDBField(pvField);
-            pvRateOfChange = pvStructure.findProperty("rateOfChange");
+            pvRateOfChange = pvProperty.findProperty(pvStructure,"rateOfChange");
             if(pvRateOfChange==null) {
                 super.message("rateOfChange not found", MessageType.error);
                 return;

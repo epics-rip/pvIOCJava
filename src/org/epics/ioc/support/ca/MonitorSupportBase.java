@@ -25,6 +25,8 @@ import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
 import org.epics.ioc.pv.PVStructure;
@@ -74,7 +76,7 @@ implements CDMonitorRequester,RecordProcessRequester
                 + ((Integer)value).toString() + " is not a valid MonitorType");
         }
     }
-    
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static IOCExecutor iocExecutor
         = IOCExecutorFactory.create("caLinkMonitor", ScanPriority.low);
     private PVInt monitorTypeAccess = null;
@@ -145,7 +147,7 @@ implements CDMonitorRequester,RecordProcessRequester
         PVField pvField = null;
         while(dbParent!=null) {
             PVField pvParent = dbParent.getPVField();
-            pvField = pvParent.findProperty("value");
+            pvField = pvProperty.findProperty(pvParent,"value");
             if(pvField!=null) break;
             dbParent = dbParent.getParent();
         }
@@ -261,9 +263,9 @@ implements CDMonitorRequester,RecordProcessRequester
                 PVField targetPVField = cdField.getPVField();
                 if(channelField==alarmChannelField) {
                     PVStructure pvStructure = (PVStructure)targetPVField;
-                    PVInt targetPVInt = (PVInt)pvStructure.findProperty("severity.index");
+                    PVInt targetPVInt = (PVInt)pvProperty.findProperty(pvStructure,"severity.index");
                     alarmSeverity = AlarmSeverity.getSeverity(targetPVInt.get());
-                    PVString pvString = (PVString)pvStructure.findProperty("message");
+                    PVString pvString = (PVString)pvProperty.findProperty(pvStructure,"message");
                     alarmMessage = pvString.get();
                     continue;
                 }

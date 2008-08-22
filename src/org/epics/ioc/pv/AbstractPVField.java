@@ -44,7 +44,7 @@ public abstract class AbstractPVField implements PVField{
         supportName = field.getSupportName();
         if(parent==null) return;
         record = parent.getPVRecord();
-        createFullFieldAndRequesterNames();
+        createFullNameANDFullFieldName();
     }
     /**
      * Called by derived classes to replace a field.
@@ -59,7 +59,7 @@ public abstract class AbstractPVField implements PVField{
      */
     protected void setRecord(PVRecord record) {
         this.record = record;
-        createFullFieldAndRequesterNames();
+        createFullNameANDFullFieldName();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -186,146 +186,6 @@ public abstract class AbstractPVField implements PVField{
         return pvEnumerated;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#findProperty(java.lang.String)
-     */
-    public PVField findProperty(String fieldName) {
-        if(fieldName==null || fieldName.length()==0) return null;
-        String[] names = periodPattern.split(fieldName,2);
-        if(names.length<=0) {
-            return null;
-        }
-        PVField currentField = this;
-        while(true) {
-            String name = names[0];
-            int arrayIndex = -1;
-            int startBracket = name.indexOf('[');
-            String nextBracket = null;
-            if(startBracket>=0) {
-                String arrayIndexString = name.substring(startBracket+1);
-                name = name.substring(0,startBracket);
-                int endBracket = arrayIndexString.indexOf(']');
-                if(endBracket<0) return null;
-                if(endBracket<(arrayIndexString.length()-1)) {
-                    nextBracket = arrayIndexString.substring(endBracket+1);
-                }
-                arrayIndexString = arrayIndexString.substring(0,endBracket);
-                arrayIndex = Integer.parseInt(arrayIndexString);
-            }
-            currentField = findField(currentField,name);
-            if(currentField==null) return null;
-            while(arrayIndex>=0) {
-                Type type = currentField.getField().getType();
-                if(type!=Type.pvArray) return null;
-                PVArray pvArray = (PVArray)currentField;
-                Array field = (Array)pvArray.getField();
-                Type elementType = field.getElementType();
-                if(elementType==Type.pvStructure) {
-                    PVStructureArray pvStructureArray =
-                        (PVStructureArray)currentField;
-                    if(arrayIndex>=pvStructureArray.getLength()) return null;
-                    StructureArrayData data = new StructureArrayData();
-                    int n = pvStructureArray.get(arrayIndex,1,data);
-                    PVStructure[] structureArray = data.data;
-                    int offset = data.offset;
-                    if(n<1 || structureArray[offset]==null) return null;
-                    currentField = (PVField)structureArray[offset];
-                } else if(elementType==Type.pvArray) {
-                    PVArrayArray pvArrayArray = (PVArrayArray)currentField;
-                    if(arrayIndex>=pvArrayArray.getLength()) break;
-                    ArrayArrayData data = new ArrayArrayData();
-                    int n = pvArrayArray.get(arrayIndex,1,data);
-                    PVArray[] arrayArray = data.data;
-                    int offset = data.offset;
-                    if(n<1 || arrayArray[offset]==null) return null;
-                    currentField = (PVField)arrayArray[offset];
-                    if(nextBracket==null) break;
-                    startBracket = nextBracket.indexOf('[');
-                    if(startBracket<0) return null;
-                    String arrayIndexString = nextBracket.substring(startBracket+1);
-                    int endBracket = arrayIndexString.indexOf(']');
-                    if(endBracket<0) return null;
-                    if(endBracket<(arrayIndexString.length()-1)) {
-                        nextBracket = arrayIndexString.substring(endBracket+1);
-                    }
-                    arrayIndexString = arrayIndexString.substring(0,endBracket);
-                    arrayIndex = Integer.parseInt(arrayIndexString);
-                    continue;
-                } else {
-                    return null;
-                }
-                break;
-            }
-            if(names.length<=1) break;
-            names = periodPattern.split(names[1],2);
-        }
-        return currentField;
-    }
-
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#findPropertyViaParent(java.lang.String)
-     */
-    public PVField findPropertyViaParent(String propertyName) {
-        PVField currentPVField = this;
-        PVField parentPVField = currentPVField.getParent();
-        while(parentPVField!=null) {
-            if(parentPVField.getField().getType()==Type.pvStructure) {
-                PVStructure parentPVStructure = (PVStructure)parentPVField;
-                for(PVField pvField : parentPVStructure.getPVFields()) {
-                    Field field = pvField.getField();
-                    if(field.getFieldName().equals(propertyName)) {
-                        if(field.getType()==Type.pvStructure) {
-                            PVStructure pvStructure = (PVStructure)pvField;
-                            if(pvStructure.getSupportName()==null
-                            && pvStructure.getStructure().getStructureName().equals("null")) break;
-                        }
-                        return pvField;
-                    }
-                }
-            }
-            parentPVField = parentPVField.getParent();
-        }
-        return null;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVField#getPropertyNames()
-     */
-    public String[] getPropertyNames() {
-        PVField pvField = this;
-        boolean skipValue = false;
-        Field field = this.getField();
-        if(field.getFieldName().equals("value")) {
-            if(this.parent!=null) {
-                pvField = this.parent;
-                skipValue = true;
-            }
-        }
-        field = pvField.getField();
-        if(field.getType()!=Type.pvStructure) return null;
-        PVStructure pvStructure = (PVStructure)pvField;
-        PVField[] pvFields = pvStructure.getPVFields();
-        int size = 0;
-        for(PVField pvf: pvFields) {
-            field = pvf.getField();
-            String fieldName = field.getFieldName();
-            if(skipValue && fieldName.equals("value")) continue;
-            // findProperty will skip null structures
-            if(pvField.findProperty(fieldName)!=null) size++;
-        }
-        if(size==0) return null;
-        String[] propertyNames = new String[size];
-        int index = 0;
-        for(PVField pvf: pvFields) {
-            field = pvf.getField();
-            String fieldName = field.getFieldName();
-            if(skipValue && fieldName.equals("value")) continue;
-            // findProperty will skip null structures
-            if(pvField.findProperty(fieldName)!=null) {
-                propertyNames[index++] = pvf.getField().getFieldName();
-            }
-        }
-        return propertyNames;
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVField#getSupportName()
      */
     public String getSupportName() {
@@ -399,67 +259,36 @@ public abstract class AbstractPVField implements PVField{
         return returnValue;
     }
     
-    private void createFullFieldAndRequesterNames() {
+    private void createFullNameANDFullFieldName() {
         if(this==record) {
-            fullFieldName = fullName = record.getRecordName();
+            fullName = record.getRecordName();
             return;
         }
         StringBuilder fieldName = new StringBuilder();
-        fieldName.append(getField().getFieldName());
-        if(parent.getField().getType()!=Type.pvArray) fieldName.insert(0, ".");
+        Field field = getField();
+        String name = field.getFieldName();
+        if(name!=null && name.length()>0) {
+            fieldName.append(name);
+            if(parent.getField().getType()!=Type.pvArray) fieldName.insert(0, ".");
+        }
         PVField parent = getParent();
         while(parent!=this.record) {
-            fieldName.insert(0,parent.getField().getFieldName());
+            field = parent.getField();
+            name = field.getFieldName();
+            boolean gotName = false;
+            if(name!=null && name.length()>0) {
+                fieldName.insert(0,parent.getField().getFieldName());
+                gotName = true;
+            }
             parent = parent.getParent();
-            if(parent!=null && parent.getField().getType()!=Type.pvArray) fieldName.insert(0, ".");
+            if(gotName && parent!=null && parent.getField().getType()!=Type.pvArray) fieldName.insert(0, ".");
         }
-        fullFieldName = fieldName.substring(1); //remove leading "."
+        if(fieldName.length()>0 && fieldName.charAt(0)=='.') {
+            fullFieldName = fieldName.substring(1); //remove leading "."
+        }
         if(record!=null) {
             fullName = record.getRecordName() + "." + fullFieldName;
         }
-    }
-    
-    private PVField findField(PVField pvField,String name) {
-        if(pvField==null) return null;
-        Field field = pvField.getField();
-        String pvFieldName = field.getFieldName();
-        if(field.getType()!=Type.pvStructure)  {
-            if(pvFieldName.equals("value")) {
-                return findField(pvField.getParent(),name);
-            }
-            return null;
-        }
-        PVStructure pvStructure = (PVStructure)pvField;
-        PVField[] pvFields = pvStructure.getPVFields();
-        Structure structure = pvStructure.getStructure();
-        int dataIndex = structure.getFieldIndex(name);
-        if(dataIndex>=0) {
-            PVField pvf = pvFields[dataIndex];
-            boolean notNullStructure = true;
-            field = pvf.getField();
-            if(field.getType()==Type.pvStructure)  {
-                pvStructure = (PVStructure)pvf;
-                pvFields = pvStructure.getPVFields();
-                structure = pvStructure.getStructure();
-                String supportName = pvStructure.getSupportName();
-                if(supportName==null || supportName.length()<=0) {
-                    supportName = structure.getSupportName();
-                }
-                if(supportName!=null && supportName.length()<=0) supportName = null;
-                if(pvFields.length==0 && supportName==null) {
-                    notNullStructure = false;
-                }
-            }
-            if(notNullStructure) return pvf;
-        }
-        if(name.equals("timeStamp")) {
-            return pvField.findPropertyViaParent(name);
-        }
-        if(pvFieldName.equals("value")) {
-            pvField = pvField.getParent();
-            if(pvField!=null) return findField(pvField,name);
-        }
-        return null;
     }
     
     private static class PVEnumeratedImpl implements PVEnumerated {

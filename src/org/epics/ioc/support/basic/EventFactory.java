@@ -7,6 +7,8 @@ package org.epics.ioc.support.basic;
 
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.Type;
@@ -43,6 +45,7 @@ public class EventFactory {
          * @see org.epics.ioc.process.RecordSupport#processRecord(org.epics.ioc.process.RecordProcessRequester)
          */
         private static String supportName = "event";
+        private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
         private SupportState supportState = SupportState.readyForInitialize;
         private PVRecord pvRecord;
         DBField dbField;
@@ -63,7 +66,7 @@ public class EventFactory {
         public void initialize() {
             DBField dbParent = dbField.getParent();
             PVField pvParent = dbParent.getPVField();
-            PVField pvField = pvParent.findProperty("value");
+            PVField pvField = pvProperty.findProperty(pvParent, "value");
             if(pvField==null) {
                 pvParent.message("value field not found", MessageType.error);
                 return;

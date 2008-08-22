@@ -1,0 +1,169 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "syncFloat64ArrayPort" structureName = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Float64ArrayDriverFactory</factoryName>
+    <portName>syncFloat64ArrayPort</portName>
+    <driverParameters structureName = "float64ArrayDriver" >
+        <delay>0.0</delay>
+        <maxSegmentSize>2</maxSegmentSize>
+    </driverParameters>
+</record>
+
+<record name = "syncFloat64ArrayDeviceControl" structureName = "portDeviceControl" >
+    <portDevice>syncFloat64ArrayPort[0]</portDevice>
+<!--
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
+<record name = "syncFloat64ArrayIncrementer">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <value elementType = "double" capacity = "7">
+        <element>0.0 1.0 2.0 3.0 4.0 5.0 6.0</element>
+    </value>
+    <input structureName = "calculation" >
+      <calculator supportName = "arrayIncrementCalculator" />
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>syncFloat64ArrayOutput</pvname>
+                <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+    <scan structureName = "scan" >
+        <type><choice>periodic</choice></type> 
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "syncFloat64ArrayOutput">
+    <value elementType = "double" />
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <output supportName = "pdrvFloat64ArrayOutput" structureName = "pdrvSupport">
+        <portName>syncFloat64ArrayPort</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
+    </output>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>syncFloat64ArrayInput</pvname>
+            </link>
+        </element>
+    </supportArray>
+</record>
+<record name = "syncFloat64ArrayInput">
+    <value elementType = "double" />
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "pdrvFloat64ArrayInput" structureName = "pdrvSupport">
+        <portName>syncFloat64ArrayPort</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
+        <size>20</size>
+    </input>
+</record>
+<record name = "syncFloat64ArrayInputInterrupt">
+    <value elementType = "double" />
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "pdrvFloat64ArrayInterruptInput" structureName = "pdrvSupport">
+        <portName>syncFloat64ArrayPort</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
+    </input>
+</record>
+
+<record name = "asynFloat64ArrayPort" structureName = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.Float64ArrayDriverFactory</factoryName>
+    <portName>asynFloat64ArrayPort</portName>
+    <driverParameters structureName = "float64ArrayDriver" >
+        <delay>0.1</delay>
+        <maxSegmentSize>0</maxSegmentSize>
+    </driverParameters>
+</record>
+
+<record name = "asynFloat64ArrayDeviceControl" structureName = "portDeviceControl" >
+    <portDevice>asynFloat64ArrayPort[0]</portDevice>
+<!--
+    <traceMask>0x0fff</traceMask>
+    <traceIOMask>0x0fff</traceIOMask>
+-->
+</record>
+
+<record name = "asynFloat64ArrayIncrementer">
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <value elementType = "double" capacity = "7">
+        <element>0.0 1.0 2.0 3.0 4.0 5.0 6.0</element>
+    </value>
+    <input structureName = "calculation" >
+      <calculator supportName = "arrayIncrementCalculator" />
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>asynFloat64ArrayOutput</pvname>
+                <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+    <scan structureName = "scan" >
+        <type><choice>periodic</choice></type> 
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "asynFloat64ArrayOutput">
+    <value elementType = "double" />
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <output supportName = "pdrvFloat64ArrayOutput" structureName = "pdrvSupport">
+        <portName>asynFloat64ArrayPort</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
+    </output>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>asynFloat64ArrayInput</pvname>
+            </link>
+        </element>
+    </supportArray>
+</record>
+<record name = "asynFloat64ArrayInput">
+    <value elementType = "double" />
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "pdrvFloat64ArrayInput" structureName = "pdrvSupport">
+        <portName>asynFloat64ArrayPort</portName>
+        <addr>0</addr>
+        <timeout>1.0</timeout>
+        <size>20</size>
+    </input>
+</record>
+<record name = "asynFloat64ArrayInputInterrupt">
+    <value elementType = "double" />
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "pdrvFloat64ArrayInterruptInput" structureName = "pdrvSupport">
+        <portName>asynFloat64ArrayPort</portName>
+        <addr>0</addr>
+        <process>true</process>
+        <size>20</size>
+    </input>
+</record>
+
+</IOCDatabase>
+

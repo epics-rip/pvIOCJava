@@ -260,11 +260,13 @@ public class GenericFactory {
                 DBArrayArray dbArrayArray = (DBArrayArray)dbArray;
                 DBArray[] dbArrays = dbArrayArray.getElementDBArrays();
                 for(DBArray dbArray: dbArrays) {
+                    if(dbArray==null) continue;
                     if(dbArray.getSupport()!=null) numberSupports++;;
                 }
                 supports = new Support[numberSupports];
                 int ind = 0;
                 for(DBArray dbArray: dbArrays) {
+                    if(dbArray==null) continue;
                     Support support = dbArray.getSupport();
                     if(support!=null) supports[ind++] = support; 
                 }
@@ -272,11 +274,13 @@ public class GenericFactory {
                 DBStructureArray dbStructureArray = (DBStructureArray)dbArray;
                 DBStructure[] dbStructures = dbStructureArray.getElementDBStructures();
                 for(DBStructure dbStructure: dbStructures) {
+                    if(dbStructure==null) continue;
                     if(dbStructure.getSupport()!=null) numberSupports++;;
                 }
                 supports = new Support[numberSupports];
                 int ind = 0;
                 for(DBStructure dbStructure: dbStructures) {
+                    if(dbStructure==null) continue;
                     Support support = dbStructure.getSupport();
                     if(support!=null) supports[ind++] = support; 
                 }

@@ -4,13 +4,13 @@
 
 <include addPath = "test/pdrv" />
 <record name = "processControl" type = "processControl" />
-<include href = "booleanDB.xml" />
-<include href = "digitalDB.xml" />
-<include href = "int32DB.xml" />
-<include href = "float64DB.xml" />
-<include href = "stringDB.xml" />
-<include href = "int32ArrayDB.xml" />
-<include href = "float64ArrayDB.xml" />
+<include href = "boolean.xml" />
+<include href = "digital.xml" />
+<include href = "int32.xml" />
+<include href = "float64.xml" />
+<include href = "string.xml" />
+<include href = "int32Array.xml" />
+<include href = "float64Array.xml" />
 <!--
 -->
 <include removePath = "test/pdrv" />

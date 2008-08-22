@@ -8,6 +8,8 @@ package org.epics.ioc.ca;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 
 /**
  * Abstract class for implementing ChannelField.
@@ -15,6 +17,7 @@ import org.epics.ioc.pv.PVField;
  *
  */
 public abstract class AbstractChannelField implements ChannelField{
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     private PVField pvField;
 
     /**
@@ -38,7 +41,7 @@ public abstract class AbstractChannelField implements ChannelField{
      * @see org.epics.ioc.ca.ChannelField#getPropertyNames()
      */
     public String[] getPropertyNames() {
-        return pvField.getPropertyNames();
+        return pvProperty.getPropertyNames(pvField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)

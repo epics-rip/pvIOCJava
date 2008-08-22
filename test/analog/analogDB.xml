@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<include addPath = "test/analog" />
+
+<include href = "ai.xml" />
+<include href = "ao.xml" />
+<include href = "aoIncremental.xml" />
+<!--
+-->
+</IOCDatabase>

@@ -9,6 +9,8 @@ import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
@@ -46,19 +48,19 @@ public class PowerSupplyFactory {
             return null;
         }
         PVField parentPVField = parentDBField.getPVField();
-        PVField valuePVField = parentPVField.findProperty("current.value");
+        PVField valuePVField = pvProperty.findProperty(parentPVField,"current.value");
         if(valuePVField==null) {
             parentPVField.message("current.value does not exist", MessageType.fatalError);
             return null;
         }
         DBField currentDBField = parentDBField.getDBRecord().findDBField(valuePVField);
-        valuePVField = parentPVField.findProperty("voltage.value");
+        valuePVField = pvProperty.findProperty(parentPVField,"voltage.value");
         if(valuePVField==null) {
             parentPVField.message("voltage.value does not exist", MessageType.fatalError);
             return null;
         }
         DBField voltageDBField = parentDBField.getDBRecord().findDBField(valuePVField);
-        valuePVField = parentPVField.findProperty("power.value");
+        valuePVField = pvProperty.findProperty(parentPVField,"power.value");
         if(valuePVField==null) {
             parentPVField.message("power.value does not exist", MessageType.fatalError);
             return null;
@@ -69,6 +71,7 @@ public class PowerSupplyFactory {
     }
     
     private static final String powerSupplyCurrentName = "powerSupplyCurrent";
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     
     static private class PowerSupplyCurrentImpl extends AbstractSupport

@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<record name = "aiExample" type = "double">
+<record name = "aiExample">
+    <value type = "double"/>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">

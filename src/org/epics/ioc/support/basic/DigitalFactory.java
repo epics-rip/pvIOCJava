@@ -24,6 +24,8 @@ import org.epics.ioc.pv.PVDataCreate;
 import org.epics.ioc.pv.PVDataFactory;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
 import org.epics.ioc.pv.PVStructure;
@@ -80,6 +82,7 @@ public class DigitalFactory {
     
     private static final String digitalInputName = "digitalInput";
     private static final String digitalOutputName = "digitalOutput";
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
 
     
@@ -120,14 +123,14 @@ public class DigitalFactory {
             DBRecord dbRecord = dbStates.getDBRecord();
             DBField parentDBField = dbStates.getParent().getParent();
             PVField parentPVField = parentDBField.getPVField();
-            PVField pvField = parentPVField.findProperty("value");
+            PVField pvField = pvProperty.findProperty(parentPVField, "value");
             if(pvField==null) {
                 super.message("parent does not have a value field", MessageType.error);
                 return;
             }
             dbValue = dbRecord.findDBField(pvField);
             if(!initValue()) return;
-            pvField = parentPVField.findProperty("valueAlarm");
+            pvField = pvProperty.findProperty(parentPVField, "valueAlarm");
             if(pvField==null) {
                 super.message("valueAlarm does not exist", MessageType.error);
                 return;
@@ -136,7 +139,7 @@ public class DigitalFactory {
             if(!initValueAlarm(dbField)) return;
             parentDBField = dbStates.getParent();
             parentPVField = parentDBField.getPVField();
-            pvField = parentPVField.findProperty("value");
+            pvField = pvProperty.findProperty(parentPVField, "value");
             if(pvField.getField().getType()!=Type.pvInt) {
                 super.message("registerValue is not an int", MessageType.error);
                 return;
@@ -190,7 +193,7 @@ public class DigitalFactory {
         private boolean initValueAlarm(DBField dbValueAlarm) {
             DBStructure dbStructure = (DBStructure)dbValueAlarm;
             PVStructure pvStructure = dbStructure.getPVStructure();
-            PVField pvField = pvStructure.findProperty("stateAlarm");
+            PVField pvField = pvProperty.findProperty(pvStructure,"stateAlarm");
             if(pvField==null) {
                 super.message("valueAlarm does not have a stateAlarm field. Why???", MessageType.error);
                 return false;

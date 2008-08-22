@@ -61,7 +61,6 @@ public class DBDFactory {
     private static class DBDInstance implements DBD {
         private String name;
         private TreeMap<String,DBDStructure> structureMap = new TreeMap<String,DBDStructure>();
-        private TreeMap<String,DBDRecordType> recordTypeMap = new TreeMap<String,DBDRecordType>();
         private TreeMap<String,DBDCreate> createMap = new TreeMap<String,DBDCreate>();
         private TreeMap<String,DBDSupport> supportMap = new TreeMap<String,DBDSupport>();
         private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -88,9 +87,8 @@ public class DBDFactory {
             if(getMasterDBD()==this) return;
             rwLock.writeLock().lock();
             try {
-                masterDBD.merge(structureMap,recordTypeMap,createMap,supportMap);
+                masterDBD.merge(structureMap,createMap,supportMap);
                 structureMap.clear();
-                recordTypeMap.clear();
                 createMap.clear();
                 supportMap.clear();
             } finally {
@@ -110,13 +108,6 @@ public class DBDFactory {
             return new SupportInstance(supportName,factoryName);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#createRecordType(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
-         */
-        public DBDRecordType createRecordType(String name, Field[] field,FieldAttribute fieldAttribute)
-        {
-            return new RecordTypeInstance(name,field,fieldAttribute);
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#createStructure(java.lang.String, org.epics.ioc.pv.Field[], org.epics.ioc.pv.Property[], org.epics.ioc.pv.FieldAttribute)
          */
         public DBDStructure createStructure(String name, Field[] field,FieldAttribute fieldAttribute)
@@ -127,7 +118,6 @@ public class DBDFactory {
         // merge allows master to be locked once
         private void merge(
                 TreeMap<String,DBDStructure> structure,
-                TreeMap<String,DBDRecordType> recordType,
                 TreeMap<String,DBDCreate> create,
                 TreeMap<String,DBDSupport> support)
         {
@@ -137,10 +127,6 @@ public class DBDFactory {
                 keys = structure.keySet();
                 for(String key: keys) {
                     structureMap.put(key,structure.get(key));
-                }
-                keys = recordType.keySet();
-                for(String key: keys) {
-                    recordTypeMap.put(key,recordType.get(key));
                 }
                 keys = create.keySet();
                 for(String key: keys) {
@@ -191,48 +177,6 @@ public class DBDFactory {
             try {
                 DBDStructure[] array = new DBDStructure[structureMap.size()];
                 structureMap.values().toArray(array);
-                return array;
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#addRecordType(org.epics.ioc.dbDefinition.DBDRecordType)
-         */
-        public boolean addRecordType(DBDRecordType recordType) {
-            rwLock.writeLock().lock();
-            try {
-                String key = recordType.getFieldName();
-                if(recordTypeMap.containsKey(key)) return false;
-                if(this!=masterDBD && masterDBD.getRecordType(key)!=null) return false;
-                recordTypeMap.put(key,recordType);
-                return true;
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#getRecordType(java.lang.String)
-         */
-        public DBDRecordType getRecordType(String recordTypeName) {
-            rwLock.readLock().lock();
-            try {
-                DBDRecordType dbdRecordType = null;
-                dbdRecordType = recordTypeMap.get(recordTypeName);
-                if(dbdRecordType==null && this!=masterDBD) dbdRecordType = masterDBD.getRecordType(recordTypeName);
-                return dbdRecordType;
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#getRecordTypeMap()
-         */
-        public DBDRecordType[] getDBDRecordTypes() {
-            rwLock.readLock().lock();
-            try {
-                DBDRecordType[] array = new DBDRecordType[recordTypeMap.size()];
-                recordTypeMap.values().toArray(array);
                 return array;
             } finally {
                 rwLock.readLock().unlock();
@@ -379,62 +323,6 @@ public class DBDFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#recordTypeList(java.lang.String)
-         */
-        public String[] recordTypeList(String regularExpression) {
-            ArrayList<String> list = new ArrayList<String>();
-            if(regularExpression==null) regularExpression = ".*";
-            Pattern pattern;
-            try {
-                pattern = Pattern.compile(regularExpression);
-            } catch (PatternSyntaxException e) {
-                return new String[0];
-            }
-            rwLock.readLock().lock();
-            try {
-                Set<String> keys = recordTypeMap.keySet();
-                for(String key: keys) {
-                    DBDRecordType dbdRecordType = recordTypeMap.get(key);
-                    String name = dbdRecordType.getFieldName();
-                    if(pattern.matcher(name).matches()) {
-                        list.add(name);
-                    }
-                }
-                String[] result = new String[list.size()];
-                for(int i=0; i< list.size(); i++) result[i] = list.get(i);
-                return result;
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.dbd.DBD#recordTypeToString(java.lang.String)
-         */
-        public String recordTypeToString(String regularExpression) {
-            StringBuilder result = new StringBuilder();
-            if(regularExpression==null) regularExpression = ".*";
-            Pattern pattern;
-            try {
-                pattern = Pattern.compile(regularExpression);
-            } catch (PatternSyntaxException e) {
-                return "PatternSyntaxException: " + e;
-            }
-            rwLock.readLock().lock();
-            try {
-                Set<String> keys = recordTypeMap.keySet();
-                for(String key: keys) {
-                    DBDRecordType dbdRecordType = recordTypeMap.get(key);
-                    String name = dbdRecordType.getFieldName();
-                    if(pattern.matcher(name).matches()) {
-                        result.append(" " + dbdRecordType.toString());
-                    }
-                }
-                return result.toString();
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.dbd.DBD#supportList(java.lang.String)
          */
         public String[] supportList(String regularExpression) {
@@ -556,14 +444,6 @@ public class DBDFactory {
         }
     }
 
-    static private class RecordTypeInstance extends StructureInstance implements DBDRecordType
-    {   
-        private RecordTypeInstance(String name,Field[] field,FieldAttribute fieldAttribute)
-        {
-            super(name,field,fieldAttribute);
-        }
-    }
-    
     static private class CreateInstance implements DBDCreate
     {
         private String createName;

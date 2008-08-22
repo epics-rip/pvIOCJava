@@ -2,17 +2,16 @@
 <IOCDatabase>
 <include addPath = "test/caV3" />
 <substitute from = "num" to = "01" />
-<include href = "scalarDB.xml" />
-<include href = "arrayDB.xml" />
-
+<include href = "scalar.xml" />
+<include href = "array.xml" />
+<!--
 <substitute from = "num" to = "02" />
-<include href = "scalarDB.xml" />
-<include href = "arrayDB.xml" />
+<include href = "scalar.xml" />
+<include href = "array.xml" />
 
 <substitute from = "num" to = "03" />
-<include href = "scalarDB.xml" />
-<include href = "arrayDB.xml" />
-<!--
+<include href = "scalar.xml" />
+<include href = "array.xml" />
 -->
 </IOCDatabase>
 

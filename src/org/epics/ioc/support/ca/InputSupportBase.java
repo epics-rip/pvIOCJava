@@ -23,6 +23,8 @@ import org.epics.ioc.pv.PVArray;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
 import org.epics.ioc.pv.PVStructure;
@@ -46,6 +48,7 @@ public class InputSupportBase extends AbstractLinkSupport
 implements CDGetRequester,
 ProcessCallbackRequester,ProcessContinueRequester
 {
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private PVBoolean processAccess = null;  
     private DBField valueDBField;
     
@@ -100,7 +103,7 @@ ProcessCallbackRequester,ProcessContinueRequester
         PVField pvField = null;
         while(dbParent!=null) {
             PVField pvParent = dbParent.getPVField();
-            pvField = pvParent.findProperty("value");
+            pvField = pvProperty.findProperty(pvParent,"value");
             if(pvField!=null) break;
             dbParent = dbParent.getParent();
         }
@@ -202,9 +205,9 @@ ProcessCallbackRequester,ProcessContinueRequester
                 PVField targetPVField = cdField.getPVField();
                 if(channelField==alarmChannelField) {
                     PVStructure pvStructure = (PVStructure)targetPVField;
-                    PVInt targetPVInt = (PVInt)pvStructure.findProperty("severity.index");
+                    PVInt targetPVInt = (PVInt)pvProperty.findProperty(pvStructure,"severity.index");
                     alarmSeverity = AlarmSeverity.getSeverity(targetPVInt.get());
-                    PVString pvString = (PVString)pvStructure.findProperty("message");
+                    PVString pvString = (PVString)pvProperty.findProperty(pvStructure,"message");
                     alarmMessage = pvString.get();
                     continue;
                 }

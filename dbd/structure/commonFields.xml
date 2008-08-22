@@ -20,7 +20,7 @@
   <field name = "nanoSeconds" type = "int" />
 </structure>
 
-<structure name = "scan">
+<structure name = "scan" supportName = "scan">
   <field name = "priority" type = "structure" structureName = "scanPriority" />
   <field name = "type" type =  "structure" structureName = "scanType" />
   <field name = "rate" type = "double"  default = "1.0" />

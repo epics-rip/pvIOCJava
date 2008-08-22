@@ -24,6 +24,8 @@ import org.epics.ioc.ca.CDField;
 import org.epics.ioc.ca.CDRecord;
 import org.epics.ioc.ca.CDStructure;
 import org.epics.ioc.ca.CDStructureArray;
+import org.epics.ioc.ca.CDArray;
+import org.epics.ioc.ca.CDArrayArray;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
@@ -252,19 +254,37 @@ public class CDGetFactory {
                 tree.setData(cdField);
                 return;
             }
-            CDStructureArray cdArray = (CDStructureArray)cdField;
-            CDStructure[] cdFields = cdArray.getElementCDStructures();
-            for(CDStructure cdf : cdFields) {
-                if(cdf==null) continue;
-                TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                Field field = cdf.getPVField().getField();
-                treeItem.setText(field.getFieldName());
-                if(elementType==Type.pvArray) {
-                    createArrayTreeItem(treeItem,cdf);
-                } else if(elementType==Type.pvStructure) {
-                    createStructureTreeItem(treeItem,cdf);
-                } else {
-                    treeItem.setData(cdField);
+            if(elementType==Type.pvStructure) {
+                CDStructureArray cdArray = (CDStructureArray)cdField;
+                CDStructure[] cdFields = cdArray.getElementCDStructures();
+                for(CDStructure cdf : cdFields) {
+                    if(cdf==null) continue;
+                    TreeItem treeItem = new TreeItem(tree,SWT.NONE);
+                    Field field = cdf.getPVField().getField();
+                    treeItem.setText(field.getFieldName());
+                    if(elementType==Type.pvArray) {
+                        createArrayTreeItem(treeItem,cdf);
+                    } else if(elementType==Type.pvStructure) {
+                        createStructureTreeItem(treeItem,cdf);
+                    } else {
+                        treeItem.setData(cdField);
+                    }
+                }
+            } else {
+                CDArrayArray cdArray = (CDArrayArray)cdField;
+                CDArray[] cdArrays =cdArray.getElementCDArrays();
+                for(CDArray cdf : cdArrays) {
+                    if(cdf==null) continue;
+                    TreeItem treeItem = new TreeItem(tree,SWT.NONE);
+                    Field field = cdf.getPVField().getField();
+                    treeItem.setText(field.getFieldName());
+                    if(elementType==Type.pvArray) {
+                        createArrayTreeItem(treeItem,cdf);
+                    } else if(elementType==Type.pvStructure) {
+                        createArrayTreeItem(treeItem,cdf);
+                    } else {
+                        treeItem.setData(cdField);
+                    }
                 }
             }
         }

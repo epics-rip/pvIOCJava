@@ -21,6 +21,8 @@ import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
@@ -135,6 +137,7 @@ implements ChannelListener,ChannelFieldGroupListener {
      */
     protected Channel channel = null;
     
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static final Pattern whiteSpacePattern = Pattern.compile("[, ]");
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     private PVString propertyNamesPVString = null;
@@ -191,7 +194,7 @@ implements ChannelListener,ChannelFieldGroupListener {
         if(providerPVString==null) return;
         pvnamePVString = pvStructure.getStringField("pvname");
         if(pvnamePVString==null) return;
-        if(pvStructure.findProperty("propertyNames")!=null) {
+        if(pvProperty.findProperty(pvStructure,"propertyNames")!=null) {
             propertyNamesPVString = pvStructure.getStringField("propertyNames");
             if(propertyNamesPVString==null) return;
         }
@@ -223,7 +226,7 @@ implements ChannelListener,ChannelFieldGroupListener {
                 PVField pvField = null;
                 PVField parent = dbStructure.getPVField().getParent();
                 if(parent!=null) {
-                    pvField = parent.findProperty(propertyName);
+                    pvField = pvProperty.findProperty(parent,propertyName);
                 }
                 if(pvField==null) {
                     pvStructure.message(

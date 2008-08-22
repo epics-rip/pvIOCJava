@@ -224,7 +224,6 @@ public class XMLToDBDFactory {
         
         private State state = State.idle;
         private String structureName;
-        private boolean isRecordType;
         private String structureSupportName = null;
         private String structureCreateName = null;
         private String fieldSupportName = null;
@@ -260,16 +259,7 @@ public class XMLToDBDFactory {
             }
             structureSupportName = attributes.get("supportName");
             structureCreateName = attributes.get("createName");
-            if(qName.equals("recordType")) {
-                if(dbd.getRecordType(structureName)!=null) {
-                    iocxmlReader.message(
-                        "recordType " + structureName + " already exists",
-                        MessageType.warning);
-                    state = State.idle;
-                    return;
-                }
-                isRecordType = true;
-            } else if(qName.equals("structure")){
+            if(qName.equals("structure")){
                 if(dbd.getStructure(structureName)!=null) {
                     iocxmlReader.message(
                         "structure " + structureName + " already exists",
@@ -277,7 +267,6 @@ public class XMLToDBDFactory {
                     state = State.idle;
                     return;
                 }
-                isRecordType = false;
             } else {
                 iocxmlReader.message(
                         "DBDXMLStructureHandler.start logic error",
@@ -301,36 +290,19 @@ public class XMLToDBDFactory {
             for(int i=0; i<field.length; i++) {
                 field[i] = iter1.next();
             }
-            if(isRecordType) {
-                DBDRecordType dbdRecordType = dbd.createRecordType(
-                        structureName,field,structureAttribute);
-                boolean result = dbd.addRecordType(dbdRecordType);
-                if(!result) {
-                    iocxmlReader.message(
-                            "recordType " + structureName + " already exists",
-                            MessageType.warning);
-                }
-                if(structureSupportName!=null) {
-                    dbdRecordType.setSupportName(structureSupportName);
-                }
-                if(structureCreateName!=null) {
-                    dbdRecordType.setCreateName(structureCreateName);
-                }
-            } else {
-                DBDStructure dbdStructure = dbd.createStructure(
-                        structureName,field,structureAttribute);
-                boolean result = dbd.addStructure(dbdStructure);
-                if(!result) {
-                    iocxmlReader.message(
-                            "structure " + structureName + " already exists",
-                            MessageType.warning);
-                }
-                if(structureSupportName!=null) {
-                    dbdStructure.setSupportName(structureSupportName);
-                }
-                if(structureCreateName!=null) {
-                    dbdStructure.setCreateName(structureCreateName);
-                }
+            DBDStructure dbdStructure = dbd.createStructure(
+                    structureName,field,structureAttribute);
+            boolean result = dbd.addStructure(dbdStructure);
+            if(!result) {
+                iocxmlReader.message(
+                        "structure " + structureName + " already exists",
+                        MessageType.warning);
+            }
+            if(structureSupportName!=null) {
+                dbdStructure.setSupportName(structureSupportName);
+            }
+            if(structureCreateName!=null) {
+                dbdStructure.setCreateName(structureCreateName);
             }
             fieldList = null;
             state= State.idle;

@@ -26,10 +26,11 @@ import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDCreate;
 import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDRecordType;
 import org.epics.ioc.dbd.DBDStructure;
 import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportState;
@@ -53,6 +54,7 @@ import org.epics.ioc.util.ThreadCreateFactory;
  */
 public class IntrospectDatabaseFactory {
     static private IOCDB iocdb = IOCDBFactory.getMaster();
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     /**
      * A shell for introspecting the local IOC database.
@@ -99,9 +101,6 @@ public class IntrospectDatabaseFactory {
             MenuItem dbdStructureMenu = new MenuItem(menuBar,SWT.CASCADE);
             dbdStructureMenu.setText("structure");
             new StructureDBD(dbdStructureMenu);
-            MenuItem dbdRecordTypeMenu = new MenuItem(menuBar,SWT.CASCADE);
-            dbdRecordTypeMenu.setText("recordType");
-            new RecordTypeDBD(dbdRecordTypeMenu);
             MenuItem dbdCreateMenu = new MenuItem(menuBar,SWT.CASCADE);
             dbdCreateMenu.setText("create");
             new CreateDBD(dbdCreateMenu);
@@ -205,10 +204,10 @@ public class IntrospectDatabaseFactory {
                 boolean isTrace = recordProcess.isTrace();
                 PVRecord pvRecord = dbRecord.getPVRecord();
                 String alarmSeverity = null;
-                PVField pvField = pvRecord.findProperty("alarm.severity.choice");
+                PVField pvField = pvProperty.findProperty(pvRecord,"alarm.severity.choice");
                 if(pvField!=null) alarmSeverity = pvField.toString();
                 String alarmMessage = null;
-                pvField = pvRecord.findProperty("alarm.message");
+                pvField = pvProperty.findProperty(pvRecord,"alarm.message");
                 if(pvField!=null) alarmMessage = pvField.toString();
                 consoleText.append(dbRecord.getPVRecord().getRecordName() + newLine);
                 consoleText.append(
@@ -259,10 +258,10 @@ public class IntrospectDatabaseFactory {
                     SupportState supportState = recordProcess.getSupportState();
                     PVRecord pvRecord = dbRecord.getPVRecord();
                     String alarmSeverity = null;
-                    PVField pvField = pvRecord.findProperty("alarm.severity.choice");
+                    PVField pvField = pvProperty.findProperty(pvRecord,"alarm.severity.choice");
                     if(pvField!=null) alarmSeverity = pvField.toString();
                     String alarmMessage = null;
-                    pvField = pvRecord.findProperty("alarm.message");
+                    pvField = pvProperty.findProperty(pvRecord,"alarm.message");
                     if(pvField!=null) alarmMessage = pvField.toString();
                     String status = "";
                     if(isActive) status += " isActive";
@@ -549,47 +548,6 @@ public class IntrospectDatabaseFactory {
                 DBDStructure[] dbdStructures = dbd.getDBDStructures();
                 for(DBDStructure dbdStructure : dbdStructures) {
                     consoleText.append(dbdStructure.toString());
-                }
-            }
-            
-        }
-        
-        private class RecordTypeDBD implements SelectionListener {
-            
-            private RecordTypeDBD(MenuItem menuItem) {
-                Menu menuRecordType = new Menu(shell,SWT.DROP_DOWN);
-                menuItem.setMenu(menuRecordType);
-                MenuItem choiceAll = new MenuItem(menuRecordType,SWT.DEFAULT|SWT.PUSH);
-                choiceAll.setText("all");
-                choiceAll.addSelectionListener(this);
-                DBDRecordType[] dbdRecordTypes = dbd.getDBDRecordTypes();
-                for(DBDRecordType dbdRecordType : dbdRecordTypes) {
-                    String name = dbdRecordType.getStructureName();
-                    MenuItem choiceItem = new MenuItem(menuRecordType,SWT.PUSH);
-                    choiceItem.setText(name);
-                    choiceItem.addSelectionListener(this);
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetDefaultSelected(SelectionEvent arg0) {
-                widgetSelected(arg0);
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetSelected(SelectionEvent arg0) {
-                MenuItem choice = (MenuItem)arg0.getSource();
-                String name = choice.getText();
-                if(!name.equals("all")) {
-                    DBDRecordType value = dbd.getRecordType(name);
-                    consoleText.append(value.toString());
-                    return;
-                }
-                DBDRecordType[] dbdRecordTypes = dbd.getDBDRecordTypes();
-                for(DBDRecordType dbdRecordType : dbdRecordTypes) {
-                    consoleText.append(dbdRecordType.toString());
                 }
             }
             

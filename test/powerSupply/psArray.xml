@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "voltage1">
+    <value type = "double" >1.0</value>
+</record>
+
+<record name = "voltage2" >
+    <value type = "double">2.0</value>
+</record>
+
+<record name = "current1" >
+  <value type = "double" />
+</record>
+
+<record name = "current2" >
+  <value type = "double" />
+</record>
+
+<record name = "powerSupplyArray" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <supply elementType = "structure" capacity = "2" >
+        <element>
+            <alarm structureName = "alarm" />
+            <voltage type = "structure">
+                 <value type = "double" />
+                 <alarm structureName = "alarm" />
+                 <input  supportName = "inputSupport" structureName = "inputSupport">
+                      <pvname>voltage1</pvname>
+                      <process>false</process>
+                 </input>
+            </voltage>
+            <current type = "structure">
+                 <value type = "double" />
+                 <alarm structureName = "alarm" />
+                 <input structureName = "null" supportName = "powerSupplyCurrent" />
+                 <output supportName = "outputSupport" structureName = "outputSupport">
+                     <pvname>current1</pvname>
+                     <process>true</process>
+                 </output>
+            </current>
+            <power type = "structure"><value type = "double" /></power>
+        </element>
+        <element>
+            <alarm structureName = "alarm" />
+            <voltage type = "structure">
+                 <value type = "double" />
+                 <alarm structureName = "alarm" />
+                 <input  supportName = "inputSupport" structureName = "inputSupport">
+                      <pvname>voltage2</pvname>
+                      <process>false</process>
+                 </input>
+            </voltage>
+            <current type = "structure">
+                 <value type = "double" />
+                 <alarm structureName = "alarm" />
+                 <input structureName = "null" supportName = "powerSupplyCurrent" />
+                 <output supportName = "outputSupport" structureName = "outputSupport">
+                     <pvname>current2</pvname>
+                     <process>true</process>
+                 </output>
+            </current>
+            <power type = "structure"><value type = "double" /></power>
+        </element>
+    </supply>
+</record>
+
+</IOCDatabase>

@@ -16,6 +16,8 @@ import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.db.RecordListener;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.MessageType;
@@ -31,6 +33,7 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public class ChannelProviderLocalFactory  {
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     private static ChannelProviderLocal channelProvider = new ChannelProviderLocal();
     /**
      * Register. This is called by ChannelFactory.
@@ -73,7 +76,7 @@ public class ChannelProviderLocalFactory  {
             DBRecord dbRecord = iocdb.findRecord(recordName);
             if(dbRecord==null) return null;
             if(fieldName!=null) {
-                PVField pvField = dbRecord.getPVRecord().findProperty(fieldName);
+                PVField pvField = pvProperty.findProperty(dbRecord.getPVRecord(), fieldName);
                 if(pvField==null) return null;
             }
             Channel channel = new ChannelImpl(dbRecord,listener,fieldName,options);
@@ -137,7 +140,7 @@ public class ChannelProviderLocalFactory  {
             if(name==null || name.length()<=0) {
                 return new ChannelFieldImpl(dbRecord,dbRecord.getDBStructure().getPVField());
             }
-            PVField pvField = super.getPVRecord().findProperty(name);
+            PVField pvField = pvProperty.findProperty(super.getPVRecord(), name);
             if(pvField==null) return null;
             return new ChannelFieldImpl(dbRecord,pvField);               
         }    
@@ -249,7 +252,7 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
              */
             public ChannelField findProperty(String propertyName) {
-                PVField pvf = pvField.findProperty(propertyName);
+                PVField pvf = pvProperty.findProperty(pvField, propertyName);
                 if (pvf == null) return null;
                 return new ChannelFieldImpl(dbRecord,pvf);
             }

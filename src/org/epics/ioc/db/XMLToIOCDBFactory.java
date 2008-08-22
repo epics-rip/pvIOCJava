@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDRecordType;
 import org.epics.ioc.dbd.DBDStructure;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.Convert;
@@ -228,7 +227,7 @@ public class XMLToIOCDBFactory {
         
         private RecordHandler(String qName, Map<String,String> attributes) {
             String recordName = attributes.get("name");
-            String recordTypeName = attributes.get("type");
+            String structureName = attributes.get("structureName");
             if(recordName==null) {
                 iocxmlReader.message(
                     "attribute name not specified",
@@ -236,11 +235,11 @@ public class XMLToIOCDBFactory {
                 state = State.idle;
                 return;
             }
-            if(recordTypeName==null) recordTypeName = "generic";
-            DBDRecordType dbdRecordType = dbd.getRecordType(recordTypeName);
-            if(dbdRecordType==null) {
+            if(structureName==null) structureName = "generic";
+            DBDStructure dbdStructure = dbd.getStructure(structureName);
+            if(dbdStructure==null) {
                 iocxmlReader.message(
-                    "record type " + recordTypeName + " does not exist.",
+                    "structure " + structureName + " does not exist.",
                     MessageType.warning);
                 state = State.idle;
                 return;
@@ -256,7 +255,7 @@ public class XMLToIOCDBFactory {
             }
             DBRecord dbRecord = iocdb.findRecord(recordName);
             if(dbRecord==null) {              
-                Structure structure = dbd.getRecordType(recordTypeName);
+                Structure structure = dbd.getStructure(structureName);
                 pvRecord = pvDataCreate.createPVRecord(recordName, structure);
             } else {
                 pvRecord = dbRecord.getPVRecord();
@@ -266,7 +265,7 @@ public class XMLToIOCDBFactory {
                 supportName = pvRecord.getSupportName();
             }
             if(supportName==null) {
-                supportName = dbdRecordType.getSupportName();
+                supportName = dbdStructure.getSupportName();
             }
             if(supportName==null) {
                 supportName = "generic";
@@ -483,7 +482,7 @@ public class XMLToIOCDBFactory {
         private void startArrayElement(String qName, Map<String,String> attributes)  {
             if(!qName.equals("element")) {
                 iocxmlReader.message(
-                        "arrayStartElement Logic error: expected element",
+                        "startArrayElement Logic error: expected element",
                         MessageType.error);
                 idleState.prevState = state;
                 state = State.idle;
@@ -504,12 +503,7 @@ public class XMLToIOCDBFactory {
             if(arrayElementType==Type.pvStructure) {
                 String structureName = attributes.get("structureName");
                 if(structureName==null) {
-                    iocxmlReader.message(
-                            "structureName not given",
-                            MessageType.warning);
-                    idleState.prevState = state;
-                    state = State.idle;
-                    return;
+                    structureName = "generic";
                 }
                 DBDStructure dbdStructure = dbd.getStructure(structureName);
                 if(dbdStructure==null) {
@@ -534,6 +528,9 @@ public class XMLToIOCDBFactory {
             } else if(arrayElementType==Type.pvArray) {
                 String elementType = attributes.get("elementType");
                 String structureName = attributes.get("structureName");
+                if(elementType.equals("structure") && structureName==null) {
+                    structureName = "generic";
+                }
                 if(elementType==null) {
                     if(structureName==null) {
                         iocxmlReader.message("elementType not given",MessageType.warning);
@@ -571,7 +568,7 @@ public class XMLToIOCDBFactory {
         private void endArrayElement(String qName)  {
             if(!qName.equals("element")) {
                 iocxmlReader.message(
-                        "arrayEndElement Logic error: expected element",
+                        "endArrayElement Logic error: expected element",
                         MessageType.error);
                 state = State.idle;
                 return;
@@ -655,6 +652,13 @@ public class XMLToIOCDBFactory {
                     typeName = "array";
                 }   
             }
+            if(typeName==null) return "not found";
+            if(typeName.equals("structure") && structureName==null) {
+                structureName = "generic";
+            }
+            if(typeName.equals("array") && elementTypeName==null) {
+                elementTypeName = "structure";
+            }
             if(structureName!=null && !typeName.equals("structure")) {
                 iocxmlReader.message(
                         "structureName specified but type is not structure",
@@ -665,7 +669,6 @@ public class XMLToIOCDBFactory {
                         "elementTypeName specified but type is not array",
                         MessageType.warning);
             }
-            if(typeName==null) return "not found";
             Field newField = null;
             PVField newPVField = null;
             if(structureName!=null) {
@@ -691,6 +694,11 @@ public class XMLToIOCDBFactory {
                 Array array = fieldCreate.createArray(qName,type);
                 newField = array;
                 newPVField = pvDataCreate.createPVArray(pvStructure, array, capacity, capacityMutable);
+                if(attributes.get("supportName")==null) {
+                    if(type==Type.pvArray || type==Type.pvStructure) {
+                        newPVField.setSupportName("generic");
+                    }
+                }
             } else {
                 Type type = fieldCreate.getType(typeName);
                 if(type==null) return "illegal type";

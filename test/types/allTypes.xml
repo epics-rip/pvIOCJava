@@ -1,0 +1,155 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "allTypesDefault" structureName = "allTypes" />
+
+<record name = "allTypesInitial">
+    <boolean type = "boolean" supportName = "noop">true</boolean>
+    <byte type = "byte" >0x7f</byte>
+    <short type = "short" >0x7fff</short>
+    <int type = "int" >0x7fffffff</int>
+    <long type = "long" >0x7fffffffffffffff</long>
+    <float type = "float" >1.0</float>
+    <double type = "double" >-1e-5</double>
+    <string type = "string"  supportName = "noop">
+        This is a string
+    </string>
+    <doubleLimit structureName = "doubleLimit"  supportName = "noop">
+        <low>0.0</low>
+        <high>10.0</high>
+    </doubleLimit>
+    <booleanArray elementType = "boolean" capacity = "3" capacityMutable = "false" length = "3">
+        <element>false true</element>
+    </booleanArray>
+    <byteArray elementType = "byte"  capacity = "3">
+        <element>1</element>
+        <element>2</element>
+        <element>0x3</element>
+    </byteArray>
+    <shortArray elementType = "short"  capacity = "4">
+        <element offset = "2">3 4</element>
+    </shortArray>
+    <longArray elementType = "long"  capacity = "2">
+        <element>0xff 0xffffff</element>
+    </longArray>
+    <floatArray elementType = "float"  capacity = "3">
+        <element>1.0,2e10 -3.55e20</element>
+    </floatArray>
+    <doubleArray elementType = "double"  capacity = "3">
+        <element>1.0,2.0,3.0</element>
+    </doubleArray>
+    <stringArray elementType = "string" >
+        <element>string1</element>
+        <element>string 2</element>
+        <element>string 3,string 4</element>
+    </stringArray>
+    <structArray elementType = "structure">
+        <element structureName = "doubleLimit">
+             <low>0.0</low>
+             <high>10.0</high>
+        </element>
+        <element structureName = "linearConvert">
+             <engUnitsLow>0.0</engUnitsLow>
+             <engUnitsHigh>100.0</engUnitsHigh>
+        </element>
+    </structArray>
+    <arrayArray elementType = "array">
+        <element elementType = "double" capacity = "5" length = "5">
+            <element>1.0,2.0,3.0</element>
+        </element>
+        <element offset = "3" elementType = "string" capacity = "5" length = "5">
+            <element>string 1  ,string 2  ,string 3  </element>
+        </element>
+    </arrayArray>
+    <arrayStructureArray elementType = "array">
+      <element elementType = "structure" >
+        <element structureName = "generic">
+          <a elementType = "double" capacity = "5" length = "5">
+              <element>1.0,2.0,3.0</element>
+          </a>
+          <b offset = "3" elementType = "string" capacity = "5" length = "5">
+              <element>string 1  ,string 2  ,string 3  </element>
+          </b>
+        </element>
+        <element structureName = "doubleLimit">
+             <low>0.0</low>
+             <high>10.0</high>
+        </element>
+      </element>
+      <element elementType = "structure" >
+        <element structureName = "generic">
+          <a elementType = "double" capacity = "5" length = "5">
+              <element>4.0,5.0,6.0</element>
+          </a>
+          <b offset = "3" elementType = "string" capacity = "5" length = "5">
+              <element>string 4  ,string 5  ,string 6  </element>
+          </b>
+        </element>
+        <element structureName = "doubleLimit">
+             <low>0.0</low>
+             <high>10.0</high>
+        </element>
+      </element>
+    </arrayStructureArray>
+    <allTypes structureName = "generic" >
+      <boolean type = "boolean" supportName = "noop">true</boolean>
+      <byte type = "byte" >0x7f</byte>
+      <short type = "short" >0x7fff</short>
+      <int type = "int" >0x7fffffff</int>
+      <long type = "long" >0x7fffffffffffffff</long>
+      <float type = "float" >1.0</float>
+      <double type = "double" >-1e-5</double>
+      <string type = "string"  supportName = "noop">
+          This is a string
+      </string>
+      <doubleLimit structureName = "doubleLimit"  supportName = "noop">
+          <low>0.0</low>
+          <high>10.0</high>
+      </doubleLimit>
+      <booleanArray elementType = "boolean" capacity = "3" capacityMutable = "false" length = "3">
+          <element>false true</element>
+      </booleanArray>
+      <byteArray elementType = "byte"  capacity = "3">
+          <element>1</element>
+          <element>2</element>
+          <element>0x3</element>
+      </byteArray>
+      <shortArray elementType = "short"  capacity = "4">
+          <element offset = "2">3 4</element>
+      </shortArray>
+      <longArray elementType = "long"  capacity = "2">
+          <element>0xff 0xffffff</element>
+      </longArray>
+      <floatArray elementType = "float"  capacity = "3">
+          <element>1.0,2e10 -3.55e20</element>
+      </floatArray>
+      <doubleArray elementType = "double"  capacity = "3">
+          <element>1.0,2.0,3.0</element>
+      </doubleArray>
+      <stringArray elementType = "string" >
+          <element>string1</element>
+          <element>string 2</element>
+          <element>string 3,string 4</element>
+      </stringArray>
+      <structArray elementType = "structure">
+          <element structureName = "doubleLimit">
+               <low>0.0</low>
+               <high>10.0</high>
+          </element>
+          <element structureName = "linearConvert">
+               <engUnitsLow>0.0</engUnitsLow>
+               <engUnitsHigh>100.0</engUnitsHigh>
+          </element>
+      </structArray>
+      <arrayArray elementType = "array">
+          <element elementType = "double" capacity = "5" length = "5">
+              <element>1.0,2.0,3.0</element>
+          </element>
+          <element offset = "3" elementType = "string" capacity = "5" length = "5">
+              <element>string 1  ,string 2  ,string 3  </element>
+          </element>
+      </arrayArray>
+    </allTypes>
+</record>
+
+</IOCDatabase>

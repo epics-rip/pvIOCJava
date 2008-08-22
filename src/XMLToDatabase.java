@@ -17,7 +17,6 @@ import org.epics.ioc.db.XMLToIOCDBFactory;
 import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.dbd.DBDCreate;
 import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDRecordType;
 import org.epics.ioc.dbd.DBDStructure;
 import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.dbd.XMLToDBDFactory;
@@ -186,13 +185,6 @@ public class XMLToDatabase {
         for(DBDCreate dbdCreate : dbdCreates) {
             System.out.print(dbdCreate.toString());
         }
-        
-        DBDRecordType[] dbdRecordTypes = dbd.getDBDRecordTypes();
-        if(dbdRecordTypes.length>0) System.out.printf("\n\nrecordTypes");
-        for(DBDRecordType dbdRecordType : dbdRecordTypes) {
-            System.out.print(dbdRecordType.toString());
-        }
-        
     }
         
     static void parseDBD(DBD dbd, String fileName,Requester iocRequester) {

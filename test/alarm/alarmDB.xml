@@ -1,24 +1,29 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "floatCounter" type = "calcDouble">
+<record name = "floatCounter">
+    <value type = "float" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray >
+        <element structureName = "calcArg">
+            <value type = "float" >0.0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>11.0</value>
+        <element structureName = "calcArg">
+            <value type = "float" >11.0</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>0.2</value>
+        <element structureName = "calcArg">
+            <value type = "float" >0.2</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+      </calcArgArray>
+      <calculator>
+        <expression>(value+inc)&lt;=max ? value+inc : min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -33,13 +38,14 @@
             <high>11.0</high>
         </limit>
     </display>
-    <scan>
+    <scan structureName = "scan">
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "floatRecord" type = "float">
+<record name = "floatRecord" >
+    <value type = "float" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
@@ -85,25 +91,31 @@
         </limit>
     </display>
 </record>
-<record name = "doubleCounter" type = "calcDouble">
+
+<record name = "doubleCounter" >
+    <value type = "double"/>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "double" >0.0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>11.0</value>
+        <element structureName = "calcArg">
+            <value type = "double" >11.0</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>0.2</value>
+        <element structureName = "calcArg">
+            <value type = "double" >0.2</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+      </calcArgArray>
+      <calculator>
+        <expression>(value+inc)&lt;=max ? value+inc : min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray">
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link supportName = "processSupport" structureName = "processSupport">
@@ -118,13 +130,14 @@
             <high>11.0</high>
         </limit>
     </display>
-    <scan>
+    <scan structureName = "scan">
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "doubleRecord" type = "double">
+<record name = "doubleRecord">
+    <value type = "double"/>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
@@ -171,25 +184,30 @@
     </display>
 </record>
 
-<record name = "byteCounter" type = "calcDouble">
+<record name = "byteCounter" >
+    <value type = "byte"/>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "byte" >0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>11.0</value>
+        <element structureName = "calcArg">
+            <value type = "byte" >11</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>1.0</value>
+        <element structureName = "calcArg">
+            <value type = "byte" >1</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+      </calcArgArray>
+      <calculator>
+        <expression>(value+inc)&lt;=max ? value+inc : min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -204,13 +222,14 @@
             <high>11.0</high>
         </limit>
     </display>
-    <scan>
+    <scan structureName = "scan">
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "byteRecord" type = "byte">
+<record name = "byteRecord">
+    <value type = "byte"/>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
@@ -257,25 +276,30 @@
     </display>
 </record>
 
-<record name = "shortCounter" type = "calcDouble">
+<record name = "shortCounter">
+    <value type = "short" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "short" >0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>11.0</value>
+        <element structureName = "calcArg">
+            <value type = "short" >11</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>1.0</value>
+        <element structureName = "calcArg">
+            <value type = "short" >1</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+      </calcArgArray>
+      <calculator>
+        <expression>(value+inc)&lt;=max ? value+inc : min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -290,13 +314,14 @@
             <high>11.0</high>
         </limit>
     </display>
-    <scan>
+    <scan structureName = "scan">
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "shortRecord" type = "short">
+<record name = "shortRecord" >
+    <value type = "short" /> 
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
@@ -343,25 +368,30 @@
     </display>
 </record>
 
-<record name = "intCounter" type = "calcDouble">
+<record name = "intCounter">
+    <value type = "int" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "int" >0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>11.0</value>
+        <element structureName = "calcArg">
+            <value type = "int" >11</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>1.0</value>
+        <element structureName = "calcArg">
+            <value type = "int" >1</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+      </calcArgArray>
+      <calculator>
+        <expression>(value+inc)&lt;=max ? value+inc : min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -376,13 +406,14 @@
             <high>11.0</high>
         </limit>
     </display>
-    <scan>
+    <scan structureName = "scan">
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "intRecord" type = "int">
+<record name = "intRecord">
+    <value type = "int" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
@@ -429,25 +460,30 @@
     </display>
 </record>
 
-<record name = "longCounter" type = "calcDouble">
+<record name = "longCounter">
+    <value type = "long" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "long" >0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>11.0</value>
+        <element structureName = "calcArg">
+            <value type = "long" >11</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>1.0</value>
+        <element structureName = "calcArg">
+            <value type = "long" >1</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+      </calcArgArray>
+      <calculator>
+        <expression>(value+inc)&lt;=max ? value+inc : min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -462,13 +498,14 @@
             <high>11.0</high>
         </limit>
     </display>
-    <scan>
+    <scan structureName = "scan">
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "longRecord" type = "long">
+<record name = "longRecord">
+    <value type = "long" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">

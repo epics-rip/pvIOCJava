@@ -1,56 +1,62 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<substitute fromTo = "checkRecord=ltgtBoolean,checkType=Boolean,checkValue=true" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=ltgtBoolean,checkType=boolean,checkValue=true" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
-     <calcArgArray>
-        <element structureName = "calcIntArg">
-            <value>1</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "int" >1</value>
             <name>a</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "int" >2</value>
             <name>b</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>1.1</value>
+        <element structureName = "calcArg">
+            <value type = "double" >1.1</value>
             <name>c</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>2.2</value>
+        <element structureName = "calcArg">
+            <value type = "double" >2.2</value>
             <name>d</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
        (a&lt;b &amp;&amp; a&lt;=a &amp;&amp; c&lt;d &amp;&amp; d&lt;=d)
        &amp;&amp;
        (b&gt;a &amp;&amp; b&gt;=b &amp;&amp; d&gt;c &amp;&amp; d&gt;=d)
         </expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkBoolean.xml" />
 
-<substitute fromTo = "checkRecord=ltgtBooleanConstant,checkType=Boolean,checkValue=true" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=ltgtBooleanConstant,checkType=boolean,checkValue=true" />
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan  structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
-    <calculator structureName = "expressionCalculator" >
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
         <expression>
        (1&lt;2 &amp;&amp; 1&lt;=1 &amp;&amp; 1.0&lt;2.0 &amp;&amp; 1.0&lt;=1.0)
        &amp;&amp;
        (2&gt;1 &amp;&amp; 2&gt;=2 &amp;&amp; 2.0&gt;1.0 &amp;&amp; 2.0&gt;=2.0)
         </expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkBoolean.xml" />

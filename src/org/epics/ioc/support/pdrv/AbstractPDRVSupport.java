@@ -22,6 +22,8 @@ import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
@@ -70,7 +72,7 @@ RecordProcessRequester
         recordName = pvRecord.getRecordName();
         recordProcess = dbRecord.getRecordProcess();
     }      
-    
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     protected String supportName;
     protected DBStructure dbStructure;
     protected PVStructure pvStructure;
@@ -106,7 +108,7 @@ RecordProcessRequester
     
     public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-        valuePVField = pvStructure.findPropertyViaParent("value");
+        valuePVField = pvProperty.findPropertyViaParent(pvStructure,"value");
         if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
             return;

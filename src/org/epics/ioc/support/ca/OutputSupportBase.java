@@ -19,6 +19,8 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVArray;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
 import org.epics.ioc.pv.Type;
@@ -46,6 +48,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
     public OutputSupportBase(String supportName,DBStructure dbStructure) {
         super(supportName,dbStructure);
     }
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private PVBoolean processAccess = null;
     private DBField valueDBField = null;
     
@@ -104,7 +107,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
         PVField pvField = null;
         while(dbParent!=null) {
             PVField pvParent = dbParent.getPVField();
-            pvField = pvParent.findProperty("value");
+            pvField = pvProperty.findProperty(pvParent,"value");
             if(pvField!=null) break;
             dbParent = dbParent.getParent();
         }

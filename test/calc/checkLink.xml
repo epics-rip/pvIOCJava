@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
- <supportArray>
+ <supportArray elementType = "structure" supportName = "supportArray">
         <element structureName = "supportArrayElement">
             <wait>true</wait>
             <link supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>${checkRecord}Check.calcArgArray[0].value</pvname>
+                <pvname>${checkRecord}Check.input.calcArgArray[0].value</pvname>
                 <process>true</process>
             </link>
         </element>

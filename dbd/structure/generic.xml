@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <DBDefinition>
 
+<structure name = "generic" supportName = "generic" />
+
 <support name = "generic"
    factoryName = "org.epics.ioc.support.basic.GenericFactory" />
 

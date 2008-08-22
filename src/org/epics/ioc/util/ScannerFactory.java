@@ -14,6 +14,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
@@ -27,6 +29,7 @@ import org.epics.ioc.support.RecordProcessRequester;
 public class ScannerFactory {
     private static PeriodicScanner periodicScanner = new PeriodicScannerImpl();
     private static EventScanner eventScanner = new EventScannerImpl();
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
 
     /**
      * Get the interface for the periodic scanner.
@@ -64,7 +67,7 @@ public class ScannerFactory {
             this.recordProcess = recordProcess;
             dbRecord = recordProcess.getRecord();
             pvRecord = dbRecord.getPVRecord();
-            PVField pvField = pvRecord.findProperty("scan.maxConsecutiveActive");
+            PVField pvField = pvProperty.findProperty(pvRecord,"scan.maxConsecutiveActive");
             if(pvField!=null && (pvField instanceof PVInt)) {
                 pvMaxConsecutiveActive = (PVInt)pvField;
             }

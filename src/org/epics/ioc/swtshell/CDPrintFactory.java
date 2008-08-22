@@ -95,8 +95,11 @@ public class CDPrintFactory {
                 if(maxNumPuts==0 && !printAll) continue;
                 PVField pvField = cdField.getPVField();
                 Field field = pvField.getField();
-                newLine(indentLevel);
-                text.append(pvField.getFullFieldName());
+                String fieldName = pvField.getField().getFieldName();
+                if(fieldName!=null && fieldName.length()>0) {
+                    newLine(indentLevel);
+                    text.append(fieldName);
+                }
                 switch(field.getType()) {
                 case pvArray: printArray(cdField,indentLevel+1,printAll); break;
                 case pvStructure: printStructure((CDStructure)cdField,indentLevel+1,printAll); break;
@@ -109,6 +112,7 @@ public class CDPrintFactory {
         private void printArray(CDField cdField, int indentLevel,boolean printAll) {
             if(checkNumPuts(cdField)) printAll = true;
             PVArray pvArray = (PVArray)cdField.getPVField();
+            
             Array array = (Array)pvArray.getField();
             Type elementType = array.getElementType();
             if(elementType.isScalar()) {
@@ -117,7 +121,6 @@ public class CDPrintFactory {
                         pvArray.toString(indentLevel+1)));
                 return;
             }
-            
             if(elementType==Type.pvArray) {
                 CDArrayArray cdArrayArray = (CDArrayArray)cdField;
                 CDArray[] cdFields = cdArrayArray.getElementCDArrays();
@@ -125,6 +128,8 @@ public class CDPrintFactory {
                     if(elementCDField==null) continue;
                     int maxNumPuts = elementCDField.getMaxNumPuts();
                     if(maxNumPuts==0 && !printAll) continue;
+                    newLine(indentLevel);
+                    text.append(elementCDField.getPVField().getFullFieldName());
                     printArray(elementCDField,indentLevel+1,printAll);
                 }
             } else if(elementType==Type.pvStructure) {

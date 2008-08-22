@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "temp">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <value elementType = "double" capacity = "3">
+        <element>0.0 1.0 2.0</element>
+    </value>
+    <input structureName = "calculation" >
+      <calculator supportName = "arrayIncrementCalculator" />
+    </input>
+    <scan structureName = "scan">
+<!--
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
+-->
+    </scan>
+    <display structureName = "display" >
+        <description>Sample Description</description>
+        <format>%f</format>
+        <resolution>1</resolution>
+        <units>volts</units>
+    </display>
+</record>
+
+</IOCDatabase>

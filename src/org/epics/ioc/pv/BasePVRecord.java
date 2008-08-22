@@ -70,6 +70,6 @@ public class BasePVRecord extends BasePVStructure implements PVRecord {
      * @see org.epics.ioc.pv.BasePVStructure#toString(int)
      */
     public String toString(int indentLevel) {
-        return super.toString(recordName + " recordType",indentLevel);
+        return super.toString(recordName,indentLevel);
     }
 }

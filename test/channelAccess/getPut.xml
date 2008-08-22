@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "getPutCounter">
+    <value type = "double"/>
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "double">0.0</value>
+            <name>min</name>
+        </element>
+        <element structureName = "calcArg">
+            <value type = "double">10.0</value>
+            <name>max</name>
+        </element>
+        <element structureName = "calcArg">
+            <value type = "double">1.0</value>
+            <name>inc</name>
+        </element>
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
+        <expression>((value+inc)&lt;=max)?(value+inc):min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>true</wait>
+            <link  supportName = "processSupport" structureName = "processSupport">
+                <pvname>getFromCounter</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>putFromCounter</pvname>
+                <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+    <valueAlarm  structureName = "doubleAlarm">
+      <active>true</active>
+      <interval>
+          <element structureName = "doubleAlarmInterval">
+              <value>2.0</value>
+              <severity><choice>major</choice></severity>
+          </element>
+          <element structureName = "doubleAlarmInterval">
+              <value>4.0</value>
+              <severity><choice>minor</choice></severity>
+          </element>
+          <element structureName = "doubleAlarmInterval">
+              <value>6.0</value>
+              <severity><choice>none</choice></severity>
+          </element>
+          <element structureName = "doubleAlarmInterval">
+              <value>8.0</value>
+              <severity><choice>minor</choice></severity>
+          </element>
+          <element structureName = "doubleAlarmInterval">
+              <value>10.0</value>
+              <severity><choice>major</choice></severity>
+          </element>
+      </interval>
+      <outOfRange><choice>invalid</choice></outOfRange>
+      <hystersis>0.3</hystersis>
+    </valueAlarm>
+    <scan structureName = "scan">
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
+    </scan>
+</record>
+
+<record name = "getFromCounter">
+    <value type = "double"/>
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "inputSupport" structureName = "inputSupport">
+        <pvname>getPutCounter</pvname>
+        <process>false</process>
+        <propertyNames>alarm</propertyNames>
+    </input>
+</record>
+<record name = "putFromCounter">
+    <value type = "double"/>
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+</record>
+
+
+</IOCDatabase>

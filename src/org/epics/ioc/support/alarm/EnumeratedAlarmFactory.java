@@ -15,6 +15,8 @@ import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Structure;
@@ -49,6 +51,7 @@ public class EnumeratedAlarmFactory {
     }
     
     private static String supportName = "enumeratedAlarm";
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     
     private static class EnumeratedAlarmImpl extends AbstractSupport
     {
@@ -80,7 +83,7 @@ public class EnumeratedAlarmFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             DBField dbParent = dbStructure.getParent();
             PVField pvParent = dbParent.getPVField();
-            PVField pvField = pvParent.findProperty("value");
+            PVField pvField = pvProperty.findProperty(pvParent, "value");
             if(pvField==null) {
                 pvStructure.message("value field not found", MessageType.error);
                 return;

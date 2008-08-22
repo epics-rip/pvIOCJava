@@ -44,6 +44,8 @@ import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVIntArray;
 import org.epics.ioc.pv.PVLong;
 import org.epics.ioc.pv.PVLongArray;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVShort;
 import org.epics.ioc.pv.PVShortArray;
@@ -64,7 +66,7 @@ import org.epics.ioc.util.Requester;
  *
  */
 public class ReplaceTest extends TestCase {
-        
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     /**
      * test replacing the default data implementration for a field.
      */
@@ -73,7 +75,9 @@ public class ReplaceTest extends TestCase {
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                "example/exampleDBD.xml",iocRequester);
+                "dbd/dbd.xml",iocRequester);
+        XMLToDBDFactory.convert(dbd,
+               "test/types/typesDBD.xml",iocRequester);
         
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();
@@ -90,7 +94,11 @@ public class ReplaceTest extends TestCase {
         //System.out.print(dbdRecordType.toString());
         //}
         XMLToIOCDBFactory.convert(dbd,iocdb,
-                "example/exampleDB.xml",iocRequester);
+                "test/analog/analogDB.xml",iocRequester);
+        XMLToIOCDBFactory.convert(dbd,iocdb,
+                  "test/powerSupply/powerSupplyDB.xml",iocRequester);
+        XMLToIOCDBFactory.convert(dbd,iocdb,
+                  "test/types/typesDB.xml",iocRequester);
 //        System.out.printf("%nrecords%n");
 //        Map<String,DBRecord> recordMap = iocdb.getRecordMap();
 //        Set<String> keys = recordMap.keySet();
@@ -246,7 +254,7 @@ public class ReplaceTest extends TestCase {
             return;
         }
         PVRecord pvRecord = dbRecord.getPVRecord();
-        PVField pvField = pvRecord.findProperty(fieldName);
+        PVField pvField = pvProperty.findProperty(pvRecord, fieldName);
         if(pvField==null){
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
@@ -291,7 +299,7 @@ public class ReplaceTest extends TestCase {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        PVField pvField = pvRecord.findProperty(fieldName);
+        PVField pvField = pvProperty.findProperty(pvRecord, fieldName);
         if(pvField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
@@ -329,7 +337,7 @@ public class ReplaceTest extends TestCase {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        PVField pvField = pvRecord.findProperty(fieldName);
+        PVField pvField = pvProperty.findProperty(pvRecord, fieldName);
         if(pvField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
@@ -356,7 +364,7 @@ public class ReplaceTest extends TestCase {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        PVField pvField = pvRecord.findProperty(fieldName);
+        PVField pvField = pvProperty.findProperty(pvRecord, fieldName);
         if(pvField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);
@@ -383,7 +391,7 @@ public class ReplaceTest extends TestCase {
             System.out.printf("record %s not found%n",recordName);
             return;
         }
-        PVField oldField = pvRecord.findProperty(fieldName);
+        PVField oldField = pvProperty.findProperty(pvRecord, fieldName);
         if(oldField==null) {
             System.out.printf("field %s not in record %s%n",
                 fieldName,recordName);

@@ -27,6 +27,7 @@ public class PVDataFactory {
     }
     
     private static final class PVDataCreateImpl implements PVDataCreate{
+        private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
         /* (non-Javadoc)
          * @see org.epics.ioc.db.PVDataCreate#createData(org.epics.ioc.db.PVData, org.epics.ioc.pv.Field)
          */
@@ -78,10 +79,11 @@ public class PVDataFactory {
             throw new IllegalArgumentException("Illegal Type. Logic error");
         }    
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.PVDataCreate#createRecord(java.lang.String, org.epics.ioc.dbd.PVDRecordType)
+         * @see org.epics.ioc.pv.PVDataCreate#createPVRecord(java.lang.String, org.epics.ioc.pv.Structure)
          */
-        public PVRecord createPVRecord(String recordName, Structure dbdRecordType) {
-            PVRecord dbRecord = new BasePVRecord(recordName,dbdRecordType);
+        public PVRecord createPVRecord(String recordName, Structure structure) {
+            Structure copy = fieldCreate.createStructure("", structure.getStructureName(), structure.getFields());
+            PVRecord dbRecord = new BasePVRecord(recordName,copy);
             return dbRecord;
         }
     }

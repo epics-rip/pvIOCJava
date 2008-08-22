@@ -1,11 +1,17 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.ioc.support.calc.*;
-import org.epics.ioc.db.*;
-import org.epics.ioc.pv.*;
-import org.epics.ioc.util.*;
-import org.epics.ioc.support.*;
+import org.epics.ioc.db.DBField;
+import org.epics.ioc.db.DBStructure;
+import org.epics.ioc.pv.DoubleArrayData;
+import org.epics.ioc.pv.PVDoubleArray;
+import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.Type;
+import org.epics.ioc.support.Support;
+import org.epics.ioc.support.SupportProcessRequester;
+import org.epics.ioc.support.calc.AbstractCalculatorSupport;
+import org.epics.ioc.support.calc.ArgType;
+import org.epics.ioc.util.RequestResult;
 
 public class ArrayIncrementCalculatorFactory {
     public static Support create(DBStructure dbStructure) {

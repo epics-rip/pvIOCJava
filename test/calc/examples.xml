@@ -1,125 +1,143 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<substitute fromTo = "checkRecord=constantExpression,checkType=Double,checkValue=18.0" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=constantExpression,checkType=double,checkValue=18.0" />
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calculator structureName = "expressionCalculator" >
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
         <expression>
             ((Math.abs(-(1.0 + 2.0*3.0 + 4*2 + 3.0))))
         </expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
-<substitute fromTo = "checkRecord=constantExpression1,checkType=Double,checkValue=18.0" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=constantExpression1,checkType=double,checkValue=18.0" />
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
-    <calculator structureName = "expressionCalculator" >
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
         <expression>
             Math.abs(-(((1.0 + (2.0*3.0)) + (4*2)) + 3.0))
         </expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
-<substitute fromTo = "checkRecord=cosPI,checkType=Double,checkValue=-1" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=cosPI,checkType=double,checkValue=-1" />
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
-    <calculator structureName = "expressionCalculator" >
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
         <expression>
             Math.cos(Math.PI)
         </expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
-<substitute fromTo = "checkRecord=calcExample,checkType=Double,checkValue=18.0" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=calcExample,checkType=double,checkValue=18.0" />
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>1.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "double">1.0</value>
             <name>a</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>2.0</value>
+        <element structureName = "calcArg">
+            <value type = "double">2.0</value>
             <name>b</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>3.0</value>
+        <element structureName = "calcArg">
+            <value type = "double">3.0</value>
             <name>c</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>4.0</value>
+        <element structureName = "calcArg">
+            <value type = "double">4.0</value>
             <name>d</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>2.0</value>
+        <element structureName = "calcArg">
+            <value type = "double">2.0</value>
             <name>e</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
             Math.abs(-(a + b*c + d*e + 3.0))
         </expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
-<record name = "calcSimpleCounter" type = "calcInt">
+<record name = "calcSimpleCounter" >
+    <value type = "int" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calculator structureName = "expressionCalculator" >
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
         <expression>value+1&lt;=10?value+1:0</expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>
 </record>
 
-<record name = "calcCounter" type = "calcDouble">
+<record name = "calcCounter">
+    <value  type = "double" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "double">0.0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>10.0</value>
+        <element structureName = "calcArg">
+            <value type = "double">10.0</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>0.5</value>
+        <element structureName = "calcArg">
+            <value type = "double">0.5</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>((value+inc)&lt;=max)?(value+inc):min</expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>

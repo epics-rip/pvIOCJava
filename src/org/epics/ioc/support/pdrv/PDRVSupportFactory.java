@@ -34,6 +34,8 @@ import org.epics.ioc.pv.PVBoolean;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
 import org.epics.ioc.pv.PVStructure;
@@ -129,6 +131,7 @@ public class PDRVSupportFactory {
     private static final String pdrvUInt32DigitalOutputSupportName = "pdrvUInt32DigitalOutput";
     
     private static Convert convert = ConvertFactory.getConvert();
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     private static enum OctetValueType {
         string,
@@ -1679,19 +1682,19 @@ public class PDRVSupportFactory {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             PVField pvField = valueDBField.getPVField();
             Field field = pvField.getField();
-            PVField pvDisplay = valueDBField.getPVField().findProperty("display");
+            PVField pvDisplay = pvProperty.findProperty(valueDBField.getPVField(),"display");
             if(pvDisplay!=null) {
-                PVField pvTemp = pvDisplay.findProperty("units");
+                PVField pvTemp = pvProperty.findProperty(pvDisplay,"units");
                 if(pvTemp!=null && pvTemp.getField().getType()==Type.pvString) {
                 	pvUnits = (PVString)pvTemp;
                 }
-                pvTemp = pvDisplay.findProperty("limit");
+                pvTemp = pvProperty.findProperty(pvDisplay,"limit");
                 if(pvTemp!=null) {
-                	PVField pvTemp1 = pvTemp.findProperty("low");
+                	PVField pvTemp1 = pvProperty.findProperty(pvTemp,"low");
                 	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
                     	pvLowLimit = (PVDouble)pvTemp1;
                     }
-                	pvTemp1 = pvTemp.findProperty("high");
+                	pvTemp1 = pvProperty.findProperty(pvTemp,"high");
                 	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
                     	pvHighLimit = (PVDouble)pvTemp1;
                     }
@@ -1811,19 +1814,19 @@ public class PDRVSupportFactory {
                 return;
             }
             super.uninitialize();
-            PVField pvDisplay = valueDBField.getPVField().findProperty("display");
+            PVField pvDisplay = pvProperty.findProperty(valueDBField.getPVField(),"display");
             if(pvDisplay!=null) {
-                PVField pvTemp = pvDisplay.findProperty("units");
+                PVField pvTemp = pvProperty.findProperty(pvDisplay,"units");
                 if(pvTemp!=null && pvTemp.getField().getType()==Type.pvString) {
                 	pvUnits = (PVString)pvTemp;
                 }
-                pvTemp = pvDisplay.findProperty("limit");
+                pvTemp = pvProperty.findProperty(pvDisplay,"limit");
                 if(pvTemp!=null) {
-                	PVField pvTemp1 = pvTemp.findProperty("low");
+                	PVField pvTemp1 = pvProperty.findProperty(pvTemp,"low");
                 	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
                     	pvLowLimit = (PVDouble)pvTemp1;
                     }
-                	pvTemp1 = pvTemp.findProperty("high");
+                	pvTemp1 = pvProperty.findProperty(pvTemp,"high");
                 	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
                     	pvHighLimit = (PVDouble)pvTemp1;
                     }

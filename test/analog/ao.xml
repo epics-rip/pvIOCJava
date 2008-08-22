@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+
+<record name = "aoCounter" >
+    <value type = "double"/>
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input structureName = "calculation" >
+      <calculator structureName = "expressionCalculator" >
+        <expression>value+.1&lt;=10?value+.1:0.0</expression>
+      </calculator>
+    </input>
+    <scan structureName = "scan">
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
+    </scan>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link  supportName = "outputSupport" structureName = "outputSupport">
+                    <pvname>ao</pvname>
+                    <process>true</process>
+            </link>
+        </element>
+    </supportArray>
+
+</record>
+
+<record name = "ao">
+    <value type = "double" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <output structureName = "linearConvertOutput">
+        <linearConvert>
+            <deviceHigh>2047</deviceHigh>
+            <deviceLow>-2048</deviceLow>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+        <output supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>aoRaw</pvname>
+                <process>true</process>
+        </output>
+
+    </output>
+</record>
+
+<record name = "aoRaw">
+  <value type = "int"/>
+</record>
+
+
+</IOCDatabase>

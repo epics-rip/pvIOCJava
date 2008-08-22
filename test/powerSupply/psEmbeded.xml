@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "adcVoltageEmbeded" >
+    <value type = "int" >2048</value>
+</record>
+
+<record name = "psEmbeded">
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <voltage type = "structure">
+        <value type = "double" />
+        <input structureName = "linearConvertInput">
+            <value type = "int" />
+            <linearConvert>
+                <deviceHigh>4095</deviceHigh>
+                <deviceLow>0</deviceLow>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>10.0</engUnitsHigh>
+            </linearConvert>
+            <input supportName = "inputSupport" structureName = "inputSupport">
+                    <pvname>adcVoltageEmbeded</pvname>
+                    <process>false</process>
+            </input>
+        </input>
+    </voltage>
+    <current type = "structure">
+        <value type = "double" />
+        <alarm structureName = "alarm" />
+        <input structureName = "null" supportName = "powerSupplyCurrent" />
+        <output structureName = "linearConvertOutput">
+            <value type = "int" />
+            <linearConvert>
+                <deviceHigh>4095</deviceHigh>
+                <deviceLow>0</deviceLow>
+                <engUnitsLow>0.0</engUnitsLow>
+                <engUnitsHigh>10.0</engUnitsHigh>
+            </linearConvert>
+            <output supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>dacCurrentEmbeded</pvname>
+                <process>true</process>
+            </output>
+        </output>
+    </current>
+    <power type = "structure"><value type = "double" /></power>
+</record>
+
+<record name = "dacCurrentEmbeded">
+    <value type = "int" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+
+</IOCDatabase>

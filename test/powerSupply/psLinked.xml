@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "adcVoltageSupported">
+    <value type = "int" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <value>1000</value>
+</record>
+
+<record name = "voltage">
+    <value type = "double" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <input structureName = "linearConvertInput">
+        <linearConvert>
+            <deviceHigh>4095</deviceHigh>
+            <deviceLow>0</deviceLow>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+        <input supportName = "inputSupport" structureName = "inputSupport">
+                <pvname>adcVoltageSupported</pvname>
+                <process>false</process>
+        </input>
+    </input>  
+</record>
+
+
+
+<record name = "psLinked" >
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <voltage type = "structure">
+        <value type = "double" />
+        <input  supportName = "inputSupport" structureName = "inputSupport">
+            <pvname>voltage</pvname>
+            <process>true</process>
+        </input>
+    </voltage>
+    <current type = "structure">
+       <value type = "double" />
+       <input structureName = "null" supportName = "powerSupplyCurrent" />
+       <output supportName = "outputSupport" structureName = "outputSupport">
+          <pvname>current</pvname>
+          <process>true</process>
+       </output>
+    </current>
+    <power type = "structure"><value type = "double" /></power>
+</record>
+
+<record name = "current" >
+    <value type = "double" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+    <output structureName = "linearConvertOutput">
+        <linearConvert>
+            <deviceHigh>4095</deviceHigh>
+            <deviceLow>0</deviceLow>
+            <engUnitsLow>0.0</engUnitsLow>
+            <engUnitsHigh>10.0</engUnitsHigh>
+        </linearConvert>
+        <output supportName = "outputSupport" structureName = "outputSupport">
+                <pvname>dacCurrentSupported</pvname>
+                <process>true</process>
+        </output>
+
+    </output>    
+</record>
+
+<record name = "dacCurrentSupported" >
+    <value type = "int" />
+    <timeStamp structureName = "timeStamp" />
+    <alarm structureName = "alarm" />
+</record>
+
+</IOCDatabase>

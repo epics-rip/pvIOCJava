@@ -1,143 +1,154 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<substitute fromTo = "checkRecord=basicMathByte,checkType=Byte,checkValue=10" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=basicMathByte,checkType=byte,checkValue=10" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcByteArg">
-            <value>4</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>a</name>
         </element>
-        <element structureName = "calcByteArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">2</value>
             <name>b</name>
         </element>
-        <element structureName = "calcByteArg">
-            <value>6</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">6</value>
             <name>c</name>
         </element>
-        <element structureName = "calcByteArg">
-            <value>4</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>d</name>
         </element>
-        <element structureName = "calcByteArg">
-            <value>3</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">3</value>
             <name>e</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
         a+b*c/d+e
         </expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
-<substitute fromTo = "checkRecord=basicMathShort,checkType=Short,checkValue=10" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=basicMathShort,checkType=short,checkValue=10" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcShortArg">
-            <value>4</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>a</name>
         </element>
-        <element structureName = "calcShortArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">2</value>
             <name>b</name>
         </element>
-        <element structureName = "calcShortArg">
-            <value>6</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">6</value>
             <name>c</name>
         </element>
-        <element structureName = "calcShortArg">
-            <value>4</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>d</name>
         </element>
-        <element structureName = "calcShortArg">
-            <value>3</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">3</value>
             <name>e</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
         a+b*c/d+e
         </expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
-<substitute fromTo = "checkRecord=basicMathInt,checkType=Int,checkValue=10" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=basicMathInt,checkType=int,checkValue=10" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcIntArg">
-            <value>4</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>a</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">2</value>
             <name>b</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>6</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">6</value>
             <name>c</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>4</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>d</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>3</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">3</value>
             <name>e</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
         a+b*c/d+e
         </expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
-<substitute fromTo = "checkRecord=basicMathLong,checkType=Long,checkValue=10" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=basicMathLong,checkType=long,checkValue=10" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
+    <input structureName = "calculation" >
     <calcArgArray>
-        <element structureName = "calcLongArg">
-            <value>4</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>a</name>
         </element>
-        <element structureName = "calcLongArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">2</value>
             <name>b</name>
         </element>
-        <element structureName = "calcLongArg">
-            <value>6</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">6</value>
             <name>c</name>
         </element>
-        <element structureName = "calcLongArg">
-            <value>4</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>d</name>
         </element>
-        <element structureName = "calcLongArg">
-            <value>3</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">3</value>
             <name>e</name>
         </element>
     </calcArgArray>
@@ -146,83 +157,90 @@
         a+b*c/d+e
         </expression>
     </calculator>
-    <scan>
+    </input>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
-<substitute fromTo = "checkRecord=basicMathFloat,checkType=Float,checkValue=10" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=basicMathFloat,checkType=float,checkValue=10" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcFloatArg">
-            <value>4</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>a</name>
         </element>
-        <element structureName = "calcFloatArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">2</value>
             <name>b</name>
         </element>
-        <element structureName = "calcFloatArg">
-            <value>6</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">6</value>
             <name>c</name>
         </element>
-        <element structureName = "calcFloatArg">
-            <value>4</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>d</name>
         </element>
-        <element structureName = "calcFloatArg">
-            <value>3</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">3</value>
             <name>e</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
         a+b*c/d+e
         </expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
-<substitute fromTo = "checkRecord=basicMathDouble,checkType=Double,checkValue=10" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<substitute fromTo = "checkRecord=basicMathDouble,checkType=double,checkValue=10" />
+<record name = "${checkRecord}">
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>4</value>
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>a</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">2</value>
             <name>b</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>6</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">6</value>
             <name>c</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>4</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">4</value>
             <name>d</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>3</value>
+        <element structureName = "calcArg">
+            <value type = "${checkType}">3</value>
             <name>e</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
         a+b*c/d+e
         </expression>
-    </calculator>
-    <scan>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
 <include href = "checkLink.xml" />

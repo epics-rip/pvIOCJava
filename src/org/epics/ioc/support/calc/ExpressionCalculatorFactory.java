@@ -29,6 +29,8 @@ import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVFloat;
 import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVLong;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVShort;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
@@ -60,6 +62,7 @@ public abstract class ExpressionCalculatorFactory  {
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final  String supportName = "expressionCalculator";
     private static Convert convert = ConvertFactory.getConvert();
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static boolean dumpTokenList = false;
     private static boolean dumpExpression = false;
     
@@ -92,17 +95,17 @@ public abstract class ExpressionCalculatorFactory  {
             }
             DBField dbParent = dbStructure.getParent();
             PVField pvParent = dbParent.getPVField();
-            PVField pvValue = pvParent.findProperty("value");
+            PVField pvValue = pvProperty.findProperty(pvParent,"value");
             if(pvValue==null) { // try parent of parent. 
                 pvValue = pvParent.getParent();
-                if(pvValue!=null) pvValue = pvValue.findProperty("value");
+                if(pvValue!=null) pvValue = pvProperty.findProperty(pvValue,"value");
             }
             if(pvValue==null) {
                 pvStructure.message("value field not found", MessageType.error);
                 return;
             }
             dbValue = dbStructure.getDBRecord().findDBField(pvValue);
-            PVField pvField = pvParent.findProperty("calcArgArray");
+            PVField pvField = pvProperty.findProperty(pvParent,"calcArgArray");
             if(pvField==null) {
                 pvStructure.message("calcArgArray field not found", MessageType.error);
                 return;

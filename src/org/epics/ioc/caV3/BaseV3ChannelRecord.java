@@ -61,6 +61,8 @@ import org.epics.ioc.pv.PVEnumerated;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVLong;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStringArray;
@@ -78,6 +80,7 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable {
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     protected static final Convert convert = ConvertFactory.getConvert();
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
@@ -389,8 +392,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         String units = null;
         int precision = -1;
         DBRType requestDBRType = fromDBR.getType();
-        PVField pvValueField = pvRecord.findProperty(v3Channel.getValueFieldName());
-        
+        PVField pvValueField = pvProperty.findProperty(pvRecord, v3Channel.getValueFieldName());
         if(nativeDBRType.isENUM()) {
             if(elementCount!=1) {
                 setAlarm(AlarmSeverity.invalid,

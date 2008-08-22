@@ -11,6 +11,8 @@ import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.RecordListener;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 
 /**
@@ -18,7 +20,7 @@ import org.epics.ioc.pv.PVRecord;
  *
  */
 public class DBListenerForTesting implements DBListener{ 
-    
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     private String recordName = null;
     private String pvName = null;
     private boolean monitorProperties = false;
@@ -119,7 +121,7 @@ public class DBListenerForTesting implements DBListener{
         if(pvName==null || pvName.length()==0) {
             pvField = pvRecord;
         } else {
-            pvField = pvRecord.findProperty(pvName);
+            pvField = pvProperty.findProperty(pvRecord, pvName);
             if(pvField==null){
                 System.out.printf("name %s not in record %s%n",pvName,recordName);
                 System.out.printf("%s\n",pvRecord.toString());
@@ -132,10 +134,10 @@ public class DBListenerForTesting implements DBListener{
         DBField dbField = dbRecord.findDBField(pvField);
         dbField.addListener(listener);
         if(monitorProperties) {
-            String[] propertyNames = pvField.getPropertyNames();
+            String[] propertyNames = pvProperty.getPropertyNames(pvField);
             if(propertyNames!=null) {
                 for(String propertyName : propertyNames) {
-                    PVField pvf = pvField.findProperty(propertyName);
+                    PVField pvf = pvProperty.findProperty(pvField, propertyName);
                     DBField dbf = dbRecord.findDBField(pvf);
                     dbf.addListener(listener);
                 }

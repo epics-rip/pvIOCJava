@@ -38,10 +38,10 @@ public class ScanTest extends TestCase {
         iocRequester = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
         XMLToDBDFactory.convert(dbd,
-                "example/exampleDBD.xml",
+                "dbd/dbd.xml",
                 iocRequester);
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        boolean initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanDB.xml",iocRequester);
+        boolean initOK = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanDB.xml",iocRequester);
         if(!initOK) return;
         
 //        Map<String,DBRecord> recordMap  recordMap = iocdbAdd.getRecordMap();
@@ -98,9 +98,7 @@ public class ScanTest extends TestCase {
             } catch (InterruptedException e) {
             }
         }
-String temp = doubleReceive09Value.toString();
-System.out.println("toString " + temp);
-        initOK = IOCFactory.initDatabase("src/org/epics/ioc/process/test/scanAddDB.xml",iocRequester);
+        initOK = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanAddDB.xml",iocRequester);
         if(!initOK) {
             System.out.println("IOCFactory.initDatabase failed");
         }

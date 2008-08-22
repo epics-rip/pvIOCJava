@@ -160,11 +160,7 @@ class ImplDBRecord implements DBRecord{
                 PVArray elementArray = pvArrays[i];
                 if(elementArray==null) continue;
                 if(elementArray==pvFieldFind[index]) {
-                    Type elementType = ((Array)elementArray.getField()).getElementType();
-                    if(elementType.isScalar()) {
-                        if(elementArray==pvField) return dbArrays[i];
-                        throw new IllegalStateException("Logic error");
-                    }
+                    if(elementArray==pvField) return dbArrays[i];
                     return findArrayField(pvField,pvFieldFind,index+1,dbArrays[i],elementArray);
                 }
             }

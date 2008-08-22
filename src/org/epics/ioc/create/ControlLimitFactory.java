@@ -8,6 +8,8 @@ package org.epics.ioc.create;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.util.MessageType;
 
 /**
@@ -16,7 +18,7 @@ import org.epics.ioc.util.MessageType;
  *
  */
 public class ControlLimitFactory {
-
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     /**
      * The create method.
      * @param dbField The field.
@@ -40,13 +42,13 @@ public class ControlLimitFactory {
             pvField.message("field is not numeric", MessageType.error);
             return null;
         }
-        PVField pvControl = pvField.findProperty("control");
+        PVField pvControl = pvProperty.findProperty(pvField, "control");
         if(pvControl==null) {
             pvField.message("control is not a property", MessageType.error);
             return null;
         }
-        PVField pvLow = pvControl.findProperty("limit.low");
-        PVField pvHigh = pvControl.findProperty("limit.high");
+        PVField pvLow = pvProperty.findProperty(pvControl,"limit.low");
+        PVField pvHigh = pvProperty.findProperty(pvControl,"limit.high");
         if(pvLow==null || pvHigh==null) {
             pvField.message("invalid control structure", MessageType.error);
             return null;

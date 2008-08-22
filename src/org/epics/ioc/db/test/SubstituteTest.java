@@ -35,7 +35,7 @@ public class SubstituteTest extends TestCase {
         DBD dbd = DBDFactory.getMasterDBD();
         Requester iocRequester = new Listener();
         XMLToDBDFactory.convert(dbd,
-                "example/exampleDBD.xml",iocRequester);
+                "dbd/dbd.xml",iocRequester);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         XMLToIOCDBFactory.convert(dbd,iocdb,
             "src/org/epics/ioc/db/test/substituteDB.xml",iocRequester);

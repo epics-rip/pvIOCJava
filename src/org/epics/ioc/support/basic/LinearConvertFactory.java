@@ -11,6 +11,8 @@ import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.pv.PVDouble;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVInt;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVStructure;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.support.AbstractSupport;
@@ -55,6 +57,7 @@ public class LinearConvertFactory {
     
     private static final String linearConvertInput = "linearConvertInput";
     private static final String linearConvertOutput = "linearConvertOutput";
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     private static abstract class LinearConvertBase extends AbstractSupport
     {
@@ -93,7 +96,7 @@ public class LinearConvertFactory {
             DBRecord dbRecord = dbStructure.getDBRecord();
             DBField parentDBField = dbStructure.getParent();
             PVField parentPVField = parentDBField.getPVField();
-            PVField pvField = parentPVField.findProperty("value");
+            PVField pvField = pvProperty.findProperty(parentPVField,"value");
             if(pvField==null) {
                 super.message("parent does not have a value field", MessageType.error);
                 return;
@@ -106,7 +109,7 @@ public class LinearConvertFactory {
             dbRawValue = dbRecord.findDBField(pvField);
             parentDBField = parentDBField.getParent();
             parentPVField = parentDBField.getPVField();
-            pvField = parentPVField.findProperty("value");
+            pvField = pvProperty.findProperty(parentPVField,"value");
             if(pvField==null) {
                 super.message("parent of parent does not have a value field", MessageType.error);
                 return;
@@ -117,13 +120,13 @@ public class LinearConvertFactory {
             }
             pvValue = (PVDouble)pvField;
             dbValue = dbRecord.findDBField(pvField);
-            pvEngUnitsLow = (PVDouble)pvStructure.findProperty("engUnitsLow");
-            pvEngUnitsHigh = (PVDouble)pvStructure.findProperty("engUnitsHigh");
-            pvDeviceLow = (PVInt)pvStructure.findProperty("deviceLow");
-            pvDeviceHigh = (PVInt)pvStructure.findProperty("deviceHigh");
-            pvSlope = (PVDouble)pvStructure.findProperty("slope");
+            pvEngUnitsLow = (PVDouble)pvProperty.findProperty(pvStructure,"engUnitsLow");
+            pvEngUnitsHigh = (PVDouble)pvProperty.findProperty(pvStructure,"engUnitsHigh");
+            pvDeviceLow = (PVInt)pvProperty.findProperty(pvStructure,"deviceLow");
+            pvDeviceHigh = (PVInt)pvProperty.findProperty(pvStructure,"deviceHigh");
+            pvSlope = (PVDouble)pvProperty.findProperty(pvStructure,"slope");
             dbSlope = dbRecord.findDBField(pvSlope);
-            pvIntercept = (PVDouble)pvStructure.findProperty("intercept");
+            pvIntercept = (PVDouble)pvProperty.findProperty(pvStructure,"intercept");
             dbIntercept = dbRecord.findDBField(pvSlope);
             super.setSupportState(SupportState.readyForStart);
         }

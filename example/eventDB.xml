@@ -1,34 +1,25 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "eventCounter" type = "calcDouble">
-    <timeStamp structureName = "timeStamp" />
+<record name = "eventCounter">
+    <value type = "byte"/>
     <alarm structureName = "alarm" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
-            <name>min</name>
-        </element>
-        <element structureName = "calcDoubleArg">
-            <value>10.0</value>
-            <name>max</name>
-        </element>
-        <element structureName = "calcDoubleArg">
-            <value>1.0</value>
-            <name>inc</name>
-        </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <scan>
+    <timeStamp structureName = "timeStamp" />
+    <input structureName = "calculation" >
+      <calculator>
+        <expression>value+1</expression>
+      </calculator>
+    </input>
+    <scan structureName = "scan" >
         <type><choice>event</choice></type>
         <eventName>eventTest</eventName>
     </scan>
 </record>
 
-<record name = "event" type = "event">
+<record name = "event">
+    <value type = "string" supportName = "event">eventTest</value>
     <timeStamp structureName = "timeStamp" />
     <alarm structureName = "alarm" />
-    <value>eventTest</value>
-    <scan>
+    <scan structureName = "scan">
         <type><choice>periodic</choice></type>
         <rate>1.0</rate>
     </scan>

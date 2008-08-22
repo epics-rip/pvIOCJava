@@ -1,22 +1,26 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "${checkRecord}Check" type = "calcBoolean">
+<record name = "${checkRecord}Check" >
+    <value  type = "boolean" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcStringArg">
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "string" />
             <name>a</name>
         </element>
-        <element structureName = "calcStringArg">
+        <element structureName = "calcArg">
             <name>b</name>
-            <value>${checkValue}</value>
+            <value type = "string" >${checkValue}</value>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>
             (a==b) ? true : false
         </expression>
-    </calculator>
+      </calculator>
+    </input>
     <valueAlarm structureName = "booleanAlarm" >
        <active>true</active>
        <falseMessage>checkExpression Failure</falseMessage>

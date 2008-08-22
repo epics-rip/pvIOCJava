@@ -1,49 +1,53 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "counter" type = "calcDouble">
+<record name = "counter">
+    <scan structureName = "scan">
+        <type><choice>periodic</choice></type>
+        <rate>1.0</rate>
+    </scan>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0.0</value>
+    <value type = "double" />
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "double" >0.0</value>
             <name>min</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>10.0</value>
+        <element structureName = "calcArg">
+            <value type = "double" >10.0</value>
             <name>max</name>
         </element>
-        <element structureName = "calcDoubleArg">
-            <value>0.5</value>
+        <element structureName = "calcArg">
+            <value type = "double">0.5</value>
             <name>inc</name>
         </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+      </calcArgArray>
+      <calculator>
+        <expression>(value+inc)&lt;=max ? value+inc : min</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
+            <link structureName = "outputSupport">
                 <pvname>counterOutput</pvname>
                 <process>true</process>
             </link>
         </element>
         <element structureName = "supportArrayElement">
             <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
+            <link structureName = "processSupport">
                 <pvname>counterInput</pvname>
             </link>
         </element>
     </supportArray>
-    <scan>
-        <type><choice>periodic</choice></type>
-<!--
--->
-        <rate>1.0</rate>
-    </scan>
 </record>
 
-<record name = "counterOutput" type = "double">
+<record name = "counterOutput" >
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
     <valueAlarm structureName = "doubleAlarm">
           <active>true</active>
           <interval>
@@ -94,59 +98,61 @@
     </control>
 </record>
 
-<record name = "counterInput" type = "double">
+<record name = "counterInput">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
     <display structureName = "display" />
     <control structureName = "control" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
+    <input structureName = "inputSupport">
         <pvname>counterOutput</pvname>
         <process>false</process>
         <propertyNames>alarm,display,control</propertyNames>
     </input>
 </record>
 
-<record name = "counterMonitor" type = "double">
+<record name = "counterMonitor">
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
     <display structureName = "display" />
     <control structureName = "control" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
+    <input structureName = "monitorSupport">
         <pvname>counterOutput</pvname>
         <process>true</process>
         <propertyNames>alarm,display,control</propertyNames>
     </input>
 </record>
 
-<record name = "counterCalculator" type = "calcDouble">
+<record name = "counterDouble">
+    <value type = "double"/>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>counterOutput</pvname>
-        <process>true</process>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
+    <input structureName = "calculation" >
+      <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "double" />
             <name>arg0</name>
-            <input supportName = "inputSupport"
-                   structureName = "inputSupport">
-               <pvname>counterOutput</pvname>
-            </input>
+            <alarm structureName = "alarm" />
+            <input structureName = "monitorSupport">
+              <pvname>counterOutput</pvname>
+              <process>true</process>
+              <propertyNames>alarm</propertyNames>
+             </input>
         </element>
-        <element structureName = "calcDoubleArg">
+        <element structureName = "calcArg">
+            <value type = "double" />
             <name>arg1</name>
             <input supportName = "inputSupport"
                    structureName = "inputSupport">
                <pvname>counterOutput</pvname>
             </input>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>arg0+arg1</expression>
-    </calculator>
+      </calculator>
+    </input>
 </record>
 
 </IOCDatabase>

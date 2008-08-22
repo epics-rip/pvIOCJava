@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-<DBDefinition>
-    <field name = "scan" type = "structure" structureName = "scan"
-         supportName = "scan" />
-</DBDefinition>
-

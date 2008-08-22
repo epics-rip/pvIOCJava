@@ -27,6 +27,8 @@ import org.epics.ioc.ca.ChannelPutGet;
 import org.epics.ioc.ca.ChannelPutGetRequester;
 import org.epics.ioc.ca.ChannelPutRequester;
 import org.epics.ioc.pv.PVField;
+import org.epics.ioc.pv.PVProperty;
+import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.Type;
 import org.epics.ioc.util.IOCExecutor;
@@ -42,7 +44,7 @@ import org.epics.ioc.util.ScanPriority;
  */
 public class BaseV3Channel extends AbstractChannel
 implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
-
+    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     private static IOCExecutor iocExecutor
         = IOCExecutorFactory.create("caV3Connect", ScanPriority.low);
     
@@ -169,8 +171,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
         }
         PVRecord pvRecord = v3ChannelRecord.getPVRecord();
         if(name==null || name.length()<=0) return new ChannelFieldImpl(pvRecord);
-        PVField pvField = pvRecord.findProperty(name);
-        if(pvField==null) return null;
+        PVField pvField = pvProperty.findProperty(pvRecord, name);
         return new ChannelFieldImpl(pvField);               
     }
     /* (non-Javadoc)
@@ -324,7 +325,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
          * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
          */
         public ChannelField findProperty(String propertyName) {
-            PVField pvf = pvField.findProperty(propertyName);
+            PVField pvf = pvProperty.findProperty(pvField, propertyName);
             if (pvf == null) return null;
             return new ChannelFieldImpl(pvf);
         }

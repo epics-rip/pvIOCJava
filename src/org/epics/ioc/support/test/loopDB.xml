@@ -1,22 +1,13 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-<record name = "root" type = "calcDouble">
-    <calcArgArray>
-        <element structureName = "calcDoubleArg">
-            <value>0</value>
-            <name>min</name>
-        </element>
-        <element structureName = "calcDoubleArg">
-            <value>1e9</value>
-            <name>max</name>
-        </element>
-        <element structureName = "calcDoubleArg">
-            <value>100.0</value>
-            <name>inc</name>
-        </element>
-    </calcArgArray>
-    <calculator supportName = "counterCalculator" />
-    <supportArray>
+<record name = "root">
+    <value type = "double"/>
+    <input structureName = "calculation" >
+      <calculator>
+        <expression>value+100.0</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -32,14 +23,16 @@
         </element>
     </supportArray>
 </record>
-<record name = "other01" type = "double">
+<record name = "other01">
+    <value type = "double"/>
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>root</pvname>
             <process>false</process>
     </input>
 </record>
-<record name = "other02" type = "double">
-    <supportArray>
+<record name = "other02">
+    <value type = "double"/>
+    <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>false</wait>
             <link  supportName = "processSupport" structureName = "processSupport">
@@ -48,7 +41,8 @@
         </element>
     </supportArray>
 </record>
-<record name = "other03" type = "double">
+<record name = "other03">
+    <value type = "double"/>
     <input supportName = "inputSupport" structureName = "inputSupport">
             <pvname>root</pvname>
             <process>false</process>

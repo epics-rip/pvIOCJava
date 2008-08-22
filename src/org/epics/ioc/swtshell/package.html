@@ -10,11 +10,38 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2008.08.07</h1>
+2008.08.22</h1>
 CONTENTS 
+
+<div class="toc">
+<ul>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Channel">Channel Access</a>
+    <ul>
+      <li><a href="#get">get</a></li>
+      <li><a href="#put">put</a></li>
+      <li><a href="#process">process</a></li>
+      <li><a href="#monitor">monitor</a></li>
+    </ul>
+  </li>
+  <li><a href="#iocConsole">iocConsole</a></li>
+  <li><a href="#Local">Local JavaIOC</a>
+    <ul>
+      <li><a href="#loadDataba">loadDatabase</a></li>
+      <li><a href="#introspect">introspectDatabase</a>
+        <ul>
+          <li><a href="#Database">Database Definitions</a></li>
+          <li><a href="#Local1">Local Record Instance</a></li>
+          <li><a href="#Show">Show Information</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+</div>
 <hr />
 
-<h2 style="text-align: center">Overview</h2>
+<h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package provides a GUI shell implemented via the SWT toolkit that
@@ -51,7 +78,7 @@ when the javaIOC is started.</p>
 text input window, the enter key must be pressed.</p>
 <hr />
 
-<h2 style="text-align: center">Channel Access</h2>
+<h2 style="text-align: center" id="Channel">Channel Access</h2>
 <hr />
 The get, put, process, and monitor buttons each start a new window. Each
 window provides the ability to connect to a PV (Process Variable). 
@@ -77,7 +104,7 @@ javaIOC Channel Access. Two types are implemented:</p>
 
 <p>See package org.epics.ioc.caV3 for details about caV3.</p>
 
-<h3>get</h3>
+<h3 id="get">get</h3>
 
 <p>The following window appears when the get button is pushed:</p>
 
@@ -153,7 +180,7 @@ It has the following controls:</p>
       along with the value. </dd>
 </dl>
 
-<h3>put</h3>
+<h3 id="put">put</h3>
 
 <p>The following window appears when the put button is pushed:</p>
 
@@ -187,7 +214,7 @@ happens:</p>
     the PV.</li>
 </ul>
 
-<h3>process</h3>
+<h3 id="process">process</h3>
 
 <p>The following window appears when the process button is pushed:</p>
 
@@ -199,7 +226,7 @@ happens:</p>
 are available for properties or fields because they are not meaningful for a
 process request.</p>
 
-<h3>monitor</h3>
+<h3 id="monitor">monitor</h3>
 
 <p>The following window appears when the monitor button is pushed:</p>
 
@@ -220,7 +247,7 @@ get. The forth and fifth rows provide options for monitor:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center">iocConsole</h2>
+<h2 style="text-align: center" id="iocConsole">iocConsole</h2>
 <hr />
 
 <p>The following window appears when the iocConsole button is pushed:</p>
@@ -235,10 +262,10 @@ displayed on the iocConsole window. Note that iocdb puts the messages on a
 queue and has a separate thead that send the messages to the requesters.</p>
 <hr />
 
-<h2 style="text-align: center">Local javaIOC</h2>
+<h2 style="text-align: center" id="Local">Local JavaIOC</h2>
 <hr />
 
-<h3>loadDatabase</h3>
+<h3 id="loadDataba">loadDatabase</h3>
 
 <p>The following window appears when the loadDatabase button is pushed:</p>
 
@@ -264,7 +291,7 @@ Instance files to a running IOC. It has the following controls:</p>
       uinitialized and are not added to the master database.</dd>
 </dl>
 
-<h3>introspectDatabase</h3>
+<h3 id="introspect">introspectDatabase</h3>
 
 <p>The following window appears when the introspectDatabase button is
 pushed:</p>
@@ -273,12 +300,12 @@ pushed:</p>
 <p><img src="./introspectDatabase.gif" alt="introspectonsole" /></p>
 </center>
 
-<h4>Database Definitions</h4>
+<h4 id="Database">Database Definitions</h4>
 
 <p>The top menubar allows the use to see all the definitions in the master
 DBD database.</p>
 
-<h4>Local Record Instance</h4>
+<h4 id="Local1">Local Record Instance</h4>
 
 <p>The second row allows the user to select and interact with a local record.
 The select button is used to select a local record. The remaining buttons
@@ -300,7 +327,7 @@ apply to the selected button. They are:</p>
       This is a dangorous operation!!</dd>
 </dl>
 
-<h4>Show Information</h4>
+<h4 id="Show">Show Information</h4>
 
 <p>The third row has two buttons that show information. They are:</p>
 <dl>

@@ -1,27 +1,30 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 
-<substitute fromTo = "checkRecord=string,checkType=String" />
+<substitute fromTo = "checkRecord=string,checkType=string" />
 <substitute from = "checkValue" to = "This is 2 strings" />
-<record name = "${checkRecord}" type = "calc${checkType}">
+<record name = "${checkRecord}" >
+    <value type = "${checkType}" />
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
-    <scan>
+    <scan structureName = "scan" >
         <processAfterStart>true</processAfterStart>
     </scan>
-     <calcArgArray>
-        <element structureName = "calcStringArg">
-            <value>This is</value>
+    <input structureName = "calculation" >
+       <calcArgArray>
+        <element structureName = "calcArg">
+            <value type = "string" >This is</value>
             <name>a</name>
         </element>
-        <element structureName = "calcIntArg">
-            <value>2</value>
+        <element structureName = "calcArg">
+            <value type = "int" >2</value>
             <name>b</name>
         </element>
-    </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+      </calcArgArray>
+      <calculator structureName = "expressionCalculator" >
         <expression>a+" " + b+" strings"</expression>
-    </calculator>
+      </calculator>
+    </input>
 <include href = "checkLink.xml" />
 </record>
 <include href = "checkString.xml" />
