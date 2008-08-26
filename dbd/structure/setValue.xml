@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<DBDefinition>
+
+<structure name = "setBooleanValue" >
+  <field name = "value" type = "boolean" />
+  <field name = "desiredValue" type = "boolean" />
+  <field name = "setValue" type = "boolean" />
+</structure>
+
+<structure name = "setIntValue" >
+  <field name = "value" type = "int" />
+  <field name = "desiredValue" type = "int" />
+  <field name = "setValue" type = "boolean" />
+</structure>
+
+<structure name = "setStringValue" >
+  <field name = "value" type = "string" />
+  <field name = "desiredValue" type = "string" />
+  <field name = "setValue" type = "boolean" />
+</structure>
+
+</DBDefinition>

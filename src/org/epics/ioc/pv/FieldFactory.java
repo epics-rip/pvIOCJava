@@ -42,7 +42,11 @@ public final class FieldFactory {
          * @see org.epics.ioc.pv.FieldCreate#getType(java.util.Map)
          */
         public Type getType(Map<String, String> attributes) {
-            return getType(attributes.get("type"));
+            Type type = getType(attributes.get("type"));
+            if(type!=null) return type;
+            if(attributes.get("structureName")!=null) return Type.pvStructure;
+            if(attributes.get("elementType")!=null) return Type.pvArray;
+            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pv.FieldCreate#getType(java.lang.String)

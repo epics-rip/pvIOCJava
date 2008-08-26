@@ -5,5 +5,8 @@
 
 <support name = "generic"
    factoryName = "org.epics.ioc.support.basic.GenericFactory" />
+   
+<support name = "noop"
+  factoryName = "org.epics.ioc.support.basic.NoopFactory" />
 
 </DBDefinition>

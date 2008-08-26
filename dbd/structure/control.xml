@@ -2,7 +2,7 @@
 <DBDefinition>
 
 <structure name = "control">
-    <field name = "limit" type = "structure" structureName = "doubleLimit" />
+    <field name = "limit" structureName = "doubleLimit" />
     <field name = "minStep" type = "double" />
 </structure>
 

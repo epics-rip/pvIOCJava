@@ -218,6 +218,8 @@ public class SupportCreationFactory {
         if(dbField.getSupport()!=null) return true;
         String supportName = dbField.getSupportName();
         if(supportName==null) return true;
+        if(supportName.length()<=0) return true;
+        if(supportName.equals("null")) return true;
         String factoryName = null;
         PVField pvField = dbField.getPVField();
         DBD dbd = DBDFactory.getMasterDBD();       

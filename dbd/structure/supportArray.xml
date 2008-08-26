@@ -3,7 +3,7 @@
 
 <structure name = "supportArrayElement">
   <field name = "wait" type = "boolean" />
-  <field name = "link" type = "structure" structureName = "null" />
+  <field name = "link" structureName = "generic" />
 </structure>
 
 <support name = "supportArray"

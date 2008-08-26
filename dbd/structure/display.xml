@@ -6,7 +6,7 @@
     <field name = "format" type = "string" />
     <field name = "units" type = "string" />
     <field name = "resolution" type = "int" />
-    <field name = "limit" type = "structure" structureName = "doubleLimit" />
+    <field name = "limit" structureName = "doubleLimit" />
 </structure>
 
 </DBDefinition>

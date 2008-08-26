@@ -181,7 +181,7 @@ public class ProcessControlFactory {
             recordNamePVString = pvRecord.getStringField("recordName");
             if(recordNamePVString==null) return;
             
-            PVStructure tracePVStructure = pvRecord.getStructureField("trace", "booleanState");
+            PVStructure tracePVStructure = pvRecord.getStructureField("trace", "setBooleanValue");
             if(tracePVStructure==null) return;
             traceValuePVBoolean = tracePVStructure.getBooleanField("value");
             if(traceValuePVBoolean==null) return;
@@ -192,7 +192,7 @@ public class ProcessControlFactory {
             if(traceSetValuePVBoolean==null) return;
             traceSetValueDBField = dbRecord.findDBField(traceSetValuePVBoolean);
             
-            PVStructure enablePVStructure = pvRecord.getStructureField("enable", "booleanState");
+            PVStructure enablePVStructure = pvRecord.getStructureField("enable", "setBooleanValue");
             if(enablePVStructure==null) return;
             enableValuePVBoolean = enablePVStructure.getBooleanField("value");
             if(enableValuePVBoolean==null) return;
@@ -218,7 +218,7 @@ public class ProcessControlFactory {
             supportStateCommandRecordPVInt = supportStateCommandRecordEnumerated.getIndexField();
             supportStateCommandRecordDBField = dbRecord.findDBField(supportStateCommandRecordPVInt);
             
-            PVStructure fieldNamePVStructure = pvRecord.getStructureField("fieldName", "stringState");
+            PVStructure fieldNamePVStructure = pvRecord.getStructureField("fieldName", "setStringValue");
             if(fieldNamePVStructure==null) return;
             fieldNamePVString = fieldNamePVStructure.getStringField("value");
             if(fieldNamePVString==null) return;
@@ -244,7 +244,7 @@ public class ProcessControlFactory {
             supportStateCommandPVInt = supportStateCommandEnumerated.getIndexField();
             supportStateCommandDBField = dbRecord.findDBField(supportStateCommandPVInt);
             
-            PVStructure supportNamePVStructure = pvRecord.getStructureField("supportName", "stringState");
+            PVStructure supportNamePVStructure = pvRecord.getStructureField("supportName", "setStringValue");
             if(supportNamePVStructure==null) return;
             supportNamePVString = supportNamePVStructure.getStringField("value");
             if(supportNamePVString==null) return;
@@ -255,7 +255,7 @@ public class ProcessControlFactory {
             if(supportNameSetPVBoolean==null) return;
             supportNameSetDBField = dbRecord.findDBField(supportNameSetPVBoolean);
             
-            PVStructure structureNamePVStructure = pvRecord.getStructureField("structureName", "stringState");
+            PVStructure structureNamePVStructure = pvRecord.getStructureField("structureName", "setStringValue");
             if(structureNamePVStructure==null) return;
             structureNamePVString = structureNamePVStructure.getStringField("value");
             if(structureNamePVString==null) return;

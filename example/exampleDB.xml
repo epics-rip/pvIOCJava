@@ -3,7 +3,6 @@
 <include addPath = "${JAVAIOC}/example" />
 <include href = "counterDB.xml" />
 <include href = "eventDB.xml" />
-<include href = "processControlDB.xml" />
 <!--
 -->
 <include removePath = "${JAVAIOC}/example" />

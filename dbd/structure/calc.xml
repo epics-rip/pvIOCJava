@@ -11,11 +11,9 @@
 </structure>
 
 <structure name = "calculation" supportName = "generic" >
-  <field name = "calcArgArray" type = "array"
-     elementType = "structure" supportName = "calcArgArray" />
-  <field name = "calculator" type = "structure" 
-     structureName = "expressionCalculator" />
-  <field name = "alarm" type = "structure" structureName = "alarm" />
+  <field name = "calcArgArray" elementType = "structure" supportName = "calcArgArray" />
+  <field name = "calculator" structureName = "expressionCalculator" />
+  <field name = "alarm" structureName = "alarm" />
 </structure>
 
 <support name = "calcArgArray"

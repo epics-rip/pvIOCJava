@@ -9,26 +9,26 @@
 <body>
 <hr />
 
-<h1 style="text-align: center">EPICS JavaIoc: Database Definition <br />
+<h1 style="text-align: center">EPICS JavaIoc: Database Definition<br />
 package: org.epics.ioc.dbd<br />
-2008.06.10</h1>
+2008.08.25</h1>
 <hr />
 CONTENTS: 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Database">Database Definition Syntax</a> 
+  <li><a href="#Database">Database Definition Syntax</a>
     <ul>
-      <li><a href="#General">General Statements</a> 
+      <li><a href="#General">General Statements</a>
         <ul>
           <li><a href="#namespace">namespace</a></li>
           <li><a href="#Include">Include</a></li>
           <li><a href="#Macro">Macro Substitution</a></li>
         </ul>
       </li>
-      <li><a href="#Structure">Structure and Record Type</a></li>
-      <li><a href="#field">field</a> 
+      <li><a href="#Structure">Structure</a></li>
+      <li><a href="#field">field</a>
         <ul>
           <li><a href="#Primitive">Primitive Types</a></li>
           <li><a href="#string">string</a></li>
@@ -43,19 +43,19 @@ CONTENTS:
   </li>
   <li><a href="#Overview1">Overview of Java Support For Database
     Definition</a></li>
-  <li><a href="#Introspect">Introspection of Database Definitions</a> 
+  <li><a href="#Introspect">Introspection of Database Definitions</a>
     <ul>
-      <li><a href="#Structure1">Structure and RecordType</a></li>
+      <li><a href="#Structure1">Structure</a></li>
       <li><a href="#Create1">Create and Support</a></li>
       <li><a href="#Support1">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Accessing">Accessing Database Definitions</a> 
+  <li><a href="#Accessing">Accessing Database Definitions</a>
     <ul>
       <li><a href="#DBD">DBD</a></li>
     </ul>
   </li>
-  <li><a href="#Creating">Creating Database Definitions</a> 
+  <li><a href="#Creating">Creating Database Definitions</a>
     <ul>
       <li><a href="#DBDFactory">DBDFactory</a></li>
       <li><a href="#XMLToDBDFa">XMLToDBDFactory</a></li>
@@ -70,26 +70,25 @@ CONTENTS:
 <hr />
 
 <p>An EPICS IOC contains a memory resident real time database. The real time
-database has a set of "smart" records. Each record is an instance on a record
-of a particular type.</p>
+database has a set of "smart" records. A record consists of a structured set
+of fields. Each field can optionally have support. A record can be processed,
+which results in the support being called.</p>
 
-<p>This package describes support for Database Definitions, i.e. support for
-the following database components: structure, recordType, create, and
-support, Included are factories for creating multiple DBD (Database
-Definition) instances. A DBD provides reflection interfaces for all database
-components it contains.</p>
+<p>This package describes a (DBD) Database Definition database,, which
+consists of the following components: structure, create, and support. This
+package provides factories for creating multiple DBD instances. A DBD
+provides reflection interfaces for the components it contains.</p>
 
 <p>The following is discussed:</p>
 <ol>
   <li>Database Definition Syntax<br />
-    The XML syntax for defining structures, record types, create, and
-    support.<br />
+    The XML syntax for defining structures, create, and support.<br />
   </li>
   <li>Java Support for Database Definitions</li>
   <li>Factory support for Database Definitions</li>
-  <li>parser support<br />
-    This reads an xml file containing menu, structure, record types, and link
-    support and adds them to a database definition file.</li>
+  <li>DBD parser<br />
+    The parser reads an xml file containing structure, support, and create
+    definitions and adds them to a database definition database.</li>
   <li>Creating and using Database Definitions.<br />
   </li>
 </ol>
@@ -98,7 +97,7 @@ components it contains.</p>
 <h2 style="text-align: center" id="Database">Database Definition Syntax</h2>
 <hr />
 A Database Definition file must be an XML file with a root tag of
-DBDDefinition: 
+DBDefinition: 
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;DBDefinition&gt;
   &lt;?-- valid Database Definition elements --&gt;
@@ -138,11 +137,10 @@ is:
 supported just like for Database Instance files. See package org.epics.ioc.db
 for details about how macro substitution works.</p>
 
-<h3 id="Structure">Structure and Record Type</h3>
+<h3 id="Structure">Structure</h3>
 
-<p>Structure and recordType both define a data structure containing fields.
-The main difference is that a structure can't be instanciated except as a
-field of a record.</p>
+<p>Structure defines a data structure containing fields. A record instance is
+a structure. A field of a structure can also be a structure.</p>
 
 <p>A structure is defined as follows:</p>
 <pre>&lt;structure name = "structureName" createName = "createName" supportName = "supportName" &gt;
@@ -151,29 +149,21 @@ field of a record.</p>
      ...
 &lt;/structure&gt;</pre>
 
-<p>A record type is defined as follows:</p>
-<pre>&lt;recordType name = "recordtypeName" supportName = "supportName" &gt;
-     &lt;field name = "fieldName" createName = "createName"
-         supportName = "supportName" type = "fieldType" ... /&gt;
-     ...
-&lt;/recordType&gt;</pre>
-
 <p>where</p>
 <dl>
   <dt><span style="font-family: courier">structureName</span></dt>
-  <dt><span style="font-family: courier">recordtypeName</span></dt>
-    <dd>The structure or record type name.</dd>
+    <dd>The structure name.</dd>
   <dt style="font-family: courier;">createName</dt>
-    <dd>The name of create for the structure, recordType, or field. A create
-      definition, described below, defines the create. When record instances
-      are defined, the createName can be overridden.</dd>
+    <dd>The name of create for the structure or field. A create definition,
+      described below, defines the create. When record instances are defined,
+      the createName can be overridden.</dd>
   <dt style="font-family: courier;">supportName</dt>
-    <dd>The name of support for the structure, record type, or field. A
-      support definition, described below, defines the support. When record
-      instances are defined, the default can be overridden.</dd>
+    <dd>The name of support for the structure or field. A support definition,
+      described below, defines the support. When record instances are
+      defined, the default can be overridden.</dd>
   <dt><span style="font-family: courier">fieldName</span></dt>
-    <dd>Should also have the same syntax as a Java identifier, unique within
-      the context of this particular structure.</dd>
+    <dd>Should have the same syntax as a Java identifier, unique within the
+      context of this particular structure.</dd>
   <dt><span style="font-family: courier">fieldType</span></dt>
     <dd>See fieldType below.</dd>
   <dt>...</dt>
@@ -192,9 +182,7 @@ style="font-family: courier">short</span>, <span
 style="font-family: courier">int</span>, <span
 style="font-family: courier">long</span>, <span
 style="font-family: courier">float</span>, <span
-style="font-family: courier">double</span>. Primitive field types are just
-defined as <span style="font-family: courier;">&lt;type /&gt;</span> For
-example 
+style="font-family: courier">double</span>. For example 
 <pre>     
     &lt;field name = "value", type = "double" /&gt;
     &lt;field name = "rawValue" type = "int" /&gt;</pre>
@@ -216,7 +204,7 @@ structure which must have been previously defined. Example:
        &lt;field name = "y"&gt; type = "double" /&gt;
    &lt;/structure&gt;
    ...
-   &lt;recordType name = "haspoint"&gt;
+   &lt;structure name = "haspoint"&gt;
        ...
        &lt;field name = "point" type = "structure" structureName = "point" /&gt;
        ...</pre>
@@ -252,7 +240,7 @@ Examples:
 
 <p>A field can have additional attributes which are specified via xml
 attributes. Any xml key,value attribute that is not handled by the
-XMLToDBDFactory becomse a field attribute. Two attributes that are recognized
+XMLToDBDFactory becomes a field attribute. Two attributes that are recognized
 by the javaIOC database are: </p>
 <pre>     default = "stringValue"
      readonly = "booleanValue"
@@ -335,8 +323,6 @@ and the database itself.</p>
 <dl>
   <dt>DBDStructure</dt>
     <dd>This is for introspecting the XML structure definitions.</dd>
-  <dt>DBDRecordType</dt>
-    <dd>This is for introspecting the XML recordType definitions.</dd>
   <dt>DBDCreate</dt>
     <dd>This is for introspecting the XML create definitions.</dd>
   <dt>DBDSupport</dt>
@@ -348,17 +334,15 @@ and the database itself.</p>
 Definitions</h2>
 <hr />
 
-<p>This section describes interfaces for accessing structure, recordType,
-create, and support, i.e. everything defined in Database Definition files
-except record instances. Reflection for fields of a structure or recordType
-is discussed in the next section.</p>
+<p>This section describes interfaces for accessing structure, create, and
+support, i.e. everything defined in Database Definition files except record
+instances. Reflection for fields of a structure is discussed in the next
+section.</p>
 
-<h3 id="Structure1">Structure and RecordType</h3>
+<h3 id="Structure1">Structure</h3>
 
-<p>The interfaces are:</p>
-<pre>    interface DBDStructure extends Structure{}
-
-    interface DBDRecordType extends DBDStructure {}</pre>
+<p>The interface is:</p>
+<pre>    interface DBDStructure extends Structure{}</pre>
 
 <p>For example the following dumps a structure</p>
 <pre>    void dumpStructure(DBDStructure structure) {
@@ -431,16 +415,11 @@ addition a number of "convenience" methods are provided.</p>
     void mergeIntoMaster();
     DBDStructure createStructure(String name,
         Field[] field,FieldAttribute fieldAttribute);
-    DBDRecordType createRecordType(String name,
-        Field[] field,FieldAttribute fieldAttribute);
     DBDCreate createCreate(String createName,String factoryName);
     DBDSupport createSupport(String supportName,String factoryName);
     DBDStructure getStructure(String structureName);
     boolean addStructure(DBDStructure structure);
     DBDStructure[] getDBDStructures();
-    DBDRecordType getRecordType(String recordTypeName);
-    boolean addRecordType(DBDRecordType recordType);
-    DBDRecordType[] getDBDRecordTypes();
     DBDCreate getCreate(String createName);
     boolean addCreate(DBDCreate create);
     DBDCreate[] getDBDCreates()
@@ -449,8 +428,6 @@ addition a number of "convenience" methods are provided.</p>
     DBDSupport[] getDBDSupports();
     String[] structureList(String regularExpression);
     String structureToString(String regularExpression);
-    String[] recordTypeList(String regularExpression);
-    String recordTypeToString(String regularExpression);
     String[] createList(String regularExpression);
     String createToString(String regularExpression);
     String[] supportList(String regularExpression);
@@ -469,8 +446,6 @@ addition a number of "convenience" methods are provided.</p>
       compoments are removed from this database.</dd>
   <dt style="font-family: courier;">createStructure</dt>
     <dd>Create a DBDStructure.</dd>
-  <dt style="font-family: courier;">createRecordType</dt>
-    <dd>Create a DBDRecordType.</dd>
   <dt style="font-family: courier;">createCreate</dt>
     <dd>Create a DBDCreate.</dd>
   <dt style="font-family: courier;">createSupport</dt>
@@ -482,13 +457,6 @@ addition a number of "convenience" methods are provided.</p>
       exists the request fails and false is returned.</dd>
   <dt style="font-family: courier;">getStructures</dt>
     <dd>Get an array of all the structure definitions. </dd>
-  <dt style="font-family: courier;">getRecordType</dt>
-    <dd>Get the DBDRecordType that describes recordTypeName.</dd>
-  <dt style="font-family: courier;">addRecordType</dt>
-    <dd>Add a recordType definition and return true. If the definition
-      already exists the request fails and false is returned.</dd>
-  <dt style="font-family: courier;">getRecordTypes</dt>
-    <dd>Get an array of all the recordType definitions.</dd>
   <dt style="font-family: courier;">getCreate</dt>
     <dd>Get the DBDCreate that describes createName.</dd>
   <dt style="font-family: courier;">addCreate</dt>
@@ -514,12 +482,6 @@ definition of regular expressions.
       match a regular expression</dd>
   <dt style="font-family: courier;">structureToString</dt>
     <dd>Get a dump of all the DBDStructure definitions with names that match
-      a regular expression.</dd>
-  <dt style="font-family: courier;">recordTypeList</dt>
-    <dd>Return an array of strings that is the list of recordType names that
-      match a regular expression</dd>
-  <dt style="font-family: courier;">recordTypeToString</dt>
-    <dd>Get a dump of all the DBDRecordType definitions with names that match
       a regular expression.</dd>
   <dt style="font-family: courier;">createList</dt>
     <dd>Return an array of strings that is the list of create names that
@@ -623,8 +585,8 @@ definition database.</p>
 
 <h3 id="Creating1">Creating Database Definitions</h3>
 
-<p>Before record instances can be created all structure, recordType,create,
-and support definitions used by record instances must be created.</p>
+<p>Before record instances can be created all structure, create, and support
+definitions used by record instances must be created.</p>
 
 <p>A running IOC always uses a DBD Database named "master" and an IOCDB also
 named "master". The prefered way to create definitions by calling:</p>

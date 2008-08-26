@@ -10,20 +10,20 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support.calc<br />
-2008.08.18</h1>
+2008.08.25</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Basic">Basic Calculation Support</a>
+  <li><a href="#Basic">Basic Calculation Support</a> 
     <ul>
       <li><a href="#Database">Database Definitions for Calculations</a></li>
       <li><a href="#Performing">Performing Calculations</a></li>
       <li><a href="#calcArgArr">calcArgArray</a></li>
     </ul>
   </li>
-  <li><a href="#Expression">ExpressionCalculator</a>
+  <li><a href="#Expression">ExpressionCalculator</a> 
     <ul>
       <li><a href="#Simple">Simple Examples</a></li>
       <li><a href="#Expression1">Expression Syntax</a></li>
@@ -36,7 +36,7 @@ CONTENTS
       <li><a href="#Test">Test</a></li>
     </ul>
   </li>
-  <li><a href="#XMLToCalcS">XMLToCalcSupport</a>
+  <li><a href="#XMLToCalcS">XMLToCalcSupport</a> 
     <ul>
       <li><a href="#Introducti">Introduction</a></li>
       <li><a href="#Syntax">Syntax</a></li>
@@ -89,11 +89,9 @@ and finally XMLToCalcSupport.</p>
 &lt;/structure&gt;
 
 &lt;structure name = "calculation" supportName = "generic" &gt;
-  &lt;field name = "calcArgArray" type = "array"
-     elementType = "structure" supportName = "calcArgArray" /&gt;
-  &lt;field name = "calculator" type = "structure" 
-     structureName = "expressionCalculator" /&gt;
-  &lt;field name = "alarm" type = "structure" structureName = "alarm" /&gt;
+  &lt;field name = "calcArgArray" elementType = "structure" supportName = "calcArgArray" /&gt;
+  &lt;field name = "calculator" type = "structure" structureName = "expressionCalculator" /&gt;
+  &lt;field name = "alarm" structureName = "alarm" /&gt;
 &lt;/structure&gt;
 
 &lt;support name = "calcArgArray"

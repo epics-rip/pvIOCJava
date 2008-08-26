@@ -11,43 +11,26 @@
 </structure>
 
 <structure name = "linearConvertInput" supportName = "generic">
-  <field name = "alarm" type = "structure"/>
-  <field name = "timeStamp" type = "structure" />  
   <field name = "value" type = "int" />
-  <field name = "input" type = "structure" />
-  <field name = "linearConvert" type = "structure"
+  <field name = "alarm" structureName = "alarm"/>
+  <field name = "input" structureName = "generic" />
+  <field name = "linearConvert"
      structureName = "linearConvert" supportName = "linearConvertInput" />
-  <!-- instance can set structureName = "intAlarm" -->
-  <field name = "valueAlarm" type = "structure" />
-  <field name = "output" type = "structure" />
-  <field name = "display" type = "structure" />
-  <!-- instance can set structureName = "intHistory" -->
-  <field name = "history" type = "structure" />
 </structure>
 
 <structure name = "linearConvertOutput" supportName = "generic">
   <field name = "value" type = "int" />
-  <field name = "linearConvert" type = "structure"
+  <field name = "alarm" structureName = "alarm"/>
+  <field name = "linearConvert"
      structureName = "linearConvert" supportName = "linearConvertOutput" />
-  <field name = "alarm" type = "structure"/>
-  <field name = "timeStamp" type = "structure" />  
-  <!-- instance can set structureName = "intAlarm" -->
-  <field name = "valueAlarm" type = "structure" />
-  <field name = "output" type = "structure" />
-  <field name = "display" type = "structure" />
-  <field name = "control" type = "structure" />
-  <!-- instance can set structureName = "intHistory" -->
-  <field name = "history" type = "structure" />
 </structure>
 
 <structure name = "incrementalDouble" supportName = "generic" >
+  <field name = "alarm" structureName = "alarm"/>
   <field name = "value" type = "double" />
-  <field name = "input" type = "structure" structureName = "null" />
+  <field name = "input" structureName = "generic" />
   <field name = "incremental" type = "boolean" supportName = "incremental"/>
   <field name = "rateOfChange" type = "double" />
-  <field name = "alarm" type = "structure"/>
-  <field name = "display" type = "structure" />
-  <field name = "control" type = "structure" />
 </structure>
 
 <support name = "linearConvertInput"

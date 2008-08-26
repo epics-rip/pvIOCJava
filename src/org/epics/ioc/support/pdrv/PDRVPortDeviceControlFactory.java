@@ -156,7 +156,7 @@ public class PDRVPortDeviceControlFactory {
             portDeviceNamePVString = pvStructure.getStringField("portDevice");
             if(portDeviceNamePVString==null) return;
             
-            PVStructure connectPVStructure = pvStructure.getStructureField("connect", "booleanState");
+            PVStructure connectPVStructure = pvStructure.getStructureField("connect", "setBooleanValue");
             if(connectPVStructure==null) return;
             connectValuePVBoolean = connectPVStructure.getBooleanField("value");
             if(connectValuePVBoolean==null) return;
@@ -168,7 +168,7 @@ public class PDRVPortDeviceControlFactory {
             connectSetValueDBField = dbRecord.findDBField(connectSetValuePVBoolean);
 
             
-            PVStructure enablePVStructure = pvStructure.getStructureField("enable", "booleanState");
+            PVStructure enablePVStructure = pvStructure.getStructureField("enable", "setBooleanValue");
             if(enablePVStructure==null) return;
             enableValuePVBoolean = enablePVStructure.getBooleanField("value");
             if(enableValuePVBoolean==null) return;
@@ -179,7 +179,7 @@ public class PDRVPortDeviceControlFactory {
             if(enableSetValuePVBoolean==null) return;
             enableSetValueDBField = dbRecord.findDBField(enableSetValuePVBoolean);
             
-            PVStructure autoConnectPVStructure = pvStructure.getStructureField("autoConnect", "booleanState");
+            PVStructure autoConnectPVStructure = pvStructure.getStructureField("autoConnect", "setBooleanValue");
             if(autoConnectPVStructure==null) return;
             autoConnectValuePVBoolean = autoConnectPVStructure.getBooleanField("value");
             if(autoConnectValuePVBoolean==null) return;
@@ -190,7 +190,7 @@ public class PDRVPortDeviceControlFactory {
             if(autoConnectSetValuePVBoolean==null) return;
             autoConnectSetValueDBField = dbRecord.findDBField(autoConnectSetValuePVBoolean);
             
-            PVStructure traceMaskPVStructure = pvStructure.getStructureField("traceMask", "intState");
+            PVStructure traceMaskPVStructure = pvStructure.getStructureField("traceMask", "setIntValue");
             if(traceMaskPVStructure==null) return;
             traceMaskValuePVInt = traceMaskPVStructure.getIntField("value");
             if(traceMaskValuePVInt==null) return;
@@ -201,7 +201,7 @@ public class PDRVPortDeviceControlFactory {
             if(traceMaskSetValuePVBoolean==null) return;
             traceMaskSetValueDBField = dbRecord.findDBField(traceMaskSetValuePVBoolean);
             
-            PVStructure traceIOMaskPVStructure = pvStructure.getStructureField("traceIOMask", "intState");
+            PVStructure traceIOMaskPVStructure = pvStructure.getStructureField("traceIOMask", "setIntValue");
             if(traceIOMaskPVStructure==null) return;
             traceIOMaskValuePVInt = traceIOMaskPVStructure.getIntField("value");
             if(traceIOMaskValuePVInt==null) return;
@@ -212,7 +212,7 @@ public class PDRVPortDeviceControlFactory {
             if(traceIOMaskSetValuePVBoolean==null) return;
             traceIOMaskSetValueDBField = dbRecord.findDBField(traceIOMaskSetValuePVBoolean);
             
-            PVStructure traceIOTruncateSizePVStructure = pvStructure.getStructureField("traceIOTruncateSize", "intState");
+            PVStructure traceIOTruncateSizePVStructure = pvStructure.getStructureField("traceIOTruncateSize", "setIntValue");
             if(traceIOTruncateSizePVStructure==null) return;
             traceIOTruncateSizeValuePVInt = traceIOTruncateSizePVStructure.getIntField("value");
             if(traceIOTruncateSizeValuePVInt==null) return;

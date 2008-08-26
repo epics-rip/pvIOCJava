@@ -13,7 +13,6 @@
   <field name = "message" type = "string" />
   <field name = "ackTransient" type = "boolean" />
   <field name = "ackSeverity" type = "structure" structureName = "alarmSeverity" />
-  <field name = "typeCode" type = "structure" />
 </structure>
 
 <structure name = "byteAlarmInterval">

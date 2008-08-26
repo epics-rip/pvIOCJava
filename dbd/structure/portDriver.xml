@@ -7,7 +7,6 @@
   <field name = "mask" type = "int" />
   <field name = "size" type = "int" />
   <field name = "process" type = "boolean" default = "false" />
-  <field name = "drvParams" type = "structure" />
 </structure>
 
 <support name = "pdrvOctetInput"
@@ -61,19 +60,17 @@
   <field name = "portName" type = "string" />
   <field name = "autoConnect" type = "boolean" default = "true" />
   <field name = "priority" type = "structure" structureName = "scanPriority" />
-  <field name = "driverParameters" type = "structure" structureName = "null"/>
 </structure>
-
 
 <structure name = "portDeviceControl" supportName = "portDeviceControl" >
   <field name = "message" type = "string" />
   <field name = "portDevice" type = "string" />
-  <field name = "connect" type = "structure" structureName = "booleanState"  />
-  <field name = "enable" type = "structure" structureName = "booleanState"   />
-  <field name = "autoConnect" type = "structure" structureName = "booleanState" />
-  <field name = "traceMask" type = "structure" structureName = "intState"  />
-  <field name = "traceIOMask" type = "structure" structureName = "intState" />
-  <field name = "traceIOTruncateSize" type = "structure" structureName = "intState" />
+  <field name = "connect" structureName = "setBooleanValue"  />
+  <field name = "enable" structureName = "setBooleanValue"   />
+  <field name = "autoConnect" structureName = "setBooleanValue" />
+  <field name = "traceMask" structureName = "setIntValue"  />
+  <field name = "traceIOMask" structureName = "setIntValue" />
+  <field name = "traceIOTruncateSize" structureName = "setIntValue" />
   <field name = "report" type = "boolean" />
   <field name = "reportDetails" type = "int" />
 </structure>
