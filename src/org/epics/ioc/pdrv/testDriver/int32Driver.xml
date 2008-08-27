@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "int32Driver">
     <field name = "delay" type = "double" />
@@ -9,4 +9,4 @@
     <field name = "high" type = "int" />
 </structure>
 
-</DBDefinition>
+</IOCDatabase>

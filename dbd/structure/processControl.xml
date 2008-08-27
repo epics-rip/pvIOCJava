@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "supportStateCommand" createName = "enumerated" >
   <field name = "index" type = "int" />
@@ -29,4 +29,4 @@
    factoryName = "org.epics.ioc.support.basic.ProcessControlFactory" />
 
 
-</DBDefinition>
+</IOCDatabase>

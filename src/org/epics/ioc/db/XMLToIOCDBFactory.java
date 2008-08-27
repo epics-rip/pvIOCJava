@@ -5,18 +5,18 @@
  */
 package org.epics.ioc.db;
 
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDStructure;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.Field;
+import org.epics.ioc.pv.FieldAttribute;
 import org.epics.ioc.pv.FieldCreate;
 import org.epics.ioc.pv.FieldFactory;
 import org.epics.ioc.pv.PVArray;
@@ -119,9 +119,15 @@ public class XMLToIOCDBFactory {
     {
         private enum State {
             idle,
+            structure,
+            support,
+            create,
             record
         } 
         private State state = State.idle;
+        private DBDXMLHandler structureHandler = new DBDXMLStructureHandler();
+        private DBDXMLHandler supportHandler = new DBDXMLSupportHandler();
+        private DBDXMLHandler createHandler = new DBDXMLCreateHandler();
         private RecordHandler  recordHandler = null;
  
         public void endDocument() {}       
@@ -130,7 +136,16 @@ public class XMLToIOCDBFactory {
         {
             switch(state) {
             case idle:
-                if(qName.equals("record")) {
+                if(qName.equals("structure")) {
+                    state = State.structure;
+                    structureHandler.start(qName,attributes);
+                } else if(qName.equals("support")) {
+                    state = State.support;
+                    supportHandler.start(qName,attributes);
+                } else if(qName.equals("create")) {
+                    state = State.create;
+                    createHandler.start(qName,attributes);
+                } else if(qName.equals("record")) {
                     recordHandler = new RecordHandler(qName,attributes);
                     state = State.record;
                 } else {
@@ -138,6 +153,15 @@ public class XMLToIOCDBFactory {
                         "startElement " + qName + " not understood",
                         MessageType.error);
                 }
+                break;
+            case structure:
+                structureHandler.startElement(qName,attributes);
+                break;
+            case support:
+                supportHandler.startElement(qName,attributes);
+                break;
+            case create:
+                createHandler.startElement(qName,attributes);
                 break;
             case record: 
                 recordHandler.startElement(qName,attributes);
@@ -152,6 +176,30 @@ public class XMLToIOCDBFactory {
                 iocxmlReader.message(
                             "endElement element " + qName + " not understood",
                             MessageType.error);
+                break;
+            case structure:
+                if(qName.equals("structure")) {
+                    structureHandler.end(qName);
+                    state = State.idle;
+                } else {
+                    structureHandler.endElement(qName);
+                }
+                break;
+            case support:
+                if(qName.equals("support")) {
+                    supportHandler.end(qName);
+                    state = State.idle;
+                } else {
+                    supportHandler.endElement(qName);
+                }
+                break;
+            case create:
+                if(qName.equals("create")) {
+                    createHandler.end(qName);
+                    state = State.idle;
+                } else {
+                    createHandler.endElement(qName);
+                }
                 break;
             case record: 
                 if(qName.equals("record")) {
@@ -169,6 +217,15 @@ public class XMLToIOCDBFactory {
             switch(state) {
             case idle:
                 break;
+            case structure:
+                structureHandler.characters(ch,start,length);
+                break;
+            case support:
+                supportHandler.characters(ch,start,length);
+                break;
+            case create:
+                createHandler.characters(ch,start,length);
+                break;
             case record: 
                 recordHandler.characters(ch,start,length);
                 break;
@@ -179,7 +236,294 @@ public class XMLToIOCDBFactory {
             requester.message(message, messageType);
         }
     }
-
+    
+    private interface DBDXMLHandler {
+        void start(String qName, Map<String,String> attributes);
+        void end(String qName);
+        void startElement(String qName, Map<String,String> attributes);
+        void characters(char[] ch, int start, int length);
+        void endElement(String qName);
+    }
+    
+    private static class DBDXMLStructureHandler implements DBDXMLHandler
+    {
+        static final String[] excludeString = {
+            "name","supportName","createName","associatedField",
+            "type","elementType","structureName","factoryName"};
+ 
+        private enum State {idle, structure, field}      
+        
+        private State state = State.idle;
+        private String structureName;
+        private String structureSupportName = null;
+        private String structureCreateName = null;
+        private String fieldSupportName = null;
+        private String fieldCreateName = null;
+        private LinkedList<Field> fieldList;
+        // remaining are for field elements
+        private String fieldName;
+        private DBDStructure fieldStructure;
+        private Type type;
+        private Type elementType;
+        private FieldAttribute fieldAttribute;
+        private FieldAttribute structureAttribute;
+        
+        DBDXMLStructureHandler()
+        {
+            super();
+        }
+            
+        public void start(String qName, Map<String,String> attributes) {
+            if(state!=State.idle) {
+                iocxmlReader.message(
+                   "DBDXMLStructureHandler.start logic error not idle",
+                   MessageType.error);
+                state = State.idle;
+                return;
+            }
+            structureName = attributes.get("name");
+            if(structureName==null || structureName.length() == 0) {
+                iocxmlReader.message("name not specified",
+                        MessageType.error);
+                state = State.idle;
+                return;
+            }
+            structureSupportName = attributes.get("supportName");
+            structureCreateName = attributes.get("createName");
+            if(qName.equals("structure")){
+                if(dbd.getStructure(structureName)!=null) {
+                    iocxmlReader.message(
+                        "structure " + structureName + " already exists",
+                        MessageType.warning);
+                    state = State.idle;
+                    return;
+                }
+            } else {
+                iocxmlReader.message(
+                        "DBDXMLStructureHandler.start logic error",
+                        MessageType.error);
+                state = State.idle;
+                return;
+            }
+            structureAttribute = fieldCreate.createFieldAttribute();
+            structureAttribute.setAttributes(attributes,excludeString);
+            fieldList = new LinkedList<Field>();
+            state = State.structure;
+        }
+    
+        public void end(String qName){
+            if(state==State.idle) {
+                fieldList = null;
+                return;
+            }
+            Field[] field = new Field[fieldList.size()];
+            ListIterator<Field> iter1 = fieldList.listIterator();
+            for(int i=0; i<field.length; i++) {
+                field[i] = iter1.next();
+            }
+            DBDStructure dbdStructure = dbd.createStructure(
+                    structureName,field,structureAttribute);
+            boolean result = dbd.addStructure(dbdStructure);
+            if(!result) {
+                iocxmlReader.message(
+                        "structure " + structureName + " already exists",
+                        MessageType.warning);
+            }
+            if(structureSupportName!=null) {
+                dbdStructure.setSupportName(structureSupportName);
+            }
+            if(structureCreateName!=null) {
+                dbdStructure.setCreateName(structureCreateName);
+            }
+            fieldList = null;
+            state= State.idle;
+        }
+     
+        public void startElement(String qName, Map<String,String> attributes){
+            if(state==State.idle) return;
+            if(qName.equals("field")) {
+                assert(state==State.structure);
+                fieldSupportName = null;
+                fieldCreateName = null;
+                fieldAttribute = fieldCreate.createFieldAttribute();
+                fieldAttribute.setAttributes(attributes, excludeString);
+                fieldName = attributes.get("name");
+                if(fieldName==null) {
+                    iocxmlReader.message("name not specified",
+                            MessageType.error);
+                    state= State.idle;
+                    return;
+                }
+                type = fieldCreate.getType(attributes);
+                if(type==null) {
+                    iocxmlReader.message("type not specified correctly",
+                            MessageType.error);
+                    state= State.idle;
+                    return;
+                }
+                if(type==Type.pvStructure) {
+                    String fieldStructureName = attributes.get("structureName");
+                    if(fieldStructureName==null) fieldStructureName = "null";
+                    fieldStructure = dbd.getStructure(fieldStructureName);
+                    if(fieldStructure==null) {
+                        iocxmlReader.message("structure " + fieldStructureName + " not found in DBD database",
+                                MessageType.error);
+                        state= State.idle;
+                        return;
+                    }
+                    fieldSupportName = attributes.get("supportName");
+                    if(fieldSupportName==null) fieldSupportName = fieldStructure.getSupportName();
+                    fieldCreateName = attributes.get("createName");
+                    if(fieldCreateName==null) fieldCreateName = fieldStructure.getCreateName();
+                }
+                if(type==Type.pvArray) {
+                    elementType = fieldCreate.getElementType(attributes);
+                    if(elementType==null) {
+                        iocxmlReader.message("elementType not specified correctly",
+                                MessageType.error);
+                        state= State.idle;
+                        return;
+                    }
+                }
+                if(fieldSupportName==null) fieldSupportName = attributes.get("supportName");
+                if(fieldCreateName==null) fieldCreateName = attributes.get("createName");
+                state = State.field;
+            }
+        }
+    
+        public void endElement(String qName){
+            if(state==State.idle) return;
+            if(!qName.equals("field")) return;
+            assert(state==State.field);
+            state = State.structure;
+            Field field = null;
+            switch(type) {
+            case pvStructure:
+                field = fieldCreate.createStructure(fieldName,
+                    fieldStructure.getStructureName(),fieldStructure.getFields(),fieldAttribute);
+                break;
+            case pvArray:
+                field = fieldCreate.createArray(fieldName,elementType,fieldAttribute);
+                break;
+            default:
+                field = fieldCreate.createField(fieldName,type,fieldAttribute);
+                    break;
+            }
+            if(field==null) {
+                throw new IllegalStateException("logic error");
+            }
+            fieldList.add(field);
+            if(fieldSupportName!=null) {
+                field.setSupportName(fieldSupportName);
+            }
+            if(fieldCreateName!=null) {
+                field.setCreateName(fieldCreateName);
+            }
+            return;
+        }
+    
+        public void characters(char[] ch, int start, int length){}
+    }
+    
+    private static class DBDXMLSupportHandler implements DBDXMLHandler{
+        
+        public void start(String qName, Map<String,String> attributes) {
+            String name = attributes.get("name");
+            if(name==null||name.length()==0) {
+                iocxmlReader.message(
+                    "name was not specified correctly",
+                    MessageType.error);
+                return;
+            }
+            DBDSupport support = dbd.getSupport(name);
+            if(support!=null) {
+                iocxmlReader.message(
+                    "support " + name  + " already exists",
+                    MessageType.warning);
+                    return;
+            }
+            String factoryName = attributes.get("factoryName");
+            if(factoryName==null||factoryName.length()==0) {
+                iocxmlReader.message(
+                    "factoryName was not specified correctly",
+                    MessageType.error);
+                return;
+            }
+            support = dbd.createSupport(name,factoryName);
+            if(support==null) {
+                iocxmlReader.message(
+                    "failed to create support " + qName,
+                    MessageType.error);
+                    return;
+            }
+            if(!dbd.addSupport(support)) {
+                iocxmlReader.message(
+                    "support " + qName + " already exists",
+                    MessageType.warning);
+                return;
+            }
+        }
+    
+        public void end(String qName) {}
+    
+        public void startElement(String qName, Map<String,String> attributes) {}
+    
+        public void endElement(String qName) {}
+    
+        public void characters(char[] ch, int start, int length) {}
+        
+    }
+    
+    private static class DBDXMLCreateHandler implements DBDXMLHandler{
+        
+        public void start(String qName, Map<String,String> attributes) {
+            String name = attributes.get("name");
+            if(name==null||name.length()==0) {
+                iocxmlReader.message(
+                    "name was not specified correctly",
+                    MessageType.error);
+                return;
+            }
+            DBDCreate create = dbd.getCreate(name);
+            if(create!=null) {
+                iocxmlReader.message(
+                    "create " + name  + " already exists",
+                    MessageType.warning);
+                    return;
+            }
+            String factoryName = attributes.get("factoryName");
+            if(factoryName==null||factoryName.length()==0) {
+                iocxmlReader.message(
+                    "factoryName was not specified correctly",
+                    MessageType.error);
+                return;
+            }
+            create = dbd.createCreate(
+                name,factoryName);
+            if(create==null) {
+                iocxmlReader.message(
+                    "failed to create create " + qName,
+                    MessageType.error);
+                    return;
+            }
+            if(!dbd.addCreate(create)) {
+                iocxmlReader.message(
+                    "create " + qName + " already exists",
+                    MessageType.warning);
+                return;
+            }
+        }
+    
+        public void end(String qName) {}
+    
+        public void startElement(String qName, Map<String,String> attributes) {}
+    
+        public void endElement(String qName) {}
+    
+        public void characters(char[] ch, int start, int length) {}
+        
+    }
+    
     private static class RecordHandler
     {
         enum State {idle, structure, field, array}

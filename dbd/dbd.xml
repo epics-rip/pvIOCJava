@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 <include addPath = "${JAVAIOC}/dbd/structure" />
 <include href = "setValue.xml" />
 <include href = "limit.xml" />
@@ -27,5 +27,5 @@
 <support name = "powerSupplyCurrent"
     factoryName = "org.epics.ioc.support.device.PowerSupplyFactory" />
     
-</DBDefinition>
+</IOCDatabase>
 

@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.ArrayArrayData;
 import org.epics.ioc.pv.PVArray;

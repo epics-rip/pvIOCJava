@@ -13,10 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.epics.ioc.create.Create;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDCreate;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.Field;
 import org.epics.ioc.pv.PVField;

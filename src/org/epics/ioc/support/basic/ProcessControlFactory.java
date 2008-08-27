@@ -7,14 +7,14 @@ package org.epics.ioc.support.basic;
 
 import org.epics.ioc.create.Create;
 import org.epics.ioc.create.Enumerated;
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
+import org.epics.ioc.db.DBDStructure;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDStructure;
 import org.epics.ioc.pv.FieldCreate;
 import org.epics.ioc.pv.FieldFactory;
 import org.epics.ioc.pv.PVBoolean;

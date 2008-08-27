@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "byteLimit">
     <field name = "low" type = "byte" />
@@ -31,4 +31,4 @@
     <field name = "high" type = "double" />
 </structure>
 
-</DBDefinition>
+</IOCDatabase>

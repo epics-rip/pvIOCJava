@@ -1,5 +1,5 @@
 <?xml version = "1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "scanPriority" createName = "enumerated" >
   <field name = "index" type = "int"/>
@@ -33,4 +33,4 @@
 <support name = "scan"
   factoryName = "org.epics.ioc.support.basic.ScanFactory" />
 
-</DBDefinition>
+</IOCDatabase>

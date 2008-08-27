@@ -10,16 +10,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDCreate;
+import org.epics.ioc.db.DBDFactory;
+import org.epics.ioc.db.DBDStructure;
+import org.epics.ioc.db.DBDSupport;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDCreate;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDStructure;
-import org.epics.ioc.dbd.DBDSupport;
-import org.epics.ioc.dbd.XMLToDBDFactory;
 import org.epics.ioc.support.SupportCreation;
 import org.epics.ioc.support.SupportCreationFactory;
 import org.epics.ioc.swtshell.SwtshellFactory;
@@ -34,7 +33,6 @@ import org.epics.ioc.util.Requester;
 
 public class XMLToDatabase {
     private enum State {
-        dbdFile,
         dbFile,
         servers
     }
@@ -52,7 +50,7 @@ public class XMLToDatabase {
         IOCDB iocdb = IOCDBFactory.create("master");
         Requester iocRequester = new Listener();
         int nextArg = 0;
-        State state = State.dbdFile;
+        State state = State.dbFile;
         while(nextArg<args.length) {
             String arg = args[nextArg++];
             if(arg.charAt(0) == '-') {
@@ -67,10 +65,8 @@ public class XMLToDatabase {
                 }
                 if(arg.equals("dumpDBD")) {
                     dumpDBD(dbd);
-                } else if(arg.equals("dumpDB")) {
+                } else if(arg.equals("dumpRecords")) {
                     dumpDB(dbd,iocdb);
-                } else if(arg.equals("dbd")) {
-                    state = State.dbdFile;
                 } else if(arg.equals("db")){
                     state = State.dbFile;
                 } else if(arg.equals("swtshell")) {
@@ -88,8 +84,6 @@ public class XMLToDatabase {
                     usage();
                     return;
                 }
-            } else if(state==State.dbdFile) {
-                parseDBD(dbd,arg,iocRequester);
             } else if(state==State.dbFile){
                 parseDB(dbd,iocdb,arg,iocRequester);
             } else if(state==State.servers) {
@@ -103,9 +97,10 @@ public class XMLToDatabase {
     }
     
     static void usage() {
-        System.out.println("Usage: -dbd DatabaseDefinitionList"
-                + " -db InstanceList"
-                + " -dumpDBD -dumpDB"
+        System.out.println("Usage:"
+                + " -db dbList"
+                + " -dumpDBD"
+                + " -dumpRecords"
                 + " -startIOC"
                 + " -server file"
                 + " -swtshell ");
@@ -184,15 +179,6 @@ public class XMLToDatabase {
         if(dbdCreates.length>0) System.out.printf("\n\ncreate");
         for(DBDCreate dbdCreate : dbdCreates) {
             System.out.print(dbdCreate.toString());
-        }
-    }
-        
-    static void parseDBD(DBD dbd, String fileName,Requester iocRequester) {
-        System.out.printf("\nparsing DBD file %s\n",fileName);
-        try {
-            XMLToDBDFactory.convert(dbd,fileName,iocRequester);
-        } catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
         }
     }
 

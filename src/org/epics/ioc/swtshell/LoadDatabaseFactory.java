@@ -20,9 +20,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.XMLToDBDFactory;
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
 import org.epics.ioc.util.IOCFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
@@ -40,12 +39,8 @@ import org.epics.ioc.util.Requester;
  *    <li>show<br />
  *      Clicking this lists the currently selected file.
  *    </li>
- *    <li>loadDBD<br />
- *    Clicking this loads the currently selected Database Definition file.
- *    If any errors are reported in the test window after the clear button.
- *    </li>
- *    <li>loadDB<br />
- *    Clicking this loads the currently selected record instance file.
+ *    <li>loadIOCDB<br />
+ *    Clicking this loads the currently selected database file.
  *    If any errors are reported in the test window after the clear button.
  *    </li>
  *    <li>text input window<br />
@@ -72,8 +67,7 @@ public class LoadDatabaseFactory {
         private Shell shell;
         private Button findButton;
         private Button showButton;
-        private Button loadDBDButton;
-        private Button loadDBButton;
+        private Button loadIOCDBButton;
         private Text fileNameText;
         private Text consoleText;
         private Button clearButton;
@@ -107,12 +101,9 @@ public class LoadDatabaseFactory {
             showButton = new Button(fileComposite,SWT.PUSH);
             showButton.setText("show");
             showButton.addSelectionListener(this);
-            loadDBDButton = new Button(fileComposite,SWT.PUSH);
-            loadDBDButton.setText("loadDBD");
-            loadDBDButton.addSelectionListener(this);
-            loadDBButton = new Button(fileComposite,SWT.PUSH);
-            loadDBButton.setText("loadDB");
-            loadDBButton.addSelectionListener(this);
+            loadIOCDBButton = new Button(fileComposite,SWT.PUSH);
+            loadIOCDBButton.setText("loadIOCDB");
+            loadIOCDBButton.addSelectionListener(this);
             fileNameText = new Text(fileComposite,SWT.BORDER);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             fileNameText.setLayoutData(gridData);
@@ -169,22 +160,7 @@ public class LoadDatabaseFactory {
                 }
                 return;
             }
-            if(e.getSource()==loadDBDButton) {
-                String fileName = fileNameText.getText();
-                if(fileName==null || fileName.length()==0) {
-                    consoleText.append("fileName not specified");
-                    return;
-                }
-                try {
-                    DBD add = DBDFactory.create("add");
-                    XMLToDBDFactory.convert(add,fileName,this);
-                    add.mergeIntoMaster();
-                } catch (RuntimeException ex) {
-                    consoleText.append(String.format("%s%s",ex.getMessage()));
-                }
-                return;
-            }
-            if(e.getSource()==loadDBButton) {
+            if(e.getSource()==loadIOCDBButton) {
                 String fileName = fileNameText.getText();
                 if(fileName==null || fileName.length()==0) {
                     consoleText.append("fileName not specified");

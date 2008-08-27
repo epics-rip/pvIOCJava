@@ -7,15 +7,14 @@ package org.epics.ioc.db.test;
 
 import junit.framework.TestCase;
 
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.XMLToDBDFactory;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.PVField;
@@ -42,7 +41,7 @@ public class ListenerTest extends TestCase {
         DBD dbd = DBDFactory.getMasterDBD(); 
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
         Requester iocRequester = new Listener();
-        XMLToDBDFactory.convert(dbd,
+        XMLToIOCDBFactory.convert(dbd,iocdb,
                 "dbd/dbd.xml",iocRequester);
         //System.out.printf("%n%nstructures");
         //Map<String,DBDStructure> structureMap = dbd.getStructureMap();

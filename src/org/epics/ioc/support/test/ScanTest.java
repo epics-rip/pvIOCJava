@@ -7,12 +7,12 @@ package org.epics.ioc.support.test;
 
 import junit.framework.TestCase;
 
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.XMLToDBDFactory;
+import org.epics.ioc.db.XMLToIOCDBFactory;
 import org.epics.ioc.pv.PVField;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.pv.Structure;
@@ -37,10 +37,11 @@ public class ScanTest extends TestCase {
     public static void testScan() {
         iocRequester = new Listener();
         DBD dbd = DBDFactory.getMasterDBD();
-        XMLToDBDFactory.convert(dbd,
+        IOCDB iocdbMaster = IOCDBFactory.getMaster();
+        XMLToIOCDBFactory.convert(dbd,iocdbMaster,
                 "dbd/dbd.xml",
                 iocRequester);
-        IOCDB iocdbMaster = IOCDBFactory.getMaster();
+        
         boolean initOK = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanDB.xml",iocRequester);
         if(!initOK) return;
         

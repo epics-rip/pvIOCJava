@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "octetDriver">
     <field name = "multiDevice" type = "boolean" />
     <field name = "delay" type = "double" />
 </structure>
 
-</DBDefinition>
+</IOCDatabase>

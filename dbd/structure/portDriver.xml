@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 <structure name = "pdrvSupport">
   <field name = "portName" type = "string" />
   <field name = "addr" type = "int" />
@@ -91,4 +91,4 @@
 <include href = "float64ArrayDriver.xml" />
 <include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
 
-</DBDefinition>
+</IOCDatabase>

@@ -11,12 +11,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.TestCase;
 
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.XMLToDBDFactory;
+import org.epics.ioc.db.XMLToIOCDBFactory;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.IOCFactory;
@@ -39,7 +39,7 @@ public class ProcessTest extends TestCase {
         DBD dbd = DBDFactory.getMasterDBD();
         IOCDB iocdbMaster = IOCDBFactory.getMaster();
         Requester parsingRequester = new Listener();
-        XMLToDBDFactory.convert(dbd,
+        XMLToIOCDBFactory.convert(dbd,iocdbMaster,
                  "dbd/dbd.xml",
                  parsingRequester);
         DBRecord[] dbRecords = null;

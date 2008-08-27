@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.db;
 
-import org.epics.ioc.dbd.DBD;
 import org.epics.ioc.pv.PVRecord;
 
 /**

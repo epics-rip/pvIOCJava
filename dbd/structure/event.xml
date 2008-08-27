@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <support name = "event"
    factoryName = "org.epics.ioc.support.basic.EventFactory" />
 
-</DBDefinition>
+</IOCDatabase>

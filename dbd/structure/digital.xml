@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "digitalState">
   <field name = "name" type = "string" />
@@ -22,4 +22,4 @@
 <support name = "digitalOutput"
    factoryName = "org.epics.ioc.support.basic.DigitalFactory" />
 
-</DBDefinition>
+</IOCDatabase>

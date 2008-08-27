@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "delay" supportName = "delay">
   <!-- min, max, inc are delay in milliseconds -->
@@ -11,4 +11,4 @@
 <support name = "delay"
   factoryName = "org.epics.ioc.support.basic.DelayFactory" />
 
-</DBDefinition>
+</IOCDatabase>

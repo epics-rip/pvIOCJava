@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "supportArrayElement">
   <field name = "wait" type = "boolean" />
@@ -9,4 +9,4 @@
 <support name = "supportArray"
   factoryName = "org.epics.ioc.support.basic.SupportArrayFactory" />
 
-</DBDefinition>
+</IOCDatabase>

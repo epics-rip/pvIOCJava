@@ -10,38 +10,68 @@
 <hr />
 
 <h1 style="text-align: center">EPICS JavaIoc: Database Access <br />
-package: org.epics.ioc.dbAcess <br />
-2008.08.25</h1>
+package: org.epics.ioc.db <br />
+2008.08.27</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Record">Record Instance Syntax</a>
+  <li><a href="#Database">Database XML Syntax</a>
     <ul>
-      <li><a href="#General">General Statements</a>
+      <li><a href="#namespace">namespace</a></li>
+      <li><a href="#structure">structure</a></li>
+      <li><a href="#field">field</a>
         <ul>
-          <li><a href="#namespace">namespace</a></li>
+          <li><a href="#Primitive">Primitive Types</a></li>
+          <li><a href="#string">string</a></li>
+          <li><a href="#structure1">structure</a></li>
+          <li><a href="#array">array</a></li>
+        </ul>
+      </li>
+      <li><a href="#field1">field attribute</a></li>
+      <li><a href="#create">create</a></li>
+      <li><a href="#support">support</a></li>
+      <li><a href="#record">record</a></li>
+      <li><a href="#field2">field definition</a></li>
+      <li><a href="#field3">field creation</a></li>
+      <li><a href="#field4">field initialization</a></li>
+      <li><a href="#Primitive1">Primitive Types</a></li>
+      <li><a href="#string1">string</a></li>
+      <li><a href="#structure2">structure</a></li>
+      <li><a href="#array1">array</a></li>
+      <li><a href="#Macro">Macro Substitution and Include</a>
+        <ul>
           <li><a href="#Include">Include</a></li>
-          <li><a href="#Macro">Macro Substitution</a></li>
+          <li><a href="#Macro1">Macro Substitution</a></li>
           <li><a href="#Example">Example Include and Macro
           Substitution</a></li>
         </ul>
       </li>
-      <li><a href="#record">record</a></li>
-      <li><a href="#field">field definition</a></li>
-      <li><a href="#field1">field creation</a></li>
-      <li><a href="#field2">field initialization</a></li>
-      <li><a href="#Primitive">Primitive Types</a></li>
-      <li><a href="#string">string</a></li>
-      <li><a href="#structure">structure</a></li>
-      <li><a href="#array">array</a></li>
     </ul>
   </li>
-  <li><a href="#Database">XML to Database Converter</a></li>
-  <li><a href="#Database1">Database Access</a>
+  <li><a href="#Database1">XML to Database Converter</a></li>
+  <li><a href="#Introspect">Introspection of Database Definitions</a>
     <ul>
-      <li><a href="#Listener">Listener Interface</a>
+      <li><a href="#DBDStructu">DBDStructure</a></li>
+      <li><a href="#DBDCreate">DBDCreate</a></li>
+      <li><a href="#DBDSupport">DBDSupport</a></li>
+    </ul>
+  </li>
+  <li><a href="#Accessing">Accessing Database Definitions</a>
+    <ul>
+      <li><a href="#DBD">DBD</a></li>
+    </ul>
+  </li>
+  <li><a href="#Creating">Creating Database Definitions</a>
+    <ul>
+      <li><a href="#DBDFactory">DBDFactory</a></li>
+      <li><a href="#Creating1">Creating Database Definitions</a></li>
+    </ul>
+  </li>
+  <li><a href="#Database2">Database Access</a>
+    <ul>
+      <li><a href="#Listener">Listener Interfaces</a>
         <ul>
           <li><a href="#DBListener">DBListener</a></li>
           <li><a href="#RecordList">RecordListener</a></li>
@@ -79,129 +109,211 @@ CONTENTS
 
 <p>An EPICS IOC contains a memory resident real time database. The real time
 database has a set of "smart" records. Each record is an instance on a record
-of a particular type. This package describes the database that holds record
-instances. The following is discussed:</p>
+of a particular type. In addition to record instances the database holds a
+set of Database Definitions (DBD) for the following: structure, create, and
+support.</p>
+
+<p>The following is discussed:</p>
 <ol>
-  <li>Record Instance Syntax<br />
-    The XML syntax for defining record instances.</li>
+  <li>Database Definition Syntax.<br />
+    The XML syntax for defining a structure, create, support, or record
+    instance. In addition macro substitution and include are available.</li>
   <li>An XML to database converter.<br />
-    Parses xml record instance files, creates record instances, and puts them
-    in an IOC database.</li>
-  <li>Database Access<br />
-    Interfaces for accessing database records and support.<br />
+    Parses xml files containing database definitions puts them in an IOC
+    database.<br />
   </li>
-  <li>IOC Database<br />
-    Interface and factory for a database containing the record instances</li>
+  <li>Creating and using structure, create, and support Database
+  Definitions.</li>
+  <li>Database Access.<br />
+    Interfaces for record instances..</li>
   <li>Rules for modifying PV Data.</li>
-  <li>Listen Support<br />
+  <li>Listen Support.<br />
     A description of the support for monitoring changes to the data in
-    database instances fields.</li>
+    database instances fields.<br />
+  </li>
 </ol>
 <hr />
 
-<h2 style="text-align: center" id="Record">Record Instance Syntax</h2>
+<h2 style="text-align: center" id="Database">Database XML Syntax</h2>
 <hr />
-A Record Instance file must be an XML file with a root tag of IOCDatabase: 
+An JavaIOV database file must be an XML file with a root tag of IOCDatabase: 
 <pre>    &lt;?xml version="1.0" ?&gt;
     &lt;IOCDatabase&gt;
-      &lt;?-- valid Record Instance Definitions --&gt;
+      &lt;?-- valid structure, create, support, and record Definitions --&gt;
     &lt;/IOCDatabase&gt;</pre>
 
-<h3 id="General">General Statements</h3>
-
-<h4 id="namespace">namespace</h4>
+<h3 style="text-align:center;" id="namespace">namespace</h3>
 At this time namespaces are not used. 
 
-<h4 id="Include">Include</h4>
-The XML file can include other files also containing Record Instance
-Definitions. Included files can also include other files. The syntax is: 
-<pre>    
-&lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
+<h3 style="text-align:center;" id="structure">structure</h3>
 
-<p>Where</p>
+<p>Structure defines a data structure containing fields. A record instance is
+a structure. A field of a structure can also be a structure.</p>
+
+<p>A structure is defined as follows:</p>
+<pre>&lt;structure name = "structureName" createName = "createName" supportName = "supportName" &gt;
+     &lt;field name = "fieldName" createName = "createName"
+         supportName = "supportName" type = "fieldType" ... /&gt;
+     ...
+&lt;/structure&gt;</pre>
+
+<p>where</p>
 <dl>
-  <dt style="font-family: courier;">href</dt>
-    <dd>The <span style="font-family: courier;">filename</span>, which must
-      be a valid XML Record Instance file, is processed. If any addPaths have
-      been defined the last one specified is prefixed to the filename.</dd>
-  <dt style="font-family: courier;">addPath</dt>
-    <dd>Add a path.</dd>
-  <dt style="font-family: courier;">removePath</dt>
-    <dd>Remove a path.</dd>
+  <dt><span style="font-family: courier">structureName</span></dt>
+    <dd>The structure name.</dd>
+  <dt style="font-family: courier;">createName</dt>
+    <dd>The name of create for the structure or field. A create definition,
+      described below, defines the create. When record instances are defined,
+      the createName can be overridden.</dd>
+  <dt style="font-family: courier;">supportName</dt>
+    <dd>The name of support for the structure or field. A support definition,
+      described below, defines the support. When record instances are
+      defined, the default can be overridden.</dd>
+  <dt><span style="font-family: courier">fieldName</span></dt>
+    <dd>Should have the same syntax as a Java identifier, unique within the
+      context of this particular structure.</dd>
+  <dt><span style="font-family: courier">fieldType</span></dt>
+    <dd>See fieldType below.</dd>
+  <dt>...</dt>
+    <dd>See field attribute below</dd>
 </dl>
 
-<h4 id="Macro">Macro Substitution</h4>
+<h3 id="field">field</h3>
+The syntax for <span style="font-family: courier">fieldType</span> depends on
+the field type. 
 
-<p>Macro substitution replaces a string of the form "${from}" with some other
-text. The syntax is:</p>
-<pre>    &lt;substitute from = "fromString" to = "toString" fromTo = "from=to,from=to,..."/&gt;</pre>
+<h4 id="Primitive">Primitive Types</h4>
+Primitive types are the same as the Java primitive types, i.e. <span
+style="font-family: courier">boolean</span>, <span
+style="font-family: courier">byte</span>, <span
+style="font-family: courier">short</span>, <span
+style="font-family: courier">int</span>, <span
+style="font-family: courier">long</span>, <span
+style="font-family: courier">float</span>, <span
+style="font-family: courier">double</span>. For example 
+<pre>     
+    &lt;field name = "value", type = "double" /&gt;
+    &lt;field name = "rawValue" type = "int" /&gt;</pre>
 
-<p>Where:</p>
+<h4 id="string">string</h4>
+A <span style="font-family: courier">string</span> is a Java <span
+style="font-family: courier;">String</span>. A <span
+style="font-family: courier;">string</span> field type is just defined as
+<span style="font-family: courier;">string</span>. For example: 
+<pre>     &lt;field name = "description" type = "string" /&gt;</pre>
+
+<h4 id="structure1">structure</h4>
+A structure field is declared as 
+<pre>    &lt;field name = "value" type = "structure" structureName = "name" /&gt;</pre>
+<span style="font-family: courier;">structureName</span> is the name of a
+structure which must have been previously defined. Example: 
+<pre>   &lt;structure name = "point"&gt;
+       &lt;field name = "x" type = "double" /&gt;
+       &lt;field name = "y"&gt; type = "double" /&gt;
+   &lt;/structure&gt;
+   ...
+   &lt;structure name = "haspoint"&gt;
+       ...
+       &lt;field name = "point" type = "structure" structureName = "point" /&gt;
+       ...</pre>
+
+<p>NOTE: The structureName does not have to be given. In this case the field
+instance must define the structureName.</p>
+
+<h4 id="array">array</h4>
+
+<p>NOTE: One dimensional arrays are a supported type. Multidimensional arrays
+can be supported via a <span style="font-family: courier;">structure</span>
+definition with fields describing the number of dimensions and the attributes
+of each dimension.</p>
+An array is defined as follows: 
+<pre>    &lt;field name = "value" type = "array" elementType = "type" capacity = "capacity" /&gt;</pre>
+where 
 <dl>
-  <dt style="font-family: courier;">from</dt>
-    <dd><span style="font-family: courier;">fromString</span> is the string
-      that appears in ${from}. If <span
-      style="font-family: courier;">from</span> is specified then <span
-      style="font-family: courier;">to</span> must also be specified.</dd>
-  <dt style="font-family: courier;">to</dt>
-    <dd><span style="font-family: courier;">toString</span> replaces
-    ${from}</dd>
-  <dt style="font-family: courier;">toFrom</dt>
-    <dd>The attribute value is a series of "from=to" pairs separated by
-      commas.</dd>
+  <dt style="font-family: courier;">elementType</dt>
+    <dd>The type must be a valid type, i.e. boolean, byte, short, int, long,
+      float, double, string,enum, structure, array or link. This must be
+      specified. If the elementType is structure than each element can be a
+      different type of structure.</dd>
+  <dt style="font-family: courier;">capacity</dt>
+    <dd>The number of array elements. If not specified the capacity is
+      determined at record initialization</dd>
+</dl>
+Examples: 
+<pre>     &lt;field name = "doubleArray" type = "array" elementType = "double" capacity = "3" /&gt;
+     &lt;field name = "value" type = "array"  elementType = "double" /&gt;
+     &lt;field name = "rectangle" type = "array" elementType = "structure" capacity = "2" /&gt;</pre>
+
+<h3 id="field1">field attribute</h3>
+
+<p>A field can have additional attributes which are specified via xml
+attributes. Any xml key,value attribute that is not handled by the
+XMLToDBDFactory becomes a field attribute. Two attributes that are recognized
+by the javaIOC database are: </p>
+<pre>     default = "stringValue"
+     readonly = "booleanValue"
+ </pre>
+
+<p>The attribute parameter values have the following meanings:</p>
+<dl>
+  <dt><span style="font-family: courier">default</span></dt>
+    <dd>Default value for an instance of this field, using the Record
+      Instance Syntax. A default can only be specified if the field type is
+      primitive or string. If a default is not specified, the field will
+      initialize to all zero bits.</dd>
+  <dt><span style="font-family: courier">readonly</span></dt>
+    <dd>Can this field be modified via channel access? If not the fields is
+      not modifable at run time or is handled by database access. Takes the
+      value false if not specified.</dd>
+</dl>
+The following examples show how attributes are defined: 
+<pre>    &lt;structure name = "example"&gt;
+        ...
+        &lt;field name = "status" type = "string" readonly = "true" /&gt;
+        &lt;field name = "displayLimit" structureName = "displayLimit" readonly = "true" /&gt;
+        ...
+        &lt;field name = "value" type = "double" default = "1.0" /&gt;
+       ...
+    &lt;/structure&gt;</pre>
+<br />
+
+
+<h3 style="text-align:center;" id="create">create</h3>
+
+<p>Create can be associated with any field of a record instance when it is
+created. See package org.epics.ioc.db for details. The syntax for a Create
+definition is:</p>
+<pre>    &lt;create name = "createName" factoryName = "factoryName" /&gt;</pre>
+where 
+<dl>
+  <dt><span style="font-family: courier">create</span></dt>
+    <dd>The tag.</dd>
+  <dt><span style="font-family: courier">createName</span></dt>
+    <dd>string that describes the create</dd>
+  <dt><span style="font-family: courier">factoryName</span></dt>
+    <dd>The name of a Java factory class that creates create instances. See
+      package org.epics.ioc.db for details,</dd>
 </dl>
 
-<p>Macro substitution can be performed on the foillowing:</p>
-<ol>
-  <li>Any attribute value in any element definition.</li>
-  <li>The content of any element definition.</li>
-</ol>
+<h3 style="text-align:center;" id="support">support</h3>
 
-<h4 id="Example">Example Include and Macro Substitution</h4>
+<p>Support can be associated with any field of a record instance when it is
+created. See package org.epics.ioc.db for details. Record types and
+structures can have default support as shown above. The syntax for a support
+definition is:</p>
+<pre>    &lt;support name = "supportName" factoryName = "factoryName" /&gt;</pre>
+where 
+<dl>
+  <dt><span style="font-family: courier">support</span></dt>
+    <dd>The tag.</dd>
+  <dt><span style="font-family: courier">supportName</span></dt>
+    <dd>string that describes the choice</dd>
+  <dt><span style="font-family: courier">factoryName</span></dt>
+    <dd>The name of a Java factory class that creates support instances. See
+      package org.epics.ioc.process for details,</dd>
+</dl>
 
-<p>The following is a template file:</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;record name = "ai${recordExtension}Record"&gt;
-    &lt;value type = "double"/&gt;
-    &lt;timeStamp structureName = "timeStamp"&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;input structureName = "linearConvertInput" &gt;
-        &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
-            &lt;pvname&gt;${pvname}&lt;/pvname&gt;
-            &lt;wait&gt;true&lt;/wait&gt;
-        &lt;/input&gt;
-        &lt;linearConvert&gt;
-            &lt;engUnitsLow&gt;${engUnitsLow}&lt;/engUnitsLow&gt;
-            &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
-        &lt;/linearConvert&gt;
-    &lt;/input&gt;
-    &lt;display structureName = "display" &gt;
-        &lt;units&gt;volts&lt;/units&gt;
-        &lt;limit&gt;
-            &lt;low&gt;${displayLow}&lt;/low&gt;
-            &lt;high&gt;${displayHigh}&lt;/high&gt;
-        &lt;/limit&gt;
-    &lt;/display&gt;
-&lt;/record&gt;
-&lt;/IOCDatabase&gt;</pre>
-
-<p>The following creates two instance files from the template:</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;include addPath = "src/org/epics/ioc/dbAccess/example" /&gt;
-&lt;substitute from = "recordExtension" to = "01" /&gt;
-&lt;substitute from = "pvname" to = "nameFor01" /&gt;
-&lt;substitute from = "displayLow" to = "0.0" /&gt;
-&lt;substitute from = "displayHigh" to = "10.0" /&gt;
-&lt;substitute from = "engUnitsLow" to = "0.0" /&gt;
-&lt;substitute from = "engUnitsHigh" to = "9.0" /&gt;
-&lt;include href = "protoAiDB.xml" /&gt;
-&lt;substitute fromTo = "recordExtension=02,pvname=nameFor02" /&gt;
-&lt;include href = "protoAiDB.xml" /&gt;
-&lt;/IOCDatabase&gt;</pre>
-
-<h3 id="record">record</h3>
+<h3 style="text-align:center;" id="record">record</h3>
 
 <p>The syntax for a record instance is:</p>
 <pre>&lt;record name = "recordName" structureName = "structureName"  supportName = "supportName"&gt;
@@ -229,7 +341,7 @@ supportName specified in the structure definition or else generic. A support
 definition with the supportName must be defined in a support DBD. If the same
 record instance appears multiple times then then last supportName is used.</p>
 
-<h3 id="field">field definition</h3>
+<h3 id="field2">field definition</h3>
 
 <p>A field is defined as follows:</p>
 <pre> 
@@ -245,7 +357,7 @@ the structure. The details are descibed in the next section.</p>
 <p><span style="font-family: courier;">supportName</span> and <span
 style="font-family: courier;">createName</span> are both optional. If
 specified then this definition overrides any value specified in the DBD
-structure. If a field is definedd multiple times than the last </p>
+structure. If a field is defined multiple times than the last </p>
 
 <p><span style="font-family: courier;">supportName</span> or <span
 style="font-family: courier;">createName</span> definition determines the
@@ -254,7 +366,7 @@ final value.</p>
 <p>For array fields additional XML attributes can appear, which are described
 below.</p>
 
-<h3 id="field1">field creation</h3>
+<h3 id="field3">field creation</h3>
 
 <p>If <span style="font-family: courier;">fieldName</span> does not exist
 then a new field can be created and appended to the end of the current
@@ -337,7 +449,7 @@ field of type double and named "value".</p>
     periodicallly.</dd>
 </dl>
 
-<h3 id="field2">field initialization</h3>
+<h3 id="field4">field initialization</h3>
 
 <p>If multiple field instance definitions appear then the last instance
 determines how the field is initialized.</p>
@@ -345,7 +457,7 @@ determines how the field is initialized.</p>
 <p>The syntax for the <span style="font-family: courier">initializer</span>
 depends on the field type.</p>
 
-<h3 id="Primitive">Primitive Types</h3>
+<h3 id="Primitive1">Primitive Types</h3>
 
 <p>For primitive types the initializer has the same format as the Java
 constants for the type. For example if the type for field value is double:</p>
@@ -360,13 +472,13 @@ example the byte value 0xff is allowed even though Java would raise an
 exception if Byte.decode was used. The sign problem does exist for long
 values.</p>
 
-<h3 id="string">string</h3>
+<h3 id="string1">string</h3>
 
 <p>For string types the initializer is a valid Java string constant. For
 example:</p>
 <pre>    &lt;units&gt;voltage&lt;/units&gt;</pre>
 
-<h3 id="structure">structure</h3>
+<h3 id="structure2">structure</h3>
 
 <p>Structure fields are initialized via a recursive definition of field.</p>
 
@@ -397,7 +509,7 @@ structure without providing a structure name. In this case the default is
 instance is defined. The syntax is:</p>
 <pre>    &lt;fieldName structureName = "structureName" supportName = "supportName" &gt;</pre>
 
-<h3 id="array">array</h3>
+<h3 id="array1">array</h3>
 The syntax for an array initializer is: 
 <pre>    &lt;fieldName capacity = "capacity" capacityMutable = "trueFalse" length = "length" &gt;
         &lt;element offset = "offset"&gt;value&lt;/element&gt;
@@ -456,19 +568,109 @@ style="font-family: courier;">structArray</span></p>
             &lt;high&gt;10.0&lt;/high&gt;
         &lt;/element&gt;
     &lt;/structArray&gt;</pre>
+
+<h3 style="text-align:center;" id="Macro">Macro Substitution and Include</h3>
+
+<h4 id="Include">Include</h4>
+The XML file can include other files also containing Record Instance
+Definitions. Included files can also include other files. The syntax is: 
+<pre>    
+&lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
+
+<p>Where</p>
+<dl>
+  <dt style="font-family: courier;">href</dt>
+    <dd>The <span style="font-family: courier;">filename</span>, which must
+      be a valid XML Record Instance file, is processed. If any addPaths have
+      been defined the last one specified is prefixed to the filename.</dd>
+  <dt style="font-family: courier;">addPath</dt>
+    <dd>Add a path.</dd>
+  <dt style="font-family: courier;">removePath</dt>
+    <dd>Remove a path.</dd>
+</dl>
+
+<h4 id="Macro1">Macro Substitution</h4>
+
+<p>Macro substitution replaces a string of the form "${from}" with some other
+text. The syntax is:</p>
+<pre>    &lt;substitute from = "fromString" to = "toString" fromTo = "from=to,from=to,..."/&gt;</pre>
+
+<p>Where:</p>
+<dl>
+  <dt style="font-family: courier;">from</dt>
+    <dd><span style="font-family: courier;">fromString</span> is the string
+      that appears in ${from}. If <span
+      style="font-family: courier;">from</span> is specified then <span
+      style="font-family: courier;">to</span> must also be specified.</dd>
+  <dt style="font-family: courier;">to</dt>
+    <dd><span style="font-family: courier;">toString</span> replaces
+    ${from}</dd>
+  <dt style="font-family: courier;">toFrom</dt>
+    <dd>The attribute value is a series of "from=to" pairs separated by
+      commas.</dd>
+</dl>
+
+<p>Macro substitution can be performed on the foillowing:</p>
+<ol>
+  <li>Any attribute value in any element definition.</li>
+  <li>The content of any element definition.</li>
+</ol>
+
+<h4 id="Example">Example Include and Macro Substitution</h4>
+
+<p>The following is a template file:</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;IOCDatabase&gt;
+&lt;record name = "ai${recordExtension}Record"&gt;
+    &lt;value type = "double"/&gt;
+    &lt;timeStamp structureName = "timeStamp"&gt;
+    &lt;alarm structureName = "alarm" /&gt;
+    &lt;input structureName = "linearConvertInput" &gt;
+        &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
+            &lt;pvname&gt;${pvname}&lt;/pvname&gt;
+            &lt;wait&gt;true&lt;/wait&gt;
+        &lt;/input&gt;
+        &lt;linearConvert&gt;
+            &lt;engUnitsLow&gt;${engUnitsLow}&lt;/engUnitsLow&gt;
+            &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
+        &lt;/linearConvert&gt;
+    &lt;/input&gt;
+    &lt;display structureName = "display" &gt;
+        &lt;units&gt;volts&lt;/units&gt;
+        &lt;limit&gt;
+            &lt;low&gt;${displayLow}&lt;/low&gt;
+            &lt;high&gt;${displayHigh}&lt;/high&gt;
+        &lt;/limit&gt;
+    &lt;/display&gt;
+&lt;/record&gt;
+&lt;/IOCDatabase&gt;</pre>
+
+<p>The following creates two instance files from the template:</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;IOCDatabase&gt;
+&lt;include addPath = "src/org/epics/ioc/dbAccess/example" /&gt;
+&lt;substitute from = "recordExtension" to = "01" /&gt;
+&lt;substitute from = "pvname" to = "nameFor01" /&gt;
+&lt;substitute from = "displayLow" to = "0.0" /&gt;
+&lt;substitute from = "displayHigh" to = "10.0" /&gt;
+&lt;substitute from = "engUnitsLow" to = "0.0" /&gt;
+&lt;substitute from = "engUnitsHigh" to = "9.0" /&gt;
+&lt;include href = "protoAiDB.xml" /&gt;
+&lt;substitute fromTo = "recordExtension=02,pvname=nameFor02" /&gt;
+&lt;include href = "protoAiDB.xml" /&gt;
+&lt;/IOCDatabase&gt;</pre>
 <hr />
 
-<h2 style="text-align: center" id="Database">XML to Database Converter</h2>
+<h2 style="text-align: center" id="Database1">XML to Database Converter</h2>
 <hr />
 
 <p><span style="font-weight:bold;">NOTE</span> : To create definitions for an
 IOC, use org.epics.ioc.util.IOCFactory.initDatabase instead of directly
 calling XMLToIOCDBFactory. initDatabase calls XMLToIOCDBFactory and also
-initializes all support. Database instances should not be added to the master
+initializes all support. Record instances should not be added to the master
 IOCDB unless all support initializes and starts correctly.</p>
 
-<p>The following reads an xml file containing record instance definitions and
-puts them into an IOCDB.</p>
+<p>The following reads an xml file and puts the result into an IOCDB.</p>
 <pre>    public class XMLToIOCDBFactory {
         public static void convert(DBD dbd, IOCDB iocdb, String fileName,
             Requester requester);
@@ -514,26 +716,262 @@ made an error is generated and nothing is done. Both methods are thread
 safe.</p>
 <hr />
 
-<h2 style="text-align: center" id="Database1">Database Access</h2>
+<h2 style="text-align: center" id="Introspect">Introspection of Database
+Definitions</h2>
 <hr />
 
-<p>This section describes interfaces for acessing fields of record instances.
-These interfaces are of interest to the database, support, Channel Access,
-etc.</p>
+<p>This section describes support for code that accessses Database
+Definitions: structure, create , and support.</p>
 
-<p>Each DBField interface provides access to a corrseponding PVField
-interface and in addition provide access to support and implement monitoring,
-i.e.DBField provides the following features:</p>
+<p>The interfaces support reflection for Database Definitions. The interfaces
+can be used by tools such as VDCT or on a running IOC database. The
+interfaces are also used by record support, link support, and the database
+itself.</p>
+
+<h3 id="DBDStructu">DBDStructure</h3>
+
+<p>The interface for introspecting an XML structure definition is:</p>
+<pre>    interface DBDStructure extends Structure{}</pre>
+
+<p>For example the following dumps a structure</p>
+<pre>    void dumpStructure(DBDStructure structure) {
+        Field[] fields = structure.getFields();
+        System.out.printf("structure %s {\n",structure.getStructureName();
+        for(Field field : fields) {
+            Type type = field.getType();
+            System.out.printf("field %s type %s",
+                field.getName(),type.toString());
+        }
+    }</pre>
+
+<p>A shorter way is:</p>
+<pre>    void dumpStructure(DBDStructure structure) {System.out.println(structure.toString);}</pre>
+
+<h3 id="DBDCreate">DBDCreate</h3>
+
+<p>The interface for introspecting an XML create definition is:</p>
+<pre>    interface DBDCreate {
+        String getCreateName();
+        String getFactoryName();
+        String toString();
+        String toString(int indentLevel);
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getCreateName</dt>
+    <dd>Get the create name.</dd>
+  <dt style="font-family: courier;">getFactoryName</dt>
+    <dd>Get the factory name. This must be the complete java package + method
+      name of a Factory that creates support for the field. See package
+      org.epics.ioc.create for details about create and create factories.</dd>
+</dl>
+
+<h3 id="DBDSupport">DBDSupport</h3>
+
+<p>The interface for introspecting an XML support definition is:</p>
+<pre>    interface DBDSupport {
+        String getSupportName();
+        String getFactoryName();
+        String toString();
+        String toString(int indentLevel);
+    }</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getSupportName</dt>
+    <dd>Get the support name.</dd>
+  <dt style="font-family: courier;">getFactoryName</dt>
+    <dd>Get the factory name. This must be the complete java package + method
+      name of a Factory that creates support for the field. See package
+      org.epics.ioc.dbProcess for details about support and support
+    factories.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="Accessing">Accessing Database
+Definitions</h2>
+<hr />
+
+<h3 id="DBD">DBD</h3>
+
+<p>DBD is an interface for accessing a Database containing Database
+Definitions. Methods are provided for accessing and inserting components. In
+addition a number of "convenience" methods are provided.</p>
+<pre>public interface DBD {
+    String getName();
+    DBD getMasterDBD();
+    void mergeIntoMaster();
+    DBDStructure createStructure(String name,
+        Field[] field,FieldAttribute fieldAttribute);
+    DBDCreate createCreate(String createName,String factoryName);
+    DBDSupport createSupport(String supportName,String factoryName);
+    DBDStructure getStructure(String structureName);
+    boolean addStructure(DBDStructure structure);
+    DBDStructure[] getDBDStructures();
+    DBDCreate getCreate(String createName);
+    boolean addCreate(DBDCreate create);
+    DBDCreate[] getDBDCreates()
+    DBDSupport getSupport(String supportName);
+    boolean addSupport(DBDSupport support);
+    DBDSupport[] getDBDSupports();
+    String[] structureList(String regularExpression);
+    String structureToString(String regularExpression);
+    String[] createList(String regularExpression);
+    String createToString(String regularExpression);
+    String[] supportList(String regularExpression);
+    String supportToString(String regularExpression);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">getName</dt>
+    <dd>The name of this DBD database.</dd>
+  <dt style="font-family: courier;">getMasterDBD</dt>
+    <dd>Get the master DBD or null if no master was passed to
+      DBDFactory.create. Normally this means that this is the master.</dd>
+  <dt style="font-family: courier;">mergeIntoMaster</dt>
+    <dd>Merge this DBD into the master DBD. After merging into master the
+      compoments are removed from this database.</dd>
+  <dt style="font-family: courier;">createStructure</dt>
+    <dd>Create a DBDStructure.</dd>
+  <dt style="font-family: courier;">createCreate</dt>
+    <dd>Create a DBDCreate.</dd>
+  <dt style="font-family: courier;">createSupport</dt>
+    <dd>Create a DBDSupport.</dd>
+  <dt style="font-family: courier;">getStructure</dt>
+    <dd>Get the DBDStructure that describes the structureName</dd>
+  <dt style="font-family: courier;">addStructure</dt>
+    <dd>Add a structure definition and return true. If the definition already
+      exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getStructures</dt>
+    <dd>Get an array of all the structure definitions. </dd>
+  <dt style="font-family: courier;">getCreate</dt>
+    <dd>Get the DBDCreate that describes createName.</dd>
+  <dt style="font-family: courier;">addCreate</dt>
+    <dd>Add a create definition and return true. If the definition already
+      exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getCreates</dt>
+    <dd>Get an array of all the create definitions. </dd>
+  <dt style="font-family: courier;">getSupport</dt>
+    <dd>Get the DBDSupport that describes supportName.</dd>
+  <dt style="font-family: courier;">addSupport</dt>
+    <dd>Add a support definition and return true. If the definition already
+      exists the request fails and false is returned.</dd>
+  <dt style="font-family: courier;">getSupports</dt>
+    <dd>Get an artray of all the support definitions.</dd>
+</dl>
+The remaining methods are convenience methods. Each convenience method
+produces a string that lists or dumps all components with names that match a
+regular expression. The java.util.regex facility is used. Consult it for a
+definition of regular expressions. 
+<dl>
+  <dt style="font-family: courier;">structureList</dt>
+    <dd>Return an array of strings that is the list of structure names that
+      match a regular expression</dd>
+  <dt style="font-family: courier;">structureToString</dt>
+    <dd>Get a dump of all the DBDStructure definitions with names that match
+      a regular expression.</dd>
+  <dt style="font-family: courier;">createList</dt>
+    <dd>Return an array of strings that is the list of create names that
+      match a regular expression.</dd>
+  <dt style="font-family: courier;">createToString</dt>
+    <dd>Get a dump of all the DBDCreate definitions with names that match a
+      regular expression.</dd>
+  <dt style="font-family: courier;">supportList</dt>
+    <dd>Return an array of strings that is the list of support names that
+      match a regular expression.</dd>
+  <dt style="font-family: courier;">supportToString</dt>
+    <dd>Get a dump of all the DBDSupport definitions with names that match a
+      regular expression.</dd>
+</dl>
+An example of using a convience method is: 
+<pre>    String[] list = master.menuList(".*[S].*");</pre>
+Produces a list of all menu definitions that have an 'S" somewhere in the
+menu name. 
+<hr />
+
+<h2 style="text-align: center" id="Creating">Creating Database
+Definitions</h2>
+<hr />
+Two classes are provided for creation of DBD Databases: 
 <ul>
-  <li>Access to support.<br />
-    PVField provides the name of support code. DBdata provides access to the
-    support itself.</li>
-  <li>Monitoring.<br />
-    This is implemented via the DBListener interface.</li>
-  <li>Access to the associated PVField interface.</li>
+  <li>DBDFactory<br />
+    A factory to create and manage DBD databases.</li>
+  <li>XMLToDBDFactory<br />
+    A factory that reads xml Database Definitions and puts them into a DBD
+    Database.</li>
 </ul>
 
-<p>In addition DBRecord provides the following features:</p>
+<h3 id="DBDFactory">DBDFactory</h3>
+
+<p>DBDFactory is a class that creates DBD Databases. It provides the
+following methods:</p>
+<pre>public class DBDFactory {
+    public static DBD create(String name);
+    public static DBD getMasterDBD();
+}
+ </pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">create</dt>
+    <dd>Create a new DBD with the specified name. If the name is "master"
+      than the master DBD is returned.</dd>
+  <dt style="font-family: courier;">getMasterDBD</dt>
+    <dd>Return the master DBD. This is created automatically by
+    DBDFactory</dd>
+  <dt></dt>
+  <dt>All methods of DBDFactory and of the DBD instances it creates are
+  thread safe.</dt>
+  <dt></dt>
+</dl>
+
+<h3 id="Creating1">Creating Database Definitions</h3>
+
+<p>Before record instances can be created all structure, create, and support
+definitions used by record instances must be created.</p>
+
+<p>A running IOC always uses a DBD Database named "master" and an IOCDB also
+named "master". The prefered way to create definitions by calling:</p>
+<pre>    maxMessageType = IOCMessageType.info;
+    DBD add = XMLToDBDFactory.create("add",fileName,this);
+    if(maxMessageType!=IOCMessageType.info) // failure take appropriate action</pre>
+
+<p>addToMaster will not add any definitions to master if any errors are
+detected. It can be called during IOC initialization and also while an IOC is
+running. For an IOC this is the only method required for generating Database
+Definitions. Other code may decide to use DBDFactory.create instead.</p>
+
+<p>All DBD methods are thread safe. In order to prevent race conditions:</p>
+<ul>
+  <li>DBD has a private readWrite lock that manages all access to its
+  methods.</li>
+  <li>Database components can be added but not removed from a DBD.</li>
+  <li>All getXXXMap methods return shallow copies of the internal map.</li>
+</ul>
+<hr />
+
+<h2 style="text-align: center" id="Database2">Database Access</h2>
+<hr />
+
+<p>This section describes interfaces for accessing fields of record
+instances. These interfaces are of interest to the database, support, Channel
+Access, etc.</p>
+
+<p>Each field has an interface DBField which provides the following
+features:</p>
+<ul>
+  <li>Access to the associated PVField interface.</li>
+  <li>Access to support and create.<br />
+    PVField provides the name of support and/or create. DBField provides
+    access to the support and/or create itself.</li>
+  <li>Monitoring.<br />
+    This is implemented via the DBListener interface.</li>
+</ul>
+
+<p>Each record instance has an interface DBRecord which provides the
+following features:</p>
 <ul>
   <li>Record locking.<br />
     Whenever code accesses any part of a record instance it must be locked.
@@ -547,16 +985,17 @@ i.e.DBField provides the following features:</p>
   belongs.</li>
 </ul>
 
-<h3 id="Listener">Listener Interface</h3>
+<h3 style="text-align:center;" id="Listener">Listener Interfaces</h3>
 
 <h4 id="DBListener">DBListener</h4>
 
 <p>DBListener is an interface that must be implemented by code that calls
-DBdata.addListener, which is a request to be notified whenever a field
-changes value. A request can be made for any field including structure fields
-or even a record instance. If the request is made for a structure field then
-the requester will be notified whenever any field of the structure changes
-value.</p>
+DBField.addListener, which is a request to be notified whenever a field
+changes value. A request can be made for any field including a structure
+field. If the request is made for a structure field then the requester will
+be notified whenever any field of the structure changes value. Since a record
+instance is a structure it is possible to monitor all changes to a record
+instance.</p>
 
 <p>DBListener has the definition:</p>
 <pre>    public interface DBListener {
@@ -615,7 +1054,7 @@ DBRecordBase for details. The definition of RecordListener is:</p>
 
 <p>At the end of this document is a example implementation of DBListener.</p>
 
-<h3 id="DBField">DBField</h3>
+<h3 style="text-align:center;" id="DBField">DBField</h3>
 
 <p>The following is the base interface for accessing a field of a record
 instance.</p>
@@ -674,7 +1113,7 @@ instance.</p>
     <dd>Remove a listener.</dd>
 </dl>
 
-<h3 id="DBStructur">DBStructure</h3>
+<h3 style="text-align:center;" id="DBStructur">DBStructure</h3>
 <pre>    public interface DBStructure extends DBField {
         PVStructure getPVStructure();
         DBField[] getDBFields();
@@ -688,7 +1127,7 @@ instance.</p>
     <dd>Get the DBField array for the subfields.</dd>
 </dl>
 
-<h3 id="DBArray">DBArray</h3>
+<h3 style="text-align:center;" id="DBArray">DBArray</h3>
 <pre>    public interface DBArray extends DBField{
         PVArray getPVArray();
     }</pre>
@@ -727,7 +1166,7 @@ instance.</p>
     <dd>Get the DBArray array for the elements.</dd>
 </dl>
 
-<h3 id="DBRecord">DBRecord</h3>
+<h3 style="text-align:center;" id="DBRecord">DBRecord</h3>
 <pre>    interface DBRecord {
         DBField findDBField(PVField pvField);
         PVRecord getPVRecord();
@@ -783,7 +1222,7 @@ instance.</p>
       code.</dd>
 </dl>
 
-<h3 id="DBRecordFa">DBRecordFactory</h3>
+<h3 style="text-align:center;" id="DBRecordFa">DBRecordFactory</h3>
 
 <p>A factory is available that implements the DBField interfaces for record
 instance fields.</p>

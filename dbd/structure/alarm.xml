@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "alarmSeverity" createName = "enumerated" >
   <field name = "index" type = "int" />
@@ -138,4 +138,4 @@
 <support name = "enumeratedAlarm"
   factoryName = "org.epics.ioc.support.alarm.EnumeratedAlarmFactory" />
 
-</DBDefinition>
+</IOCDatabase>

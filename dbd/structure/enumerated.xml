@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "enumerated" createName = "enumerated" >
   <field name = "index" type = "int" />
@@ -11,4 +11,4 @@
   factoryName = "org.epics.ioc.create.EnumeratedFactory" />
 
 
-</DBDefinition>
+</IOCDatabase>

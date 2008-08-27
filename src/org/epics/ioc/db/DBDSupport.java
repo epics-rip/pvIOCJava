@@ -3,7 +3,7 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.ioc.dbd;
+package org.epics.ioc.db;
 
 /**
  * Reflection interface for a DBDSupport.

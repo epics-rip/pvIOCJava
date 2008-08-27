@@ -7,13 +7,12 @@ package org.epics.ioc.db.test;
 
 import junit.framework.TestCase;
 
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.IOCDB;
 import org.epics.ioc.db.IOCDBFactory;
 import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.XMLToDBDFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;
 /**
@@ -33,10 +32,10 @@ public class SubstituteTest extends TestCase {
      */
     public static void testXML() {
         DBD dbd = DBDFactory.getMasterDBD();
-        Requester iocRequester = new Listener();
-        XMLToDBDFactory.convert(dbd,
-                "dbd/dbd.xml",iocRequester);
         IOCDB iocdb = IOCDBFactory.create("testIOCDatabase");
+        Requester iocRequester = new Listener();
+        XMLToIOCDBFactory.convert(dbd,iocdb,
+                "dbd/dbd.xml",iocRequester);
         XMLToIOCDBFactory.convert(dbd,iocdb,
             "src/org/epics/ioc/db/test/substituteDB.xml",iocRequester);
         System.out.printf("%n%nrecord list%n");

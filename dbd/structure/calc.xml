@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "calcArg" supportName = "generic" >
   <!-- instance must define value -->
@@ -22,4 +22,4 @@
 <support name = "expressionCalculator"
  factoryName = "org.epics.ioc.support.calc.ExpressionCalculatorFactory" />
 
-</DBDefinition>
+</IOCDatabase>

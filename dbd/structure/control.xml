@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 
 <structure name = "control">
     <field name = "limit" structureName = "doubleLimit" />
@@ -9,4 +9,4 @@
 <!-- the following is for a value field with a parent that has a field named control that is a control-->
 <create name = "controlLimit"
   factoryName = "org.epics.ioc.create.ControlLimitFactory" />
-</DBDefinition>
+</IOCDatabase>
