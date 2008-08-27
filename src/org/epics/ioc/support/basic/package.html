@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: basic support<br />
 package: org.epics.ioc.support.basic<br />
-2008.06.26</h1>
+2008.08.26</h1>
 CONTENTS 
 
 <div class="toc">
@@ -20,14 +20,14 @@ CONTENTS
   <li><a href="#Noop">Noop Support</a></li>
   <li><a href="#ScanSuppor">ScanSupport</a></li>
   <li><a href="#ProcessCon">ProcessControl Support</a></li>
-  <li><a href="#Linear">Linear Conversion</a>
+  <li><a href="#Linear">Linear Conversion</a> 
     <ul>
       <li><a href="#linearConv">linearConversion</a></li>
       <li><a href="#LinearConv">LinearConvertInputFactory</a></li>
       <li><a href="#LinearConv1">LinearConvertOutputFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Digital">Digital Support</a>
+  <li><a href="#Digital">Digital Support</a> 
     <ul>
       <li><a href="#Java">Java Definitions</a></li>
     </ul>
@@ -49,7 +49,8 @@ services.</p>
 <p>The following factories are provided:</p>
 <dl>
   <dt>GenericFactory</dt>
-    <dd>Generic support for a record or structure.</dd>
+    <dd>Generic support for a structure or for an array with elementType of
+      array or structure.</dd>
   <dt>NoopFactory</dt>
     <dd>Support for all fields that just acts like it always succeeds
       successfully.</dd>
@@ -88,42 +89,26 @@ services.</p>
 <pre>    public class GenericFactory {
         public static Support create(DBStructure dbStructure);
     }</pre>
-
-<p>Generic Support is used for many record/structure definitions including:
-</p>
-<ul>
-  <li>boolean, byte, short, int, long, float, double, string.</li>
-  <li>Arrays of the previous types.</li>
-  <li>aoIncrementalDouble.</li>
-  <li>enumerated - a record with an enum value.</li>
-  <li>event - a record that announces events.</li>
-</ul>
-It can be used for all of these because it just looks for fields that have
-associated support and calls the support. It also has a few conventions so
-that it works with a variety of support modules. 
-
-<p>GenericSupportFactory implements record or structure support for an
-arbitrary set of fields which have associated support. It calls each support
-in the order that the fields are defined in the Database Definition File. It
-uses the following semantics:</p>
+Generic Support is used for many record/structure definitions . It is often
+used because it just looks for fields that have associated support and calls
+the support. It also has a few conventions so that it works with a variety of
+support modules.  It implements the following semantics:
 <dl>
-  <dt>common</dt>
-    <dd>It does not call the support for fields scan, timeStamp, and
-      processAfterStart. These are the fields that appear in commom.xml</dd>
+  <dt>scan</dt>
+    <dd>It does not call the support for field scan or timeStamp because
+      recordProcess handles these fields.</dd>
   <dt style="font-family: courier;">alarm</dt>
     <dd>If field alarm is present and has AlarmSupport then it is handled
       properly.</dd>
   <dt>fields with associated support.</dt>
-    <dd>For all fields with support, except the fields in common, the support
-      methods are called, i.e. initialize,start,stop,uninitialize, and
-      process. For each support process must complete before process for the
-      next support module is called.</dd>
+    <dd>For each field with support, the support methods are called, i.e.
+      initialize,start,stop,uninitialize, and process. Each process must
+      complete before process for the next support module is called.</dd>
 </dl>
 
 <p>The above rules allow the generic support to be used for many record types
-and embeded versions of these record types. Lets consider an example. double
-(either the structure or the recordType) has the following fields which might
-have support.:</p>
+and embeded versions of these record types. Lets consider an example which
+has the following fields with support.:</p>
 <dl>
   <dt style="font-family: courier;">input</dt>
     <dd>This is a link field. If support is defined then the record instance
@@ -254,7 +239,7 @@ record. It has the definitions:</p>
     default = "idle initialize start stop uninitialize" /&gt;
 &lt;/structure&gt;
 
-&lt;recordType name = "processControl" supportName = "processControl" &gt;
+&lt;structure name = "processControl" supportName = "processControl" &gt;
   &lt;field name = "message" type = "string" /&gt;
   &lt;field name = "recordName" type = "string" /&gt;
   &lt;field name = "trace" type = "structure" structureName = "booleanState" /&gt;
@@ -267,7 +252,7 @@ record. It has the definitions:</p>
   &lt;field name = "supportStateCommand" type = "structure" structureName = "supportStateCommand" /&gt;
   &lt;field name = "supportName" type = "structure" structureName = "stringState" /&gt;
   &lt;field name = "structureName" type = "structure" structureName = "stringState" /&gt;
-&lt;/recordType&gt;
+&lt;/structure&gt;
 
 
 &lt;support name = "processControl"
@@ -425,8 +410,8 @@ array to create the choices.</p>
 <h2 style="text-align: center" id="Incrementa">Incremental Support</h2>
 <hr />
 
-<p>This is support for incremental outputs.For example it supports the
-aoIncrementalOutut record.</p>
+<p>This is support for incremental outputs.For example it supports an
+incremental output record.</p>
 
 <p>This uses the Java definitions:</p>
 <pre>    public interface IncrementalSupport extends Support{

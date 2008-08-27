@@ -10,14 +10,14 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: alarm support<br />
 package: org.epics.ioc.alarm.support<br />
-2008.06.26</h1>
+2008.08.27</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#Alarm">Alarm Support</a></li>
-  <li><a href="#Value">Value Alarms</a>
+  <li><a href="#Value">Value Alarms</a> 
     <ul>
       <li><a href="#Boolean">Boolean Alarms</a></li>
       <li><a href="#Numeric">Numeric Alarms</a></li>
@@ -83,18 +83,21 @@ a severity at least as great as any of the lower level alarms.</p>
   <dt style="font-family: courier;">Support</dt>
     <dd>Standard support methods..</dd>
   <dt style="font-family: courier;">beginProcess</dt>
-    <dd>This is called when a record begins processing.</dd>
+    <dd>This is called when a field begins processing. It must be called by
+      support for the structure that has alarm as a subfield. Support generic
+      calls it.</dd>
   <dt style="font-family: courier;">endProcess</dt>
-    <dd>This is called when a record finishes processing. If setAlarm was not
-      called since beginProcess was called than it makes sure that the
-      severity is noAlarm. If the severity and/or message was changed during
-      record processing it calls postPut.</dd>
+    <dd>This is called when a record finishes processing.It must be called by
+      support for the structure that has alarm as a subfield. Support generic
+      calls it. If setAlarm was not called since beginProcess was called than
+      it makes sure that the severity is noAlarm. If the severity and/or
+      message was changed during record processing it calls postPut.</dd>
   <dt style="font-family: courier;">setAlarm</dt>
-    <dd>While a record is processing and code, normally one of the support
-      modules described below, can call setAlarm. This method changes the new
-      message and severity only if the severity passed to setAlarm is greater
-      than the current new severity or if this is the first call since the
-      record started processing.</dd>
+    <dd>While a record is processing code, normally another support module,
+      can call setAlarm. This method changes the new message and severity
+      only if the severity passed to setAlarm is greater than the current new
+      severity or if this is the first call since the record started
+      processing.</dd>
 </dl>
 
 <p>AlarmFactory provides the static methods:</p>

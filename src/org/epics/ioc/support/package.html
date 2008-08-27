@@ -10,18 +10,18 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2008.07.01</h1>
+2008.08.27</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a>
+  <li><a href="#Overview">Overview</a> 
     <ul>
       <li><a href="#RecordProc">RecordProcess</a></li>
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Record">Record Processing Theory of Operation</a>
+  <li><a href="#Record">Record Processing Theory of Operation</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requester">Requester Examples</a></li>
@@ -32,7 +32,7 @@ CONTENTS
       <li><a href="#Support1">Support Overview</a></li>
     </ul>
   </li>
-  <li><a href="#Record1">Record Process</a>
+  <li><a href="#Record1">Record Process</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#RecordProc2">RecordProcess - General Purpose
@@ -49,19 +49,19 @@ CONTENTS
       <li><a href="#RecordProc7">RecordProcessFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Support2">Support</a>
+  <li><a href="#Support2">Support</a> 
     <ul>
       <li><a href="#Support3">Support State</a></li>
       <li><a href="#Support4">Support</a></li>
     </ul>
   </li>
-  <li><a href="#AbstractSu">AbstractSupport</a>
+  <li><a href="#AbstractSu">AbstractSupport</a> 
     <ul>
       <li><a href="#AbstractSu1">AbstractSupport</a></li>
       <li><a href="#Definition2">Definitions</a></li>
     </ul>
   </li>
-  <li><a href="#Support5">Support Creation</a>
+  <li><a href="#Support5">Support Creation</a> 
     <ul>
       <li><a href="#Definition3">Definitions:</a></li>
       <li><a href="#Support6">Support Creation</a></li>
@@ -175,15 +175,14 @@ support.</p>
 recordProcess can be requested to process the record. It in turn calls the
 process method of the support attached to the record. A record is also the
 top level structure. The record support process method calls the support for
-any field of the top level structure that has associated support. Any of
-these supports can call other support.</p>
+any field of the top level structure that has associated support. Any support
+can call other support.</p>
 
 <h3 id="Definition">Definitions</h3>
 <dl>
   <dt>synchronous</dt>
     <dd>Code that does not block, i.e. does not perform actions like waiting
-      for I/O to complete. It is permissible to take locks that that are
-      shared by other synchronous code.</dd>
+      for I/O to complete.</dd>
   <dt>asynchronous</dt>
     <dd>Code that can block.</dd>
   <dt>record</dt>
@@ -195,9 +194,9 @@ these supports can call other support.</p>
       can be either synchronous or asynchronous. Support code can invoke
       other support code.</dd>
   <dt>record support</dt>
-    <dd>The top level support for a record instance. Most support that is
-      attached to a structure can also be record support if the structure is
-      the top level structure. </dd>
+    <dd>The top level support for a record instance. Support that is attached
+      to a structure can also be record support if the structure is the top
+      level structure. </dd>
   <dt>recordProcess</dt>
     <dd>During database initialization every record instance is assigned an
       instances of RecordProcess, which coordinates record processing.</dd>
