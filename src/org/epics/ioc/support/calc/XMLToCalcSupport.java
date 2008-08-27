@@ -89,7 +89,7 @@ public class XMLToCalcSupport {
                 return;
             }
             supportWriter.println("<?xml version=\"1.0\" ?>");
-            supportWriter.println("<DBDefinition>");
+            supportWriter.println("<IOCDatabase>");
             iocxmlReader = IOCXMLReaderFactory.getReader();
             iocxmlReader.parse("JavaIOCCalculation",
                     pathName + File.separator + fileName,
@@ -136,7 +136,7 @@ public class XMLToCalcSupport {
         private PrintWriter calculateWriter = null;
         
         public void endDocument(){
-            supportWriter.println("</DBDefinition>");
+            supportWriter.println("</IOCDatabase>");
             supportWriter.close();
         }       
 

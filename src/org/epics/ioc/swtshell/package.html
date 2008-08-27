@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2008.08.22</h1>
+2008.08.27</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Access</a>
+  <li><a href="#Channel">Channel Access</a> 
     <ul>
       <li><a href="#get">get</a></li>
       <li><a href="#put">put</a></li>
@@ -25,10 +25,10 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#iocConsole">iocConsole</a></li>
-  <li><a href="#Local">Local JavaIOC</a>
+  <li><a href="#Local">Local JavaIOC</a> 
     <ul>
       <li><a href="#loadDataba">loadDatabase</a></li>
-      <li><a href="#introspect">introspectDatabase</a>
+      <li><a href="#introspect">introspectDatabase</a> 
         <ul>
           <li><a href="#Database">Database Definitions</a></li>
           <li><a href="#Local1">Local Record Instance</a></li>
@@ -273,20 +273,21 @@ queue and has a separate thead that send the messages to the requesters.</p>
 <p><img src="./loadDatabase.gif" alt="loadDatabase" /></p>
 </center>
 
-<p>This is used to load additional Database Definition Database or Record
-Instance files to a running IOC. It has the following controls:</p>
+<p>This is used to load additional IOCDB definitions to a running IOC. It has
+the following controls:</p>
 <dl>
   <dt>find</dt>
     <dd>This brings up a file selection box that allows the selection of a
       DBD or DB file.</dd>
   <dt>show</dt>
     <dd>Lists the selected file.</dd>
-  <dt>loadDBD</dt>
-    <dd>Loads the selected DBD file. If the file loads without error it is
-      added to the master DBD field.</dd>
   <dt>loadDB</dt>
-    <dd>Loads, initializes, and starts record instance files. If all of the
-      new record instances is stated, then the records are added to ther
+    <dd>Adds definitions from the selected file to the JavaIOC file.
+      Structure, create, and support definitions are added only if the file
+      loads without error. It is an error if the definition already
+    exists.</dd>
+    <dd>Record instances are loaded, initialized, and started. If all of the
+      new record instances are stated, then the records are added to ther
       master database. If any record fails to start, all the records are
       uinitialized and are not added to the master database.</dd>
 </dl>

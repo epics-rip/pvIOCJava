@@ -11,14 +11,14 @@ import java.lang.reflect.Modifier;
 
 import org.epics.ioc.db.DBArray;
 import org.epics.ioc.db.DBArrayArray;
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
+import org.epics.ioc.db.DBDSupport;
 import org.epics.ioc.db.DBField;
 import org.epics.ioc.db.DBRecord;
 import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.db.DBStructureArray;
 import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDSupport;
 import org.epics.ioc.pv.Array;
 import org.epics.ioc.pv.PVArray;
 import org.epics.ioc.pv.PVField;

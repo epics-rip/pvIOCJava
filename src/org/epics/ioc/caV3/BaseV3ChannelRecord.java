@@ -45,9 +45,9 @@ import gov.aps.jca.event.GetListener;
 
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelMonitorRequester;
-import org.epics.ioc.dbd.DBD;
-import org.epics.ioc.dbd.DBDFactory;
-import org.epics.ioc.dbd.DBDStructure;
+import org.epics.ioc.db.DBD;
+import org.epics.ioc.db.DBDFactory;
+import org.epics.ioc.db.DBDStructure;
 import org.epics.ioc.pv.Convert;
 import org.epics.ioc.pv.ConvertFactory;
 import org.epics.ioc.pv.Field;

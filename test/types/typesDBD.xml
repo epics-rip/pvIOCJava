@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<DBDefinition>
+<IOCDatabase>
 <structure name = "allTypes" supportName = "generic" >
   <field name = "boolean" type = "boolean" default = "true" />
     <field name = "byte" type = "byte"  default = "-0x7f" />
@@ -30,4 +30,4 @@
     <field name = "structArray" type = "array" elementType = "structure" />
     <field name = "arrayArray" type = "array" elementType = "array" />
 </structure>
-</DBDefinition>
+</IOCDatabase>
