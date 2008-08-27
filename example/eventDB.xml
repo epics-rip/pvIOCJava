@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <record name = "eventCounter">
-    <value type = "byte"/>
+    <value type = "int"/>
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input structureName = "calculation" >
