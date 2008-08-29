@@ -1,5 +1,50 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
+<record name = "valueOnly">
+    <value type = "double" />
+</record>
+
+<record name = "simpleCounter" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <value type = "int" />
+    <input structureName = "calculation" >
+      <calculator>
+        <expression>(value+1)&lt;=10 ? value+1 : 0</expression>
+      </calculator>
+    </input>
+    <valueAlarm structureName = "intAlarm">
+          <active>true</active>
+          <interval>
+              <element structureName = "intAlarmInterval">
+                  <value>2</value>
+                  <severity><choice>major</choice></severity>
+                  <message>LOWLOW</message>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>4</value>
+                  <severity><choice>minor</choice></severity>
+                  <message>LOW</message>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>6</value>
+                  <severity><choice>none</choice></severity>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>8</value>
+                  <severity><choice>minor</choice></severity>
+                  <message>HIGH</message>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>10</value>
+                  <severity><choice>major</choice></severity>
+                  <message>HIHI</message>
+              </element>
+          </interval>
+          <outOfRange><choice>invalid</choice></outOfRange>
+    </valueAlarm> 
+</record>
+
 <record name = "counter">
     <scan structureName = "scan">
         <type><choice>periodic</choice></type>

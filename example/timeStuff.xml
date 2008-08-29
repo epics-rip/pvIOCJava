@@ -1,0 +1,193 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+<record name = "valueOnly">
+    <value type = "int" />
+</record>
+
+<record name = "simpleCounter" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <value type = "int" />
+    <input structureName = "calculation" >
+      <calculator>
+        <expression>(value+1)&lt;=10 ? value+1 : 0</expression>
+      </calculator>
+    </input>
+</record>
+
+<record name = "counterWithAlarm" >
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <value type = "int" />
+    <input structureName = "calculation" >
+      <calculator>
+        <expression>(value+1)&lt;=10 ? value+1 : 0</expression>
+      </calculator>
+    </input>
+    <valueAlarm structureName = "intAlarm">
+          <active>true</active>
+          <interval>
+              <element structureName = "intAlarmInterval">
+                  <value>2</value>
+                  <severity><choice>major</choice></severity>
+                  <message>LOWLOW</message>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>4</value>
+                  <severity><choice>minor</choice></severity>
+                  <message>LOW</message>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>6</value>
+                  <severity><choice>none</choice></severity>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>8</value>
+                  <severity><choice>minor</choice></severity>
+                  <message>HIGH</message>
+              </element>
+              <element structureName = "intAlarmInterval">
+                  <value>10</value>
+                  <severity><choice>major</choice></severity>
+                  <message>HIHI</message>
+              </element>
+          </interval>
+          <outOfRange><choice>invalid</choice></outOfRange>
+    </valueAlarm> 
+</record>
+
+
+<record name = "counterWithLinks">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "int" />
+    <input structureName = "calculation" >
+      <calculator>
+        <expression>(value+1)&lt;=10 ? value+1 : 0</expression>
+      </calculator>
+    </input>
+    <supportArray elementType = "structure" supportName = "supportArray" >
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link1</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link2</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link3</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link4</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link5</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link6</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link7</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link8</pvname>
+            </link>
+        </element>
+        <element structureName = "supportArrayElement">
+            <wait>false</wait>
+            <link structureName = "processSupport">
+                <pvname>link9</pvname>
+            </link>
+        </element>
+    </supportArray>
+</record>
+
+<record name = "link1" >
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+
+<record name = "link2">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+
+<record name = "link3">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+<record name = "link4">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+<record name = "link5">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+<record name = "link6">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+<record name = "link7">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+
+<record name = "link8">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+<record name = "link9">
+    <timeStamp structureName = "timeStamp" />
+    <value type = "double" />
+    <input structureName = "inputSupport">
+        <pvname>counterWithLinks</pvname>
+    </input>
+</record>
+
+</IOCDatabase>
