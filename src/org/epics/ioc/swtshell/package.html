@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2008.08.27</h1>
+2008.08.28</h1>
 CONTENTS 
 
 <div class="toc">
@@ -308,9 +308,11 @@ DBD database.</p>
 
 <h4 id="Local1">Local Record Instance</h4>
 
-<p>The second row allows the user to select and interact with a local record.
-The select button is used to select a local record. The remaining buttons
-apply to the selected button. They are:</p>
+<p>The next three row allows the user to select and interact with a local
+record. The select button is used to select a local record. The text window
+after select shows the currently selected record and can also be used to
+enter a record name. The remaining buttons apply to the selected button. They
+are:</p>
 <dl>
   <dt>dump</dt>
     <dd>shows the contents of the record.</dd>
@@ -320,6 +322,9 @@ apply to the selected button. They are:</p>
     <dd>Allows the user to set trace on or off.</dd>
   <dt>setEnable</dt>
     <dd>Allows the use to set the enable state on or off.</dd>
+  <dt>timeProcess</dt>
+    <dd>Processes the selected record numberTimes and shows how many times it
+      can be processed per second.</dd>
   <dt>setSupportState</dt>
     <dd>Allows the use to issue a support state method, i.e. initialize,
       start, stop, or uninitialize.</dd>
