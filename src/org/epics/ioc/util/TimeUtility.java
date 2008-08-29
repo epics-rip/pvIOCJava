@@ -17,7 +17,7 @@ public class TimeUtility {
      * @return The number of milliseconds since the epoch.
      */
     public static long getMillis(TimeStamp timeStamp) {
-        return timeStamp.secondsPastEpoch + (timeStamp.nanoSeconds/1000000);
+        return timeStamp.secondsPastEpoch*1000 + (timeStamp.nanoSeconds/1000000);
     }
     /**
      * Convert milliseconds since the epoch to a TimeStamp.
