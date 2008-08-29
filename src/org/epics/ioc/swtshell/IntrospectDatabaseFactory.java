@@ -5,6 +5,9 @@
  */
 package org.epics.ioc.swtshell;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -33,13 +36,20 @@ import org.epics.ioc.pv.PVProperty;
 import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.pv.PVRecord;
 import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.EventScanner;
+import org.epics.ioc.util.IOCExecutor;
+import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.PeriodicScanner;
+import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.Requester;
+import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ScannerFactory;
 import org.epics.ioc.util.ThreadCreateFactory;
+import org.epics.ioc.util.TimeStamp;
+import org.epics.ioc.util.TimeUtility;
 
 /**
  * A shell for introspecting a JavaIOC Database.
@@ -53,8 +63,11 @@ import org.epics.ioc.util.ThreadCreateFactory;
  *
  */
 public class IntrospectDatabaseFactory {
-    static private IOCDB iocdb = IOCDBFactory.getMaster();
+    private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:introspectDatabase",ScanPriority.low);
+    private static IOCDB iocdb = IOCDBFactory.getMaster();
+    private static DBD dbd = DBDFactory.getMasterDBD();
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
+    private static final String newLine = String.format("%n");
     
     /**
      * A shell for introspecting the local IOC database.
@@ -67,17 +80,18 @@ public class IntrospectDatabaseFactory {
     
     
     private static class Introspect implements SelectionListener, Requester{
-        private static DBD dbd = DBDFactory.getMasterDBD();
-        private static final String newLine = String.format("%n");
         private Display display;
         private Shell shell;
         private Button selectButton;
+        private Text selectText = null;
         private Button dumpButton;
         private Button showStateButton;
         private Button setTraceButton;
         private Button setEnableButton;
         private Button setSupportStateButton;
         private Button releaseProcessorButton;
+        private Button timeProcessButton;
+        private Text numberTimesText = null;
         private Button showBadRecordsButton;
         private Button showThreadsButton;
         private Button clearButton;
@@ -107,17 +121,36 @@ public class IntrospectDatabaseFactory {
             MenuItem dbdSupportMenu = new MenuItem(menuBar,SWT.CASCADE);
             dbdSupportMenu.setText("support");
             new SupportDBD(dbdSupportMenu);
-            Composite composite = new Composite(shell,SWT.BORDER);
+            Composite recordComposite = new Composite(shell,SWT.BORDER);
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            recordComposite.setLayoutData(gridData);
+            layout = new GridLayout();
+            layout.numColumns = 1;
+            recordComposite.setLayout(layout);
+            
+            Composite composite = new Composite(recordComposite,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
             composite.setLayoutData(gridData);
             layout = new GridLayout();
-            layout.numColumns = 8;
+            layout.numColumns = 3;
             composite.setLayout(layout);
             new Label(composite,SWT.NONE).setText("record");
             selectButton = new Button(composite,SWT.PUSH);
             selectButton.setText("select");
             selectLocalRecord = SelectLocalRecordFactory.create(shell,this);
             selectButton.addSelectionListener(this);
+            selectText = new Text(composite,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.minimumWidth = 500;
+            selectText.setLayoutData(gridData);
+            selectText.addSelectionListener(this);
+            
+            composite = new Composite(recordComposite,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            composite.setLayoutData(gridData);
+            layout = new GridLayout();
+            layout.numColumns = 4;
+            composite.setLayout(layout);
             dumpButton = new Button(composite,SWT.PUSH);
             dumpButton.setText("dump");
             dumpButton.setEnabled(false);
@@ -134,6 +167,29 @@ public class IntrospectDatabaseFactory {
             setEnableButton.setText("setEnable");
             setEnableButton.setEnabled(false);
             setEnableButton.addSelectionListener(this);
+            
+            composite = new Composite(recordComposite,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            composite.setLayoutData(gridData);
+            layout = new GridLayout();
+            layout.numColumns = 4;
+            composite.setLayout(layout);
+            timeProcessButton = new Button(composite,SWT.PUSH);
+            timeProcessButton.setText("timeProcess");
+            timeProcessButton.addSelectionListener(this);
+            new Label(composite,SWT.NONE).setText("numberTimes");
+            numberTimesText = new Text(composite,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.minimumWidth = 100;
+            numberTimesText.setLayoutData(gridData);
+            numberTimesText.setText("100000");
+            
+            composite = new Composite(recordComposite,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            composite.setLayoutData(gridData);
+            layout = new GridLayout();
+            layout.numColumns = 2;
+            composite.setLayout(layout);
             setSupportStateButton = new Button(composite,SWT.PUSH);
             setSupportStateButton.setText("setSupportState");
             setSupportStateButton.setEnabled(false);
@@ -182,16 +238,40 @@ public class IntrospectDatabaseFactory {
             if(object==selectButton) {
                 dbRecord = selectLocalRecord.getDBRecord();
                 if(dbRecord==null) {
-                    consoleText.append("record not found"+ String.format("%n"));
+                    consoleText.append("record not found"+ newLine);
                     setButtonsEnabled(false);
                 } else {
                     consoleText.append(dbRecord.getPVRecord().getRecordName() + String.format("%n"));
                     setButtonsEnabled(true);
+                    selectText.setText(dbRecord.getPVRecord().getRecordName());
                 }
                 return;
             }
+            if(object==selectText) {
+                dbRecord = iocdb.findRecord(selectText.getText());
+                if(dbRecord==null) {
+                    consoleText.append("record not found"+ newLine);
+                    setButtonsEnabled(false);
+                } else {
+                    setButtonsEnabled(true);
+                }
+            }
             if(object==dumpButton) {
                 consoleText.append(dbRecord.getPVRecord().toString());
+                return;
+            }
+            if(object==timeProcessButton) {
+                if(dbRecord==null) {
+                    consoleText.append("no record"+ newLine);
+                    return;
+                }
+                int ntimes = Integer.parseInt(numberTimesText.getText());
+                if(ntimes<=0) {
+                    consoleText.append("invalid numberTimes"+ newLine);
+                    return;
+                }
+                TimeProcess timeProcess = new TimeProcess(dbRecord,ntimes,this);
+                consoleText.append(timeProcess.doIt() + newLine);
                 return;
             }
             if(object==showStateButton) {
@@ -316,6 +396,7 @@ public class IntrospectDatabaseFactory {
             showStateButton.setEnabled(value);
             setTraceButton.setEnabled(value);
             setEnableButton.setEnabled(value);
+            timeProcessButton.setEnabled(value);
             setSupportStateButton.setEnabled(value);
             releaseProcessorButton.setEnabled(value);
         }
@@ -631,6 +712,108 @@ public class IntrospectDatabaseFactory {
                 for(DBDSupport dbdSupport : dbdSupports) {
                     consoleText.append(dbdSupport.toString());
                 }
+            }
+        }
+        
+        private class TimeProcess implements Runnable,RecordProcessRequester
+        {   
+            private Requester requester;
+            private DBRecord dbRecord;
+            int ntimes = 100000;
+            private RecordProcess recordProcess = null;
+            private ReentrantLock lock = new ReentrantLock();
+            private Condition waitAllDone = lock.newCondition();
+            private boolean allDone = false;
+            private Condition waitProcessDone = lock.newCondition();
+            private boolean processDone = false;
+            private String result = null;
+
+            private TimeProcess(DBRecord dbRecord,int ntimes,Requester requester) {
+                this.requester = requester;
+                this.dbRecord = dbRecord;
+                this.ntimes = ntimes;
+            }
+            
+            String doIt() {
+                recordProcess = dbRecord.getRecordProcess();
+                if(!recordProcess.setRecordProcessRequester(this)) return "could not process the record";
+                allDone = false;
+                iocExecutor.execute(this);
+                lock.lock();
+                try {
+                    while(!allDone) {
+                        try {
+                        waitAllDone.await();
+                        } catch(InterruptedException e) {}
+                    }
+                }finally {
+                    lock.unlock();
+                }
+                recordProcess.releaseRecordProcessRequester(this);
+                return result;
+            }
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+                TimeStamp timeStamp = new TimeStamp();
+                long start = System.currentTimeMillis();
+                TimeUtility.set(timeStamp,start);
+               for(int i=0; i<ntimes; i++) {
+                   processDone = false;
+                   recordProcess.process(this, false, timeStamp);
+                   lock.lock();
+                   try {
+                       while(!processDone) {
+                           try {
+                           waitProcessDone.await();
+                           } catch(InterruptedException e) {}
+                       }
+                   }finally {
+                       lock.unlock();
+                   }
+               }
+               long end = System.currentTimeMillis();
+               double diff = end - start;
+               diff = diff/1000.0;
+               result = "seconds/record=" + diff/ntimes + " records/second=" + ((double)ntimes)/diff;
+               lock.lock();
+               try {
+                   allDone = true;
+                   waitAllDone.signal();
+               } finally {
+                   lock.unlock();
+               }
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requester#getRequesterName()
+             */
+            public String getRequesterName() {
+                return requester.getRequesterName();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+             */
+            public void message(final String message, final MessageType messageType) {
+                requester.message(message, MessageType.info);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
+             */
+            public void recordProcessComplete() {
+                lock.lock();
+                try {
+                    processDone = true;
+                    waitProcessDone.signal();
+                } finally {
+                    lock.unlock();
+                }
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
+             */
+            public void recordProcessResult(RequestResult requestResult) {
+                // nothing to do
             }
         }
     }
