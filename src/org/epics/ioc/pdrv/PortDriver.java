@@ -20,11 +20,11 @@ public interface PortDriver {
     /**
      * Create a new device for this port.
      * @param user The user connecting to a device.
-     * @param addr The device address.
+     * @param deviceName The deviceName.
      * @return The device interface or null if it can not be created.
      * If null is returned user.getMessage() provides the reason.
      */
-    Device createDevice(User user, int addr);
+    Device createDevice(User user, String deviceName);
     /**
      * Attempt to connect.
      * @param user The user.
@@ -34,7 +34,7 @@ public interface PortDriver {
     Status connect(User user);
     /**
      * Attempt to disconnect.
-     * @param user The requestor.
+     * @param user The requester.
      * @return Result. Status.success means that the attempt was successful.
      * If the attempt fails user.getMessage() describes why the request failed.
      */
