@@ -195,7 +195,7 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
         private Condition moreWork = lock.newCondition();
         
         private Interrupt() {
-            String name = device.getPort().getPortName() + "[" + device.getAddr() + "]";
+            String name = device.getPort().getPortName() + "[" + device.getDeviceName() + "]";
             name += AbstractInt32Array.this.getInterfaceName();
             threadCreate.create(name,4, this);
         }

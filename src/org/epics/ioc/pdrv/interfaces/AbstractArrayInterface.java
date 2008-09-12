@@ -52,7 +52,7 @@ public abstract class AbstractArrayInterface extends AbstractPVArray implements 
     	if((reason&trace.getMask())==0) return;
         trace.print(reason,
         	"port " + device.getPort().getPortName()
-        	+ ":" + device.getAddr() + " "+ message);
+        	+ ":" + device.getDeviceName() + " "+ message);
     }
     /**
      * Generate a trace message.
@@ -64,7 +64,7 @@ public abstract class AbstractArrayInterface extends AbstractPVArray implements 
     	if((reason&trace.getMask())==0) return;
     	trace.print(reason,format,
             	"port " + device.getPort().getPortName()
-            	+ ":" + device.getAddr() + " " + args);
+            	+ ":" + device.getDeviceName() + " " + args);
     }
 	/* (non-Javadoc)
 	 * @see org.epics.ioc.pdrv.interfaces.Interface#getDevice()

@@ -199,7 +199,7 @@ public abstract class AbstractFloat64Array extends AbstractArrayInterface implem
         private Condition moreWork = lock.newCondition();
         
         private Interrupt() {
-            String name = device.getPort().getPortName() + "[" + device.getAddr() + "]";
+            String name = device.getPort().getPortName() + "[" + device.getDeviceName() + "]";
             name += AbstractFloat64Array.this.getInterfaceName();
             threadCreate.create(name,4, this);
         }

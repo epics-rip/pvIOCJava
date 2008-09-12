@@ -212,7 +212,7 @@ public abstract class AbstractUInt32Digital extends AbstractInterface  implement
         private int value;
         
         private Interrupt() {
-            String name = device.getPort().getPortName() + "[" + device.getAddr() + "]";
+            String name = device.getPort().getPortName() + "[" + device.getDeviceName() + "]";
             name += AbstractUInt32Digital.this.getInterfaceName();
             threadCreate.create(name,4, this);
         }

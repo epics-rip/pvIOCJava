@@ -185,7 +185,7 @@ public abstract class AbstractFloat64 extends AbstractInterface implements Float
         private Condition moreWork = lock.newCondition();
         
         private Interrupt() {
-            String name = device.getPort().getPortName() + "[" + device.getAddr() + "]";
+            String name = device.getPort().getPortName() + "[" + device.getDeviceName() + "]";
             name += AbstractFloat64.this.getInterfaceName();
             threadCreate.create(name,4, this);
         }
