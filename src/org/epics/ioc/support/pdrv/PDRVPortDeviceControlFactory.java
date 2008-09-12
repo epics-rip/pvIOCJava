@@ -59,7 +59,8 @@ public class PDRVPortDeviceControlFactory {
         private DBField dbMessage = null;
         private PVString pvMessage = null;
         
-        private PVString portDeviceNamePVString = null;
+        private PVString portNamePVString = null;
+        private PVString deviceNamePVString = null;
         
         private PVBoolean connectValuePVBoolean = null;
         private DBField connectValueDBField = null;
@@ -110,8 +111,10 @@ public class PDRVPortDeviceControlFactory {
         private SupportProcessRequester supportProcessRequester = null;
         private String message = emptyMessage;
         
-        private String portDeviceNamePrevious = null;
-        private String portDeviceNameDesired = null;
+        private String portName = null;
+        private String portNameDesired = null;
+        private String deviceName = null;
+        private String deviceNameDesired = null;
         
         private boolean connectDesiredValue = false;
         private boolean connectSetValue = false;
@@ -153,8 +156,10 @@ public class PDRVPortDeviceControlFactory {
             if(pvMessage==null) return;
             dbMessage = dbRecord.findDBField(pvMessage);
             
-            portDeviceNamePVString = pvStructure.getStringField("portDevice");
-            if(portDeviceNamePVString==null) return;
+            portNamePVString = pvStructure.getStringField("portName");
+            if(portNamePVString==null) return;
+            deviceNamePVString = pvStructure.getStringField("deviceName");
+            if(deviceNamePVString==null) return;
             
             PVStructure connectPVStructure = pvStructure.getStructureField("connect", "setBooleanValue");
             if(connectPVStructure==null) return;
@@ -237,7 +242,8 @@ public class PDRVPortDeviceControlFactory {
         public void process(SupportProcessRequester supportProcessRequester) {
             message = emptyMessage;
             this.supportProcessRequester = supportProcessRequester;
-            portDeviceNameDesired = portDeviceNamePVString.get();
+            portNameDesired = portNamePVString.get();
+            deviceNameDesired = deviceNamePVString.get();
             connectDesiredValue = connectDesiredValuePVBoolean.get();
             connectSetValue = connectSetValuePVBoolean.get();
             enableDesiredValue = enableDesiredValuePVBoolean.get();
@@ -343,26 +349,14 @@ public class PDRVPortDeviceControlFactory {
         }
         
         private void connectPortDevice() {
-            if(!portDeviceNameDesired.equals(portDeviceNamePrevious) ) {
+            if(!portNameDesired.equals(portName)
+            ||!deviceNameDesired.equals(deviceName)) {
                 user.disconnectPort();
-                portDeviceNamePrevious = portDeviceNameDesired;
-                String portName = null;
+                portName = portNameDesired;
+                deviceName = deviceNameDesired;
                 boolean portOnly = false;
-                int addr = 0;
-                int index = portDeviceNamePrevious.indexOf('[');
-                if(index<=0) {
+                if(deviceNameDesired==null || deviceNameDesired.length()<=0) {
                     portOnly = true;
-                    portName = portDeviceNamePrevious;
-                } else {
-                    portOnly = false;
-                    portName = portDeviceNamePrevious.substring(0, index);
-                    int indexEnd = portDeviceNamePrevious.indexOf(']');
-                    if(index<=0) {
-                        message =portDeviceNamePrevious + " is illegal value for portDevice";
-                        return;
-                    }
-                    String addrString = portDeviceNamePrevious.substring(index+1,indexEnd);
-                    addr = Integer.parseInt(addrString);
                 }
                 port = user.connectPort(portName);
                 if(port==null) {
@@ -373,9 +367,9 @@ public class PDRVPortDeviceControlFactory {
                     device = null;
                     trace = port.getTrace();
                 } else {
-                    device = user.connectDevice(addr);
+                    device = user.connectDevice(deviceName);
                     if(device==null) {
-                        message = "could not connect to addr " + addr + " of port " + portName;
+                        message = "could not connect to addr " + deviceName + " of port " + portName;
                         user.disconnectPort();
                         port = null;
                     }

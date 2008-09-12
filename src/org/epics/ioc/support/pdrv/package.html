@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support.pdrv<br />
-2008.06.26</h1>
+2008.09.12</h1>
 CONTENTS 
 
 <div class="toc">
@@ -101,7 +101,7 @@ portDriver support.</p>
         protected AlarmSupport alarmSupport = null;
         protected PVStructure configStructure = null;;
         protected PVString pvPortName = null;
-        protected PVInt pvAddr = null;
+        protected PVString pvDeviceName = null;
         protected PVInt pvMask = null;
         protected PVInt pvSize = null;
         protected PVDouble pvTimeout = null;
@@ -231,13 +231,13 @@ javaIOC/dbd/structures/portDriver.xml.</p>
 <hr />
 
 <p>This implements support for the portRecord which has the definition:</p>
-<pre>&lt;recordType name = "portCreate" supportName = "portCreate" &gt;
+<pre>&lt;structure name = "portCreate" supportName = "portCreate" &gt;
   &lt;field name = "factoryName" type = "string" /&gt;
   &lt;field name = "portName" type = "string" /&gt;
   &lt;field name = "autoConnect" type = "boolean" default = "true" /&gt;
   &lt;field name = "priority" type = "structure" structureName = "scanPriority" /&gt;
   &lt;field name = "driverParameters" type = "structure" structureName = "null"/&gt;
-&lt;/recordType&gt;
+&lt;/structure&gt;
 
 &lt;support name = "portCreate"
    factoryName = "org.epics.ioc.support.pdrv.PDRVPortCreateFactory" /&gt;</pre>
@@ -252,7 +252,7 @@ id="PDRVPortDe">PDRVPortDeviceControlFactory</h2>
 
 <p>This implements support for the portDeviceControl which has the
 definition:</p>
-<pre>&lt;recordType name = "portDeviceControl" supportName = "portDeviceControl" &gt;
+<pre>&lt;structure name = "portDeviceControl" supportName = "portDeviceControl" &gt;
   &lt;field name = "message" type = "string" /&gt;
   &lt;field name = "portDevice" type = "string" /&gt;
   &lt;field name = "connect" type = "structure" structureName = "booleanState"  /&gt;
@@ -263,7 +263,7 @@ definition:</p>
   &lt;field name = "traceIOTruncateSize" type = "structure" structureName = "intState" /&gt;
   &lt;field name = "report" type = "boolean" /&gt;
   &lt;field name = "reportDetails" type = "int" /&gt;
-&lt;/recordType&gt;
+&lt;/structure&gt;
 
 &lt;support name = "portDeviceControl"
    factoryName = "org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory" /&gt;</pre>

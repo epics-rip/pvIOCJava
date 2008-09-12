@@ -6,5 +6,6 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry exported="true" kind="lib" path="jar/jca-2.3.2.jar"/>
 	<classpathentry kind="lib" path="jar/caj-1.1.5.jar"/>
+	<classpathentry kind="lib" path="/home/mrk/workspace/javaIOC/jar/remoteTea.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

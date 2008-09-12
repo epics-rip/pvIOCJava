@@ -11,10 +11,11 @@
 </record>
 
 <record name = "syncFloat64DeviceControl" structureName = "portDeviceControl" >
-    <portDevice>syncFloat64Port[0]</portDevice>
+    <portName>syncFloat64Port</portName>
+    <deviceName>0</deviceName>
 <!--
-    <traceMask>0x0fff</traceMask>
-    <traceIOMask>0x0fff</traceIOMask>
+    <traceMask><value>0xfff</value></traceMask>
+    <traceIOMask><value>0xfff</value></traceIOMask>
 -->
 </record>
 
@@ -48,7 +49,7 @@
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
         <portName>syncFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <timeout>.2</timeout>
     </output>
     <supportArray elementType = "structure" supportName = "supportArray" >
@@ -67,7 +68,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
         <portName>syncFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <timeout>.2</timeout>
         <size>20</size>
     </input>
@@ -79,7 +80,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
         <portName>syncFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <process>true</process>
         <size>20</size>
     </input>
@@ -91,7 +92,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
         <portName>syncFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <size>20</size>
     </input>
     <scan structureName = "scan" >
@@ -110,10 +111,11 @@
 </record>
 
 <record name = "asynFloat64DeviceControl" structureName = "portDeviceControl" >
-    <portDevice>syncFloat64Port[0]</portDevice>
+    <portName>asynFloat64Port</portName>
+    <deviceName>0</deviceName>
 <!--
-    <traceMask>0x0fff</traceMask>
-    <traceIOMask>0x0fff</traceIOMask>
+    <traceMask><value>0xfff</value></traceMask>
+    <traceIOMask><value>0xfff</value></traceIOMask>
 -->
 </record>
 
@@ -147,7 +149,7 @@
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
         <portName>asynFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <timeout>.2</timeout>
     </output>
     <supportArray elementType = "structure" supportName = "supportArray" >
@@ -166,7 +168,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
         <portName>asynFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <timeout>.2</timeout>
         <size>20</size>
     </input>
@@ -178,7 +180,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
         <portName>asynFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <process>true</process>
         <size>20</size>
     </input>
@@ -190,7 +192,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
         <portName>asynFloat64Port</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <size>20</size>
     </input>
     <scan structureName = "scan" >

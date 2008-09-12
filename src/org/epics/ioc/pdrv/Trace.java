@@ -14,7 +14,7 @@ import java.io.Writer;
  */
 public interface Trace {
     /**
-     * An error has occured.
+     * An error message.
      */
     public static final int ERROR = 0x0001;
     /**

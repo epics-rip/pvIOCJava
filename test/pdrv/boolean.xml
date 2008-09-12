@@ -11,10 +11,11 @@
 </record>
 
 <record name = "syncBooleanDeviceControl" structureName = "portDeviceControl" >
-    <portDevice>syncBooleanPort[0]</portDevice>
+    <portName>syncBooleanPort</portName>
+    <deviceName>0</deviceName>
 <!--
-    <traceMask>0x0fff</traceMask>
-    <traceIOMask>0x0fff</traceIOMask>
+    <traceMask><value>0xfff</value></traceMask>
+    <traceIOMask><value>0xfff</value></traceIOMask>
 -->
 </record>
 
@@ -50,7 +51,7 @@
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
         <portName>syncBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>32767</mask>
         <timeout>.2</timeout>
     </output>
@@ -83,7 +84,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
         <portName>syncBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>0x1</mask>
         <timeout>.2</timeout>
     </input>
@@ -102,7 +103,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
         <portName>syncBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>0x2</mask>
         <timeout>.2</timeout>
     </input>
@@ -121,7 +122,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
         <portName>syncBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>0x4</mask>
         <timeout>.2</timeout>
     </input>
@@ -144,10 +145,11 @@
 </record>
 
 <record name = "asynBooleanDeviceControl" structureName = "portDeviceControl" >
-    <portDevice>asynBooleanPort[0]</portDevice>
+    <portName>asyncBooleanPort</portName>
+    <deviceName>0</deviceName>
 <!--
-    <traceMask>0x0fff</traceMask>
-    <traceIOMask>0x0fff</traceIOMask>
+    <traceMask><value>0xfff</value></traceMask>
+    <traceIOMask><value>0xfff</value></traceIOMask>
 -->
 </record>
 
@@ -181,7 +183,7 @@
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
         <portName>asynBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>32767</mask>
         <timeout>.2</timeout>
     </output>
@@ -215,7 +217,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
         <portName>asynBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>0x1</mask>
         <timeout>.2</timeout>
     </input>
@@ -234,7 +236,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
         <portName>asynBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>0x2</mask>
         <timeout>.2</timeout>
     </input>
@@ -252,7 +254,7 @@
     <timeStamp structureName = "timeStamp" />
     <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
         <portName>asynBooleanPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>0x4</mask>
         <timeout>.2</timeout>
     </input>

@@ -9,12 +9,12 @@ import org.epics.ioc.util.AlarmSeverity;
 
 
 /**
- * An interface for making pdrv (Port Driver) requests and for communication between driver
+ * An interface for making PDRV (Port Driver) requests and for communication between driver
  * and user.
- * The pdrv rules ensure that at any given time at most one user is the "owner" of a port.
+ * The PDRV rules ensure that at any given time at most one user is the "owner" of a port.
  * Only the owner is allow to call the I/O interfaces implemented by the port/device driver.
  * While owner a user can make an arbitrary number of calls to the port/device interfaces.
- * Each pdrv user must create a User instance by calling Factory.createUser.
+ * Each PDRV user must create a User instance by calling Factory.createUser.
  * Locking rules:
  * <ul>
  *    <li> A user owns the port because of 1) it called
@@ -49,7 +49,7 @@ public interface User {
     
     /**
      * Create a new User that is connected to the same port and device.
-     * The new user will also have the same reason and timeout as the orginal.
+     * The new user will also have the same reason and timeout as the original.
      * @param queueRequestCallback The callback for queueRequest.
      * @return The new User.
      */
@@ -72,10 +72,10 @@ public interface User {
     Port getPort();
     /**
      * Connect the user to a device.
-     * @param addr The device address.
+     * @param deviceName The device deviceName.
      * @return An interface to the device or null if the device does not exist.
      */
-    Device connectDevice(int addr);
+    Device connectDevice(String deviceName);
     /**
      * Disconnect this user from the device.
      */
@@ -101,10 +101,10 @@ public interface User {
      * <ul>
      *    <li>The port and/or device is not enabled</li>
      *    <li>The device is blocked by another user</li>
-     *    <li>The port and/or device is not connected.
+     *    <li>The port and/or device is not connected.</li>
      * </ul>
      * It will attempt to connect if autoConnect is true. 
-     * @return Status.sucess if the port is connected, enabled, and not blocked by another user.
+     * @return Status.success if the port is connected, enabled, and not blocked by another user.
      */
     Status lockPort();
     /**
@@ -112,7 +112,7 @@ public interface User {
      */
     void unlockPort();
     /**
-     * Called by pdrv methods to report errors to a user.
+     * Called to report errors to a user.
      * @param message The message.
      */
     void setMessage(String message);
@@ -184,7 +184,7 @@ public interface User {
     /**
      * Reason is for optional use by user/driver communication.
      * Both user and driver must understand how it is used in order for
-     * it to be usefull.
+     * it to be useful.
      * @param reason The reason.
      */
     void setReason(int reason);
@@ -194,15 +194,25 @@ public interface User {
      */
     int getReason();
     /**
-     * An auxillary status that can be set by drivers to communicate information to users.
+     * An auxiliary status that can be set by drivers to communicate information to users.
      * @param auxStatus The additional status.
      */
     void setAuxStatus(int auxStatus);
     /**
-     * Get the auxillary status.
+     * Get the auxiliary status.
      * @return The status.
      */
     int getAuxStatus();
+    /**
+     * A boolean value set by a driver to pass additional information to a user.
+     * @param value The value.
+     */
+    void setBoolean(boolean value);
+    /**
+     * Get the boolean value.
+     * @return The value.
+     */
+    boolean getBoolean();
     /**
      * An int value set by a driver to pass additional information to a user.
      * @param value The int value.

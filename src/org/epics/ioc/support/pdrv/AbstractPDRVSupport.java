@@ -86,7 +86,7 @@ RecordProcessRequester
     
     protected AlarmSupport alarmSupport = null;
     protected PVString pvPortName = null;
-    protected PVInt pvAddr = null;
+    protected PVString pvDeviceName = null;
     protected PVInt pvMask = null;
     protected PVInt pvSize = null;
     
@@ -117,8 +117,8 @@ RecordProcessRequester
         alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
         pvPortName = pvStructure.getStringField("portName");
         if(pvPortName==null) return;
-        pvAddr = pvStructure.getIntField("addr");
-        if(pvAddr==null) return;
+        pvDeviceName = pvStructure.getStringField("deviceName");
+        if(pvDeviceName==null) return;
         pvMask = pvStructure.getIntField("mask");
         if(pvMask==null) return;
         pvSize = pvStructure.getIntField("size");
@@ -144,7 +144,7 @@ RecordProcessRequester
         if(super.getSupportState()!=SupportState.readyForStart) return;
         pvDrvParams = null;
         pvTimeout = null;
-        pvAddr = null;
+        pvDeviceName = null;
         pvPortName = null;
         pvStructure = null;
         alarmSupport = null;
@@ -162,8 +162,7 @@ RecordProcessRequester
             return;
         }
         portTrace = port.getTrace();
-        int addr = pvAddr.get();
-        device = user.connectDevice(addr);
+        device = user.connectDevice(pvDeviceName.get());
         if(device==null) {
             pvStructure.message(user.getMessage(),MessageType.error);
             return;

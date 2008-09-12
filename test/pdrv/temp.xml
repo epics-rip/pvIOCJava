@@ -11,14 +11,12 @@
         <high>2047</high>
     </driverParameters>
 </record>
-
+<!--
 <record name = "syncInt32DeviceControl" structureName = "portDeviceControl" >
     <portName>syncInt32Port</portName>
     <deviceName>0</deviceName>
-<!--
     <traceMask><value>0xfff</value></traceMask>
     <traceIOMask><value>0xfff</value></traceIOMask>
--->
 </record>
 
 <record name = "syncInt32Counter">
@@ -44,7 +42,7 @@
         </element>
     </supportArray>
 </record>
-
+-->
 <record name = "syncInt32Out">
     <value type = "int"/>
     <alarm structureName = "alarm" />
@@ -54,16 +52,8 @@
         <deviceName>0</deviceName>
         <timeout>.2</timeout>
     </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncInt32In</pvname>
-            </link>
-        </element>
-    </supportArray>
 </record>
-
+<!--
 <record name = "syncInt32In">
     <value type = "int"/>
     <alarm structureName = "alarm" />
@@ -117,10 +107,8 @@
 <record name = "asynInt32DeviceControl" structureName = "portDeviceControl" >
     <portName>asynInt32Port</portName>
     <deviceName>0</deviceName>
-<!--
     <traceMask><value>0xfff</value></traceMask>
     <traceIOMask><value>0xfff</value></traceIOMask>
--->
 </record>
 
 <record name = "asynInt32Counter">
@@ -205,7 +193,6 @@
     </scan>
 </record>
 
-<!--
 -->
 
 

@@ -479,6 +479,7 @@ public class PDRVSupportFactory {
                 nbytes = convert.toByteArray(valuePVField, 0, size, octetArray, 0);
             } else {
                 String string = convert.getString(valuePVField);
+                if(string==null) string = "";
                 nbytes = string.length();
                 if(size<nbytes) {
                     size = nbytes;

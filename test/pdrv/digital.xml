@@ -11,10 +11,11 @@
 </record>
 
 <record name = "syncDigitalPortControl" structureName = "portDeviceControl" >
-    <portDevice>syncDigitalPort[0]</portDevice>
+    <portName>syncDigitalPort</portName>
+    <deviceName>0</deviceName>
 <!--
-    <traceMask>0x0fff</traceMask>
-    <traceIOMask>0x0fff</traceIOMask>
+    <traceMask><value>0xfff</value></traceMask>
+    <traceIOMask><value>0xfff</value></traceIOMask>
 -->
 </record>
 
@@ -56,7 +57,7 @@
     <timeStamp structureName = "timeStamp" />
     <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
         <portName>syncDigitalPort</portName>
-        <addr>0</addr>
+        <deviceName>0</deviceName>
         <mask>15</mask>
         <timeout>.2</timeout>
     </output>
@@ -102,7 +103,7 @@
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
             <portName>syncDigitalPort</portName>
-            <addr>0</addr>
+            <deviceName>0</deviceName>
             <mask>0x1</mask>
             <timeout>.2</timeout>
         </input>  
@@ -137,7 +138,7 @@
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
             <portName>syncDigitalPort</portName>
-            <addr>0</addr>
+            <deviceName>0</deviceName>
             <mask>0x2</mask>
             <timeout>.2</timeout>
         </input>  
@@ -172,7 +173,7 @@
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
             <portName>syncDigitalPort</portName>
-            <addr>0</addr>
+            <deviceName>0</deviceName>
             <mask>0x3</mask>
             <timeout>.2</timeout>
         </input>  
@@ -219,7 +220,7 @@
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
             <portName>syncDigitalPort</portName>
-            <addr>0</addr>
+            <deviceName>0</deviceName>
             <mask>0xc</mask>
             <timeout>.2</timeout>
         </input>   
@@ -266,7 +267,7 @@
         <alarm structureName = "alarm" />
         <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
             <portName>syncDigitalPort</portName>
-            <addr>0</addr>
+            <deviceName>0</deviceName>
             <mask>0xf</mask>
             <timeout>.2</timeout>
         </input>  

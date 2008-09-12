@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2008.08.27 </h1>
+2008.09.12 </h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -106,15 +106,15 @@ single field named value.</p>
 <div class="toc">
 <ul>
   <li><a href="#Preface">Preface</a></li>
-  <li><a href="#Part">Part I: JavaIOC - Brief Description</a>
+  <li><a href="#Part">Part I: JavaIOC - Brief Description</a> 
     <ul>
-      <li><a href="#Overview">Overview Of Part I</a>
+      <li><a href="#Overview">Overview Of Part I</a> 
         <ul>
           <li><a href="#Getting">Getting Started</a></li>
           <li><a href="#Status">Status and Remaining Tasks</a></li>
         </ul>
       </li>
-      <li><a href="#Package">Package Summary</a>
+      <li><a href="#Package">Package Summary</a> 
         <ul>
           <li><a href="#default">default - JavaIOC/src</a></li>
           <li><a href="#org.epics.">org.epics.ioc.swtshell </a></li>
@@ -138,9 +138,9 @@ single field named value.</p>
           <li><a href="#org.epics.15">org.epics.ioc.pdrv.testDriver </a></li>
         </ul>
       </li>
-      <li><a href="#Database">Database Syntax</a>
+      <li><a href="#Database">Database Syntax</a> 
         <ul>
-          <li><a href="#Database1">Database Definition</a>
+          <li><a href="#Database1">Database Definition</a> 
             <ul>
               <li><a href="#Basic">Basic Syntax</a></li>
               <li><a href="#Field">Field Syntax</a></li>
@@ -148,7 +148,7 @@ single field named value.</p>
                 Definitions</a></li>
             </ul>
           </li>
-          <li><a href="#Record">Record Instance Definition</a>
+          <li><a href="#Record">Record Instance Definition</a> 
             <ul>
               <li><a href="#Syntax">Syntax</a></li>
               <li><a href="#Example1">Example</a></li>
@@ -156,7 +156,7 @@ single field named value.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#PVData">PVData</a>
+      <li><a href="#PVData">PVData</a> 
         <ul>
           <li><a href="#Field1">Field Types</a></li>
           <li><a href="#PVData1">PVData Reflection</a></li>
@@ -168,9 +168,9 @@ single field named value.</p>
       <li><a href="#Data">DB Data</a></li>
       <li><a href="#Channel">Channel Access</a></li>
       <li><a href="#Record1">Record Processing</a></li>
-      <li><a href="#Database2">Database Examples</a>
+      <li><a href="#Database2">Database Examples</a> 
         <ul>
-          <li><a href="#Record2">Record Instance Examples</a>
+          <li><a href="#Record2">Record Instance Examples</a> 
             <ul>
               <li><a href="#doubleInpu">doubleInput</a></li>
               <li><a href="#doubleOutp">doubleOutput</a></li>
@@ -185,16 +185,16 @@ single field named value.</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part1">Part II: JavaIOC Data Model</a>
+  <li><a href="#Part1">Part II: JavaIOC Data Model</a> 
     <ul>
       <li><a href="#Summary">Summary</a></li>
-      <li><a href="#JavaIOC3">JavaIOC Data Model</a>
+      <li><a href="#JavaIOC3">JavaIOC Data Model</a> 
         <ul>
           <li><a href="#Basic1">Basic Concept</a></li>
           <li><a href="#getPropety">getPropety</a></li>
         </ul>
       </li>
-      <li><a href="#Definition">Definitions for Standard Properties</a>
+      <li><a href="#Definition">Definitions for Standard Properties</a> 
         <ul>
           <li><a href="#timeStamp">timeStamp</a></li>
           <li><a href="#alarm">alarm</a></li>
@@ -205,22 +205,22 @@ single field named value.</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a>
+  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a> 
     <ul>
       <li><a href="#Overview1">Overview Of Part III</a></li>
-      <li><a href="#JavaIOC4">JavaIOC/dbd</a>
+      <li><a href="#JavaIOC4">JavaIOC/dbd</a> 
         <ul>
           <li><a href="#dbd.xml">dbd.xml</a></li>
         </ul>
       </li>
-      <li><a href="#structure">dbd/structure/alarm.xml</a>
+      <li><a href="#structure">dbd/structure/alarm.xml</a> 
         <ul>
           <li><a href="#numeric">numeric alarms</a></li>
           <li><a href="#boolean">boolean alarms</a></li>
           <li><a href="#enumerated">enumerated alarms</a></li>
         </ul>
       </li>
-      <li><a href="#structure1">dbd/structure/analog.xml</a>
+      <li><a href="#structure1">dbd/structure/analog.xml</a> 
         <ul>
           <li><a href="#linearConv">linearConvert</a></li>
           <li><a href="#linearConv1">linearConvertInput</a></li>
@@ -229,7 +229,7 @@ single field named value.</p>
         </ul>
       </li>
       <li><a href="#structure2">dbd/structure/calc.xml</a></li>
-      <li><a href="#support6">dbd/structure/channelAccess.xml</a>
+      <li><a href="#support6">dbd/structure/channelAccess.xml</a> 
         <ul>
           <li><a href="#processSup">processSupport</a></li>
           <li><a href="#monitorSup">monitorSupport</a></li>
@@ -241,7 +241,7 @@ single field named value.</p>
       <li><a href="#structures2">dbd/structures/commonFields.xml</a></li>
       <li><a href="#structures2">dbd/structures/control.xml</a></li>
       <li><a href="#structure3">dbd/structure/delay.xml</a></li>
-      <li><a href="#structure4">dbd/structure/digital.xml</a>
+      <li><a href="#structure4">dbd/structure/digital.xml</a> 
         <ul>
           <li><a href="#digitalSta">digitalState</a></li>
           <li><a href="#digital">digital</a></li>
@@ -252,7 +252,7 @@ single field named value.</p>
       <li><a href="#structure5">dbd/structure/event.xml</a></li>
       <li><a href="#structure7">dbd/structure/generic.xml</a></li>
       <li><a href="#structure8">dbd/structure/limit.xml</a></li>
-      <li><a href="#structure13">dbd/structure/portDriver.xml</a>
+      <li><a href="#structure13">dbd/structure/portDriver.xml</a> 
         <ul>
           <li><a href="#pdrvSuppor">pdrvSupport</a></li>
         </ul>
@@ -2565,7 +2565,7 @@ org.epics.ioc.portDriver for details.</p>
 &lt;IOCDatabase&gt;
 &lt;structure name = "pdrvSupport"&gt;
   &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "addr" type = "int" /&gt;
+  &lt;field name = "deviceName" type = "string" /&gt;
   &lt;field name = "timeout" type = "double" /&gt;
   &lt;field name = "mask" type = "int" /&gt;
   &lt;field name = "size" type = "int" /&gt;
@@ -2627,7 +2627,8 @@ org.epics.ioc.portDriver for details.</p>
 
 &lt;structure name = "portDeviceControl" supportName = "portDeviceControl" &gt;
   &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "portDevice" type = "string" /&gt;
+  &lt;field name = "portName" type = "string" /&gt;
+  &lt;field name = "deviceName" type = "string" /&gt;
   &lt;field name = "connect" structureName = "setBooleanValue"  /&gt;
   &lt;field name = "enable" structureName = "setBooleanValue"   /&gt;
   &lt;field name = "autoConnect" structureName = "setBooleanValue" /&gt;
@@ -2653,6 +2654,11 @@ org.epics.ioc.portDriver for details.</p>
 &lt;include href = "int32ArrayDriver.xml" /&gt;
 &lt;include href = "float64ArrayDriver.xml" /&gt;
 &lt;include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" /&gt;
+
+&lt;include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" /&gt;
+&lt;include href = "vxi11Driver.xml" /&gt;
+&lt;include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" /&gt;
+
 &lt;/IOCDatabase&gt;</pre>
 
 <h4 id="pdrvSuppor">pdrvSupport</h4>
