@@ -39,12 +39,6 @@ public interface Port {
      */
     Device[] getDevices();
     /**
-     * Get an array of the port interfaces.
-     * This can be called without owning the port.
-     * @return The array of interfaces.
-     */
-    Interface[] getInterfaces();
-    /**
      * Get the Trace object for this port.
      * This can be called without owning the port.
      * @return The interface.
@@ -62,12 +56,6 @@ public interface Port {
      * @return The name.
      */
     String getPortName();
-    /**
-     * Does this port support multiple devices.
-     * This can be called without owning the port.
-     * @return (false,true) is it (does not, does) support multiple devices.
-     */
-    boolean isMultiDevicePort();
     /**
      * Can this port block while performing I/O.
      * This can be called without owning the port.
@@ -87,32 +75,16 @@ public interface Port {
      */
     void autoConnect(boolean trueFalse);
     /**
-     * Get the device for the specified address.
+     * Get the device for the specified deviceName.
      * This can be called without owning the port.
-     * If a device at the specified address does not exist than the
+     * If a device deviceName does not exist than the
      * portDriver is asked to create one.
      * @param user The user.
-     * @param addr The address.
+     * @param deviceName The name of the device.
      * @return The Device interface or null if no device is available for the
-     * specified  addrsss.
+     * specified deviceName.
      */
-    Device getDevice(User user, int addr);
-    /**
-     * Attempt to connect.
-     * This must be called without owning the port.
-     * @param user The user.
-     * @return Result. Status.success means that the attempt was successful.
-     * If the attempt fails user.getMessage() describes why the request failed.
-     */
-    Status connect(User user);
-    /**
-     * Attempt to disconnect.
-     * This must be called without owning the port.
-     * @param user The requestor.
-     * @return Result. Status.success means that the attempt was successful.
-     * If the attempt fails user.getMessage() describes why the request failed.
-     */
-    Status disconnect(User user);
+    Device getDevice(User user, String deviceName);
     /**
      * Is the port connected to hardware.
      * This can be called without owning the port.
@@ -147,20 +119,26 @@ public interface Port {
      */
     void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);
     /**
-     * Find an interface for the port.
-     * This can be called without owning the port.
-     * @param user The user.
-     * @param interfaceName The name of the interface.
-     * @param interposeInterfaceOK Can an interpose interface be returned.
-     * If not then only an interface implemented by the portDriver will be returned.
-     * @return The interface or null if an interface with this name does not exist.
-     */
-    Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
-    /**
      * Scan the queues.
-     * Can be called without owning the port.
+     * Can be called with or without owning the port.
      */
     void scanQueues();
+    /**
+     * Attempt to connect.
+     * This must be called with the port owned by the user.
+     * @param user The user.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage() describes why the request failed.
+     */
+    Status connect(User user);
+    /**
+     * Attempt to disconnect.
+     * This must be called with the port owned by the user.
+     * @param user The requester.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage() describes why the request failed.
+     */
+    Status disconnect(User user);
     /**
      * Register to receive notice when lockPort, unLock port are called.
      * This should only be called by a driver.
@@ -177,25 +155,10 @@ public interface Port {
      * a result of a call to PortDriver.createDevice, which is called with the port locked.
      * If it is called for some other reason than it must be called with the port locked.
      * @param deviceDriver The deviceDriver interface.
-     * @param addr The address.
+     * @param deviceName The deviceName.
      * @return The deviceDriver interface or null if the driver can not create a device.
      */
-    Device createDevice(DeviceDriver deviceDriver, int addr);
-    /**
-     * Register an interface for accessing the port.
-     * Called by portDriver to register an interface.
-     * This must be called with the port locked.
-     * @param iface The interface.
-     */
-    void registerInterface(Interface iface);
-    /**
-     * Called by any code that wants to interpose an interface.
-     * This must be called with the port locked.
-     * The interpose interface can take special action and also call the lower level interface if it exists.
-     * @param iface The new interface.
-     * @return The previous interface.
-     */
-    Interface interposeInterface(Interface iface);
+    Device createDevice(DeviceDriver deviceDriver, String deviceName);
     /**
      * A connect exception. This is called by the portDriver.
      * It is normally called as a result of Port calling portDriver.connect.

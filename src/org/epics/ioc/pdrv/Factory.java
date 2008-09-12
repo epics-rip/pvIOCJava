@@ -49,18 +49,16 @@ public class Factory {
      * @param portName The portName.
      * @param portDriver The portDriver.
      * @param driverName The driver name.
-     * @param isMultiDevicePort Does this port support multiple devices?
      * @param canBlock Can this port block while performing I/O.
      * @param autoConnect Initial state for autoConnect for the port and its devices.
      * @param priority If the port can block this is the priority for the portThread.
      * @return The interface for the Port instance.
      */
     public static Port createPort(String portName,PortDriver portDriver,String driverName,
-            boolean isMultiDevicePort,boolean canBlock,
-            boolean autoConnect,ScanPriority priority)
+            boolean canBlock,boolean autoConnect,ScanPriority priority)
     { 
         PortImpl port = new PortImpl(
-                portName,portDriver,driverName,isMultiDevicePort,canBlock,autoConnect,priority);
+                portName,portDriver,driverName,canBlock,autoConnect,priority);
         globalLock.lock();
         try {
             if(!portList.add(port)) {
@@ -91,16 +89,16 @@ public class Factory {
             globalLock.unlock();
         }
     }
-    
+    /**
+     * Get the port interface.
+     * @param portName The name of the port.
+     * @return The interface or null if the port does not exits.
+     */
     public static Port getPort(String portName) {
         for(Port port : portList) {
             if(port.getPortName().equals(portName)) return port;
         }
         return null;
-    }
-    
-    public static Trace createTrace() {
-    	return new TraceImpl();
     }
     
     private static ReentrantLock globalLock = new ReentrantLock();
@@ -127,6 +125,7 @@ public class Factory {
         private String message = null;
         private String alarmMessage = null;
         private AlarmSeverity alarmSeverity = null;
+        private boolean booleanvalue = false;
         private int intValue;
         private double doubleValue;
         private String stringValue = null;;
@@ -185,9 +184,9 @@ public class Factory {
             return port;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.User#connectDevice(int)
+         * @see org.epics.ioc.pdrv.User#connectDevice(java.lang.String)
          */
-        public Device connectDevice(int addr) {
+        public Device connectDevice(String deviceName) {
         	clearErrorParms();
             if(device!=null) {
                 setMessage("already connected");
@@ -197,7 +196,7 @@ public class Factory {
                 setMessage("not connected to a port");
                 return null;
             }
-            device = (DeviceImpl)port.getDevice(this, addr);
+            device = (DeviceImpl)port.getDevice(this, deviceName);
             return device;
         }
         /* (non-Javadoc)
@@ -231,12 +230,7 @@ public class Factory {
             if(portThread!=null) {
                 portThread.queueRequest(this,queuePriority);
             } else {
-                Status status = null;
-                if(device!=null) {
-                    status = device.lockPort(this);
-                } else {
-                    status = lockPort();
-                }
+                Status status = lockPort();
                 if(status!=Status.success) {
                     queueRequestCallback.callback(status, this);
                     return;
@@ -269,11 +263,40 @@ public class Factory {
                 setMessage("not connected to a port");
                 return Status.error;
             }
+            Status status = Status.success;
             if(device!=null) {
-                return device.lockPort(this);
+                status = device.lockPort(this);
             } else {
-                return port.lockPort(this);
+                status = port.lockPort(this);
             }
+            if(status!=Status.success) return status;
+            if(!port.isConnected()) {
+                if(port.isAutoConnect()) {
+                    status = port.connect(this);
+                } else {
+                    setMessage("port is not connected");
+                    status = Status.error;
+                }
+                if(status!=Status.success) {
+                    setAlarm(AlarmSeverity.invalid,getMessage());
+                    port.unlockPort(this);
+                    return status;
+                }
+            }
+            if(device!=null && !device.isConnected()) {
+                if(device.isAutoConnect()) {
+                    status = device.connect(this);
+                } else {
+                    setMessage("device is not connected");
+                    status = Status.error;
+                }
+                if(status!=Status.success) {
+                    setAlarm(AlarmSeverity.invalid,getMessage());
+                    port.unlockPort(this);
+                    return status;
+                }
+            }
+            return status;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#unlockPort(org.epics.ioc.pdrv.User)
@@ -287,6 +310,18 @@ public class Factory {
          */
         public int getAuxStatus() {
             return auxStatus;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.User#getBoolean()
+         */
+        public boolean getBoolean() {
+            return booleanvalue;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.User#setBoolean(boolean)
+         */
+        public void setBoolean(boolean value) {
+            booleanvalue = value;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getDouble()
@@ -424,13 +459,11 @@ public class Factory {
     private static class PortImpl implements Port {
         
         private PortImpl(String portName,PortDriver portDriver,String driverName,
-            boolean isMultiDevicePort,boolean canBlock,
-            boolean autoConnect,ScanPriority priority)
+            boolean canBlock,boolean autoConnect,ScanPriority priority)
         {
             this.portName = portName;
             this.portDriver = portDriver;
             this.driverName = driverName;
-            this.isMultiDevicePort = isMultiDevicePort;
             this.autoConnect = autoConnect;
             if(canBlock) {
                 portThread = new PortThread(this,priority);
@@ -441,7 +474,6 @@ public class Factory {
         private String portName;
         private PortDriver portDriver;
         private String driverName;
-        private boolean isMultiDevicePort;
         private boolean autoConnect;        
         private PortThread portThread = null;        
         
@@ -461,17 +493,6 @@ public class Factory {
         
         private LockPortNotify lockPortNotify = null;   
 
-        
-        private static class PortInterface {
-            private Interface iface;
-            private Interface interposeInterface = null;
-            
-            private PortInterface(Interface iface) {
-                this.iface = iface;
-            }
-        }
-        private List<PortInterface> interfaceList = new LinkedList<PortInterface>();
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#report(boolean, int)
          */
@@ -483,20 +504,7 @@ public class Factory {
             ));
             if(details>0) {
                 builder.append(String.format(
-                        "    isMultiDevicePort %b autoConnect %b connected %b enabled %b%n",
-                        isMultiDevicePort,autoConnect,connected,enabled
-                ));
-                Interface[] interfaces = getInterfaces();
-                int length = interfaces.length;
-                if(length>0) {
-                    builder.append("    Interfaces: ");
-                    for(int i=0; i<interfaces.length; i++) {
-                        Interface iface = interfaces[i];
-                        builder.append(iface.getInterfaceName() + " ");
-                    }
-                    builder.append(String.format("%n"));
-                }
-
+                        "    autoConnect %b connected %b enabled %b%n",autoConnect,connected,enabled));
             }
             if(reportDevices) {
                 Device[] devices = getDevices();
@@ -523,23 +531,7 @@ public class Factory {
             }
             return devices;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Port#getInterfaces()
-         */
-        public Interface[] getInterfaces() {
-            Interface[] interfaces = null;
-            portLock.lock();
-            try {
-                int size = interfaceList.size();
-                interfaces = new Interface[size];
-                for(int i=0; i<size; i++) {
-                    interfaces[i] = interfaceList.get(i).iface;
-                }
-            } finally {
-                portLock.unlock();
-            }
-            return interfaces;
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getDriverName()
          */
@@ -558,12 +550,7 @@ public class Factory {
         public Trace getTrace() {
             return trace;
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Port#isMultiDevicePort()
-         */
-        public boolean isMultiDevicePort() {
-            return isMultiDevicePort;
-        }
+       
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#canBlock()
          */
@@ -601,22 +588,22 @@ public class Factory {
             if(trueFalse) scanQueues();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Port#getDevice(org.epics.ioc.pdrv.User, int)
+         * @see org.epics.ioc.pdrv.Port#getDevice(org.epics.ioc.pdrv.User, java.lang.String)
          */
-        public Device getDevice(User user, int addr) {
+        public Device getDevice(User user, String deviceName) {
             portLock.lock();
             try {
                 int size = deviceList.size();
                 for(int i=0; i<size; i++) {
                     Device device = deviceList.get(i);
-                    if(device.getAddr()==addr) return device;
+                    if(device.getDeviceName().equals(deviceName)) return device;
                 }
             } finally {
                 portLock.unlock();
             }
             lockPort((UserImpl)user);
             try {
-                return portDriver.createDevice(user, addr);
+                return portDriver.createDevice(user, deviceName);
             } finally {
                 unlockPort((UserImpl)user);
             }
@@ -624,70 +611,42 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#connect(org.epics.ioc.pdrv.User)
          */
-        public Status connect(User theUser) {
-            UserImpl user = (UserImpl)theUser;
-            lockPortLock.lock();
-            try {
-                if(lockPortUser!=null) {
-                    if(lockPortUser==user) {
-                        user.setMessage("Illegal to call connect while owning the port");
-                        return Status.error;
-                    }
-                    try {
-                        portUnlock.await();
-                    } catch (InterruptedException e){}
-                }
-                if(connected) {
-                    user.setMessage("already connected");
-                    return Status.error;
-                }
-                lockPortUser = user;
-            } finally {
-                lockPortLock.unlock();
+        public Status connect(User user) {         
+            if(lockPortUser!=user) {
+                user.setMessage("Illegal to call connect without owning the port");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                return Status.error;
+            }
+            if(connected) {
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                user.setMessage("already connected");
+                return Status.error;
             }
             trace.print(Trace.FLOW, "%s connect", portName);
-            Status status = Status.success;
-            lockPort(user);
-            try {
-                status = portDriver.connect(user);
-            } finally {
-                unlockPort(user);
+            Status status = portDriver.connect(user);
+            if(status!=Status.success) {
+                user.setAlarm(AlarmSeverity.invalid, user.getMessage());
+            } else {
+                if(portThread!=null) portThread.scanQueues();
             }
-            if(portThread!=null) portThread.scanQueues();
             return status;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#disconnect(org.epics.ioc.pdrv.User)
          */
-        public Status disconnect(User theUser) {
-            UserImpl user = (UserImpl)theUser;
-            lockPortLock.lock();
-            try {
-                if(lockPortUser!=null) {
-                    if(lockPortUser==user) {
-                        user.setMessage("Illegal to call disconnect while owning the port");
-                        return Status.error;
-                    }
-                    try {
-                        portUnlock.await();
-                    } catch (InterruptedException e){}
-                }
-                if(!connected) {
-                    user.setMessage("not connected");
-                    return Status.error;
-                }
-                lockPortUser = user;
-            } finally {
-                lockPortLock.unlock();
+        public Status disconnect(User user) {
+            if(lockPortUser!=user) {
+                user.setMessage("Illegal to call disconnect without owning the port");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                return Status.error;
+            }
+            if(!connected) {
+                user.setMessage("not connected");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                return Status.error;
             }
             trace.print(Trace.FLOW, "%s disconnect", portName);
-            Status status = Status.success;
-            lockPort(user);
-            try {
-                status = portDriver.disconnect(user);
-            } finally {
-                unlockPort(user);
-            }
+            Status status = portDriver.disconnect(user);
             if(portThread!=null) portThread.scanQueues();
             return status;
         }
@@ -759,33 +718,6 @@ public class Factory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Port#findInterface(org.epics.ioc.pdrv.User, java.lang.String, boolean)
-         */
-        public Interface findInterface(User user,
-                String interfaceName,boolean interposeInterfaceOK)
-        {
-            portLock.lock();
-            try {
-                ListIterator<PortInterface> iter = interfaceList.listIterator();
-                while(iter.hasNext()) {
-                    PortInterface portIface = iter.next();
-                    Interface iface = portIface.iface;
-                    int compare = interfaceName.compareTo(iface.getInterfaceName());
-                    if(compare==0) {
-                        if(interposeInterfaceOK && portIface.interposeInterface!=null) {
-                            return portIface.interposeInterface;
-                        }
-                        return iface;
-                    }
-                    if(compare<0) break;
-                }                
-            } finally {
-                portLock.unlock();
-            }
-            user.setMessage("interface " + interfaceName + " not found");
-            return null;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortUser#scanQueue()
          */
         public void scanQueues() {
@@ -821,36 +753,22 @@ public class Factory {
                 portLock.unlock();
             }
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Port#createDevice(org.epics.ioc.pdrv.DeviceDriver, int)
+         * @see org.epics.ioc.pdrv.Port#createDevice(org.epics.ioc.pdrv.DeviceDriver, java.lang.String)
          */
-        public Device createDevice(DeviceDriver deviceDriver, int addrNew) {
-            trace.print(Trace.FLOW, "%s createDevice addr %d", portName,addrNew);
-            DeviceImpl deviceNew = new DeviceImpl(this,deviceDriver,addrNew);
+        public Device createDevice(DeviceDriver deviceDriver, String deviceName) {
+            
+            trace.print(Trace.FLOW, "%s createDevice %s", portName,deviceName);
+            DeviceImpl deviceNew = new DeviceImpl(this,deviceDriver,deviceName);
             portLock.lock();
             try {
-                if(!isMultiDevicePort) {
-                    if(deviceList.size()!=0) {
-                        throw new IllegalStateException("device already created");
-                    }
-                    deviceList.add(deviceNew);
-                    return deviceNew;
-                }
+                
                 ListIterator<DeviceImpl> iter = deviceList.listIterator();
                 while(iter.hasNext()) {
                     Device device = iter.next();
-                    if(deviceNew==device) {
-                        throw new IllegalStateException("already registered");
-                    }
-                    int addr = device.getAddr();
-                    if(addrNew==addr) {
+                    if(deviceName.equals(device.getDeviceName())) {
                         throw new IllegalStateException(
-                                "addr " + addr + " already registered");
-                    }
-                    if(addrNew<addr) {
-                        iter.add(deviceNew);
-                        return deviceNew;
+                                deviceName + " already registered");
                     }
                 }
                 deviceList.add(deviceNew);
@@ -858,63 +776,6 @@ public class Factory {
                 portLock.unlock();
             }
             return deviceNew;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.asyn.PortDriver#registerInterface(org.epics.ioc.asyn.Interface)
-         */
-        public void registerInterface(Interface ifaceNew) {
-            String interfaceName = ifaceNew.getInterfaceName();
-            trace.print(Trace.FLOW, "%s registerInterface %s", portName,interfaceName);
-            PortInterface portInterfaceNew = new PortInterface(ifaceNew);
-            portLock.lock();
-            try {
-                ListIterator<PortInterface> iter = interfaceList.listIterator();
-                while(iter.hasNext()) {
-                    PortInterface portInterface = iter.next();
-                    Interface iface = portInterface.iface;
-                    if(iface==ifaceNew) {
-                        throw new IllegalStateException("interface already registered");
-                    }
-                    int compare = interfaceName.compareTo(iface.getInterfaceName());
-                    if(compare==0) {
-                        throw new IllegalStateException(
-                                "interface " + interfaceName + " already registered");
-                    }
-                    if(compare<0) {
-                        iter.add(portInterfaceNew);
-                        return;
-                    }
-                }
-                interfaceList.add(portInterfaceNew);
-            } finally {
-                portLock.unlock();
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.asyn.PortDriver#interposeInterface(org.epics.ioc.asyn.Interface)
-         */
-        public Interface interposeInterface(Interface interposeInterface) {
-            String interfaceName = interposeInterface.getInterfaceName();
-            trace.print(Trace.FLOW, "%s interposeInterface %s", portName,interfaceName);
-            portLock.lock();
-            try {
-                ListIterator<PortInterface> iter = interfaceList.listIterator();
-                while(iter.hasNext()) {
-                    PortInterface portInterface = iter.next();
-                    Interface iface = portInterface.iface;
-                    int compare = interfaceName.compareTo(iface.getInterfaceName());
-                    if(compare==0) {
-                        Interface returnInterface = portInterface.interposeInterface;
-                        portInterface.interposeInterface = interposeInterface;
-                        if(returnInterface==null) returnInterface = iface;
-                        return returnInterface;
-                    }
-                }
-                interfaceList.add(new PortInterface(interposeInterface));
-            } finally {
-                portLock.unlock();
-            }
-            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortDriver#exceptionConnect()
@@ -972,20 +833,6 @@ public class Factory {
             } finally {
                 lockPortLock.unlock();
             }
-            if(!connected) {
-                if(autoConnect) {
-                    Status status = portDriver.connect(user);
-                    if(status!=Status.success) {
-                        unlockPort(user);
-                        return status;
-                    }
-                }
-                if(!connected) {
-                    unlockPort(user);
-                    user.message = "not connected";
-                    return Status.error;
-                }
-            }
             LockPortNotify notify = lockPortNotify;
             if(notify!=null) notify.lock(user);
             return Status.success;
@@ -1035,11 +882,12 @@ public class Factory {
     
     private static class DeviceImpl implements Device {
 
-        private DeviceImpl(PortImpl port,DeviceDriver deviceDriver,int addr) {
+        private DeviceImpl(PortImpl port,DeviceDriver deviceDriver,String deviceName) {
             this.port = port;
             this.deviceDriver = deviceDriver;
-            this.addr = addr;
+            this.deviceName = deviceName;
             portName = port.getPortName();
+            fullName = portName + "[" + deviceName + "]";
             autoConnect = port.autoConnect;
         }
 
@@ -1056,7 +904,8 @@ public class Factory {
         private PortImpl port;
         private String portName;
         private DeviceDriver deviceDriver;
-        private int addr;
+        private String deviceName;
+        private String fullName;
         private Trace trace = new TraceImpl();
         private List<DeviceInterface> interfaceList = new LinkedList<DeviceInterface>();
 
@@ -1076,8 +925,8 @@ public class Factory {
         public String report(int details) {
             StringBuilder builder = new StringBuilder();
             builder.append(String.format(
-                    "    addr %d isBlocked %b autoConnect %b connected %b enabled %b%n",
-                    addr,isBlockedByOtherUser(null),autoConnect,connected,enabled
+                    "     %s isBlocked %b autoConnect %b connected %b enabled %b%n",
+                    fullName,isBlockedByOtherUser(null),autoConnect,connected,enabled
             ));
             if(details>0) {
                 Interface[] interfaces = getInterfaces();
@@ -1111,10 +960,16 @@ public class Factory {
             return interfaces;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Device#getAddr()
+         * @see org.epics.ioc.pdrv.Device#getDeviceName()
          */
-        public int getAddr() {
-            return addr;
+        public String getDeviceName() {
+            return deviceName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.Device#getFullName()
+         */
+        public String getFullName() {
+            return fullName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#getPort()
@@ -1132,7 +987,7 @@ public class Factory {
          * @see org.epics.ioc.asyn.DeviceUser#enable(boolean)
          */
         public void enable(boolean trueFalse) {
-            trace.print(Trace.FLOW, "%s[%s] enable %b", portName,addr,trueFalse);
+            trace.print(Trace.FLOW, "%s enable %b", fullName,trueFalse);
             deviceLock.lock();
             try {
                 enabled = trueFalse;
@@ -1146,7 +1001,7 @@ public class Factory {
          * @see org.epics.ioc.asyn.DeviceUser#autoConnect(boolean)
          */
         public void autoConnect(boolean trueFalse) {
-            trace.print(Trace.FLOW, "%s[%s] autoConnect %b", portName,addr,trueFalse);
+            trace.print(Trace.FLOW, "%s autoConnect %b", fullName,trueFalse);
             deviceLock.lock();
             try {
                 autoConnect = trueFalse;
@@ -1159,40 +1014,38 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#connect(org.epics.ioc.pdrv.User)
          */
-        public Status connect(User theUser) {
-            UserImpl user = (UserImpl)theUser;
-            trace.print(Trace.FLOW, "%s[%s] connect", portName,addr);
+        public Status connect(User user) {
+            trace.print(Trace.FLOW, "%s connect", fullName);
             PortImpl port = (PortImpl)user.getPort();
-            Status status = port.lockPort(user);
-            if(status!=Status.success) return status;
-            try {
-                if(connected) {
-                    user.setMessage("already connected");
-                    return Status.error;
-                }
-                return deviceDriver.connect(user);
-            } finally {
-                port.unlockPort(user);
+            if(port.lockPortUser!=user) {
+                user.setMessage("Illegal to call connect without owning the port");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                return Status.error;
             }
+            if(connected) {
+                user.setMessage("already connected");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                return Status.error;
+            }
+            return deviceDriver.connect(user);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#disconnect(org.epics.ioc.pdrv.User)
          */
-        public Status disconnect(User theUser) {
-            UserImpl user = (UserImpl)theUser;
-            trace.print(Trace.FLOW, "%s[%s] disconnect", portName,addr);
+        public Status disconnect(User user) {
+            trace.print(Trace.FLOW, "%s disconnect", fullName);
             PortImpl port = (PortImpl)user.getPort();
-            Status status = port.lockPort(user);
-            if(status!=Status.success) return status;
-            try {
-                if(!connected) {
-                    user.setMessage("not connected");
-                    return Status.error;
-                }
-                return deviceDriver.disconnect(user);
-            } finally {
-                port.unlockPort(user);
+            if(port.lockPortUser!=user) {
+                user.setMessage("Illegal to call disconnect without owning the port");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                return Status.error;
             }
+            if(!connected) {
+                user.setMessage("not connected");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
+                return Status.error;
+            }
+            return deviceDriver.disconnect(user);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#isAutoConnect()
@@ -1216,7 +1069,7 @@ public class Factory {
          * @see org.epics.ioc.asyn.DeviceUser#exceptionListenerAdd(org.epics.ioc.asyn.ConnectExceptionListener)
          */
         public void exceptionListenerAdd(ConnectExceptionListener asynConnectExceptionListener) {
-            trace.print(Trace.FLOW, "%s[%s] exceptionListenerAdd", portName,addr);
+            trace.print(Trace.FLOW, "%s exceptionListenerAdd", fullName);
             deviceLock.lock();
             try {
                 if(!exceptionActive) {   
@@ -1240,7 +1093,7 @@ public class Factory {
          * @see org.epics.ioc.asyn.DeviceUser#exceptionListenerRemove(org.epics.ioc.asyn.ConnectExceptionListener)
          */
         public void exceptionListenerRemove(ConnectExceptionListener asynConnectExceptionListener) {
-            trace.print(Trace.FLOW, "%s[%s] exceptionListenerRemove", portName,addr);
+            trace.print(Trace.FLOW, "%s exceptionListenerRemove", fullName);
             deviceLock.lock();
             try {
                 if(!exceptionActive) {   
@@ -1287,9 +1140,10 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Device#blockOtherUsers(org.epics.ioc.pdrv.User)
          */
         public Status blockOtherUsers(User user) {
-            trace.print(Trace.FLOW, "%s[%s] blockOtherUsers", portName,addr);
+            trace.print(Trace.FLOW, "%s blockOtherUsers", fullName);
             if(blockingUser!=null) {
                 user.setMessage("already blocked");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             blockingUser = user;
@@ -1306,7 +1160,7 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Device#unblockOtherUsers(org.epics.ioc.pdrv.User)
          */
         public void unblockOtherUsers(User user) {
-            trace.print(Trace.FLOW, "%s[%s] unblockOtherUsers", portName,addr);
+            trace.print(Trace.FLOW, "%s unblockOtherUsers", fullName);
             if(user!=blockingUser) {
                 throw new IllegalStateException("not the blocking asynUser");
             }
@@ -1320,7 +1174,7 @@ public class Factory {
          */
         public void registerInterface(Interface ifaceNew) {
             String interfaceName = ifaceNew.getInterfaceName();
-            trace.print(Trace.FLOW, "%s[%s] registerInterface %s", portName,addr,interfaceName);
+            trace.print(Trace.FLOW, "%s registerInterface %s", fullName,interfaceName);
             DeviceInterface deviceInterfaceNew = new DeviceInterface(ifaceNew);
 
             ListIterator<DeviceInterface> iter = interfaceList.listIterator();
@@ -1348,7 +1202,7 @@ public class Factory {
          */
         public Interface interposeInterface(Interface interposeInterface) {
             String interfaceName = interposeInterface.getInterfaceName();
-            trace.print(Trace.FLOW, "%s[%s] interposeInterface %s", portName,addr,interfaceName);
+            trace.print(Trace.FLOW, "%s interposeInterface %s", fullName,interfaceName);
             ListIterator<DeviceInterface> iter = interfaceList.listIterator();
             while(iter.hasNext()) {
                 DeviceInterface deviceInterface = iter.next();
@@ -1369,7 +1223,7 @@ public class Factory {
          * @see org.epics.ioc.asyn.DeviceDriver#exceptionConnect()
          */
         public void exceptionConnect() {
-            trace.print(Trace.FLOW, "%s[%s] exceptionConnect", portName,addr);
+            trace.print(Trace.FLOW, "%s exceptionConnect", fullName);
             deviceLock.lock();
             try {
                 if(connected) {
@@ -1386,7 +1240,7 @@ public class Factory {
          * @see org.epics.ioc.asyn.DeviceDriver#exceptionDisconnect()
          */
         public void exceptionDisconnect() {
-            trace.print(Trace.FLOW, "%s[%s] exceptionDisconnect", portName,addr);
+            trace.print(Trace.FLOW, "%s exceptionDisconnect", fullName);
             deviceLock.lock();
             try {
                 if(!connected) {
@@ -1400,31 +1254,19 @@ public class Factory {
         }
         
         private Status lockPort(UserImpl user) {
-            trace.print(Trace.FLOW, "%s[%s] device.lockPort", portName,addr);
+            trace.print(Trace.FLOW, "%s device.lockPort", fullName);
             Status status = port.lockPort((UserImpl)user);
             if(status!=Status.success) return status;
             if(!enabled) {
                 port.unlockPort((UserImpl)user);
                 user.setMessage("device disabled");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
-            }
-            if(!connected) {
-                if(autoConnect) {
-                    status = deviceDriver.connect(user);
-                    if(status!=Status.success)  {
-                        port.unlockPort((UserImpl)user);
-                        return status;
-                    }
-                }
-                if(!connected) {
-                    port.unlockPort((UserImpl)user);
-                    user.setMessage("device not connected");
-                    return Status.error;
-                }
             }
             if(blockingUser!=null&&blockingUser!=user) {
                 port.unlockPort((UserImpl)user);
                 user.setMessage("device blocked by other user");
+                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             return Status.success;
@@ -1884,7 +1726,27 @@ public class Factory {
                     status = device.lockPort(user);
                 } else {
                     status = port.lockPort(user);
-                    
+
+                }
+                if(status==Status.success) {
+                    if(!port.isConnected()) {
+                        if(port.isAutoConnect()) {
+                            status = port.connect(user);
+                        } else {
+                            user.setMessage("port is not connected");
+                            user.setAlarm(AlarmSeverity.invalid,user.getMessage());
+                            status = Status.error;
+                        }
+                    }
+                    if(status==Status.success && device!=null && !device.isConnected()) {
+                        if(device.isAutoConnect()) {
+                            status = device.connect(user);
+                        } else {
+                            user.setMessage("device is not connected");
+                            user.setAlarm(AlarmSeverity.invalid,user.getMessage());
+                            status = Status.error;
+                        }
+                    }
                 }
                 try {
                     queueRequestCallback.callback(status,user);
