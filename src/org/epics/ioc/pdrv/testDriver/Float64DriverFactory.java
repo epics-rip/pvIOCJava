@@ -82,9 +82,8 @@ public class Float64DriverFactory {
             register = new double[numberRegisters];
             this.delay = delay;
             milliseconds = (long)(delay * 1000.0);
-            boolean isMultiDevicePort = (numberRegisters==1) ? false : true;
             port = Factory.createPort(portName, this, "float64Driver",
-                isMultiDevicePort, canBlock, autoConnect,priority);
+                canBlock, autoConnect,priority);
             trace = port.getTrace();
         }
         /* (non-Javadoc)
@@ -109,13 +108,14 @@ public class Float64DriverFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#createDevice(org.epics.ioc.pdrv.User, int)
          */
-        public Device createDevice(User user, int addr) {
+        public Device createDevice(User user, String deviceName) {
+            int addr = Integer.parseInt(deviceName);
             if(addr>=register.length) {
-                user.setMessage("illegal address");
+                user.setMessage("illegal deviceName");
                 return null;
             }
             Float64Device float64Device = new Float64Device(addr);
-            Device device = port.createDevice(float64Device, addr);
+            Device device = port.createDevice(float64Device, deviceName);
             float64Device.init(device);
             return device;
         }
@@ -133,19 +133,18 @@ public class Float64DriverFactory {
             return Status.success;
         }
         private class Float64Device implements DeviceDriver {   
-            private int addr;
             private Device device;
             private Trace trace;
-            private String deviceName = null;
+            private int addr;
             
             private Float64Device(int addr) {
                 this.addr = addr;
             }
+           
             
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 new Float64Interface(device);
             }
             /* (non-Javadoc)
@@ -158,10 +157,10 @@ public class Float64DriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
              */
             public Status connect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " connect");
+                trace.print(Trace.FLOW ,device.getFullName() + " connect");
                 if(device.isConnected()) {
                     user.setMessage("already connected");
-                    trace.print(Trace.ERROR ,deviceName + " already connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
                 device.exceptionConnect();
@@ -171,10 +170,10 @@ public class Float64DriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
              */
             public Status disconnect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " disconnect");
+                trace.print(Trace.FLOW ,device.getFullName() + " disconnect");
                 if(!device.isConnected()) {
                     user.setMessage("not connected");
-                    trace.print(Trace.ERROR ,deviceName + " not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " not connected");
                     return Status.error;
                 }
                 device.exceptionDisconnect();
@@ -191,7 +190,7 @@ public class Float64DriverFactory {
                  */
                 public Status read(User user) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " read but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " read but not connected");
                         return Status.error;
                     }
                     double timeout = user.getTimeout();
@@ -207,7 +206,7 @@ public class Float64DriverFactory {
                         }
                     }
                     user.setDouble(register[addr]);
-                    trace.print(Trace.DRIVER,deviceName + " read value = " + register[addr]);
+                    trace.print(Trace.DRIVER,device.getFullName() + " read value = " + register[addr]);
                     return Status.success;
                 }                
                 /* (non-Javadoc)
@@ -215,7 +214,7 @@ public class Float64DriverFactory {
                  */
                 public Status write(User user, double value) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " write but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " write but not connected");
                         return Status.error;
                     }
                     double timeout = user.getTimeout();
@@ -231,7 +230,7 @@ public class Float64DriverFactory {
                         }
                     }
                     register[addr] = value;
-                    trace.print(Trace.DRIVER,deviceName + " write value = " + register[addr]);
+                    trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
                     super.interruptOccured(value);
                     return Status.success;
                 }

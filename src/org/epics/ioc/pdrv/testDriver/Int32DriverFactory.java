@@ -102,9 +102,8 @@ public class Int32DriverFactory {
             this.low = low;
             this.high = high;
             this.delay = delay;
-            boolean isMultiDevicePort = (numberRegisters==1) ? false : true;
             port = Factory.createPort(portName, this, "int32Driver",
-                isMultiDevicePort, canBlock, autoConnect,priority);
+                canBlock, autoConnect,priority);
             trace = port.getTrace();
         }
         /* (non-Javadoc)
@@ -130,13 +129,14 @@ public class Int32DriverFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#createDevice(org.epics.ioc.pdrv.User, int)
          */
-        public Device createDevice(User user, int addr) {
+        public Device createDevice(User user, String deviceName) {
+            int addr = Integer.parseInt(deviceName);
             if(addr>=register.length) {
-                user.setMessage("illegal address");
+                user.setMessage("illegal deviceName");
                 return null;
             }
             Int32Device intDevice = new Int32Device(addr);
-            Device device = port.createDevice(intDevice, addr);
+            Device device = port.createDevice(intDevice, deviceName);
             intDevice.init(device);
             return device;
         }
@@ -157,7 +157,6 @@ public class Int32DriverFactory {
             private int addr;
             private Device device;
             private Trace trace;
-            private String deviceName = null;
             
             private Int32Device(int addr) {
                 this.addr = addr;
@@ -167,7 +166,6 @@ public class Int32DriverFactory {
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 new Int32Interface(device);
             }
             /* (non-Javadoc)
@@ -180,10 +178,10 @@ public class Int32DriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
              */
             public Status connect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " connect");
+                trace.print(Trace.FLOW ,device.getFullName() + " connect");
                 if(device.isConnected()) {
                     user.setMessage("already connected");
-                    trace.print(Trace.ERROR ,deviceName + " already connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
                 device.exceptionConnect();
@@ -193,10 +191,10 @@ public class Int32DriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
              */
             public Status disconnect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " disconnect");
+                trace.print(Trace.FLOW ,device.getFullName() + " disconnect");
                 if(!device.isConnected()) {
                     user.setMessage("not connected");
-                    trace.print(Trace.ERROR ,deviceName + " not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " not connected");
                     return Status.error;
                 }
                 device.exceptionDisconnect();
@@ -224,7 +222,7 @@ public class Int32DriverFactory {
                  */
                 public Status read(User user) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " read but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " read but not connected");
                         return Status.error;
                     }
                     double timeout = user.getTimeout();
@@ -240,7 +238,7 @@ public class Int32DriverFactory {
                         }
                     }
                     user.setInt(register[addr]);
-                    trace.print(Trace.DRIVER,deviceName + " read value = " + register[addr]);
+                    trace.print(Trace.DRIVER,device.getFullName() + " read value = " + register[addr]);
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -248,7 +246,7 @@ public class Int32DriverFactory {
                  */
                 public Status write(User user, int value) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " write but  not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " write but  not connected");
                         return Status.error;
                     }
                     double timeout = user.getTimeout();
@@ -264,12 +262,12 @@ public class Int32DriverFactory {
                         }
                     }
                     if(value<low || value>high) {
-                        trace.print(Trace.ERROR, deviceName + " value " + value + " out of bounds");
+                        trace.print(Trace.ERROR, device.getFullName() + " value " + value + " out of bounds");
                         user.setMessage("value out of bounds");
                         return Status.error;
                     }
                     register[addr] = value;
-                    trace.print(Trace.DRIVER,deviceName + " write value = " + register[addr]);
+                    trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
                     super.interruptOccured(value);
                     return Status.success;
                 }

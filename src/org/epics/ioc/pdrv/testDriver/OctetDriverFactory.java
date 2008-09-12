@@ -54,22 +54,13 @@ public class OctetDriverFactory {
     static public void create(
         String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
     {
-        PVField[] pvFields = pvStructure.getPVFields();
-        Structure structure = (Structure)pvStructure.getField();
-        int index = structure.getFieldIndex("multiDevice");
-        if(index<0) {
-            throw new IllegalStateException("field multiDevice not found");
-        }
-        PVBoolean pvMultiDevice = (PVBoolean)pvFields[index];
-        boolean multiDevice = pvMultiDevice.get();
-        index = structure.getFieldIndex("delay");
-        if(index<0) {
+        PVDouble pvDelay = pvStructure.getDoubleField("delay");
+        if(pvDelay==null) {
             throw new IllegalStateException("field delay not found");
         }
-        PVDouble pvDelay = (PVDouble)pvFields[index];
         double delay = pvDelay.get();
         boolean canBlock = ((delay>0.0) ? true : false);
-        new OctetDriver(portName,multiDevice,autoConnect,canBlock,priority,delay);
+        new OctetDriver(portName,autoConnect,canBlock,priority,delay);
     }
     
     static private class OctetDriver implements PortDriver {
@@ -78,13 +69,13 @@ public class OctetDriverFactory {
         private Port port;
         private Trace trace;
         
-        private OctetDriver(String portName,boolean isMultiDevicePort,
+        private OctetDriver(String portName,
             boolean autoConnect,boolean canBlock,ScanPriority priority,double delay)
         {
             this.delay = delay;
             this.portName = portName;
             port = Factory.createPort(portName, this, "octetDriver",
-                isMultiDevicePort, canBlock, autoConnect, priority);
+                 canBlock, autoConnect, priority);
             trace = port.getTrace();
         }
         /* (non-Javadoc)
@@ -110,9 +101,10 @@ public class OctetDriverFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#createDevice(org.epics.ioc.pdrv.User, int)
          */
-        public Device createDevice(User user, int addr) {
-            EchoDevice echoDevice = new EchoDevice(addr,delay);
-            Device device = port.createDevice(echoDevice, addr);
+        public Device createDevice(User user, String deviceName) {
+            
+            EchoDevice echoDevice = new EchoDevice(delay);
+            Device device = port.createDevice(echoDevice, deviceName);
             echoDevice.init(device);
             return device;
         }
@@ -136,15 +128,13 @@ public class OctetDriverFactory {
         private double delay;
         private Device device;
         private Trace trace;
-        private String deviceName;
         
-        private EchoDevice(int addr,double delay) {
+        private EchoDevice(double delay) {
             this.delay = delay;
         }
         
         private void init(Device device) {
             this.device = device;
-            deviceName = device.getPort().getPortName() + ":" + device.getAddr();
             trace = device.getTrace();
             new EchoOctet(device);
         }
@@ -158,10 +148,10 @@ public class OctetDriverFactory {
          * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
          */
         public Status connect(User user) {
-            trace.print(Trace.FLOW ,deviceName + " connect");
+            trace.print(Trace.FLOW ,device.getFullName() + " connect");
             if(device.isConnected()) {
                 user.setMessage("already connected");
-                trace.print(Trace.ERROR ,deviceName + " already connected");
+                trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                 return Status.error;
             }
             device.exceptionConnect();
@@ -171,10 +161,10 @@ public class OctetDriverFactory {
          * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
          */
         public Status disconnect(User user) {
-            trace.print(Trace.FLOW ,deviceName + " disconnect");
+            trace.print(Trace.FLOW ,device.getFullName() + " disconnect");
             if(!device.isConnected()) {
                 user.setMessage("not connected");
-                trace.print(Trace.ERROR ,deviceName + " not connected");
+                trace.print(Trace.ERROR ,device.getFullName() + " not connected");
                 return Status.error;
             }
             device.exceptionDisconnect();
@@ -200,7 +190,7 @@ public class OctetDriverFactory {
              */
             public Status flush(User user) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName + " flush but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " flush but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -213,7 +203,7 @@ public class OctetDriverFactory {
              */
             public Status getInputEos(User user, byte[] eos) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR,deviceName +  " getInputEos but not connected");
+                    trace.print(Trace.ERROR,device.getFullName() +  " getInputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -222,7 +212,7 @@ public class OctetDriverFactory {
                 eos[1] = eosInput[1];
                 trace.printIO(Trace.FLOW ,
                         eosInput,eosLenInput,
-                        deviceName +  " getInputEos");
+                        device.getFullName() +  " getInputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -230,7 +220,7 @@ public class OctetDriverFactory {
              */
             public Status getOutputEos(User user, byte[] eos) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName +  " getOutputEos but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() +  " getOutputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -239,7 +229,7 @@ public class OctetDriverFactory {
                 eos[1] = eosOutput[1];
                 trace.printIO(Trace.FLOW ,
                         eosOutput,eosLenOutput,
-                        deviceName + " getOutputEos");
+                        device.getFullName() + " getOutputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -247,7 +237,7 @@ public class OctetDriverFactory {
              */
             public Status read(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName +  " read but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() +  " read but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -289,7 +279,7 @@ public class OctetDriverFactory {
                 for(int i=0; i<n; i++) {
                     data[i] = buffer[i];
                 }
-                trace.printIO(Trace.DRIVER ,data,n,deviceName + " read");
+                trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " read");
                 size = 0;
                 return status;
             }
@@ -298,7 +288,7 @@ public class OctetDriverFactory {
              */
             public Status readRaw(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName +  " readRaw but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() +  " readRaw but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -327,7 +317,7 @@ public class OctetDriverFactory {
                 for(int i=0; i<n; i++) {
                     data[i] = buffer[i];
                 }
-                trace.printIO(Trace.DRIVER ,data,n,deviceName +  " readRaw");
+                trace.printIO(Trace.DRIVER ,data,n,device.getFullName() +  " readRaw");
                 size = 0;
                 return status;
             }
@@ -336,7 +326,7 @@ public class OctetDriverFactory {
              */
             public Status setInputEos(User user, byte[] eos, int eosLen) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName + " setInputEos but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " setInputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -346,7 +336,7 @@ public class OctetDriverFactory {
                 }
                 eosLenInput = eosLen;
                 for(int i=0; i<eosLen; i++) eosInput[i] = eos[i];
-                trace.printIO(Trace.FLOW ,eosInput,eosLenInput,deviceName + " setInputEos");
+                trace.printIO(Trace.FLOW ,eosInput,eosLenInput,device.getFullName() + " setInputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -354,7 +344,7 @@ public class OctetDriverFactory {
              */
             public Status setOutputEos(User user, byte[] eos, int eosLen) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName + " setOutputEos but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " setOutputEos but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -364,7 +354,7 @@ public class OctetDriverFactory {
                 }
                 eosLenOutput = eosLen;
                 for(int i=0; i<eosLen; i++) eosOutput[i] = eos[i];
-                trace.printIO(Trace.FLOW ,eosOutput,eosLenOutput,deviceName + " setOutputEos");
+                trace.printIO(Trace.FLOW ,eosOutput,eosLenOutput,device.getFullName() + " setOutputEos");
                 return Status.success;
             }
             /* (non-Javadoc)
@@ -372,7 +362,7 @@ public class OctetDriverFactory {
              */
             public Status write(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName + " write but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " write but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -413,7 +403,7 @@ public class OctetDriverFactory {
                     buffer[i] = data[i];
                 }
                 user.setInt(n);
-                trace.printIO(Trace.DRIVER ,data,n,deviceName + " write");
+                trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " write");
                 super.interruptOccured(buffer, nbytes);
                 return status;
             }
@@ -422,7 +412,7 @@ public class OctetDriverFactory {
              */
             public Status writeRaw(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,deviceName + " writeRaw but not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " writeRaw but not connected");
                     user.setMessage("not connected");
                     return Status.error;
                 }
@@ -452,7 +442,7 @@ public class OctetDriverFactory {
                     buffer[i] = data[i];
                 }
                 user.setInt(size);
-                trace.printIO(Trace.DRIVER ,data,n,deviceName + " writeRaw");
+                trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " writeRaw");
                 super.interruptOccured(buffer, nbytes);
                 return status;
             }

@@ -78,7 +78,7 @@ public class Int32ArrayDriverFactory {
             milliseconds = (long)(delay * 1000.0);
             this.maxSegmentSize = maxSegmentSize;
             port = Factory.createPort(portName, this, "int32ArrayDriver",
-                true, canBlock, autoConnect,priority);
+                canBlock, autoConnect,priority);
             trace = port.getTrace();
         }
         /* (non-Javadoc)
@@ -103,9 +103,9 @@ public class Int32ArrayDriverFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#createDevice(org.epics.ioc.pdrv.User, int)
          */
-        public Device createDevice(User user, int addr) {
+        public Device createDevice(User user, String deviceName) {
             Int32ArrayDevice intDevice = new Int32ArrayDevice();
-            Device device = port.createDevice(intDevice, addr);
+            Device device = port.createDevice(intDevice, deviceName);
             intDevice.init(device);
             return device;
         }
@@ -126,14 +126,12 @@ public class Int32ArrayDriverFactory {
         private class Int32ArrayDevice implements DeviceDriver {
             private Device device;
             private Trace trace;
-            private String deviceName = null;
             
             private Int32ArrayDevice() {}
             
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 Array array = fieldCreate.createArray("drvPrivate", Type.pvInt);
                 new Int32ArrayImpl(parent,array,device);
             }
@@ -147,10 +145,10 @@ public class Int32ArrayDriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
              */
             public Status connect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " connect");
+                trace.print(Trace.FLOW ,device.getFullName() + " connect");
                 if(device.isConnected()) {
                     user.setMessage("already connected");
-                    trace.print(Trace.ERROR ,deviceName + " already connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
                 device.exceptionConnect();
@@ -160,10 +158,10 @@ public class Int32ArrayDriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
              */
             public Status disconnect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " disconnect");
+                trace.print(Trace.FLOW ,device.getFullName() + " disconnect");
                 if(!device.isConnected()) {
                     user.setMessage("not connected");
-                    trace.print(Trace.ERROR ,deviceName + " not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " not connected");
                     return Status.error;
                 }
                 device.exceptionDisconnect();
@@ -200,7 +198,7 @@ public class Int32ArrayDriverFactory {
                  */
                 public Status startRead(User user) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " startRead but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " startRead but not connected");
                         return Status.error;
                     }
                     double timeout = user.getTimeout();
@@ -215,11 +213,11 @@ public class Int32ArrayDriverFactory {
                  */
                 public Status startWrite(User user) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " startWrite but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " startWrite but not connected");
                         return Status.error;
                     }
                     if(!super.isMutable()) {
-                        trace.print(Trace.ERROR,deviceName + " put but notMutable");
+                        trace.print(Trace.ERROR,device.getFullName() + " put but notMutable");
                         user.setMessage("not mutable");
                         return Status.error;
                     }
@@ -232,7 +230,7 @@ public class Int32ArrayDriverFactory {
                 }              
                 public int get(int offset,int len, IntArrayData data) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " get but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " get but not connected");
                         return 0;
                     }
                     if(delay>0.0) {
@@ -260,7 +258,7 @@ public class Int32ArrayDriverFactory {
                         return 0;
                     }
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " put but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " put but not connected");
                         return 0;
                     }
                     if(delay>0.0) {

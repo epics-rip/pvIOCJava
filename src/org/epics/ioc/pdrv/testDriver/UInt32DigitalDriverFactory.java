@@ -81,9 +81,7 @@ public class UInt32DigitalDriverFactory {
         {
             register = new int[numberRegisters];
             this.delay = delay;
-            boolean isMultiDevicePort = (numberRegisters==1) ? false : true;
-            port = Factory.createPort(portName, this, "uint32DigitalDriver",
-                isMultiDevicePort, canBlock, autoConnect,priority);
+            port = Factory.createPort(portName, this, "uint32DigitalDriver",canBlock, autoConnect,priority);
             portName = port.getPortName();
             trace = port.getTrace();
         }
@@ -109,13 +107,14 @@ public class UInt32DigitalDriverFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#createDevice(org.epics.ioc.pdrv.User, int)
          */
-        public Device createDevice(User user, int addr) {
+        public Device createDevice(User user, String deviceName) {
+            int addr = Integer.parseInt(deviceName);
             if(addr>=register.length) {
-                user.setMessage("illegal address");
+                user.setMessage("illegal deviceName");
                 return null;
             }
             UInt32DigitalDevice intDevice = new UInt32DigitalDevice(addr);
-            Device device = port.createDevice(intDevice, addr);
+            Device device = port.createDevice(intDevice, deviceName);
             intDevice.init(device);
             return device;
         }
@@ -136,7 +135,6 @@ public class UInt32DigitalDriverFactory {
             private int addr;
             private Device device;
             private Trace trace;
-            private String deviceName;
             
             private UInt32DigitalDevice(int addr) {
                 this.addr = addr;
@@ -144,7 +142,6 @@ public class UInt32DigitalDriverFactory {
             
             private void init(Device device) {
                 this.device = device;
-                deviceName = device.getPort().getPortName() + ":" + device.getAddr();
                 trace = device.getTrace();
                 new UInt32DigitalInterface(device);
             }
@@ -158,10 +155,10 @@ public class UInt32DigitalDriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#connect(org.epics.ioc.pdrv.User)
              */
             public Status connect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " connect");
+                trace.print(Trace.FLOW ,device.getFullName() + " connect");
                 if(device.isConnected()) {
                     user.setMessage("already connected");
-                    trace.print(Trace.ERROR ,deviceName + " already connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
                 device.exceptionConnect();
@@ -171,10 +168,10 @@ public class UInt32DigitalDriverFactory {
              * @see org.epics.ioc.pdrv.DeviceDriver#disconnect(org.epics.ioc.pdrv.User)
              */
             public Status disconnect(User user) {
-                trace.print(Trace.FLOW ,deviceName + " disconnect");
+                trace.print(Trace.FLOW ,device.getFullName() + " disconnect");
                 if(!device.isConnected()) {
                     user.setMessage("not connected");
-                    trace.print(Trace.ERROR ,deviceName + " not connected");
+                    trace.print(Trace.ERROR ,device.getFullName() + " not connected");
                     return Status.error;
                 }
                 device.exceptionDisconnect();
@@ -192,7 +189,7 @@ public class UInt32DigitalDriverFactory {
                  */
                 public Status read(User user, int mask) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " read but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " read but not connected");
                         return Status.error;
                     }
                     double timeout = user.getTimeout();
@@ -209,7 +206,7 @@ public class UInt32DigitalDriverFactory {
                     }
                     int value = register[addr]&mask;
                     user.setInt(value);
-                    trace.print(Trace.DRIVER,deviceName + " read value = " + value);
+                    trace.print(Trace.DRIVER,device.getFullName() + " read value = " + value);
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -217,7 +214,7 @@ public class UInt32DigitalDriverFactory {
                  */
                 public Status write(User user, int value, int mask) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR,deviceName + " write but not connected");
+                        trace.print(Trace.ERROR,device.getFullName() + " write but not connected");
                         return Status.error;
                     }
                     double timeout = user.getTimeout();
@@ -235,7 +232,7 @@ public class UInt32DigitalDriverFactory {
                     int newValue = register[addr]&~mask;
                     newValue |= value&mask;
                     register[addr] = newValue;
-                    trace.print(Trace.DRIVER,deviceName + " write value = " + register[addr]);
+                    trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
                     super.interruptOccured(newValue);
                     return Status.success;
                 }
