@@ -2,7 +2,7 @@
 <IOCDatabase>
 <structure name = "pdrvSupport">
   <field name = "portName" type = "string" />
-  <field name = "addr" type = "int" />
+  <field name = "deviceName" type = "string" />
   <field name = "timeout" type = "double" />
   <field name = "mask" type = "int" />
   <field name = "size" type = "int" />
@@ -64,7 +64,8 @@
 
 <structure name = "portDeviceControl" supportName = "portDeviceControl" >
   <field name = "message" type = "string" />
-  <field name = "portDevice" type = "string" />
+  <field name = "portName" type = "string" />
+  <field name = "deviceName" type = "string" />
   <field name = "connect" structureName = "setBooleanValue"  />
   <field name = "enable" structureName = "setBooleanValue"   />
   <field name = "autoConnect" structureName = "setBooleanValue" />
@@ -90,5 +91,9 @@
 <include href = "int32ArrayDriver.xml" />
 <include href = "float64ArrayDriver.xml" />
 <include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
+
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
+<include href = "vxi11Driver.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
 
 </IOCDatabase>

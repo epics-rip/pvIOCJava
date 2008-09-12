@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: portDriver Interfaces<br />
 package: org.epics.ioc.pdrv.interfaces<br />
-2007.11.14</h1>
+2008.09.12</h1>
 CONTENTS 
 
 <div class="toc">
@@ -72,6 +72,12 @@ CONTENTS
       <li><a href="#Float64Arr2">Float64ArrayInterposeBase</a></li>
     </ul>
   </li>
+  <li><a href="#GPIB">GPIB Interfaces</a>
+    <ul>
+      <li><a href="#GpibContro">GpibController</a></li>
+      <li><a href="#GpibDevice">GpibDevice</a></li>
+    </ul>
+  </li>
 </ul>
 </div>
 <hr />
@@ -118,6 +124,10 @@ calls interface methods to communicate with a device..</p>
     An interface for double value.</li>
   <li>float64Array<br />
     An interface for an array of doubles.</li>
+  <li>gpibController<br />
+    An interface for a GPIB controller.</li>
+  <li>gpibDevice<br />
+    An interface for a GPIB device.</li>
 </ul>
 <hr />
 
@@ -963,6 +973,121 @@ following:</p>
   <dt>other methods</dt>
     <dd>Just call the interposed method. This an interpose implementation
       only needs to implement the methods it wants to override.</dd>
+</dl>
+<hr />
+
+<h2 style="text-align: center" id="GPIB">GPIB Interfaces</h2>
+<hr />
+
+<p>A driver that implements GPIB controller and device commands implements a
+DeviceDriver for the controller itself. The deviceName should be controller.
+This device has a two I/O interfaces: gpibController and GPIBDevice. For each
+actual GPIB device it implements interfaces Octet and GPIBDevice. </p>
+
+<h3 id="GpibContro">GpibController</h3>
+
+<p><span style="font-family: courier;">gpibController</span> has the
+definition:</p>
+<pre>public interface GpibSrqHandler {
+     public void srqHandler(GpibController controller);
+}
+
+public interface GpibController {
+    Status ifc(User user);
+    Status getBusAddress(User user);
+    Status setBusAddress(User user,int address);
+    Status isRemote(User user);
+    Status isSRQ(User user);
+    Status isNDAC(User user);
+    Status isSystemController(User user);
+    Status isControllerInCharge(User user);
+    Status isTalker(User user);
+    Status isListener(User user);
+    Status setATN(User user,boolean state);
+    Status setREN(User user,boolean state);
+    Status passControl(User user,int addr);
+    Status sendCommand(User user,byte data[]);
+    Status enableSRQ (User user,boolean state);
+    void registerSrqHandler(GpibSrqHandler srqHandler);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">srqHandler</dt>
+    <dd>A user supplied method that is called when the controller detects an
+      SRQ.</dd>
+  <dt style="font-family: courier;">ifc</dt>
+    <dd>Issue an interface clear.</dd>
+  <dt style="font-family: courier;">getBusAddress</dt>
+    <dd>Get the bus address on the controller itself.</dd>
+  <dt style="font-family: courier;">setBusAddress</dt>
+    <dd>Set the bus address for the controller itself. This is required if
+      the default bus address for the controller conflicts with the address
+      of a device connected to the controller.</dd>
+  <dt style="font-family: courier;">isRemote</dt>
+    <dd>Is the remote line asserted?</dd>
+  <dt style="font-family: courier;">isSRQ</dt>
+    <dd>Is SRQ asserted?</dd>
+  <dt style="font-family: courier;">isNDAC</dt>
+    <dd>Is NDAC asserted?</dd>
+  <dt style="font-family: courier;">isSystemController</dt>
+    <dd>Is this controller the system controller?</dd>
+  <dt style="font-family: courier;">isControllerInCharge</dt>
+    <dd>Is this controller the controller in charge?</dd>
+  <dt style="font-family: courier;">isTalker</dt>
+    <dd>Is talker asserted?</dd>
+  <dt style="font-family: courier;">isListener</dt>
+    <dd>Is listener asserted?</dd>
+  <dt style="font-family: courier;">setATN</dt>
+    <dd>Set ATN line</dd>
+  <dt style="font-family: courier;">setREN</dt>
+    <dd>Set REN line</dd>
+  <dt style="font-family: courier;">passControl</dt>
+    <dd>Pass control to the specified address.</dd>
+  <dt style="font-family: courier;">sendCommand</dt>
+    <dd>Send the commands to the controller.</dd>
+  <dt style="font-family: courier;">enableSRQ</dt>
+    <dd>Allow SRQs.</dd>
+  <dt style="font-family: courier;">registerSrqHandler</dt>
+    <dd>Register a handler to be called when an SRQ is detected.</dd>
+</dl>
+
+<h3 id="GpibDevice">GpibDevice</h3>
+
+<p><span style="font-family: courier;">gpibDevice</span> has the
+definition:</p>
+<pre>public interface GpibDevice {
+    Status trigger(User user);
+    Status clear(User user);
+    Status lock(User user);
+    Status unlock(User user);
+    boolean getEOI();
+    void setEOI(boolean eoi);
+    Status getStatusByte(User user);
+    Status remote(User user);
+    Status local(User user);
+}</pre>
+
+<p>where</p>
+<dl>
+  <dt style="font-family: courier;">trigger</dt>
+    <dd>Issue a trigger command.</dd>
+  <dt style="font-family: courier;">clear</dt>
+    <dd>Issue a clear command.</dd>
+  <dt style="font-family: courier;">lock</dt>
+    <dd>Lock the device or controller</dd>
+  <dt style="font-family: courier;">unlock</dt>
+    <dd>Unlock the device or controller</dd>
+  <dt style="font-family: courier;">getEOI</dt>
+    <dd>Get the current state of EOI</dd>
+  <dt style="font-family: courier;">setEOI</dt>
+    <dd>Should EOI be asserted when the last octet is sent.</dd>
+  <dt style="font-family: courier;">getStatusByte</dt>
+    <dd>Get the status byte.</dd>
+  <dt style="font-family: courier;">remote</dt>
+    <dd>Set the device or controller to remote control.</dd>
+  <dt style="font-family: courier;">local</dt>
+    <dd>Set the device or controller to locale control.</dd>
 </dl>
 </body>
 </html>

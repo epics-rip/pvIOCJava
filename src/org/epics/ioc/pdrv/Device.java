@@ -23,10 +23,15 @@ public interface Device {
      */
     Interface[] getInterfaces();
     /**
-     * Get the device address.
-     * @return The address.
+     * Get the deviceName.
+     * @return The name.
      */
-    int getAddr();
+    String getDeviceName();
+    /**
+     * Get the name of the port and device, which has the format portName[deviceName].
+     * @return The name.
+     */
+    String getFullName();
     /**
      * Get the port for this device.
      * @return The Port interface.
@@ -48,22 +53,6 @@ public interface Device {
      * @param trueFalse The autoConnect state.
      */
     void autoConnect(boolean trueFalse);
-    /**
-     * Attempt to connect.
-     * This must be called without owning the port.
-     * @param user The requestor.
-     * @return Result. Status.success means that the attempt was successful.
-     * If the attempt fails user.getMessage describes why the request failed.
-     */
-    Status connect(User user);
-    /**
-     * Attempt to disconnect.
-     * This must be called without owning the port.
-     * @param user The requestor.
-     * @return Result. Status.success means that the attempt was successful.
-     * If the attempt fails user.getMessage describes why the request failed.
-     */
-    Status disconnect(User user);
     /**
      * Is the device connected to it's I/O.
      * @return (false,true) if it (is not, is) connected.
@@ -99,6 +88,22 @@ public interface Device {
      * @return The Interface or null if the interface is not registered.
      */
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
+    /**
+     * Attempt to connect.
+     * This must be called with the port owned by the user.
+     * @param user The requester.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage describes why the request failed.
+     */
+    Status connect(User user);
+    /**
+     * Attempt to disconnect.
+     * This must be called with the port owned by the user.
+     * @param user The requester.
+     * @return Result. Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage describes why the request failed.
+     */
+    Status disconnect(User user);
 ;    /**
      * Block all other users from accessing the device.
      * Must be called with the port owned by the caller.
