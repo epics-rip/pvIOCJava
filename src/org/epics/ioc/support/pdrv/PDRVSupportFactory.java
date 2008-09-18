@@ -230,10 +230,6 @@ public class PDRVSupportFactory {
                     String string = String.copyValueOf(charArray, 0, nbytes);
                     convert.fromString(valuePVField, string);
                 }
-                AlarmSeverity severity = user.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
-                }
                 deviceTrace.print(Trace.FLOW,
                     "%s:%s processContinue calling postPut",fullName,supportName);
                 valueDBField.postPut();
@@ -349,10 +345,6 @@ public class PDRVSupportFactory {
                 "%s:%s processContinue ",fullName,supportName);
             if(status==Status.success) {
                 putData();
-                AlarmSeverity severity = user.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
-                }
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
@@ -583,10 +575,6 @@ public class PDRVSupportFactory {
             if(status==Status.success) {
                 convert.fromInt(valuePVField, value);
                 valueDBField.postPut();
-                AlarmSeverity severity = user.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
-                }
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
@@ -1081,14 +1069,11 @@ public class PDRVSupportFactory {
         	if(status!=Status.success) {
         		deviceTrace.print(Trace.ERROR,
         				"%s:%s int32Array.startRead failed", fullName,supportName);
+        		alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
         		return;
         	}
         	convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
         	int32Array.endRead(user);
-        	AlarmSeverity severity = user.getAlarmSeverity();
-        	if(severity!=AlarmSeverity.none) {
-        		alarmSupport.setAlarm(user.getAlarmMessage(),severity);
-        	}
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.Int32ArrayInterruptListener#interrupt(org.epics.ioc.pv.PVIntArray)
@@ -1131,9 +1116,8 @@ public class PDRVSupportFactory {
                 dbRecord.lock();
                 try {
                     valuePVArray.asynAccessEnd(this);
-                    AlarmSeverity severity = user.getAlarmSeverity();
-                    if(severity!=AlarmSeverity.none) {
-                    	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
+                    if(status!=Status.success) {
+                        alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
                     }
                     valueDBField.postPut();
                 } finally {
@@ -1778,13 +1762,10 @@ public class PDRVSupportFactory {
         	if(status!=Status.success) {
         		deviceTrace.print(Trace.ERROR,
         				"%s:%s float64.read failed", fullName,supportName);
+        		alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
         		return;
         	}
         	value = user.getDouble();
-        	AlarmSeverity severity = user.getAlarmSeverity();
-        	if(severity!=AlarmSeverity.none) {
-        		alarmSupport.setAlarm(user.getAlarmMessage(),severity);
-        	}
         	deviceTrace.print(Trace.SUPPORT, "%s value = %e", fullName,value);
         }
     }
@@ -2171,10 +2152,6 @@ public class PDRVSupportFactory {
          */
         public void processContinue() {
             valuePVArray.asynAccessEnd(this);
-            AlarmSeverity severity = user.getAlarmSeverity();
-            if(severity!=AlarmSeverity.none) {
-            	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
-            }
             valueDBField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }        
@@ -2295,10 +2272,8 @@ public class PDRVSupportFactory {
             if(status==Status.success) {
                 convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
                 float64Array.endRead(user);
-                AlarmSeverity severity = user.getAlarmSeverity();
-                if(severity!=AlarmSeverity.none) {
-                	alarmSupport.setAlarm(user.getAlarmMessage(),severity);
-                }
+            } else {
+                alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
             }
         }
         

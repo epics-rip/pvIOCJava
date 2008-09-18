@@ -13,14 +13,14 @@ import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pdrv.interfaces.*;
+import org.epics.ioc.pdrv.interfaces.AbstractInterface;
+import org.epics.ioc.pdrv.interfaces.AbstractOctet;
 import org.epics.ioc.pdrv.interfaces.GpibController;
 import org.epics.ioc.pdrv.interfaces.GpibDevice;
 import org.epics.ioc.pdrv.interfaces.GpibSrqHandler;
 import org.epics.ioc.pv.PVInt;
 import org.epics.ioc.pv.PVString;
 import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.ScanPriority;
 /**
  * The factory for vxi11Driver.
@@ -212,8 +212,7 @@ public class DriverFactory {
             private Status returnStatus(User user,Status status,String traceMessage) {
                 if(status!=Status.success) {
                     String message = vxiUser.getError().name() + " " + vxiUser.getString();
-                    user.setAlarm(AlarmSeverity.major, message);
-                    trace.print(Trace.ERROR ,device.getFullName() + " " + traceMessage + " " + user.getAlarmMessage());
+                    trace.print(Trace.ERROR ,device.getFullName() + " " + message + " " + traceMessage + " " + user.getMessage());
                 } else {
                     trace.print(Trace.FLOW ,device.getFullName() + " " + traceMessage);
                 }

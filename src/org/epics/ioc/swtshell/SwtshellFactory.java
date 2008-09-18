@@ -102,6 +102,13 @@ public class SwtshellFactory {
                     IntrospectDatabaseFactory.init(display);
                 }
             });
+            Button portDriver = new Button(shell,SWT.PUSH);
+            portDriver.setText("portDriver");
+            portDriver.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    PortDriverFactory.init(display);
+                }
+            });
             Button v3iocshellDB = new Button(shell,SWT.PUSH);
             v3iocshellDB.setText("v3iocshell");
             v3iocshellDB.addSelectionListener( new SelectionAdapter() {

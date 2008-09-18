@@ -59,84 +59,49 @@ public class PDRVPortDeviceControlFactory {
         private DBField dbMessage = null;
         private PVString pvMessage = null;
         
-        private PVString portNamePVString = null;
-        private PVString deviceNamePVString = null;
+        private PVString pvPortName = null;
+        private PVString pvDeviceName = null;
+        private String portName = null;
+        private String deviceName = null;
         
-        private PVBoolean connectValuePVBoolean = null;
-        private DBField connectValueDBField = null;
-        private PVBoolean connectDesiredValuePVBoolean = null;
-        private PVBoolean connectSetValuePVBoolean = null;
-        private DBField connectSetValueDBField = null;
+        private PVBoolean pvConnect = null;
+        private DBField dbConnect = null;
+        private boolean connect = false;
         
-        private PVBoolean enableValuePVBoolean = null;
-        private DBField enableValueDBField = null;
-        private PVBoolean enableDesiredValuePVBoolean = null;
-        private PVBoolean enableSetValuePVBoolean = null;
-        private DBField enableSetValueDBField = null;
-        
-        private PVBoolean autoConnectValuePVBoolean = null;
-        private DBField autoConnectValueDBField = null;
-        private PVBoolean autoConnectDesiredValuePVBoolean = null;
-        private PVBoolean autoConnectSetValuePVBoolean = null;
-        private DBField autoConnectSetValueDBField = null;
-        
-        private PVInt traceMaskValuePVInt = null;
-        private DBField traceMaskValueDBField = null;
-        private PVInt traceMaskDesiredValuePVInt = null;
-        private PVBoolean traceMaskSetValuePVBoolean = null;
-        private DBField traceMaskSetValueDBField = null;
-        
+        private PVBoolean pvEnable = null;
+        private DBField dbEnable = null;
+        private boolean enable = false;
 
-        private PVInt traceIOMaskValuePVInt = null;
-        private DBField traceIOMaskValueDBField = null;
-        private PVInt traceIOMaskDesiredValuePVInt = null;
-        private PVBoolean traceIOMaskSetValuePVBoolean = null;
-        private DBField traceIOMaskSetValueDBField = null;
+        private PVBoolean pvAutoConnect = null;
+        private DBField dbAutoConnect = null;
+        private boolean autoConnect = false;
         
-
-        private PVInt traceIOTruncateSizeValuePVInt = null;
-        private DBField traceIOTruncateSizeValueDBField = null;
-        private PVInt traceIOTruncateSizeDesiredValuePVInt = null;
-        private PVBoolean traceIOTruncateSizeSetValuePVBoolean = null;
-        private DBField traceIOTruncateSizeSetValueDBField = null;
+        private PVInt pvTraceMask = null;
+        private DBField dbTraceMask = null;
+        private int traceMask = 0;
         
-        private PVBoolean reportPVBoolean = null;
-        private DBField reportDBField = null;
-        private PVInt reportDetailsPVInt = null;
+        private PVInt pvTraceIOMask = null;
+        private DBField dbTraceIOMask = null;
+        private int traceIOMask = 0;
+        
+        private PVInt pvTraceIOTruncateSize = null;
+        private DBField dbTraceIOTruncateSize = null;
+        private int traceIOTruncateSize = 0;
+ 
+        private PVBoolean pvReport = null;
+        private boolean report = false;
+        private PVInt pvReportDetails = null;
+        private int reportDetails = 0;
+        
         
         private Port port = null;
         private Device device = null;
         private Trace trace = null;
         
         private SupportProcessRequester supportProcessRequester = null;
+        private boolean isConnected = true;
+        private boolean justConnected = false;
         private String message = emptyMessage;
-        
-        private String portName = null;
-        private String portNameDesired = null;
-        private String deviceName = null;
-        private String deviceNameDesired = null;
-        
-        private boolean connectDesiredValue = false;
-        private boolean connectSetValue = false;
-        private boolean connectNewValue = false;
-        private boolean enableDesiredValue = false;
-        private boolean enableSetValue = false;
-        private boolean enableNewValue = false;
-        private boolean autoConnectDesiredValue = false;
-        private boolean autoConnectSetValue = false;
-        private boolean autoConnectNewValue = false;
-        private int traceMaskDesiredValue = 0;
-        private boolean traceMaskSetValue = false;
-        private int traceMaskNewValue = 0;
-        private int traceIOMaskDesiredValue = 0;
-        private boolean traceIOMaskSetValue = false;
-        private int traceIOMaskNewValue = 0;
-        private int traceIOTruncateSizeDesiredValue = 0;
-        private boolean traceIOTruncateSizeSetValue = false;
-        private int traceIOTruncateSizeNewValue = 0;
-        private boolean report = false;
-        private int reportDetails = 0;
-        
         
         private PortDeviceControl(String supportName,DBStructure dbStructure) {
             super(supportName,dbStructure);
@@ -155,84 +120,51 @@ public class PDRVPortDeviceControlFactory {
             pvMessage = pvStructure.getStringField("message");
             if(pvMessage==null) return;
             dbMessage = dbRecord.findDBField(pvMessage);
-            
-            portNamePVString = pvStructure.getStringField("portName");
-            if(portNamePVString==null) return;
-            deviceNamePVString = pvStructure.getStringField("deviceName");
-            if(deviceNamePVString==null) return;
-            
-            PVStructure connectPVStructure = pvStructure.getStructureField("connect", "setBooleanValue");
-            if(connectPVStructure==null) return;
-            connectValuePVBoolean = connectPVStructure.getBooleanField("value");
-            if(connectValuePVBoolean==null) return;
-            connectValueDBField = dbRecord.findDBField(connectValuePVBoolean);
-            connectDesiredValuePVBoolean = connectPVStructure.getBooleanField("desiredValue");
-            if(connectDesiredValuePVBoolean==null) return;
-            connectSetValuePVBoolean = connectPVStructure.getBooleanField("setValue");
-            if(connectSetValuePVBoolean==null) return;
-            connectSetValueDBField = dbRecord.findDBField(connectSetValuePVBoolean);
-
-            
-            PVStructure enablePVStructure = pvStructure.getStructureField("enable", "setBooleanValue");
-            if(enablePVStructure==null) return;
-            enableValuePVBoolean = enablePVStructure.getBooleanField("value");
-            if(enableValuePVBoolean==null) return;
-            enableValueDBField = dbRecord.findDBField(enableValuePVBoolean);
-            enableDesiredValuePVBoolean = enablePVStructure.getBooleanField("desiredValue");
-            if(enableDesiredValuePVBoolean==null) return;
-            enableSetValuePVBoolean = enablePVStructure.getBooleanField("setValue");
-            if(enableSetValuePVBoolean==null) return;
-            enableSetValueDBField = dbRecord.findDBField(enableSetValuePVBoolean);
-            
-            PVStructure autoConnectPVStructure = pvStructure.getStructureField("autoConnect", "setBooleanValue");
-            if(autoConnectPVStructure==null) return;
-            autoConnectValuePVBoolean = autoConnectPVStructure.getBooleanField("value");
-            if(autoConnectValuePVBoolean==null) return;
-            autoConnectValueDBField = dbRecord.findDBField(autoConnectValuePVBoolean);
-            autoConnectDesiredValuePVBoolean = autoConnectPVStructure.getBooleanField("desiredValue");
-            if(autoConnectDesiredValuePVBoolean==null) return;
-            autoConnectSetValuePVBoolean = autoConnectPVStructure.getBooleanField("setValue");
-            if(autoConnectSetValuePVBoolean==null) return;
-            autoConnectSetValueDBField = dbRecord.findDBField(autoConnectSetValuePVBoolean);
-            
-            PVStructure traceMaskPVStructure = pvStructure.getStructureField("traceMask", "setIntValue");
-            if(traceMaskPVStructure==null) return;
-            traceMaskValuePVInt = traceMaskPVStructure.getIntField("value");
-            if(traceMaskValuePVInt==null) return;
-            traceMaskValueDBField = dbRecord.findDBField(traceMaskValuePVInt);
-            traceMaskDesiredValuePVInt = traceMaskPVStructure.getIntField("desiredValue");
-            if(traceMaskDesiredValuePVInt==null) return;
-            traceMaskSetValuePVBoolean = traceMaskPVStructure.getBooleanField("setValue");
-            if(traceMaskSetValuePVBoolean==null) return;
-            traceMaskSetValueDBField = dbRecord.findDBField(traceMaskSetValuePVBoolean);
-            
-            PVStructure traceIOMaskPVStructure = pvStructure.getStructureField("traceIOMask", "setIntValue");
-            if(traceIOMaskPVStructure==null) return;
-            traceIOMaskValuePVInt = traceIOMaskPVStructure.getIntField("value");
-            if(traceIOMaskValuePVInt==null) return;
-            traceIOMaskValueDBField = dbRecord.findDBField(traceIOMaskValuePVInt);
-            traceIOMaskDesiredValuePVInt = traceIOMaskPVStructure.getIntField("desiredValue");
-            if(traceIOMaskDesiredValuePVInt==null) return;
-            traceIOMaskSetValuePVBoolean = traceIOMaskPVStructure.getBooleanField("setValue");
-            if(traceIOMaskSetValuePVBoolean==null) return;
-            traceIOMaskSetValueDBField = dbRecord.findDBField(traceIOMaskSetValuePVBoolean);
-            
-            PVStructure traceIOTruncateSizePVStructure = pvStructure.getStructureField("traceIOTruncateSize", "setIntValue");
-            if(traceIOTruncateSizePVStructure==null) return;
-            traceIOTruncateSizeValuePVInt = traceIOTruncateSizePVStructure.getIntField("value");
-            if(traceIOTruncateSizeValuePVInt==null) return;
-            traceIOTruncateSizeValueDBField = dbRecord.findDBField(traceIOTruncateSizeValuePVInt);
-            traceIOTruncateSizeDesiredValuePVInt = traceIOTruncateSizePVStructure.getIntField("desiredValue");
-            if(traceIOTruncateSizeDesiredValuePVInt==null) return;
-            traceIOTruncateSizeSetValuePVBoolean = traceIOTruncateSizePVStructure.getBooleanField("setValue");
-            if(traceIOTruncateSizeSetValuePVBoolean==null) return;
-            traceIOTruncateSizeSetValueDBField = dbRecord.findDBField(traceIOTruncateSizeSetValuePVBoolean);
-            
-            reportPVBoolean = pvStructure.getBooleanField("report");
-            if(reportPVBoolean==null) return;
-            reportDBField = dbRecord.findDBField(reportPVBoolean);
-            reportDetailsPVInt = pvStructure.getIntField("reportDetails");
+            pvPortName = pvStructure.getStringField("portName");
+            if(pvPortName==null) return;
+            pvDeviceName = pvStructure.getStringField("deviceName");
+            if(pvDeviceName==null) return;
+            pvConnect = pvStructure.getBooleanField("connect");
+            if(pvConnect==null) return;
+            dbConnect = dbRecord.findDBField(pvConnect);
+            pvEnable = pvStructure.getBooleanField("enable");
+            if(pvEnable==null) return;
+            dbEnable = dbRecord.findDBField(pvEnable);
+            pvAutoConnect = pvStructure.getBooleanField("autoConnect");
+            if(pvAutoConnect==null) return;
+            dbAutoConnect = dbRecord.findDBField(pvAutoConnect);
+            pvTraceMask = pvStructure.getIntField("traceMask");
+            if(pvTraceMask==null) return;
+            dbTraceMask = dbRecord.findDBField(pvTraceMask);
+            pvTraceIOMask = pvStructure.getIntField("traceIOMask");
+            if(pvTraceIOMask==null) return;
+            dbTraceIOMask = dbRecord.findDBField(pvTraceIOMask);
+            pvTraceIOTruncateSize = pvStructure.getIntField("traceIOTruncateSize");
+            if(pvTraceIOTruncateSize==null) return;
+            dbTraceIOTruncateSize = dbRecord.findDBField(pvTraceIOTruncateSize);
+            pvReport = pvStructure.getBooleanField("report");
+            pvReportDetails = pvStructure.getIntField("reportDetails");
             super.initialize();
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#start()
+         */
+        @Override
+        public void start() {
+            super.start();
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#stop()
+         */
+        @Override
+        public void stop() {
+            if(port!=null) {
+                port.disconnect(user);
+                port = null;
+            }
+            super.stop();
         }
 
         /* (non-Javadoc)
@@ -242,22 +174,16 @@ public class PDRVPortDeviceControlFactory {
         public void process(SupportProcessRequester supportProcessRequester) {
             message = emptyMessage;
             this.supportProcessRequester = supportProcessRequester;
-            portNameDesired = portNamePVString.get();
-            deviceNameDesired = deviceNamePVString.get();
-            connectDesiredValue = connectDesiredValuePVBoolean.get();
-            connectSetValue = connectSetValuePVBoolean.get();
-            enableDesiredValue = enableDesiredValuePVBoolean.get();
-            enableSetValue = enableSetValuePVBoolean.get();
-            autoConnectDesiredValue = autoConnectDesiredValuePVBoolean.get();
-            autoConnectSetValue = autoConnectSetValuePVBoolean.get();
-            traceMaskDesiredValue = traceMaskDesiredValuePVInt.get();
-            traceMaskSetValue = traceMaskSetValuePVBoolean.get();
-            traceIOMaskDesiredValue = traceIOMaskDesiredValuePVInt.get();
-            traceIOMaskSetValue = traceIOMaskSetValuePVBoolean.get();
-            traceIOTruncateSizeDesiredValue = traceIOTruncateSizeDesiredValuePVInt.get();
-            traceIOTruncateSizeSetValue = traceIOTruncateSizeSetValuePVBoolean.get();
-            report = reportPVBoolean.get();
-            reportDetails = reportDetailsPVInt.get();
+            portName = pvPortName.get();
+            deviceName = pvDeviceName.get();
+            connect = pvConnect.get();
+            enable = pvEnable.get();
+            autoConnect = pvAutoConnect.get();
+            traceMask = pvTraceMask.get();
+            traceIOMask = pvTraceIOMask.get();
+            traceIOTruncateSize = pvTraceIOTruncateSize.get();
+            report = pvReport.get();
+            reportDetails = pvReportDetails.get();
             recordProcess.requestProcessCallback(this);
         }
         /* (non-Javadoc)
@@ -265,18 +191,16 @@ public class PDRVPortDeviceControlFactory {
          */
         public void processCallback() {
             connectPortDevice();
-            if(port==null) {
-                message = "not connected to port";
-                recordProcess.processContinue(this);
-                return;
+            if(isConnected) {
+                // order is important
+                autoConnect();
+                traceMask();
+                traceIOMask();
+                traceIOTruncateSize();
+                enable();
+                connect();
+                report();
             }
-            connect();
-            enable();
-            autoConnect();
-            traceMask();
-            traceIOMask();
-            traceIOTruncateSize();
-            report();
             recordProcess.processContinue(this);
         }
         /* (non-Javadoc)
@@ -286,215 +210,196 @@ public class PDRVPortDeviceControlFactory {
             if(message!=emptyMessage) {
                 pvMessage.put(message);
                 dbMessage.postPut();
+                message = emptyMessage;
             }
-            if(connectSetValue) {
-                connectSetValuePVBoolean.put(false);
-                connectSetValueDBField.postPut();
+            if(connect!=pvConnect.get()) {
+                pvConnect.put(connect);
+                dbConnect.postPut();
             }
-            boolean prevBoolean = connectValuePVBoolean.get();
-            if(prevBoolean!=connectNewValue) {
-                connectValuePVBoolean.put(connectNewValue);
-                connectValueDBField.postPut();
+            if(enable!=pvEnable.get()) {
+                pvEnable.put(enable);
+                dbEnable.postPut();
             }
-            if(enableSetValue) {
-                enableSetValuePVBoolean.put(false);
-                enableSetValueDBField.postPut();
+            if(autoConnect!=pvAutoConnect.get()) {
+                pvAutoConnect.put(autoConnect);
+                dbAutoConnect.postPut();
             }
-            prevBoolean = enableValuePVBoolean.get();
-            if(prevBoolean!=enableNewValue) {
-                enableValuePVBoolean.put(enableNewValue);
-                enableValueDBField.postPut();
+            if(traceMask!=pvTraceMask.get()) {
+                pvTraceMask.put(traceMask);
+                dbTraceMask.postPut();
             }
-            if(autoConnectSetValue) {
-                autoConnectSetValuePVBoolean.put(false);
-                autoConnectSetValueDBField.postPut();
+            if(traceIOMask!=pvTraceIOMask.get()) {
+                pvTraceIOMask.put(traceIOMask);
+                dbTraceIOMask.postPut();
             }
-            prevBoolean = autoConnectValuePVBoolean.get();
-            if(prevBoolean!=autoConnectNewValue) {
-                autoConnectValuePVBoolean.put(autoConnectNewValue);
-                autoConnectValueDBField.postPut();
-            }
-            if(traceMaskSetValue) {
-                traceMaskSetValuePVBoolean.put(false);
-                traceMaskSetValueDBField.postPut();
-            }
-            int prevInt = traceMaskValuePVInt.get();
-            if(prevInt!=traceMaskNewValue) {
-                traceMaskValuePVInt.put(traceMaskNewValue);
-                traceMaskValueDBField.postPut();
-            }
-            if(traceIOMaskSetValue) {
-                traceIOMaskSetValuePVBoolean.put(false);
-                traceIOMaskSetValueDBField.postPut();
-            }
-            prevInt = traceIOMaskValuePVInt.get();
-            if(prevInt!=traceIOMaskNewValue) {
-                traceIOMaskValuePVInt.put(traceIOMaskNewValue);
-                traceIOMaskValueDBField.postPut();
-            }
-            if(traceIOTruncateSizeSetValue) {
-                traceIOTruncateSizeSetValuePVBoolean.put(false);
-                traceIOTruncateSizeSetValueDBField.postPut();
-            }
-            prevInt = traceIOTruncateSizeValuePVInt.get();
-            if(prevInt!=traceIOTruncateSizeNewValue) {
-                traceIOTruncateSizeValuePVInt.put(traceIOTruncateSizeNewValue);
-                traceIOTruncateSizeValueDBField.postPut();
-            }
-            if(report) {
-                reportPVBoolean.put(false);
-                reportDBField.postPut();
+            if(traceIOTruncateSize!=pvTraceIOTruncateSize.get()) {
+                pvTraceIOTruncateSize.put(traceIOTruncateSize);
+                dbTraceIOTruncateSize.postPut();
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         
         private void connectPortDevice() {
-            if(!portNameDesired.equals(portName)
-            ||!deviceNameDesired.equals(deviceName)) {
-                user.disconnectPort();
-                portName = portNameDesired;
-                deviceName = deviceNameDesired;
-                boolean portOnly = false;
-                if(deviceNameDesired==null || deviceNameDesired.length()<=0) {
-                    portOnly = true;
+            justConnected = false;
+            isConnected = false;
+            boolean portOnly = false;
+            if(deviceName==null || deviceName.length()<=0) {
+                portOnly = true;
+            }
+            if(port!=null) {
+                if(portName.equals(port.getPortName())) {
+                    if(device!=null) {
+                        if(deviceName.equals(device.getDeviceName())){
+                            isConnected = true;
+                            return;
+                        }
+                    } else if(portOnly) {
+                        isConnected = true;
+                        return;
+                    }
                 }
-                port = user.connectPort(portName);
-                if(port==null) {
-                    message = "could not connect to port " + portName;
+                user.disconnectPort();
+                port = null;
+            }
+            port = user.connectPort(portName);
+            if(port==null) {
+                message = "could not connect to port " + portName;
+                port = null;
+                return;
+            }
+            if(portOnly) {
+                device = null;
+                trace = port.getTrace();
+            } else {
+                device = user.connectDevice(deviceName);
+                if(device==null) {
+                    message = "could not connect to " + portName +"[" + deviceName + "]";
+                    user.disconnectPort();
+                    port = null;
                     return;
                 }
-                if(portOnly) {
-                    device = null;
-                    trace = port.getTrace();
-                } else {
-                    device = user.connectDevice(deviceName);
-                    if(device==null) {
-                        message = "could not connect to addr " + deviceName + " of port " + portName;
-                        user.disconnectPort();
-                        port = null;
-                    }
-                    trace = device.getTrace();
-                }
+                trace = device.getTrace();
             }
+            isConnected = true;;
+            justConnected = true;
         }
 
         private void connect() {
             Status status = null;
-            if(port==null) return;
-            if(connectSetValue) {
-                if(connectDesiredValue==false) {
-                    if(device!=null) {
-                        if(device.isConnected()) {
-                            status = device.disconnect(user);
-                            if(status!=Status.success) message = user.getMessage();
-                        }
-                    } else {
-                        if(port.isConnected()) {
-                            status = port.disconnect(user);
-                            if(status!=Status.success) message = user.getMessage();
+            if(device!=null) {
+                if(justConnected) {
+                    connect = device.isConnected(); return;
+                }
+                if(connect==device.isConnected()) return;
+                if(connect) {
+                    status = user.lockPortForConnect();
+                    if(status==Status.success) {
+                        try {
+                            status = device.connect(user);
+                        } finally {
+                            user.unlockPort();
                         }
                     }
                 } else {
-                    if(device!=null) {
-                        if(!device.isConnected()) {
-                            status = device.connect(user);
-                            if(status!=Status.success) message = user.getMessage();
-                        }
-                    } else {
-                        if(!port.isConnected()) {
-                            status = port.connect(user);
-                            if(status!=Status.success) message = user.getMessage();
+                    status = user.lockPort();
+                    if(status==Status.success) {
+                        try {
+                            status = device.disconnect(user);
+                        } finally {
+                            user.unlockPort();
                         }
                     }
                 }
-            }
-            if(device!=null) {
-                connectNewValue = device.isConnected();
+                if(status!=Status.success) message = user.getMessage();
+                connect = device.isConnected();
             } else {
-                connectNewValue = port.isConnected();
-            }
+                if(justConnected) {
+                    connect = port.isConnected(); return;
+                }
+                if(connect==port.isConnected()) return;
+                if(connect) {
+                    status = user.lockPortForConnect();
+                    if(status==Status.success) {
+                        try {
+                            status = port.connect(user);
+                        } finally {
+                            user.unlockPort();
+                        }
+                    }
+                } else {
+                    status = user.lockPort();
+                    if(status==Status.success) {
+                        try {
+                            status = port.disconnect(user);
+                        } finally {
+                            user.unlockPort();
+                        }
+                    }
+                }
+                if(status!=Status.success) message = user.getMessage();
+                connect = port.isConnected();
+            }       
         }
     
         private void enable() {
-            if(port==null) return;
-            if(enableSetValue) {
-                if(device!=null) {
-                    boolean oldValue = device.isEnabled();
-                    if(enableDesiredValue!=oldValue) {
-                        device.enable(enableDesiredValue);
-                    }
-                } else {
-                    boolean oldValue = port.isEnabled();
-                    if(enableDesiredValue!=oldValue) {
-                        port.enable(enableDesiredValue);
-                    }
-                }
-            }
             if(device!=null) {
-                enableNewValue = device.isConnected();
+                if(justConnected) {
+                    enable = device.isEnabled(); return;
+                }
+                if(enable==device.isEnabled()) return;
+                device.enable(enable);
             } else {
-                enableNewValue = port.isConnected();
-            }
+                if(justConnected) {
+                    enable = port.isEnabled(); return;
+                }
+                if(enable==port.isEnabled()) return;
+                port.enable(enable);
+            }       
         }
         
         private void autoConnect() {
-            if(port==null) return;
-            if(autoConnectSetValue) {
-                if(device!=null) {
-                    boolean oldValue = device.isEnabled();
-                    if(autoConnectDesiredValue!=oldValue) {
-                        device.autoConnect(autoConnectDesiredValue);
-                    }
-                } else {
-                    boolean oldValue = port.isEnabled();
-                    if(autoConnectDesiredValue!=oldValue) {
-                        port.autoConnect(autoConnectDesiredValue);
-                    }
-                }
-            }
             if(device!=null) {
-                autoConnectNewValue = device.isConnected();
+                if(justConnected) {
+                    autoConnect = device.isAutoConnect(); return;
+                }
+                if(autoConnect==device.isAutoConnect()) return;
+                device.autoConnect(autoConnect);
             } else {
-                autoConnectNewValue = port.isConnected();
-            }
+                if(justConnected) {
+                    autoConnect = port.isAutoConnect(); return;
+                }
+                if(autoConnect==port.isAutoConnect()) return;
+                port.autoConnect(autoConnect);
+            }       
         }
         
         private void traceMask() {
-            if(trace==null) return;
-            if(traceMaskSetValue) {
-                int oldValue = trace.getMask();
-                if(traceMaskDesiredValue!=oldValue) {
-                    trace.setMask(traceMaskDesiredValue);
-                }
+            if(justConnected) {
+                traceMask = trace.getMask();
             }
-            traceMaskNewValue = trace.getMask();
+            if(traceMask==trace.getMask()) return;
+            trace.setMask(traceMask);
         }
         
         private void traceIOMask() {
-            if(trace==null) return;
-            if(traceIOMaskSetValue) {
-                int oldValue = trace.getIOMask();
-                if(traceIOMaskDesiredValue!=oldValue) {
-                    trace.setIOMask(traceIOMaskDesiredValue);
-                }
+            if(justConnected) {
+                traceIOMask = trace.getIOMask();
             }
-            traceIOMaskNewValue = trace.getIOMask();
+            if(traceIOMask==trace.getIOMask()) return;
+            trace.setIOMask(traceIOMask);
         }
         
         private void traceIOTruncateSize() {
-            if(trace==null) return;
-            if(traceIOTruncateSizeSetValue) {
-                int oldValue = trace.getIOTruncateSize();
-                if(traceIOTruncateSizeDesiredValue!=oldValue) {
-                    trace.setIOTruncateSize(traceIOTruncateSizeDesiredValue);
-                }
+            if(justConnected) {
+                traceIOTruncateSize = trace.getIOTruncateSize();
             }
-            traceIOTruncateSizeNewValue = trace.getIOTruncateSize();
+            if(traceIOTruncateSize==trace.getIOTruncateSize()) return;
+            trace.setIOTruncateSize(traceIOTruncateSize);
         }
         
         private void report() {
-            if(port==null) return;
             if(!report) return;
+            if(message!=emptyMessage) return;
             if(device!=null) {
                 message = device.report(reportDetails);
             } else {

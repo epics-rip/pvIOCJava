@@ -20,8 +20,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.db.DBD;
-import org.epics.ioc.db.DBDFactory;
 import org.epics.ioc.util.IOCFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.Requester;

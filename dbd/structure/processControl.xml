@@ -11,17 +11,10 @@
 <structure name = "processControl" supportName = "processControl" >
   <field name = "message" type = "string" />
   <field name = "recordName" type = "string" />
-  <field name = "trace" structureName = "setBooleanValue" />
-  <field name = "enable" structureName = "setBooleanValue" />
-  <field name = "supportStateRecord" structureName = "supportState" />
-  <field name = "supportStateCommandRecord" structureName = "supportStateCommand" />
-  <!-- remaining fields refer to a field of the record -->
-  <field name = "fieldName" structureName = "setStringValue"  />
+  <field name = "trace" type = "boolean" />
+  <field name = "enable" type = "boolean" />
   <field name = "supportState" structureName = "supportState" />
   <field name = "supportStateCommand" structureName = "supportStateCommand" />
-  <field name = "supportName" structureName = "setStringValue" />
-  <field name = "structureName" structureName = "setStringValue" />
-  
 </structure>
 
 

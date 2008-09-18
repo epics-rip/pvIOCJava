@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
 <include addPath = "${JAVAIOC}/dbd/structure" />
-<include href = "setValue.xml" />
 <include href = "limit.xml" />
 <include href = "display.xml" />
 <include href = "control.xml" />

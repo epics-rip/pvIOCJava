@@ -258,12 +258,10 @@ RecordProcessRequester
             deviceTrace.print(Trace.ERROR,
                     "%s:%s callback error %s",
                     fullName,supportName,user.getMessage());
+            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
         }
         deviceTrace.print(Trace.FLOW,
                 "%s:%s callback calling processContinue", fullName,supportName);
-        if(user.getAlarmSeverity()!=AlarmSeverity.none) {
-        	alarmSupport.setAlarm(user.getAlarmMessage(),user.getAlarmSeverity());
-        }
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)

@@ -191,8 +191,8 @@ public class RecordProcessFactory {
             dbRecord.lock();
             try {
                 if(trace) traceMessage(" start");
-                if(scanSupport!=null) scanSupport.start();
                 recordSupport.start();
+                if(scanSupport!=null) scanSupport.start();
                 if(processSelf!=null) processSelf.start();
             } finally {
                 dbRecord.unlock();

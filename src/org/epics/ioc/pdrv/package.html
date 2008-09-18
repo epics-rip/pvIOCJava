@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: portDriver<br />
 package: org.epics.ioc.pdrv<br />
-2008.09.12</h1>
+2008.09.18</h1>
 CONTENTS 
 
 <div class="toc">
@@ -58,8 +58,7 @@ CONTENTS
       <li><a href="#User4">User connection to a device</a></li>
       <li><a href="#getDevice">getDevice</a></li>
       <li><a href="#User5">User Messages</a></li>
-      <li><a href="#Alarms">Alarms</a></li>
-      <li><a href="#L841">I/O Timeouts</a></li>
+      <li><a href="#L835">I/O Timeouts</a></li>
       <li><a href="#Driver1">Driver Private</a></li>
       <li><a href="#User6">User Private</a></li>
       <li><a href="#Passing">Passing Information Between User and
@@ -69,7 +68,7 @@ CONTENTS
   <li><a href="#Connect">Connect Exception</a></li>
   <li><a href="#Port">Port</a>
     <ul>
-      <li><a href="#User7">User Locate Interface/Device</a></li>
+      <li><a href="#User7">User Locate Device</a></li>
       <li><a href="#User8">User Connection Methods</a></li>
       <li><a href="#Informatio">Informational Methods</a></li>
       <li><a href="#Connection1">Connection Methods</a></li>
@@ -586,7 +585,8 @@ the devices connected to the port.</p>
 <dl>
   <dt style="font-family: courier;">asynQueueRequestCallback</dt>
     <dd>This is an interface implemented by the user. It is called when a
-      queueRequest is dequeued. See Port for details.</dd>
+      queueRequest is dequeued. See Port for details. If the user does not
+      want to call queueRequest a null is acceptable.</dd>
 </dl>
 
 <h3 id="createPort">createPort</h3>
@@ -643,8 +643,7 @@ is returned.</p>
 
 <p>User is the interface for accessing a port and/or device. It is created by
 Factory and used by client code. </p>
-<pre>
-public interface User {
+<pre>public interface User {
     public static final int REASON_SIGNAL = -1;
     User duplicateUser(QueueRequestCallback queueRequestCallback);
     Port connectPort(String portName);
@@ -656,12 +655,11 @@ public interface User {
     void queueRequest(QueuePriority queuePriority);
     void cancelRequest();
     Status lockPort();
+    Status lockPortForConnect();
+    Status lockDeviceForConnect();
     void unlockPort();
     void setMessage(String message);
     String getMessage();
-    void setAlarm(AlarmSeverity alarmSeverity,String message);
-    AlarmSeverity getAlarmSeverity();
-    String getAlarmMessage();
     void setTimeout(double timeout);
     double getTimeout();
     void setPortDriverPvt(Object PDRVPvt);
@@ -674,6 +672,8 @@ public interface User {
     int getReason();
     void setAuxStatus(int auxStatus);
     int getAuxStatus();
+    void setBoolean(boolean value);
+    boolean getBoolean();
     void setInt(int value);
     int getInt();
     void setDouble(double value);
@@ -741,8 +741,6 @@ block while making the request can call queueRequest. An example is link
 support for javaIOC records. Such support must not block or it will block the
 record instance itself.</p>
 
-<p></p>
-
 <p>If queueRequest is called for a port that can block than the request is
 queued. The port has an associated thread. When the request is taken from the
 queue, the port is locked and the requestors callback is called. If
@@ -792,6 +790,8 @@ called between the time when cancel is called and when it returns.</p>
 <p>If a user is willing to block during asynchronous port I/O requests then
 it can just call lockPort/unlockPort. </p>
 <pre>    Status lockPort();
+    Status lockPortForConnect();
+    Status lockDeviceForConnect();
     void unlockPort();</pre>
 
 <p>Code that uses lockPort should follow the pattern:</p>
@@ -801,6 +801,8 @@ it can just call lockPort/unlockPort. </p>
      } finally {
          user.unlockPort();
      }</pre>
+
+<p>The other lock methods are for calling port.connect and device.connect.</p>
 
 <h3 id="User3">User connection to a port</h3>
 <pre>    Port connectPort(String portName);
@@ -841,14 +843,7 @@ itself.</p>
 must also call user.setMessage to explain why the method failed. The user can
 then call getMessage to find the reason.</p>
 
-<h3 id="Alarms">Alarms</h3>
-<pre>    void setAlarm(AlarmSeverity alarmSeverity,String message);
-    AlarmSeverity getAlarmSeverity();
-    String getAlarmMessage();</pre>
-
-<p>Methods that set and get alarms. </p>
-
-<h3 id="L841">I/O Timeouts</h3>
+<h3 id="L835">I/O Timeouts</h3>
 <pre>    void setTimeout(double timeout);
     double getTimeout();</pre>
 
@@ -942,11 +937,9 @@ connecy/disconnect can be called without locking the port.</p>
 <pre>public interface Port {
     String report(boolean reportDevices,int details);
     Device[] getDevices();
-    Interface[] getInterfaces();
     Trace getTrace();
     String getDriverName();
     String getPortName();
-    boolean isMultiDevicePort();
     boolean canBlock();
     void enable(boolean trueFalse);
     void autoConnect(boolean trueFalse);
@@ -956,29 +949,21 @@ connecy/disconnect can be called without locking the port.</p>
     boolean isConnected();
     boolean isEnabled();
     boolean isAutoConnect();
-    void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
-    void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);
-    Interface findInterface(User user,String interfaceName,
-        boolean interposeInterfaceOK);
+    Status exceptionListenerAdd(User user,ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerRemove(User user);
     void scanQueues();
     void registerLockPortNotify(LockPortNotify lockPortNotify);
     void unregisterLockPortNotify();
     Device createDevice(DeviceDriver deviceDriver, int addr);
-    void registerInterface(Interface iface);
-    Interface interposeInterface(Interface iface);
     void exceptionConnect();
     void exceptionDisconnect();
 }</pre>
 
-<h3 id="User7">User Locate Interface/Device</h3>
+<h3 id="User7">User Locate Device</h3>
 
 <p>After a user has connected to a port via a call to user.connectPort it can
-connect to a device by calling port.getDevice. If a PDRV implements
-interfaces than they can be found via a call to port.findInterface. Most
-drivers will implement interfaces for devices but not for the port.</p>
-<pre>    Interface findInterface(User user,String interfaceName,
-        boolean interposeInterfaceOK);
-    Device getDevice(User user, int addr);</pre>
+connect to a device by calling port.getDevice.</p>
+<pre>    Device getDevice(User user, int addr);</pre>
 
 <h3 id="User8">User Connection Methods</h3>
 
@@ -998,7 +983,6 @@ queueRequest or call lockPort/unlockPort to call these methods.</p>
     Interface[] getInterfaces();
     String getDriverName();
     String getPortName();
-    boolean isMultiDevicePort();
     boolean canBlock();</pre>
 
 <p>where</p>
@@ -1029,8 +1013,8 @@ queueRequest or call lockPort/unlockPort to call these methods.</p>
     boolean isConnected();
     boolean isEnabled();
     boolean isAutoConnect();
-    void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
-    void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);</pre>
+    Status exceptionListenerAdd(User user,ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerRemove(User user);</pre>
 
 <p>where</p>
 <dl>
@@ -1059,10 +1043,8 @@ queueRequest or call lockPort/unlockPort to call these methods.</p>
 
 <p>These are methods called by a driver.</p>
 <pre>    Device createDevice(DeviceDriver deviceDriver, int addr);
-    void registerInterface(Interface iface);
     void exceptionConnect();
     void exceptionDisconnect(); 
-    Interface interposeInterface(Interface iface);
     Trace getTrace();
     void scanQueues();</pre>
 
@@ -1071,14 +1053,10 @@ queueRequest or call lockPort/unlockPort to call these methods.</p>
   <dt style="font-family: courier;">createDevice</dt>
     <dd>The driver calls this as a result of a call to port.createDevice,
       that is port.createDevice must itself call portDriver.createDevice.</dd>
-  <dt style="font-family: courier;">registerInterface</dt>
-    <dd>A portDriver must call this for each interface it implements.</dd>
   <dt style="font-family: courier;">exceptionConnect</dt>
     <dd>When a port connects it must calls this.</dd>
   <dt style="font-family: courier;">exceptionDisconnect</dt>
     <dd>When a port disconnects it must calls this.</dd>
-  <dt style="font-family: courier;">interposeInterface</dt>
-    <dd>This is for any code that wants to interpose a port interface.</dd>
   <dt style="font-family: courier;">getTrace</dt>
     <dd>Get the trace interface for the port.</dd>
   <dt style="font-family: courier;">scanQueues</dt>
@@ -1141,8 +1119,8 @@ definitions for Device are:</p>
     boolean isConnected();
     boolean isEnabled();
     boolean isAutoConnect();
-    void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
-    void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerAdd(User user,ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerRemove(User user);
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
     Status lockPort(User user);
     Status connect(User user);
@@ -1223,8 +1201,8 @@ void unblockOtherUsers(User user);</pre>
     boolean isEnabled();
     boolean isAutoConnect();
     boolean isBlockedByOtherUser(User user);
-    void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
-    void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);</pre>
+    Status exceptionListenerAdd(User user,ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerRemove(User user);</pre>
 
 <p>where</p>
 <dl>
@@ -1302,10 +1280,9 @@ facility.</p>
     Writer getFile();
     void setIOTruncateSize(int size);
     int getIOTruncateSize();
-    void optionChangeListenerAdd(
+    Status optionChangeListenerAdd(User user,
          TraceOptionChangeListener traceOptionChangeListener);
-    void optionChangeListenerRemove(
-         TraceOptionChangeListener traceOptionChangeListener);
+    Status optionChangeListenerRemove(User user);
     void print(int reason,String message);
     void print(int reason,String format, Object... args);
     void printIO(int reason, byte[] buffer,long len,String message);
@@ -1412,10 +1389,9 @@ following:</p>
 }</pre>
 
 <p>The Trace methods for a listener are:</p>
-<pre>    void optionChangeListenerAdd(
+<pre>    Status optionChangeListenerAdd(User user,
          TraceOptionChangeListener traceOptionChangeListener);
-    void optionChangeListenerRemove(
-         TraceOptionChangeListener traceOptionChangeListener);</pre>
+    Status optionChangeListenerRemove(User user);</pre>
 
 <h3 id="Generating">Generating Trace Messages</h3>
 
@@ -1504,8 +1480,7 @@ org.epics.ioc.pdrv.interfaces</span></p>
     public static User createUser(QueueRequestCallback asynQueueRequestCallback);
     public static Port createPort(
             String portName,PortDriver PDRV,
-            String driverName,
-            boolean isMultiDevicePort,boolean canBlock,
+            String driverName,boolean canBlock,
             boolean autoConnect,ScanPriority priority);
     public static String[] getPortNames();
     public static Port getPort(String portName);
@@ -1530,12 +1505,11 @@ public interface User {
     void queueRequest(QueuePriority queuePriority);
     void cancelRequest();
     Status lockPort();
+    Status lockPortForConnect();
+    Status lockDeviceForConnect();
     void unlockPort();
     void setMessage(String message);
     String getMessage();
-    void setAlarm(AlarmSeverity alarmSeverity,String message);
-    AlarmSeverity getAlarmSeverity();
-    String getAlarmMessage();
     void setTimeout(double timeout);
     double getTimeout();
     void setPortDriverPvt(Object PDRVPvt);
@@ -1596,8 +1570,8 @@ public interface Port {
     boolean isConnected();
     boolean isEnabled();
     boolean isAutoConnect();
-    void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
-    void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerAdd(User user,ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerRemove(User user);
     void scanQueues();
     Status connect(User user);
     Status disconnect(User user);
@@ -1619,8 +1593,8 @@ public interface Device {
     boolean isConnected();
     boolean isEnabled();
     boolean isAutoConnect();
-    void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
-    void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerAdd(User user,ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerRemove(User user);
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
     Status connect(User user);
     Status disconnect(User user);
@@ -1655,10 +1629,9 @@ public interface Trace {
     Writer getFile();
     void setIOTruncateSize(int size);
     int getIOTruncateSize();
-    void optionChangeListenerAdd(
+    Status optionChangeListenerAdd(User user,
          TraceOptionChangeListener traceOptionChangeListener);
-    void optionChangeListenerRemove(
-         TraceOptionChangeListener traceOptionChangeListener);
+    void optionChangeListenerRemove(User user);
     void print(int reason,String message);
     void print(int reason,String format, Object... args);
     void printIO(int reason, byte[] buffer,long len,String message);

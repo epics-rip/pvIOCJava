@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2008.09.12 </h1>
+2008.09.18 </h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -258,7 +258,6 @@ single field named value.</p>
         </ul>
       </li>
       <li><a href="#recordType7">dbd/recordType/processControl.xml</a></li>
-      <li><a href="#structure11">dbd/structure/setValue.xml</a></li>
       <li><a href="#structure6">dbd/structure/supportArray.xml</a></li>
       <li><a href="#structure12">dbd/structure/supportState.xml</a></li>
     </ul>
@@ -1719,7 +1718,6 @@ JavaIOC.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
 &lt;IOCDatabase&gt;
 &lt;include addPath = "${JAVAIOC}/dbd/structure" /&gt;
-&lt;include href = "setValue.xml" /&gt;
 &lt;include href = "limit.xml" /&gt;
 &lt;include href = "display.xml" /&gt;
 &lt;include href = "control.xml" /&gt;
@@ -2629,12 +2627,12 @@ org.epics.ioc.portDriver for details.</p>
   &lt;field name = "message" type = "string" /&gt;
   &lt;field name = "portName" type = "string" /&gt;
   &lt;field name = "deviceName" type = "string" /&gt;
-  &lt;field name = "connect" structureName = "setBooleanValue"  /&gt;
-  &lt;field name = "enable" structureName = "setBooleanValue"   /&gt;
-  &lt;field name = "autoConnect" structureName = "setBooleanValue" /&gt;
-  &lt;field name = "traceMask" structureName = "setIntValue"  /&gt;
-  &lt;field name = "traceIOMask" structureName = "setIntValue" /&gt;
-  &lt;field name = "traceIOTruncateSize" structureName = "setIntValue" /&gt;
+  &lt;field name = "connect" type = "boolean"  /&gt;
+  &lt;field name = "enable" type = "boolean"   /&gt;
+  &lt;field name = "autoConnect" type = "boolean" /&gt;
+  &lt;field name = "traceMask" type = "int"  /&gt;
+  &lt;field name = "traceIOMask" type = "int" /&gt;
+  &lt;field name = "traceIOTruncateSize" type = "int" /&gt;
   &lt;field name = "report" type = "boolean" /&gt;
   &lt;field name = "reportDetails" type = "int" /&gt;
 &lt;/structure&gt;
@@ -2727,47 +2725,16 @@ record. It has the definitions:</p>
     default = "idle initialize start stop uninitialize" /&gt;
 &lt;/structure&gt;
 &lt;structure name = "processControl" supportName = "processControl" &gt;
-  &lt;field name = "message" type = "string" /&gt;
+ &lt;field name = "message" type = "string" /&gt;
   &lt;field name = "recordName" type = "string" /&gt;
-  &lt;field name = "trace" structureName = "setBooleanValue" /&gt;
-  &lt;field name = "enable" structureName = "setBooleanValue" /&gt;
-  &lt;field name = "supportStateRecord" structureName = "supportState" /&gt;
-  &lt;field name = "supportStateCommandRecord" structureName = "supportStateCommand" /&gt;
-  &lt;!-- remaining fields refer to a field of the record --&gt;
-  &lt;field name = "fieldName" structureName = "setStringValue"  /&gt;
+  &lt;field name = "trace" type = "boolean" /&gt;
+  &lt;field name = "enable" type = "boolean" /&gt;
   &lt;field name = "supportState" structureName = "supportState" /&gt;
-  &lt;field name = "supportStateCommand" structureName = "supportStateCommand" /&gt;
-  &lt;field name = "supportName" structureName = "setStringValue" /&gt;
-  &lt;field name = "structureName" structureName = "setStringValue" /&gt;
+  &lt;field name = "supportStateCommand" structureName = "supportStateCommand" /&gt;  
 &lt;/structure&gt;
+
 &lt;support name = "processControl"
    factoryName = "org.epics.ioc.support.basic.ProcessControlFactory" /&gt;
-&lt;/IOCDatabase&gt;</pre>
-<hr />
-
-<h3 style="text-align: center"
-id="structure11">dbd/structure/setValue.xml</h3>
-<hr />
-
-<p>The following describes the structure for setting a value. This is used by
-processControl and by portDeviceControl.</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "setBooleanValue" &gt;
-  &lt;field name = "value" type = "boolean" /&gt;
-  &lt;field name = "desiredValue" type = "boolean" /&gt;
-  &lt;field name = "setValue" type = "boolean" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "setIntValue" &gt;
-  &lt;field name = "value" type = "int" /&gt;
-  &lt;field name = "desiredValue" type = "int" /&gt;
-  &lt;field name = "setValue" type = "boolean" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "setStringValue" &gt;
-  &lt;field name = "value" type = "string" /&gt;
-  &lt;field name = "desiredValue" type = "string" /&gt;
-  &lt;field name = "setValue" type = "boolean" /&gt;
-&lt;/structure&gt;
 &lt;/IOCDatabase&gt;</pre>
 <hr />
 

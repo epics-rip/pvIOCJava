@@ -96,14 +96,17 @@ public interface Trace {
     int getIOTruncateSize();
     /**
      * Add a listener for put of any trace option.
+     * @param user The user.
      * @param traceOptionChangeListener The listener.
+     * @return Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage() describes why the request failed.
      */
-    void optionChangeListenerAdd(TraceOptionChangeListener traceOptionChangeListener);
+    Status optionChangeListenerAdd(User user,TraceOptionChangeListener traceOptionChangeListener);
     /**
      * Remove a listener for put of any trace option.
-     * @param traceOptionChangeListener The listener.
+     * @param user The user.
      */
-    void optionChangeListenerRemove(TraceOptionChangeListener traceOptionChangeListener);
+    void optionChangeListenerRemove(User user);
     /**
      * Generate a trace message.
      * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.

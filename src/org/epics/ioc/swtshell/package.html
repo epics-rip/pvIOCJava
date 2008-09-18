@@ -10,13 +10,19 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2008.08.28</h1>
+2008.09.18</h1>
 CONTENTS 
+<hr />
+
+<h2 style="text-align: center" id="Overview">Overview</h2>
+<hr />
+
+<p>This package pro</p>
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Access</a> 
+  <li><a href="#Channel">Channel Access</a>
     <ul>
       <li><a href="#get">get</a></li>
       <li><a href="#put">put</a></li>
@@ -24,31 +30,28 @@ CONTENTS
       <li><a href="#monitor">monitor</a></li>
     </ul>
   </li>
-  <li><a href="#iocConsole">iocConsole</a></li>
-  <li><a href="#Local">Local JavaIOC</a> 
+  <li><a href="#Local">Local JavaIOC</a>
     <ul>
       <li><a href="#loadDataba">loadDatabase</a></li>
-      <li><a href="#introspect">introspectDatabase</a> 
+      <li><a href="#introspect">introspectDatabase</a>
         <ul>
           <li><a href="#Database">Database Definitions</a></li>
           <li><a href="#Local1">Local Record Instance</a></li>
           <li><a href="#Show">Show Information</a></li>
         </ul>
       </li>
+      <li><a href="#portDriver">portDriver</a></li>
     </ul>
   </li>
+  <li><a href="#iocConsole">iocConsole</a></li>
 </ul>
 </div>
-<hr />
 
-<h2 style="text-align: center" id="Overview">Overview</h2>
-<hr />
-
-<p>This package provides a GUI shell implemented via the SWT toolkit that
-comes with eclipse. The default JavaIOC package overview document gives brief
-instructions for starting the swtshell. If you want to communicate with a V3
-EPICS IOC then the option "-server server/beforeStartIOC.txt" must be given
-when the javaIOC is started.</p>
+<p>vides a GUI shell implemented via the SWT toolkit that comes with eclipse.
+The default JavaIOC package overview document gives brief instructions for
+starting the swtshell. If you want to communicate with a V3 EPICS IOC then
+the option "-server server/beforeStartIOC.txt" must be given when the javaIOC
+is started.</p>
 
 <p>The following window appears when swtshell is started:</p>
 
@@ -68,6 +71,8 @@ when the javaIOC is started.</p>
   <li>loadDatabase and introspectDatabase<br />
     Each of these buttons starts another window for interacting with the
     local javaIOC. They are described bnelow.</li>
+  <li>portDriver<br />
+    Starts a window for interacting with a portDriver port and device.</li>
   <li>v3iocshell<br />
     The v3iocshell buttom starts a V3 epics ioc that is part of the same
     process as the javaIOC. In the future this will be used to communicate
@@ -247,21 +252,6 @@ get. The forth and fifth rows provide options for monitor:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="iocConsole">iocConsole</h2>
-<hr />
-
-<p>The following window appears when the iocConsole button is pushed:</p>
-
-<center>
-<p><img src="./iocConsole.gif" alt="iocConsole" /></p>
-</center>
-
-<p>When this is started, it calls iocdb.addRequester where iocdb is the
-master IOCDB. Whenever any code sends a message to the iocdb, the message is
-displayed on the iocConsole window. Note that iocdb puts the messages on a
-queue and has a separate thead that send the messages to the requesters.</p>
-<hr />
-
 <h2 style="text-align: center" id="Local">Local JavaIOC</h2>
 <hr />
 
@@ -344,5 +334,31 @@ are:</p>
     <dd>Shows all threads created via the thread utilities in package
       org.epics.ioc.util.</dd>
 </dl>
+
+<h3 id="portDriver">portDriver</h3>
+
+<p>The following window appears when the portDriver button is pushed:</p>
+
+<center>
+<p><img src="./portDriver.gif" alt="portDriver" /></p>
+</center>
+
+<p>The first row has buttons to select a port and a device. The other rows
+are for setting trace options and for connect and enable commands.</p>
+<hr />
+
+<h2 style="text-align: center" id="iocConsole">iocConsole</h2>
+<hr />
+
+<p>The following window appears when the iocConsole button is pushed:</p>
+
+<center>
+<p><img src="./iocConsole.gif" alt="iocConsole" /></p>
+</center>
+
+<p>When this is started, it calls iocdb.addRequester where iocdb is the
+master IOCDB. Whenever any code sends a message to the iocdb, the message is
+displayed on the iocConsole window. Note that iocdb puts the messages on a
+queue and has a separate thead that send the messages to the requesters.</p>
 </body>
 </html>

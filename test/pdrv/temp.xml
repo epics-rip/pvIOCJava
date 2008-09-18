@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <IOCDatabase>
-
+<record name = "processControl" structureName = "processControl" />
 <record name = "syncInt32Port" structureName = "portCreate">
     <factoryName>org.epics.ioc.pdrv.testDriver.Int32DriverFactory</factoryName>
     <portName>syncInt32Port</portName>
@@ -11,7 +11,7 @@
         <high>2047</high>
     </driverParameters>
 </record>
-<!--
+
 <record name = "syncInt32DeviceControl" structureName = "portDeviceControl" >
     <portName>syncInt32Port</portName>
     <deviceName>0</deviceName>
@@ -32,6 +32,7 @@
         <type><choice>periodic</choice></type>
         <rate>0.5</rate>
     </scan>
+<!--
     <supportArray elementType = "structure" supportName = "supportArray" >
         <element structureName = "supportArrayElement">
             <wait>false</wait>
@@ -41,8 +42,9 @@
             </link>
         </element>
     </supportArray>
-</record>
 -->
+</record>
+<!--
 <record name = "syncInt32Out">
     <value type = "int"/>
     <alarm structureName = "alarm" />
@@ -53,7 +55,7 @@
         <timeout>.2</timeout>
     </output>
 </record>
-<!--
+
 <record name = "syncInt32In">
     <value type = "int"/>
     <alarm structureName = "alarm" />

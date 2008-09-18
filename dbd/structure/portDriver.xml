@@ -66,12 +66,12 @@
   <field name = "message" type = "string" />
   <field name = "portName" type = "string" />
   <field name = "deviceName" type = "string" />
-  <field name = "connect" structureName = "setBooleanValue"  />
-  <field name = "enable" structureName = "setBooleanValue"   />
-  <field name = "autoConnect" structureName = "setBooleanValue" />
-  <field name = "traceMask" structureName = "setIntValue"  />
-  <field name = "traceIOMask" structureName = "setIntValue" />
-  <field name = "traceIOTruncateSize" structureName = "setIntValue" />
+  <field name = "connect" type = "boolean"  />
+  <field name = "enable" type = "boolean"   />
+  <field name = "autoConnect" type = "boolean" />
+  <field name = "traceMask" type = "int"  />
+  <field name = "traceIOMask" type = "int" />
+  <field name = "traceIOTruncateSize" type = "int" />
   <field name = "report" type = "boolean" />
   <field name = "reportDetails" type = "int" />
 </structure>

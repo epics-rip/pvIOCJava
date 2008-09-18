@@ -71,15 +71,20 @@ public interface Device {
      */
     boolean isAutoConnect();
     /**
-     * Add a listener for connect exceptions.
-     * @param connectExceptionListener The listener.
+     * Add a listener for connect/disconnect events.
+     * This can be called without owning the port.
+     * @param user The user.
+     * @param connectExceptionListener The listener interface.
+     * @return Status.success means that the attempt was successful.
+     * If the attempt fails user.getMessage() describes why the request failed.
      */
-    void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener);
+    Status exceptionListenerAdd(User user,ConnectExceptionListener connectExceptionListener);
     /**
-     * Remove a listener for connect exceptions.
-     * @param connectExceptionListener The listener.
+     * Remove a listener for connect/disconnect events.
+     * This can be called without owning the port.
+     * @param user The user.
      */
-    void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener);
+    void exceptionListenerRemove(User user);
     /**
      * Find an interface.
      * @param user The user.
@@ -92,7 +97,7 @@ public interface Device {
      * Attempt to connect.
      * This must be called with the port owned by the user.
      * @param user The requester.
-     * @return Result. Status.success means that the attempt was successful.
+     * @return Status.success means that the attempt was successful.
      * If the attempt fails user.getMessage describes why the request failed.
      */
     Status connect(User user);
@@ -100,7 +105,7 @@ public interface Device {
      * Attempt to disconnect.
      * This must be called with the port owned by the user.
      * @param user The requester.
-     * @return Result. Status.success means that the attempt was successful.
+     * @return Status.success means that the attempt was successful.
      * If the attempt fails user.getMessage describes why the request failed.
      */
     Status disconnect(User user);

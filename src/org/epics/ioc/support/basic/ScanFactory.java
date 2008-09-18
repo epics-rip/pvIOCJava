@@ -227,6 +227,7 @@ public class ScanFactory {
             
             
             private void startScanner() {
+                if(!isActive || !isStarted) return;
                 boolean result = true;
                 switch (scanType) {
                 case passive: break;
