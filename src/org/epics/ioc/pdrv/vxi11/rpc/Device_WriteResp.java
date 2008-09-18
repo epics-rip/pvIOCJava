@@ -4,8 +4,12 @@
  * See http://remotetea.sourceforge.net for details
  */
 package org.epics.ioc.pdrv.vxi11.rpc;
-import org.acplt.oncrpc.*;
 import java.io.IOException;
+
+import org.acplt.oncrpc.OncRpcException;
+import org.acplt.oncrpc.XdrAble;
+import org.acplt.oncrpc.XdrDecodingStream;
+import org.acplt.oncrpc.XdrEncodingStream;
 
 public class Device_WriteResp implements XdrAble {
     public Device_ErrorCode error;

@@ -4,10 +4,13 @@
  * See http://remotetea.sourceforge.net for details
  */
 package org.epics.ioc.pdrv.vxi11.rpc;
-import org.acplt.oncrpc.*;
 import java.io.IOException;
-
 import java.net.InetAddress;
+
+import org.acplt.oncrpc.OncRpcClient;
+import org.acplt.oncrpc.OncRpcClientStub;
+import org.acplt.oncrpc.OncRpcException;
+import org.acplt.oncrpc.XdrVoid;
 
 /**
  * The class <code>vxi11core_DEVICE_CORE_Client</code> implements the client stub proxy
