@@ -2,8 +2,6 @@ package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pdrv.vxi11.VXI11SrqHandler;
-import org.epics.ioc.pdrv.vxi11.VXI11User;
 
 public interface GpibController {
     /**
