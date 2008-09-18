@@ -19,7 +19,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.util.AlarmSeverity;
 import org.epics.ioc.util.RunnableReady;
 import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ThreadCreate;
@@ -61,9 +60,10 @@ public class Factory {
                 portName,portDriver,driverName,canBlock,autoConnect,priority);
         globalLock.lock();
         try {
-            if(!portList.add(port)) {
+            if(portList.contains(port)){
                 throw new IllegalStateException("port already exists"); 
             }
+            portList.add(port);
             return port;
         } finally {
             globalLock.unlock();
@@ -95,10 +95,15 @@ public class Factory {
      * @return The interface or null if the port does not exits.
      */
     public static Port getPort(String portName) {
-        for(Port port : portList) {
-            if(port.getPortName().equals(portName)) return port;
+        globalLock.lock();
+        try {
+            for(Port port : portList) {
+                if(port.getPortName().equals(portName)) return port;
+            }
+            return null;
+        } finally {
+            globalLock.unlock();
         }
-        return null;
     }
     
     private static ReentrantLock globalLock = new ReentrantLock();
@@ -123,8 +128,6 @@ public class Factory {
         
         private int auxStatus;
         private String message = null;
-        private String alarmMessage = null;
-        private AlarmSeverity alarmSeverity = null;
         private boolean booleanvalue = false;
         private int intValue;
         private double doubleValue;
@@ -174,6 +177,9 @@ public class Factory {
          */
         public void disconnectPort() {
             disconnectDevice();
+            if(port==null) return;
+            port.exceptionListenerRemove(this);
+            port.trace.optionChangeListenerRemove(this);
             port = null;
             portDriverPvt = null;
         }
@@ -206,6 +212,8 @@ public class Factory {
         	clearErrorParms();
             if(device==null) return;
             cancelRequest();
+            device.exceptionListenerRemove(this);
+            device.trace.optionChangeListenerRemove(this);
             device = null;
             deviceDriverPvt = null;
         }
@@ -274,11 +282,10 @@ public class Factory {
                 if(port.isAutoConnect()) {
                     status = port.connect(this);
                 } else {
-                    setMessage("port is not connected");
                     status = Status.error;
                 }
                 if(status!=Status.success) {
-                    setAlarm(AlarmSeverity.invalid,getMessage());
+                    setMessage("port is not connected");
                     port.unlockPort(this);
                     return status;
                 }
@@ -287,13 +294,50 @@ public class Factory {
                 if(device.isAutoConnect()) {
                     status = device.connect(this);
                 } else {
-                    setMessage("device is not connected");
                     status = Status.error;
                 }
                 if(status!=Status.success) {
-                    setAlarm(AlarmSeverity.invalid,getMessage());
+                    setMessage("device is not connected");
                     port.unlockPort(this);
                     return status;
+                }
+            }
+            return status;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.User#lockPortForConnect()
+         */
+        public Status lockPortForConnect() {
+            clearErrorParms();
+            if(port==null) {
+                setMessage("not connected to a port");
+                return Status.error;
+            }
+            Status status = port.lockPort(this);
+            if(status==Status.success) {
+                if(port.connected) {
+                    setMessage("port already connected");
+                    status = Status.error;
+                    port.unlockPort(this);
+                }
+            }
+            return status;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.User#lockDeviceForConnect()
+         */
+        public Status lockDeviceForConnect() {
+            clearErrorParms();
+            if(device==null) {
+                setMessage("not connected to a device");
+                return Status.error;
+            }
+            Status status = device.lockPort(this);
+            if(status==Status.success) {
+                if(device.connected) {
+                    setMessage("device already connected");
+                    status = Status.error;
+                    port.unlockPort(this);
                 }
             }
             return status;
@@ -341,16 +385,7 @@ public class Factory {
         public String getMessage() {
             return message;
         }
-        public String getAlarmMessage() {
-			return alarmMessage;
-		}
-		public AlarmSeverity getAlarmSeverity() {
-			return alarmSeverity;
-		}
-		public void setAlarm(AlarmSeverity alarmSeverity, String message) {
-			this.alarmSeverity = alarmSeverity;
-			this.alarmMessage = message;
-		}
+        
 		/* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getReason()
          */
@@ -451,8 +486,6 @@ public class Factory {
         private void clearErrorParms() {
         	auxStatus = 0;
         	message = null;
-        	alarmMessage = null;
-        	alarmSeverity = AlarmSeverity.none;
         }
     }
     
@@ -481,10 +514,7 @@ public class Factory {
         private boolean enabled = true;
         
         private List<DeviceImpl> deviceList = new LinkedList<DeviceImpl>();
-                
-        private List<ConnectExceptionListener> exceptionListenerList
-            = new LinkedList<ConnectExceptionListener>();
-        private List<ConnectExceptionListener> exceptionListenerListNew = null;
+        private ConnectExceptionList exceptionList = new ConnectExceptionList();
         private boolean exceptionActive = false;
         
         private UserImpl lockPortUser = null;
@@ -561,31 +591,43 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Port#enable(boolean)
          */
         public void enable(boolean trueFalse) {
-            trace.print(Trace.FLOW, "%s enable %b", portName,trueFalse);
+            boolean changed = false;
             portLock.lock();
             try {
-                if(enabled==trueFalse) return;
-                enabled = trueFalse;
+                if(enabled!=trueFalse) {
+                    enabled = trueFalse;
+                    changed = true;
+                }
+
             } finally {
                 portLock.unlock();
             }
-            raiseException(ConnectException.enable);
-            if(trueFalse) scanQueues();
+            trace.print(Trace.FLOW, "%s enable %b wasChanged %b", portName,trueFalse,changed);
+            if(changed) {
+                raiseException(ConnectException.enable);
+                if(trueFalse) scanQueues();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#autoConnect(boolean)
          */
         public void autoConnect(boolean trueFalse) {
-            trace.print(Trace.FLOW, "%s autoConnect %b ", portName,trueFalse);
+            boolean changed = false;
+            trace.print(Trace.FLOW, "%s autoConnect %b", portName,trueFalse);
             portLock.lock();
             try {
-                if(autoConnect==trueFalse) return;
-                autoConnect = trueFalse;
+                if(autoConnect!=trueFalse) {
+                    autoConnect = trueFalse;
+                    changed = true;
+                }
             } finally {
                 portLock.unlock();
             }
-            raiseException(ConnectException.autoConnect);
-            if(trueFalse) scanQueues();
+            trace.print(Trace.FLOW, "%s autoConnect %b was changed %b", portName,trueFalse,changed);
+            if(changed) {
+                raiseException(ConnectException.autoConnect);
+                if(trueFalse) scanQueues();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getDevice(org.epics.ioc.pdrv.User, java.lang.String)
@@ -614,21 +656,15 @@ public class Factory {
         public Status connect(User user) {         
             if(lockPortUser!=user) {
                 user.setMessage("Illegal to call connect without owning the port");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             if(connected) {
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 user.setMessage("already connected");
                 return Status.error;
             }
             trace.print(Trace.FLOW, "%s connect", portName);
             Status status = portDriver.connect(user);
-            if(status!=Status.success) {
-                user.setAlarm(AlarmSeverity.invalid, user.getMessage());
-            } else {
-                if(portThread!=null) portThread.scanQueues();
-            }
+            if(status==Status.success && portThread!=null) portThread.scanQueues();
             return status;
         }
         /* (non-Javadoc)
@@ -637,12 +673,10 @@ public class Factory {
         public Status disconnect(User user) {
             if(lockPortUser!=user) {
                 user.setMessage("Illegal to call disconnect without owning the port");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             if(!connected) {
                 user.setMessage("not connected");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             trace.print(Trace.FLOW, "%s disconnect", portName);
@@ -669,50 +703,31 @@ public class Factory {
             return autoConnect;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Port#exceptionListenerAdd(org.epics.ioc.pdrv.ConnectExceptionListener)
+         * @see org.epics.ioc.pdrv.Port#exceptionListenerAdd(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.ConnectExceptionListener)
          */
-        public void exceptionListenerAdd(ConnectExceptionListener connectExceptionListener)
+        public Status exceptionListenerAdd(User user,ConnectExceptionListener listener)
         {
             trace.print(Trace.FLOW, "%s exceptionListenerAdd", portName);
             portLock.lock();
             try {
-                if(!exceptionActive) {   
-                    if(!exceptionListenerList.add(connectExceptionListener)) {
-                        trace.print(Trace.ERROR, "%s exceptionListenerAdd failed", portName);
-                    }
-                    return;
-                }
-                if(exceptionListenerListNew==null) {
-                    exceptionListenerListNew =
-                        new LinkedList<ConnectExceptionListener>(exceptionListenerList);
-                }
-                if(!exceptionListenerListNew.add(connectExceptionListener)) {
-                    trace.print(Trace.ERROR, "%s exceptionListenerAdd failed", portName);
-                }                
+                if(!exceptionActive) {
+                    return exceptionList.add(user, listener);
+
+                } else {
+                    return exceptionList.addNew(user, listener);
+                }          
             } finally {
                 portLock.unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Port#exceptionListenerRemove(org.epics.ioc.pdrv.ConnectExceptionListener)
+         * @see org.epics.ioc.pdrv.Port#exceptionListenerRemove(org.epics.ioc.pdrv.User)
          */
-        public void exceptionListenerRemove(ConnectExceptionListener connectExceptionListener) { 
+        public void exceptionListenerRemove(User user) {
             trace.print(Trace.FLOW, "%s exceptionListenerRemove", portName);
             portLock.lock();
             try {
-                if(!exceptionActive) {   
-                    if(!exceptionListenerList.remove(connectExceptionListener)) {
-                        trace.print(Trace.ERROR, "%s exceptionListenerRemove failed", portName);
-                    }
-                    return;
-                }
-                if(exceptionListenerListNew==null) {
-                    exceptionListenerListNew =
-                        new LinkedList<ConnectExceptionListener>(exceptionListenerList);
-                }
-                if(!exceptionListenerListNew.remove(connectExceptionListener)) {
-                    trace.print(Trace.ERROR, "%s exceptionListenerRemove failed", portName);
-                }                
+                exceptionList.remove(user);
             } finally {
                 portLock.unlock();
             }
@@ -757,12 +772,10 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Port#createDevice(org.epics.ioc.pdrv.DeviceDriver, java.lang.String)
          */
         public Device createDevice(DeviceDriver deviceDriver, String deviceName) {
-            
             trace.print(Trace.FLOW, "%s createDevice %s", portName,deviceName);
             DeviceImpl deviceNew = new DeviceImpl(this,deviceDriver,deviceName);
             portLock.lock();
             try {
-                
                 ListIterator<DeviceImpl> iter = deviceList.listIterator();
                 while(iter.hasNext()) {
                     Device device = iter.next();
@@ -801,8 +814,8 @@ public class Factory {
             trace.print(Trace.FLOW, "%s exceptionDisconnect", portName);
             portLock.lock();
             try {
-                if(connected) {
-                    throw new IllegalStateException("already connected");
+                if(!connected) {
+                    throw new IllegalStateException("already disconnected");
                 }
                 connected = false;
             } finally {
@@ -816,11 +829,12 @@ public class Factory {
             trace.print(Trace.FLOW, "%s lockPort", portName);
             lockPortLock.lock();
             try {
-                if(!enabled) {
-                    user.message = "port disabled";
-                    return Status.error;
-                }
-                if(lockPortUser!=null) {
+                while(true) {
+                    if(!enabled) {
+                        user.message = "port disabled";
+                        return Status.error;
+                    }
+                    if(lockPortUser==null) break;
                     if(lockPortUser==user) {
                         user.message = "already locked. Illegal request";
                         return Status.error;
@@ -862,17 +876,10 @@ public class Factory {
             } finally {
                 portLock.unlock();
             }
-            ListIterator<ConnectExceptionListener> iter =  exceptionListenerList.listIterator();
-            while(iter.hasNext()) {
-                ConnectExceptionListener asynConnectExceptionListener = iter.next();
-                asynConnectExceptionListener.exception(connectException);
-            }
+            exceptionList.raiseException(connectException);
             portLock.lock();
             try {
-                if(exceptionListenerListNew!=null) {
-                    exceptionListenerList = exceptionListenerListNew;
-                    exceptionListenerListNew = null;
-                }
+                exceptionList.merge();
                 exceptionActive = false; 
             } finally {
                 portLock.unlock();
@@ -908,13 +915,9 @@ public class Factory {
         private String fullName;
         private Trace trace = new TraceImpl();
         private List<DeviceInterface> interfaceList = new LinkedList<DeviceInterface>();
-
-        private List<ConnectExceptionListener> exceptionListenerList = new LinkedList<ConnectExceptionListener>();
-        private List<ConnectExceptionListener> exceptionListenerListNew = null;
+        private ConnectExceptionList exceptionList = new ConnectExceptionList();
         private boolean exceptionActive = false;
-        
         private User blockingUser = null;
-
         private boolean autoConnect = false;
         private boolean connected = false;
         private boolean enabled = true;
@@ -987,29 +990,41 @@ public class Factory {
          * @see org.epics.ioc.asyn.DeviceUser#enable(boolean)
          */
         public void enable(boolean trueFalse) {
-            trace.print(Trace.FLOW, "%s enable %b", fullName,trueFalse);
+            boolean changed = false;
             deviceLock.lock();
             try {
-                enabled = trueFalse;
+                if(enabled!=trueFalse) {
+                    enabled = trueFalse;
+                    changed = true;
+                }
             } finally {
                 deviceLock.unlock();
             }
-            raiseException(ConnectException.enable);
-            if(trueFalse) port.scanQueues();
+            trace.print(Trace.FLOW, "%s enable %b was changed %b", fullName,trueFalse,changed);
+            if(changed) {
+                raiseException(ConnectException.enable);
+                if(trueFalse) port.scanQueues();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#autoConnect(boolean)
          */
         public void autoConnect(boolean trueFalse) {
-            trace.print(Trace.FLOW, "%s autoConnect %b", fullName,trueFalse);
+            boolean changed = false;
             deviceLock.lock();
             try {
-                autoConnect = trueFalse;
+                if(autoConnect!=trueFalse) {
+                    autoConnect = trueFalse;
+                    changed = true;
+                }
             } finally {
                 deviceLock.unlock();
             }
-            raiseException(ConnectException.autoConnect);
-            if(trueFalse) port.scanQueues();
+            trace.print(Trace.FLOW, "%s autoConnect %b was changed %b", fullName,trueFalse,changed);
+            if(changed) {
+                raiseException(ConnectException.autoConnect);
+                if(trueFalse) port.scanQueues();
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#connect(org.epics.ioc.pdrv.User)
@@ -1019,12 +1034,10 @@ public class Factory {
             PortImpl port = (PortImpl)user.getPort();
             if(port.lockPortUser!=user) {
                 user.setMessage("Illegal to call connect without owning the port");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             if(connected) {
                 user.setMessage("already connected");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             return deviceDriver.connect(user);
@@ -1037,12 +1050,10 @@ public class Factory {
             PortImpl port = (PortImpl)user.getPort();
             if(port.lockPortUser!=user) {
                 user.setMessage("Illegal to call disconnect without owning the port");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             if(!connected) {
                 user.setMessage("not connected");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             return deviceDriver.disconnect(user);
@@ -1066,49 +1077,30 @@ public class Factory {
             return enabled;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.asyn.DeviceUser#exceptionListenerAdd(org.epics.ioc.asyn.ConnectExceptionListener)
+         * @see org.epics.ioc.pdrv.Device#exceptionListenerAdd(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.ConnectExceptionListener)
          */
-        public void exceptionListenerAdd(ConnectExceptionListener asynConnectExceptionListener) {
-            trace.print(Trace.FLOW, "%s exceptionListenerAdd", fullName);
+        public Status exceptionListenerAdd(User user,ConnectExceptionListener listener)
+        {
+            trace.print(Trace.FLOW, "%s exceptionListenerAdd", portName);
             deviceLock.lock();
             try {
-                if(!exceptionActive) {   
-                    if(!exceptionListenerList.add(asynConnectExceptionListener)) {
-                        throw new IllegalStateException("add failed");
-                    }
-                    return;
-                }
-                if(exceptionListenerListNew==null) {
-                    exceptionListenerListNew =
-                        new LinkedList<ConnectExceptionListener>(exceptionListenerList);
-                }
-                if(!exceptionListenerListNew.add(asynConnectExceptionListener)) {
-                    throw new IllegalStateException("add failed");
-                }
+                if(!exceptionActive) {
+                    return exceptionList.add(user, listener);
+                } else {
+                    return exceptionList.addNew(user, listener);
+                }          
             } finally {
                 deviceLock.unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.asyn.DeviceUser#exceptionListenerRemove(org.epics.ioc.asyn.ConnectExceptionListener)
+         * @see org.epics.ioc.pdrv.Device#exceptionListenerRemove(org.epics.ioc.pdrv.User)
          */
-        public void exceptionListenerRemove(ConnectExceptionListener asynConnectExceptionListener) {
-            trace.print(Trace.FLOW, "%s exceptionListenerRemove", fullName);
+        public void exceptionListenerRemove(User user) {
+            trace.print(Trace.FLOW, "%s exceptionListenerRemove", portName);
             deviceLock.lock();
             try {
-                if(!exceptionActive) {   
-                    if(!exceptionListenerList.remove(asynConnectExceptionListener)) {
-                        throw new IllegalStateException("add failed");
-                    }
-                    return;
-                }
-                if(exceptionListenerListNew==null) {
-                    exceptionListenerListNew =
-                        new LinkedList<ConnectExceptionListener>(exceptionListenerList);
-                }
-                if(!exceptionListenerListNew.remove(asynConnectExceptionListener)) {
-                    throw new IllegalStateException("add failed");
-                }
+                exceptionList.remove(user);
             } finally {
                 deviceLock.unlock();
             }
@@ -1143,7 +1135,6 @@ public class Factory {
             trace.print(Trace.FLOW, "%s blockOtherUsers", fullName);
             if(blockingUser!=null) {
                 user.setMessage("already blocked");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             blockingUser = user;
@@ -1176,7 +1167,6 @@ public class Factory {
             String interfaceName = ifaceNew.getInterfaceName();
             trace.print(Trace.FLOW, "%s registerInterface %s", fullName,interfaceName);
             DeviceInterface deviceInterfaceNew = new DeviceInterface(ifaceNew);
-
             ListIterator<DeviceInterface> iter = interfaceList.listIterator();
             while(iter.hasNext()) {
                 DeviceInterface deviceInterface = iter.next();
@@ -1207,7 +1197,6 @@ public class Factory {
             while(iter.hasNext()) {
                 DeviceInterface deviceInterface = iter.next();
                 Interface iface = deviceInterface.iface;
-
                 int compare = interfaceName.compareTo(iface.getInterfaceName());
                 if(compare==0) {
                     Interface returnInterface = deviceInterface.interposeInterface;
@@ -1260,36 +1249,27 @@ public class Factory {
             if(!enabled) {
                 port.unlockPort((UserImpl)user);
                 user.setMessage("device disabled");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             if(blockingUser!=null&&blockingUser!=user) {
                 port.unlockPort((UserImpl)user);
                 user.setMessage("device blocked by other user");
-                user.setAlarm(AlarmSeverity.major, user.getMessage());
                 return Status.error;
             }
             return Status.success;
         }
-
-        private void raiseException(ConnectException asynException) {
+        
+        private void raiseException(ConnectException connectException) {
             deviceLock.lock();
             try {
-                exceptionActive = true; 
+                exceptionActive = true;
             } finally {
                 deviceLock.unlock();
             }
-            ListIterator<ConnectExceptionListener> iter =  exceptionListenerList.listIterator();
-            while(iter.hasNext()) {
-                ConnectExceptionListener asynConnectExceptionListener = iter.next();
-                asynConnectExceptionListener.exception(asynException);
-            }
+            exceptionList.raiseException(connectException);
             deviceLock.lock();
             try {
-                if(exceptionListenerListNew!=null) {
-                    exceptionListenerList = exceptionListenerListNew;
-                    exceptionListenerListNew = null;
-                }
+                exceptionList.merge();
                 exceptionActive = false; 
             } finally {
                 deviceLock.unlock();
@@ -1303,7 +1283,6 @@ public class Factory {
         }
         
         private static final int DEFAULT_TRACE_TRUNCATE_SIZE = 80;
-        
         private ReentrantLock traceLock = new ReentrantLock();
         private Writer file = new BufferedWriter(new OutputStreamWriter(System.out));
         private TimeStamp timeStamp = new TimeStamp();
@@ -1311,9 +1290,8 @@ public class Factory {
         private int iomask = Trace.IO_NODATA;//|Trace.IO_ASCII;
         private int truncateSize = DEFAULT_TRACE_TRUNCATE_SIZE;
         
-        private List<TraceOptionChangeListener> optionChangeListenerList = new LinkedList<TraceOptionChangeListener>();
-        private List<TraceOptionChangeListener> optionChangeListenerListNew = null;
-        private boolean optionChangeActive = true;
+        private TraceOptionChangeList optionChangeList = new TraceOptionChangeList();
+        private boolean optionChangeActive = false;
         
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#getTraceFile()
@@ -1366,10 +1344,10 @@ public class Factory {
             traceLock.lock();
             try {
                 this.file = file;
-                raiseException();
             } finally {
                 traceLock.unlock();
             }
+            raiseException();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#setTraceIOMask(int)
@@ -1378,10 +1356,10 @@ public class Factory {
             traceLock.lock();
             try {
                 iomask = mask;
-                raiseException();
             } finally {
                 traceLock.unlock();
             }
+            raiseException();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.Trace#setTraceIOTruncateSize(long)
@@ -1408,48 +1386,27 @@ public class Factory {
             raiseException();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Trace#optionChangeListenerAdd(org.epics.ioc.pdrv.TraceOptionChangeListener)
+         * @see org.epics.ioc.pdrv.Trace#optionChangeListenerAdd(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.TraceOptionChangeListener)
          */
-        public void optionChangeListenerAdd(TraceOptionChangeListener traceOptionChangeListener) {
+        public Status optionChangeListenerAdd(User user,TraceOptionChangeListener listener) {
             traceLock.lock();
             try {
-                if(!optionChangeActive) {   
-                    if(!optionChangeListenerList.add(traceOptionChangeListener)) {
-                        throw new IllegalStateException("add failed");
-                    }
-                    return;
-                }
-                if(optionChangeListenerListNew==null) {
-                    optionChangeListenerListNew =
-                        new LinkedList<TraceOptionChangeListener>(optionChangeListenerList);
-                }
-                if(!optionChangeListenerListNew.add(traceOptionChangeListener)) {
-                    throw new IllegalStateException("add failed");
+                if(!optionChangeActive) {
+                    return optionChangeList.add(user, listener);
+                } else {
+                    return optionChangeList.addNew(user, listener);
                 }
             } finally {
                 traceLock.unlock();
             }
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.Trace#optionChangeListenerRemove(org.epics.ioc.pdrv.TraceOptionChangeListener)
+         * @see org.epics.ioc.pdrv.Trace#optionChangeListenerRemove(org.epics.ioc.pdrv.User)
          */
-        public void optionChangeListenerRemove(TraceOptionChangeListener traceOptionChangeListener) {
+        public void optionChangeListenerRemove(User user) {
             traceLock.lock();
             try {
-                if(!optionChangeActive) {   
-                    if(!optionChangeListenerList.remove(traceOptionChangeListener)) {
-                        throw new IllegalStateException("add failed");
-                    }
-                    return;
-                }
-                if(optionChangeListenerListNew==null) {
-                    optionChangeListenerListNew =
-                        new LinkedList<TraceOptionChangeListener>(optionChangeListenerList);
-                }
-                if(!optionChangeListenerListNew.remove(traceOptionChangeListener)) {
-                    throw new IllegalStateException("add failed");
-                }
+                optionChangeList.remove(user);
             } finally {
                 traceLock.unlock();
             }
@@ -1528,17 +1485,10 @@ public class Factory {
             } finally {
                 traceLock.unlock();
             }
-            ListIterator<TraceOptionChangeListener> iter =  optionChangeListenerList.listIterator();
-            while(iter.hasNext()) {
-                TraceOptionChangeListener asynOptionChangeListener = iter.next();
-                asynOptionChangeListener.optionChange();
-            }
+            optionChangeList.raiseException();
             traceLock.lock();
             try {
-                if(optionChangeListenerListNew!=null) {
-                    optionChangeListenerList = optionChangeListenerListNew;
-                    optionChangeListenerListNew = null;
-                }
+                optionChangeList.merge();
                 optionChangeActive = false; 
             } finally {
                 traceLock.unlock();
@@ -1573,6 +1523,160 @@ public class Factory {
             }
             return value;
         }
+    }
+    
+    private static class ConnectExceptionList {
+        Status add(User user, ConnectExceptionListener listener) {
+            for(ConnectExceptionNode node : list) {
+                if(node.user==user) {
+                    user.setMessage("already a ConnectExceptionListener");
+                    return Status.error;
+                }
+            }
+            ConnectExceptionNode node = new ConnectExceptionNode(user,listener);
+            list.add(node);
+            return Status.success;
+        }
+        Status addNew(User user, ConnectExceptionListener listener) {
+            for(ConnectExceptionNode node : list) {
+                if(node.user==user) {
+                    user.setMessage("already a ConnectExceptionListener");
+                    return Status.error;
+                }
+            }
+            if(listNew==null) {
+                listNew = new LinkedList<ConnectExceptionNode>();
+            } else {
+                for(ConnectExceptionNode node : listNew) {
+                    if(node.user==user) {
+                        user.setMessage("already a ConnectExceptionListener");
+                        return Status.error;
+                    }
+                }
+            }
+            ConnectExceptionNode node = new ConnectExceptionNode(user,listener);
+            listNew.add(node);
+            return Status.success;
+        }
+        void raiseException(ConnectException connectException) {
+            ListIterator<ConnectExceptionNode> iter =  list.listIterator();
+            while(iter.hasNext()) {
+                ConnectExceptionNode node = iter.next();
+                node.listener.exception(connectException);
+            }
+        }
+        void merge() {
+            if(listNew!=null) {
+                list.addAll(listNew);
+                listNew = null;
+            }
+        }
+        void remove(User user) {
+            ListIterator<ConnectExceptionNode> iter =  list.listIterator();
+            while(iter.hasNext()) {
+                ConnectExceptionNode node = iter.next();
+                if(node.user==user) {
+                    iter.remove();
+                    return;
+                }
+            }
+            if(listNew==null) return;
+            iter =  listNew.listIterator();
+            while(iter.hasNext()) {
+                ConnectExceptionNode node = iter.next();
+                if(node.user==user) {
+                    iter.remove();
+                    return;
+                }
+            }
+        }
+        private static class ConnectExceptionNode {
+            User user;
+            ConnectExceptionListener listener;
+            ConnectExceptionNode(User user,ConnectExceptionListener listener) {
+                this.user = user;
+                this.listener = listener;
+            }
+        }
+        private List<ConnectExceptionNode> list = new LinkedList<ConnectExceptionNode>();
+        private List<ConnectExceptionNode> listNew = null;
+    }
+    
+    private static class TraceOptionChangeList {
+        Status add(User user, TraceOptionChangeListener listener) {
+            for(TraceOptionChangeNode node : list) {
+                if(node.user==user) {
+                    user.setMessage("already a TraceOptionChangeListener");
+                    return Status.error;
+                }
+            }
+            TraceOptionChangeNode node = new TraceOptionChangeNode(user,listener);
+            list.add(node);
+            return Status.success;
+        }
+        Status addNew(User user, TraceOptionChangeListener listener) {
+            for(TraceOptionChangeNode node : list) {
+                if(node.user==user) {
+                    user.setMessage("already a TraceOptionChangeListener");
+                    return Status.error;
+                }
+            }
+            if(listNew==null) {
+                listNew = new LinkedList<TraceOptionChangeNode>();
+            } else {
+                for(TraceOptionChangeNode node : listNew) {
+                    if(node.user==user) {
+                        user.setMessage("already a TraceOptionChangeListener");
+                        return Status.error;
+                    }
+                }
+            }
+            TraceOptionChangeNode node = new TraceOptionChangeNode(user,listener);
+            listNew.add(node);
+            return Status.success;
+        }
+        void raiseException() {
+            ListIterator<TraceOptionChangeNode> iter =  list.listIterator();
+            while(iter.hasNext()) {
+                TraceOptionChangeNode node = iter.next();
+                node.listener.optionChange();
+            }
+        }
+        void merge() {
+            if(listNew!=null) {
+                list.addAll(listNew);
+                listNew = null;
+            }
+        }
+        void remove(User user) {
+            ListIterator<TraceOptionChangeNode> iter =  list.listIterator();
+            while(iter.hasNext()) {
+                TraceOptionChangeNode node = iter.next();
+                if(node.user==user) {
+                    iter.remove();
+                    return;
+                }
+            }
+            if(listNew==null) return;
+            iter =  listNew.listIterator();
+            while(iter.hasNext()) {
+                TraceOptionChangeNode node = iter.next();
+                if(node.user==user) {
+                    iter.remove();
+                    return;
+                }
+            }
+        }
+        private static class TraceOptionChangeNode {
+            User user;
+            TraceOptionChangeListener listener;
+            TraceOptionChangeNode(User user,TraceOptionChangeListener listener) {
+                this.user = user;
+                this.listener = listener;
+            }
+        }
+        private List<TraceOptionChangeNode> list = new LinkedList<TraceOptionChangeNode>();
+        private List<TraceOptionChangeNode> listNew = null;
     }
     
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
@@ -1734,7 +1838,6 @@ public class Factory {
                             status = port.connect(user);
                         } else {
                             user.setMessage("port is not connected");
-                            user.setAlarm(AlarmSeverity.invalid,user.getMessage());
                             status = Status.error;
                         }
                     }
@@ -1743,7 +1846,6 @@ public class Factory {
                             status = device.connect(user);
                         } else {
                             user.setMessage("device is not connected");
-                            user.setAlarm(AlarmSeverity.invalid,user.getMessage());
                             status = Status.error;
                         }
                     }
@@ -1756,5 +1858,6 @@ public class Factory {
                 user = null;
             }
         }
+        
     }
 }
