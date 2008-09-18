@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.pdrv;
 
-import org.epics.ioc.util.AlarmSeverity;
 
 
 /**
@@ -108,6 +107,16 @@ public interface User {
      */
     Status lockPort();
     /**
+     * lockPort with permission to call port.connect.
+     * @return success if user is connected to a port and it is not connected.
+     */
+    Status lockPortForConnect();
+    /**
+     * lockPort with permission to call device.connect.
+     * @return success if user is connected to a device and it is not connected.
+     */
+    Status lockDeviceForConnect();
+    /**
      * Unlock the port.
      */
     void unlockPort();
@@ -121,22 +130,6 @@ public interface User {
      * @return The latest message.
      */
     String getMessage();
-    /**
-     * Set an alarm.
-     * @param alarmSeverity The severity.
-     * @param message The message.
-     */
-    void setAlarm(AlarmSeverity alarmSeverity,String message);
-    /**
-     * Get the alarm Severity.
-     * @return The severity.
-     */
-    AlarmSeverity getAlarmSeverity();
-    /**
-     * Get the alarm message.
-     * @return The message.
-     */
-    String getAlarmMessage();
     /**
      * Set the timeout for individual IO requests.
      * @param timeout The timeout in seconds.
