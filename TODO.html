@@ -9,17 +9,14 @@
 
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: TODO<br />
-2008.04.10</h1>
+2009.09.22</h1>
 <ul>
   <li>alarm 
     <ul>
       <li>ackTransient and ackSeverity.<br />
-        Are these implemented?</li>
+      </li>
       <li>typeCode<br />
         What should this be? </li>
-      <li>should pvField.findProperty look up the parent tree until it find
-        an alarm? If no then should there be a new method
-      pvField.findAlarm?</li>
     </ul>
   </li>
   <li>Channel Access Monitors<br />
@@ -44,11 +41,6 @@
         arrays</li>
     </ul>
   </li>
-  <li>pv<br />
-    Get rid of asynAccessCallListener, ..., isAsynAccessActive. This is used
-    by PDRV so that PDRVSupport for arrays can call convert.copyArray and let
-    the driver deliver the array in chunks. Add something to PDRV so that
-    this can be done without adding something to PVField.</li>
 </ul>
 </body>
 </html>
