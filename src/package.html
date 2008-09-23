@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2008.09.18 </h1>
+2008.09.23 </h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -106,15 +106,15 @@ single field named value.</p>
 <div class="toc">
 <ul>
   <li><a href="#Preface">Preface</a></li>
-  <li><a href="#Part">Part I: JavaIOC - Brief Description</a> 
+  <li><a href="#Part">Part I: JavaIOC - Brief Description</a>
     <ul>
-      <li><a href="#Overview">Overview Of Part I</a> 
+      <li><a href="#Overview">Overview Of Part I</a>
         <ul>
           <li><a href="#Getting">Getting Started</a></li>
           <li><a href="#Status">Status and Remaining Tasks</a></li>
         </ul>
       </li>
-      <li><a href="#Package">Package Summary</a> 
+      <li><a href="#Package">Package Summary</a>
         <ul>
           <li><a href="#default">default - JavaIOC/src</a></li>
           <li><a href="#org.epics.">org.epics.ioc.swtshell </a></li>
@@ -136,11 +136,12 @@ single field named value.</p>
           <li><a href="#org.epics.13">org.epics.ioc.pdrv </a></li>
           <li><a href="#org.epics.14">org.epics.ioc.pdrv.interfaces </a></li>
           <li><a href="#org.epics.15">org.epics.ioc.pdrv.testDriver </a></li>
+          <li><a href="#org.epics.16">org.epics.ioc.pdrv.vxi11 </a></li>
         </ul>
       </li>
-      <li><a href="#Database">Database Syntax</a> 
+      <li><a href="#Database">Database Syntax</a>
         <ul>
-          <li><a href="#Database1">Database Definition</a> 
+          <li><a href="#Database1">Database Definition</a>
             <ul>
               <li><a href="#Basic">Basic Syntax</a></li>
               <li><a href="#Field">Field Syntax</a></li>
@@ -148,7 +149,7 @@ single field named value.</p>
                 Definitions</a></li>
             </ul>
           </li>
-          <li><a href="#Record">Record Instance Definition</a> 
+          <li><a href="#Record">Record Instance Definition</a>
             <ul>
               <li><a href="#Syntax">Syntax</a></li>
               <li><a href="#Example1">Example</a></li>
@@ -156,7 +157,7 @@ single field named value.</p>
           </li>
         </ul>
       </li>
-      <li><a href="#PVData">PVData</a> 
+      <li><a href="#PVData">PVData</a>
         <ul>
           <li><a href="#Field1">Field Types</a></li>
           <li><a href="#PVData1">PVData Reflection</a></li>
@@ -168,9 +169,9 @@ single field named value.</p>
       <li><a href="#Data">DB Data</a></li>
       <li><a href="#Channel">Channel Access</a></li>
       <li><a href="#Record1">Record Processing</a></li>
-      <li><a href="#Database2">Database Examples</a> 
+      <li><a href="#Database2">Database Examples</a>
         <ul>
-          <li><a href="#Record2">Record Instance Examples</a> 
+          <li><a href="#Record2">Record Instance Examples</a>
             <ul>
               <li><a href="#doubleInpu">doubleInput</a></li>
               <li><a href="#doubleOutp">doubleOutput</a></li>
@@ -185,16 +186,16 @@ single field named value.</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part1">Part II: JavaIOC Data Model</a> 
+  <li><a href="#Part1">Part II: JavaIOC Data Model</a>
     <ul>
       <li><a href="#Summary">Summary</a></li>
-      <li><a href="#JavaIOC3">JavaIOC Data Model</a> 
+      <li><a href="#JavaIOC3">JavaIOC Data Model</a>
         <ul>
           <li><a href="#Basic1">Basic Concept</a></li>
           <li><a href="#getPropety">getPropety</a></li>
         </ul>
       </li>
-      <li><a href="#Definition">Definitions for Standard Properties</a> 
+      <li><a href="#Definition">Definitions for Standard Properties</a>
         <ul>
           <li><a href="#timeStamp">timeStamp</a></li>
           <li><a href="#alarm">alarm</a></li>
@@ -205,22 +206,22 @@ single field named value.</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a> 
+  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a>
     <ul>
       <li><a href="#Overview1">Overview Of Part III</a></li>
-      <li><a href="#JavaIOC4">JavaIOC/dbd</a> 
+      <li><a href="#JavaIOC4">JavaIOC/dbd</a>
         <ul>
           <li><a href="#dbd.xml">dbd.xml</a></li>
         </ul>
       </li>
-      <li><a href="#structure">dbd/structure/alarm.xml</a> 
+      <li><a href="#structure">dbd/structure/alarm.xml</a>
         <ul>
           <li><a href="#numeric">numeric alarms</a></li>
           <li><a href="#boolean">boolean alarms</a></li>
           <li><a href="#enumerated">enumerated alarms</a></li>
         </ul>
       </li>
-      <li><a href="#structure1">dbd/structure/analog.xml</a> 
+      <li><a href="#structure1">dbd/structure/analog.xml</a>
         <ul>
           <li><a href="#linearConv">linearConvert</a></li>
           <li><a href="#linearConv1">linearConvertInput</a></li>
@@ -229,7 +230,7 @@ single field named value.</p>
         </ul>
       </li>
       <li><a href="#structure2">dbd/structure/calc.xml</a></li>
-      <li><a href="#support6">dbd/structure/channelAccess.xml</a> 
+      <li><a href="#support6">dbd/structure/channelAccess.xml</a>
         <ul>
           <li><a href="#processSup">processSupport</a></li>
           <li><a href="#monitorSup">monitorSupport</a></li>
@@ -241,7 +242,7 @@ single field named value.</p>
       <li><a href="#structures2">dbd/structures/commonFields.xml</a></li>
       <li><a href="#structures2">dbd/structures/control.xml</a></li>
       <li><a href="#structure3">dbd/structure/delay.xml</a></li>
-      <li><a href="#structure4">dbd/structure/digital.xml</a> 
+      <li><a href="#structure4">dbd/structure/digital.xml</a>
         <ul>
           <li><a href="#digitalSta">digitalState</a></li>
           <li><a href="#digital">digital</a></li>
@@ -252,7 +253,7 @@ single field named value.</p>
       <li><a href="#structure5">dbd/structure/event.xml</a></li>
       <li><a href="#structure7">dbd/structure/generic.xml</a></li>
       <li><a href="#structure8">dbd/structure/limit.xml</a></li>
-      <li><a href="#structure13">dbd/structure/portDriver.xml</a> 
+      <li><a href="#structure13">dbd/structure/portDriver.xml</a>
         <ul>
           <li><a href="#pdrvSuppor">pdrvSupport</a></li>
         </ul>
@@ -282,17 +283,16 @@ packages are provided with each package.</p>
 
 <p><a href="http://www.anl.gov/epics">EPICS</a> is a set of Open Source
 software tools, libraries and applications developed collaboratively and used
-worldwide to create distributed soft real-time control systems for scientific
-instruments such as a particle accelerators, telescopes and other large
-scientific experiments. An IOC (Input/Output Controller) is a network node
-that controls and/or monitors a collection of devices. An IOC contains a
-memory resident real time database. The real time database has a set of
-"smart" records. Each record is an instance on a record of a particular
-type.</p>
+worldwide to create distributed soft real-time control systems for large
+scientific instruments such as a particle accelerators, telescopes, etc. An
+IOC (Input/Output Controller) is a network node that controls and/or monitors
+a collection of devices. An IOC contains a memory resident real time
+database. The real time database has a set of "smart" records. </p>
 
 <p>JavaIOC is a JAVA implementation of an IOC. It has many similarities to a
 EPICS V3 ( the 3.13 and 3.14 releases of EPICS base) but extends the data
-types to support structures and arrays. </p>
+types to support structures and arrays and allows any field to optionally
+have support.</p>
 
 <h4 id="Getting">Getting Started</h4>
 
@@ -317,15 +317,16 @@ style="font-family: courier;">XMLToDatabase</span>, that:</p>
     interacts with a running JavaIOC.</li>
 </ul>
 
-<p>Run <span style="font-family: courier;">JavaIOC/src/XMLToDatabase</span>
-as an <span style="font-weight:bold;">eclipse SWT application.</span></p>
+<p>Run <span
+style="font-family: courier;">${JavaIOC}/src/XMLToDatabase</span> as an <span
+style="font-weight:bold;">eclipse SWT application.</span></p>
 
 <p>The arguments to XMLToDatabase can be any combination of:</p>
 <ul>
   <li>-db <br />
     followed by filenames of files containing XML database definitions.<br />
   </li>
-  <li>-dumpDB<br />
+  <li>-dumpDBD<br />
     dump the structure, create, and support definitions</li>
   <li>-dumpRecords<br />
     dump the record instances</li>
@@ -442,7 +443,8 @@ implemented.</p>
     logMessage facility needs to be implemented. Once in place it will be
     easy to modify the existing code to use the message server.</li>
   <li>portDriver<br />
-    Hardware drivers and STREAMS.</li>
+    Hardware drivers and STREAMS. Support for VXI11 (network based GPIB like
+    devices and controllers) has been written but not tested.</li>
 </ul>
 
 <p>Additional components are also desirable:</p>
@@ -458,6 +460,10 @@ implemented.</p>
 </ul>
 
 <p>Thus lots of work has been done but lots of work remains.</p>
+
+<p>In the near furure the plan is to test the VXI11 portDriver, implement
+STREAMS support, and implement a driver for simple network based devices
+including serial support via terminal servers like MOXA. </p>
 <hr />
 
 <h3 style="text-align: center" id="Package">Package Summary</h3>
@@ -640,6 +646,15 @@ href="org/epics/ioc/pdrv/testDriver/package-summary.html">org.epics.ioc.pdrv.tes
 </h4>
 
 <p>This directory contains test port drivers.</p>
+
+<h4 id="org.epics.16"><a
+href="org/epics/ioc/pdrv/vxi11/package-summary.html">org.epics.ioc.pdrv.vxi11</a>
+</h4>
+
+<p>THIS HAS NOT BEEN TESTED</p>
+
+<p>This directory has a portDriver that implements the VXI11 protocal.</p>
+<hr />
 <hr />
 
 <h3 style="text-align: center" id="Database">Database Syntax</h3>
@@ -649,8 +664,7 @@ href="org/epics/ioc/pdrv/testDriver/package-summary.html">org.epics.ioc.pdrv.tes
 and record instances is XML based. In addition XML based macro substitution
 and include is supported. Package <span><a
 href="org/epics/ioc/db/package-summary.html">org.epics.ioc.db</a></span>
-provides details about about the XML syntax. This section provides a brief
-tutorial.</p>
+describes the XML syntax. This section provides a brief tutorial.</p>
 
 <h4 style="text-align: center" id="Database1">Database Definition</h4>
 
@@ -679,7 +693,9 @@ where "..." represents other attributes. The basic attributes are:
     <dd>the field name. This must be defined.</dd>
   <dt style="font-family: courier;">type</dt>
     <dd>The field type must be one of:<br />
-      boolean,byte,short,int,long,float,double,string,enum,menu,link,structure,array</dd>
+      boolean,byte,short,int,long,float,double,string,enum,menu,link,structure,array.
+      If thus name,value pair is not present than either structureName or
+      elementType must be defined.</dd>
   <dt style="font-family: courier;">createName</dt>
     <dd>The name of a create. A create is called at the time a field is being
       created. Normally it replaces the default data implementation.</dd>
@@ -788,8 +804,8 @@ and meaning as for defining a DBD structure.</p>
 <h3 style="text-align: center" id="PVData">PVData</h3>
 <hr />
 
-<p>JavaIOC data is stored in a PVData (Process Variable) Database, which is a
-collection of record instances. A record instance is a structured set of
+<p>JavaIOC data is stored in a Process Variable Database (called a DB), which
+is a collection of record instances. A record instance is a structured set of
 fields. A JavaIOC implements interfaces for accessing fields of database
 records. The interfaces are a combination of reflection ( what is a field)
 and data (what a field has) interfaces. Each field has a type as defined in
@@ -1016,10 +1032,10 @@ this section, which just shows the interfaces.</p>
 for details. Some features are:</p>
 <ul>
   <li>Local Channel Access is implemented.</li>
-  <li>A V3 Channel Access server is available. Thus Channel Access clients
-    can access a JavaIOC database.</li>
-  <li>V3 Channel Access client code is implemented. This allows the JavaIOC
-    to communicate with an EPICS IOC.</li>
+  <li>An EPICS V3 Channel Access server is available. Thus Channel Access
+    clients can access a JavaIOC database.</li>
+  <li>EPICS V3 Channel Access client code is implemented. This allows the
+    JavaIOC to communicate with an EPICS IOC.</li>
   <li>Link support is implemented. 
     <ul>
       <li>Get, Put, and PutGet are all supported. Each can optionally process
@@ -1068,17 +1084,18 @@ processing. Only one object can process a record. Methods are available to
 request being the record processor and methods involved with processing. A
 process can be synchronous or asynchronous. An asynchronous operation is an
 operation that blocks, e.g. file I/O. recordProcess provides methods that
-allow asynchronous support but that only lock a record instance when blocking
-can not occur. </p>
+allow asynchronous support but that only lock a record instance while the
+record is being accessed. </p>
 
 <p>Whenever any field of a record is being accessed or whenever anything is
 done that can modify the state of a record, the record must be locked. In
-most cases recordProcess takes care of locking and unlocking.</p>
+most cases recordProcess automatically takes care of locking and
+unlocking.</p>
 
 <p>Each record instance must have associated support and each field of a
 record can optionally have support.</p>
 
-<p>Support must implement interface Support:</p>
+<p>Support implements interface Support:</p>
 
 <p></p>
 <pre>    public interface Support extends Requester {
@@ -1100,9 +1117,9 @@ record can optionally have support.</p>
     <dd>Initialization related to the record itself. Support must not connect
       to other records or to hardware.</dd>
   <dt>start</dt>
-    <dd>Support can connect to other records or top hardware.</dd>
+    <dd>Support can connect to other record or hardware.</dd>
   <dt>stop</dt>
-    <dd>Disconnect from other records or hardware.</dd>
+    <dd>Disconnect from other record or hardware.</dd>
   <dt>uninitialize</dt>
     <dd>Remove any connection to the record.</dd>
   <dt>process</dt>
@@ -1117,7 +1134,7 @@ field.</p>
 <p>Typical support code does the following core functions:</p>
 <ul>
   <li>initialize<br />
-    Determine the "value" field. Most support modules look for a field named
+    Find the "value" field. Most support modules look for a field named
     "value".<br />
     Many support modules also provide support for other fields, which are
     identified by name. For example if a support module supports alarms it
@@ -1145,8 +1162,8 @@ or for any field that is a stucture or an array with elementType of structure
 or array. All that it does is look at all the fields in the structure or
 array that is passed to it's initalizer. For each field that has support it
 calls the support. The supports are called in the order the fields are
-defined in the recordType or structure. It waits for each support to finish
-before the next support is called. If any support fails, it does not call any
+defined in the structure or array. It waits for each support to finish before
+the next support is called. If any support fails, it does not call any
 additional support. </p>
 <hr />
 
@@ -1200,6 +1217,8 @@ the following support</p>
 record because input is initialized to a Channel Access inputLink.</p>
 <pre>&lt;record name = "doubleInput"&gt;
     &lt;value type = "double" /&gt;
+    &lt;timeStamp structureName = "timeStamp" /&gt;
+    &lt;alarm structureName = "alarm" /&gt;
     &lt;input supportName = "inputLink" &gt;
         &lt;configure structureName = "inputLink"&gt;
             &lt;pvname&gt;counterCounter&lt;/pvname&gt;
@@ -1214,6 +1233,8 @@ record because input is initialized to a Channel Access inputLink.</p>
 record because output is initialized to a Channel Access outputLink.</p>
 <pre>&lt;record name = "doubleOutput"&gt;
     &lt;value type = "double" /&gt;
+    &lt;timeStamp structureName = "timeStamp" /&gt;
+    &lt;alarm structureName = "alarm" /&gt;
     &lt;output supportName = "outputSupport" structureName = "outputSupport"&gt;
             &lt;pvname&gt;counterCounter&lt;/pvname&gt;
             &lt;process&gt;false&lt;/process&gt;
@@ -1271,7 +1292,7 @@ support.</p>
 <h5 id="psSimple">psSimple</h5>
 
 <p>The following creates a powerSupply instance that does no input or output.
-The voltage and power must be written via channel access.</p>
+The power.value must be set via channel access.</p>
 <pre>&lt;record name = "psSimple"&gt;
     &lt;timeStamp structureName = "timeStamp" /&gt;
     &lt;alarm structureName = "alarm" /&gt;
@@ -1329,9 +1350,9 @@ writes its current via embeded support.</p>
                 &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
                 &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
             &lt;/linearConvert&gt;
-            &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
-                    &lt;pvname&gt;adcVoltageEmbeded&lt;/pvname&gt;
-                    &lt;process&gt;false&lt;/process&gt;
+            &lt;input supportName = "pdrvInt32Input" structureName = "pdrvSupport"&gt;
+                &lt;portName&gt;adcPort&lt;/portName&gt;
+                &lt;deviceName&gt;1&lt;/deviceName&gt;
             &lt;/input&gt;
         &lt;/input&gt;
     &lt;/voltage&gt;
@@ -1347,9 +1368,9 @@ writes its current via embeded support.</p>
                 &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
                 &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
             &lt;/linearConvert&gt;
-            &lt;output supportName = "outputSupport" structureName = "outputSupport"&gt;
-                &lt;pvname&gt;dacCurrentEmbeded&lt;/pvname&gt;
-                &lt;process&gt;true&lt;/process&gt;
+            &lt;output  supportName = "pdrvInt32Output" structureName = "pdrvSupport"&gt;
+                &lt;portName&gt;dacPort&lt;/portName&gt;
+                &lt;deviceName&gt;3&lt;/deviceName&gt;
             &lt;/output&gt;
         &lt;/output&gt;
     &lt;/current&gt;
@@ -1423,9 +1444,8 @@ timeStamp.</p>
 
 <p>This data model supports existing EPICS V3 channel access clients. In the
 future it is expected that more powerfull or special purpose client will be
-developed that can handle structured data. Such clients will access a
-structure. For example a client could ask for an entire record. In this case
-each field is considered a property.</p>
+developed that can handle structured data. Such clients could access a
+structure. For example a client could ask for an entire record. </p>
 <hr />
 
 <h3 style="text-align: center" id="JavaIOC3">JavaIOC Data Model</h3>
@@ -1574,8 +1594,8 @@ named supply that is an array of powerSupply structures.</p>
 Properties</h3>
 <hr />
 
-<p>The following are the proposed set of structures for standard properties
-for general purpose client tools. </p>
+<p>The following are the set of structures for standard properties for
+general purpose client tools. </p>
 
 <h4 id="timeStamp">timeStamp</h4>
 <pre>&lt;structure name = "timeStamp"&gt;

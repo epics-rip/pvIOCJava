@@ -129,7 +129,7 @@ public class CDPrintFactory {
                     int maxNumPuts = elementCDField.getMaxNumPuts();
                     if(maxNumPuts==0 && !printAll) continue;
                     newLine(indentLevel);
-                    text.append(elementCDField.getPVField().getFullFieldName());
+                    text.append(elementCDField.getPVField().getField().getFieldName());
                     printArray(elementCDField,indentLevel+1,printAll);
                 }
             } else if(elementType==Type.pvStructure) {
@@ -139,6 +139,8 @@ public class CDPrintFactory {
                     if(elementCDField==null) continue;
                     int maxNumPuts = elementCDField.getMaxNumPuts();
                     if(maxNumPuts==0 && !printAll) continue;
+                    newLine(indentLevel);
+                    text.append(elementCDField.getPVField().getField().getFieldName());
                     printStructure(elementCDField,indentLevel+1,printAll);
                 }
             }
