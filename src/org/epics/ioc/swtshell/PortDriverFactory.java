@@ -71,6 +71,7 @@ public class PortDriverFactory {
         private Button traceIO_HEXPortButton;
         private Button traceIO_ESCAPEPortButton;
         private Button traceIO_ASCIIPortButton;
+        private Button reportPortButton;
         private Button connectPortButton;
         private Button enablePortButton;
         private Button autoConnectPortButton;
@@ -84,6 +85,7 @@ public class PortDriverFactory {
         private Button traceIO_HEXDeviceButton;
         private Button traceIO_ESCAPEDeviceButton;
         private Button traceIO_ASCIIDeviceButton;
+        private Button reportDeviceButton;
         private Button connectDeviceButton;
         private Button enableDeviceButton;
         private Button autoConnectDeviceButton;
@@ -168,9 +170,12 @@ public class PortDriverFactory {
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             composite.setLayoutData(gridData);
             layout = new GridLayout();
-            layout.numColumns = 4;
+            layout.numColumns = 5;
             composite.setLayout(layout);
             new Label(composite,SWT.NONE).setText("Port  ");
+            reportPortButton = new Button(composite,SWT.PUSH);
+            reportPortButton.setText("report");
+            reportPortButton.addSelectionListener(this);
             autoConnectPortButton = new Button(composite,SWT.PUSH);
             autoConnectPortButton.setText("noAutoConnect");
             autoConnectPortButton.addSelectionListener(this);
@@ -224,9 +229,12 @@ public class PortDriverFactory {
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             composite.setLayoutData(gridData);
             layout = new GridLayout();
-            layout.numColumns = 4;
+            layout.numColumns = 5;
             composite.setLayout(layout);
             new Label(composite,SWT.NONE).setText("Device");
+            reportDeviceButton = new Button(composite,SWT.PUSH);
+            reportDeviceButton.setText("report");
+            reportDeviceButton.addSelectionListener(this);
             autoConnectDeviceButton = new Button(composite,SWT.PUSH);
             autoConnectDeviceButton.setText("noAutoConnect");
             autoConnectDeviceButton.addSelectionListener(this);
@@ -348,6 +356,11 @@ public class PortDriverFactory {
                 setWidgets();
                 return;
             }
+            if(object==reportPortButton) {
+                String report = port.report(true, 3);
+                message(report,MessageType.info);
+                return;
+            }
             if(object==connectPortButton) {
                 status = Status.success;
                 if(port.isConnected()) {
@@ -383,6 +396,12 @@ public class PortDriverFactory {
             if(object==autoConnectPortButton) {
                 port.autoConnect(!port.isAutoConnect());
                 setWidgets();
+                return;
+            }
+            if(object==reportDeviceButton) {
+                String report = device.report(3);
+                message(String.format("%n") + device.getFullName() + String.format("%n"),MessageType.info);
+                message(report,MessageType.info);
                 return;
             }
             if(object==connectDeviceButton) {
@@ -456,7 +475,10 @@ public class PortDriverFactory {
         }
 
         private void message(String message, MessageType messageType) {
-            consoleText.setText(message);
+            if(messageType!=MessageType.info) {
+                consoleText.append(messageType.name() + " ");
+            }
+            consoleText.append(message);
         }
         
         private void setWidgets() {
