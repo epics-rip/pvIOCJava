@@ -236,10 +236,7 @@ public class PDRVSupportFactory {
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            deviceTrace.print(Trace.FLOW,
-                "%s:%s processContinue calling supportProcessDone",
-                fullName,supportName);
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -348,10 +345,7 @@ public class PDRVSupportFactory {
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            deviceTrace.print(Trace.FLOW,
-                "%s:%s processContinue calling supportProcessDone",
-                fullName,supportName);
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
 		/* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.OctetInterruptListener#interrupt(byte[], int)
@@ -491,10 +485,7 @@ public class PDRVSupportFactory {
             if(status!=Status.success) {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            deviceTrace.print(Trace.FLOW,
-                "%s:%s processContinue calling supportProcessDone",
-                fullName,supportName);
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -578,7 +569,7 @@ public class PDRVSupportFactory {
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -663,7 +654,7 @@ public class PDRVSupportFactory {
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.Int32InterruptListener#interrupt(int)
@@ -857,7 +848,7 @@ public class PDRVSupportFactory {
             if(status!=Status.success) {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -948,7 +939,7 @@ public class PDRVSupportFactory {
         public void processContinue() {
             valuePVArray.asynAccessEnd(this);
             valueDBField.postPut();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -1058,7 +1049,7 @@ public class PDRVSupportFactory {
         public void processContinue() {
             valuePVArray.asynAccessEnd(this);
             valueDBField.postPut();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -1214,12 +1205,6 @@ public class PDRVSupportFactory {
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
-         */
-        public void processContinue() {
-            supportProcessRequester.supportProcessDone(RequestResult.success);
-        }        
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
@@ -1357,7 +1342,7 @@ public class PDRVSupportFactory {
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -1484,7 +1469,7 @@ public class PDRVSupportFactory {
          */
         public void processContinue() {
             putData();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalInterruptListener#interrupt(int)
@@ -1750,7 +1735,7 @@ public class PDRVSupportFactory {
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -1875,7 +1860,7 @@ public class PDRVSupportFactory {
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.Float64InterruptListener#interrupt(double)
@@ -2067,7 +2052,7 @@ public class PDRVSupportFactory {
             if(status!=Status.success) {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -2153,7 +2138,7 @@ public class PDRVSupportFactory {
         public void processContinue() {
             valuePVArray.asynAccessEnd(this);
             valueDBField.postPut();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -2262,7 +2247,7 @@ public class PDRVSupportFactory {
         public void processContinue() {
             valuePVArray.asynAccessEnd(this);
             valueDBField.postPut();
-            supportProcessRequester.supportProcessDone(RequestResult.success);
+            super.processContinue();
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
@@ -2412,12 +2397,6 @@ public class PDRVSupportFactory {
         public void process(SupportProcessRequester supportProcessRequester) {
             super.process(supportProcessRequester);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
-         */
-        public void processContinue() {
-            supportProcessRequester.supportProcessDone(RequestResult.success);
-        }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */

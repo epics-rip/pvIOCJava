@@ -73,6 +73,7 @@ RecordProcessRequester
         recordProcess = dbRecord.getRecordProcess();
     }      
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
+    protected static final String emptyString = "";
     protected String supportName;
     protected DBStructure dbStructure;
     protected PVStructure pvStructure;
@@ -211,6 +212,7 @@ RecordProcessRequester
             throw new IllegalStateException("supportProcessRequester is null");
         }
         this.supportProcessRequester = supportProcessRequester;
+        user.setMessage(emptyString);
         if(isProcessor) {
             deviceTrace.print(Trace.FLOW,
                 "%s:%s process calling processContinue", fullName,supportName);
@@ -237,10 +239,14 @@ RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
      */
-    public void processContinue() {       
+    public void processContinue() { 
         deviceTrace.print(Trace.FLOW,
             "%s:%s processContinue calling supportProcessDone",
             fullName,supportName);
+        String message = user.getMessage();
+        if(message!=null && message!=emptyString) {
+            alarmSupport.setAlarm(message, AlarmSeverity.minor);
+        }
         supportProcessRequester.supportProcessDone(RequestResult.success);
     }
     /* (non-Javadoc)
