@@ -29,7 +29,7 @@
             <name>e</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
         a+b*c/d+e
         </expression>
@@ -70,7 +70,7 @@
             <name>e</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
         a+b*c/d+e
         </expression>
@@ -111,7 +111,7 @@
             <name>e</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
         a+b*c/d+e
         </expression>
@@ -152,7 +152,7 @@
             <name>e</name>
         </element>
     </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+    <calculator >
         <expression>
         a+b*c/d+e
         </expression>
@@ -193,7 +193,7 @@
             <name>e</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
         a+b*c/d+e
         </expression>
@@ -234,7 +234,7 @@
             <name>e</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
         a+b*c/d+e
         </expression>

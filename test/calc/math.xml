@@ -15,7 +15,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.abs(a)
         </expression>
@@ -40,7 +40,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.abs(a)
         </expression>
@@ -65,7 +65,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.abs(a)
         </expression>
@@ -90,7 +90,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.abs(a)
         </expression>
@@ -115,7 +115,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.toDegrees(Math.acos(a))
         </expression>
@@ -140,7 +140,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.toDegrees(Math.asin(a))
         </expression>
@@ -165,7 +165,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.toDegrees(Math.atan(a))
         </expression>
@@ -194,7 +194,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.toDegrees(Math.atan2(a,b))
         </expression>
@@ -220,7 +220,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.cbrt(a)
         </expression>
@@ -245,7 +245,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.ceil(a)
         </expression>
@@ -270,7 +270,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.cos(Math.PI*a)
         </expression>
@@ -295,7 +295,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.cosh(a)
         </expression>
@@ -320,7 +320,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.log(Math.exp(a))
         </expression>
@@ -345,7 +345,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.log(Math.expm1(a)+1)
         </expression>
@@ -370,7 +370,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.floor(a)
         </expression>
@@ -399,7 +399,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.hypot(a,b)
         </expression>
@@ -429,7 +429,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.IEEEremainder(a,b)
         </expression>
@@ -455,7 +455,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.log(Math.E*a)
         </expression>
@@ -480,7 +480,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.log10(a)
         </expression>
@@ -505,7 +505,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.log1p(Math.E*a-1)
         </expression>
@@ -534,7 +534,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.max(a,b)
         </expression>
@@ -563,7 +563,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.max(a,b)
         </expression>
@@ -592,7 +592,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.max(a,b)
         </expression>
@@ -621,7 +621,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.max(a,b)
         </expression>
@@ -650,7 +650,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.min(a,b)
         </expression>
@@ -679,7 +679,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.min(a,b)
         </expression>
@@ -708,7 +708,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.min(a,b)
         </expression>
@@ -737,7 +737,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.min(a,b)
         </expression>
@@ -766,7 +766,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.pow(a,b)
         </expression>
@@ -794,7 +794,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.pow(a,Math.pow(a,b))
         </expression>
@@ -820,7 +820,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.pow(a,Math.pow(a,Math.pow(a,b)))
         </expression>
@@ -836,7 +836,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.random()
         </expression>
@@ -859,7 +859,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.rint(a)
         </expression>
@@ -884,7 +884,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.round(a)
         </expression>
@@ -909,7 +909,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.round(a)
         </expression>
@@ -934,7 +934,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.signum(a)
         </expression>
@@ -959,7 +959,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.signum(a)
         </expression>
@@ -984,7 +984,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.sin(Math.PI*a)
         </expression>
@@ -1009,7 +1009,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.sinh(a)
         </expression>
@@ -1034,7 +1034,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.sqrt(a)
         </expression>
@@ -1059,7 +1059,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.tan(Math.PI*a)
         </expression>
@@ -1084,7 +1084,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.tanh(a)
         </expression>
@@ -1103,7 +1103,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.toDegrees(Math.PI)
         </expression>
@@ -1128,7 +1128,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.toDegrees(Math.toRadians(a))
         </expression>
@@ -1153,7 +1153,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.ulp(a)
         </expression>
@@ -1178,7 +1178,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.ulp(a)
         </expression>

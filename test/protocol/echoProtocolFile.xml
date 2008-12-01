@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<IOCProtocol>
+<terminator>CR LF</terminator>
+<prococol name = "echoInt">
+  <out>%s</out>
+  <in>%i</in>
+</protocol name = "echoOut">
+  <out>%s</out>
+  <in>%f</in>
+</protocol>
+
+</IOCProtocol>

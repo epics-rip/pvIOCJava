@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<IOCDatabase>
+
+<record name = "stringPort" structureName = "portCreate">
+    <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
+    <portName>stringPort</portName>
+    <driverParameters structureName = "octetDriver" >
+        <delay>0.0</delay>
+    </driverParameters>
+</record>
+
+
+<record name = "protocolEcho" structureName = "protocolFileCreate">
+  <fileName>test/protocol/echoProtocol.xml</fileName>
+</record>
+
+
+<record name = "protocolEchoInt32">
+    <value type = "int"/>
+    <alarm structureName = "alarm" />
+    <timeStamp structureName = "timeStamp" />
+    <input supportName = "pdrvInt32Input" structureName = "pdrvSupport">
+        <portName>stringPort</portName>
+        <deviceName>0</deviceName>
+        <interpose type = "structure" supportName = "protocolInterpose">
+            <value>1234</value>
+            <protocolFilename>test/protocol/echoProtocolFile.xml</protocolFilename>
+            <protocolname>echoInt</protocolname>
+        </interpose>
+        <size>20</size>
+    </input>
+</record>
+
+
+<!--
+-->
+
+
+</IOCDatabase>

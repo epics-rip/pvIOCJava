@@ -15,7 +15,7 @@
             <value type = "${checkType}">${checkValue}</value>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             (a==b) ? true : false
         </expression>

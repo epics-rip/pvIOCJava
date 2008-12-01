@@ -10,7 +10,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>10</expression>
       </calculator>
     </input>
@@ -27,7 +27,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>10L</expression>
       </calculator>
     </input>
@@ -47,7 +47,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>-10</expression>
       </calculator>
     </input>
@@ -65,7 +65,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>-10L</expression>
       </calculator>
     </input>
@@ -83,7 +83,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>0xFFFFFFFF</expression>
       </calculator>
     </input>
@@ -101,7 +101,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>0xFFFFFFFFL</expression>
       </calculator>
     </input>
@@ -119,7 +119,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>10.0F</expression>
       </calculator>
     </input>
@@ -137,7 +137,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>10D</expression>
       </calculator>
     </input>
@@ -155,7 +155,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>-1E26F</expression>
       </calculator>
     </input>
@@ -173,7 +173,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>-1e100D</expression>
       </calculator>
     </input>
@@ -191,7 +191,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>Math.E</expression>
       </calculator>
     </input>
@@ -209,7 +209,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>Math.PI</expression>
       </calculator>
     </input>
@@ -227,7 +227,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>-Math.E</expression>
       </calculator>
     </input>
@@ -245,7 +245,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>-Math.PI</expression>
       </calculator>
     </input>

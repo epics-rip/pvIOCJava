@@ -7,7 +7,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             ((Math.abs(-(1.0 + 2.0*3.0 + 4*2 + 3.0))))
         </expression>
@@ -29,7 +29,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.abs(-(((1.0 + (2.0*3.0)) + (4*2)) + 3.0))
         </expression>
@@ -48,7 +48,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.cos(Math.PI)
         </expression>
@@ -89,7 +89,7 @@
             <name>e</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             Math.abs(-(a + b*c + d*e + 3.0))
         </expression>
@@ -104,7 +104,7 @@
     <alarm structureName = "alarm" />
     <timeStamp structureName = "timeStamp" />
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>value+1&lt;=10?value+1:0</expression>
       </calculator>
     </input>
@@ -133,7 +133,7 @@
             <name>inc</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator>
         <expression>((value+inc)&lt;=max)?(value+inc):min</expression>
       </calculator>
     </input>

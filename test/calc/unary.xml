@@ -16,7 +16,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>!a</expression>
       </calculator>
     </input>
@@ -39,7 +39,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>+~-a</expression>
       </calculator>
     </input>
@@ -62,7 +62,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>+(~(-a))</expression>
       </calculator>
     </input>

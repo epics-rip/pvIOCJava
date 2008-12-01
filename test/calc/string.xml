@@ -21,7 +21,7 @@
             <name>b</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>a+" " + b+" strings"</expression>
       </calculator>
     </input>

@@ -25,7 +25,7 @@
             <name>c</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             ~(a&amp;b|c)
         </expression>
@@ -58,7 +58,7 @@
             <name>c</name>
         </element>
     </calcArgArray>
-    <calculator structureName = "expressionCalculator" >
+    <calculator >
         <expression>
             ~(a&amp;b|c)
         </expression>
@@ -91,7 +91,7 @@
             <name>c</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             ~(a&amp;b|c)
         </expression>
@@ -124,7 +124,7 @@
             <name>c</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             (~(a&amp;b|c))&amp;0x7fffffffffffffffL
         </expression>

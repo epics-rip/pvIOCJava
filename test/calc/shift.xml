@@ -28,7 +28,7 @@
             <name>d</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             ((a&gt;&gt;&gt;b)&lt;&lt;c)|d
         </expression>
@@ -53,7 +53,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&lt;&lt;3
         </expression>
@@ -78,7 +78,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&lt;&lt;3
         </expression>
@@ -103,7 +103,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&lt;&lt;3
         </expression>
@@ -128,7 +128,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&lt;&lt;3
         </expression>
@@ -153,7 +153,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;4
         </expression>
@@ -178,7 +178,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;&gt;4
         </expression>
@@ -203,7 +203,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;8
         </expression>
@@ -228,7 +228,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;&gt;8
         </expression>
@@ -253,7 +253,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;24
         </expression>
@@ -278,7 +278,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;&gt;24
         </expression>
@@ -303,7 +303,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;56
         </expression>
@@ -328,7 +328,7 @@
             <name>a</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             a&gt;&gt;&gt;56
         </expression>

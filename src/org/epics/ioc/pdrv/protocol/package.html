@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="" />
+  <title>EPICS JavaIoc: PortDriver: Protocol Interpose</title>
+</head>
+
+<body>
+<hr />
+
+<h1 style="text-align: center">EPICS JavaIoc: PortDriver: Protocol Interpose<br />
+package: org.epics.ioc.pdrv.protocol<br />
+2008.10.04</h1>
+CONTENTS 
+
+<hr />
+<h2 style="text-align: center">Overview</h2>
+<hr />
+<p>Marty do the following:</p>
+<ul>
+  <li>Modify AbstractPDRVSupport<br />
+    Look for interpose. If found and has support then
+    call it. When queueRequest.callback is called call the interpose
+    process before calling queueCallback.</li>
+</ul>
+
+<hr />
+<h2 style="text-align: center">Database XML Syntax</h2>
+<hr />
+An JavaIOC protocol file must be an XML file with a root tag of IOCProtocol: 
+<pre>    &lt;?xml version="1.0" ?&gt;
+    &lt;IOCProtocol&gt;
+      &lt;?-- valid protocol Definitions --&gt;
+    &lt;/IOCProtocol&gt;</pre>
+
+<h3 style="text-align:center;">namespace</h3>
+At this time namespaces are not used. 
+
+<h3 style="text-align:center;">prococol</h3>
+
+<p>Structure defines a data structure containing fields. A record instance is
+a structure. A field of a structure can also be a structure.</p>
+
+<p>A structure is defined as follows:</p>
+<pre>&lt;structure name = "structureName" createName = "createName" supportName = "supportName" &gt;
+     &lt;field name = "fieldName" createName = "createName"
+         supportName = "supportName" type = "fieldType" ... /&gt;
+     ...
+&lt;/structure&gt;</pre>
+
+<p>where</p>
+<dl>
+  <dt><span style="font-family: courier">structureName</span></dt>
+    <dd>The structure name.</dd>
+  <dt style="font-family: courier;">createName</dt>
+    <dd>The name of create for the structure or field. A create definition,
+      described below, defines the create. When record instances are defined,
+      the createName can be overridden.</dd>
+  <dt style="font-family: courier;">supportName</dt>
+    <dd>The name of support for the structure or field. A support definition,
+      described below, defines the support. When record instances are
+      defined, the default can be overridden.</dd>
+  <dt><span style="font-family: courier">fieldName</span></dt>
+    <dd>Should have the same syntax as a Java identifier, unique within the
+      context of this particular structure.</dd>
+  <dt><span style="font-family: courier">fieldType</span></dt>
+    <dd>See fieldType below.</dd>
+  <dt>...</dt>
+    <dd>See field attribute below</dd>
+</dl>
+<h3 style="text-align:center;">Macro Substitution and Include</h3>
+
+<h4>Include</h4>
+The XML file can include other files also containing Record Instance
+Definitions. Included files can also include other files. The syntax is: 
+<pre>    
+&lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
+
+<p>Where</p>
+<dl>
+  <dt style="font-family: courier;">href</dt>
+    <dd>The <span style="font-family: courier;">filename</span>, which must
+      be a valid XML Record Instance file, is processed. If any addPaths have
+      been defined the last one specified is prefixed to the filename.</dd>
+  <dt style="font-family: courier;">addPath</dt>
+    <dd>Add a path.</dd>
+  <dt style="font-family: courier;">removePath</dt>
+    <dd>Remove a path.</dd>
+</dl>
+
+<h4>Macro Substitution</h4>
+
+<p>Macro substitution replaces a string of the form "${from}" with some other
+text. The syntax is:</p>
+<pre>    &lt;substitute from = "fromString" to = "toString" fromTo = "from=to,from=to,..."/&gt;</pre>
+
+<p>Where:</p>
+<dl>
+  <dt style="font-family: courier;">from</dt>
+    <dd><span style="font-family: courier;">fromString</span> is the string
+      that appears in ${from}. If <span
+      style="font-family: courier;">from</span> is specified then <span
+      style="font-family: courier;">to</span> must also be specified.</dd>
+  <dt style="font-family: courier;">to</dt>
+    <dd><span style="font-family: courier;">toString</span> replaces
+    ${from}</dd>
+  <dt style="font-family: courier;">toFrom</dt>
+    <dd>The attribute value is a series of "from=to" pairs separated by
+      commas.</dd>
+</dl>
+
+<p>Macro substitution can be performed on the foillowing:</p>
+<ol>
+  <li>Any attribute value in any element definition.</li>
+  <li>The content of any element definition.</li>
+</ol>
+
+<h4>Example Include and Macro Substitution</h4>
+
+<p>The following is a template file:</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;IOCDatabase&gt;
+&lt;record name = "ai${recordExtension}Record"&gt;
+    &lt;value type = "double"/&gt;
+    &lt;timeStamp structureName = "timeStamp"&gt;
+    &lt;alarm structureName = "alarm" /&gt;
+    &lt;input structureName = "linearConvertInput" &gt;
+        &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
+            &lt;pvname&gt;${pvname}&lt;/pvname&gt;
+            &lt;wait&gt;true&lt;/wait&gt;
+        &lt;/input&gt;
+        &lt;linearConvert&gt;
+            &lt;engUnitsLow&gt;${engUnitsLow}&lt;/engUnitsLow&gt;
+            &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
+        &lt;/linearConvert&gt;
+    &lt;/input&gt;
+    &lt;display structureName = "display" &gt;
+        &lt;units&gt;volts&lt;/units&gt;
+        &lt;limit&gt;
+            &lt;low&gt;${displayLow}&lt;/low&gt;
+            &lt;high&gt;${displayHigh}&lt;/high&gt;
+        &lt;/limit&gt;
+    &lt;/display&gt;
+&lt;/record&gt;
+&lt;/IOCDatabase&gt;</pre>
+
+<p>The following creates two instance files from the template:</p>
+<pre>&lt;?xml version="1.0" ?&gt;
+&lt;IOCDatabase&gt;
+&lt;include addPath = "src/org/epics/ioc/dbAccess/example" /&gt;
+&lt;substitute from = "recordExtension" to = "01" /&gt;
+&lt;substitute from = "pvname" to = "nameFor01" /&gt;
+&lt;substitute from = "displayLow" to = "0.0" /&gt;
+&lt;substitute from = "displayHigh" to = "10.0" /&gt;
+&lt;substitute from = "engUnitsLow" to = "0.0" /&gt;
+&lt;substitute from = "engUnitsHigh" to = "9.0" /&gt;
+&lt;include href = "protoAiDB.xml" /&gt;
+&lt;substitute fromTo = "recordExtension=02,pvname=nameFor02" /&gt;
+&lt;include href = "protoAiDB.xml" /&gt;
+&lt;/IOCDatabase&gt;</pre>
+</body>
+</html>

@@ -28,7 +28,7 @@
             <name>d</name>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
        (a&lt;b &amp;&amp; a&lt;=a &amp;&amp; c&lt;d &amp;&amp; d&lt;=d)
        &amp;&amp;
@@ -49,7 +49,7 @@
         <processAfterStart>true</processAfterStart>
     </scan>
     <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
        (1&lt;2 &amp;&amp; 1&lt;=1 &amp;&amp; 1.0&lt;2.0 &amp;&amp; 1.0&lt;=1.0)
        &amp;&amp;

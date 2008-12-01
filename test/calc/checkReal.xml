@@ -15,7 +15,7 @@
             <value type = "${checkType}">${checkValue}</value>
         </element>
       </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
+      <calculator >
         <expression>
             (Math.abs(Math.max(a,b))>1e-5) ?
             ((Math.abs(a-b)/Math.abs(Math.max(a,b)))&lt;1e-5 ? true : false)
