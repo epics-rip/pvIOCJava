@@ -14,12 +14,13 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractInt32;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.util.ScanPriority;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
 /**
  * The factory for int32Driver.
  * int32Driver is a portDriver for testing the int32 support in org.epics.ioc.pdrv.support.
@@ -55,7 +56,7 @@ public class Int32DriverFactory {
      * @param pvStructure The interface for structure int32Driver.
      */
     static public void create(
-        String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
+        String portName,boolean autoConnect,ThreadPriority priority,PVStructure pvStructure)
     {
         PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = (Structure)pvStructure.getField();
@@ -95,7 +96,7 @@ public class Int32DriverFactory {
         private Port port;
         private Trace trace;
         
-        private Int32Driver(String portName,boolean autoConnect,ScanPriority priority,
+        private Int32Driver(String portName,boolean autoConnect,ThreadPriority priority,
             int numberRegisters,int low,int high,boolean canBlock,double delay)
         {
             register = new int[numberRegisters];

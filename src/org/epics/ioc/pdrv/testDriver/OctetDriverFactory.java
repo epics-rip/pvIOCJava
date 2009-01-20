@@ -15,9 +15,13 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractOctet;
 import org.epics.ioc.pdrv.interfaces.Octet;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.util.ScanPriority;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
 /**
  * The factory for octetDriver.
  * octetDriver is a portDriver for testing PDRV components.
@@ -49,7 +53,7 @@ public class OctetDriverFactory {
      * @param pvStructure The interface for structure octetDriver.
      */
     static public void create(
-        String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
+        String portName,boolean autoConnect,ThreadPriority priority,PVStructure pvStructure)
     {
         PVDouble pvDelay = pvStructure.getDoubleField("delay");
         if(pvDelay==null) {
@@ -67,7 +71,7 @@ public class OctetDriverFactory {
         private Trace trace;
         
         private OctetDriver(String portName,
-            boolean autoConnect,boolean canBlock,ScanPriority priority,double delay)
+            boolean autoConnect,boolean canBlock,ThreadPriority priority,double delay)
         {
             this.delay = delay;
             this.portName = portName;

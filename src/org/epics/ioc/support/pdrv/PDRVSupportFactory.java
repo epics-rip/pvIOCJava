@@ -176,12 +176,6 @@ public class PDRVSupportFactory {
             }
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
         public void start() {
@@ -214,15 +208,14 @@ public class PDRVSupportFactory {
                 "%s:%s processContinue ",fullName,supportName);
             if(status==Status.success) {
                 if(octetValueType==OctetValueType.array) {
-                    convert.fromByteArray(valuePVField, 0, nbytes, octetArray, 0);
+                    convert.fromByteArray((PVArray)valuePVField, 0, nbytes, octetArray, 0);
                 } else {
                     for(int i=0; i<nbytes; i++) charArray[i] = (char)octetArray[i];
                     String string = String.copyValueOf(charArray, 0, nbytes);
-                    convert.fromString(valuePVField, string);
+                    convert.fromString((PVScalar)valuePVField, string);
                 }
                 deviceTrace.print(Trace.FLOW,
                     "%s:%s processContinue calling postPut",fullName,supportName);
-                valuePVField.postPut();
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
@@ -267,36 +260,32 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type==Type.pvString) {
-                octetValueType = OctetValueType.string;
-            } else if(type==Type.pvBoolean) {
-                octetValueType = OctetValueType.bool;
-            } else if(type.isNumeric()) {
-                octetValueType = OctetValueType.numeric;
-            } else if(type==Type.pvArray) {
+            Field field = valuePVField.getField();
+            if(field.getType()==Type.scalarArray) {
                 Array array = (Array)field;
-                Type elementType = array.getElementType();
+                ScalarType elementType = array.getElementType();
                 if(!elementType.isNumeric()) {
                     pvStructure.message("value field is not a supported type", MessageType.fatalError);
                     super.uninitialize();
                     return;
                 }
                 octetValueType = OctetValueType.array;
+            } else if(field.getType()==Type.scalar) {
+                PVScalar pvScalar = (PVScalar)valuePVField;
+                ScalarType scalarType = pvScalar.getScalar().getScalarType();
+                if(scalarType==ScalarType.pvString) {
+                    octetValueType = OctetValueType.string;
+                } else if(scalarType==ScalarType.pvBoolean) {
+                    octetValueType = OctetValueType.bool;
+                } else if(scalarType.isNumeric()) {
+                    octetValueType = OctetValueType.numeric;
+                } 
             } else {
                 pvStructure.message("value field is not a supported type", MessageType.fatalError);
                 super.uninitialize();
                 return;
             }
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
@@ -360,15 +349,14 @@ public class PDRVSupportFactory {
         
         private void putData() {
             if(octetValueType==OctetValueType.array) {
-                convert.fromByteArray(valuePVField, 0, nbytes, octetArray, 0);
+                convert.fromByteArray((PVArray)valuePVField, 0, nbytes, octetArray, 0);
             } else {
                 for(int i=0; i<nbytes; i++) charArray[i] = (char)octetArray[i];
                 String string = String.copyValueOf(charArray, 0, nbytes);
-                convert.fromString(valuePVField, string);
+                convert.fromString((PVScalar)valuePVField, string);
             }
             deviceTrace.print(Trace.FLOW,
                 "%s:%s putData and  calling postPut",fullName,supportName);
-            valuePVField.postPut();
         }
     }
     
@@ -392,36 +380,32 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type==Type.pvString) {
-                octetValueType = OctetValueType.string;
-            } else if(type==Type.pvBoolean) {
-                octetValueType = OctetValueType.bool;
-            } else if(type.isNumeric()) {
-                octetValueType = OctetValueType.numeric;
-            } else if(type==Type.pvArray) {
+            Field field = valuePVField.getField();
+            if(field.getType()==Type.scalarArray) {
                 Array array = (Array)field;
-                Type elementType = array.getElementType();
+                ScalarType elementType = array.getElementType();
                 if(!elementType.isNumeric()) {
                     pvStructure.message("value field is not a supported type", MessageType.fatalError);
                     super.uninitialize();
                     return;
                 }
                 octetValueType = OctetValueType.array;
+            } else if(field.getType()==Type.scalar) {
+                PVScalar pvScalar = (PVScalar)valuePVField;
+                ScalarType scalarType = pvScalar.getScalar().getScalarType();
+                if(scalarType==ScalarType.pvString) {
+                    octetValueType = OctetValueType.string;
+                } else if(scalarType==ScalarType.pvBoolean) {
+                    octetValueType = OctetValueType.bool;
+                } else if(scalarType.isNumeric()) {
+                    octetValueType = OctetValueType.numeric;
+                } 
             } else {
                 pvStructure.message("value field is not a supported type", MessageType.fatalError);
                 super.uninitialize();
                 return;
             }
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
@@ -452,7 +436,7 @@ public class PDRVSupportFactory {
             deviceTrace.print(Trace.FLOW,
                 "%s:%s process",fullName,supportName);
             if(octetValueType==OctetValueType.array) {
-                nbytes = convert.toByteArray(valuePVField, 0, size, octetArray, 0);
+                nbytes = convert.toByteArray((PVArray)valuePVField, 0, size, octetArray, 0);
             } else {
                 String string = convert.getString(valuePVField);
                 if(string==null) string = "";
@@ -501,7 +485,6 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
 
-        private PVField valuePVField = null;
         private Int32 int32 = null;
         private int value;
         private Status status = Status.success;
@@ -511,12 +494,7 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
+            if(valuePVField.getField().getType()==Type.scalar) return;
             super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
@@ -554,8 +532,7 @@ public class PDRVSupportFactory {
          */
         public void processContinue() {
             if(status==Status.success) {
-                convert.fromInt(valuePVField, value);
-                valuePVField.postPut();
+                convert.fromInt((PVScalar)valuePVField, value);
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
@@ -584,8 +561,7 @@ public class PDRVSupportFactory {
         private Int32InterruptInput(PVStructure pvStructure,String supportName) {
             super(supportName,pvStructure);
         }
-
-        private PVField valuePVField = null;
+        
         private Int32 int32 = null;
         private int value;
         private Status status = Status.success;
@@ -595,12 +571,7 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
+            if(valuePVField.getField().getType()==Type.scalar) return;
             super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
@@ -667,10 +638,9 @@ public class PDRVSupportFactory {
         }
         
         private void putData() {
-            convert.fromInt(valuePVField, value);
+            convert.fromInt((PVScalar)valuePVField, value);
             deviceTrace.print(Trace.FLOW,
                 "%s:%s putData and  calling postPut",fullName,supportName);
-            valuePVField.postPut();
         }
     }
     
@@ -681,7 +651,6 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
 
-        private PVField valuePVField = null;
         private Int32 int32 = null;
         private int numValues = 0;
         private long sum = 0;
@@ -691,12 +660,7 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
+            if(valuePVField.getField().getType()==Type.scalar) return;
             super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
@@ -749,10 +713,9 @@ public class PDRVSupportFactory {
                         AlarmSeverity.major);
             } else {
                 double average = ((double)sum)/numValues;
-                convert.fromDouble(valuePVField, average);
+                convert.fromDouble((PVScalar)valuePVField, average);
                 numValues = 0;
                 sum = 0;
-                valuePVField.postPut();
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
@@ -776,7 +739,6 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
 
-        private PVField valuePVField = null;
         private Int32 int32 = null;
         private int value;
         private Status status = Status.success;
@@ -786,12 +748,7 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
+            if(valuePVField.getField().getType()==Type.scalar) return;
             super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
@@ -828,7 +785,7 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            value = convert.toInt(valuePVField);
+            value = convert.toInt((PVScalar)valuePVField);
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
@@ -855,7 +812,6 @@ public class PDRVSupportFactory {
     }
     
     private static class Int32ArrayInput extends AbstractPDRVSupport
-    implements AsynAccessListener
     {
         private Int32ArrayInput(PVStructure pvStructure,String supportName) {
             super(supportName,pvStructure);
@@ -869,19 +825,9 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type!=Type.pvArray) {
-                super.uninitialize();
-                pvStructure.message("value field is not an array", MessageType.fatalError);
-                return;
-            }
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(elementType.isNumeric()) {
-                valuePVArray = (PVArray)pvField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalarArray) {
+                valuePVArray = (PVArray)valuePVField;
+                if(valuePVArray.getArray().getElementType().isNumeric()) return;   
             }
             super.uninitialize();
             pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -917,21 +863,6 @@ public class PDRVSupportFactory {
             int32Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
-         */
-        public void process(SupportProcessRequester supportProcessRequester) {
-            valuePVArray.asynAccessStart(this);
-            super.process(supportProcessRequester);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
-         */
-        public void processContinue() {
-            valuePVArray.asynAccessEnd(this);
-            valuePVField.postPut();
-            super.processContinue();
-        }        
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
@@ -945,25 +876,10 @@ public class PDRVSupportFactory {
         	convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
         	int32Array.endRead(user);
         }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
-         */
-        public void beginSyncAccess() {             
-            pvRecord.lock();
-            deviceTrace.print(Trace.FLOW, "%s beginSyncAccess", fullName);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AsynAccessListener#endSyncAccess()
-         */
-        public void endSyncAccess() {           
-            deviceTrace.print(Trace.FLOW, "%s endSyncAccess", fullName);
-            pvRecord.unlock();
-        }
     }
     
     private static class Int32ArrayInterruptInput extends AbstractPDRVSupport
-    implements Int32ArrayInterruptListener,AsynAccessListener
+    implements Int32ArrayInterruptListener
     {
         private Int32ArrayInterruptInput(PVStructure pvStructure,String supportName) {
             super(supportName,pvStructure);
@@ -977,19 +893,9 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type!=Type.pvArray) {
-                super.uninitialize();
-                pvStructure.message("value field is not an array", MessageType.fatalError);
-                return;
-            }
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(elementType.isNumeric()) {
-                valuePVArray = (PVArray)pvField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalarArray) {
+                valuePVArray = (PVArray)valuePVField;
+                if(valuePVArray.getArray().getElementType().isNumeric()) return;   
             }
             super.uninitialize();
             pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -1027,21 +933,6 @@ public class PDRVSupportFactory {
             int32Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
-         */
-        public void process(SupportProcessRequester supportProcessRequester) {
-            valuePVArray.asynAccessStart(this);
-            super.process(supportProcessRequester);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
-         */
-        public void processContinue() {
-            valuePVArray.asynAccessEnd(this);
-            valuePVField.postPut();
-            super.processContinue();
-        }        
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
@@ -1062,68 +953,29 @@ public class PDRVSupportFactory {
         public void interrupt(Int32Array int32Array) {
             if(super.isProcess()) {
                 recordProcess.setActive(this);
-                valuePVArray.asynAccessStart(this);
                 Status status = int32Array.startRead(user);
                 if(status==Status.success) {
                     convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
                     int32Array.endRead(user);
-                }
-                pvRecord.lock();
-                try {
-                    valuePVArray.asynAccessEnd(this);
-                } finally {
-                    pvRecord.unlock();
                 }
                 recordProcess.process(this, false, null);
             } else {
-                boolean isModifier = false;
                 pvRecord.lock();
                 try {
-                    isModifier = valuePVArray.asynAccessStart(this);
-                } finally {
-                    pvRecord.unlock();
-                }
-                if(!isModifier) {
-                    deviceTrace.print(Trace.ERROR,
-                            "%s:%s interrupt but asynNodifyActive",
-                            fullName,supportName);
-                    return;
-                }
-                Status status = int32Array.startRead(user);
-                if(status==Status.success) {
-                    convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
-                    int32Array.endRead(user);
-                }
-                pvRecord.lock();
-                try {
-                    valuePVArray.asynAccessEnd(this);
-                    if(status!=Status.success) {
+                    Status status = int32Array.startRead(user);
+                    if(status==Status.success) {
+                        convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
+                        int32Array.endRead(user);
+                    } else {
                         alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
-                    }
-                    valuePVField.postPut();
-                } finally {
+                    } 
+                }finally {
                     pvRecord.unlock();
                 }
                 deviceTrace.print(Trace.SUPPORT,
                         "%s:%s interrupt and record not processed",
                         fullName,supportName);
             }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
-         */
-        public void beginSyncAccess() {
-        	pvRecord.lock();
-            deviceTrace.print(Trace.FLOW,
-                    "%s:%s beginSyncAccess", fullName,supportName);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AsynAccessListener#endSyncAccess()
-         */
-        public void endSyncAccess() {                      
-            deviceTrace.print(Trace.FLOW,
-                    "%s:%s endSyncAccess", fullName,supportName);
-            pvRecord.unlock();
         }
     }
     
@@ -1141,19 +993,9 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type!=Type.pvArray) {
-                super.uninitialize();
-                pvStructure.message("value field is not an array", MessageType.fatalError);
-                return;
-            }
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(elementType.isNumeric()) {
-                valuePVArray = (PVArray)pvField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalarArray) {
+                valuePVArray = (PVArray)valuePVField;
+                if(valuePVArray.getArray().getElementType().isNumeric()) return;   
             }
             super.uninitialize();
             pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -1189,12 +1031,6 @@ public class PDRVSupportFactory {
             int32Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
-         */
-        public void process(SupportProcessRequester supportProcessRequester) {
-            super.process(supportProcessRequester);
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
@@ -1210,15 +1046,6 @@ public class PDRVSupportFactory {
         }
     }
     
-    private static Enumerated getEnumerated(PVField pvField) {
-    	if(pvField.getPVField().getField().getType()!=Type.pvStructure) return null;
-    	PVStructure pvStructure = (PVStructure)pvField;
-        Create create = pvStructure.getCreate();
-        if(create==null || !(create instanceof Enumerated)) return null;
-        Enumerated enumerated = (Enumerated)create;
-        return enumerated;
-    }
-    
     private static class UInt32DigitalInput extends AbstractPDRVSupport
     {
         private UInt32DigitalInput(PVStructure pvStructure,String supportName) {
@@ -1226,7 +1053,7 @@ public class PDRVSupportFactory {
         }
 
         private PVBoolean valuePVBoolean = null;
-        private Type valueType = null;
+        private ScalarType valueScalarType = null;
         private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
         private int value;
@@ -1239,20 +1066,20 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            valueType = field.getType();
-            if(valueType==Type.pvBoolean) {
-                valuePVBoolean = (PVBoolean)valuePVField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalar) {
+                PVScalar pvScalar = (PVScalar)valuePVField;
+                valueScalarType = pvScalar.getScalar().getScalarType();
+                if(valueScalarType==ScalarType.pvBoolean) {
+                    valuePVBoolean = (PVBoolean)valuePVField;
+                    return;
+                } else if(valueScalarType==ScalarType.pvInt) {
+                    pvIndex = (PVInt)valuePVField;
+                    return;
+                }
             }
-            if(valueType==Type.pvInt) {
-                pvIndex = (PVInt)valuePVField;
-                return;
-            }
-            enumerated = getEnumerated(valuePVField);
+            enumerated = EnumeratedFactory.getEnumerated(valuePVField);
             if(enumerated!=null) {
-            	pvIndex = enumerated.getIndexField();
+            	pvIndex = enumerated.getIndex();
             	return;
             }
             pvStructure.message("value field is not a valid type", MessageType.fatalError);
@@ -1283,13 +1110,11 @@ public class PDRVSupportFactory {
             if(enumerated!=null) {
             	String[] choices = uint32Digital.getChoices(user);
             	if(choices!=null) {
-            		PVStringArray pvStringArray = enumerated.getChoicesField();
+            		PVStringArray pvStringArray = enumerated.getChoices();
             		pvStringArray.put(0, choices.length, choices, 0);
-            		PVField pvField = super.getPVField().getPVRecord().findPVField(pvStringArray);
-            		pvField.postPut();
             	}
             }
-            if(valueType==Type.pvInt || valueType==Type.pvBoolean) {
+            if(valueScalarType!=null) {
             	mask = pvMask.get();
             	if(mask==0) {
             		pvStructure.message("mask is 0", MessageType.fatalError);
@@ -1315,7 +1140,7 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
          */
         public void processContinue() {
-        	if(valueType==Type.pvInt || valueType==Type.pvBoolean) {
+        	if(valueScalarType!=null) {
                 value = value&mask;
                 value >>>= shift;
         	}
@@ -1324,11 +1149,9 @@ public class PDRVSupportFactory {
                 boolean newValue = ((value==0) ? false : true);
                 if(oldValue!=newValue) {
                     valuePVBoolean.put(newValue);
-                    valuePVField.postPut();
                 }
             } else if(pvIndex!=null)  {
                 pvIndex.put(value);
-                valuePVField.postPut();
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
@@ -1358,9 +1181,8 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
         
-        private Type valueType = null;
+        private ScalarType valueScalarType = null;
         private PVBoolean valuePVBoolean = null;
-        private PVField pvIndex = null;
         private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
         private int value;
@@ -1373,24 +1195,24 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            valueType = field.getType();
-            if(valueType==Type.pvBoolean) {
-                valuePVBoolean = (PVBoolean)valuePVField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalar) {
+                PVScalar pvScalar = (PVScalar)valuePVField;
+                valueScalarType = pvScalar.getScalar().getScalarType();
+                if(valueScalarType==ScalarType.pvBoolean) {
+                    valuePVBoolean = (PVBoolean)valuePVField;
+                    return;
+                } else if(valueScalarType==ScalarType.pvInt) {
+                    pvIndex = (PVInt)valuePVField;
+                    return;
+                }
             }
-            if(valueType==Type.pvInt) {
-                pvIndex = (PVInt)valuePVField;
-                return;
-            }
-            enumerated = getEnumerated(valuePVField);
+            enumerated = EnumeratedFactory.getEnumerated(valuePVField);
             if(enumerated!=null) {
-            	pvIndex = enumerated.getIndexField();
-            	return;
+                pvIndex = enumerated.getIndex();
+                return;
             }
+            pvStructure.message("value field is not a valid type", MessageType.fatalError);
             super.uninitialize();
-            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
         /* (non-Javadoc)
@@ -1399,7 +1221,6 @@ public class PDRVSupportFactory {
         public void uninitialize() {
             super.uninitialize();
             valuePVBoolean = null;
-            pvIndex = null;
             pvIndex = null;
         }
         /* (non-Javadoc)
@@ -1418,13 +1239,11 @@ public class PDRVSupportFactory {
             if(enumerated!=null) {
             	String[] choices = uint32Digital.getChoices(user);
             	if(choices!=null) {
-            		PVStringArray pvStringArray = enumerated.getChoicesField();
+            		PVStringArray pvStringArray = enumerated.getChoices();
             		pvStringArray.put(0, choices.length, choices, 0);
-            		PVField pvField = super.getPVField().getPVRecord().findPVField(pvStringArray);
-            		pvField.postPut();
             	}
             }
-            if(valueType==Type.pvInt) {
+            if(valueScalarType!=null) {
             	mask = pvMask.get();
             	if(mask==0) {
             		pvStructure.message("mask is 0", MessageType.fatalError);
@@ -1482,7 +1301,7 @@ public class PDRVSupportFactory {
         }
         
         private void putData() {
-        	if(valueType==Type.pvInt) {
+        	if(valueScalarType!=null) {
                 value = value&mask;
                 value >>>= shift;
         	}
@@ -1490,13 +1309,11 @@ public class PDRVSupportFactory {
                 valuePVBoolean.put((value==0) ? false : true);
             } else if(pvIndex!=null)  {
                 pvIndex.put(value);
-                pvIndex.postPut();
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
             deviceTrace.print(Trace.FLOW,
                     "%s:%s putData and  calling postPut",fullName,supportName);
-            valuePVField.postPut();
         }
     }
     
@@ -1505,7 +1322,7 @@ public class PDRVSupportFactory {
         private UInt32DigitalOutput(PVStructure pvStructure,String supportName) {
             super(supportName,pvStructure);
         }
-        private Type valueType = null;
+        private ScalarType valueScalarType = null;
         private PVBoolean valuePVBoolean = null;
         private PVInt pvIndex = null;
         private UInt32Digital uint32Digital = null;
@@ -1519,23 +1336,23 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            valueType = field.getType();
-            if(valueType==Type.pvBoolean) {
-                valuePVBoolean = (PVBoolean)valuePVField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalar) {
+                PVScalar pvScalar = (PVScalar)valuePVField;
+                valueScalarType = pvScalar.getScalar().getScalarType();
+                if(valueScalarType==ScalarType.pvBoolean) {
+                    valuePVBoolean = (PVBoolean)valuePVField;
+                    return;
+                } else if(valueScalarType==ScalarType.pvInt) {
+                    pvIndex = (PVInt)valuePVField;
+                    return;
+                }
             }
-            if(valueType==Type.pvInt) {
-                pvIndex = (PVInt)valuePVField;
-                return;
-            }
-            enumerated = getEnumerated(valuePVField);
+            enumerated = EnumeratedFactory.getEnumerated(valuePVField);
             if(enumerated!=null) {
-            	pvIndex = enumerated.getIndexField();
-            	return;
+                pvIndex = enumerated.getIndex();
+                return;
             }
-            pvStructure.message("value field is not a scalar type", MessageType.fatalError);
+            pvStructure.message("value field is not a valid type", MessageType.fatalError);
             super.uninitialize();
             return;
         }      
@@ -1563,13 +1380,11 @@ public class PDRVSupportFactory {
             if(enumerated!=null) {
             	String[] choices = uint32Digital.getChoices(user);
             	if(choices!=null) {
-            		PVStringArray pvStringArray = enumerated.getChoicesField();
+            		PVStringArray pvStringArray = enumerated.getChoices();
             		pvStringArray.put(0, choices.length, choices, 0);
-            		PVField pvField = super.getPVField().getPVRecord().findPVField(pvStringArray);
-            		pvField.postPut();
             	}
             }
-            if(valueType==Type.pvInt) {
+            if(valueScalarType!=null) {
             	mask = pvMask.get();
             	if(mask==0) {
             		pvStructure.message("mask is 0", MessageType.fatalError);
@@ -1602,7 +1417,7 @@ public class PDRVSupportFactory {
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
-            if(valueType==Type.pvInt) {
+            if(valueScalarType!=null) {
                 value <<= shift;
             }
             super.process(supportProcessRequester);
@@ -1640,30 +1455,34 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            PVField pvDisplay = pvProperty.findProperty(valuePVField.getPVField(),"display");
+            PVField pvDisplay = pvProperty.findProperty(valuePVField,"display");
             if(pvDisplay!=null) {
                 PVField pvTemp = pvProperty.findProperty(pvDisplay,"units");
-                if(pvTemp!=null && pvTemp.getField().getType()==Type.pvString) {
-                	pvUnits = (PVString)pvTemp;
+                if(pvTemp!=null && pvTemp.getField().getType()==Type.scalar) {
+                    PVScalar pvScalar = (PVScalar)pvTemp;
+                    if(pvScalar.getScalar().getScalarType()==ScalarType.pvString) {
+                        pvUnits = (PVString)pvTemp;
+                    }
                 }
                 pvTemp = pvProperty.findProperty(pvDisplay,"limit");
                 if(pvTemp!=null) {
-                	PVField pvTemp1 = pvProperty.findProperty(pvTemp,"low");
-                	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
-                    	pvLowLimit = (PVDouble)pvTemp1;
+                    PVField pvTemp1 = pvProperty.findProperty(pvTemp,"low");
+                    if(pvTemp1!=null && pvTemp1.getField().getType()==Type.scalar) {
+                        PVScalar pvScalar = (PVScalar)pvTemp1;
+                        if(pvScalar.getScalar().getScalarType()==ScalarType.pvDouble) {
+                            pvLowLimit = (PVDouble)pvTemp1;
+                        }
                     }
-                	pvTemp1 = pvProperty.findProperty(pvTemp,"high");
-                	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
-                    	pvHighLimit = (PVDouble)pvTemp1;
+                    pvTemp1 = pvProperty.findProperty(pvTemp,"high");
+                    if(pvTemp1!=null && pvTemp1.getField().getType()==Type.scalar) {
+                        PVScalar pvScalar = (PVScalar)pvTemp1;
+                        if(pvScalar.getScalar().getScalarType()==ScalarType.pvDouble) {
+                            pvHighLimit = (PVDouble)pvTemp1;
+                        }
                     }
                 }
             }
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
+            if(valuePVField.getField().getType()==Type.scalar) return;
             super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
@@ -1691,8 +1510,6 @@ public class PDRVSupportFactory {
             if(pvUnits!=null && (pvUnits.get()==null || pvUnits.get().length()==0)) {
             	String units = float64.getUnits(user);
             	pvUnits.put(units);
-            	PVField pvField = super.getPVField().getPVRecord().findPVField(pvUnits);
-        		pvField.postPut();
             }
             if(pvLowLimit!=null && pvHighLimit!=null) {
             	if(pvLowLimit.get()==pvHighLimit.get()) {
@@ -1700,10 +1517,6 @@ public class PDRVSupportFactory {
             		if(limits!=null) {
             		    pvLowLimit.put(limits[0]);
             		    pvHighLimit.put(limits[1]);
-            		    PVField pvField = super.getPVField().getPVRecord().findPVField(pvLowLimit);
-                		pvField.postPut();
-                		pvField = super.getPVField().getPVRecord().findPVField(pvHighLimit);
-                		pvField.postPut();
             		}
             	}
             }
@@ -1720,8 +1533,7 @@ public class PDRVSupportFactory {
          */
         public void processContinue() {
             if(status==Status.success) {
-                convert.fromDouble(valuePVField, value);
-                valuePVField.postPut();
+                convert.fromDouble((PVScalar)valuePVField, value);
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
@@ -1764,31 +1576,35 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
-            super.uninitialize();
-            PVField pvDisplay = pvProperty.findProperty(valuePVField.getPVField(),"display");
+            PVField pvDisplay = pvProperty.findProperty(valuePVField,"display");
             if(pvDisplay!=null) {
                 PVField pvTemp = pvProperty.findProperty(pvDisplay,"units");
-                if(pvTemp!=null && pvTemp.getField().getType()==Type.pvString) {
-                	pvUnits = (PVString)pvTemp;
+                if(pvTemp!=null && pvTemp.getField().getType()==Type.scalar) {
+                    PVScalar pvScalar = (PVScalar)pvTemp;
+                    if(pvScalar.getScalar().getScalarType()==ScalarType.pvString) {
+                        pvUnits = (PVString)pvTemp;
+                    }
                 }
                 pvTemp = pvProperty.findProperty(pvDisplay,"limit");
                 if(pvTemp!=null) {
-                	PVField pvTemp1 = pvProperty.findProperty(pvTemp,"low");
-                	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
-                    	pvLowLimit = (PVDouble)pvTemp1;
+                    PVField pvTemp1 = pvProperty.findProperty(pvTemp,"low");
+                    if(pvTemp1!=null && pvTemp1.getField().getType()==Type.scalar) {
+                        PVScalar pvScalar = (PVScalar)pvTemp1;
+                        if(pvScalar.getScalar().getScalarType()==ScalarType.pvDouble) {
+                            pvLowLimit = (PVDouble)pvTemp1;
+                        }
                     }
-                	pvTemp1 = pvProperty.findProperty(pvTemp,"high");
-                	if(pvTemp1!=null && pvTemp1.getField().getType()==Type.pvDouble) {
-                    	pvHighLimit = (PVDouble)pvTemp1;
+                    pvTemp1 = pvProperty.findProperty(pvTemp,"high");
+                    if(pvTemp1!=null && pvTemp1.getField().getType()==Type.scalar) {
+                        PVScalar pvScalar = (PVScalar)pvTemp1;
+                        if(pvScalar.getScalar().getScalarType()==ScalarType.pvDouble) {
+                            pvHighLimit = (PVDouble)pvTemp1;
+                        }
                     }
                 }
             }
+            if(valuePVField.getField().getType()==Type.scalar) return;
+            super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
@@ -1815,8 +1631,6 @@ public class PDRVSupportFactory {
             if(pvUnits!=null && (pvUnits.get()==null || pvUnits.get().length()==0)) {
             	String units = float64.getUnits(user);
             	pvUnits.put(units);
-            	PVField pvField = super.getPVField().getPVRecord().findPVField(pvUnits);
-        		pvField.postPut();
             }
             if(pvLowLimit!=null && pvHighLimit!=null) {
             	if(pvLowLimit.get()==pvHighLimit.get()) {
@@ -1824,10 +1638,6 @@ public class PDRVSupportFactory {
             		if(limits!=null) {
             		    pvLowLimit.put(limits[0]);
             		    pvHighLimit.put(limits[1]);
-            		    PVField pvField = super.getPVField().getPVRecord().findPVField(pvLowLimit);
-                		pvField.postPut();
-                		pvField = super.getPVField().getPVRecord().findPVField(pvHighLimit);
-                		pvField.postPut();
             		}
             	}
             }
@@ -1873,10 +1683,9 @@ public class PDRVSupportFactory {
         }
         
         private void putData() {
-            convert.fromDouble(valuePVField, value);
+            convert.fromDouble((PVScalar)valuePVField, value);
             deviceTrace.print(Trace.FLOW,
                 "%s:%s putData and  calling postPut",fullName,supportName);
-            valuePVField.postPut();
         }
     }
     
@@ -1896,12 +1705,7 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
+            if(valuePVField.getField().getType()==Type.scalar) return;
             super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
@@ -1953,10 +1757,9 @@ public class PDRVSupportFactory {
                         AlarmSeverity.major);
             } else {
                 double average = sum/numValues;
-                convert.fromDouble(valuePVField, average);
+                convert.fromDouble((PVScalar)valuePVField, average);
                 numValues = 0;
                 sum = 0.0;
-                valuePVField.postPut();
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
@@ -1990,12 +1793,7 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            if(field.getType().isScalar()) {
-                valuePVField = pvField;
-                return;
-            }
+            if(valuePVField.getField().getType()==Type.scalar) return;
             super.uninitialize();
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
@@ -2032,7 +1830,7 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            value = convert.toDouble(valuePVField);
+            value = convert.toDouble((PVScalar)valuePVField);
             super.process(supportProcessRequester);
         }
         /* (non-Javadoc)
@@ -2054,7 +1852,6 @@ public class PDRVSupportFactory {
     }
     
     private static class Float64ArrayInput extends AbstractPDRVSupport
-    implements AsynAccessListener
     {
         private Float64ArrayInput(PVStructure pvStructure,String supportName) {
             super(supportName,pvStructure);
@@ -2068,19 +1865,9 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type!=Type.pvArray) {
-                super.uninitialize();
-                pvStructure.message("value field is not an array", MessageType.fatalError);
-                return;
-            }
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(elementType.isNumeric()) {
-                valuePVArray = (PVArray)pvField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalarArray) {
+                valuePVArray = (PVArray)valuePVField;
+                if(valuePVArray.getArray().getElementType().isNumeric()) return;   
             }
             super.uninitialize();
             pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -2116,21 +1903,6 @@ public class PDRVSupportFactory {
             float64Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
-         */
-        public void process(SupportProcessRequester supportProcessRequester) {
-            valuePVArray.asynAccessStart(this);
-            super.process(supportProcessRequester);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
-         */
-        public void processContinue() {
-            valuePVArray.asynAccessEnd(this);
-            valuePVField.postPut();
-            super.processContinue();
-        }        
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
@@ -2161,7 +1933,7 @@ public class PDRVSupportFactory {
     }
     
     private static class Float64ArrayInterruptInput extends AbstractPDRVSupport
-    implements Float64ArrayInterruptListener,AsynAccessListener
+    implements Float64ArrayInterruptListener
     {
         private Float64ArrayInterruptInput(PVStructure pvStructure,String supportName) {
             super(supportName,pvStructure);
@@ -2175,19 +1947,9 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type!=Type.pvArray) {
-                super.uninitialize();
-                pvStructure.message("value field is not an array", MessageType.fatalError);
-                return;
-            }
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(elementType.isNumeric()) {
-                valuePVArray = (PVArray)pvField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalarArray) {
+                valuePVArray = (PVArray)valuePVField;
+                if(valuePVArray.getArray().getElementType().isNumeric()) return;   
             }
             super.uninitialize();
             pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -2225,21 +1987,6 @@ public class PDRVSupportFactory {
             float64Array = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#process(org.epics.ioc.process.SupportProcessRequester)
-         */
-        public void process(SupportProcessRequester supportProcessRequester) {          
-            valuePVArray.asynAccessStart(this);
-            super.process(supportProcessRequester);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#processContinue()
-         */
-        public void processContinue() {
-            valuePVArray.asynAccessEnd(this);
-            valuePVField.postPut();
-            super.processContinue();
-        }        
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#queueCallback()
          */
         public void queueCallback() {
@@ -2258,42 +2005,23 @@ public class PDRVSupportFactory {
         public void interrupt(Float64Array float64Array) {
             if(super.isProcess()) {
                 recordProcess.setActive(this);
-                valuePVArray.asynAccessStart(this);
                 Status status = float64Array.startRead(user);
                 if(status==Status.success) {
                     convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
                     float64Array.endRead(user);
-                }
-                pvRecord.lock();
-                try {
-                    valuePVArray.asynAccessEnd(this);
-                } finally {
-                    pvRecord.unlock();
                 }
                 recordProcess.process(this, false, null);
             } else {
-                boolean isModifier = false;
                 pvRecord.lock();
                 try {
-                    isModifier = valuePVArray.asynAccessStart(this);
-                } finally {
-                    pvRecord.unlock();
-                }
-                if(!isModifier) {
-                    deviceTrace.print(Trace.ERROR,
-                            "%s:%s interrupt but asynNodifyActive",
-                            fullName,supportName);
-                    return;
-                }
-                Status status = float64Array.startRead(user);
-                if(status==Status.success) {
-                    convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
-                    float64Array.endRead(user);
-                }
-                pvRecord.lock();
-                try {
-                    valuePVArray.asynAccessEnd(this);
-                    valuePVField.postPut();
+
+                    Status status = float64Array.startRead(user);
+                    if(status==Status.success) {
+                        convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
+                        float64Array.endRead(user);
+                    } else {
+                        alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
+                    } 
                 } finally {
                     pvRecord.unlock();
                 }
@@ -2301,22 +2029,6 @@ public class PDRVSupportFactory {
                         "%s:%s interrupt and record not processed",
                         fullName,supportName);
             }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AsynAccessListener#beginSyncAccess()
-         */
-        public void beginSyncAccess() {
-            deviceTrace.print(Trace.FLOW,
-                    "%s beginSyncAccess", fullName);
-            pvRecord.lock();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pv.AsynAccessListener#endSyncAccess()
-         */
-        public void endSyncAccess() {
-            pvRecord.unlock();
-            deviceTrace.print(Trace.FLOW,
-                    "%s endSyncAccess", fullName);
         }
     }
     
@@ -2334,19 +2046,9 @@ public class PDRVSupportFactory {
         public void initialize(RecordSupport recordSupport) {
             super.initialize(recordSupport);
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            PVField pvField = valuePVField.getPVField();
-            Field field = pvField.getField();
-            Type type = field.getType();
-            if(type!=Type.pvArray) {
-                super.uninitialize();
-                pvStructure.message("value field is not an array", MessageType.fatalError);
-                return;
-            }
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(elementType.isNumeric()) {
-                valuePVArray = (PVArray)pvField;
-                return;
+            if(valuePVField.getField().getType()==Type.scalarArray) {
+                valuePVArray = (PVArray)valuePVField;
+                if(valuePVArray.getArray().getElementType().isNumeric()) return;   
             }
             super.uninitialize();
             pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);

@@ -5,6 +5,13 @@
  */
 package org.epics.ioc.pdrv.testDriver;
 
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
+
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
 import org.epics.ioc.pdrv.Factory;
@@ -14,18 +21,7 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractFloat64Array;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.DoubleArrayData;
-import org.epics.ioc.pv.FieldCreate;
-import org.epics.ioc.pv.FieldFactory;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.ScanPriority;
+
 /**
  * The factory for float64ArrayDriver.
  * float64ArrayDriver is a portDriver for testing the float64Array support in org.epics.ioc.pdrv.support.
@@ -42,7 +38,7 @@ public class Float64ArrayDriverFactory {
      * @param pvStructure The interface for structure float64ArrayDriver.
      */
     static public void create(
-        String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
+        String portName,boolean autoConnect,ThreadPriority priority,PVStructure pvStructure)
     {
         PVField[] pvFields = pvStructure.getPVFields();
         Structure structure = (Structure)pvStructure.getField();
@@ -66,11 +62,11 @@ public class Float64ArrayDriverFactory {
         private double delay;
         private long milliseconds;
         private int maxSegmentSize = 0;
-        private PVField parent;
+        private PVStructure parent;
         private Port port;
         private Trace trace;
         
-        private Float64ArrayDriver(PVField parent,String portName,boolean autoConnect,ScanPriority priority,
+        private Float64ArrayDriver(PVStructure parent,String portName,boolean autoConnect,ThreadPriority priority,
             boolean canBlock,double delay,int maxSegmentSize)
         {
             this.parent = parent;
@@ -132,7 +128,7 @@ public class Float64ArrayDriverFactory {
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                Array array = fieldCreate.createArray("drvPrivate", Type.pvDouble);
+                Array array = fieldCreate.createArray("drvPrivate", ScalarType.pvDouble);
                 new Float64ArrayImpl(parent,array,device);
             }
             /* (non-Javadoc)
@@ -171,7 +167,7 @@ public class Float64ArrayDriverFactory {
             private class Float64ArrayImpl extends AbstractFloat64Array{
                 private double[] value = new double[0];
                 
-                private Float64ArrayImpl(PVField parent,Array array,Device device) {
+                private Float64ArrayImpl(PVStructure parent,Array array,Device device) {
                     super(parent,array,0,true,device);
                 }
                 /* (non-Javadoc)
@@ -182,17 +178,12 @@ public class Float64ArrayDriverFactory {
                         super.message("not capacityMutable", MessageType.error);
                         return;
                     }
-                    super.asynAccessCallListener(true);
-                    try {
-                        if(length>len) length = len;
-                        double[]newarray = new double[len];
-                        if(length>0) System.arraycopy(value,0,newarray,0,length);
-                        value = newarray;
-                        capacity = len;
-                    } finally {
-                        super.asynAccessCallListener(false);
-                    }
-                }                
+                    if(length>len) length = len;
+                    double[]newarray = new double[len];
+                    if(length>0) System.arraycopy(value,0,newarray,0,length);
+                    value = newarray;
+                    capacity = len;
+                }            
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.AbstractFloat64Array#startRead(org.epics.ioc.pdrv.User)
                  */
@@ -238,22 +229,17 @@ public class Float64ArrayDriverFactory {
                     }
                     if(delay>0.0) {
                         try {
-                        Thread.sleep(milliseconds);
+                            Thread.sleep(milliseconds);
                         } catch (InterruptedException ie) {
-                            
+
                         }
                     }
                     if(maxSegmentSize>0 && len>maxSegmentSize) len = maxSegmentSize;
-                    super.asynAccessCallListener(true);
-                    try {
-                        int n = len;
-                        if(offset+len > length) n = length - offset;
-                        data.data = value;
-                        data.offset = offset;
-                        return n;
-                    } finally {
-                        super.asynAccessCallListener(false);
-                    }
+                    int n = len;
+                    if(offset+len > length) n = length - offset;
+                    data.data = value;
+                    data.offset = offset;
+                    return n;
                 }                
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pv.PVDoubleArray#put(int, int, double[], int)
@@ -269,28 +255,23 @@ public class Float64ArrayDriverFactory {
                     }
                     if(delay>0.0) {
                         try {
-                        Thread.sleep(milliseconds);
+                            Thread.sleep(milliseconds);
                         } catch (InterruptedException ie) {
-                            
+
                         }
                     }
                     if(maxSegmentSize>0 && len>maxSegmentSize) len = maxSegmentSize;
-                    super.asynAccessCallListener(true);
-                    try {
-                        if(offset+len > length) {
-                            int newlength = offset + len;
-                            if(newlength>capacity) {
-                                setCapacity(newlength);
-                                newlength = capacity;
-                                len = newlength - offset;
-                                if(len<=0) return 0;
-                            }
-                            length = newlength;
+                    if(offset+len > length) {
+                        int newlength = offset + len;
+                        if(newlength>capacity) {
+                            setCapacity(newlength);
+                            newlength = capacity;
+                            len = newlength - offset;
+                            if(len<=0) return 0;
                         }
-                        System.arraycopy(from,fromOffset,value,offset,len);                       
-                    } finally {
-                        super.asynAccessCallListener(false);
+                        length = newlength;
                     }
+                    System.arraycopy(from,fromOffset,value,offset,len);                       
                     return len;
                 }
                 /* (non-Javadoc)
