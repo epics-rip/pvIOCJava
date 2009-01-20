@@ -17,19 +17,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.ArrayArrayData;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVArrayArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.PVStructureArray;
-import org.epics.ioc.pv.StructureArrayData;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
 
 /**
  * Factory which implements SelectField.
@@ -130,44 +122,8 @@ public class SelectFieldFactory {
                 treeItem.setText(field.getFieldName());
                 treeItem.setData(pvField);
                 Type type = field.getType();
-                if(type==Type.pvStructure) {
+                if(type==Type.structure) {
                     createStructureTreeItem(treeItem,(PVStructure)pvField);
-                } else if(type==Type.pvArray) {
-                    createArrayTreeItem(treeItem,(PVArray)pvField);
-                }
-            }
-        }
-
-        private void createArrayTreeItem(TreeItem tree, PVArray pvArray) {
-            Array array = (Array)pvArray.getField();
-            Type elementType = array.getElementType();
-            if(elementType.isScalar()) return;
-            int length = pvArray.getLength();
-            if(elementType==Type.pvArray) {
-                PVArrayArray pvArrayArray = (PVArrayArray)pvArray;
-                ArrayArrayData arrayArrayData = new ArrayArrayData();
-                pvArrayArray.get(0, length, arrayArrayData);
-                PVArray[] pvArrays = arrayArrayData.data;
-                for(PVArray elementPVArray : pvArrays) {
-                    if(elementPVArray==null) continue;
-                    TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                    Field field = elementPVArray.getField();
-                    treeItem.setText(field.getFieldName());
-                    treeItem.setData(elementPVArray);
-                    createArrayTreeItem(treeItem,elementPVArray);
-                }
-            } else if(elementType==Type.pvStructure) {
-                PVStructureArray pvStructureArray = (PVStructureArray)pvArray;
-                StructureArrayData structureArrayData = new StructureArrayData();
-                pvStructureArray.get(0, length, structureArrayData);
-                PVStructure[] pvStructures = structureArrayData.data;
-                for(PVStructure pvStructure : pvStructures) {
-                    if(pvStructure==null) continue;
-                    TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                    Field field = pvStructure.getField();
-                    treeItem.setText(field.getFieldName());
-                    treeItem.setData(pvStructure);
-                    createStructureTreeItem(treeItem,pvStructure);
                 }
             }
         }

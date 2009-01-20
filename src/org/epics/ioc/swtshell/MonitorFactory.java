@@ -32,13 +32,13 @@ import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
-import org.epics.ioc.util.ScanPriority;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
 /**
  * A shell for monitoring a channel.
  * @author mrk
@@ -63,8 +63,8 @@ public class MonitorFactory {
             this.display = display;
         }
 
-        private static IOCExecutor iocExecutor
-            = IOCExecutorFactory.create("swtshellMonitor", ScanPriority.low);
+        private static Executor executor
+            = ExecutorFactory.create("swtshellMonitor", ThreadPriority.low);
         private static String windowName = "monitor";
         private Display display;
         private Shell shell = null;
@@ -289,7 +289,7 @@ public class MonitorFactory {
                 startStopButton.setText("stopMonitor");
                 disableOptions();
                 startStopButton.setEnabled(true);
-                cdMonitor.start(queueSize,iocExecutor);
+                cdMonitor.start(queueSize,executor);
                 return;
             }
         }
@@ -343,9 +343,13 @@ public class MonitorFactory {
         private void enableOptions() {
             Field field = channelField.getField();
             Type type = field.getType();
-            if(!type.isNumeric()) {
-                monitorType = MonitorType.put;
-                putButton.setSelection(true);
+            if(type==Type.scalar) {
+                Scalar scalar = (Scalar)field;
+                ScalarType scalarType = scalar.getScalarType();
+                if(!scalarType.isNumeric()) {
+                    monitorType = MonitorType.put;
+                    putButton.setSelection(true);
+                }
             }
             propertyButton.setEnabled(true);
             putButton.setEnabled(true);

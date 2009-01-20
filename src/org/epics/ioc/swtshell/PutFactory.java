@@ -31,13 +31,15 @@ import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requester;
-import org.epics.ioc.util.ScanPriority;
-/**
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
+
+/*
  * A shell for channelGet.
  * @author mrk
  *
@@ -59,8 +61,8 @@ public class PutFactory {
             this.display = display;
         }
 
-        private static IOCExecutor iocExecutor
-            = IOCExecutorFactory.create("swtshell:put",ScanPriority.low);
+        private static Executor executor
+            = ExecutorFactory.create("swtshell:put",ThreadPriority.low);
         private static String windowName = "put";
         private Display display;
         private Shell shell = null;
@@ -237,7 +239,7 @@ public class PutFactory {
                 cdRecord.getCDStructure().clearNumPuts();
                 CDGet cdGet = CDGetFactory.create(shell);
                 cdGet.getValue(cdRecord);
-                iocExecutor.execute(this);
+                executor.execute(this);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

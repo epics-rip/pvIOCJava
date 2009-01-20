@@ -7,11 +7,11 @@ package org.epics.ioc.swtshell;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.util.MessageNode;
-import org.epics.ioc.util.MessageQueue;
-import org.epics.ioc.util.MessageQueueFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
 
 /**
  * Factory that manages messages.

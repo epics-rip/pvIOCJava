@@ -1,35 +1,35 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.BooleanArrayData;
-import org.epics.ioc.pv.PVBooleanArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.calc.AbstractCalculatorSupport;
-import org.epics.ioc.support.calc.ArgType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+import org.epics.ioc.support.calc.*;
 
 public class BooleanArrayToggleCalculatorFactory {
-    public static Support create(DBStructure dbStructure) {
-        return new BooleanArrayToggleCalculator(dbStructure);
+    public static Support create(PVStructure pvStructure) {
+        return new BooleanArrayToggleCalculator(pvStructure);
     }
 
     private static String supportName = "booleanArrayToggleCalculator";
 
     private static class BooleanArrayToggleCalculator extends AbstractCalculatorSupport
     {
-        private BooleanArrayToggleCalculator(DBStructure dbStructure) {
-            super(supportName,dbStructure);
+        private BooleanArrayToggleCalculator(PVStructure pvStructure) {
+            super(supportName,pvStructure);
         }
 
 
         private ArgType[] argTypes = new ArgType[0];
 
-        private DBField valueDB = null;
         private PVBooleanArray valuePV = null;
         private BooleanArrayData valueData = new BooleanArrayData();
         private boolean[] value;
@@ -37,14 +37,13 @@ public class BooleanArrayToggleCalculatorFactory {
 
         protected ArgType[] getArgTypes() { return argTypes;}
 
-        protected Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.scalarArray;}
 
         protected void setArgPVFields(PVField[] pvArgs) {
         };
 
-        protected void setValueDBField(DBField dbValue) {
-            this.valueDB = dbValue;
-            valuePV = (PVBooleanArray)dbValue.getPVField();
+        protected void setValuePVField(PVField pvValue) {
+            valuePV = (PVBooleanArray)pvValue;
         };
 
         public void process(SupportProcessRequester supportProcessRequester) {
@@ -52,7 +51,6 @@ public class BooleanArrayToggleCalculatorFactory {
             valuePV.get(0,valueLength,valueData);
             value = valueData.data;
             compute();
-            valueDB.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 

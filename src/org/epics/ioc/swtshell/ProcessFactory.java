@@ -21,12 +21,14 @@ import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requester;
-import org.epics.ioc.util.ScanPriority;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
+
 /**
  * Shell for processing a channel.
  * @author mrk
@@ -49,8 +51,8 @@ public class ProcessFactory {
             this.display = display;
         }
 
-        private static IOCExecutor iocExecutor
-            = IOCExecutorFactory.create("swtshell:Get",ScanPriority.low);
+        private static Executor executor
+            = ExecutorFactory.create("swtshell:Get",ThreadPriority.low);
         private static String windowName = "process";
         private Display display;
         private Shell shell = null;
@@ -164,7 +166,7 @@ public class ProcessFactory {
             private ProcessIt(Channel channel,Requester requester) {
                 this.requester = requester;
                 channelProcess = channel.createChannelProcess(this);
-                if(channelProcess!=null) iocExecutor.execute(this);
+                if(channelProcess!=null) executor.execute(this);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

@@ -1,11 +1,23 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
+<structure name = "counterCalculatorFactory">
+ <scalar name = "supportFactory" type = "string">
+   org.epics.ioc.support.calc.example.CounterCalculatorFactory</scalar>
+</structure>
 
-<support name = "counterCalculator" factoryName = "org.epics.ioc.support.calc.example.CounterCalculatorFactory" />
+<structure name = "arrayIncrementCalculatorFactory">
+ <scalar name = "supportFactory" type = "string">
+   org.epics.ioc.support.calc.example.ArrayIncrementCalculatorFactory</scalar>
+</structure>
 
-<support name = "arrayIncrementCalculator" factoryName = "org.epics.ioc.support.calc.example.ArrayIncrementCalculatorFactory" />
+<structure name = "booleanArrayToggleCalculatorFactory">
+ <scalar name = "supportFactory" type = "string">
+   org.epics.ioc.support.calc.example.BooleanArrayToggleCalculatorFactory</scalar>
+</structure>
 
-<support name = "booleanArrayToggleCalculator" factoryName = "org.epics.ioc.support.calc.example.BooleanArrayToggleCalculatorFactory" />
+<structure name = "arrayAddCalculatorFactory">
+ <scalar name = "supportFactory" type = "string">
+   org.epics.ioc.support.calc.example.ArrayAddCalculatorFactory</scalar>
+</structure>
 
-<support name = "arrayAddCalculator" factoryName = "org.epics.ioc.support.calc.example.ArrayAddCalculatorFactory" />
-</IOCDatabase>
+</database>

@@ -7,7 +7,7 @@ package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pv.PVDoubleArray;
+import org.epics.pvData.pv.PVDoubleArray;
 
 /**
  * Interface for a device that has an array of 32 bit values.

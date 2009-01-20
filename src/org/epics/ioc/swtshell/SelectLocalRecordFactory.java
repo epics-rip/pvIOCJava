@@ -15,12 +15,11 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
 
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
 /**
  * Factory which implements SelectLocalRecord.
  * @author mrk
@@ -37,11 +36,12 @@ public class SelectLocalRecordFactory {
         return new SelectRecordFactory(parent,requester);
     }
     
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    
     private static class SelectRecordFactory extends Dialog
     implements SelectLocalRecord, SelectionListener
     {
-        private Requester requester;
-        private IOCDB iocdb = IOCDBFactory.getMaster();        
+        private Requester requester;     
         private Shell shell;
         private List list;
         private int ntimes = 0;
@@ -72,16 +72,9 @@ public class SelectLocalRecordFactory {
             gridLayout.numColumns = 1;
             composite.setLayout(gridLayout);
             list = new List(composite,SWT.SINGLE|SWT.V_SCROLL);
-            DBRecord[] dbRecords = iocdb.getDBRecords();
-            if(dbRecords.length==0) {
-                requester.message(String.format(
-                        "iocdb %s has no records",
-                        iocdb.getName()),
-                        MessageType.error);
-                return null;
-            }
-            for(DBRecord dbRecord : dbRecords) {
-                list.add(dbRecord.getPVRecord().getRecordName());
+            PVRecord[] pvRecords = masterPVDatabase.getRecords();
+            for(PVRecord pvRecord : pvRecords) {
+                list.add(pvRecord.getRecordName());
             }
             list.addSelectionListener(this);
             GridData listGridData = new GridData();
@@ -101,12 +94,12 @@ public class SelectLocalRecordFactory {
             return recordName;
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.SelectLocalRecord#getDBRecord()
+         * @see org.epics.ioc.swtshell.SelectLocalRecord#getPVRecord()
          */
-        public DBRecord getDBRecord() {
+        public PVRecord getPVRecord() {
             String recordName = getRecordName();
             if(recordName==null) return null;
-            return iocdb.findRecord(recordName);
+            return masterPVDatabase.findRecord(recordName);
         }
 
         /* (non-Javadoc)

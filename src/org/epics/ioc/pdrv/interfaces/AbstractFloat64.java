@@ -16,10 +16,11 @@ import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.util.RunnableReady;
-import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadCreateFactory;
-import org.epics.ioc.util.ThreadReady;
+import org.epics.pvData.misc.RunnableReady;
+import org.epics.pvData.misc.ThreadCreate;
+import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadReady;
+
 
 
 

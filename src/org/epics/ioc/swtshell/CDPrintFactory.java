@@ -9,18 +9,16 @@ import java.util.Date;
 
 import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.ca.CDArray;
-import org.epics.ioc.ca.CDArrayArray;
 import org.epics.ioc.ca.CDField;
 import org.epics.ioc.ca.CDRecord;
 import org.epics.ioc.ca.CDStructure;
-import org.epics.ioc.ca.CDStructureArray;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.PVTimeStamp;
-import org.epics.ioc.util.TimeStamp;
+
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
 
 /**
  * Factory which implememnts CDPrint.
@@ -77,13 +75,9 @@ public class CDPrintFactory {
         
         private void printStructure(CDStructure cdStructure,int indentLevel,boolean printAll) {
             if(checkNumPuts(cdStructure)) printAll = true;
-            PVTimeStamp pvTimeStamp = PVTimeStamp.create(cdStructure.getPVField());
-            if(pvTimeStamp!=null) {
-                TimeStamp timeStamp = new TimeStamp();
-                pvTimeStamp.get(timeStamp);
-                long secondPastEpochs = timeStamp.secondsPastEpoch;
-                int nano = timeStamp.nanoSeconds;
-                long milliPastEpoch = nano/1000000 + secondPastEpochs*1000;
+            TimeStamp timeStamp = TimeStampFactory.getTimeStamp(cdStructure.getPVStructure());
+            if(timeStamp!=null) {
+                long milliPastEpoch = timeStamp.getMilliSeconds();
                 Date date = new Date(milliPastEpoch);
                 text.append(String.format(" = %tF %tT.%tL", date,date,date));
                 return;
@@ -101,9 +95,9 @@ public class CDPrintFactory {
                     text.append(fieldName);
                 }
                 switch(field.getType()) {
-                case pvArray: printArray(cdField,indentLevel+1,printAll); break;
-                case pvStructure: printStructure((CDStructure)cdField,indentLevel+1,printAll); break;
-                default: printScalar(cdField,indentLevel+1,printAll); break;
+                case scalar: printScalar(cdField,indentLevel+1,printAll); break;
+                case scalarArray: printArray(cdField,indentLevel+1,printAll); break;
+                case structure: printStructure((CDStructure)cdField,indentLevel+1,printAll); break;
                 }
             }
         }
@@ -112,38 +106,10 @@ public class CDPrintFactory {
         private void printArray(CDField cdField, int indentLevel,boolean printAll) {
             if(checkNumPuts(cdField)) printAll = true;
             PVArray pvArray = (PVArray)cdField.getPVField();
-            
-            Array array = (Array)pvArray.getField();
-            Type elementType = array.getElementType();
-            if(elementType.isScalar()) {
-                text.append(String.format(
-                        " = %s",
-                        pvArray.toString(indentLevel+1)));
-                return;
-            }
-            if(elementType==Type.pvArray) {
-                CDArrayArray cdArrayArray = (CDArrayArray)cdField;
-                CDArray[] cdFields = cdArrayArray.getElementCDArrays();
-                for(CDArray elementCDField : cdFields) {
-                    if(elementCDField==null) continue;
-                    int maxNumPuts = elementCDField.getMaxNumPuts();
-                    if(maxNumPuts==0 && !printAll) continue;
-                    newLine(indentLevel);
-                    text.append(elementCDField.getPVField().getField().getFieldName());
-                    printArray(elementCDField,indentLevel+1,printAll);
-                }
-            } else if(elementType==Type.pvStructure) {
-                CDStructureArray cdStructureArray = (CDStructureArray)cdField;
-                CDStructure[] cdFields = cdStructureArray.getElementCDStructures();
-                for(CDStructure elementCDField : cdFields) {
-                    if(elementCDField==null) continue;
-                    int maxNumPuts = elementCDField.getMaxNumPuts();
-                    if(maxNumPuts==0 && !printAll) continue;
-                    newLine(indentLevel);
-                    text.append(elementCDField.getPVField().getField().getFieldName());
-                    printStructure(elementCDField,indentLevel+1,printAll);
-                }
-            }
+            text.append(String.format(
+                    " = %s",
+                    pvArray.toString(indentLevel+1)));
+            return;
         }
         
         private void printScalar(CDField cdField, int indentLevel,boolean printAll) {

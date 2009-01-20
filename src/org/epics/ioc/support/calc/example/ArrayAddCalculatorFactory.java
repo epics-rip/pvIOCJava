@@ -1,35 +1,36 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.DoubleArrayData;
-import org.epics.ioc.pv.PVDoubleArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.calc.AbstractCalculatorSupport;
-import org.epics.ioc.support.calc.ArgType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+import org.epics.ioc.support.calc.*;
 
 public class ArrayAddCalculatorFactory {
-    public static Support create(DBStructure dbStructure) {
-        return new ArrayAddCalculator(dbStructure);
+    public static Support create(PVStructure pvStructure) {
+        return new ArrayAddCalculator(pvStructure);
     }
 
     private static String supportName = "arrayAddCalculator";
 
     private static class ArrayAddCalculator extends AbstractCalculatorSupport
     {
-        private ArrayAddCalculator(DBStructure dbStructure) {
-            super(supportName,dbStructure);
+        private ArrayAddCalculator(PVStructure pvStructure) {
+            super(supportName,pvStructure);
         }
 
 
         private ArgType[] argTypes = new ArgType[] {
-            new ArgType("a",Type.pvArray,Type.pvDouble),
-            new ArgType("b",Type.pvArray,Type.pvDouble)
+            new ArgType("a",Type.scalar,ScalarType.pvDouble),
+            new ArgType("b",Type.scalar,ScalarType.pvDouble)
         };
         private PVDoubleArray aPV = null;
         private DoubleArrayData aData = new DoubleArrayData();
@@ -40,7 +41,6 @@ public class ArrayAddCalculatorFactory {
         private double[] b;
         private int bLength;
 
-        private DBField valueDB = null;
         private PVDoubleArray valuePV = null;
         private DoubleArrayData valueData = new DoubleArrayData();
         private double[] value;
@@ -48,16 +48,15 @@ public class ArrayAddCalculatorFactory {
 
         protected ArgType[] getArgTypes() { return argTypes;}
 
-        protected Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.scalarArray;}
 
         protected void setArgPVFields(PVField[] pvArgs) {
             aPV = (PVDoubleArray)pvArgs[0];
             bPV = (PVDoubleArray)pvArgs[1];
         };
 
-        protected void setValueDBField(DBField dbValue) {
-            this.valueDB = dbValue;
-            valuePV = (PVDoubleArray)dbValue.getPVField();
+        protected void setValuePVField(PVField pvValue) {
+            valuePV = (PVDoubleArray)pvValue;
         };
 
         public void process(SupportProcessRequester supportProcessRequester) {
@@ -71,7 +70,6 @@ public class ArrayAddCalculatorFactory {
             bPV.get(0,bLength,bData);
             b = bData.data;
             compute();
-            valueDB.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 

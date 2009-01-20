@@ -24,12 +24,14 @@ import org.epics.ioc.ca.ChannelAccess;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProvider;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
+
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.ca.*;
 
 /**
  * @author mrk
@@ -42,13 +44,13 @@ public class ChannelConnectFactory {
     }
     
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     
     private static class ChannelConnectImpl
     implements ChannelConnect,Requester,
         DisposeListener,SelectionListener,ChannelListener,
         Runnable
     {
-        private IOCDB iocdb = IOCDBFactory.getMaster();
         private ChannelListener channelListener;
         private Requester requester;
         private Display display = null;
@@ -249,12 +251,11 @@ public class ChannelConnectFactory {
                 pvName = pvNameText.getText();
                 if(selectLocalFieldButton!=null) selectLocalFieldButton.setEnabled(true);
             } else if(object==selectLocalFieldButton) {
-                DBRecord dbRecord = iocdb.findRecord(pvName);
-                if(dbRecord==null) {
+                PVRecord pvRecord = masterPVDatabase.findRecord(pvName);
+                if(pvRecord==null) {
                     message("findRecord failed",MessageType.error);
                     return;
                 }
-                PVRecord pvRecord = dbRecord.getPVRecord();
                 SelectField selectField = SelectFieldFactory.create(shell, requester);
                 String fieldName = selectField.selectFieldName(pvRecord);
                 pvName = pvName + "." + fieldName;

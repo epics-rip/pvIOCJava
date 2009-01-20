@@ -17,10 +17,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
 
 /**
  * A shell for getting values from a channel.
@@ -37,6 +40,8 @@ public class IOCConsoleFactory {
         iocConsoleImpl.start();
     }
 
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    
     private static class IOCConsoleImpl implements DisposeListener,Requester,Runnable
     {
 
@@ -48,7 +53,6 @@ public class IOCConsoleFactory {
         private static String newLine = String.format("%n");
         private Display display;
         private Shell shell = null;
-        private IOCDB iocdb = IOCDBFactory.getMaster();
         private Text consoleText = null; 
         private String consoleMessage = null;
         
@@ -56,7 +60,7 @@ public class IOCConsoleFactory {
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
-            iocdb.removeRequester(this);
+            masterPVDatabase.removeRequester(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -112,7 +116,7 @@ public class IOCConsoleFactory {
             shell.pack();
             shell.open();
             shell.addDisposeListener(this);
-            iocdb.addRequester(this);
+            masterPVDatabase.addRequester(this);
         }
     }
 }

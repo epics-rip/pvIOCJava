@@ -7,7 +7,7 @@ package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pv.IntArrayData;
+import org.epics.pvData.pv.IntArrayData;
 
 /**
  * Base for interposing a Int32Array.
@@ -23,8 +23,7 @@ public class Int32ArrayInterposeBase extends AbstractArrayInterface implements I
      * @param arg The interface to the lower level implementation.
      */
     protected Int32ArrayInterposeBase(Int32Array arg) {
-        super(arg.getParent(),arg.getArray(),arg.getCapacity(),
-        		arg.isCapacityMutable(),
+        super(arg.getParent(),arg.getArray(),
         		arg.getDevice(),arg.getInterfaceName());
         this.int32Array = arg;
     }

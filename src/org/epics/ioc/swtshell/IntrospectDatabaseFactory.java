@@ -23,33 +23,20 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.db.DBD;
-import org.epics.ioc.db.DBDCreate;
-import org.epics.ioc.db.DBDFactory;
-import org.epics.ioc.db.DBDStructure;
-import org.epics.ioc.db.DBDSupport;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
+
+
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
+import org.epics.ioc.support.SupportDatabase;
+import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.EventScanner;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.PeriodicScanner;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requester;
-import org.epics.ioc.util.ScanPriority;
-import org.epics.ioc.util.ScannerFactory;
-import org.epics.ioc.util.ThreadCreateFactory;
-import org.epics.ioc.util.TimeStamp;
-import org.epics.ioc.util.TimeUtility;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
 
 /**
  * A shell for introspecting a JavaIOC Database.
@@ -63,10 +50,10 @@ import org.epics.ioc.util.TimeUtility;
  *
  */
 public class IntrospectDatabaseFactory {
-    private static IOCExecutor iocExecutor = IOCExecutorFactory.create("swtshell:introspectDatabase",ScanPriority.low);
-    private static IOCDB iocdb = IOCDBFactory.getMaster();
-    private static DBD dbd = DBDFactory.getMasterDBD();
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
+    private static final Executor executor = ExecutorFactory.create("swtshell:introspectDatabase",ThreadPriority.low);
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static final SupportDatabase masterSupportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
+    private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static final String newLine = String.format("%n");
     
     /**
@@ -98,7 +85,7 @@ public class IntrospectDatabaseFactory {
         private Text consoleText;
         private SelectLocalRecord selectLocalRecord;
         
-        private DBRecord dbRecord = null;
+        private PVRecord pvRecord = null;
         
         private Introspect(Display display) {
             this.display = display;
@@ -112,15 +99,9 @@ public class IntrospectDatabaseFactory {
             shell.setLayout(layout);
             Menu menuBar = new Menu(shell,SWT.BAR);
             shell.setMenuBar(menuBar);
-            MenuItem dbdStructureMenu = new MenuItem(menuBar,SWT.CASCADE);
-            dbdStructureMenu.setText("structure");
-            new StructureDBD(dbdStructureMenu);
-            MenuItem dbdCreateMenu = new MenuItem(menuBar,SWT.CASCADE);
-            dbdCreateMenu.setText("create");
-            new CreateDBD(dbdCreateMenu);
-            MenuItem dbdSupportMenu = new MenuItem(menuBar,SWT.CASCADE);
-            dbdSupportMenu.setText("support");
-            new SupportDBD(dbdSupportMenu);
+            MenuItem pvdStructureMenu = new MenuItem(menuBar,SWT.CASCADE);
+            pvdStructureMenu.setText("structure");
+            new StructurePVD(pvdStructureMenu);
             Composite recordComposite = new Composite(shell,SWT.BORDER);
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
             recordComposite.setLayoutData(gridData);
@@ -236,20 +217,20 @@ public class IntrospectDatabaseFactory {
         public void widgetSelected(SelectionEvent e) {
             Object object = e.getSource();
             if(object==selectButton) {
-                dbRecord = selectLocalRecord.getDBRecord();
-                if(dbRecord==null) {
+                pvRecord = selectLocalRecord.getPVRecord();
+                if(pvRecord==null) {
                     consoleText.append("record not found"+ newLine);
                     setButtonsEnabled(false);
                 } else {
-                    consoleText.append(dbRecord.getPVRecord().getRecordName() + String.format("%n"));
+                    consoleText.append(pvRecord.getPVRecord().getRecordName() + String.format("%n"));
                     setButtonsEnabled(true);
-                    selectText.setText(dbRecord.getPVRecord().getRecordName());
+                    selectText.setText(pvRecord.getPVRecord().getRecordName());
                 }
                 return;
             }
             if(object==selectText) {
-                dbRecord = iocdb.findRecord(selectText.getText());
-                if(dbRecord==null) {
+                pvRecord = masterPVDatabase.findRecord(selectText.getText());
+                if(pvRecord==null) {
                     consoleText.append("record not found"+ newLine);
                     setButtonsEnabled(false);
                 } else {
@@ -257,11 +238,11 @@ public class IntrospectDatabaseFactory {
                 }
             }
             if(object==dumpButton) {
-                consoleText.append(dbRecord.getPVRecord().toString());
+                consoleText.append(pvRecord.getPVRecord().toString());
                 return;
             }
             if(object==timeProcessButton) {
-                if(dbRecord==null) {
+                if(pvRecord==null) {
                     consoleText.append("no record"+ newLine);
                     return;
                 }
@@ -270,26 +251,25 @@ public class IntrospectDatabaseFactory {
                     consoleText.append("invalid numberTimes"+ newLine);
                     return;
                 }
-                TimeProcess timeProcess = new TimeProcess(dbRecord,ntimes,this);
+                TimeProcess timeProcess = new TimeProcess(pvRecord,ntimes,this);
                 consoleText.append(timeProcess.doIt() + newLine);
                 return;
             }
             if(object==showStateButton) {
-                RecordProcess recordProcess = dbRecord.getRecordProcess();
+                RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                 boolean processSelf = recordProcess.canProcessSelf();
                 String processRequesterName = recordProcess.getRecordProcessRequesterName();
                 SupportState supportState = recordProcess.getSupportState();
                 boolean isActive = recordProcess.isActive();
                 boolean isEnabled = recordProcess.isEnabled();
                 boolean isTrace = recordProcess.isTrace();
-                PVRecord pvRecord = dbRecord.getPVRecord();
                 String alarmSeverity = null;
                 PVField pvField = pvProperty.findProperty(pvRecord,"alarm.severity.choice");
                 if(pvField!=null) alarmSeverity = pvField.toString();
                 String alarmMessage = null;
                 pvField = pvProperty.findProperty(pvRecord,"alarm.message");
                 if(pvField!=null) alarmMessage = pvField.toString();
-                consoleText.append(dbRecord.getPVRecord().getRecordName() + newLine);
+                consoleText.append(pvRecord.getPVRecord().getRecordName() + newLine);
                 consoleText.append(
                     "  processSelf " + processSelf + " processRequester " + processRequesterName
                     + " supportState " + supportState.name() + newLine);
@@ -315,7 +295,7 @@ public class IntrospectDatabaseFactory {
                 return;
             }
             if(object==releaseProcessorButton) {
-                RecordProcess recordProcess = dbRecord.getRecordProcess();
+                RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                 if(recordProcess==null) {
                     message("recordProcess is null", MessageType.error);
                     return;
@@ -330,13 +310,12 @@ public class IntrospectDatabaseFactory {
                 return;
             }
             if(object==showBadRecordsButton) {
-                DBRecord[] dbRecords = iocdb.getDBRecords();
-                for(DBRecord dbRecord : dbRecords) {
-                    RecordProcess recordProcess = dbRecord.getRecordProcess();
+                PVRecord[] pvRecords = masterPVDatabase.getRecords();
+                for(PVRecord pvRecord : pvRecords) {
+                    RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                     boolean isActive = recordProcess.isActive();
                     boolean isEnabled = recordProcess.isEnabled();
                     SupportState supportState = recordProcess.getSupportState();
-                    PVRecord pvRecord = dbRecord.getPVRecord();
                     String alarmSeverity = null;
                     PVField pvField = pvProperty.findProperty(pvRecord,"alarm.severity.choice");
                     if(pvField!=null) alarmSeverity = pvField.toString();
@@ -412,7 +391,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = dbRecord.getRecordProcess();
+                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                 boolean initialState = recordProcess.isEnabled();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
@@ -472,7 +451,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = dbRecord.getRecordProcess();
+                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                 boolean initialState = recordProcess.isTrace();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
@@ -535,7 +514,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = dbRecord.getRecordProcess();
+                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
                 GridLayout gridLayout = new GridLayout();
@@ -593,17 +572,17 @@ public class IntrospectDatabaseFactory {
             }
             
         }
-        private class StructureDBD implements SelectionListener {
+        private class StructurePVD implements SelectionListener {
             
-            private StructureDBD(MenuItem menuItem) {
+            private StructurePVD(MenuItem menuItem) {
                 Menu menuStructure = new Menu(shell,SWT.DROP_DOWN);
                 menuItem.setMenu(menuStructure);
                 MenuItem choiceAll = new MenuItem(menuStructure,SWT.DEFAULT|SWT.PUSH);
                 choiceAll.setText("all");
                 choiceAll.addSelectionListener(this);
-                DBDStructure[] dbdStructures = dbd.getDBDStructures();
-                for(DBDStructure dbdStructure : dbdStructures) {
-                    String name = dbdStructure.getStructureName();
+                PVStructure[] pvdStructures = masterPVDatabase.getStructures();
+                for(PVStructure pvdStructure : pvdStructures) {
+                    String name = pvdStructure.getFullName();
                     MenuItem choiceItem = new MenuItem(menuStructure,SWT.PUSH);
                     choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
@@ -622,103 +601,22 @@ public class IntrospectDatabaseFactory {
                 MenuItem choice = (MenuItem)arg0.getSource();
                 String name = choice.getText();
                 if(!name.equals("all")) {
-                    DBDStructure value = dbd.getStructure(name);
+                    PVStructure value = masterPVDatabase.findStructure(name);
                     consoleText.append(value.toString());
                     return;
                 }
-                DBDStructure[] dbdStructures = dbd.getDBDStructures();
-                for(DBDStructure dbdStructure : dbdStructures) {
-                    consoleText.append(dbdStructure.toString());
+                PVStructure[] pvdStructures = masterPVDatabase.getStructures();
+                for(PVStructure pvdStructure : pvdStructures) {
+                    consoleText.append(pvdStructure.toString());
                 }
             }
             
-        }
-        
-        private class CreateDBD implements SelectionListener {
-            
-            private CreateDBD(MenuItem menuItem) {
-                Menu menuCreate = new Menu(shell,SWT.DROP_DOWN);
-                menuItem.setMenu(menuCreate);
-                MenuItem choiceAll = new MenuItem(menuCreate,SWT.DEFAULT|SWT.PUSH);
-                choiceAll.setText("all");
-                choiceAll.addSelectionListener(this);
-                DBDCreate[] dbdCreates = dbd.getDBDCreates();
-                for(DBDCreate dbdCreate : dbdCreates) {
-                    String name = dbdCreate.getCreateName();
-                    MenuItem choiceItem = new MenuItem(menuCreate,SWT.PUSH);
-                    choiceItem.setText(name);
-                    choiceItem.addSelectionListener(this);
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetDefaultSelected(SelectionEvent arg0) {
-                widgetSelected(arg0);
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetSelected(SelectionEvent arg0) {
-                MenuItem choice = (MenuItem)arg0.getSource();
-                String name = choice.getText();
-                if(!name.equals("all")) {
-                    DBDCreate value = dbd.getCreate(name);
-                    consoleText.append(value.toString());
-                    return;
-                }
-                DBDCreate[] dbdCreates = dbd.getDBDCreates();
-                for(DBDCreate dbdCreate: dbdCreates) {
-                    consoleText.append(dbdCreate.toString());
-                }
-            }
-        }
-        
-        
-        private class SupportDBD implements SelectionListener {
-            
-            private SupportDBD(MenuItem menuItem) {
-                Menu menuSupport = new Menu(shell,SWT.DROP_DOWN);
-                menuItem.setMenu(menuSupport);
-                MenuItem choiceAll = new MenuItem(menuSupport,SWT.DEFAULT|SWT.PUSH);
-                choiceAll.setText("all");
-                choiceAll.addSelectionListener(this);
-                DBDSupport[] dbdSupports = dbd.getDBDSupports();
-                for(DBDSupport dbdSupport : dbdSupports) {
-                    String name = dbdSupport.getSupportName();
-                    MenuItem choiceItem = new MenuItem(menuSupport,SWT.PUSH);
-                    choiceItem.setText(name);
-                    choiceItem.addSelectionListener(this);
-                }
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetDefaultSelected(SelectionEvent arg0) {
-                widgetSelected(arg0);
-            }
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            public void widgetSelected(SelectionEvent arg0) {
-                MenuItem choice = (MenuItem)arg0.getSource();
-                String key = choice.getText();
-                if(!key.equals("all")) {
-                    DBDSupport value = dbd.getSupport(key);
-                    consoleText.append(value.toString());
-                    return;
-                }
-                DBDSupport[] dbdSupports = dbd.getDBDSupports();
-                for(DBDSupport dbdSupport : dbdSupports) {
-                    consoleText.append(dbdSupport.toString());
-                }
-            }
         }
         
         private class TimeProcess implements Runnable,RecordProcessRequester
         {   
             private Requester requester;
-            private DBRecord dbRecord;
+            private PVRecord pvRecord;
             int ntimes = 100000;
             private RecordProcess recordProcess = null;
             private ReentrantLock lock = new ReentrantLock();
@@ -728,17 +626,17 @@ public class IntrospectDatabaseFactory {
             private boolean processDone = false;
             private String result = null;
 
-            private TimeProcess(DBRecord dbRecord,int ntimes,Requester requester) {
+            private TimeProcess(PVRecord pvRecord,int ntimes,Requester requester) {
                 this.requester = requester;
-                this.dbRecord = dbRecord;
+                this.pvRecord = pvRecord;
                 this.ntimes = ntimes;
             }
             
             String doIt() {
-                recordProcess = dbRecord.getRecordProcess();
+                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                 if(!recordProcess.setRecordProcessRequester(this)) return "could not process the record";
                 allDone = false;
-                iocExecutor.execute(this);
+                executor.execute(this);
                 lock.lock();
                 try {
                     while(!allDone) {
@@ -756,9 +654,9 @@ public class IntrospectDatabaseFactory {
              * @see java.lang.Runnable#run()
              */
             public void run() {
-                TimeStamp timeStamp = new TimeStamp();
+                TimeStamp timeStamp = TimeStampFactory.create(0,0);
                 long start = System.currentTimeMillis();
-                TimeUtility.set(timeStamp,start);
+                timeStamp.put(start);
                for(int i=0; i<ntimes; i++) {
                    processDone = false;
                    recordProcess.process(this, false, timeStamp);

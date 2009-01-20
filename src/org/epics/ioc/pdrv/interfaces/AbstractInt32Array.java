@@ -15,12 +15,12 @@ import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.RunnableReady;
-import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadCreateFactory;
-import org.epics.ioc.util.ThreadReady;
+import org.epics.pvData.misc.RunnableReady;
+import org.epics.pvData.misc.ThreadCreate;
+import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadReady;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.PVStructure;
 
 
 
@@ -59,9 +59,9 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
      * @param device The device.
      */
     protected AbstractInt32Array(
-        PVField parent,Array array,int capacity,boolean capacityMutable,Device device)
+        PVStructure parent,Array array,int capacity,boolean capacityMutable,Device device)
     {
-        super(parent,array,capacity,capacityMutable,device,"int32Array");
+        super(parent,array,device,"int32Array");
     }    
     /* (non-Javadoc)
      * @see org.epics.ioc.pv.PVIntArray#share(org.epics.ioc.pv.PVIntArray)

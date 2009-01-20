@@ -7,7 +7,7 @@ package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pv.DoubleArrayData;
+import org.epics.pvData.pv.DoubleArrayData;
 
 /**
  * Base for interposing a Float64Array.
@@ -22,8 +22,7 @@ public class Float64ArrayInterposeBase extends AbstractArrayInterface implements
      * @param arg The interface to the lower level implementation.
      */
     protected Float64ArrayInterposeBase(Float64Array arg) {
-        super(arg.getParent(),arg.getArray(),arg.getCapacity(),
-        	arg.isCapacityMutable(),
+        super(arg.getParent(),arg.getArray(),
         	arg.getDevice(),arg.getInterfaceName());
         this.float64Array = arg;
     }

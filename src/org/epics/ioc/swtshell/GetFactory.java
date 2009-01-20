@@ -26,12 +26,14 @@ import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requester;
-import org.epics.ioc.util.ScanPriority;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
+
 
 /**
  * A shell for getting values from a channel.
@@ -55,8 +57,8 @@ public class GetFactory {
             this.display = display;
         }
 
-        private static IOCExecutor iocExecutor
-            = IOCExecutorFactory.create("swtshell:Get",ScanPriority.low);
+        private static Executor executor
+            = ExecutorFactory.create("swtshell:Get",ThreadPriority.low);
         private static String windowName = "get";
         private Display display;
         private Shell shell = null;
@@ -236,7 +238,7 @@ public class GetFactory {
                     cd.destroy();
                     return;
                 }
-                iocExecutor.execute(this);
+                executor.execute(this);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

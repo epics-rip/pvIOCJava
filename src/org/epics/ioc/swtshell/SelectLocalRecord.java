@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.swtshell;
 
-import org.epics.ioc.db.DBRecord;
+import org.epics.pvData.pv.*;
 
 /**
  * Shell to select the name of a local JavaIOC record.
@@ -22,5 +22,5 @@ public interface SelectLocalRecord {
      * Get the DBRecord interface.
      * @return The interface or null if no records.
      */
-    public DBRecord getDBRecord();
+    public PVRecord getPVRecord();
 }

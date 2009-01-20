@@ -6,7 +6,8 @@
 package org.epics.ioc.support.alarm;
 
 import org.epics.ioc.support.Support;
-import org.epics.ioc.util.AlarmSeverity;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.property.*;
 
 
 /**

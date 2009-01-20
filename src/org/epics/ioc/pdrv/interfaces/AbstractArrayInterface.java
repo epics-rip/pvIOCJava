@@ -7,9 +7,9 @@ package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Trace;
-import org.epics.ioc.pv.AbstractPVArray;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.PVField;
+import org.epics.pvData.factory.AbstractPVArray;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.PVStructure;
 
 /**
  * Abstract base class for array interfaces.
@@ -27,22 +27,15 @@ public abstract class AbstractArrayInterface extends AbstractPVArray implements 
 	 * @param interfaceName The interfaceName.
 	 */
 	protected AbstractArrayInterface(
-			PVField parent,Array array,int capacity,boolean capacityMutable,
-            Device device,String interfaceName)
+			PVStructure parent,Array array,Device device,String interfaceName)
     {
-		super(parent,array,capacity,capacityMutable);
+		super(parent,array);
 		this.device = device;
 		this.interfaceName = interfaceName;
 		trace = device.getTrace();
 		device.registerInterface(this);
 	}
-	/* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVArray#setSharable(boolean)
-     */
-    @Override
-    public boolean setSharable(boolean isSharable) {
-        return false;
-    }
+	
     /**
      * Generate a trace message.
      * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.

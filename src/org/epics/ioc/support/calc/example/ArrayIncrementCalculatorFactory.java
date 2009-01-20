@@ -1,35 +1,35 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.DoubleArrayData;
-import org.epics.ioc.pv.PVDoubleArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.calc.AbstractCalculatorSupport;
-import org.epics.ioc.support.calc.ArgType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+import org.epics.ioc.support.calc.*;
+
 
 public class ArrayIncrementCalculatorFactory {
-    public static Support create(DBStructure dbStructure) {
-        return new ArrayIncrementCalculator(dbStructure);
+    public static Support create(PVStructure pvStructure) {
+        return new ArrayIncrementCalculator(pvStructure);
     }
 
     private static String supportName = "arrayIncrementCalculator";
 
     private static class ArrayIncrementCalculator extends AbstractCalculatorSupport
     {
-        private ArrayIncrementCalculator(DBStructure dbStructure) {
-            super(supportName,dbStructure);
+        private ArrayIncrementCalculator(PVStructure pvStructure) {
+            super(supportName,pvStructure);
         }
 
 
         private ArgType[] argTypes = new ArgType[0];
-
-        private DBField valueDB = null;
         private PVDoubleArray valuePV = null;
         private DoubleArrayData valueData = new DoubleArrayData();
         private double[] value;
@@ -37,14 +37,13 @@ public class ArrayIncrementCalculatorFactory {
 
         protected ArgType[] getArgTypes() { return argTypes;}
 
-        protected Type getValueType() { return Type.pvArray;}
+        protected Type getValueType() { return Type.scalarArray;}
 
         protected void setArgPVFields(PVField[] pvArgs) {
         };
 
-        protected void setValueDBField(DBField dbValue) {
-            this.valueDB = dbValue;
-            valuePV = (PVDoubleArray)dbValue.getPVField();
+        protected void setValuePVField(PVField pvValue) {
+            valuePV = (PVDoubleArray)pvValue;
         };
 
         public void process(SupportProcessRequester supportProcessRequester) {
@@ -52,7 +51,6 @@ public class ArrayIncrementCalculatorFactory {
             valuePV.get(0,valueLength,valueData);
             value = valueData.data;
             compute();
-            valueDB.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 

@@ -4,30 +4,13 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.support.alarm;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
 
-import org.epics.ioc.create.Enumerated;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.db.DBStructureArray;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVShort;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.PVStructureArray;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.*;
 
 /**
  * Support for an shortAlarm link.
@@ -36,37 +19,25 @@ import org.epics.ioc.util.RequestResult;
  */
 public class ShortAlarmFactory {
     /**
-     * Create support for an shortAlarm structure.
-     * @param dbStructure The structure.
-     * @return An interface to the support or null if the supportName was not "shortArray".
+     * Create support for an byteAlarm structure.
+     * @param pvStructure The structure.
+     * @return An interface to the support.
      */
-    public static Support create(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        String supportName = pvStructure.getSupportName();
-        if(supportName==null || !supportName.equals(supportName)) {
-            pvStructure.message("does not have support " + supportName,MessageType.error);
-            return null;
-        }
-        return new ShortAlarmImpl(dbStructure);
+    public static Support create(PVStructure pvStructure) {
+        return new ShortAlarmImpl(pvStructure);
     }
-    
-    private static String supportName = "shortAlarm";
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     
     private static class ShortAlarmImpl extends AbstractSupport
     {
-        private DBStructure dbStructure;
         private PVStructure pvStructure;
         
-        private boolean noop;
         private AlarmSupport alarmSupport;
         
-        private PVStructureArray intervalPVArray;
         private PVInt pvOutOfRange;
         private PVBoolean pvActive;
         private PVShort pvHystersis;
         
-        private DBStructureArray dbAlarmIntervalArray = null;
+        private PVStructure pvAlarmIntervalArray = null;
         private PVShort[] pvAlarmIntervalValue = null;
         private PVInt[] pvAlarmIntervalSeverity = null;
         private PVString[] pvAlarmIntervalMessage = null;
@@ -75,63 +46,32 @@ public class ShortAlarmFactory {
         private short lastAlarmIntervalValue;
         private int lastAlarmSeverityIndex;
        
-        private ShortAlarmImpl(DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            this.dbStructure = dbStructure;
-            pvStructure = dbStructure.getPVStructure();
+        private ShortAlarmImpl(PVStructure pvStructure) {
+            super("shortAlarm",pvStructure);
+            this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#initialize()
+         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
-        public void initialize() {
+        public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
-            DBField dbParent = dbStructure.getParent();
-            PVField pvParent = dbParent.getPVField();
-            PVField pvField = pvProperty.findProperty(pvParent, "value");
-            if(pvField==null) {
-                pvStructure.message("value field not found", MessageType.error);
-                return;
-            }
-            DBField valueDBField = dbStructure.getDBRecord().findDBField(pvField);
-            pvField = valueDBField.getPVField();
-            if(pvField.getField().getType()!=Type.pvShort) {
-                super.message("field type is not short", MessageType.error);
-                return;
-            }
-            pvValue = (PVShort)pvField;
-            noop = false;
-            alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
+            pvValue = pvStructure.getParent().getShortField("value");
+            if(pvValue==null) return;
+            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
-                noop = true;
-                setSupportState(supportState);
                 return;
             }
-            DBField[] dbFields = dbStructure.getDBFields();
-            if(dbFields.length==0) {
-                noop = true;
-                setSupportState(supportState);
-                return;
-            }
-            Structure structure = dbStructure.getPVStructure().getStructure();
             pvActive = pvStructure.getBooleanField("active");
             if(pvActive==null) return;
-            
-            intervalPVArray = (PVStructureArray)pvStructure.getArrayField(
-                "interval", Type.pvStructure);
-            if(intervalPVArray==null) return;
-            int index = structure.getFieldIndex("interval");
-            dbAlarmIntervalArray = (DBStructureArray)dbFields[index];
-            index = structure.getFieldIndex("outOfRange");
-            if(index<0) {
-                super.message("outOfRange does not exist", MessageType.error);
-                return;
-            }
-            Enumerated enumerated = AlarmSeverity.getAlarmSeverity(dbFields[index]);
+            pvAlarmIntervalArray = pvStructure.getStructureField("interval");
+            if(pvAlarmIntervalArray==null) return;  
+            PVStructure pvStruct = pvStructure.getStructureField("outOfRange");
+            if(pvStruct==null) return;
+            Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvStruct);
             if(enumerated==null) return;
-            pvOutOfRange = enumerated.getIndexField();
-            if(pvOutOfRange==null) return;
+            pvOutOfRange = enumerated.getIndex();
             pvHystersis = pvStructure.getShortField("hystersis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
@@ -142,60 +82,37 @@ public class ShortAlarmFactory {
         public void start() {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             SupportState supportState = SupportState.ready;
-            if(noop) {
-                setSupportState(supportState);
-                return;
-            }
-            int size = intervalPVArray.getLength();
+            PVField[] pvFields = pvAlarmIntervalArray.getPVFields();
+            int size = pvFields.length;
             if(size<=0) {
                 super.message("invalid interval", MessageType.error);
                 return;
             }
-            DBStructure[] dbFields = dbAlarmIntervalArray.getElementDBStructures();
             pvAlarmIntervalValue = new PVShort[size];
             pvAlarmIntervalSeverity = new PVInt[size];
             pvAlarmIntervalMessage = new PVString[size];
-            
             for(int i=0; i<size; i++) {
-                DBStructure dbStructure = dbFields[i];
-                PVStructure pvStructure = dbStructure.getPVStructure();
-                Structure structure = pvStructure.getStructure();
-                PVField[] pvFields = pvStructure.getPVFields();
-                Field[] fields = structure.getFields();
-                int index = structure.getFieldIndex("value");
-                if(index<0) {
-                    super.message("invalid interval no value field", MessageType.error);
+                PVField pvField = pvFields[i];
+                if(pvField.getField().getType()!=Type.structure) {
+                    super.message("invalid interval. not a structure", MessageType.error);
                     return;
                 }
-                Field field = fields[index];
-                if(field.getType()!=Type.pvShort) {
-                    super.message("invalid interval value field is not short", MessageType.error);
-                    return;
-                }
-                pvAlarmIntervalValue[i] = (PVShort)pvFields[index];
-                index = structure.getFieldIndex("severity");
-                if(index<0) {
-                    super.message("invalid interval no severity field", MessageType.error);
-                    return;
-                }
-                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(
-                        dbStructure.getDBFields()[index]);
+                PVStructure pvStructure = (PVStructure)pvField;
+                PVShort pvValue = pvStructure.getShortField("value");
+                if(pvValue==null) return;
+                pvAlarmIntervalValue[i] = pvValue;
+                PVStructure pvStruct = pvStructure.getStructureField("severity");
+                if(pvStruct==null) return;
+                
+                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvStruct);
                 if(enumerated==null) {
                     super.message("invalid interval severity field is not alarmSeverity", MessageType.error);
                     return;
                 }
-                pvAlarmIntervalSeverity[i] = enumerated.getIndexField();
-                index = structure.getFieldIndex("message");
-                if(index<0) {
-                    super.message("invalid interval no message field", MessageType.error);
-                    return;
-                }
-                field = fields[index];
-                if(field.getType()!=Type.pvString) {
-                    super.message("invalid interval message field is not string", MessageType.error);
-                    return;
-                }
-                pvAlarmIntervalMessage[i] = (PVString)pvFields[index];
+                pvAlarmIntervalSeverity[i] = enumerated.getIndex();
+                PVString pvMessage = pvStructure.getStringField("message");
+                if(pvMessage==null) return;
+                pvAlarmIntervalMessage[i] = pvMessage;
             }
             lastAlarmSeverityIndex = 0;
             setSupportState(supportState);
@@ -210,21 +127,10 @@ public class ShortAlarmFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#uninitialize()
-         */
-        public void uninitialize() {
-            if(super.getSupportState()!=SupportState.ready) return;
-            pvActive = null;
-            pvOutOfRange = null;
-            intervalPVArray = null;
-            pvHystersis = null;
-            setSupportState(SupportState.readyForInitialize);
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
         public void process(SupportProcessRequester supportProcessRequester) {
-            if(!noop && pvActive.get()) checkAlarm();
+            if(pvActive.get()) checkAlarm();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
 
@@ -251,7 +157,7 @@ public class ShortAlarmFactory {
             AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityIndex);
             if(severityIndex<lastAlarmSeverityIndex) {
                 int diff = lastAlarmIntervalValue - val;
-                if(diff<0.0) diff = -diff;
+                if(diff<0) diff = -diff;
                 if(diff<pvHystersis.get()) {
                     alarmSeverity = AlarmSeverity.getSeverity(lastAlarmSeverityIndex);
                     intervalValue = lastAlarmIntervalValue;

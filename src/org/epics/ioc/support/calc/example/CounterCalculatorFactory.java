@@ -1,35 +1,39 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.calc.AbstractCalculatorSupport;
-import org.epics.ioc.support.calc.ArgType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+import org.epics.ioc.support.calc.*;
+
+
 
 public class CounterCalculatorFactory {
-    public static Support create(DBStructure dbStructure) {
-        return new CounterCalculator(dbStructure);
+    public static Support create(PVStructure pvStructure) {
+        return new CounterCalculator(pvStructure);
     }
 
     private static String supportName = "counterCalculator";
 
     private static class CounterCalculator extends AbstractCalculatorSupport
     {
-        private CounterCalculator(DBStructure dbStructure) {
-            super(supportName,dbStructure);
+        private CounterCalculator(PVStructure pvStructure) {
+            super(supportName,pvStructure);
         }
 
 
         private ArgType[] argTypes = new ArgType[] {
-            new ArgType("min",Type.pvDouble,null),
-            new ArgType("max",Type.pvDouble,null),
-            new ArgType("inc",Type.pvDouble,null)
+            new ArgType("min",Type.scalar,null),
+            new ArgType("max",Type.scalar,null),
+            new ArgType("inc",Type.scalar,null)
         };
         private PVDouble minPV = null;
         private double min;
@@ -38,13 +42,12 @@ public class CounterCalculatorFactory {
         private PVDouble incPV = null;
         private double inc;
 
-        private DBField valueDB = null;
         private PVDouble valuePV = null;
         private double value;
 
         protected ArgType[] getArgTypes() { return argTypes;}
 
-        protected Type getValueType() { return Type.pvDouble;}
+        protected Type getValueType() { return Type.scalar;}
 
         protected void setArgPVFields(PVField[] pvArgs) {
             minPV = (PVDouble)pvArgs[0];
@@ -52,9 +55,8 @@ public class CounterCalculatorFactory {
             incPV = (PVDouble)pvArgs[2];
         };
 
-        protected void setValueDBField(DBField dbValue) {
-            this.valueDB = dbValue;
-            valuePV = (PVDouble)dbValue.getPVField();
+        protected void setValuePVField(PVField pvValue) {
+            valuePV = (PVDouble)pvValue;
         };
 
         public void process(SupportProcessRequester supportProcessRequester) {
@@ -64,7 +66,6 @@ public class CounterCalculatorFactory {
             inc = incPV.get();
             compute();
             valuePV.put(value);
-            valueDB.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
