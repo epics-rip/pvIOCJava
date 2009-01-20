@@ -6,7 +6,7 @@
 package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pv.PVStructure;
+import org.epics.pvData.pv.PVStructure;
 
 /**
  * Interface for attaching user specific data to a driver.
