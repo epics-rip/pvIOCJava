@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVStructure;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVStructure;
 
 /**
  * CDStructure - A CDRecord field that holds a PVStructure.

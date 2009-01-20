@@ -5,10 +5,9 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVString;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+
 
 /**
  * An convenience interface for the scan field of a record instance.
@@ -21,7 +20,7 @@ public interface ScanField {
      * Get the priority.
      * @return The priority.
      */
-    ScanPriority getPriority();
+    ThreadPriority getPriority();
     /**
      * Get the priority index interface.
      * @return The priority index interface.

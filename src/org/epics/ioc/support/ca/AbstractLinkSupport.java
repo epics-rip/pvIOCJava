@@ -7,33 +7,18 @@ package org.epics.ioc.support.ca;
 
 import java.util.regex.Pattern;
 
-import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelAccess;
-import org.epics.ioc.ca.ChannelAccessFactory;
-import org.epics.ioc.ca.ChannelField;
-import org.epics.ioc.ca.ChannelFieldGroupListener;
-import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
-import org.epics.ioc.pv.PVEnumerated;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.support.alarm.AlarmFactory;
-import org.epics.ioc.support.alarm.AlarmSupport;
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+import org.epics.ioc.support.basic.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
 
 /**
  * Abstract Support for Channel Access Links.
@@ -41,28 +26,28 @@ import org.epics.ioc.util.MessageType;
  * @author mrk
  *
  */
-abstract class AbstractLinkSupport extends AbstractSupport
+abstract class AbstractLinkSupport extends GenericBase
 implements ChannelListener,ChannelFieldGroupListener {
     /**
      * The convert implementation.
      */
     protected static final Convert convert = ConvertFactory.getConvert();
     /**
-     * The dbStructure for this Support.
+     * A pvProperty for use by AbstractLinkSupport and derived classes.
      */
-    protected DBStructure dbStructure;
-    /**
-     * The pvStructure for dbStructure.
-     */
-    protected PVStructure pvStructure;
+    protected static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     /**
      * The channelRequesterName.
      */
     protected String channelRequesterName;
     /**
-     * The dbRecord for dbStructure.
+     * The pvStructure that this link supports.
      */
-    protected DBRecord dbRecord;
+    protected PVStructure pvStructure;
+    /**
+     * The pvRecord for pvStructure.
+     */
+    protected PVRecord pvRecord;
     /**
      * The recordProcess for this record.
      */
@@ -72,35 +57,25 @@ implements ChannelListener,ChannelFieldGroupListener {
      */
     protected AlarmSupport alarmSupport = null;
     /**
-     * The interface for getting the channel provider name.
+     * The name of the channel provider.
      */
-    protected PVString providerPVString = null;
+    protected PVString providerPV = null;
     /**
      * The interface for getting the pvName.
      */
-    protected PVString pvnamePVString = null;
-    
+    protected PVString pvnamePV = null;
     /**
-     * Is the value field and enumerated structure?
+     * Is the value field an enumerated structure?
      */
     protected boolean valueIsEnumerated = false;
     /**
-     * If valueIsEnumerated this is the interface for the choices DBField.
-     */
-    protected DBField valueChoicesDBField = null;
-    /**
      * If valueIsEnumerated this is the interface for the choices PVStringArray.
      */
-    protected PVStringArray valueChoicesPVStringArray = null;
-    /**
-     * If valueIsEnumerated this is the interface for the index DBField.
-     */
-    protected DBField valueIndexDBField = null;
+    protected PVStringArray valueChoicesPV = null;
     /**
      * If valueIsEnumerated this is the interface for the index PVInt.
      */
-    protected PVInt valueIndexPVInt = null;
-    
+    protected PVInt valueIndexPV = null;
     /**
      * Is alarm a property?
      */
@@ -108,12 +83,11 @@ implements ChannelListener,ChannelFieldGroupListener {
     /**
      * If alarm is a property this is the PVString interface for the message.
      */
-    protected PVString alarmMessagePVString = null;
+    protected PVString alarmMessagePV = null;
     /**
      * If alarm is a property this is the PVInt interface for the severity.
      */
-    protected PVInt alarmSeverityIndexPVInt = null;
-    
+    protected PVInt alarmSeverityIndexPV = null;
     /**
      * The array of propertyNames.
      */
@@ -128,32 +102,27 @@ implements ChannelListener,ChannelFieldGroupListener {
      */
     protected PVField[] propertyPVFields = null;
     /**
-     * The array of DBFields for the additional propertys.
-     */
-    protected DBField[] propertyDBFields = null;
-    
-    /**
      * The channel to which this link is connected.
      */
     protected Channel channel = null;
-    
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
+   
     private static final Pattern whiteSpacePattern = Pattern.compile("[, ]");
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
-    private PVString propertyNamesPVString = null;
+    private PVString propertyNamesPV = null;
     private StringArrayData stringArrayData = null;
     
     
     /**
      * @param supportName
-     * @param dbStructure
+     * @param pvStructure
      */
     protected AbstractLinkSupport(
-        String supportName,DBStructure dbStructure)
+        String supportName,PVStructure pvStructure)
     {
-        super(supportName,dbStructure);
-        this.dbStructure = dbStructure;
-        dbRecord = dbStructure.getDBRecord();
+        super(supportName,pvStructure);
+        this.pvStructure = pvStructure;
+        pvRecord = pvStructure.getPVRecord();
+        channelRequesterName = pvStructure.getFullName();
     }
     
     /**
@@ -166,50 +135,45 @@ implements ChannelListener,ChannelFieldGroupListener {
     
     public abstract void connectionChange(boolean isConnected);
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#initialize()
+     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    @Override
-    public void initialize() {
+    public void initialize(RecordSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,null)) return;
-        pvStructure = dbStructure.getPVStructure();
         while(true) {
-            PVField parent = dbStructure.getPVField().getParent();
+            PVStructure parent = pvStructure.getParent();
             if(parent==null) break;
             PVField pvField = parent.getSubField("value");
             if(pvField==null) break;
-            PVEnumerated valuePVEnumerated = pvField.getPVEnumerated();
+            Enumerated valuePVEnumerated = EnumeratedFactory.getEnumerated(pvField);
             if(valuePVEnumerated==null) break;
             valueIsEnumerated = true;
-            valueChoicesPVStringArray = valuePVEnumerated.getChoicesField();
-            valueChoicesDBField = dbRecord.findDBField(valueChoicesPVStringArray);
-            valueIndexPVInt = valuePVEnumerated.getIndexField();
-            valueIndexDBField = dbRecord.findDBField(valueIndexPVInt);
+            valueChoicesPV = valuePVEnumerated.getChoices();
+            valueIndexPV = valuePVEnumerated.getIndex();
             stringArrayData = new StringArrayData();
             break;
         }
-        channelRequesterName = pvStructure.getFullName();
-        recordProcess = dbRecord.getRecordProcess();
-        alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
-        providerPVString = pvStructure.getStringField("providerName");
-        if(providerPVString==null) return;
-        pvnamePVString = pvStructure.getStringField("pvname");
-        if(pvnamePVString==null) return;
+        recordProcess = recordSupport.getRecordProcess();
+        alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+        providerPV = pvStructure.getStringField("providerName");
+        if(providerPV==null) return;
+        pvnamePV = pvStructure.getStringField("pvname");
+        if(pvnamePV==null) return;
         if(pvProperty.findProperty(pvStructure,"propertyNames")!=null) {
-            propertyNamesPVString = pvStructure.getStringField("propertyNames");
-            if(propertyNamesPVString==null) return;
+            propertyNamesPV = pvStructure.getStringField("propertyNames");
+            if(propertyNamesPV==null) return;
         }
-        setSupportState(SupportState.readyForStart);
+        super.initialize(recordSupport);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
     public void start() {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
-        String providerName = providerPVString.get();
-        String pvname = pvnamePVString.get();
+        String providerName = providerPV.get();
+        String pvname = pvnamePV.get();
         
-        if(propertyNamesPVString!=null) {
-            String value = propertyNamesPVString.get();
+        if(propertyNamesPV!=null) {
+            String value = propertyNamesPV.get();
             if(value!=null) {
                 propertyNames = whiteSpacePattern.split(value);
             }
@@ -223,30 +187,39 @@ implements ChannelListener,ChannelFieldGroupListener {
             for(int i=0; i<length; i++) {
                 String propertyName = propertyNames[i];
                 addPropertys[i] = false;
-                PVField pvField = null;
-                PVField parent = dbStructure.getPVField().getParent();
-                if(parent!=null) {
-                    pvField = pvProperty.findProperty(parent,propertyName);
-                }
-                if(pvField==null) {
-                    pvStructure.message(
-                            "propertyName " + propertyName + " does not exist",
-                            MessageType.warning);
-                    continue;
-                }
                 if(propertyName.equals("alarm")) {
-                    PVField message = pvField.getSubField("message");
-                    PVField severity = pvField.getSubField("severity");
-                    PVEnumerated pvEnumerated = null;
-                    if(severity!=null) pvEnumerated = severity.getPVEnumerated();
-                    if(message==null || pvEnumerated==null) {
+                    PVField pvField = pvStructure.getSubField("alarm");
+                    if(pvField==null) {
+                        pvStructure.message("does not have fieldalarm", MessageType.warning);
+                        continue;
+                    }
+                    Alarm alarm = AlarmFactory.getAlarm(pvField);
+                    if(alarm==null) {
                         pvStructure.message("alarm is not valid structure", MessageType.warning);
                         continue;
                     }
                     alarmIsProperty = true;
-                    alarmMessagePVString = (PVString)message;
-                    alarmSeverityIndexPVInt = pvEnumerated.getIndexField();
+                    alarmMessagePV = alarm.getAlarmMessage();
+                    alarmSeverityIndexPV = alarm.getAlarmSeverityIndex();
                     continue;
+                } else {
+                    PVField pvField = null;
+                    PVStructure parent = pvStructure.getParent();
+                    if(parent!=null) {
+                        pvField = pvProperty.findProperty(parent,propertyName);
+                    }
+                    if(pvField==null) {
+                        pvStructure.message(
+                                "propertyName " + propertyName + " does not exist",
+                                MessageType.warning);
+                        continue;
+                    }
+                    if(pvField.getField().getType()!=Type.structure) {
+                        pvStructure.message(
+                                "propertyName " + propertyName + " is not a structure",
+                                MessageType.warning);
+                        continue;
+                    }
                 }
                 addPropertys[i] = true;
                 num++;
@@ -254,25 +227,22 @@ implements ChannelListener,ChannelFieldGroupListener {
             if(num<=0) break;
             gotAdditionalPropertys = true;
             propertyPVFields = new PVField[num];
-            propertyDBFields = new DBField[num];
             int index = 0;
             for(int i=0; i<length; i++) {
                 if(!addPropertys[i]) continue;
                 String propertyName = propertyNames[i];
-                PVField parent = dbStructure.getPVField().getParent();
+                PVStructure parent = pvStructure.getParent();
                 propertyPVFields[index] = parent.getSubField(propertyName);
-                propertyDBFields[index] = dbRecord.findDBField(propertyPVFields[index]);
                 index++;
             }
             break;
         }
-        
         channel = channelAccess.createChannel(pvname,propertyNames, providerName, this);
         if(channel==null) {
             message("providerName " + providerName + " pvname " + pvname + " not found",MessageType.error);
             return;
         }
-        setSupportState(SupportState.ready);
+        super.start();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#stop()
@@ -281,49 +251,34 @@ implements ChannelListener,ChannelFieldGroupListener {
         channel.destroy();
         channel = null;
         alarmIsProperty = false;
-        alarmMessagePVString = null;
-        alarmSeverityIndexPVInt = null;
+        alarmMessagePV = null;
+        alarmSeverityIndexPV = null;
         propertyNames = null;
         gotAdditionalPropertys = false;
         propertyPVFields = null;
-        propertyDBFields = null;
-        setSupportState(SupportState.readyForStart);
+        propertyPVFields = null;
+        super.stop();
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#uninitialize()
-     */
-    public void uninitialize() {
-        if(super.getSupportState()==SupportState.ready) {
-            stop();
-        }
-        valueIsEnumerated = false;
-        valueChoicesDBField = null;
-        valueChoicesPVStringArray = null;
-        valueIndexDBField = null;
-        if(super.getSupportState()==SupportState.readyForInitialize) return;
-        setSupportState(SupportState.readyForInitialize);
-    }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.process.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
     public void message(String message,MessageType messageType) {
-        dbRecord.lock();
+        pvRecord.lock();
         try {
             pvStructure.message(message, messageType);
         } finally {
-            dbRecord.unlock();
+            pvRecord.unlock();
         }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
      */
     public void destroy(Channel c) {
-        dbRecord.lock();
+        pvRecord.lock();
         try {
             if(super.getSupportState()!=SupportState.ready) return;
         } finally {
-            dbRecord.unlock();
+            pvRecord.unlock();
         }
         recordProcess.stop();
         recordProcess.start();
@@ -333,38 +288,35 @@ implements ChannelListener,ChannelFieldGroupListener {
      */
     public void channelStateChange(Channel c, boolean isConnected) {
         if(isConnected) {
-            dbRecord.lock();
+            pvRecord.lock();
             try {
                 PVRecord pvRecord = channel.getPVRecord();
                 if(valueIsEnumerated) {
-                    PVEnumerated pvEnumerated = null;
+                    Enumerated enumerated = null;
                     String fieldName = channel.getFieldName();
                     if(fieldName!=null) {
                         PVField pvField = pvRecord.getSubField(fieldName);
-                        pvEnumerated = pvField.getPVEnumerated();
+                        enumerated = EnumeratedFactory.getEnumerated(pvField);
                     }
-                    if(pvEnumerated!=null) {
-                        PVStringArray fromPVArray =pvEnumerated.getChoicesField();
+                    if(enumerated!=null) {
+                        PVStringArray fromPVArray =enumerated.getChoices();
                         int len = fromPVArray.getLength();
                         fromPVArray.get(0, len, stringArrayData);
-                        valueChoicesPVStringArray.put(0, len, stringArrayData.data, 0);
-                        valueChoicesDBField.postPut();
+                        valueChoicesPV.put(0, len, stringArrayData.data, 0);
                     }
                 }
                 if(gotAdditionalPropertys) {
                     for(int i=0; i< propertyPVFields.length; i++) {
                         PVField toPVField = propertyPVFields[i];
-                        DBField dbField = propertyDBFields[i];
                         PVField fromPVField = pvRecord.getSubField(toPVField.getField().getFieldName());
                         if(fromPVField!=null) {
                             PVStructure pvStructure = (PVStructure)fromPVField;
                             convert.copyStructure(pvStructure, (PVStructure)toPVField);
-                            dbField.postPut();
                         }
                     }
                 }
             } finally {
-                dbRecord.unlock();
+                pvRecord.unlock();
             }
         }
         connectionChange(isConnected);

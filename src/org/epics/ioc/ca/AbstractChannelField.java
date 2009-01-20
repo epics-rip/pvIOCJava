@@ -5,11 +5,12 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVEnumerated;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.PVField;
 
 /**
  * Abstract class for implementing ChannelField.
@@ -34,10 +35,6 @@ public abstract class AbstractChannelField implements ChannelField{
         return pvField;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelField#postPut()
-     */
-    public abstract void postPut();
-    /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getPropertyNames()
      */
     public String[] getPropertyNames() {
@@ -54,8 +51,8 @@ public abstract class AbstractChannelField implements ChannelField{
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getEnumerated()
      */
-    public PVEnumerated getEnumerated() {
-        return pvField.getPVEnumerated();
+    public Enumerated getEnumerated() {
+        return EnumeratedFactory.getEnumerated(pvField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelField#getAccessRights()

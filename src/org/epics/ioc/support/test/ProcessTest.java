@@ -11,20 +11,20 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.TestCase;
 
-import org.epics.ioc.db.DBD;
-import org.epics.ioc.db.DBDFactory;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.util.IOCFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requester;
-import org.epics.ioc.util.TimeStamp;
-import org.epics.ioc.util.TimeUtility;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.pvData.test.RequesterForTesting;
+import org.epics.pvData.xml.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+
 
 /**
  * JUnit test for RecordProcess.
@@ -32,24 +32,25 @@ import org.epics.ioc.util.TimeUtility;
  *
  */
 public class ProcessTest extends TestCase {
+    private static PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static SupportDatabase masterSupportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
+    private static MessageType maxMessageType = MessageType.info;
     /**
      * test PVAccess.
      */
     public static void testProcess() {
-        DBD dbd = DBDFactory.getMasterDBD();
-        IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        Requester parsingRequester = new Listener();
-        XMLToIOCDBFactory.convert(dbd,iocdbMaster,
-                 "dbd/dbd.xml",
-                 parsingRequester);
-        DBRecord[] dbRecords = null;
-        boolean initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/support/test/processTestDB.xml",parsingRequester);
-        if(!initOK) {
+        Requester iocRequester = new RequesterForTesting("accessTest");
+        XMLToPVDatabaseFactory.convert(masterPVDatabase,"${PVDATA}/xml/structures.xml", iocRequester);
+        if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
+        XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester);
+        if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
+        boolean ok = IOCFactory.initDatabase("src/org/epics/ioc/support/test/processTestPV.xml", iocRequester);
+        PVRecord[] pvRecords;
+        if(!ok) {
             System.out.printf("\nrecords\n");
-            dbRecords = iocdbMaster.getDBRecords();
-            for(DBRecord dbRecord: dbRecords) {
-                System.out.print(dbRecord.toString());
+            pvRecords = masterPVDatabase.getRecords();
+            for(PVRecord pvRecord: pvRecords) {
+                System.out.print(pvRecord.toString());
             }
             return;
         }
@@ -57,46 +58,67 @@ public class ProcessTest extends TestCase {
             Thread.sleep(1000);
             System.out.println();
         } catch (InterruptedException e) {}
-        dbRecords = iocdbMaster.getDBRecords();
-        DBRecord dbRecord = iocdbMaster.findRecord("counter");
-        assertNotNull(dbRecord);
-        Requester iocdbRequester = new IOCDBListener();
-        iocdbMaster.addRequester(iocdbRequester);
-        TestProcess testProcess = new TestProcess(dbRecord);
-        for(DBRecord record: dbRecords) {
-            RecordProcess recordProcess = record.getRecordProcess();
+        pvRecords = masterPVDatabase.getRecords();
+        PVRecord pvRecord = masterPVDatabase.findRecord("counter");
+        assertNotNull(pvRecord);
+        Requester pvDatabaseRequester = new PVDatabaseRequester();
+        masterPVDatabase.addRequester(pvDatabaseRequester);
+        TestProcess testProcess = new TestProcess(pvRecord);
+        for(PVRecord record: pvRecords) {
+            RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(record).getRecordProcess();
             recordProcess.setTrace(true);
         }
         testProcess.test(); 
-        for(DBRecord record: dbRecords) {
-            RecordProcess recordProcess = record.getRecordProcess();
+        for(PVRecord record: pvRecords) {
+            RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(record).getRecordProcess();
             recordProcess.setTrace(false);
         } 
         System.out.println("starting performance test"); 
         testProcess.testPerform();
+        
+
+        
+        ok = IOCFactory.initDatabase("src/org/epics/ioc/support/test/loopPV.xml", iocRequester);
+        if(!ok) return;
+        
 //        System.out.printf("\nrecords\n");
-//        for(String key: keys) {
-//            DBRecord record = recordMap.get(key);
-//            System.out.print(record.toString());
+//        pvRecords = masterPVDatabase.getRecords();
+//        for(PVRecord record: pvRecords) {
+//            System.out.println(record.toString());
 //        }
-        initOK = IOCFactory.initDatabase(
-            "src/org/epics/ioc/support/test/loopDB.xml",parsingRequester);
-        if(!initOK) return;
-        dbRecord = iocdbMaster.findRecord("root");
-        assertNotNull(dbRecord);
-        testProcess = new TestProcess(dbRecord);
-        dbRecords = iocdbMaster.getDBRecords();
-        for(DBRecord record: dbRecords) {
-            RecordProcess recordProcess = record.getRecordProcess();
+        
+        pvRecord = masterPVDatabase.findRecord("root");
+        assertNotNull(pvRecord);
+        testProcess = new TestProcess(pvRecord);
+        pvRecords = masterPVDatabase.getRecords();
+        for(PVRecord record: pvRecords) {
+            RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(record).getRecordProcess();
             recordProcess.setTrace(true);
         }
         System.out.printf("%n%n");
         testProcess.test();
-//        System.out.printf("\nrecords\n");
-//        for(String key: keys) {
-//            DBRecord record = recordMap.get(key);
-//            System.out.print(record.toString());
-//        }
+    }
+    
+    private static class RequesterForTesting implements Requester {
+        private String requesterName = null;
+        
+        RequesterForTesting(String requesterName) {
+            this.requesterName = requesterName;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#getRequestorName()
+         */
+        public String getRequesterName() {
+            return requesterName;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+         */
+        public void message(String message, MessageType messageType) {
+            System.out.println(message);
+            if(messageType.ordinal()>maxMessageType.ordinal()) maxMessageType = messageType;
+        }
     }
     
     private static class TestProcess implements RecordProcessRequester {
@@ -105,8 +127,8 @@ public class ProcessTest extends TestCase {
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
         
-        private TestProcess(DBRecord record) {
-            recordProcess = record.getRecordProcess();
+        private TestProcess(PVRecord record) {
+            recordProcess = masterSupportDatabase.getRecordSupport(record).getRecordProcess();
             assertNotNull(recordProcess);
         }
         
@@ -125,9 +147,9 @@ public class ProcessTest extends TestCase {
         }
 
         void test() {
-            TimeStamp timeStamp = new TimeStamp();
+            TimeStamp timeStamp = TimeStampFactory.create(0, 0);
             allDone = false;
-            TimeUtility.set(timeStamp,System.currentTimeMillis());
+            timeStamp.put(System.currentTimeMillis());
             boolean gotIt =recordProcess.setRecordProcessRequester(this);
             if(!gotIt) {
                 System.out.println("could not become recordProcessor");
@@ -156,7 +178,7 @@ public class ProcessTest extends TestCase {
             double microseconds;
             double processPerSecond;
             startTime = System.nanoTime();
-            TimeStamp timeStamp = new TimeStamp();
+            TimeStamp timeStamp = TimeStampFactory.create(0, 0);
             allDone = false;
             boolean gotIt =recordProcess.setRecordProcessRequester(this);
             if(!gotIt) {
@@ -164,7 +186,7 @@ public class ProcessTest extends TestCase {
             }
             for(int i=0; i< nwarmup + ntimes; i++) {
                 allDone = false;
-                TimeUtility.set(timeStamp,System.currentTimeMillis());
+                timeStamp.put(System.currentTimeMillis());
                 recordProcess.process(this,false,timeStamp);
                 if(!allDone) {
                     lock.lock();
@@ -221,7 +243,7 @@ public class ProcessTest extends TestCase {
         }
     }
     
-    private static class Listener implements Requester {
+    private static class PVDatabaseRequester implements Requester {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequestorName()
          */
@@ -233,24 +255,7 @@ public class ProcessTest extends TestCase {
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            System.out.println("parseListener: " + message);
-            
-        }
-    }
-    
-    private static class IOCDBListener implements Requester {
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequestorName()
-         */
-        public String getRequesterName() {
-            return "ProcessTest";
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            System.out.println("IOCDBListener: " + messageType + " " + message);
+            System.out.println("ProcessTest: " + messageType + " " + message);
             
         }
     }

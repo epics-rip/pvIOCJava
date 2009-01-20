@@ -5,32 +5,13 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.create.Create;
-import org.epics.ioc.create.Enumerated;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.ScanPriority;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+import org.epics.ioc.util.*;
 
 /**
  * Support for an array of calcArg structures.
@@ -40,26 +21,28 @@ import org.epics.ioc.util.ScanPriority;
 public class ProcessControlFactory {
     /**
      * Create support for an array of calcArg structures.
-     * @param dbField The array which must be an array of links.
+     * @param pvField The array which must be an array of links.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(DBStructure dbField) {
-        return new ProcessControlImpl(dbField);
+    public static Support create(PVStructure pvField) {
+        return new ProcessControlImpl(pvField);
     }
     
     private static final String supportName = "processControl";
+    private static final String emptyString = "";
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static final SupportDatabase supportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
     
     
     private static class ProcessControlImpl extends AbstractSupport
     implements Runnable,ProcessContinueRequester
     {
-        private static final String emptyString = "";
-        private IOCExecutor iocExecutor = IOCExecutorFactory.create(ProcessControlFactory.supportName, ScanPriority.lowest);
-        private IOCDB masterIOCDB = IOCDBFactory.getMaster();
+        
+        private Executor iocExecutor = ExecutorFactory.create(ProcessControlFactory.supportName, ThreadPriority.lowest);
+        
         private RecordProcess recordProcess = null;
         
         private PVString pvMessage = null;
-        private DBField dbMessage = null;
         private String message = emptyString;
         
         private PVString pvRecordName = null;
@@ -68,20 +51,18 @@ public class ProcessControlFactory {
         
         private PVBoolean pvTrace = null;
         private boolean trace = false;
-        private DBField dbTrace = null;
         
         private PVBoolean pvEnable = null;
         private boolean enable = false;
-        private DBField dbEnable = null;
         
         private Enumerated supportStateEnumerated = null;
         private PVInt supportStatePVInt = null;
-        private DBField supportStateDBField = null;
+        private PVField supportStatePVField = null;
         private Enumerated supportStateCommandEnumerated = null;
         private PVInt supportStateCommandPVInt = null;
-        private DBField supportStateCommandDBField = null;
+        private PVField supportStateCommandPVField = null;
         
-        private DBRecord targetDBRecord = null;
+        private PVRecord targetPVRecord = null;
         private RecordProcess targetRecordProcess = null;
         
         private RequestResult requestResult = null;
@@ -91,48 +72,37 @@ public class ProcessControlFactory {
         private SupportState supportState = null;
         
         
-        private ProcessControlImpl(DBStructure dbField) {
-            super(ProcessControlFactory.supportName,dbField);
+        private ProcessControlImpl(PVStructure pvField) {
+            super(ProcessControlFactory.supportName,pvField);
             
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize()
+         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
         @Override
-        public void initialize() {
-            DBField dbField = super.getDBField();
-            DBRecord dbRecord = dbField.getDBRecord();
-            recordProcess = dbRecord.getRecordProcess();
-            
-            PVStructure pvRecord = dbRecord.getPVRecord();
-            
+        public void initialize(RecordSupport recordSupport) {
+            PVField pvField = super.getPVField();
+            PVRecord pvRecord = pvField.getPVRecord();
+            recordProcess = recordSupport.getRecordProcess();
             pvMessage = pvRecord.getStringField("message");
             if(pvMessage==null) return;
-            dbMessage = dbRecord.findDBField(pvMessage);
             pvRecordName = pvRecord.getStringField("recordName");
             if(pvRecordName==null) return;
             pvTrace = pvRecord.getBooleanField("trace");
             if(pvTrace==null) return;
-            dbTrace = dbRecord.findDBField(pvTrace);
             pvEnable = pvRecord.getBooleanField("enable");
             if(pvEnable==null) return;
-            dbEnable = dbRecord.findDBField(pvEnable);
-            PVStructure pvStructure = pvRecord.getStructureField("supportState", "supportState");
+            PVStructure pvStructure = pvRecord.getStructureField("supportState");
             if(pvStructure==null) return;
-            dbField = dbRecord.findDBField(pvStructure);
-            supportStateEnumerated = SupportState.getSupportState(dbField);
+            supportStateEnumerated = SupportState.getSupportState(pvField);
             if(supportStateEnumerated==null) return;
-            supportStatePVInt = supportStateEnumerated.getIndexField();
-            supportStateDBField = dbRecord.findDBField(supportStatePVInt);
-            pvStructure = pvRecord.getStructureField("supportStateCommand", "supportStateCommand");
+            supportStatePVInt = supportStateEnumerated.getIndex();
+            pvStructure = pvRecord.getStructureField("supportStateCommand");
             if(pvStructure==null) return;
-            dbField = dbRecord.findDBField(pvStructure);
-            supportStateCommandEnumerated = SupportStateCommand.getSupportStateCommand(dbField);
+            supportStateCommandEnumerated = SupportStateCommand.getSupportStateCommand(pvField);
             if(supportStateCommandEnumerated==null) return;
-            supportStateCommandPVInt = supportStateCommandEnumerated.getIndexField();
-            supportStateCommandDBField = dbRecord.findDBField(supportStateCommandPVInt);
-            super.initialize();
+            supportStateCommandPVInt = supportStateCommandEnumerated.getIndex();
+            super.initialize(recordSupport);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -143,7 +113,6 @@ public class ProcessControlFactory {
             recordName = pvRecordName.get();
             if(recordName==null || recordName.equals("")) {
                 pvMessage.put("recordName is null");
-                dbMessage.postPut();
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
@@ -161,18 +130,18 @@ public class ProcessControlFactory {
          */
         public void run() {
             if(!recordName.equals(recordNamePrevious)) {
-                targetDBRecord = masterIOCDB.findRecord(recordName);
-                if(targetDBRecord==null) {
+                targetPVRecord = masterPVDatabase.findRecord(recordName);
+                if(targetPVRecord==null) {
                     requestResult = RequestResult.failure;
                     message = "recordName " + recordName + " not found";
                     recordProcess.processContinue(this);
                     return;
                 }
-                targetRecordProcess = targetDBRecord.getRecordProcess();
+                targetRecordProcess = supportDatabase.getRecordSupport(targetPVRecord).getRecordProcess();
                 if(targetRecordProcess==null) {
                     requestResult = RequestResult.failure;
                     message = "recordProcess for " + "recordName " + recordName + " not found";
-                    targetDBRecord = null;
+                    targetPVRecord = null;
                     recordProcess.processContinue(this);
                     return;
                 }
@@ -183,12 +152,12 @@ public class ProcessControlFactory {
                 recordProcess.processContinue(this);
                 return;
             }
-            if(targetDBRecord==null) {
+            if(targetPVRecord==null) {
                 message = "not connected to a record";
                 recordProcess.processContinue(this);
                 return;
             }
-            targetDBRecord.lock();
+            targetPVRecord.lock();
             try {
                 targetRecordProcess.setTrace(trace);
                 targetRecordProcess.setEnabled(enable);
@@ -239,7 +208,7 @@ public class ProcessControlFactory {
                 supportState = targetRecordProcess.getSupportState();
                 recordProcess.processContinue(this);
             } finally {
-                targetDBRecord.unlock();
+                targetPVRecord.unlock();
             }
         }
 
@@ -248,26 +217,21 @@ public class ProcessControlFactory {
          */
         public void processContinue() {
             pvMessage.put(message);
-            dbMessage.postPut();
             if(trace!=pvTrace.get()) {
                 pvTrace.put(trace);
-                dbTrace.postPut();
             }
             if(enable!=pvEnable.get()) {
                 pvEnable.put(enable);
-                dbEnable.postPut();
             }
             
             if(supportState!=null) {
                 int index = supportState.ordinal();
                 if(index!=supportStatePVInt.get()) {
                     supportStatePVInt.put(index);
-                    supportStateDBField.postPut();
                 }
             }
             if(supportStateCommandPVInt.get()!=0) {
                 supportStateCommandPVInt.put(0);
-                supportStateCommandDBField.postPut();
             }
             supportProcessRequester.supportProcessDone(requestResult);
         }
@@ -305,24 +269,17 @@ public class ProcessControlFactory {
             };
             /**
              * Convenience method for code that accesses a supportStateCommand structure.
-             * @param dbField A field which is potentially a supportStateCommand structure.
-             * @return The Enumerated interface only if dbField has an Enumerated interface and defines
+             * @param pvField A field which is potentially a supportStateCommand structure.
+             * @return The Enumerated interface only if pvField has an Enumerated interface and defines
              * the supportStateCommand choices.
              */
-            public static Enumerated getSupportStateCommand(DBField dbField) {
-                PVField pvField = dbField.getPVField();
-                if(pvField.getField().getType()!=Type.pvStructure) {
-                    pvField.message("field is not a structure", MessageType.error);
+            public static Enumerated getSupportStateCommand(PVField pvField) {
+                Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
+                if(enumerated==null) {
+                    pvField.message("not an enumerated structure", MessageType.error);
                     return null;
                 }
-                DBStructure dbStructure = (DBStructure)dbField;
-                Create create = dbStructure.getCreate();
-                if(create==null || !(create instanceof Enumerated)) {
-                    pvField.message("interface Enumerated not found", MessageType.error);
-                    return null;
-                }
-                Enumerated enumerated = (Enumerated)create;
-                PVStringArray pvChoices = enumerated.getChoicesField();
+                PVStringArray pvChoices = enumerated.getChoices();
                 int len = pvChoices.getLength();
                 if(len!=supportStateCommandChoices.length) {
                     pvField.message("not an supportStateCommand structure", MessageType.error);

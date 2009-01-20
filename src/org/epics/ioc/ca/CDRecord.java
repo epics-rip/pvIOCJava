@@ -5,9 +5,9 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVDataCreate;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVRecord;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVRecord;
 
 /**
  * CDRecord - A record that holds a PVRecord.

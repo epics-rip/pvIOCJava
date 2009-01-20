@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.pv.MessageType;
 
 /**
  * @author mrk

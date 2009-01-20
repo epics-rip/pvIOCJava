@@ -5,13 +5,10 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.FieldCreate;
-import org.epics.ioc.pv.FieldFactory;
-import org.epics.ioc.pv.PVDataCreate;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.Structure;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVRecord;
 
 /**
  * Base class for a CDRecord (Channel Data Record).
@@ -19,7 +16,6 @@ import org.epics.ioc.pv.Structure;
  *
  */
 public class BaseCDRecord implements CDRecord {
-    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private PVDataCreate pvDataCreate;
     private PVRecord pvRecord;
     private CDStructure cdStructure;
@@ -40,9 +36,7 @@ public class BaseCDRecord implements CDRecord {
         for(int i=0; i<length; i++) {
             newFields[i] = channelFields[i].getPVField().getField();
         }
-        Structure structure = fieldCreate.createStructure(
-                "channelData", "channelData", newFields);
-        pvRecord = pvDataCreate.createPVRecord(recordName, structure);
+        pvRecord = pvDataCreate.createPVRecord(recordName, newFields);
         cdStructure = new BaseCDStructure(null,this,pvRecord,channelFields);
     }
     /* (non-Javadoc)

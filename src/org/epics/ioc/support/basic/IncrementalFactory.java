@@ -5,24 +5,13 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+import org.epics.ioc.util.*;
 
 /**
  * Record that implements incremental outputs.
@@ -43,15 +32,18 @@ import org.epics.ioc.util.RequestResult;
 public class IncrementalFactory {
     /**
      * Create the support for the record or structure.
-     * @param dbField The field for which to create support. It must have type boolean.
+     * @param pvField The field for which to create support. It must have type boolean.
      * @return The support instance.
      */
-    public static Support create(DBField dbField) {
-        PVField pvField = dbField.getPVField();
-        if(pvField.getField().getType()!=Type.pvBoolean) {
+    public static Support create(PVField pvField) {
+        if(pvField.getField().getType()!=Type.scalar) {
             pvField.message("type is not boolean", MessageType.error);
         }
-        return new IncrementalImpl(dbField);
+        PVScalar pvScalar = (PVScalar)pvField;
+        if(pvScalar.getScalar().getScalarType()!=ScalarType.pvBoolean) {
+            pvField.message("type is not boolean", MessageType.error);
+        }
+        return new IncrementalImpl((PVBoolean)pvField);
     }
     
     private static Convert convert = ConvertFactory.getConvert();
@@ -60,86 +52,52 @@ public class IncrementalFactory {
     {
         private static String supportName = "incremental";
         private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
-        private DBStructure dbStructure;
-        private PVStructure pvStructure;
-        private DBField dbValue = null;
-        private PVField pvValue = null;
-        private PVField pvDesiredValue = null;
         private PVBoolean pvIncremental = null;
-        private PVField pvRateOfChange = null;
+        private PVScalar pvValue = null;
+        private PVScalar pvDesiredValue = null;
+        private PVScalar pvRateOfChange = null;
         
         private double desiredValue = 0.0;
         private double value = 0.0;
         private boolean incremental = true;
         private double rateOfChange = 0.0;
         
-        private IncrementalImpl(DBField dbField) {
-            super(supportName,dbField);
-            pvIncremental = (PVBoolean)dbField.getPVField();
-            dbStructure = (DBStructure)dbField.getParent();
-            pvStructure = dbStructure.getPVStructure();
+        private IncrementalImpl(PVBoolean pvBoolean) {
+            super(supportName,pvBoolean);
+            pvIncremental = pvBoolean;
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#initialize()
+         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
-        public void initialize() {
+        public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            DBRecord dbRecord = dbStructure.getDBRecord();
-            DBField parentDBField = dbStructure;
-            PVField parentPVField = parentDBField.getPVField();
-            PVField pvField = pvProperty.findProperty(parentPVField, "value");
-            if(pvField==null) {
-                super.message("parent does not have a value field", MessageType.error);
+            PVStructure parent = pvIncremental.getParent().getParent();
+            PVField pvField = parent.getSubField("value");
+            if(pvField==null || pvField.getField().getType()!=Type.scalar) {
+                parent.message("does not have a scalar field named value", MessageType.error);
                 return;
             }
-            if(pvField.getField().getType()!=Type.pvDouble) {
-                super.message("the parent value field does not have type double", MessageType.error);
+            pvDesiredValue = (PVScalar)pvField;
+            pvField = parent.getSubField("rateOfChange");
+            if(pvField==null || pvField.getField().getType()!=Type.scalar) {
+                parent.message("does not have a scalar field named value", MessageType.error);
                 return;
             }
-            pvDesiredValue = (PVDouble)pvField;
-            parentDBField = parentDBField.getParent();
-            parentPVField = parentDBField.getPVField();
-            pvField = pvProperty.findProperty(parentPVField, "value");
-            if(pvField==null) {
-                super.message("parent of parent does not have a value field", MessageType.error);
+            pvRateOfChange = (PVScalar)pvField;
+            parent = parent.getParent();
+            pvField = parent.getSubField("value");
+            if(pvField==null || pvField.getField().getType()!=Type.scalar) {
+                parent.message("does not have a scalar field named value", MessageType.error);
                 return;
             }
-            if(pvField.getField().getType()!=Type.pvDouble) {
-                super.message("the parent of parent value field does not have type double", MessageType.error);
-                return;
-            }
-            pvValue = (PVDouble)pvField;
-            dbValue = dbRecord.findDBField(pvField);
-            pvRateOfChange = pvProperty.findProperty(pvStructure,"rateOfChange");
-            if(pvRateOfChange==null) {
-                super.message("rateOfChange not found", MessageType.error);
-                return;
-            }
-            if(!pvRateOfChange.getField().getType().isNumeric()) {
-                super.message("rateOfChange must be a numeric field", MessageType.error);
-                return;
-            }
+            pvValue = (PVScalar)pvField;
             super.setSupportState(SupportState.readyForStart); 
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#start()
-         */
-        public void start() {
-            super.setSupportState(SupportState.ready);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#stop()
-         */
-        public void stop() {
-            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#uninitialize()
          */
         public void uninitialize() {
-            dbValue = null;
+            pvValue = null;
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
@@ -166,7 +124,6 @@ public class IncrementalFactory {
                 }
             }
             convert.fromDouble(pvValue, newValue);
-            dbValue.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
     }

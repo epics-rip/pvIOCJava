@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+
 
 /**
  * @author mrk

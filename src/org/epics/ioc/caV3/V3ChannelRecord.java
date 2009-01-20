@@ -5,11 +5,23 @@
  */
 package org.epics.ioc.caV3;
 
-import gov.aps.jca.dbr.DBR;
-import gov.aps.jca.dbr.DBRType;
+import gov.aps.jca.dbr.*;
+import gov.aps.jca.event.*;
 
-import org.epics.ioc.ca.ChannelMonitorRequester;
-import org.epics.ioc.pv.PVRecord;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.pvData.test.RequesterForTesting;
+import org.epics.pvData.xml.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+
 
 /**
  * Interface to the data for the channel.

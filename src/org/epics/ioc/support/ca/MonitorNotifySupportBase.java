@@ -5,18 +5,18 @@
  */
 package org.epics.ioc.support.ca;
 
-import org.epics.ioc.ca.ChannelField;
-import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.ca.ChannelMonitorNotify;
-import org.epics.ioc.ca.ChannelMonitorNotifyFactory;
-import org.epics.ioc.ca.ChannelMonitorNotifyRequester;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+
 
 /**
  * Implementation for a channel access monitorNotify link.
@@ -32,16 +32,16 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param dbStructure The dbStructure for the field being supported.
+     * @param pvStructure The pvStructure for the field being supported.
      */
-    public MonitorNotifySupportBase(String supportName,DBStructure dbStructure) {
-        super(supportName,dbStructure);
+    public MonitorNotifySupportBase(String supportName,PVStructure pvStructure) {
+        super(supportName,pvStructure);
     }      
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.CASupportFactory.CASupport#initialize()
+     * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize() {
-        super.initialize();
+    public void initialize(RecordSupport recordSupport) {
+        super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         if(!recordProcess.setRecordProcessRequester(this)) {
             message("notifySupport but record already has recordProcessor",MessageType.error);
@@ -99,12 +99,12 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
      */
     public void monitorEvent() {
         if(isActive) {
-            dbRecord.lock();
+            pvRecord.lock();
             try {
                 alarmSupport.setAlarm(
                     "channelMonitorNotify event but record already active", AlarmSeverity.minor);
             } finally {
-                dbRecord.unlock();
+                pvRecord.unlock();
             }
             return;
         }

@@ -7,13 +7,13 @@ package org.epics.ioc.ca;
 
 import java.util.LinkedList;
 
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Type;
 
 /**
  * Abstract class for code that implements Channel.
@@ -260,7 +260,7 @@ public abstract class AbstractChannel implements Channel{
     public synchronized String getPropertyName() {
         if(fieldName==null||fieldName.length()<=0) return "value";
         PVField pvField = pvProperty.findProperty(pvRecord,fieldName);
-        if(pvField!=null && pvField.getField().getType()==Type.pvStructure) {
+        if(pvField!=null && pvField.getField().getType()==Type.structure) {
             PVStructure pvStructure = (PVStructure)pvField;
             if(pvStructure.getStructure().getFieldIndex("value") >=0) {
                 return fieldName + ".value";

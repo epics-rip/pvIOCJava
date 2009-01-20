@@ -11,13 +11,13 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.support.RecordProcess;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.pvData.misc.*;
+
+
+import org.epics.ioc.support.*;
 import org.epics.ioc.support.RecordProcessRequester;
 
 /**
@@ -27,6 +27,7 @@ import org.epics.ioc.support.RecordProcessRequester;
  *
  */
 public class ScannerFactory {
+    private static SupportDatabase supportDatabase = SupportDatabaseFactory.get(PVDatabaseFactory.getMaster());
     private static PeriodicScanner periodicScanner = new PeriodicScannerImpl();
     private static EventScanner eventScanner = new EventScannerImpl();
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
@@ -52,7 +53,6 @@ public class ScannerFactory {
     private static class ProcessRecord implements RecordProcessRequester {
         private String name;
         private RecordProcess recordProcess;
-        private DBRecord dbRecord;
         private PVRecord pvRecord;
         private boolean isActive = false;
         private int numberConsecutiveActive = 0;
@@ -65,8 +65,7 @@ public class ScannerFactory {
         private ProcessRecord(String name,RecordProcess recordProcess) {
             this.name = name;
             this.recordProcess = recordProcess;
-            dbRecord = recordProcess.getRecord();
-            pvRecord = dbRecord.getPVRecord();
+            pvRecord = recordProcess.getRecord();
             PVField pvField = pvProperty.findProperty(pvRecord,"scan.maxConsecutiveActive");
             if(pvField!=null && (pvField instanceof PVInt)) {
                 pvMaxConsecutiveActive = (PVInt)pvField;
@@ -80,11 +79,11 @@ public class ScannerFactory {
                     maxConsecutiveActive = pvMaxConsecutiveActive.get();
                 }
                 if(++numberConsecutiveActive == maxConsecutiveActive) {
-                    dbRecord.lock();
+                    pvRecord.lock();
                     try {
                         pvRecord.message("record active too long", MessageType.warning);
                     } finally {
-                        dbRecord.unlock();
+                        pvRecord.unlock();
                     }
                 }
             } else {
@@ -94,8 +93,8 @@ public class ScannerFactory {
             }
         }
         
-        private DBRecord getDBRecord() {
-            return dbRecord;
+        private PVRecord getPVRecord() {
+            return pvRecord;
         }
         
         private void release() {
@@ -149,7 +148,7 @@ public class ScannerFactory {
         private String name;
         private ProcessRecord[] processRecords = new ProcessRecord[0];
         
-        private TimeStamp timeStamp = new TimeStamp();
+        private TimeStamp timeStamp = TimeStampFactory.create(0, 0);
         
         private boolean isActive = false;
         private boolean listModify = false;
@@ -175,7 +174,7 @@ public class ScannerFactory {
             } finally {
                 lock.unlock();
             }
-            TimeUtility.set(timeStamp,startTime);
+            timeStamp.put(startTime);
             for(ProcessRecord processRecord : processRecords) {
                 if(processRecord!=null) processRecord.execute(timeStamp);
             }
@@ -190,13 +189,13 @@ public class ScannerFactory {
             }
         }
 
-        boolean remove(DBRecord dbRecord) {
+        boolean remove(PVRecord pvRecord) {
             lock.lock();
             try {
                 ProcessRecord recordExecutor = null;
                 int index = 0;
                 for(int i=0; i< processRecords.length; i++) {
-                    if(processRecords[i].getDBRecord()==dbRecord) {
+                    if(processRecords[i].getPVRecord()==pvRecord) {
                         recordExecutor = processRecords[i];
                         index = i;
                         break;
@@ -349,11 +348,10 @@ public class ScannerFactory {
         
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.PeriodicScanner#schedule(org.epics.ioc.db.DBRecord)
+         * @see org.epics.ioc.util.PeriodicScanner#schedule(org.epics.ioc.pv.PVRecord)
          */
-        public boolean addRecord(DBRecord dbRecord) {
-            ScanField scanField = ScanFieldFactory.create(dbRecord);
-            PVRecord pvRecord = dbRecord.getPVRecord();
+        public boolean addRecord(PVRecord pvRecord) {
+            ScanField scanField = ScanFieldFactory.create(pvRecord);
             if(scanField==null) {
                 pvRecord.message(
                         "PeriodicScanner.addRecord invalid scan field",
@@ -380,7 +378,7 @@ public class ScannerFactory {
             } finally {
                 lock.unlock();
             }
-            RecordProcess recordProcess = dbRecord.getRecordProcess();
+            RecordProcess recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
             processRecord = new ProcessRecord(processPeriodic.getName(),recordProcess);
             if(!recordProcess.setRecordProcessRequester(processRecord)){
                 return false;
@@ -389,10 +387,10 @@ public class ScannerFactory {
             return true;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.PeriodicScanner#unschedule(org.epics.ioc.db.DBRecord, double, org.epics.ioc.util.ScanPriority)
+         * @see org.epics.ioc.util.PeriodicScanner#unschedule(org.epics.ioc.pv.PVRecord, double, org.epics.ioc.util.ThreadPriority)
          */
-        public boolean removeRecord(DBRecord dbRecord, double rate, ScanPriority scanPriority) {
-            int priority = scanPriority.getJavaPriority();
+        public boolean removeRecord(PVRecord pvRecord, double rate, ThreadPriority threadPriority) {
+            int priority = threadPriority.getJavaPriority();
             long period = rateToPeriod(rate);
             ProcessPeriodic processPeriodic = null;
             lock.lock();
@@ -405,12 +403,12 @@ public class ScannerFactory {
                 lock.unlock();
             }
             if(processPeriodic==null) {
-                dbRecord.getPVRecord().message(
+                pvRecord.getPVRecord().message(
                         "PeriodicScanner.unschedule but not in list",
                         MessageType.error);
                 return false;
             }
-            processPeriodic.remove(dbRecord);
+            processPeriodic.remove(pvRecord);
             return true;
         }
         /* (non-Javadoc)
@@ -435,11 +433,11 @@ public class ScannerFactory {
             return builder.toString();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.PeriodicScanner#show(double, org.epics.ioc.util.ScanPriority)
+         * @see org.epics.ioc.util.PeriodicScanner#show(double, org.epics.ioc.util.ThreadPriority)
          */
-        public String show(double rate, ScanPriority scanPriority) {
+        public String show(double rate, ThreadPriority threadPriority) {
             StringBuilder builder = new StringBuilder();
-            int priority = scanPriority.getJavaPriority();
+            int priority = threadPriority.getJavaPriority();
             long period = rateToPeriod(rate);
             lock.lock();
             try {
@@ -478,11 +476,11 @@ public class ScannerFactory {
             return builder.toString();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.PeriodicScanner#show(org.epics.ioc.util.ScanPriority)
+         * @see org.epics.ioc.util.PeriodicScanner#show(org.epics.ioc.util.ThreadPriority)
          */
-        public String show(ScanPriority scanPriority) {
+        public String show(ThreadPriority threadPriority) {
             StringBuilder builder = new StringBuilder();
-            int priority = scanPriority.getJavaPriority();
+            int priority = threadPriority.getJavaPriority();
             lock.lock();
             try {
                 ListIterator<PeriodNode> iter = periodList.listIterator();
@@ -624,7 +622,7 @@ public class ScannerFactory {
             eventName = name;
             thread = threadCreate.create(
                 "event(" + name + ")",
-                ScanPriority.valueOf("higher").getJavaPriority(),
+                ThreadPriority.valueOf("higher").getJavaPriority(),
                 this);
         }
         /* (non-Javadoc)
@@ -824,13 +822,12 @@ public class ScannerFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.EventScanner#addRecord(org.epics.ioc.db.DBRecord)
+         * @see org.epics.ioc.util.EventScanner#addRecord(org.epics.ioc.pv.PVRecord)
          */
-        public boolean addRecord(DBRecord dbRecord) {
-            PVRecord pvRecord = dbRecord.getPVRecord();
+        public boolean addRecord(PVRecord pvRecord) {
             lock.lock();
             try {
-                ScanField scanField = ScanFieldFactory.create(dbRecord);
+                ScanField scanField = ScanFieldFactory.create(pvRecord);
                 if(scanField==null) {
                     pvRecord.message(
                             "Eventcanner.addRecord invalid scan field",
@@ -868,7 +865,7 @@ public class ScannerFactory {
                     processEvent = new ProcessEvent(threadName,priority);
                     announce.addProcessEvent(processEvent);
                 }
-                RecordProcess recordProcess = dbRecord.getRecordProcess();
+                RecordProcess recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
                 ProcessRecord processRecord = new ProcessRecord(processEvent.getName(),recordProcess);
                 if(!recordProcess.setRecordProcessRequester(processRecord)){
                     return false;
@@ -892,26 +889,26 @@ public class ScannerFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.EventScanner#removeRecord(org.epics.ioc.db.DBRecord, java.lang.String, org.epics.ioc.util.ScanPriority)
+         * @see org.epics.ioc.util.EventScanner#removeRecord(org.epics.pvData.pv.PVRecord, java.lang.String, org.epics.pvData.misc.ThreadPriority)
          */
-        public boolean removeRecord(DBRecord dbRecord, String eventName, ScanPriority scanPriority) {
+        public boolean removeRecord(PVRecord pvRecord, String eventName, ThreadPriority threadPriority) {
             lock.lock();
             try {
                 Announce announce = getAnnounce(eventName);
-                int priority = scanPriority.getJavaPriority();
+                int priority = threadPriority.getJavaPriority();
                 ProcessEvent processEvent = null;
                 ProcessEvent[] processEvents = announce.processEvents;
                 for(int i=0; i<processEvents.length; i++) {
                     ProcessEvent processEventNow = processEvents[i];
-                    int threadPriority = processEventNow.getThread().getPriority();
-                    if(priority<threadPriority) continue;
-                    if(priority==threadPriority) {
+                    int threadPrio = processEventNow.getThread().getPriority();
+                    if(priority<threadPrio) continue;
+                    if(priority==threadPrio) {
                         processEvent = processEventNow;
                         break;
                     }
                 }
-                if(processEvent==null || !processEvent.remove(dbRecord)) {
-                    dbRecord.getPVRecord().message(
+                if(processEvent==null || !processEvent.remove(pvRecord)) {
+                    pvRecord.getPVRecord().message(
                             "EventScanner.removeRecord but not in list",
                             MessageType.error);
                 }

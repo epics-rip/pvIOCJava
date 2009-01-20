@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.util.TimeStamp;
+import org.epics.pvData.property.TimeStamp;
+import org.epics.pvData.pv.PVRecord;
 
 /**
  * Record processing support.
@@ -33,9 +33,9 @@ public interface RecordProcess {
     boolean isActive();
     /**
      * Get the record this RecordProcess processes.
-     * @return The DBRecord interface.
+     * @return The PVRecord interface.
      */
-    DBRecord getRecord();
+    PVRecord getRecord();
     /**
      * Is trace active for this record.
      * @return (false,true) if trace (is not, is) active

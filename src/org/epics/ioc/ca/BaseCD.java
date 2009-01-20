@@ -8,8 +8,8 @@ package org.epics.ioc.ca;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.epics.ioc.pv.PVDataCreate;
-import org.epics.ioc.pv.PVField;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVField;
 
 
 /**
@@ -91,7 +91,7 @@ public class BaseCD implements CD
         for(int i=0; i<length; i++) {
             CDField cdField = cdFields[i];
             if(cdField.getChannelField().getPVField()==pvField) {
-                cdField.get(pvField,true);
+                cdField.get(pvField);
                 return true;
             }
         }

@@ -6,28 +6,25 @@
 package org.epics.ioc.support.pdrv;
 
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStructure;
+
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.Support;
+import org.epics.ioc.support.*;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.*;
+
 
 /**
  * Record Support for starting a port driver.
@@ -40,11 +37,8 @@ public class PDRVPortDeviceControlFactory {
      * @param dbStructure The structure for a port record.
      * @return The record support.
      */
-    public static Support create(DBStructure dbStructure) {
-        String supportName = dbStructure.getPVStructure().getSupportName();
-        if(supportName.equals(supportName)) return new PortDeviceControl(supportName,dbStructure);
-        dbStructure.getPVStructure().message("support name is not " + supportName,MessageType.fatalError);
-        return null;
+    public static Support create(PVStructure pvStructure) {
+        return new PortDeviceControl(supportName,pvStructure);
     }
     
     private static final String supportName = "portDeviceControl";
@@ -55,8 +49,8 @@ public class PDRVPortDeviceControlFactory {
         private static final String emptyMessage = "";
         private User user = Factory.createUser(null);
         private RecordProcess recordProcess = null;
-        private DBRecord dbRecord = null;
-        private DBField dbMessage = null;
+        private PVStructure pvStructure = null;
+        private PVRecord pvRecord = null;
         private PVString pvMessage = null;
         
         private PVString pvPortName = null;
@@ -65,27 +59,21 @@ public class PDRVPortDeviceControlFactory {
         private String deviceName = null;
         
         private PVBoolean pvConnect = null;
-        private DBField dbConnect = null;
         private boolean connect = false;
         
         private PVBoolean pvEnable = null;
-        private DBField dbEnable = null;
         private boolean enable = false;
 
         private PVBoolean pvAutoConnect = null;
-        private DBField dbAutoConnect = null;
         private boolean autoConnect = false;
         
         private PVInt pvTraceMask = null;
-        private DBField dbTraceMask = null;
         private int traceMask = 0;
         
         private PVInt pvTraceIOMask = null;
-        private DBField dbTraceIOMask = null;
         private int traceIOMask = 0;
         
         private PVInt pvTraceIOTruncateSize = null;
-        private DBField dbTraceIOTruncateSize = null;
         private int traceIOTruncateSize = 0;
  
         private PVBoolean pvReport = null;
@@ -103,58 +91,41 @@ public class PDRVPortDeviceControlFactory {
         private boolean justConnected = false;
         private String message = emptyMessage;
         
-        private PortDeviceControl(String supportName,DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            dbRecord = dbStructure.getDBRecord();
+        private PortDeviceControl(String supportName,PVStructure pvStructure) {
+            super(supportName,pvStructure);
+            this.pvStructure = pvStructure;
+            pvRecord = pvStructure.getPVRecord();
         }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
         @Override
-        public void initialize() {
+        public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            recordProcess = dbRecord.getRecordProcess();
-            PVStructure pvStructure = dbRecord.getPVRecord();
-            
+            recordProcess = recordSupport.getRecordProcess();
             pvMessage = pvStructure.getStringField("message");
             if(pvMessage==null) return;
-            dbMessage = dbRecord.findDBField(pvMessage);
             pvPortName = pvStructure.getStringField("portName");
             if(pvPortName==null) return;
             pvDeviceName = pvStructure.getStringField("deviceName");
             if(pvDeviceName==null) return;
             pvConnect = pvStructure.getBooleanField("connect");
             if(pvConnect==null) return;
-            dbConnect = dbRecord.findDBField(pvConnect);
             pvEnable = pvStructure.getBooleanField("enable");
             if(pvEnable==null) return;
-            dbEnable = dbRecord.findDBField(pvEnable);
             pvAutoConnect = pvStructure.getBooleanField("autoConnect");
             if(pvAutoConnect==null) return;
-            dbAutoConnect = dbRecord.findDBField(pvAutoConnect);
             pvTraceMask = pvStructure.getIntField("traceMask");
             if(pvTraceMask==null) return;
-            dbTraceMask = dbRecord.findDBField(pvTraceMask);
             pvTraceIOMask = pvStructure.getIntField("traceIOMask");
             if(pvTraceIOMask==null) return;
-            dbTraceIOMask = dbRecord.findDBField(pvTraceIOMask);
             pvTraceIOTruncateSize = pvStructure.getIntField("traceIOTruncateSize");
             if(pvTraceIOTruncateSize==null) return;
-            dbTraceIOTruncateSize = dbRecord.findDBField(pvTraceIOTruncateSize);
             pvReport = pvStructure.getBooleanField("report");
             pvReportDetails = pvStructure.getIntField("reportDetails");
-            super.initialize();
+            super.initialize(recordSupport);
         }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#start()
-         */
-        @Override
-        public void start() {
-            super.start();
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#stop()
          */
@@ -209,32 +180,25 @@ public class PDRVPortDeviceControlFactory {
         public void processContinue() {
             if(message!=emptyMessage) {
                 pvMessage.put(message);
-                dbMessage.postPut();
                 message = emptyMessage;
             }
             if(connect!=pvConnect.get()) {
                 pvConnect.put(connect);
-                dbConnect.postPut();
             }
             if(enable!=pvEnable.get()) {
                 pvEnable.put(enable);
-                dbEnable.postPut();
             }
             if(autoConnect!=pvAutoConnect.get()) {
                 pvAutoConnect.put(autoConnect);
-                dbAutoConnect.postPut();
             }
             if(traceMask!=pvTraceMask.get()) {
                 pvTraceMask.put(traceMask);
-                dbTraceMask.postPut();
             }
             if(traceIOMask!=pvTraceIOMask.get()) {
                 pvTraceIOMask.put(traceIOMask);
-                dbTraceIOMask.postPut();
             }
             if(traceIOTruncateSize!=pvTraceIOTruncateSize.get()) {
                 pvTraceIOTruncateSize.put(traceIOTruncateSize);
-                dbTraceIOTruncateSize.postPut();
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }

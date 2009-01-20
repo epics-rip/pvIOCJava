@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.support.calc;
 
-import org.epics.ioc.pv.Type;
+import org.epics.pvData.pv.*;
 
 /**
  * The name and type for an argument for a calculation.
@@ -24,14 +24,14 @@ public class ArgType {
     /**
      * The element type for an array.
      */
-    public Type elementType = null;
+    public ScalarType elementType = null;
     /**
      * Constructor.
      * @param name The argument name.
      * @param type The argument type.
-     * @param elementType The lement type for an array.
+     * @param elementType The element type for an array.
      */
-    public ArgType(String name,Type type,Type elementType) {
+    public ArgType(String name,Type type,ScalarType elementType) {
         this.name = name;
         this.type = type;
         this.elementType = elementType;

@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.Requester;
+import org.epics.pvData.pv.Requester;
 
 /**
  *  Requester that monitors a channel without requesting data.

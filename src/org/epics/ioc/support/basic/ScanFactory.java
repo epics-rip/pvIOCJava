@@ -5,28 +5,21 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBListener;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.db.RecordListener;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+import org.epics.ioc.util.*;
+
 import org.epics.ioc.util.EventScanner;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
+
 import org.epics.ioc.util.PeriodicScanner;
+import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanField;
 import org.epics.ioc.util.ScanFieldFactory;
-import org.epics.ioc.util.ScanPriority;
 import org.epics.ioc.util.ScanType;
 import org.epics.ioc.util.ScannerFactory;
 
@@ -36,102 +29,82 @@ import org.epics.ioc.util.ScannerFactory;
  *
  */
 public class ScanFactory {
-    private static IOCExecutor iocExecutor 
-        = IOCExecutorFactory.create("scanFieldModify", ScanPriority.lower);
+    private static Executor executor 
+        = ExecutorFactory.create("scanFieldModify", ThreadPriority.lower);
     private static PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
     private static EventScanner eventScanner = ScannerFactory.getEventScanner();
-    private static final String supportName = "scan";
     /**
      * Create support for the scan field.
-     * @param dbStructure The interface to the scan field.
+     * @param pvStructure The interface to the scan field.
      * @return The support or null if the scan field is improperly defined.
      */
-    public static Support create(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        ScanField  scanField = ScanFieldFactory.create(dbStructure.getDBRecord());
+    public static Support create(PVStructure pvStructure) {
+        ScanField  scanField = ScanFieldFactory.create(pvStructure.getPVRecord());
         if(scanField==null) return null;
-        String supportName = pvStructure.getSupportName();
-        if(!supportName.equals(supportName)) {
-            pvStructure.message(
-                    "ScanFactory create supportName is " + supportName
-                    + " but expected scan",
-                    MessageType.fatalError);
-                return null;
-        }
-        return new ScanImpl(dbStructure,scanField);
+        return new ScanImpl(pvStructure,scanField);
     }
     
-    private static class ScanImpl extends AbstractSupport implements DBListener
+    private static class ScanImpl extends AbstractSupport implements PVListener
     {
         private ScanField scanField;
-        private DBRecord dbRecord = null;
-        
-        private RecordListener recordListener;
+        private PVRecord pvRecord = null;
         
         private boolean isActive = false;
         private boolean isStarted = false;
         
         private PVStructure pvScanType;
-        private DBField dbScanType;
         private PVInt pvScanTypeIndex;
-        private DBField dbScanTypeIndex;
         
         private PVDouble pvRate;
-        private DBField dbRate;
         private PVString pvEventName;
-        private DBField dbEventName;
         
         private ScanType scanType = null;
         private double scanRate;
-        private ScanPriority scanPriority = null;
+        private ThreadPriority threadPriority = null;
         private String eventName = null;
         private ScanModify scanModify = null;
         
-        private ScanImpl(DBStructure dbScan,ScanField scanField) {
-            super(supportName,dbScan);
+        private ScanImpl(PVStructure pvScan,ScanField scanField) {
+            super("scan",pvScan);
             this.scanField = scanField;
-            dbRecord = dbScan.getDBRecord();
-            recordListener = dbRecord.createRecordListener(this);
-            pvScanType = dbScan.getPVStructure().getStructureField("type", "scanType");
-            dbScanType = dbRecord.findDBField(pvScanType);
+            pvRecord = pvScan.getPVRecord();
+            pvRecord.registerListener(this);
+            pvScanType = pvScan.getStructureField("type");
             pvScanTypeIndex = scanField.getScanTypeIndexPV();
-            dbScanTypeIndex = dbRecord.findDBField(pvScanTypeIndex);
             pvRate = scanField.getRatePV();
-            dbRate = dbRecord.findDBField(pvRate); 
-            pvEventName = scanField.getEventNamePV();
-            dbEventName = dbRecord.findDBField(pvEventName); 
+            pvEventName = scanField.getEventNamePV(); 
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#beginProcess()
+         * @see org.epics.pvData.pv.PVListener#beginGroupPut(org.epics.pvData.pv.PVRecord)
          */
-        public void beginProcess() {}
+        public void beginGroupPut(PVRecord pvRecord) {}
+
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
+         * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVField)
          */
-        public void dataPut(DBField requested, DBField dbField) {
+        public void dataPut(PVStructure requested, PVField pvField) {
             if(!isStarted || !isActive) return;
-            if(dbField.getPVField()!=pvScanTypeIndex) return;
+            if(pvField!=pvScanTypeIndex) return;
             callScanModify();
         }
+
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField)
+         * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
          */
-        public void dataPut(DBField dbField) {
+        public void endGroupPut(PVRecord pvRecord) {}
+
+        public void dataPut(PVField pvField) {
             if(!isStarted || !isActive) return;
-            if(dbField==dbEventName) {
+            if(pvField==pvEventName) {
                 if(scanType==ScanType.periodic) return;
             }
             callScanModify();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#endProcess()
+         * @see org.epics.pvData.pv.PVListener#unlisten(org.epics.pvData.pv.PVRecord)
          */
-        public void endProcess() {}
-        /* (non-Javadoc)
-         * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
-         */
-        public void unlisten(RecordListener listener) {}
+        public void unlisten(PVRecord pvRecord) {}
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#getName()
          */
@@ -181,15 +154,15 @@ public class ScanFactory {
         }       
         
         private void addListeners() {
-            dbScanType.addListener(recordListener);
-            dbRate.addListener(recordListener);
-            dbEventName.addListener(recordListener);
+            pvScanType.addListener(this);
+            pvRate.addListener(this);
+            pvEventName.addListener(this);
         }
         
         private void removeListeners() {
-            dbScanType.removeListener(recordListener);
-            dbRate.removeListener(recordListener);
-            dbEventName.removeListener(recordListener);
+            pvScanType.removeListener(this);
+            pvRate.removeListener(this);
+            pvEventName.removeListener(this);
         }
         
         private void callScanModify() {
@@ -198,7 +171,7 @@ public class ScanFactory {
             } else {
                 scanType = scanField.getScanType();
                 scanRate = scanField.getRate();
-                scanPriority = scanField.getPriority();
+                threadPriority = scanField.getPriority();
                 eventName = scanField.getEventName();
                 if(scanType==ScanType.event || scanType==ScanType.periodic) {
                     scanModify = new ScanModify();
@@ -222,7 +195,7 @@ public class ScanFactory {
             }
             
             public void modify() {
-                iocExecutor.execute(this);
+                executor.execute(this);
             }
             
             
@@ -232,11 +205,11 @@ public class ScanFactory {
                 switch (scanType) {
                 case passive: break;
                 case event:
-                    result = eventScanner.addRecord(dbRecord);
+                    result = eventScanner.addRecord(pvRecord);
                     if(result) isEvent = true;
                     break;
                 case periodic:
-                    result = periodicScanner.addRecord(dbRecord);
+                    result = periodicScanner.addRecord(pvRecord);
                     if(result) isPeriodic = true;
                     break;
                 }
@@ -246,32 +219,30 @@ public class ScanFactory {
             private void stopScanner() {
                 boolean result = true;
                 if(isEvent) {
-                    result = eventScanner.removeRecord(dbRecord, eventName, scanPriority);
+                    result = eventScanner.removeRecord(pvRecord, eventName, threadPriority);
                     isEvent = false;
                 } else if(isPeriodic) {
-                    result = periodicScanner.removeRecord(dbRecord, scanRate, scanPriority);
+                    result = periodicScanner.removeRecord(pvRecord, scanRate, threadPriority);
                     isPeriodic = false;
                 }
                 if(!result && pvScanTypeIndex!=null) {
                     pvScanTypeIndex.put(0);
-                    dbScanTypeIndex.postPut();
                 }
                 update(!result);
             }
             
             private void update(boolean setPassive) {
-                dbRecord.lock();
+                pvRecord.lock();
                 try {
                     if(setPassive) {
                         pvScanTypeIndex.put(0);
-                        dbScanTypeIndex.postPut();
                     }
                     scanType = scanField.getScanType();
                     scanRate = scanField.getRate();
-                    scanPriority = scanField.getPriority();
+                    threadPriority = scanField.getPriority();
                     eventName = scanField.getEventName();
                 } finally {
-                    dbRecord.unlock();
+                    pvRecord.unlock();
                 }
             }
         }

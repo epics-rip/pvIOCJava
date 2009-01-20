@@ -8,20 +8,24 @@ package org.epics.ioc.ca;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVByte;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVFloat;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVLong;
-import org.epics.ioc.pv.PVShort;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVBoolean;
+import org.epics.pvData.pv.PVByte;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVFloat;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVLong;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVShort;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.Scalar;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 
 /**
  * Factory that implements CDMonitor.
@@ -56,7 +60,7 @@ public class CDMonitorFactory {
         
         private Channel channel;
         private CDMonitorRequester cdMonitorRequester;
-        private IOCExecutor iocExecutor = null;
+        private Executor executor = null;
         private CDQueue cdQueue = null;    
         private CallRequester callRequester = null;;    
         private ChannelMonitor channelMonitor = null;
@@ -70,14 +74,20 @@ public class CDMonitorFactory {
          * @see org.epics.ioc.ca.CDMonitor#lookForAbsoluteChange(org.epics.ioc.ca.ChannelField, double)
          */
         public void lookForAbsoluteChange(ChannelField channelField, double value) {
-            Type type = channelField.getField().getType();
-            if(!type.isNumeric()) {
+            Field field = channelField.getField();
+            if(field.getType()!=Type.scalar) {
+                message("field is not a numeric scalar", MessageType.error);
+                lookForPut(channelField,true);
+                return;
+            }
+            Scalar scalar = (Scalar)field;
+            if(!scalar.getScalarType().isNumeric()) {
                 message("field is not a numeric scalar", MessageType.error);
                 lookForPut(channelField,true);
                 return;
             }
             MonitorField monitorField
-                = new MonitorField(MonitorType.absoluteChange,type,value);
+                = new MonitorField(MonitorType.absoluteChange,scalar.getScalarType(),value);
             monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
@@ -86,13 +96,15 @@ public class CDMonitorFactory {
          * @see org.epics.ioc.ca.CDMonitor#lookForChange(org.epics.ioc.ca.ChannelField, boolean)
          */
         public void lookForChange(ChannelField channelField, boolean causeMonitor) {
-            Type type = channelField.getField().getType();
-            if(!type.isPrimitive()) {
+            Field field = channelField.getField();
+            Type type = field.getType();
+            if(type!=Type.scalar && type!=Type.scalarArray) {
                 message("field is not primitive", MessageType.error);
                 lookForPut(channelField,causeMonitor);
                 return;
             }
-            MonitorField monitorField = new MonitorField(type,causeMonitor);
+            Scalar scalar = (Scalar)field;
+            MonitorField monitorField = new MonitorField(type,scalar.getScalarType(),causeMonitor);
             monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
@@ -101,14 +113,21 @@ public class CDMonitorFactory {
          * @see org.epics.ioc.ca.CDMonitor#lookForPercentageChange(org.epics.ioc.ca.ChannelField, double)
          */
         public void lookForPercentageChange(ChannelField channelField, double value) {
-            Type type = channelField.getField().getType();
-            if(!type.isNumeric()) {
+            Field field = channelField.getField();
+            Type type = field.getType();
+            if(type!=Type.scalar) {
                 message("field is not a numeric scalar", MessageType.error);
                 lookForPut(channelField,true);
                 return;
             }
-            MonitorField monitorField
-                = new MonitorField(MonitorType.percentageChange,type,value);
+            Scalar scalar = (Scalar)field;
+            ScalarType scalarType = scalar.getScalarType();
+            if(!scalarType.isNumeric()){
+                message("field is not a numeric scalar", MessageType.error);
+                lookForPut(channelField,true);
+                return;
+            }
+            MonitorField monitorField = new MonitorField(MonitorType.percentageChange,scalarType,value);
             monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
@@ -123,16 +142,16 @@ public class CDMonitorFactory {
             channelFieldList.add(channelField);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.CDMonitor#start(int, org.epics.ioc.util.IOCExecutor)
+         * @see org.epics.ioc.ca.CDMonitor#start(int, org.epics.ioc.util.Executor)
          */
-        public void start(int queueSize, IOCExecutor iocExecutor) {
+        public void start(int queueSize, Executor executor) {
             
             channelFieldGroup = channel.createFieldGroup(this);
             for(int i=0; i<channelFieldList.size(); i++) {
                 channelFieldGroup.addChannelField(channelFieldList.get(i));
             }
             cdQueue = CDFactory.createCDQueue(queueSize, channel, channelFieldGroup);
-            this.iocExecutor = iocExecutor;
+            this.executor = executor;
             callRequester = new CallRequester();
             
             channelMonitor = channel.createChannelMonitor(this);
@@ -255,7 +274,7 @@ public class CDMonitorFactory {
                 }
             }
             private void call() {
-                iocExecutor.execute(this);
+                executor.execute(this);
             }
 
         }
@@ -269,7 +288,7 @@ public class CDMonitorFactory {
         
         private static class MonitorField {
             private MonitorType monitorType;
-            private Type type = null;
+            private ScalarType scalarType = null;
             private boolean causeMonitor;
             
             private boolean lastBooleanValue;
@@ -288,22 +307,22 @@ public class CDMonitorFactory {
                 this.monitorType = MonitorType.onPut;
                 this.causeMonitor = causeMonitor;
             }
-            private MonitorField(Type type,boolean causeMonitor) {
+            private MonitorField(Type type,ScalarType scalarType,boolean causeMonitor) {
                 this.monitorType = MonitorType.onChange;
-                this.type = type;
+                this.scalarType = scalarType;
                 this.causeMonitor = causeMonitor;
             }
-            private MonitorField(MonitorType monitorType, Type type, double deadband) {
+            private MonitorField(MonitorType monitorType, ScalarType scalarType, double deadband) {
                 causeMonitor = true;
                 this.monitorType = monitorType;
-                this.type = type;
+                this.scalarType = scalarType;
                 this.deadband = deadband;
             }
             
             private void initField(PVField pvField) {
                 if(monitorType==MonitorType.onPut) return;
-                if(monitorType==MonitorType.onChange) {
-                    switch(type) {
+                if(scalarType!=null) {
+                    switch(scalarType) {
                     case pvBoolean: {
                             PVBoolean data= (PVBoolean)pvField;
                             lastBooleanValue = data.get();
@@ -348,7 +367,7 @@ public class CDMonitorFactory {
                         throw new IllegalStateException("Logic error. Why is type not numeric?");      
                     }
                 }
-                lastMonitorValue = convert.toDouble(pvField);
+                lastMonitorValue = convert.toDouble((PVScalar)pvField);
             }
             
             private boolean newField(PVField pvField) {
@@ -356,8 +375,9 @@ public class CDMonitorFactory {
                     if(causeMonitor) return true;
                     return false;
                 }
-                if(monitorType==MonitorType.onChange) {
-                    switch(type) {
+                if(scalarType==null) return true;
+                if(monitorType==MonitorType.onChange && scalarType!=null) {
+                    switch(scalarType) {
                     case pvBoolean: {
                             PVBoolean pvData= (PVBoolean)pvField;
                             boolean data = pvData.get();
@@ -420,7 +440,7 @@ public class CDMonitorFactory {
                     }
                 }
                 double newValue;
-                switch(type) {
+                switch(scalarType) {
                 case pvByte: {
                         PVByte data= (PVByte)pvField;
                         newValue = (double)data.get();

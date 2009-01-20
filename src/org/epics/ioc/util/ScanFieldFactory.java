@@ -5,19 +5,9 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.create.Enumerated;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+
 
 
 /**
@@ -34,100 +24,59 @@ public class ScanFieldFactory {
      * If it does the field must be a scan structure.
      * ScanFieldFactory does no locking so code that uses it must be thread safe.
      * In general this means that the record instance must be locked when any method is called. 
-     * @param dbRecord The record instance.
+     * @param pvRecord The record instance.
      * @return The ScanField interface or null of the record instance does not have
      * a valid pvType field.
      */
-    public static ScanField create(DBRecord dbRecord) {
-        PVRecord pvRecord = dbRecord.getPVRecord();
-        Structure recordStructure = (Structure)pvRecord.getField();
-        PVField[] pvFields = pvRecord.getPVFields();
-        int index;
-        PVField pvField;  
-        index = recordStructure.getFieldIndex("scan");
-        if(index<0) return null;
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvStructure){
-            pvRecord.message("field scan is not a structure", MessageType.fatalError);
+    public static ScanField create(PVRecord pvRecord) {
+        PVStructure pvScan = pvRecord.getStructureField("scan");
+        if(pvScan==null) {
+            pvRecord.message("scan not found or is not a structure", MessageType.fatalError);
             return null;
         }
-        DBStructure dbScan = (DBStructure)dbRecord.getDBStructure().getDBFields()[index];
-        DBField[] dbFields = dbScan.getDBFields();
-        PVStructure pvScan = (PVStructure)pvField;
-        Structure structure = pvScan.getStructure();
-        if(!structure.getStructureName().equals("scan")) {
-            pvScan.message("is not a scan structure", MessageType.fatalError);
+        PVStructure priority = pvScan.getStructureField("priority");
+        if(priority==null) {
+            pvScan.message("priority not found or is not a structure", MessageType.fatalError);
             return null;
         }
-        pvFields = pvScan.getPVFields(); 
-        index = structure.getFieldIndex("priority");
-        if(index<0) {
-            pvScan.message("does not have field priority", MessageType.fatalError);
-            return null;
-        }
-        Enumerated enumerated = ScanPriority.getScanPriority(dbFields[index]);
+        Enumerated enumerated = EnumeratedFactory.getEnumerated(priority);
         if(enumerated==null) {
-            pvField.message("priority is not a scanPriority structure", MessageType.fatalError);
+            priority.message("priority is not enumerated", MessageType.fatalError);
             return null;
         }
-        PVInt pvPriority = enumerated.getIndexField();
-        index = structure.getFieldIndex("type");
-        if(index<0) {
-            pvScan.message("does not have field type", MessageType.fatalError);
-            return null;
-        }
-        enumerated = ScanType.getScanType(dbFields[index]);
-        if(enumerated==null) {
-            pvField.message("type is not a scanType structure", MessageType.fatalError);
-            return null;
-        }
-        PVInt pvType = enumerated.getIndexField();
+        PVInt pvPriority = enumerated.getIndex();
         
-        index = structure.getFieldIndex("rate");
-        if(index<0) {
-            pvField.message("does not have a field pvRate", MessageType.fatalError);
+        PVStructure type = pvScan.getStructureField("type");
+        if(priority==null) {
+            pvScan.message("type not found or is not a structure", MessageType.fatalError);
             return null;
         }
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvDouble) {
-            pvField.message("is not a double", MessageType.fatalError);
+        enumerated = EnumeratedFactory.getEnumerated(type);
+        if(enumerated==null) {
+            type.message("type is not enumerated", MessageType.fatalError);
             return null;
         }
-        PVDouble pvRate = (PVDouble)pvField;
-        index = structure.getFieldIndex("eventName");
-        if(index<0) {
-            pvField.message("does not have a field eventName", MessageType.fatalError);
-            return null;
+        PVInt pvType = enumerated.getIndex();
+        
+        PVDouble pvRate = pvScan.getDoubleField("rate");
+        if(pvRate==null) {
+            pvScan.message("rate field not found or is not a double", MessageType.fatalError);
         }
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvString) {
-            ((PVField)pvField).message("is not a string", MessageType.fatalError);
-            return null;
+        
+        PVString pvEventName = pvScan.getStringField("eventName");
+        if(pvRate==null) {
+            pvScan.message("eventName not found or is not a string", MessageType.fatalError);
         }
-        PVString pvEventName = (PVString)pvField;
-        index = structure.getFieldIndex("processSelf");
-        if(index<0) {
-            pvField.message("does not have a field processSelf", MessageType.fatalError);
-            return null;
+        
+        PVBoolean pvProcessSelf = pvScan.getBooleanField("processSelf");
+        if(pvProcessSelf==null) {
+            pvScan.message("processSelf not found or is not a boolean", MessageType.fatalError);
         }
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvBoolean) {
-            ((PVField)pvField).message("is not a boolean", MessageType.fatalError);
-            return null;
+        PVBoolean pvProcessAfterStart = pvScan.getBooleanField("processAfterStart");
+        if(pvProcessAfterStart==null) {
+            pvScan.message("processAfterStart not found or is not a boolean", MessageType.fatalError);
         }
-        PVBoolean pvProcessSelf = (PVBoolean)pvField;
-        index = structure.getFieldIndex("processAfterStart");
-        if(index<0) {
-            pvField.message("does not have a field processAfterStart", MessageType.fatalError);
-            return null;
-        }
-        pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.pvBoolean) {
-            ((PVField)pvField).message("is not a boolean", MessageType.fatalError);
-            return null;
-        }
-        PVBoolean pvProcessAfterStart = (PVBoolean)pvField;
-        return new ScanFieldInstance(dbScan,pvPriority,pvType,pvRate,pvEventName,pvProcessSelf,pvProcessAfterStart);
+        return new ScanFieldInstance(pvScan,pvPriority,pvType,pvRate,pvEventName,pvProcessSelf,pvProcessAfterStart);
     }
     
     
@@ -139,7 +88,7 @@ public class ScanFieldFactory {
         private PVBoolean pvProcessSelf;
         private PVBoolean pvProcessAfterStart;
         
-        private ScanFieldInstance(DBField scanField,PVInt pvPriority, PVInt pvType,
+        private ScanFieldInstance(PVField scanField,PVInt pvPriority, PVInt pvType,
             PVDouble pvRate, PVString pvEventName, PVBoolean pvProcessSelfField, PVBoolean pvProcessAfterStart)
         {
             super();
@@ -159,8 +108,8 @@ public class ScanFieldFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getPriority()
          */
-        public ScanPriority getPriority() {
-            return ScanPriority.values()[pvPriority.get()];
+        public ThreadPriority getPriority() {
+            return ThreadPriority.values()[pvPriority.get()];
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getRate()

@@ -5,13 +5,7 @@
  */
 package org.epics.ioc.pdrv;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -19,13 +13,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.util.RunnableReady;
-import org.epics.ioc.util.ScanPriority;
-import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadCreateFactory;
-import org.epics.ioc.util.ThreadReady;
-import org.epics.ioc.util.TimeStamp;
-import org.epics.ioc.util.TimeUtility;
+import org.epics.pvData.misc.RunnableReady;
+import org.epics.pvData.misc.ThreadCreate;
+import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.misc.ThreadReady;
+
 
 /**
  * Factory for creating PDRV (Port Driver) objects.
@@ -54,7 +47,7 @@ public class Factory {
      * @return The interface for the Port instance.
      */
     public static Port createPort(String portName,PortDriver portDriver,String driverName,
-            boolean canBlock,boolean autoConnect,ScanPriority priority)
+            boolean canBlock,boolean autoConnect,ThreadPriority priority)
     { 
         PortImpl port = new PortImpl(
                 portName,portDriver,driverName,canBlock,autoConnect,priority);
@@ -492,7 +485,7 @@ public class Factory {
     private static class PortImpl implements Port {
         
         private PortImpl(String portName,PortDriver portDriver,String driverName,
-            boolean canBlock,boolean autoConnect,ScanPriority priority)
+            boolean canBlock,boolean autoConnect,ThreadPriority priority)
         {
             this.portName = portName;
             this.portDriver = portDriver;
@@ -1369,12 +1362,12 @@ public class Factory {
         private List<UserImpl>[] queueListArray = new ArrayList[numQueuePriorities];  
         private List<UserImpl> waitUnblockList = new ArrayList<UserImpl>();   
         
-        private PortThread(PortImpl port,ScanPriority scanPriority) {
+        private PortThread(PortImpl port,ThreadPriority threadPriority) {
             this.port = port;
             for(int i=0; i<queueListArray.length; i++) {
                 queueListArray[i] = new ArrayList<UserImpl>();
             }
-            threadCreate.create(port.getPortName(), scanPriority.getJavaPriority(), this);
+            threadCreate.create(port.getPortName(), threadPriority.getJavaPriority(), this);
         }
         
         private void queueRequest(UserImpl user,QueuePriority asynQueuePriority)

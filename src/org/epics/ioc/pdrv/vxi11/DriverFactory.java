@@ -18,10 +18,11 @@ import org.epics.ioc.pdrv.interfaces.AbstractOctet;
 import org.epics.ioc.pdrv.interfaces.GpibController;
 import org.epics.ioc.pdrv.interfaces.GpibDevice;
 import org.epics.ioc.pdrv.interfaces.GpibSrqHandler;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.util.ScanPriority;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
+
 /**
  * The factory for vxi11Driver.
  * vxi11Driver is a portDriver for communication with VXI11 devices.
@@ -55,7 +56,7 @@ public class DriverFactory {
      * @param pvStructure The interface for structure vxi11Driver.
      */
     static public void create(
-            String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure)
+            String portName,boolean autoConnect,ThreadPriority priority,PVStructure pvStructure)
     {
         PVString pvHostName = pvStructure.getStringField("hostName");
         if(pvHostName==null) {
@@ -84,7 +85,7 @@ public class DriverFactory {
         private VXI11User vxiUser = VXI11UserFactory.create();
 
 
-        private PortDriverImpl(String portName,boolean autoConnect,ScanPriority priority,PVStructure pvStructure,
+        private PortDriverImpl(String portName,boolean autoConnect,ThreadPriority priority,PVStructure pvStructure,
                 String hostName,String vxiName,int lockTimeout)
         {
             this.portName = portName;

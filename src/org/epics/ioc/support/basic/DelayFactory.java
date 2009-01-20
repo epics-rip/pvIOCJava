@@ -8,18 +8,16 @@ package org.epics.ioc.support.basic;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.PVLong;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
 
 /**
  * @author mrk
@@ -27,24 +25,15 @@ import org.epics.ioc.util.RequestResult;
  */
 public class DelayFactory {
     
-    public static Support create(DBStructure dbStructure) {
-        PVStructure pvStructure = dbStructure.getPVStructure();
-        String supportName = pvStructure.getSupportName();
-        if(supportName==null || !supportName.equals(supportName)) {
-            pvStructure.message("does not have support " + supportName,MessageType.error);
-            return null;
-        }
-        return new DelayImpl(dbStructure);
+    public static Support create(PVStructure pvStructure) {
+        return new DelayImpl(pvStructure);
     }
     
     private static Timer timer = new Timer("delaySupportTimer");
-    private static String supportName = "delay";
     
     private static class DelayImpl extends AbstractSupport implements ProcessContinueRequester
     {       
-        private DBStructure dbStructure = null;
         private PVStructure pvStructure = null;
-        private DBRecord dbRecord = null;
         private RecordProcess recordProcess = null;
         private PVLong minAccess = null;
         private PVLong maxAccess = null;
@@ -54,19 +43,16 @@ public class DelayFactory {
         private long delay = 0;
         private SupportProcessRequester supportProcessRequester = null;
 
-        private DelayImpl(DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            this.dbStructure = dbStructure;
-            pvStructure = dbStructure.getPVStructure();
+        private DelayImpl(PVStructure pvStructure) {
+            super("delay",pvStructure);
+            this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#initialize()
+         * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordProcess)
          */
-        public void initialize() {
+        public void initialize(RecordProcess recordProcess) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            PVStructure pvStructure = dbStructure.getPVStructure();
-            dbRecord = dbStructure.getDBRecord();
-            recordProcess = dbRecord.getRecordProcess();
+            this.recordProcess = recordProcess;
             minAccess = pvStructure.getLongField("min");
             if(minAccess==null) return;
             maxAccess = pvStructure.getLongField("max");

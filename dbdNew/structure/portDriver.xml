@@ -1,0 +1,145 @@
+<?xml version="1.0" ?>
+<database>
+<structure name = "pdrvSupport">
+  <scalar name = "portName" type = "string" />
+  <scalar name = "deviceName" type = "string" />
+  <scalar name = "timeout" type = "double" />
+  <scalar name = "mask" type = "int" />
+  <scalar name = "size" type = "int" />
+  <scalar name = "process" type = "boolean" default = "false" />
+</structure>
+
+<structure name = "pdrvOctetInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvOctetInterruptInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvOctetOutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+
+<structure name = "pdrvInt32InputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32InterruptInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32AverageInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32OutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+
+<structure name = "pdrvInt32ArrayInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32ArrayInterruptInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32ArrayOutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+
+<structure name = "pdrvFloat64InputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64InterruptInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64AverageInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64OutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+
+<structure name = "pdrvFloat64ArrayInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64ArrayInterruptInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64ArrayOutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+
+<structure name = "pdrvUInt32DigitalInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvUInt32DigitalInterruptInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+<structure name = "pdrvUInt32DigitalOutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
+</structure>
+
+<structure name = "portCreateFactoryFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVPortCreateFactory"</scalar>
+</structure>
+
+<structure name = "portDeviceControlFcatory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory"</scalar>
+</structure>
+
+
+<structure name = "portCreate">
+  <attribute name = "supportFactory" type = "string">portCreateFactory</attribute>
+  <scalar name = "factoryName" type = "string" />
+  <scalar name = "portName" type = "string" />
+  <scalar name = "autoConnect" type = "boolean">true</scalar>
+  <structure name = "priority" type = "scanPriority" />
+</structure>
+
+<structure name = "portDeviceControl">
+  <attribute name = "supportFactory" type = "string">portDeviceControlFactory</attribute>
+  <scalar name = "message" type = "string" />
+  <scalar name = "portName" type = "string" />
+  <scalar name = "deviceName" type = "string" />
+  <scalar name = "connect" type = "boolean"  />
+  <scalar name = "enable" type = "boolean"   />
+  <scalar name = "autoConnect" type = "boolean" />
+  <scalar name = "traceMask" type = "int"  />
+  <scalar name = "traceIOMask" type = "int" />
+  <scalar name = "traceIOTruncateSize" type = "int" />
+  <scalar name = "report" type = "boolean" />
+  <scalar name = "reportDetails" type = "int" />
+</structure>
+
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
+<include href = "octetDriver.xml" />
+<include href = "int32Driver.xml" />
+<include href = "float64Driver.xml" />
+<include href = "uint32DigitalDriver.xml" />
+<include href = "int32ArrayDriver.xml" />
+<include href = "float64ArrayDriver.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
+
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
+<include href = "vxi11Driver.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
+
+</database>

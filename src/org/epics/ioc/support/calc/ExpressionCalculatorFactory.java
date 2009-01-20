@@ -13,37 +13,18 @@ package org.epics.ioc.support.calc;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.FieldCreate;
-import org.epics.ioc.pv.FieldFactory;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVByte;
-import org.epics.ioc.pv.PVDataCreate;
-import org.epics.ioc.pv.PVDataFactory;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVFloat;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVLong;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVShort;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.support.alarm.AlarmFactory;
-import org.epics.ioc.support.alarm.AlarmSupport;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+
 
 
 
@@ -54,13 +35,10 @@ import org.epics.ioc.util.RequestResult;
  */
 public abstract class ExpressionCalculatorFactory  {
 
-    public static Support create(DBStructure dbStructure) {
-        return new ExpressionCalculator(dbStructure);
+    public static Support create(PVStructure pvStructure) {
+        return new ExpressionCalculator(pvStructure);
     }
-
-    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private static final  String supportName = "expressionCalculator";
     private static Convert convert = ConvertFactory.getConvert();
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static boolean dumpTokenList = false;
@@ -68,33 +46,29 @@ public abstract class ExpressionCalculatorFactory  {
     
     private static class ExpressionCalculator extends AbstractSupport {
         
-        private ExpressionCalculator(DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            this.dbStructure = dbStructure;
-            pvStructure = dbStructure.getPVStructure();
+        private ExpressionCalculator(PVStructure pvStructure) {
+            super("expressionCalculator",pvStructure);
+            this.pvStructure = pvStructure;
         }
         
         
-        private DBStructure dbStructure = null;
-        private PVStructure pvStructure;
+        private PVStructure pvStructure = null;
         private AlarmSupport alarmSupport = null;
-        private DBField dbValue = null;
-        private CalcArgArraySupport calcArgArraySupport = null;
+        private PVScalar pvValue = null;
+        private CalcArgs calcArgsSupport = null;
         
         private Expression expression = null;
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize()
+         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
-        public void initialize() {
+        public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
+            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
-            DBField dbParent = dbStructure.getParent();
-            PVField pvParent = dbParent.getPVField();
+            PVField pvParent = pvStructure.getParent();
             PVField pvValue = pvProperty.findProperty(pvParent,"value");
             if(pvValue==null) { // try parent of parent. 
                 pvValue = pvParent.getParent();
@@ -104,25 +78,28 @@ public abstract class ExpressionCalculatorFactory  {
                 pvStructure.message("value field not found", MessageType.error);
                 return;
             }
-            dbValue = dbStructure.getDBRecord().findDBField(pvValue);
-            PVField pvField = pvProperty.findProperty(pvParent,"calcArgArray");
+            if(pvValue.getField().getType()!=Type.scalar) {
+                pvValue.message("ExpressionCalculator requires this field to be a scalar", MessageType.error);
+                return;
+            }
+            this.pvValue = (PVScalar)pvValue;
+            PVField pvField = pvProperty.findProperty(pvParent,"calcArgs");
             if(pvField==null) {
-                pvStructure.message("calcArgArray field not found", MessageType.error);
+                pvStructure.message("calcArgs field not found", MessageType.error);
                 return;
             }
-            DBField dbField = dbStructure.getDBRecord().findDBField(pvField);
-            Support support = dbField.getSupport();
-            if(!(support instanceof CalcArgArraySupport)) {
-                pvStructure.message("calcArgArraySupport not found", MessageType.error);
+            Support support = recordSupport.getSupport(pvField);
+            if(!(support instanceof CalcArgs)) {
+                pvStructure.message("calcArgsSupport not found", MessageType.error);
                 return;
             }
-            calcArgArraySupport = (CalcArgArraySupport)support;
-            PVString pvExpression = dbStructure.getPVStructure().getStringField("expression");
+            calcArgsSupport = (CalcArgs)support;
+            PVString pvExpression = pvStructure.getStringField("expression");
             if(pvExpression==null) return;
             Parse parse = new Parse(pvExpression);
             expression = parse.parse();
             if(expression==null) return;
-            super.initialize();
+            super.initialize(recordSupport);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#uninitialize()
@@ -130,7 +107,7 @@ public abstract class ExpressionCalculatorFactory  {
         public void uninitialize() {
             expression = null;
             alarmSupport = null;
-            dbValue = null;
+            pvValue = null;
             super.uninitialize();
         }
         /* (non-Javadoc)
@@ -141,10 +118,8 @@ public abstract class ExpressionCalculatorFactory  {
                 if(expression.operator!=null) {
                     expression.operator.compute();
                 }
-                PVField pvResult = expression.pvResult;
-                PVField pvValue = dbValue.getPVField();
+                PVScalar pvResult = expression.pvResult;
                 if(pvResult!=pvValue) convert.copyScalar(pvResult, pvValue);
-                dbValue.postPut();
             } catch (ArithmeticException e) {
                 alarmSupport.setAlarm(e.getMessage(), AlarmSeverity.invalid);
             }
@@ -387,7 +362,7 @@ public abstract class ExpressionCalculatorFactory  {
         private static class Expression {
             Operator operator = null;
             Expression[] expressionArguments = null;
-            PVField pvResult = null;
+            PVScalar pvResult = null;
             Token token = null;
             
             void computeArguments() {
@@ -1161,22 +1136,25 @@ public abstract class ExpressionCalculatorFactory  {
                     PVField pvField = null;
                     String name = token.value;
                     if(name.equals("value")) {
-                        pvField = dbValue.getPVField();
+                        pvField = pvValue;
                     } else {
-                        pvField = calcArgArraySupport.getPVField(name);
+                        pvField = calcArgsSupport.getPVField(name);
                     }
                     if(pvField==null) {
                         pvStructure.message("variable " + name + " not found", MessageType.error);
                         return false;
                     }
-                    exp.pvResult = pvField;
+                    if(pvField.getField().getType()!=Type.scalar) {
+                        pvStructure.message("ExpressionCalculator requires this to be a scalar", MessageType.error);
+                        return false;
+                    }
+                    exp.pvResult = (PVScalar)pvField;
                     expStack.push(exp);
                     return true;
                 }
                 case booleanConstant: {
                     Boolean scalar = Boolean.valueOf(token.value);
-                    Field field = fieldCreate.createField("result", Type.pvBoolean);
-                    PVBoolean pv = (PVBoolean)pvDataCreate.createPVField(pvStructure, field);
+                    PVBoolean pv = (PVBoolean)pvDataCreate.createPVScalar(pvStructure,"result", ScalarType.pvBoolean);
                     pv.put(scalar);
                     pv.setMutable(false);
                     exp.pvResult = pv;
@@ -1184,14 +1162,13 @@ public abstract class ExpressionCalculatorFactory  {
                     return true;
                 }
                 case integerConstant: {
-                    PVField pvField = null;
+                    PVScalar pvScalar = null;
                     String value = token.value;
                     int length = value.length();
                     char lastChar = value.charAt(length-1);
-                    Type pvType = (lastChar=='L') ? Type.pvLong : Type.pvInt;
-                    Field field = fieldCreate.createField("result", pvType);
-                    pvField = pvDataCreate.createPVField(pvStructure, field);
-                    if(pvType==Type.pvLong) {
+                    ScalarType scalarType = (lastChar=='L') ? ScalarType.pvLong : ScalarType.pvInt;
+                    pvScalar = pvDataCreate.createPVScalar(pvStructure,"result", scalarType);
+                    if(scalarType==ScalarType.pvLong) {
                         Long scalar = new Long(0);
                         try {
                             scalar = Long.decode(value.substring(0, length-1));
@@ -1199,7 +1176,7 @@ public abstract class ExpressionCalculatorFactory  {
                             pvStructure.message(e.getMessage(), MessageType.error);
                             return false;
                         }
-                        PVLong pv = (PVLong)pvField;
+                        PVLong pv = (PVLong)pvScalar;
                         pv.put(scalar);
                     } else {
                         Long scalar = new Long(0);
@@ -1209,40 +1186,38 @@ public abstract class ExpressionCalculatorFactory  {
                             pvStructure.message(e.getMessage(), MessageType.error);
                             return false;
                         }
-                        PVInt pv = (PVInt)pvField;
+                        PVInt pv = (PVInt)pvScalar;
                         pv.put((int)(long)scalar);
                     }
-                    pvField.setMutable(false);
-                    exp.pvResult = pvField;
+                    pvScalar.setMutable(false);
+                    exp.pvResult = pvScalar;
                     expStack.push(exp);
                     return true;
                 }
                 case realConstant: {
-                    PVField pvField = null;
+                    PVScalar pvScalar = null;
                     String value = token.value;
                     int length = value.length();
                     char lastChar = value.charAt(length-1);
-                    Type pvType = (lastChar=='F') ? Type.pvFloat : Type.pvDouble;
-                    Field field = fieldCreate.createField("result", pvType);
-                    pvField = pvDataCreate.createPVField(pvStructure, field);
-                    if(pvType==Type.pvFloat) {
+                    ScalarType scalarType = (lastChar=='F') ? ScalarType.pvFloat : ScalarType.pvDouble;
+                    pvScalar = pvDataCreate.createPVScalar(pvStructure,"result", scalarType);
+                    if(scalarType==ScalarType.pvFloat) {
                         Float scalar = Float.valueOf(value);
-                        PVFloat pv = (PVFloat)pvField;
+                        PVFloat pv = (PVFloat)pvScalar;
                         pv.put(scalar);
                     } else {
                         Double scalar = Double.valueOf(value);
-                        PVDouble pv = (PVDouble)pvField;
+                        PVDouble pv = (PVDouble)pvScalar;
                         pv.put(scalar);
                     }
-                    pvField.setMutable(false);
-                    exp.pvResult = pvField;
+                    pvScalar.setMutable(false);
+                    exp.pvResult = pvScalar;
                     expStack.push(exp);
                     return true;
                 }
                 case stringConstant: {
                     String scalar = token.value;
-                    Field field = fieldCreate.createField("result", Type.pvString);
-                    PVString pv = (PVString)pvDataCreate.createPVField(pvStructure, field);
+                    PVString pv = (PVString)pvDataCreate.createPVScalar(pvStructure,"result", ScalarType.pvString);
                     pv.put(scalar);
                     pv.setMutable(false);
                     exp.pvResult = pv;
@@ -1251,8 +1226,7 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 case mathConstant: {
                     String functionName = exp.token.value;
-                    Field field = fieldCreate.createField("result", Type.pvDouble);
-                    PVDouble pv = (PVDouble)pvDataCreate.createPVField(pvStructure, field);
+                    PVDouble pv = (PVDouble)pvDataCreate.createPVScalar(pvStructure,"result", ScalarType.pvDouble);
                     double value = (functionName.equals("E")) ? Math.E : Math.PI;
                     pv.put(value);
                     pv.setMutable(false);
@@ -1300,8 +1274,8 @@ public abstract class ExpressionCalculatorFactory  {
                     }
                     exp.expressionArguments = new Expression[1];
                     exp.expressionArguments[0] = expStack.pop();
-                    PVField argResult = exp.expressionArguments[0].pvResult;
-                    Type argType = argResult.getField().getType();
+                    PVScalar argResult = exp.expressionArguments[0].pvResult;
+                    ScalarType argType = argResult.getScalar().getScalarType();
                     opExp.operationSemantics = null;
                     outer:
                     for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
@@ -1316,7 +1290,7 @@ public abstract class ExpressionCalculatorFactory  {
                             }
                             continue;
                         case bool:
-                            if(argType==Type.pvBoolean) {
+                            if(argType==ScalarType.pvBoolean) {
                                 opExp.operationSemantics = sem;
                                 break outer;
                             }
@@ -1328,7 +1302,7 @@ public abstract class ExpressionCalculatorFactory  {
                             }
                             continue;
                         case string:
-                            if(argType==Type.pvString) {
+                            if(argType==ScalarType.pvString) {
                                 opExp.operationSemantics = sem;
                                 break outer;
                             }
@@ -1367,8 +1341,8 @@ public abstract class ExpressionCalculatorFactory  {
                     exp.expressionArguments = new Expression[2];
                     exp.expressionArguments[1] = expStack.pop();
                     exp.expressionArguments[0] = expStack.pop();
-                    PVField argResult = exp.expressionArguments[0].pvResult;
-                    Type argType = argResult.getField().getType();
+                    PVScalar argResult = exp.expressionArguments[0].pvResult;
+                    ScalarType argType = argResult.getScalar().getScalarType();
                     opExp.operationSemantics = null;
                     outer:
                     for(OperationSemantics sem : ExpressionCalculator.operationSemantics) {
@@ -1383,7 +1357,7 @@ public abstract class ExpressionCalculatorFactory  {
                             }
                             continue;
                         case bool:
-                            if(argType==Type.pvBoolean) {
+                            if(argType==ScalarType.pvBoolean) {
                                 opExp.operationSemantics = sem;
                                 break outer;
                             }
@@ -1395,7 +1369,7 @@ public abstract class ExpressionCalculatorFactory  {
                             }
                             continue;
                         case string:
-                            if(argType==Type.pvString) {
+                            if(argType==ScalarType.pvString) {
                                 opExp.operationSemantics = sem;
                                 break outer;
                             }
@@ -1435,10 +1409,10 @@ public abstract class ExpressionCalculatorFactory  {
                     exp.expressionArguments[2] = expStack.pop();
                     exp.expressionArguments[1] = expStack.pop();
                     exp.expressionArguments[0] = expStack.pop();
-                    Type arg0Type = exp.expressionArguments[0].pvResult.getField().getType();
-                    Type arg1Type = exp.expressionArguments[1].pvResult.getField().getType();
-                    Type arg2Type = exp.expressionArguments[2].pvResult.getField().getType();
-                    if(arg0Type!=Type.pvBoolean) {
+                    ScalarType arg0Type = exp.expressionArguments[0].pvResult.getScalar().getScalarType();
+                    ScalarType arg1Type = exp.expressionArguments[1].pvResult.getScalar().getScalarType();
+                    ScalarType arg2Type = exp.expressionArguments[2].pvResult.getScalar().getScalarType();
+                    if(arg0Type!=ScalarType.pvBoolean) {
                         pvStructure.message("arg0 must be boolean",MessageType.error);
                         return false;
                     }
@@ -1651,10 +1625,10 @@ public abstract class ExpressionCalculatorFactory  {
         static class UnaryMinus implements Operator {
             private PVStructure parent;
             private OperatorExpression operatorExpression;
-            private PVField argPV;
+            private PVScalar argPV;
             
-            private PVField resultPV;
-            private Type resultType;
+            private PVScalar resultPV;
+            private ScalarType resultType;
             
             UnaryMinus(PVStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
@@ -1665,17 +1639,16 @@ public abstract class ExpressionCalculatorFactory  {
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
              */
             public boolean createPVResult(String fieldName) {
-                Field argField = argPV.getField();
-                Type argType = argField.getType();
+                Scalar argScalar = argPV.getScalar();
+                ScalarType argType = argScalar.getScalarType();
                 if(!argType.isNumeric()) {
                     parent.message(
                             "For operator + "  + argPV.getFullFieldName() + " is not numeric",
                             MessageType.fatalError);
                     return false;
                 }
-                resultType = argField.getType();
-                Field resultField = fieldCreate.createField(fieldName, resultType);
-                resultPV = pvDataCreate.createPVField(parent, resultField);
+                resultType = argScalar.getScalarType();
+                resultPV = pvDataCreate.createPVScalar(parent, fieldName,resultType);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -1707,10 +1680,10 @@ public abstract class ExpressionCalculatorFactory  {
         static class BitwiseComplement implements Operator {
             private PVStructure parent;
             private OperatorExpression operatorExpression;
-            private PVField argPV;
+            private PVScalar argPV;
             
-            private PVField resultPV;
-            private Type resultType;
+            private PVScalar resultPV;
+            private ScalarType resultType;
             
             BitwiseComplement(PVStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
@@ -1721,8 +1694,8 @@ public abstract class ExpressionCalculatorFactory  {
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
              */
             public boolean createPVResult(String fieldName) {
-                Field argField = argPV.getField();
-                Type argType = argField.getType();
+                Scalar argScalar = argPV.getScalar();
+                ScalarType argType = argScalar.getScalarType();
                
                 if(!argType.isInteger()) {
                     parent.message(
@@ -1730,9 +1703,8 @@ public abstract class ExpressionCalculatorFactory  {
                             MessageType.fatalError);
                     return false;
                 }
-                resultType = argField.getType();
-                Field resultField = fieldCreate.createField(fieldName, resultType);
-                resultPV = pvDataCreate.createPVField(parent, resultField);
+                resultType = argScalar.getScalarType();
+                resultPV = pvDataCreate.createPVScalar(parent,fieldName,resultType);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -1760,7 +1732,7 @@ public abstract class ExpressionCalculatorFactory  {
         static class BooleanNot implements Operator {
             private PVStructure parent;
             private OperatorExpression operatorExpression;
-            PVField pvField = null;
+            private PVScalar pvField = null;
             private PVBoolean argPV = null;
             private PVBoolean resultPV = null;
             
@@ -1773,15 +1745,14 @@ public abstract class ExpressionCalculatorFactory  {
              * @see org.epics.ioc.support.calc.ExpressionCalculatorFactory.ExpressionCalculator.Operator#createPVResult(java.lang.String)
              */
             public boolean createPVResult(String fieldName) {
-                if(pvField.getField().getType()!=Type.pvBoolean) {
+                if(pvField.getScalar().getScalarType()!=ScalarType.pvBoolean) {
                     parent.message(
                             "For operator ! " + argPV.getFullFieldName() + " is not boolean",
                             MessageType.fatalError);
                     return false;
                 }
                 argPV = (PVBoolean)pvField;
-                Field resultField = fieldCreate.createField(fieldName, Type.pvBoolean);
-                resultPV = (PVBoolean)pvDataCreate.createPVField(parent, resultField);
+                resultPV = (PVBoolean)pvDataCreate.createPVScalar(parent,fieldName,ScalarType.pvBoolean);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -1798,15 +1769,15 @@ public abstract class ExpressionCalculatorFactory  {
             protected OperationSemantics operationSemantics;
             protected OperatorExpression operatorExpression;
 
-            protected PVField arg0PV;
-            protected Field arg0Field;
-            protected Type arg0Type;
-            protected PVField arg1PV;
-            protected Field arg1Field;
-            protected Type arg1Type;
-            protected PVField resultPV;
-            protected Field resultField;
-            protected Type resultType;
+            protected PVScalar arg0PV;
+            protected Scalar arg0Field;
+            protected ScalarType arg0Type;
+            protected PVScalar arg1PV;
+            protected Scalar arg1Field;
+            protected ScalarType arg1Type;
+            protected PVScalar resultPV;
+            protected Scalar resultField;
+            protected ScalarType resultType;
 
 
             NumericBinaryBase(PVStructure parent,OperatorExpression operatorExpression) {
@@ -1819,12 +1790,12 @@ public abstract class ExpressionCalculatorFactory  {
              */
             public boolean createPVResult(String fieldName) {
                 arg0PV = operatorExpression.expressionArguments[0].pvResult;
-                arg0Field = arg0PV.getField();
-                arg0Type = arg0Field.getType();
+                arg0Field = arg0PV.getScalar();
+                arg0Type = arg0Field.getScalarType();
                 arg1PV = operatorExpression.expressionArguments[1].pvResult;
-                arg1Field = arg1PV.getField();
-                arg1Type = arg1Field.getType();
-                if(!convert.isCopyScalarCompatible(arg0PV.getField(),arg1PV.getField())) {
+                arg1Field = arg1PV.getScalar();
+                arg1Type = arg1Field.getScalarType();
+                if(!convert.isCopyScalarCompatible(arg0Field,arg1Field)) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
                             + arg0PV.getFullFieldName()
@@ -1832,13 +1803,12 @@ public abstract class ExpressionCalculatorFactory  {
                             MessageType.fatalError);
                     return false;
                 }
-                int ind0 = arg0PV.getField().getType().ordinal();
-                int ind1 = arg1PV.getField().getType().ordinal();
+                int ind0 = arg0Type.ordinal();
+                int ind1 = arg1Type.ordinal();
                 int ind = ind0;
                 if(ind<ind1) ind = ind1;
-                resultType = Type.values()[ind];
-                resultField = fieldCreate.createField(fieldName, resultType);
-                resultPV = pvDataCreate.createPVField(parent, resultField);
+                resultType = ScalarType.values()[ind];
+                resultPV = pvDataCreate.createPVScalar(parent,fieldName,resultType);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -2149,8 +2119,8 @@ public abstract class ExpressionCalculatorFactory  {
             private PVStructure parent;
             private OperatorExpression operatorExpression;
 
-            private PVField arg0PV;
-            private PVField arg1PV;
+            private PVScalar arg0PV;
+            private PVScalar arg1PV;
             private PVString resultPV;
 
             StringPlus(PVStructure parent,OperatorExpression operatorExpression) {
@@ -2163,8 +2133,7 @@ public abstract class ExpressionCalculatorFactory  {
             public boolean createPVResult(String fieldName) {
                 arg0PV = operatorExpression.expressionArguments[0].pvResult;
                 arg1PV = operatorExpression.expressionArguments[1].pvResult;
-                Field resultField = fieldCreate.createField(fieldName, Type.pvString);
-                resultPV = (PVString)pvDataCreate.createPVField(parent, resultField);
+                resultPV = (PVString)pvDataCreate.createPVScalar(parent,fieldName, ScalarType.pvString);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -2183,10 +2152,10 @@ public abstract class ExpressionCalculatorFactory  {
             protected OperatorExpression operatorExpression;
             protected OperationSemantics operationSemantics;
             
-            protected PVField arg0PV;
-            protected PVField arg1PV;
-            protected PVField resultPV;
-            protected Type resultType;
+            protected PVScalar arg0PV;
+            protected PVScalar arg1PV;
+            protected PVScalar resultPV;
+            protected ScalarType resultType;
 
             ShiftBase(PVStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
@@ -2195,11 +2164,11 @@ public abstract class ExpressionCalculatorFactory  {
             }
             public boolean createPVResult(String fieldName) {
                 arg0PV = operatorExpression.expressionArguments[0].pvResult;
-                Field arg0Field = arg0PV.getField();
-                Type arg0Type = arg0Field.getType();
+                Scalar arg0Field = arg0PV.getScalar();
+                ScalarType arg0Type = arg0Field.getScalarType();
                 arg1PV = operatorExpression.expressionArguments[1].pvResult;
-                Field arg1Field = arg1PV.getField();
-                Type arg1Type = arg1Field.getType();
+                Scalar arg1Field = arg1PV.getScalar();
+                ScalarType arg1Type = arg1Field.getScalarType();
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
@@ -2209,8 +2178,7 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 resultType = arg0Type;
-                Field resultField = fieldCreate.createField(fieldName, arg0Type);
-                resultPV = pvDataCreate.createPVField(parent, resultField);
+                resultPV = pvDataCreate.createPVScalar(parent,fieldName, arg0Type);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -2332,9 +2300,9 @@ public abstract class ExpressionCalculatorFactory  {
             protected OperationSemantics operationSemantics;
             protected OperatorExpression operatorExpression;
 
-            protected PVField arg0PV;
-            protected Type type;
-            protected PVField arg1PV;
+            protected PVScalar arg0PV;
+            protected ScalarType scalarType;
+            protected PVScalar arg1PV;
             protected PVBoolean resultPV;
 
             Relational(PVStructure parent,OperatorExpression operatorExpression) {
@@ -2349,7 +2317,7 @@ public abstract class ExpressionCalculatorFactory  {
                 expressionArgument = operatorExpression.expressionArguments[1];
                 arg1PV = expressionArgument.pvResult;
                 Type arg1Type = arg1PV.getField().getType();
-                if(!convert.isCopyScalarCompatible(arg0PV.getField(),arg1PV.getField())) {
+                if(!convert.isCopyScalarCompatible(arg0PV.getScalar(),arg1PV.getScalar())) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
                             + arg0PV.getFullFieldName()
@@ -2359,9 +2327,8 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 int ind0 = arg0Type.ordinal();
                 int ind1 = arg1Type.ordinal();
-                type = Type.values()[Math.max(ind0,ind1)];
-                Field resultField = fieldCreate.createField(fieldName, Type.pvBoolean);
-                resultPV = (PVBoolean)pvDataCreate.createPVField(parent, resultField);
+                scalarType = ScalarType.values()[Math.max(ind0,ind1)];
+                resultPV = (PVBoolean)pvDataCreate.createPVScalar(parent,fieldName,ScalarType.pvBoolean);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -2376,7 +2343,7 @@ public abstract class ExpressionCalculatorFactory  {
             public void compute() {
                 operatorExpression.computeArguments();
                 boolean result = false;
-                switch(type) {
+                switch(scalarType) {
                 case pvByte: {
                     byte arg0 = convert.toByte(arg0PV);
                     byte arg1 = convert.toByte(arg1PV);
@@ -2432,7 +2399,7 @@ public abstract class ExpressionCalculatorFactory  {
             public void compute() {
                 operatorExpression.computeArguments();
                 boolean result = false;
-                switch(type) {
+                switch(scalarType) {
                 case pvByte: {
                     byte arg0 = convert.toByte(arg0PV);
                     byte arg1 = convert.toByte(arg1PV);
@@ -2488,7 +2455,7 @@ public abstract class ExpressionCalculatorFactory  {
             public void compute() {
                 operatorExpression.computeArguments();
                 boolean result = false;
-                switch(type) {
+                switch(scalarType) {
                 case pvByte: {
                     byte arg0 = convert.toByte(arg0PV);
                     byte arg1 = convert.toByte(arg1PV);
@@ -2544,7 +2511,7 @@ public abstract class ExpressionCalculatorFactory  {
             public void compute() {
                 operatorExpression.computeArguments();
                 boolean result = false;
-                switch(type) {
+                switch(scalarType) {
                 case pvByte: {
                     byte arg0 = convert.toByte(arg0PV);
                     byte arg1 = convert.toByte(arg1PV);
@@ -2600,7 +2567,7 @@ public abstract class ExpressionCalculatorFactory  {
             public void compute() {
                 operatorExpression.computeArguments();
                 boolean result = false;
-                switch(type) {
+                switch(scalarType) {
                 case pvBoolean: {
                     boolean arg0 = ((PVBoolean)arg0PV).get();
                     boolean arg1 = ((PVBoolean)arg1PV).get();
@@ -2668,7 +2635,7 @@ public abstract class ExpressionCalculatorFactory  {
             public void compute() {
                 operatorExpression.computeArguments();
                 boolean result = false;
-                switch(type) {
+                switch(scalarType) {
                 case pvByte: {
                     byte arg0 = convert.toByte(arg0PV);
                     byte arg1 = convert.toByte(arg1PV);
@@ -2721,10 +2688,10 @@ public abstract class ExpressionCalculatorFactory  {
             protected OperationSemantics operationSemantics;
             protected OperatorExpression operatorExpression;
             
-            protected PVField arg0PV;
-            protected PVField arg1PV;
-            protected PVField resultPV;
-            protected Type resultType;
+            protected PVScalar arg0PV;
+            protected PVScalar arg1PV;
+            protected PVScalar resultPV;
+            protected ScalarType resultType;
 
             BitwiseBase(PVStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
@@ -2733,11 +2700,11 @@ public abstract class ExpressionCalculatorFactory  {
             }
             public boolean createPVResult(String fieldName) {
                 arg0PV = operatorExpression.expressionArguments[0].pvResult;
-                Field arg0Field = arg0PV.getField();
-                Type arg0Type = arg0Field.getType();
+                Scalar arg0Field = arg0PV.getScalar();
+                ScalarType arg0Type = arg0Field.getScalarType();
                 arg1PV = operatorExpression.expressionArguments[1].pvResult;
-                Field arg1Field = arg1PV.getField();
-                Type arg1Type = arg1Field.getType();
+                Scalar arg1Field = arg1PV.getScalar();
+                ScalarType arg1Type = arg1Field.getScalarType();
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
@@ -2750,8 +2717,7 @@ public abstract class ExpressionCalculatorFactory  {
                 if(arg1Type.ordinal()>arg0Type.ordinal()) {
                     resultType = arg1Type;
                 }
-                Field resultField = fieldCreate.createField(fieldName, resultType);
-                resultPV = pvDataCreate.createPVField(parent, resultField);
+                resultPV = pvDataCreate.createPVScalar(parent,fieldName, resultType);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -2901,31 +2867,30 @@ public abstract class ExpressionCalculatorFactory  {
             }
             public boolean createPVResult(String fieldName) {
                 Expression expressionArgument = operatorExpression.expressionArguments[0];
-                PVField pvField = expressionArgument.pvResult;
-                Type type = pvField.getField().getType();
-                if(type!=Type.pvBoolean) {
+                PVScalar pvScalar = expressionArgument.pvResult;
+                ScalarType scalarType = pvScalar.getScalar().getScalarType();
+                if(scalarType!=ScalarType.pvBoolean) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + pvField.getFullFieldName()
+                            + pvScalar.getFullFieldName()
                             + " is not boolean",
                             MessageType.fatalError);
                     return false;
                 }
-                arg0PV = (PVBoolean)pvField;
+                arg0PV = (PVBoolean)pvScalar;
                 expressionArgument = operatorExpression.expressionArguments[1];
-                pvField = expressionArgument.pvResult;
-                type = pvField.getField().getType();
-                if(type!=Type.pvBoolean) {
+                pvScalar = expressionArgument.pvResult;
+                scalarType = pvScalar.getScalar().getScalarType();
+                if(scalarType!=ScalarType.pvBoolean) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + pvField.getFullFieldName()
+                            + pvScalar.getFullFieldName()
                             + " is not boolean",
                             MessageType.fatalError);
                     return false;
                 }
-                arg1PV = (PVBoolean)pvField;
-                Field resultField = fieldCreate.createField(fieldName, Type.pvBoolean);
-                resultPV = (PVBoolean)pvDataCreate.createPVField(parent, resultField);
+                arg1PV = (PVBoolean)pvScalar;
+                resultPV = (PVBoolean)pvDataCreate.createPVScalar(parent,fieldName, ScalarType.pvBoolean);
                 operatorExpression.pvResult = resultPV;
                 return true;
             }
@@ -3003,8 +2968,8 @@ public abstract class ExpressionCalculatorFactory  {
             private OperationSemantics operationSemantics;
             private OperatorExpression operatorExpression;
             private PVBoolean ifPV;
-            private PVField[] argPVs = new PVField[2];
-            private PVField pvResult;
+            private PVScalar[] argPVs = new PVScalar[2];
+            private PVScalar pvResult;
             private Operator ifOperator;
             private Operator[] argOperators = new Operator[2];
 
@@ -3016,10 +2981,10 @@ public abstract class ExpressionCalculatorFactory  {
             public boolean createPVResult(String fieldName) {
                 Expression expressionArgument = operatorExpression.expressionArguments[0];
                 ifOperator = expressionArgument.operator;
-                PVField argPV = expressionArgument.pvResult;
-                Field argField = argPV.getField();
-                Type argType = argField.getType();
-                if(argType!=Type.pvBoolean) {
+                PVScalar argPV = expressionArgument.pvResult;
+                Scalar argField = argPV.getScalar();
+                ScalarType argType = argField.getScalarType();
+                if(argType!=ScalarType.pvBoolean) {
                     parent.message(
                             "if clause is not type boolean",
                             MessageType.fatalError);
@@ -3032,7 +2997,7 @@ public abstract class ExpressionCalculatorFactory  {
                 expressionArgument = operatorExpression.expressionArguments[2];
                 argPVs[1] = expressionArgument.pvResult;
                 argOperators[1] = expressionArgument.operator;
-                if(!convert.isCopyScalarCompatible(argPVs[0].getField(),argPVs[1].getField())) {
+                if(!convert.isCopyScalarCompatible(argPVs[0].getScalar(),argPVs[1].getScalar())) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
                             + argPVs[0].getFullFieldName()
@@ -3040,13 +3005,12 @@ public abstract class ExpressionCalculatorFactory  {
                             MessageType.fatalError);
                     return false;
                 }
-                int ind0 = argPVs[0].getField().getType().ordinal();
-                int ind1 = argPVs[1].getField().getType().ordinal();
+                int ind0 = argPVs[0].getScalar().getScalarType().ordinal();
+                int ind1 = argPVs[1].getScalar().getScalarType().ordinal();
                 int ind = ind0;
                 if(ind<ind1) ind = ind1;
-                Type resultType = Type.values()[ind];
-                Field resultField = fieldCreate.createField(fieldName, resultType);
-                pvResult = pvDataCreate.createPVField(parent, resultField);
+                ScalarType resultType = ScalarType.values()[ind];
+                pvResult = pvDataCreate.createPVScalar(parent,fieldName, resultType);
                 operatorExpression.pvResult = pvResult;
                 return true;
 
@@ -3107,13 +3071,13 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class MathDoubleOneArg implements Operator {
-            protected PVField parent = null;
+            protected PVStructure parent = null;
             protected MathFunctionExpression mathFunctionExpression = null;
             protected PVDouble pvArg;
             protected PVDouble pvResult;
             
 
-            MathDoubleOneArg(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathDoubleOneArg(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3122,14 +3086,13 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                PVField pvField = mathFunctionExpression.expressionArguments[0].pvResult; 
-                if(pvField.getField().getType()!=Type.pvDouble) {
+                PVScalar pvField = mathFunctionExpression.expressionArguments[0].pvResult; 
+                if(pvField.getScalar().getScalarType()!=ScalarType.pvDouble) {
                    pvField.message("arg type must be double", MessageType.error);
                    return false;
                 }
                 pvArg = (PVDouble)pvField;
-                Field resultField = fieldCreate.createField(fieldName, Type.pvDouble);
-                pvResult = (PVDouble)pvDataCreate.createPVField(parent, resultField);
+                pvResult = (PVDouble)pvDataCreate.createPVScalar(parent,fieldName, ScalarType.pvDouble);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
@@ -3138,14 +3101,14 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class MathDoubleTwoArg implements Operator {
-            protected PVField parent = null;
+            protected PVStructure parent = null;
             protected MathFunctionExpression mathFunctionExpression = null;
             protected PVDouble pvArg0;
             protected PVDouble pvArg1;
             protected PVDouble pvResult;
             
 
-            MathDoubleTwoArg(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathDoubleTwoArg(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3154,20 +3117,19 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                PVField pvField = mathFunctionExpression.expressionArguments[0].pvResult;
-                if(pvField.getField().getType()!=Type.pvDouble) {
-                   pvField.message("arg type must be double", MessageType.error);
+                PVScalar pvScalar = mathFunctionExpression.expressionArguments[0].pvResult;
+                if(pvScalar.getScalar().getScalarType()!=ScalarType.pvDouble) {
+                   pvScalar.message("arg type must be double", MessageType.error);
                    return false;
                 }
-                pvArg0 = (PVDouble)pvField;
-                pvField = mathFunctionExpression.expressionArguments[1].pvResult;
-                if(pvField.getField().getType()!=Type.pvDouble) {
-                   pvField.message("arg type must be double", MessageType.error);
+                pvArg0 = (PVDouble)pvScalar;
+                pvScalar = mathFunctionExpression.expressionArguments[1].pvResult;
+                if(pvScalar.getScalar().getScalarType()!=ScalarType.pvDouble) {
+                   pvScalar.message("arg type must be double", MessageType.error);
                    return false;
                 }
-                pvArg1 = (PVDouble)pvField;
-                Field resultField = fieldCreate.createField(fieldName, Type.pvDouble);
-                pvResult = (PVDouble)pvDataCreate.createPVField(parent, resultField);
+                pvArg1 = (PVDouble)pvScalar;
+                pvResult = (PVDouble)pvDataCreate.createPVScalar(parent,fieldName,ScalarType.pvDouble);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
@@ -3179,12 +3141,12 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class MathAbs implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVField parent;
-            private PVField pvArg;
-            private PVField pvResult;
-            private Type type;
+            private PVStructure parent;
+            private PVScalar pvArg;
+            private PVScalar pvResult;
+            private ScalarType scalarType;
             
-            MathAbs(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathAbs(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3196,20 +3158,19 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
-                type = pvArg.getField().getType();
-                if(type!=Type.pvInt && type!=Type.pvLong && type!=Type.pvFloat && type!=Type.pvDouble) {
+                scalarType = pvArg.getScalar().getScalarType();
+                if(scalarType!=ScalarType.pvInt && scalarType!=ScalarType.pvLong && scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
                     return false;
                 }
-                Field resultField = fieldCreate.createField(fieldName, type);
-                pvResult = pvDataCreate.createPVField(parent, resultField);
+                pvResult = pvDataCreate.createPVScalar(parent,fieldName, scalarType);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
 
             public void compute() {
                 mathFunctionExpression.computeArguments();
-                switch(type) {
+                switch(scalarType) {
                 case pvInt: 
                     convert.fromInt(pvResult, Math.abs(convert.toInt(pvArg)));
                     break;
@@ -3227,7 +3188,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class MathAcos extends MathDoubleOneArg {
-            MathAcos(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathAcos(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3236,7 +3197,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathAsin extends MathDoubleOneArg {
-            MathAsin(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathAsin(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3245,7 +3206,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathAtan extends MathDoubleOneArg {
-            MathAtan(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathAtan(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3254,7 +3215,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathAtan2 extends MathDoubleTwoArg {
-            MathAtan2(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathAtan2(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3263,7 +3224,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCbrt extends MathDoubleOneArg {
-            MathCbrt(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathCbrt(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3272,7 +3233,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCeil extends MathDoubleOneArg {
-            MathCeil(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathCeil(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3281,7 +3242,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCos extends MathDoubleOneArg {
-            MathCos(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathCos(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3290,7 +3251,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCosh extends MathDoubleOneArg {
-            MathCosh(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathCosh(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3299,7 +3260,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathExp extends MathDoubleOneArg {
-            MathExp(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathExp(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3308,7 +3269,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathExpm1 extends MathDoubleOneArg {
-            MathExpm1(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathExpm1(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3317,7 +3278,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathFloor extends MathDoubleOneArg {
-            MathFloor(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathFloor(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3326,7 +3287,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathHypot extends MathDoubleTwoArg {
-            MathHypot(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathHypot(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3335,7 +3296,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathIEEEremainder extends MathDoubleTwoArg {
-            MathIEEEremainder(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathIEEEremainder(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3344,7 +3305,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathLog extends MathDoubleOneArg {
-            MathLog(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathLog(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3353,7 +3314,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathLog10 extends MathDoubleOneArg {
-            MathLog10(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathLog10(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3362,7 +3323,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathLog1p extends MathDoubleOneArg {
-            MathLog1p(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathLog1p(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3372,13 +3333,13 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathMax implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVField parent;
-            private PVField pv0Arg;
-            private PVField pv1Arg;
-            private PVField pvResult;
-            private Type type;
+            private PVStructure parent;
+            private PVScalar pv0Arg;
+            private PVScalar pv1Arg;
+            private PVScalar pvResult;
+            private ScalarType scalarType;
             
-            MathMax(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathMax(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3388,25 +3349,24 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 pv0Arg = mathFunctionExpression.expressionArguments[0].pvResult;;
-                Type type = pv0Arg.getField().getType();
-                if(type!=Type.pvInt && type!=Type.pvLong && type!=Type.pvFloat && type!=Type.pvDouble) {
+                ScalarType scalarType = pv0Arg.getScalar().getScalarType();
+                if(scalarType!=ScalarType.pvInt && scalarType!=ScalarType.pvLong && scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
                     pv0Arg.message("illegal arg type", MessageType.error);
                     return false;
                 }
-                this.type = type;
+                this.scalarType = scalarType;
                 pv1Arg = mathFunctionExpression.expressionArguments[1].pvResult;
-                if(!pv1Arg.getField().getType().isNumeric()) {
+                if(!pv1Arg.getScalar().getScalarType().isNumeric()) {
                     pv1Arg.message("illegal arg type", MessageType.error);
                     return false;
                 }
-                Field resultField = fieldCreate.createField(fieldName, this.type);
-                pvResult = pvDataCreate.createPVField(parent, resultField);
+                pvResult = pvDataCreate.createPVScalar(parent,fieldName, this.scalarType);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
             public void compute() {
                 mathFunctionExpression.computeArguments();
-                switch(type) {
+                switch(scalarType) {
                 case pvInt:
                     convert.fromInt(pvResult,Math.max(convert.toInt(pv0Arg), convert.toInt(pv1Arg)));
                     break;
@@ -3424,13 +3384,13 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathMin implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVField parent;
-            private PVField pv0Arg;
-            private PVField pv1Arg;
-            private PVField pvResult;
-            private Type type;
+            private PVStructure parent;
+            private PVScalar pv0Arg;
+            private PVScalar pv1Arg;
+            private PVScalar pvResult;
+            private ScalarType scalarType;
             
-            MathMin(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathMin(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3440,26 +3400,25 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 pv0Arg = mathFunctionExpression.expressionArguments[0].pvResult;
-                Type type = pv0Arg.getField().getType();
-                if(type!=Type.pvInt && type!=Type.pvLong && type!=Type.pvFloat && type!=Type.pvDouble) {
+                ScalarType scalarType = pv0Arg.getScalar().getScalarType();
+                if(scalarType!=ScalarType.pvInt && scalarType!=ScalarType.pvLong && scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
                     pv0Arg.message("illegal arg type", MessageType.error);
                     return false;
                 }
-                this.type = type;
+                this.scalarType = scalarType;
                 pv1Arg = mathFunctionExpression.expressionArguments[1].pvResult;
-                type = pv1Arg.getField().getType();
-                if(type!=this.type) {
+                scalarType = pv1Arg.getScalar().getScalarType();
+                if(scalarType!=this.scalarType) {
                     pv1Arg.message("arg1 type must be the same as arg0", MessageType.error);
                     return false;
                 }
-                Field resultField = fieldCreate.createField(fieldName, this.type);
-                pvResult = pvDataCreate.createPVField(parent, resultField);
+                pvResult = pvDataCreate.createPVScalar(parent,fieldName, this.scalarType);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
             public void compute() {
                 mathFunctionExpression.computeArguments();
-                switch(type) {
+                switch(scalarType) {
                 case pvInt:
                     convert.fromInt(pvResult,Math.min(convert.toInt(pv0Arg), convert.toInt(pv1Arg)));
                     break;
@@ -3476,7 +3435,7 @@ public abstract class ExpressionCalculatorFactory  {
             } 
         }
         static class MathPow extends MathDoubleTwoArg {
-            MathPow(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathPow(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3486,10 +3445,10 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathRandom implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVField parent;
+            private PVStructure parent;
             private PVDouble pvResult;
             
-            MathRandom(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathRandom(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3498,8 +3457,7 @@ public abstract class ExpressionCalculatorFactory  {
                     parent.message("illegal number of args", MessageType.error);
                     return false;
                 }
-                Field resultField = fieldCreate.createField(fieldName, Type.pvDouble);
-                pvResult = (PVDouble)pvDataCreate.createPVField(parent, resultField);
+                pvResult = (PVDouble)pvDataCreate.createPVScalar(parent,fieldName, ScalarType.pvDouble);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
@@ -3508,7 +3466,7 @@ public abstract class ExpressionCalculatorFactory  {
             } 
         }
         static class MathRint extends MathDoubleOneArg {
-            MathRint(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathRint(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3518,12 +3476,12 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathRound implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVField parent;
-            private PVField pvArg;
-            private PVField pvResult;
-            private Type argType;
+            private PVStructure parent;
+            private PVScalar pvArg;
+            private PVScalar pvResult;
+            private ScalarType argType;
             
-            MathRound(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathRound(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3533,20 +3491,19 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
-                argType = pvArg.getField().getType();
-                if(argType!=Type.pvFloat && argType!=Type.pvDouble) {
+                argType = pvArg.getScalar().getScalarType();
+                if(argType!=ScalarType.pvFloat && argType!=ScalarType.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
                     return false;
                 }
-                Type resultType = (argType==Type.pvFloat) ? Type.pvInt : Type.pvLong;
-                Field resultField = fieldCreate.createField(fieldName, resultType);
-                pvResult = pvDataCreate.createPVField(parent, resultField);
+                ScalarType resultType = (argType==ScalarType.pvFloat) ? ScalarType.pvInt : ScalarType.pvLong;
+                pvResult = pvDataCreate.createPVScalar(parent,fieldName, resultType);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
             public void compute() {
                 mathFunctionExpression.computeArguments();
-                if(argType==Type.pvFloat) {
+                if(argType==ScalarType.pvFloat) {
                     PVFloat from = (PVFloat)pvArg;
                     PVInt to = (PVInt)pvResult;
                     to.put(Math.round(from.get()));
@@ -3559,12 +3516,12 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathSignum implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVField parent;
-            private PVField pvArg;
-            private PVField pvResult;
-            private Type type;
+            private PVStructure parent;
+            private PVScalar pvArg;
+            private PVScalar pvResult;
+            private ScalarType scalarType;
             
-            MathSignum(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathSignum(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }    
@@ -3574,19 +3531,18 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
-                type = pvArg.getField().getType();
-                if(type!=Type.pvFloat && type!=Type.pvDouble) {
+                scalarType = pvArg.getScalar().getScalarType();
+                if(scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
                     return false;
                 }
-                Field resultField = fieldCreate.createField(fieldName, type);
-                pvResult = pvDataCreate.createPVField(parent, resultField);
+                pvResult = pvDataCreate.createPVScalar(parent,fieldName, scalarType);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
             public void compute() {
                 mathFunctionExpression.computeArguments();
-                if(type==Type.pvFloat) {
+                if(scalarType==ScalarType.pvFloat) {
                     PVFloat from = (PVFloat)pvArg;
                     PVFloat to = (PVFloat)pvResult;
                     to.put(Math.signum(from.get()));
@@ -3598,7 +3554,7 @@ public abstract class ExpressionCalculatorFactory  {
             } 
         }
         static class MathSin extends MathDoubleOneArg {
-            MathSin(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathSin(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3607,7 +3563,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathSinh extends MathDoubleOneArg {
-            MathSinh(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathSinh(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3616,7 +3572,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathSqrt extends MathDoubleOneArg {
-            MathSqrt(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathSqrt(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3625,7 +3581,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathTan extends MathDoubleOneArg {
-            MathTan(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathTan(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3634,7 +3590,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathTanh extends MathDoubleOneArg {
-            MathTanh(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathTanh(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3643,7 +3599,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathToDegrees extends MathDoubleOneArg {
-            MathToDegrees(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathToDegrees(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3652,7 +3608,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathToRadians extends MathDoubleOneArg {
-            MathToRadians (PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathToRadians (PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3662,12 +3618,12 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathUlp implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVField parent;
-            private PVField pvArg;
-            private PVField pvResult;
-            private Type type;
+            private PVStructure parent;
+            private PVScalar pvArg;
+            private PVScalar pvResult;
+            private ScalarType scalarType;
             
-            MathUlp(PVField parent,MathFunctionExpression mathFunctionExpression) {
+            MathUlp(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3677,19 +3633,18 @@ public abstract class ExpressionCalculatorFactory  {
                     return false;
                 }
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
-                type = pvArg.getField().getType();
-                if(type!=Type.pvFloat && type!=Type.pvDouble) {
+                scalarType = pvArg.getScalar().getScalarType();
+                if(scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
                     pvArg.message("illegal arg type", MessageType.error);
                     return false;
                 }
-                Field resultField = fieldCreate.createField(fieldName, type);
-                pvResult = pvDataCreate.createPVField(parent, resultField);
+                pvResult = pvDataCreate.createPVScalar(parent,fieldName, scalarType);
                 mathFunctionExpression.pvResult = pvResult;
                 return true;
             }
             public void compute() {
                 mathFunctionExpression.computeArguments();
-                if(type==Type.pvFloat) {
+                if(scalarType==ScalarType.pvFloat) {
                     PVFloat from = (PVFloat)pvArg;
                     PVFloat to = (PVFloat)pvResult;
                     to.put(Math.ulp(from.get()));

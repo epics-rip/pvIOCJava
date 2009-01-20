@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<database>
+
+<structure name = "calcArgsFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.calc.CalcArgsFactory</scalar>
+</structure>
+
+<structure name = "expressionCalculatorFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.calc.ExpressionCalculatorFactory</scalar>
+</structure>
+
+
+<structure name = "calcArg" >
+  <auxInfo name = "supportFactory" type = "string">genericFactory</auxInfo>
+  <!-- instance must define value -->
+  <scalar name = "name" type = "string" />
+</structure>
+
+<structure name = "expressionCalculator" >
+  <auxInfo name = "supportFactory" type = "string">expressionCalculatorFactory</auxInfo>
+  <scalar name = "expression" type = "string" />
+</structure>
+
+<structure name = "calculation" >
+  <auxInfo name = "supportFactory" type = "string">genericFactory</auxInfo>
+  <structure name = "calcArgs">
+     <!-- each field of calcArgs must be a calcArg structure -->
+     <auxInfo name = "supportFactory" type = "string">calcArgsFactory</auxInfo>
+  </structure>
+  <structure name = "calculator" type = "expressionCalculator" />
+  <structure name = "alarm" type = "alarm" />
+</structure>
+
+</database>

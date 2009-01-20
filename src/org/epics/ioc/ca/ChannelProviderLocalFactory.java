@@ -8,20 +8,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBListener;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.db.RecordListener;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.util.MessageType;
+import org.epics.ioc.support.SupportDatabase;
+import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDatabase;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVListener;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Type;
 
 /**
  * Factory and implementation of local channel access, i.e. channel access that
@@ -42,11 +43,13 @@ public class ChannelProviderLocalFactory  {
         channelProvider.register();
     }
     
-    private static class ChannelProviderLocal implements ChannelProvider{
-        private static boolean isRegistered = false; 
-        private static final IOCDB iocdb = IOCDBFactory.getMaster();
-        private static final String providerName = "local";
+    private static boolean isRegistered = false; 
+    private static final PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+    private static final SupportDatabase supportDatabase = SupportDatabaseFactory.get(pvDatabase);
+    private static final String providerName = "local";
 
+    private static class ChannelProviderLocal implements ChannelProvider{
+        
         private void register() {
             if(registerPvt()) ChannelAccessFactory.getChannelAccess().registerChannelProvider(this);
         }
@@ -73,13 +76,13 @@ public class ChannelProviderLocalFactory  {
                     options = names[0];
                 }
             }
-            DBRecord dbRecord = iocdb.findRecord(recordName);
-            if(dbRecord==null) return null;
+            PVRecord pvRecord = pvDatabase.findRecord(recordName);
+            if(pvRecord==null) return null;
             if(fieldName!=null) {
-                PVField pvField = pvProperty.findProperty(dbRecord.getPVRecord(), fieldName);
+                PVField pvField = pvProperty.findProperty(pvRecord.getPVRecord(), fieldName);
                 if(pvField==null) return null;
             }
-            Channel channel = new ChannelImpl(dbRecord,listener,fieldName,options);
+            Channel channel = new ChannelImpl(pvRecord,listener,fieldName,options);
             return channel;
         }
         /* (non-Javadoc)
@@ -95,7 +98,7 @@ public class ChannelProviderLocalFactory  {
             int index = channelName.indexOf('.');
             String recordName = channelName;
             if(index>=0) recordName = channelName.substring(0,index);
-            if(iocdb.findRecord(recordName)==null) return false;
+            if(pvDatabase.findRecord(recordName)==null) return false;
             return true;
         }
         /* (non-Javadoc)
@@ -111,21 +114,21 @@ public class ChannelProviderLocalFactory  {
     static private Pattern rightBracePattern = Pattern.compile("[}]");
     
     private static class ChannelImpl extends AbstractChannel {
-        private DBRecord dbRecord;
+        private PVRecord pvRecord;
         private String fieldName;
         
-        private ChannelImpl(DBRecord record,ChannelListener listener,
+        private ChannelImpl(PVRecord record,ChannelListener listener,
                 String fieldName, String options)
         {
             super(listener,options);
-            dbRecord = record;
+            pvRecord = record;
             this.fieldName = fieldName;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#connect()
          */
         public void connect() {
-            super.setPVRecord(dbRecord.getPVRecord(),fieldName);
+            super.setPVRecord(pvRecord.getPVRecord(),fieldName);
             super.connect();
         }
                 
@@ -138,11 +141,11 @@ public class ChannelProviderLocalFactory  {
                 return null;
             }
             if(name==null || name.length()<=0) {
-                return new ChannelFieldImpl(dbRecord,dbRecord.getDBStructure().getPVField());
+                return new ChannelFieldImpl(pvRecord);
             }
             PVField pvField = pvProperty.findProperty(super.getPVRecord(), name);
             if(pvField==null) return null;
-            return new ChannelFieldImpl(dbRecord,pvField);               
+            return new ChannelFieldImpl(pvField);               
         }    
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
@@ -227,26 +230,16 @@ public class ChannelProviderLocalFactory  {
         }
         
         private static class ChannelFieldImpl extends AbstractChannelField implements ChannelField {
-            private DBRecord dbRecord;
-            private DBField dbField;
             private PVField pvField;
 
             /**
              * Constructor
-             * @param dbRecord The dbRecord for this channel.
-             * @param pvField The pvField for the channelField.
+             * @param pvRecord The pvRecord for this channel.
+             * @param pvField 
              */
-            public ChannelFieldImpl(DBRecord dbRecord,PVField pvField) {
+            public ChannelFieldImpl(PVField pvField) {
                 super(pvField);
-                this.dbRecord = dbRecord;
                 this.pvField = pvField;
-                dbField = dbRecord.findDBField(pvField);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelField#postPut()
-             */
-            public void postPut() {
-                dbField.postPut();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
@@ -254,15 +247,17 @@ public class ChannelProviderLocalFactory  {
             public ChannelField findProperty(String propertyName) {
                 PVField pvf = pvProperty.findProperty(pvField, propertyName);
                 if (pvf == null) return null;
-                return new ChannelFieldImpl(dbRecord,pvf);
+                return new ChannelFieldImpl(pvf);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
              */
             public ChannelField createChannelField(String fieldName) {
-                PVField pvf = pvField.getSubField(fieldName);
+                if(pvField.getField().getType()!=Type.structure) return null;
+                PVStructure pvStructure = (PVStructure)pvField;
+                PVField pvf = pvStructure.getSubField(fieldName);
                 if (pvf == null) return null;
-                return new ChannelFieldImpl(dbRecord,pvf);
+                return new ChannelFieldImpl(pvf);
             }
         }
 
@@ -283,7 +278,12 @@ public class ChannelProviderLocalFactory  {
             }
             
             private boolean init() {
-                recordProcess = dbRecord.getRecordProcess();
+                recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                if(recordProcess==null) {
+                    channelProcessRequester.message(
+                            "record does not have a recordProcess", MessageType.error);
+                        return false;
+                }
                 isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
                 if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
                     channelProcessRequester.message(
@@ -367,8 +367,7 @@ public class ChannelProviderLocalFactory  {
             private Iterator<ChannelField> channelFieldListIter;
             private PVField pvField;
             
-            private ChannelGetImpl(ChannelFieldGroup channelFieldGroup,
-                ChannelGetRequester channelGetRequester,boolean process)
+            private ChannelGetImpl(ChannelFieldGroup channelFieldGroup,ChannelGetRequester channelGetRequester,boolean process)
             {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
@@ -379,12 +378,18 @@ public class ChannelProviderLocalFactory  {
                 channelFieldList = fieldGroup.getList();
                 requesterName = "Get:" + channelGetRequester.getRequesterName();
                 if(process) {
-                    recordProcess = dbRecord.getRecordProcess();
-                    isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-                    if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
+                    recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                    if(recordProcess==null) {
                         channelGetRequester.message(
-                                "already has process requester other than self",MessageType.warning);
+                                "record does not have a recordProcess", MessageType.error);
                         this.process = false;
+                    } else {
+                        isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
+                        if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
+                            channelGetRequester.message(
+                                    "already has process requester other than self",MessageType.warning);
+                            this.process = false;
+                        }
                     }
                 }
             }
@@ -475,20 +480,20 @@ public class ChannelProviderLocalFactory  {
                         if(!channelFieldListIter.hasNext()) return;
                         ChannelField field = channelFieldListIter.next();
                         pvField = field.getPVField();
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelGetRequester.nextGetField(field,pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
                     } else {
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelGetRequester.nextDelayedGetField(pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
@@ -514,8 +519,7 @@ public class ChannelProviderLocalFactory  {
             private PVField pvField;
             private int fieldIndex;
             
-            private ChannelPutImpl(ChannelFieldGroup channelFieldGroup,
-                ChannelPutRequester channelPutRequester, boolean process)
+            private ChannelPutImpl(ChannelFieldGroup channelFieldGroup,ChannelPutRequester channelPutRequester, boolean process)
             {
                 if(channelFieldGroup==null) {
                     throw new IllegalStateException("no field group");
@@ -524,12 +528,18 @@ public class ChannelProviderLocalFactory  {
                 this.process = process;
                 channelFields = channelFieldGroup.getArray();
                 if(process) {
-                    recordProcess = dbRecord.getRecordProcess();
-                    isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-                    if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
+                    recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                    if(recordProcess==null) {
                         channelPutRequester.message(
-                                "already has process requester other than self",MessageType.warning);
+                                "record does not have a recordProcess", MessageType.error);
                         this.process = false;
+                    } else {
+                        isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
+                        if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
+                            channelPutRequester.message(
+                                    "already has process requester other than self",MessageType.warning);
+                            this.process = false;
+                        }
                     }
                 }
                 requesterName = "Put:" + channelPutRequester.getRequesterName();
@@ -632,20 +642,20 @@ public class ChannelProviderLocalFactory  {
                         }
                         ChannelField field = channelFields[fieldIndex++];
                         pvField = field.getPVField();
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelPutRequester.nextPutField(field,pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
                     } else {
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelPutRequester.nextDelayedPutField(pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
@@ -680,12 +690,18 @@ public class ChannelProviderLocalFactory  {
                 putChannelFields = putFieldGroup.getArray();
                 requesterName = "ChannelGetPut:" + channelPutGetRequester.getRequesterName();
                 if(process) {
-                    recordProcess = dbRecord.getRecordProcess();
-                    isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-                    if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
+                    recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                    if(recordProcess==null) {
                         channelPutGetRequester.message(
-                                "already has process requester other than self",MessageType.warning);
+                                "record does not have a recordProcess", MessageType.error);
                         this.process = false;
+                    } else {
+                        isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
+                        if(!isRecordProcessRequester && !recordProcess.canProcessSelf()) {
+                            channelPutGetRequester.message(
+                                    "already has process requester other than self",MessageType.warning);
+                            this.process = false;
+                        }
                     }
                 }
             }
@@ -800,20 +816,20 @@ public class ChannelProviderLocalFactory  {
                         }
                         ChannelField field = putChannelFields[fieldIndex++];
                         pvField = field.getPVField();
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelPutGetRequester.nextPutField(field,pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
                     } else {
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelPutGetRequester.nextDelayedPutField(pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
@@ -850,20 +866,20 @@ public class ChannelProviderLocalFactory  {
                             return;
                         }
                         ChannelField field = getChannelFields[fieldIndex++];
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelPutGetRequester.nextGetField(field,pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
                     } else {
-                        dbRecord.lock();
+                        pvRecord.lock();
                         try {
                             more = channelPutGetRequester.nextDelayedGetField(pvField);
                         } finally {
-                            dbRecord.unlock();
+                            pvRecord.unlock();
                         }
                         if(more) return;
                         pvField = null;
@@ -872,14 +888,12 @@ public class ChannelProviderLocalFactory  {
             }
         }
         
-        private class MonitorImpl implements
-        ChannelMonitor,DBListener
+        private class MonitorImpl implements ChannelMonitor,PVListener
         {
             private Channel channel;
             private ChannelMonitorRequester channelMonitorRequester;
             private boolean isStarted = false;
             private ChannelFieldGroup channelFieldGroup = null;
-            private RecordListener recordListener = null;
             private boolean processActive = false;
             private boolean putStructureActive = false;
             
@@ -929,17 +943,17 @@ public class ChannelProviderLocalFactory  {
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 for(ChannelField cf : channelFieldList) {
                     ChannelField channelField = (ChannelField)cf;
-                    DBField dbField = dbRecord.findDBField(channelField.getPVField());
-                    PVField targetPVField = getRequestedPVField(dbField);
+                    PVField pvField = channelField.getPVField();
+                    PVField targetPVField = getRequestedPVField(pvField);
                     channelMonitorRequester.dataPut(targetPVField);
                 }
                 channelMonitorRequester.endPut();
-                recordListener = dbRecord.createRecordListener(this);
+                pvRecord.registerListener(this);
                 channelFieldList = channelFieldGroup.getList();
                 for(ChannelField cf : channelFieldList) {
                     ChannelField channelField = (ChannelField)cf;
-                    DBField dbField = dbRecord.findDBField(channelField.getPVField());
-                    dbField.addListener(recordListener);
+                    PVField pvField = channelField.getPVField();
+                    pvField.addListener(this);
                 }
             }
 
@@ -949,38 +963,37 @@ public class ChannelProviderLocalFactory  {
             public void stop() {
                 if(!isStarted) return;
                 isStarted = false;
-                dbRecord.removeRecordListener(recordListener);
-                recordListener = null;
+                pvRecord.unregisterListener(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#beginProcess()
+             * @see org.epics.pvData.pv.PVListener#beginGroupPut(org.epics.pvData.pv.PVRecord)
              */
-            public void beginProcess() {
+            public void beginGroupPut(PVRecord pvRecord) {
                 if(!isStarted) return;
                 processActive = true;
                 channelMonitorRequester.beginPut();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#endProcess()
+             * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
              */
-            public void endProcess() {
+            public void endGroupPut(PVRecord pvRecord) {
                 if(!isStarted) return;
                 processActive = false;
                 channelMonitorRequester.endPut();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#beginPut(org.epics.ioc.db.DBStructure)
+             * @see org.epics.ioc.pv.PVListener#beginPut(org.epics.ioc.pv.PVStructure)
              */
-            public void beginPut(DBStructure dbStructure) {
+            public void beginPut(PVStructure pvStructure) {
                 if(!isStarted) return;
                 if(processActive) return;
                 putStructureActive = true;
                 channelMonitorRequester.beginPut();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#endPut(org.epics.ioc.db.DBStructure)
+             * @see org.epics.ioc.pv.PVListener#endPut(org.epics.ioc.pv.PVStructure)
              */
-            public void endPut(DBStructure dbStructure) {
+            public void endPut(PVStructure pvStructure) {
                 if(!isStarted) return;
                 if(processActive) return;
                 if(!putStructureActive) return;
@@ -988,23 +1001,23 @@ public class ChannelProviderLocalFactory  {
                 channelMonitorRequester.endPut();
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField, org.epics.ioc.db.DBField)
+             * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVField)
              */
-            public void dataPut(DBField dbRequested, DBField dbField) {
-                PVField pvRequested = getRequestedPVField(dbRequested);
+            public void dataPut(PVStructure requested, PVField pvField) {
+                PVField pvRequested = getRequestedPVField(requested);
                 boolean beginEnd = (!processActive&&!putStructureActive) ? true : false;
                 if(beginEnd) channelMonitorRequester.beginPut();
-                channelMonitorRequester.dataPut(pvRequested, dbField.getPVField());                
+                channelMonitorRequester.dataPut(pvRequested, pvField);                
                 if(beginEnd) {
                     channelMonitorRequester.endPut();
                 }
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#dataPut(org.epics.ioc.db.DBField)
+             * @see org.epics.ioc.pv.PVListener#dataPut(org.epics.ioc.pv.PVField)
              */
-            public void dataPut(DBField dbField) {
-                PVField targetPVField = getRequestedPVField(dbField);
+            public void dataPut(PVField pvField) {
+                PVField targetPVField = getRequestedPVField(pvField);
                 boolean beginEnd = (!processActive&&!putStructureActive) ? true : false;
                 if(beginEnd) channelMonitorRequester.beginPut();
                 channelMonitorRequester.dataPut(targetPVField);
@@ -1013,19 +1026,18 @@ public class ChannelProviderLocalFactory  {
                 }
             }
             
-            private PVField getRequestedPVField(DBField requestedDBField) {
+            private PVField getRequestedPVField(PVField requestedPVField) {
                 List<ChannelField> channelFieldList = channelFieldGroup.getList();
                 for(ChannelField cf : channelFieldList) {
-                    PVField pvField = requestedDBField.getPVField();
-                    if(cf.getPVField()==pvField) return pvField;
+                    PVField pvField = cf.getPVField();
+                    if(pvField==requestedPVField) return pvField;
                 }
                 throw new IllegalStateException("Logic error. Unexpected dataPut"); 
             }
-
             /* (non-Javadoc)
-             * @see org.epics.ioc.db.DBListener#unlisten(org.epics.ioc.db.RecordListener)
+             * @see org.epics.pvData.pv.PVListener#unlisten(org.epics.pvData.pv.PVRecord)
              */
-            public void unlisten(RecordListener listener) {
+            public void unlisten(PVRecord pvRecord) {
                 stop();
                 channel.getChannelListener().destroy(channel);
             }   

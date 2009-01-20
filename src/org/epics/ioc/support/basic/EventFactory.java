@@ -5,22 +5,14 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.EventAnnounce;
-import org.epics.ioc.util.EventScanner;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.ScannerFactory;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+import org.epics.ioc.util.*;
+
 
 /**
  * Support a field which must have type string.
@@ -31,11 +23,20 @@ import org.epics.ioc.util.ScannerFactory;
 public class EventFactory {
     /**
      * Create the support for the field.
-     * @param dbField The field which must have type string.
+     * @param pvField The field which must have type string.
      * @return The support instance.
      */
-    public static Support create(DBField dbField) {
-        return new EventImpl(dbField);
+    public static Support create(PVField pvField) {
+        if(pvField.getField().getType()!=Type.scalar) {
+            pvField.message("illegal field type. Must be strinng", MessageType.error);
+            return null;
+        }
+        PVScalar pvScalar = (PVScalar)pvField;
+        if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
+            pvField.message("illegal field type. Must be strinng", MessageType.error);
+            return null;
+        }
+        return new EventImpl((PVString)pvField);
     }
     
     
@@ -44,42 +45,20 @@ public class EventFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordSupport#processRecord(org.epics.ioc.process.RecordProcessRequester)
          */
-        private static String supportName = "event";
-        private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
+        private static final String supportName = "event";
+        private static final EventScanner eventScanner = ScannerFactory.getEventScanner();
         private SupportState supportState = SupportState.readyForInitialize;
-        private PVRecord pvRecord;
-        DBField dbField;
         private PVString pvEventName = null;
-        private EventScanner eventScanner = null;
+        private PVRecord pvRecord = null;
         private EventAnnounce eventAnnounce = null;
         private String eventName = null;
         
-        private EventImpl(DBField dbField) {
-            super(supportName,dbField);
-            this.dbField = dbField;
-            pvRecord = dbField.getDBRecord().getPVRecord();
-            eventScanner = ScannerFactory.getEventScanner();
+        private EventImpl(PVString pvField) {
+            super(supportName,pvField);
+            this.pvEventName = pvField;
+            pvRecord = pvField.getPVRecord();
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#initialize()
-         */
-        public void initialize() {
-            DBField dbParent = dbField.getParent();
-            PVField pvParent = dbParent.getPVField();
-            PVField pvField = pvProperty.findProperty(pvParent, "value");
-            if(pvField==null) {
-                pvParent.message("value field not found", MessageType.error);
-                return;
-            }
-            DBField valueDBField = dbField.getDBRecord().findDBField(pvField);
-            pvField = valueDBField.getPVField();
-            if(pvField.getField().getType()!=Type.pvString) {
-                super.message("illegal field type. Must be strinng", MessageType.error);
-            }
-            pvEventName = (PVString)pvField;
-            supportState = SupportState.readyForStart;
-            setSupportState(supportState);
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */

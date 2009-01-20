@@ -5,10 +5,10 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVStructure;
 
 /**
  * This is a support that does nothing except act like it connects, etc.
@@ -21,7 +21,7 @@ public class NoopFactory {
      * @param dbStructure The structure to support.
      * @return The Support interface.
      */
-    public static Support create(DBStructure dbStructure) {
+    public static Support create(PVStructure dbStructure) {
         return new Noop(dbStructure);
     }    
     /**
@@ -29,16 +29,16 @@ public class NoopFactory {
      * @param dbField The field to support.
      * @return The Support interface.
      */
-    public static Support create(DBField dbField) {
+    public static Support create(PVField dbField) {
         return new Noop(dbField);
     }    
     
     private static class Noop extends AbstractSupport {
         private static String supportName = "noop";
         
-        private Noop(DBField dbField) {
+        private Noop(PVField dbField) {
             super(supportName,dbField);
         }
-        // The AbstractPDRVSupport methods provide semantics
+        // The AbstractSupport methods provide semantics
     }
 }

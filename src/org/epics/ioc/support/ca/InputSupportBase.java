@@ -7,37 +7,17 @@ package org.epics.ioc.support.ca;
 
 import java.util.List;
 
-import org.epics.ioc.ca.CD;
-import org.epics.ioc.ca.CDFactory;
-import org.epics.ioc.ca.CDField;
-import org.epics.ioc.ca.CDGet;
-import org.epics.ioc.ca.CDGetRequester;
-import org.epics.ioc.ca.CDStructure;
-import org.epics.ioc.ca.ChannelField;
-import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.ProcessCallbackRequester;
-import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
 
 /**
  * Implementation for a channel access input link.
@@ -45,12 +25,10 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public class InputSupportBase extends AbstractLinkSupport
-implements CDGetRequester,
-ProcessCallbackRequester,ProcessContinueRequester
+implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
 {
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private PVBoolean processAccess = null;  
-    private DBField valueDBField;
+    private PVField valuePVField;
     
     private String channelFieldName = null;
     private boolean process = false;
@@ -82,37 +60,34 @@ ProcessCallbackRequester,ProcessContinueRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param dbStructure The dbStructure for the field being supported.
+     * @param pvStructure The pvStructure for the field being supported.
      */
-    public InputSupportBase(String supportName,DBStructure dbStructure) {
-        super(supportName,dbStructure);
+    public InputSupportBase(String supportName,PVStructure pvStructure) {
+        super(supportName,pvStructure);
     }
-   
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#initialize()
+     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize() {           
-        super.initialize();
+    public void initialize(RecordSupport recordSupport) {   
+        super.initialize(recordSupport);
         if(super.getSupportState()!=SupportState.readyForStart) return;
         processAccess = pvStructure.getBooleanField("process");
         if(processAccess==null) {
             uninitialize();
             return;
         }
-        DBField dbParent = dbStructure.getParent();
-        PVField pvField = null;
-        while(dbParent!=null) {
-            PVField pvParent = dbParent.getPVField();
-            pvField = pvProperty.findProperty(pvParent,"value");
-            if(pvField!=null) break;
-            dbParent = dbParent.getParent();
+        PVStructure pvParent = pvStructure.getParent();
+        valuePVField = null;
+        while(pvParent!=null) {
+            valuePVField = pvParent.getSubField("value");
+            if(valuePVField!=null) break;
+            pvParent = pvParent.getParent();
         }
-        if(pvField==null) {
+        if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
             uninitialize();
             return;
         }
-        valueDBField = dbStructure.getDBRecord().findDBField(pvField);
     }       
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
@@ -154,18 +129,18 @@ ProcessCallbackRequester,ProcessContinueRequester
             channelFieldName = channel.getFieldName();
             if(channelFieldName==null) channelFieldName = "value";
             if(!prepareForInput()) return;
-            dbRecord.lock();
+            pvRecord.lock();
             try {
                 isReady = true;
             } finally {
-                dbRecord.unlock();
+                pvRecord.unlock();
             }
         } else {
-            dbRecord.lock();
+            pvRecord.lock();
             try {
                 isReady = false;
             } finally {
-                dbRecord.unlock();
+                pvRecord.unlock();
             }
             disconnect();
         }
@@ -193,7 +168,7 @@ ProcessCallbackRequester,ProcessContinueRequester
      * @see org.epics.ioc.ca.CDGetRequester#getDone(org.epics.ioc.util.RequestResult)
      */
     public void getDone(RequestResult requestResult) {
-        dbRecord.lock();
+        pvRecord.lock();
         try {
             ChannelFieldGroup channelFieldGroup = cd.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
@@ -213,7 +188,7 @@ ProcessCallbackRequester,ProcessContinueRequester
                 }
                 if(cdField.getMaxNumPuts()==0) continue;
                 if(channelField==valueChannelField) {
-                    if(copy(targetPVField,valueDBField.getPVField())) valueChanged = true;
+                    if(copy(targetPVField,valuePVField)) valueChanged = true;
                 } else if(channelField==valueIndexChannelField){
                     PVInt pvInt = (PVInt)targetPVField;
                     newValueIndex = pvInt.get();
@@ -253,7 +228,7 @@ ProcessCallbackRequester,ProcessContinueRequester
                 alarmMessage = "get request failed";
             }
         } finally {
-            dbRecord.unlock();
+            pvRecord.unlock();
         }
         
         this.requestResult = requestResult;
@@ -310,8 +285,15 @@ ProcessCallbackRequester,ProcessContinueRequester
             propertyChannelFields = new ChannelField[length];
             for(int i=0; i<length; i++) {
                 propertyValueChanged[i] = false;
-                ChannelField channelField = channel.createChannelField(
-                    propertyPVFields[i].getField().getFieldName());
+                String fieldName = propertyPVFields[i].getField().getFieldName();
+                ChannelField channelField = channel.createChannelField(fieldName);
+                if(channelField==null) {
+                    pvStructure.message(
+                            "propertyName " + fieldName
+                            + " is not in channel " + channel.getChannelName(),
+                            MessageType.error);
+                    return false;
+                }
                 channelFieldGroup.addChannelField(channelField);
                 propertyChannelFields[i] = channelField;
             }
@@ -323,29 +305,29 @@ ProcessCallbackRequester,ProcessContinueRequester
             
     private boolean checkCompatibility(Field targetField) {
         Type targetType = targetField.getType();
-        Field valueField = valueDBField.getPVField().getField();
+        Field valueField = valuePVField.getField();
         Type valueType = valueField.getType();
-        if(valueType.isScalar() && targetType.isScalar()) {
-            if(convert.isCopyScalarCompatible(targetField,valueField)) return true;
-        } else if(targetType==Type.pvArray && valueType==Type.pvArray) {
+        if(valueType==Type.scalar && targetType==Type.scalar) {
+            if(convert.isCopyScalarCompatible((Scalar)targetField,(Scalar)valueField)) return true;
+        } else if(targetType==Type.scalarArray && valueType==Type.scalarArray) {
             Array targetArray = (Array)targetField;
             Array valueArray = (Array)valueField;
             if(convert.isCopyArrayCompatible(targetArray,valueArray)) return true;
-        } else if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+        } else if(targetType==Type.structure && valueType==Type.structure) {
             Structure targetStructure = (Structure)targetField;
             Structure valueStructure = (Structure)valueField;
             if(convert.isCopyStructureCompatible(targetStructure,valueStructure)) return true;
         }
-        message("is not compatible with pvname " + pvnamePVString.get(),MessageType.error);
+        message("is not compatible with pvname " + pvnamePV.get(),MessageType.error);
         return false;
     }
      
     private boolean copy(PVField fromPVField,PVField toPVField) {
         Type fromType = fromPVField.getField().getType();
         Type toType = toPVField.getField().getType();
-        if(fromType.isScalar() && toType.isScalar()) {
-            convert.copyScalar(fromPVField, toPVField);
-        } else if(fromType==Type.pvArray && toType==Type.pvArray) {
+        if(fromType==Type.scalar && toType==Type.scalar) {
+            convert.copyScalar((PVScalar)fromPVField,(PVScalar)toPVField);
+        } else if(fromType==Type.scalarArray && toType==Type.scalarArray) {
             PVArray fromPVArray = (PVArray)fromPVField;
             PVArray toPVArray = (PVArray)toPVField;
             int arrayLength = fromPVArray.getLength();
@@ -353,7 +335,7 @@ ProcessCallbackRequester,ProcessContinueRequester
             if(num!=arrayLength) message(
                 "length " + arrayLength + " but only copied " + num,
                 MessageType.warning);;
-        } else if(fromType==Type.pvStructure && toType==Type.pvStructure) {
+        } else if(fromType==Type.structure && toType==Type.structure) {
             PVStructure fromPVStructure = (PVStructure)fromPVField;
             PVStructure toPVStructure = (PVStructure)toPVField;
             convert.copyStructure(fromPVStructure,toPVStructure);
@@ -368,25 +350,21 @@ ProcessCallbackRequester,ProcessContinueRequester
     
     private void post() {
         if(valueChanged) {
-            valueDBField.postPut();
             valueChanged = false;
         }
         if(valueIndexChanged) {
-            valueIndexPVInt.put(newValueIndex);
-            valueIndexDBField.postPut();
+            valueIndexPV.put(newValueIndex);
             valueIndexChanged = false;
             newValueIndex = 0;
         }
         if(valueChoicesChanged) {
-            valueChoicesPVStringArray.put(0, newValueChoices.length, newValueChoices, 0);
-            valueChoicesDBField.postPut();
+            valueChoicesPV.put(0, newValueChoices.length, newValueChoices, 0);
             valueChoicesChanged = false;
             newValueChoices = null;
         }
         if(gotAdditionalPropertys){
             for(int j=0; j<propertyChannelFields.length; j++) {
                 if(propertyValueChanged[j]) {
-                    propertyDBFields[j].postPut();
                     propertyValueChanged[j] = false;
                 }
             }

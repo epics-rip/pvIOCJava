@@ -5,23 +5,13 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+import org.epics.ioc.util.*;
 
 /**
  * Not implemented.
@@ -31,105 +21,92 @@ import org.epics.ioc.util.RequestResult;
 public class LinearConvertFactory {
     /**
      * Factory creation method.
-     * @param dbStructure The field to support.
+     * @param pvStructure The field to support.
      * @return The Support interface.
      */
-    public static Support create(DBStructure dbStructure) {
-        String supportName = dbStructure.getSupportName();
-        PVStructure pvStructure = dbStructure.getPVStructure();
+    public static Support create(PVStructure pvStructure) {
+        PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
+        PVScalar pvScalar = pvAuxInfo.getInfo("support");
+        if(pvScalar==null) {
+            pvStructure.message("no pvAuxInfo with name support. Why??", MessageType.error);
+            return null;
+        }
+        if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
+            pvStructure.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
+            return null;
+        }
+        String supportName = ((PVString)pvScalar).get();
         if(supportName==null) {
-            pvStructure.message("supportName is null", MessageType.error);
+            pvStructure.message("supportName is not defined", MessageType.error);
             return null;
         }
         if(supportName.equals(linearConvertInput)) {
-            return new LinearConvertInput(dbStructure);
+            return new LinearConvertInput(pvStructure);
         }
         if(supportName.equals(linearConvertOutput)) {
-            return new LinearConvertOutput(dbStructure);
+            return new LinearConvertOutput(pvStructure);
         }
         if(!supportName.equals(supportName)) {
-            dbStructure.getPVStructure().message(
+            pvStructure.message(
                 "does not have support " + supportName,MessageType.error);
             return null;
         }
-        return new LinearConvertInput(dbStructure);
+        return new LinearConvertInput(pvStructure);
     }
     
     private static final String linearConvertInput = "linearConvertInput";
     private static final String linearConvertOutput = "linearConvertOutput";
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     private static abstract class LinearConvertBase extends AbstractSupport
     {
         
-        protected DBStructure dbStructure = null;
         protected PVStructure pvStructure = null;
-        protected DBField dbValue = null;
         protected PVDouble pvValue = null;
-        protected DBField dbRawValue = null;
-        protected PVInt pvRawValue;
+        protected PVInt pvRawValue = null;
         protected PVInt pvDeviceHigh;
         protected PVInt pvDeviceLow;
         
         protected PVDouble pvEngUnitsLow;
         protected PVDouble pvEngUnitsHigh;
         protected PVDouble pvSlope;
-        protected DBField dbSlope;
         protected PVDouble pvIntercept;
-        protected DBField dbIntercept;
         
         protected double slope;
         protected double intercept;
         
         
-        protected LinearConvertBase(String supportName,DBStructure dbStructure) {
-            super(supportName,dbStructure);
-            this.dbStructure = dbStructure;
-            pvStructure = dbStructure.getPVStructure();
+        protected LinearConvertBase(String supportName,PVStructure pvStructure) {
+            super(supportName,pvStructure);
+            this.pvStructure = pvStructure;
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.AbstractSupport#initialize()
+         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
-        public void initialize() {
+        @Override
+        public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,linearConvertInput)) return;
-            DBRecord dbRecord = dbStructure.getDBRecord();
-            DBField parentDBField = dbStructure.getParent();
-            PVField parentPVField = parentDBField.getPVField();
-            PVField pvField = pvProperty.findProperty(parentPVField,"value");
-            if(pvField==null) {
-                super.message("parent does not have a value field", MessageType.error);
-                return;
-            }
-            if(pvField.getField().getType()!=Type.pvInt) {
-                super.message("parent value field does not have type int", MessageType.error);
-                return;
-            }
-            pvRawValue = (PVInt)pvField;
-            dbRawValue = dbRecord.findDBField(pvField);
-            parentDBField = parentDBField.getParent();
-            parentPVField = parentDBField.getPVField();
-            pvField = pvProperty.findProperty(parentPVField,"value");
-            if(pvField==null) {
-                super.message("parent of parent does not have a value field", MessageType.error);
-                return;
-            }
-            if(pvField.getField().getType()!=Type.pvDouble) {
-                super.message("parent of parent value field does not have type double", MessageType.error);
-                return;
-            }
-            pvValue = (PVDouble)pvField;
-            dbValue = dbRecord.findDBField(pvField);
-            pvEngUnitsLow = (PVDouble)pvProperty.findProperty(pvStructure,"engUnitsLow");
-            pvEngUnitsHigh = (PVDouble)pvProperty.findProperty(pvStructure,"engUnitsHigh");
-            pvDeviceLow = (PVInt)pvProperty.findProperty(pvStructure,"deviceLow");
-            pvDeviceHigh = (PVInt)pvProperty.findProperty(pvStructure,"deviceHigh");
-            pvSlope = (PVDouble)pvProperty.findProperty(pvStructure,"slope");
-            dbSlope = dbRecord.findDBField(pvSlope);
-            pvIntercept = (PVDouble)pvProperty.findProperty(pvStructure,"intercept");
-            dbIntercept = dbRecord.findDBField(pvSlope);
+            PVStructure parentPVField = pvStructure.getParent();
+            pvRawValue = getInt(pvStructure,"value");
+            if(pvRawValue==null) return;
+            parentPVField = parentPVField.getParent();
+            pvValue = getDouble(parentPVField,"value");
+            if(pvValue==null) return;
+            pvEngUnitsLow = getDouble(pvStructure,"pvEngUnitsLow");
+            if(pvEngUnitsLow==null) return;
+            pvEngUnitsHigh = getDouble(pvStructure,"pvEngUnitsHigh");
+            if(pvEngUnitsHigh==null) return;
+            pvDeviceLow = getInt(pvStructure,"pvDeviceLow");
+            if(pvDeviceLow==null) return;
+            pvDeviceHigh = getInt(pvStructure,"pvDeviceHigh");
+            if(pvDeviceHigh==null) return;
+            pvSlope = getDouble(pvStructure,"pvSlope");
+            if(pvSlope==null) return;
+            pvIntercept = getDouble(pvStructure,"pvIntercept");
+            if(pvIntercept==null) return;
             super.setSupportState(SupportState.readyForStart);
         }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#uninitialize()
          */
@@ -159,9 +136,7 @@ public class LinearConvertFactory {
                 intercept = (deviceHigh*engUnitsLow - deviceLow*engUnitsHigh)
                     /(deviceHigh - deviceLow);
                 pvSlope.put(slope);
-                dbSlope.postPut();
                 pvIntercept.put(intercept);
-                dbIntercept.postPut();
             }
             super.setSupportState(SupportState.ready);
         }
@@ -172,12 +147,46 @@ public class LinearConvertFactory {
             super.setSupportState(SupportState.readyForStart);
         }
         
+        private PVDouble getDouble(PVStructure parent,String fieldName) {
+            PVField pvField = parent.getSubField(fieldName);
+            if(pvField==null) {
+                parent.message("does not have field " + fieldName, MessageType.error);
+            }
+            if(pvField.getField().getType()!=Type.scalar) {
+                pvField.message("type is not double", MessageType.error);
+                return null;
+            }
+            PVScalar pvScalar = (PVScalar)pvField;
+            if(pvScalar.getScalar().getScalarType()!=ScalarType.pvDouble) {
+                super.message("parent of parent value field does not have type int", MessageType.error);
+                return null;
+            }
+            return (PVDouble)pvField;
+        }
+        
+        private PVInt getInt(PVStructure parent,String fieldName) {
+            PVField pvField = parent.getSubField(fieldName);
+            if(pvField==null) {
+                parent.message("does not have field " + fieldName, MessageType.error);
+            }
+            if(pvField.getField().getType()!=Type.scalar) {
+                pvField.message("type is not double", MessageType.error);
+                return null;
+            }
+            PVScalar pvScalar = (PVScalar)pvField;
+            if(pvScalar.getScalar().getScalarType()!=ScalarType.pvInt) {
+                super.message("parent of parent value field does not have type int", MessageType.error);
+                return null;
+            }
+            return (PVInt)pvField;
+        }
+        
     }
     
     private static  class LinearConvertInput extends LinearConvertBase {
         
-        private LinearConvertInput(DBStructure dbStructure) {
-            super(linearConvertInput,dbStructure);
+        private LinearConvertInput(PVStructure pvStructure) {
+            super(linearConvertInput,pvStructure);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -186,7 +195,6 @@ public class LinearConvertFactory {
             double rawValue = (double)pvRawValue.get();
             double value = rawValue*slope + intercept;
             pvValue.put(value);
-            dbValue.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         
@@ -194,8 +202,8 @@ public class LinearConvertFactory {
     
     private static  class LinearConvertOutput extends LinearConvertBase {
         
-        private LinearConvertOutput(DBStructure dbStructure) {
-            super(linearConvertOutput,dbStructure);
+        private LinearConvertOutput(PVStructure pvStructure) {
+            super(linearConvertOutput,pvStructure);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -204,7 +212,6 @@ public class LinearConvertFactory {
             double value = pvValue.get();
             double rawValue = (value -intercept)/slope;
             pvRawValue.put((int)rawValue);
-            dbRawValue.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         

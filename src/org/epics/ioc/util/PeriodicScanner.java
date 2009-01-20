@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.db.DBRecord;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
 
 /**
  * Periodic Scanner.
@@ -19,7 +20,7 @@ import org.epics.ioc.db.DBRecord;
  * The defaults are minPeriod = .01 seconds and deltaPeriod = .01 seconds.
  * These can be overridden by environment variables IOCPeriodicScanPeriodMinimum
  * and IOCPeriodicScanPeriodDelta.
- * The priority values are defined by ScanPriority.
+ * The priority values are defined by ThreadPriority.
  * @author mrk
  *
  */
@@ -28,20 +29,20 @@ public interface PeriodicScanner {
      * Schedule a record to be periodically scanned.
      * The record must have a scan field and it must specify periodic scanning.
      * This is called by ScanField only after the record instance has been merged into
-     * the master IOCDB and the record instance has been started.
-     * @param dbRecord The record instance.
+     * the master pvDatabase and the record instance has been started.
+     * @param pvRecord The record instance.
      * @return false if the request failed or true if it was successful.
      */
-    boolean addRecord(DBRecord dbRecord);
+    boolean addRecord(PVRecord pvRecord);
     /**
      * Remove the record from it's periodic scan list.
      * This is called by ScanField whenever any of the scan fields are modified or ScanField.stop is called
-     * @param dbRecord The record instance.
+     * @param pvRecord The record instance.
      * @param rate The current scan rate.
-     * @param scanPriority The current priority.
+     * @param threadPriority The current priority.
      * @return false if the request failed or true if it was successful.
      */
-    boolean removeRecord(DBRecord dbRecord,double rate,ScanPriority scanPriority);
+    boolean removeRecord(PVRecord pvRecord,double rate,ThreadPriority threadPriority);
     /**
      * Show a list of all records being periodically scanned.
      * @return The list.
@@ -52,7 +53,7 @@ public interface PeriodicScanner {
      * @param priority The priority.
      * @return The list.
      */
-    String show(ScanPriority priority);
+    String show(ThreadPriority priority);
     /**
      * Show a list of all records being scanned at the specified rate.
      * @param rate The rate.
@@ -66,5 +67,5 @@ public interface PeriodicScanner {
      * @param priority The priority.
      * @return The list.
      */
-    String show(double rate,ScanPriority priority);
+    String show(double rate,ThreadPriority priority);
 }

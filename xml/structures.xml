@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<database>
+<include addPath = "${JAVAIOC}/xml/structure" />
+<include href = "generic.xml" />
+<include href = "commonFields.xml" />
+<include href = "control.xml" />
+<include href = "alarm.xml" />
+<include href = "supportState.xml" />
+<include href = "channelAccess.xml" />
+<include href = "analog.xml" />
+<include href = "digital.xml" />
+<include href = "event.xml" />
+<include href = "calc.xml" />
+<include href = "delay.xml" />
+<include href = "processControl.xml" />
+
+<!--
+<include href = "portDriver.xml" />
+<include removePath = "${JAVAIOC}/xml/structure" />
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" />
+<include href = "exampleCalculatorSupport.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" />
+-->
+
+<!-- following is for tests -->
+<structure name = "powerSupplyCurrentFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.device.PowerSupplyFactory</scalar>
+</structure>
+
+
+<include removePath = "${JAVAIOC}/xml/structure" />
+</database>
+

@@ -16,10 +16,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.locks.ReentrantLock;
 
-
-import org.epics.ioc.util.TimeStamp;
-import org.epics.ioc.util.TimeUtility;
-
 /**
  * Factory for creating implementations of Trace.
  * @author mrk
@@ -47,7 +43,6 @@ public class TraceFactory {
         private static final int DEFAULT_TRACE_TRUNCATE_SIZE = 80;
         private ReentrantLock traceLock = new ReentrantLock();
         private Writer file = new BufferedWriter(new OutputStreamWriter(System.out));
-        private TimeStamp timeStamp = new TimeStamp();
         private int mask = Trace.ERROR;//|Trace.SUPPORT|Trace.DRIVER;//|Trace.FLOW;
         private int iomask = Trace.IO_NODATA;//|Trace.IO_ASCII;
         private int truncateSize = DEFAULT_TRACE_TRUNCATE_SIZE;
@@ -258,11 +253,7 @@ public class TraceFactory {
         }
 
         private String getTime() {
-            TimeUtility.set(timeStamp,System.currentTimeMillis());
-            long secondPastEpochs = timeStamp.secondsPastEpoch;
-            int nano = timeStamp.nanoSeconds;
-            long milliPastEpoch = nano/1000000 + secondPastEpochs*1000;
-            Date date = new Date(milliPastEpoch);
+            Date date = new Date(System.currentTimeMillis());
             return String.format("%tF %tT.%tL ", date,date,date);
         }
         private static HashMap<Character,String> escapedMap = new HashMap<Character,String> ();

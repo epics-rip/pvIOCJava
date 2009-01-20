@@ -5,13 +5,14 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.Type;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.Type;
+
 
 /**
  * Implementation of CDField.
@@ -104,28 +105,21 @@ public class BaseCDField implements CDField {
         maxNumPuts = 0;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#get(org.epics.ioc.pv.PVField, boolean)
+     * @see org.epics.ioc.ca.CDField#get(org.epics.pvData.pv.PVField)
      */
-    public void get(PVField toPVField,boolean postPut) {
+    public void get(PVField toPVField) {
         if(numPuts<=0) return;
         Field field = toPVField.getField();
         Type type = field.getType();
         if(type!=pvField.getField().getType()) {
             throw new IllegalStateException("Logic error.");
         }
-        if(type.isScalar()) {
-            convert.copyScalar(pvField,toPVField);
-            if(postPut) channelField.postPut();
-        } else if(type==Type.pvArray) {
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(!elementType.isScalar()) {
-                throw new IllegalStateException("Logic error.");
-            }
+        if(type==Type.scalar) {
+            convert.copyScalar((PVScalar)pvField,(PVScalar)toPVField);
+        } else if(type==Type.scalarArray) {
             PVArray pvArray = (PVArray)pvField;
             PVArray toPVArray = (PVArray)toPVField;
             convert.copyArray(pvArray, 0, toPVArray, 0, pvArray.getLength());
-            if(postPut) channelField.postPut();
         } else {
             throw new IllegalStateException("Logic error.");
         }
@@ -139,14 +133,9 @@ public class BaseCDField implements CDField {
         if(type!=pvField.getField().getType()) {
             throw new IllegalStateException("Logic error.");
         }
-        if(type.isScalar()) {
-            convert.copyScalar(fromPVField, pvField);
-        } else if(type==Type.pvArray) {
-            Array array = (Array)field;
-            Type elementType = array.getElementType();
-            if(!elementType.isScalar()) {
-                throw new IllegalStateException("Logic error.");
-            }
+        if(type==Type.scalar) {
+            convert.copyScalar((PVScalar)fromPVField, (PVScalar)pvField);
+        } else if(type==Type.scalarArray) {
             PVArray pvArray = (PVArray)pvField;
             PVArray fromPVArray = (PVArray)fromPVField;
             convert.copyArray(fromPVArray, 0, pvArray, 0, fromPVArray.getLength());

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<database>
+<structure name = "eventFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.basic.EventFactory</scalar>
+</structure>
+</database>

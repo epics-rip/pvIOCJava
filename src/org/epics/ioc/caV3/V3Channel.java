@@ -6,8 +6,21 @@
 package org.epics.ioc.caV3;
 
 import org.epics.ioc.ca.Channel;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.IOCExecutor;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.pvData.test.RequesterForTesting;
+import org.epics.pvData.xml.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+
 
 /**
  * Channel interface for communicating with V3 IOCs.
@@ -45,10 +58,10 @@ public interface V3Channel extends Channel
      * Get a general purpose IOCExecutor.
      * @return The iocExecutor;
      */
-    IOCExecutor getIOCExecutor();
+    Executor getExecutor();
     /**
      * If the native type is enum what is the request type.
      * @return The Type.
      */
-    Type getEnumRequestType();
+    ScalarType getEnumRequestScalarType();
 }

@@ -5,14 +5,8 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.create.Create;
-import org.epics.ioc.create.Enumerated;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.pv.Type;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
 
 /**
  * Defines that scan types, i.e. what causes a record to process.
@@ -41,24 +35,21 @@ public enum ScanType {
     };
     /**
      * Convenience method for code the raises alarms.
-     * @param dbField A field which is potentially a scanType structure.
-     * @return The Enumerated interface only if dbField has an Enumerated interface and defines
+     * @param pvField A field which is potentially a scanType structure.
+     * @return The Enumerated interface only if pvField has an Enumerated interface and defines
      * the scanType choices.
      */
-    public static Enumerated getScanType(DBField dbField) {
-        PVField pvField = dbField.getPVField();
-        if(pvField.getField().getType()!=Type.pvStructure) {
-            pvField.message("field is not an scanType structure", MessageType.error);
+    public static Enumerated getScanType(PVField pvField) {
+        if(pvField.getField().getType()!=Type.structure) {
+            pvField.message("field is not a structure", MessageType.error);
             return null;
         }
-        DBStructure dbStructure = (DBStructure)dbField;
-        Create create = dbStructure.getCreate();
-        if(create==null || !(create instanceof Enumerated)) {
+        Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
+        if(enumerated==null) {
             pvField.message("interface Enumerated not found", MessageType.error);
             return null;
         }
-        Enumerated enumerated = (Enumerated)create;
-        PVStringArray pvChoices = enumerated.getChoicesField();
+        PVStringArray pvChoices = enumerated.getChoices();
         int len = pvChoices.getLength();
         if(len!=scanTypeChoices.length) {
             pvField.message("not an scanType structure", MessageType.error);

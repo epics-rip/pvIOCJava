@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<database>
+<record name = "counter" type = "generic">
+<!--
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+-->
+    <scalar name = "value" type = "double" />
+    <structure name = "display" type = "display"/>
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">value+100.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "supportSequence" type = "generic" >
+        <structure name = "0" type = "processSupport">
+            <scalar name = "pvname" >double01</scalar>
+        </structure>
+        <structure name = "1" type = "outputSupport">
+            <scalar name = "pvname" >double02</scalar>
+            <scalar name = "process" >true</scalar>
+        </structure>
+    </structure>
+</record>
+<record name = "double01" type = "generic">
+<!--
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+-->
+    <scalar name = "value" type = "double" />
+    <structure name = "display" type = "display" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "pvname">counter</scalar>
+        <scalar name = "process">false</scalar>
+        <scalar name = "propertyNames">alarm,display</scalar>
+    </structure>
+</record>
+<record name = "double02" type = "generic">
+<!--
+  <structure name = "alarm" type = "alarm" />
+  <structure name = "timeStamp" type = "timeStamp" />
+-->
+  <scalar name = "value" type = "double" />
+</record>
+
+</database>

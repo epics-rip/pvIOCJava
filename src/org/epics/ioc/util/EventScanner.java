@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.ioc.db.DBRecord;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
 
 /**
  * Event Scanner.
@@ -26,21 +27,21 @@ public interface EventScanner {
     /**
      * Add a record to be event scanned.
      * The record must have a scan field and it must specify event scanning.
-     * @param dbRecord The record instance.
+     * @param pvRecord The record instance.
      * This is called by ScanField only after the record instance has been merged into
-     * the master IOCDB and the record instance has been started.
+     * the master pvDatabase and the record instance has been started.
      * @return false if the request failed or true if it was successful.
      */
-    boolean addRecord(DBRecord dbRecord);
+    boolean addRecord(PVRecord pvRecord);
     /**
      * Remove the record from it's event scanned list.
      * This is called by ScanField whenever any of the scan fields are modified or ScanField.stop is called.
-     * @param dbRecord The record instance.
+     * @param pvRecord The record instance.
      * @param eventName The current event name.
      * @param scanPriority The current priority.
      * @return false if the request failed or true if it was successful.
      */
-    boolean removeRecord(DBRecord dbRecord,String eventName,ScanPriority scanPriority);
+    boolean removeRecord(PVRecord pvRecord,String eventName,ThreadPriority scanPriority);
     /**
      * Add an event announcer.
      * @param eventName The event name.

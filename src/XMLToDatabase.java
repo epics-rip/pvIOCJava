@@ -10,20 +10,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.epics.ioc.db.DBD;
-import org.epics.ioc.db.DBDCreate;
-import org.epics.ioc.db.DBDFactory;
-import org.epics.ioc.db.DBDStructure;
-import org.epics.ioc.db.DBDSupport;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.support.SupportCreation;
-import org.epics.ioc.support.SupportCreationFactory;
-import org.epics.ioc.swtshell.SwtshellFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+
+import org.epics.ioc.util.*;
+import org.epics.ioc.swtshell.*;
 
 /**
  * read and dump a Database Definition and Record Instance Files.
@@ -37,6 +30,7 @@ public class XMLToDatabase {
         servers
     }
 
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     /**
      * read and dump a database instance file.
      * @param  args is a sequence of flags and filenames.
@@ -46,8 +40,6 @@ public class XMLToDatabase {
             usage();
             return;
         }
-        DBD dbd = DBDFactory.getMasterDBD();
-        IOCDB iocdb = IOCDBFactory.create("master");
         Requester iocRequester = new Listener();
         int nextArg = 0;
         State state = State.dbFile;
@@ -63,29 +55,23 @@ public class XMLToDatabase {
                     }
                     arg = args[nextArg++];
                 }
-                if(arg.equals("dumpDBD")) {
-                    dumpDBD(dbd);
+                if(arg.equals("dumpStructures")) {
+                    dumpStructures();
                 } else if(arg.equals("dumpRecords")) {
-                    dumpDB(dbd,iocdb);
-                } else if(arg.equals("db")){
+                    dumpRecords();
+                } else if(arg.equals("pv")){
                     state = State.dbFile;
                 } else if(arg.equals("swtshell")) {
                     SwtshellFactory.swtshell();
                 } else if(arg.equals("server")) {
                     state = State.servers;
-                } else if(arg.equals("startIOC")) {
-                    SupportCreate supportCreate = new SupportCreate();
-                    if(!supportCreate.create()) {
-                        System.out.println("support create failed");
-                        return;
-                    }
                 } else {
                     System.err.println("unknown arg: " + arg);
                     usage();
                     return;
                 }
             } else if(state==State.dbFile){
-                parseDB(dbd,iocdb,arg,iocRequester);
+                parseDB(arg,iocRequester);
             } else if(state==State.servers) {
                 startServer(arg);
             } else {
@@ -98,10 +84,9 @@ public class XMLToDatabase {
     
     static void usage() {
         System.out.println("Usage:"
-                + " -db dbList"
-                + " -dumpDBD"
+                + " -pv pvList"
+                + " -dumpStructures"
                 + " -dumpRecords"
-                + " -startIOC"
                 + " -server file"
                 + " -swtshell ");
     }
@@ -162,43 +147,31 @@ public class XMLToDatabase {
         }
     }
         
-    static void dumpDBD(DBD dbd) {
-        DBDStructure[] dbdStructures = dbd.getDBDStructures();
-        if(dbdStructures.length>0) System.out.printf("\n\nstructures");
-        for(DBDStructure dbdStructure : dbdStructures) {
-            System.out.print(dbdStructure.toString());
+    static void dumpStructures() {
+        PVStructure[] pvStructures = masterPVDatabase.getStructures();
+        if(pvStructures.length>0) System.out.printf("\n\nstructures");
+        for(PVStructure pvStructure : pvStructures) {
+            System.out.print(pvStructure.toString());
         }
-        
-        DBDSupport[] dbdSupports = dbd.getDBDSupports();
-        if(dbdSupports.length>0) System.out.printf("\n\nsupport");
-        for(DBDSupport dbdSupport : dbdSupports) {
-            System.out.print(dbdSupport.toString());
-        }
-        
-        DBDCreate[] dbdCreates = dbd.getDBDCreates();
-        if(dbdCreates.length>0) System.out.printf("\n\ncreate");
-        for(DBDCreate dbdCreate : dbdCreates) {
-            System.out.print(dbdCreate.toString());
+    }
+    
+    static void dumpRecords() {
+        PVRecord[] pvRecords = masterPVDatabase.getRecords();
+        if(pvRecords.length>0) System.out.printf("\n\nstructures");
+        for(PVRecord pvRecord : pvRecords) {
+            System.out.print(pvRecord.toString());
         }
     }
 
-    static void parseDB(DBD dbd, IOCDB iocdb,String fileName,Requester iocRequester) {
-        System.out.printf("\nparsing DB file %s\n",fileName);
+    static void parseDB(String fileName,Requester iocRequester) {
+        System.out.printf("\nparsing PV file %s\n",fileName);
         try {
-            XMLToIOCDBFactory.convert(dbd,iocdb,fileName,iocRequester);
+            IOCFactory.initDatabase(fileName,iocRequester);
         }  catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
     }
-    
-    static void dumpDB(DBD dbd, IOCDB iocdb) {
-        System.out.printf("\nrecords\n");
-        DBRecord[] dbRecords = iocdb.getDBRecords();
-        for(DBRecord dbRecord : dbRecords) {
-            System.out.print(dbRecord.toString());
-        }
-    }
-    
+     
     private static class Listener implements Requester {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -212,48 +185,6 @@ public class XMLToDatabase {
         public void message(String message, MessageType messageType) {
             System.out.println(message);
             
-        }
-    }
-    
-    private static class SupportCreate implements Requester{
-        
-        private SupportCreate() {}
-        
-        private void message(String message) {
-            System.out.println(message);
-        }
-        private boolean create() {
-            IOCDB iocdb = IOCDBFactory.getMaster();
-            SupportCreation supportCreation = SupportCreationFactory.createSupportCreation(iocdb, this);
-            boolean gotSupport = supportCreation.createSupport();
-            if(!gotSupport) {
-                message("Did not find all support.");
-                return false;
-            }
-            boolean readyForStart = supportCreation.initializeSupport();
-            if(!readyForStart) {
-                message("initializeSupport failed");
-                return false;
-            }
-            boolean ready = supportCreation.startSupport();
-            if(!ready) {
-                message("startSupport failed");
-                return false;
-            }
-            return true;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        public String getRequesterName() {
-            return "swtshell";
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            System.out.println("swtshell " + message);
         }
     }
 }

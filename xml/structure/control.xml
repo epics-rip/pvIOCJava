@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<database>
+<structure name = "controlLimitFactory">
+  <scalar name = "pvReplaceFactory" type = "string">
+    org.epics.ioc.support.basic.ControlLimitFactory</scalar>
+</structure>
+</database>

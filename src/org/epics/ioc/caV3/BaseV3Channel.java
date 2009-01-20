@@ -36,6 +36,7 @@ import org.epics.ioc.util.IOCExecutorFactory;
 import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanPriority;
+import org.epics.pvData.pv.ScalarType;
 
 /**
  * Base class that implements V3Channel.
@@ -123,13 +124,13 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#getIOCExecutor()
      */
-    public IOCExecutor getIOCExecutor() {
+    public IOCExecutor getExecutor() {
         return iocExecutor;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#getEnumRequestType()
      */
-    public Type getEnumRequestType() {
+    public ScalarType getEnumRequestScalarType() {
         return enumRequestType;
     }
     /* (non-Javadoc)

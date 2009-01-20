@@ -7,41 +7,17 @@ package org.epics.ioc.support.ca;
 
 import java.util.List;
 
-import org.epics.ioc.ca.CD;
-import org.epics.ioc.ca.CDField;
-import org.epics.ioc.ca.CDMonitor;
-import org.epics.ioc.ca.CDMonitorFactory;
-import org.epics.ioc.ca.CDMonitorRequester;
-import org.epics.ioc.ca.CDStructure;
-import org.epics.ioc.ca.ChannelField;
-import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVEnumerated;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.ScanPriority;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
 
 /**
  * Implementation for a channel access monitor link.
@@ -54,10 +30,10 @@ implements CDMonitorRequester,RecordProcessRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param dbStructure The dbStructure for the field being supported.
+     * @param pvStructure The pvStructure for the field being supported.
      */
-    public MonitorSupportBase(String supportName,DBStructure dbStructure) {
-        super(supportName,dbStructure);
+    public MonitorSupportBase(String supportName,PVStructure pvStructure) {
+        super(supportName,pvStructure);
     }
     
     private enum MonitorType {
@@ -77,19 +53,18 @@ implements CDMonitorRequester,RecordProcessRequester
         }
     }
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
-    private static IOCExecutor iocExecutor
-        = IOCExecutorFactory.create("caLinkMonitor", ScanPriority.low);
+    private static Executor executor = ExecutorFactory.create("caLinkMonitor", ThreadPriority.low);
     private PVInt monitorTypeAccess = null;
-    private PVDouble deadbandAccess = null;
+    private PVDouble deapvandAccess = null;
     private PVInt queueSizeAccess = null;
     private PVBoolean reportOverrunAccess = null;
     private PVBoolean processAccess = null;  
     
-    private DBField valueDBField = null;
+    private PVField valuePVField = null;
     
     private String channelFieldName = null;
     private MonitorType monitorType = null;
-    private double deadband = 0.0;
+    private double deapvand = 0.0;
     private int queueSize = 0;
     private boolean reportOverrun = false;
     private boolean isRecordProcessRequester = false;
@@ -114,21 +89,20 @@ implements CDMonitorRequester,RecordProcessRequester
     private String alarmMessage = null;
     private int numberOverrun = 0;
    
-    
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#initialize()
+     * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize() {
-        super.initialize();
+    public void initialize(RecordSupport recordSupport) {
+        super.initialize(recordSupport);
         if(super.getSupportState()!=SupportState.readyForStart) return;
-        PVStructure pvTypeStructure = pvStructure.getStructureField("type", "monitorType");
-        PVEnumerated pvEnumerated = pvTypeStructure.getPVEnumerated();
-        if(pvEnumerated!=null) monitorTypeAccess = pvEnumerated.getIndexField();
+        PVStructure pvTypeStructure = pvStructure.getStructureField("type");
+        Enumerated enumerated = EnumeratedFactory.getEnumerated(pvTypeStructure);
+        if(enumerated!=null) monitorTypeAccess = enumerated.getIndex();
         if(monitorTypeAccess==null) {
             uninitialize(); return;
         }
-        deadbandAccess = pvStructure.getDoubleField("deadband");
-        if(deadbandAccess==null)  {
+        deapvandAccess = pvStructure.getDoubleField("deapvand");
+        if(deapvandAccess==null)  {
             uninitialize(); return;
         }
         queueSizeAccess = pvStructure.getIntField("queueSize");
@@ -143,19 +117,17 @@ implements CDMonitorRequester,RecordProcessRequester
         if(processAccess==null)  {
             uninitialize(); return;
         }
-        DBField dbParent = dbStructure.getParent();
-        PVField pvField = null;
-        while(dbParent!=null) {
-            PVField pvParent = dbParent.getPVField();
-            pvField = pvProperty.findProperty(pvParent,"value");
-            if(pvField!=null) break;
-            dbParent = dbParent.getParent();
+        PVStructure pvParent = pvStructure.getParent();
+        PVField valuePVField = null;
+        while(pvParent!=null) {
+            valuePVField = pvProperty.findProperty(pvParent,"value");
+            if(valuePVField!=null) break;
+            pvParent = pvParent.getParent();
         }
-        if(pvField==null) {
+        if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
             uninitialize(); return;
         }
-        valueDBField = dbStructure.getDBRecord().findDBField(pvField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
@@ -165,7 +137,7 @@ implements CDMonitorRequester,RecordProcessRequester
         if(super.getSupportState()!=SupportState.ready) return;
         int index = monitorTypeAccess.get();
         monitorType = MonitorType.getType(index);
-        deadband = deadbandAccess.get();
+        deapvand = deapvandAccess.get();
         queueSize = queueSizeAccess.get();
         if(queueSize<=1) {
             pvStructure.message("queueSize being put to 2", MessageType.warning);
@@ -237,13 +209,13 @@ implements CDMonitorRequester,RecordProcessRequester
             numberOverrun = number;
             return;
         }
-        dbRecord.lock();
+        pvRecord.lock();
         try {
             pvStructure.message(
                 "missed " + Integer.toString(number) + " notifications",
                 MessageType.warning);
         } finally {
-            dbRecord.unlock();
+            pvRecord.unlock();
         }
     } 
     
@@ -251,7 +223,7 @@ implements CDMonitorRequester,RecordProcessRequester
      * @see org.epics.ioc.ca.CDMonitorRequester#monitorCD(org.epics.ioc.ca.CD)
      */
     public void monitorCD(CD cd) {
-        dbRecord.lock();
+        pvRecord.lock();
         try {
             ChannelFieldGroup channelFieldGroup = cd.getChannelFieldGroup();
             List<ChannelField> channelFieldList = channelFieldGroup.getList();
@@ -271,7 +243,7 @@ implements CDMonitorRequester,RecordProcessRequester
                 }
                 if(cdField.getMaxNumPuts()==0) continue;
                 if(channelField==valueChannelField) {
-                    if(copy(targetPVField,valueDBField.getPVField())) valueChanged = true;
+                    if(copy(targetPVField,valuePVField)) valueChanged = true;
                 } else if(channelField==valueIndexChannelField){
                     PVInt pvInt = (PVInt)targetPVField;
                     newValueIndex = pvInt.get();
@@ -310,7 +282,7 @@ implements CDMonitorRequester,RecordProcessRequester
                 post();
             }
         } finally {
-            dbRecord.unlock();
+            pvRecord.unlock();
         }
         if(process) {
             if(isRecordProcessRequester) {
@@ -319,11 +291,11 @@ implements CDMonitorRequester,RecordProcessRequester
                 recordProcess.processSelfProcess(this, false);
                 return;
             }
-            dbRecord.lock();
+            pvRecord.lock();
             try {
                 post();
             } finally {
-                dbRecord.unlock();
+                pvRecord.unlock();
             }
         }
     }
@@ -382,9 +354,9 @@ implements CDMonitorRequester,RecordProcessRequester
             case change:
                 cdMonitor.lookForChange(valueChannelField, true); break;
             case absoluteChange:
-                cdMonitor.lookForAbsoluteChange(valueChannelField, deadband); break;
+                cdMonitor.lookForAbsoluteChange(valueChannelField, deapvand); break;
             case percentageChange:
-                cdMonitor.lookForPercentageChange(valueChannelField, deadband); break;
+                cdMonitor.lookForPercentageChange(valueChannelField, deapvand); break;
             }
         }
         if(alarmIsProperty) {
@@ -409,34 +381,34 @@ implements CDMonitorRequester,RecordProcessRequester
                 cdMonitor.lookForPut(channelField, true);
             }
         }
-        cdMonitor.start(queueSize,iocExecutor);
+        cdMonitor.start(queueSize,executor);
     }
     
     private boolean checkCompatibility(Field targetField) {
         Type targetType = targetField.getType();
-        Field valueField = valueDBField.getPVField().getField();
+        Field valueField = valuePVField.getField();
         Type valueType = valueField.getType();
-        if(valueType.isScalar() && targetType.isScalar()) {
-            if(convert.isCopyScalarCompatible(targetField,valueField)) return true;
-        } else if(targetType==Type.pvArray && valueType==Type.pvArray) {
+        if(valueType==Type.scalar && targetType==Type.scalar) {
+            if(convert.isCopyScalarCompatible((Scalar)targetField,(Scalar)valueField)) return true;
+        } else if(targetType==Type.scalarArray && valueType==Type.scalarArray) {
             Array targetArray = (Array)targetField;
             Array valueArray = (Array)valueField;
             if(convert.isCopyArrayCompatible(targetArray,valueArray)) return true;
-        } else if(targetType==Type.pvStructure && valueType==Type.pvStructure) {
+        } else if(targetType==Type.structure && valueType==Type.structure) {
             Structure targetStructure = (Structure)targetField;
             Structure valueStructure = (Structure)valueField;
             if(convert.isCopyStructureCompatible(targetStructure,valueStructure)) return true;
         }
-        message("is not compatible with pvname " + pvnamePVString.get(),MessageType.error);
+        message("is not compatible with pvname " + pvnamePV.get(),MessageType.error);
         return false;
     }
     
     private boolean copy(PVField fromPVField,PVField toPVField) {
         Type fromType = fromPVField.getField().getType();
         Type toType = toPVField.getField().getType();
-        if(fromType.isScalar() && toType.isScalar()) {
-            convert.copyScalar(fromPVField, toPVField);
-        } else if(fromType==Type.pvArray && toType==Type.pvArray) {
+        if(fromType==Type.scalar && toType==Type.scalar) {
+            convert.copyScalar((PVScalar)fromPVField,(PVScalar)toPVField);
+        } else if(fromType==Type.scalarArray && toType==Type.scalarArray) {
             PVArray fromPVArray = (PVArray)fromPVField;
             PVArray toPVArray = (PVArray)toPVField;
             int arrayLength = fromPVArray.getLength();
@@ -444,7 +416,7 @@ implements CDMonitorRequester,RecordProcessRequester
             if(num!=arrayLength) message(
                 "length " + arrayLength + " but only copied " + num,
                 MessageType.warning);;
-        } else if(fromType==Type.pvStructure && toType==Type.pvStructure) {
+        } else if(fromType==Type.structure && toType==Type.structure) {
             PVStructure fromPVStructure = (PVStructure)fromPVField;
             PVStructure toPVStructure = (PVStructure)toPVField;
             convert.copyStructure(fromPVStructure,toPVStructure);
@@ -459,25 +431,21 @@ implements CDMonitorRequester,RecordProcessRequester
     
     private void post() {
         if(valueChanged) {
-            valueDBField.postPut();
             valueChanged = false;
         }
         if(valueIndexChanged) {
-            valueIndexPVInt.put(newValueIndex);
-            valueIndexDBField.postPut();
+            valueIndexPV.put(newValueIndex);
             valueIndexChanged = false;
             newValueIndex = 0;
         }
         if(valueChoicesChanged) {
-            valueChoicesPVStringArray.put(0, newValueChoices.length, newValueChoices, 0);
-            valueChoicesDBField.postPut();
+            valueChoicesPV.put(0, newValueChoices.length, newValueChoices, 0);
             valueChoicesChanged = false;
             newValueChoices = null;
         }
         if(gotAdditionalPropertys){
             for(int j=0; j<propertyChannelFields.length; j++) {
                 if(propertyValueChanged[j]) {
-                    propertyDBFields[j].postPut();
                     propertyValueChanged[j] = false;
                 }
             }

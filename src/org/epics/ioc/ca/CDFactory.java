@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVDataFactory;
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.pv.MessageType;
+
 
 /**
  * A factory for creating CD and CDQueue.

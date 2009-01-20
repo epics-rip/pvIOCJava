@@ -5,18 +5,19 @@
  */
 package org.epics.ioc.support.calc;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.MessageType;
+import java.util.List;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
 
 /**
  * @author mrk
@@ -25,21 +26,19 @@ import org.epics.ioc.util.MessageType;
 public abstract class AbstractCalculatorSupport extends AbstractSupport {
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private String supportName = null;
-    private DBStructure dbStructure = null;
-    private PVStructure pvStructure;
+    private PVStructure pvStructure = null;
     
     
 
     /**
      * Constructor.
      * @param supportName The supportName.
-     * @param dbStructure The structure being supported.
+     * @param pvStructure The structure being supported.
      */
-    protected AbstractCalculatorSupport(String supportName,DBStructure dbStructure) {
-        super(supportName,dbStructure);
+    protected AbstractCalculatorSupport(String supportName,PVStructure pvStructure) {
+        super(supportName,pvStructure);
         this.supportName = supportName;
-        this.dbStructure = dbStructure;
-        pvStructure = dbStructure.getPVStructure();
+        this.pvStructure = pvStructure;
     }
     
     /**
@@ -58,45 +57,42 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
      */
     abstract protected void setArgPVFields(PVField[] pvArgs);
     /**
-     * Called by AbstractCalculatorSupport to give the derived class the DBField for the value.
-     * @param dbValue The DBField for the value.
+     * Called by AbstractCalculatorSupport to give the derived class the PVField for the value.
+     * @param pvValue The PVField for the value.
      */
-    abstract protected void setValueDBField(DBField dbValue);
-    /* 
-     * Calls getArgTypes, creates the PVField[] for the arguments and calls setArgPVFields.
-     * Calls getValueType, locates DBField for the value field, and calls setValueDBField.
+    abstract protected void setValuePVField(PVField pvValue);
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize() {
+    public void initialize(RecordSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-        DBField dbParent = dbStructure.getParent();
-        PVField pvParent = dbParent.getPVField();
-        PVField pvField = pvProperty.findProperty(pvParent,"value");
-        if(pvField==null) { // try parent of parent. 
-            pvField = pvParent.getParent();
-            if(pvField!=null) pvField = pvProperty.findProperty(pvField,"value");
+        PVStructure pvParent = pvStructure.getParent();
+        PVField valuePVField = pvProperty.findProperty(pvParent,"value");
+        // if not found try partent of parent
+        if(valuePVField==null) {
+            PVStructure pvTemp = pvParent.getParent();
+            if(pvTemp!=null) valuePVField = pvProperty.findProperty(pvTemp,"value");
         }
-        if(pvField==null) {
+        if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
             return;
         }
-        DBField valueDBField = dbStructure.getDBRecord().findDBField(pvField);
-        if(getValueType()!=valueDBField.getPVField().getField().getType()) {
+        if(getValueType()!=valuePVField.getField().getType()) {
             pvStructure.message("value field has illegal type", MessageType.error);
             return;
         }
-        setValueDBField(valueDBField);
-        pvField = pvProperty.findProperty(pvParent,"calcArgArray");
+        setValuePVField(valuePVField);
+        PVField pvField = pvProperty.findProperty(pvParent,"calcArgArray");
         if(pvField==null) {
             pvStructure.message("calcArgArray field not found", MessageType.error);
             return;
         }
-        DBField dbField = dbStructure.getDBRecord().findDBField(pvField);
-        Support support = dbField.getSupport();
-        if(!(support instanceof CalcArgArraySupport)) {
+        Support support = recordSupport.getSupport(pvField);
+        if(!(support instanceof CalcArgs)) {
             pvStructure.message("calcArgArraySupport not found", MessageType.error);
             return;
         }
-        CalcArgArraySupport calcArgArraySupport = (CalcArgArraySupport)support;
+        CalcArgs calcArgArraySupport = (CalcArgs)support;
         ArgType[] argTypes = getArgTypes();
         int num = argTypes.length;
         PVField[] pvFields = new PVField[num];
@@ -111,7 +107,7 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
                 pvStructure.message("field " + argType.name + " has illegal type", MessageType.error);
                 return;
             }
-            if(argType.type==Type.pvArray) {
+            if(argType.type==Type.scalarArray) {
                 Array array = (Array)pvField.getField();
                 if(array.getElementType()!=argType.elementType) {
                     pvStructure.message("field " + argType.name + " has illegal element type", MessageType.error);

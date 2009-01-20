@@ -1,89 +1,87 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <record name = "enumeratedCounter">
-    <value type = "byte"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
-        <expression>(value+1&lt;=3)?(value+1):0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type> 
-        <rate>1.0</rate>
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>enumerated.value.index</pvname>
-                <process>true</process>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>enumeratedInput</pvname>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "byte"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=3 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+    <structure name = "scan" type = "scan" >
+        <structure name = "type">
+            <scalar name = "choice">periodic</scalar>
+        </structure> 
+        <scalar name = "rate">1.0</scalar>
+        <scalar name = "processAfterStart">true</scalar>
+    </scalar>
+    <structure name = "supportSequence" supportName = "generic" >
+        <structure name = "0" type = "outputSupport">
+            <auxInfo name = "supportFactory" type = "string">outputSupportFactory</auxInfo>
+            <scalar name = "pvname">enumerated.value.index</scalar>
+            <scalar name = "process">true</scalar>
+        </structure>
+        <structure name = "0" type = "processSupport">
+            <scalar name = "wait">false</scalar>
+            <scalar name = "pvname">enumeratedInput</scalar>
+        </structure>
+    </structure>
 </record>
 
 
 <record name = "enumerated">
-    <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "digital">
-        <alarm structureName = "alarm" />
-        <states supportName = "digitalOutput" >
-             <element structureName = "digitalState">
-                 <name>zero</name>
-                 <value>0</value>
-                 <severity><choice>major</choice></severity>
-                 <message>ZERO ALARM</message>
-             </element>
-             <element structureName = "digitalState">
-                 <name>one</name>
-                 <value>1</value>
-                 <severity><choice>none</choice></severity>
-             </element>
-             <element structureName = "digitalState">
-                 <name>two</name>
-                 <value>2</value>
-                 <severity><choice>none</choice></severity>
-             </element>
-             <element structureName = "digitalState">
-                 <name>three</name>
-                <value>3</value>
-                <severity><choice>minor</choice></severity>
-                 <message>THREE ALARM</message>
-             </element>
-             <element structureName = "digitalState">
-                 <name>four</name>
-                 <value>4</value>
-                 <severity><choice>major</choice></severity>
-                 <message>FOUR ALARM</message>
-             </element>
-        </states>
-    </input>
-    <valueAlarm structureName = "enumeratedAlarm">
-            <active>true</active>
-            <changeStateAlarm>
-                 <severity><choice>none</choice></severity>
-                 <message>Change State</message>
-             </changeStateAlarm>
-    </valueAlarm>
+    <structure name = "value" type = "enumerated"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "digital">
+        <structure name = "alarm" type = "alarm" />
+        <structure name = "states" type = "digitalOutput" >
+             <structure name = "0" type = "digitalState">
+                 <scalar name = "name">zero</scalar>
+                 <scalar name = "value">0</scalar>
+                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                 <scalar name = "message">ZERO ALARM</scalar>
+             </structure>
+             <structure name = "1" type = "digitalState">
+                 <scalar name = "name">one</scalar>
+                 <scalar name = "value">1</scalar>
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+             </structure>
+             <structure name = "2" type = "digitalState">
+                 <scalar name = "name">two</scalar>
+                 <scalar name = "value">2</scalar>
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+             </structure>
+             <structure name = "3" type = "digitalState">
+                 <scalar name = "name">three</scalar>
+                 <scalar name = "value">3</scalar>
+                 <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                 <scalar name = "message">THREE ALARM</scalar>
+             </structure>
+             <structure name = "4" type = "digitalState">
+                 <scalar name = "name">four</scalar>
+                 <scalar name = "value">4</scalar>
+                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                 <scalar name = "message">FOUR ALARM</scalar>
+             </structure>
+        </structure>
+    </structure>
+    <structure name = "valueAlarm" type = "enumeratedAlarm">
+            <scalar name = "active">true</scalar>
+            <structure name = "changeStateAlarm">
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                 <scalar name = "message">Change State</scalar>
+             </structure>
+    </structure>
 </record>
 
 
 <record name = "enumeratedInput" >
     <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
     <input supportName = "inputSupport" structureName = "inputSupport">
         <pvname>enumerated.value</pvname>
         <process>false</process>
@@ -94,8 +92,8 @@
 
 <record name = "enumeratedMonitor" >
     <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <pvname>enumerated.value</pvname>
         <process>true</process>
@@ -105,8 +103,8 @@
 
 <record name = "enumeratedInputIndex">
     <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <pvname>enumerated.value.index</pvname>
         <process>true</process>
@@ -116,8 +114,8 @@
 
 <record name = "enumeratedMonitorIndex">
     <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <pvname>enumerated.value.index</pvname>
         <process>true</process>
@@ -127,8 +125,8 @@
 
 <record name = "enumeratedInputChoice">
     <value type = "string"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <pvname>enumerated.value.choice</pvname>
         <process>true</process>
@@ -138,8 +136,8 @@
 
 <record name = "enumeratedMonitorChoice">
     <value type = "string"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
     <input supportName = "monitorSupport" structureName = "monitorSupport">
         <pvname>enumerated.value.choice</pvname>
         <process>true</process>

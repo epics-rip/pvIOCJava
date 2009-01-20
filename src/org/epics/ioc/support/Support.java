@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.util.Requester;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.Requester;
 
 /**
  * Interface that must be implemented by IOC support.
@@ -14,6 +14,11 @@ import org.epics.ioc.util.Requester;
  *
  */
 public interface Support extends Requester{
+    /**
+     * Get the support name.
+     * @return The name.
+     */
+    String getSupportName();
     /**
      * Get the support state.
      * @return The state.
@@ -23,13 +28,14 @@ public interface Support extends Requester{
      * Get the field which this support supports.
      * @return The field.
      */
-    DBField getDBField();
+    PVField getPVField();
     /**
      * Initialize.
      * Perform initialization related to record instance but
      * do not connect to I/O or other records.
+     * @param recordProcess The recordProcess for this record.
      */
-    void initialize();
+    void initialize(RecordSupport recordSupport);
     /**
      * Invoked when it is safe to link to I/O and/or other records.
      */

@@ -5,10 +5,9 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
 
 /**
  * Abstract base class for support code.
@@ -18,11 +17,10 @@ import org.epics.ioc.util.RequestResult;
  *
  */
 public abstract class AbstractSupport implements Support {
-        
-    private String name;
-    private DBField dbField;
+    protected String supportName;
     private PVField pvField;
     private SupportState supportState = SupportState.readyForInitialize;
+    protected RecordSupport recordSupport = null;
     
     /**
      * Constructor.
@@ -31,16 +29,21 @@ public abstract class AbstractSupport implements Support {
      * @param dbField The DBdata which is supported.
      * This can be a record or any field in a record.
      */
-    protected AbstractSupport(String name,DBField dbField) {
-        this.name = name;
-        this.dbField = dbField;
-        pvField = dbField.getPVField();
+    protected AbstractSupport(String name,PVField pvField) {
+        this.supportName = name;
+        this.pvField = pvField;
     } 
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.Support#getSupportName()
+     */
+    public String getSupportName() {
+        return supportName;
+    }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()
      */
     public String getRequesterName() {
-        return name;
+        return supportName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
@@ -55,15 +58,16 @@ public abstract class AbstractSupport implements Support {
         return supportState;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.Support#getDBField()
+     * @see org.epics.ioc.support.Support#getPVField()
      */
-    public DBField getDBField() {
-        return dbField;
+    public PVField getPVField() {
+        return pvField;
     } 
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.Support#initialize()
+     * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordProcess)
      */
-    public void initialize() {
+    public void initialize(RecordSupport recordSupport) {
+        this.recordSupport = recordSupport;
         setSupportState(SupportState.readyForStart);
     }
     /* (non-Javadoc)

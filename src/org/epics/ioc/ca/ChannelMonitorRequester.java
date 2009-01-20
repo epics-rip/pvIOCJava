@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.Requester;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.Requester;
 
 /**
  * Interface 

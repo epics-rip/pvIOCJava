@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<database>
+<record name = "root" type = "generic" >
+    <scalar name = "value"  type = "double"/>
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">value+100.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "supportSequence" type = "generic" >
+        <structure name = "0" type = "processSupport">
+            <scalar name = "wait" type = "boolean">false</scalar>
+            <scalar name = "pvname" >other01</scalar>
+        </structure>
+        <structure name = "1" type = "outputSupport">
+            <scalar name = "wait" type = "boolean">false</scalar>
+            <scalar name = "pvname" >other02</scalar>
+            <scalar name = "process" >true</scalar>
+        </structure>
+    </structure>
+</record>
+<record name = "other01" type = "generic" >
+    <scalar name = "value"  type = "double"/>
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "pvname">root</scalar>
+        <scalar name = "process">false</scalar>
+    </structure>
+</record>
+<record name = "other02" type = "generic" >
+    <scalar name = "value"  type = "double"/>
+    <structure name = "supportSequence" type = "generic" >
+        <structure name = "0" type = "processSupport">
+            <scalar name = "wait" type = "boolean">false</scalar>
+            <scalar name = "pvname" >other03</scalar>
+        </structure>
+    </structure>
+</record>
+<record name = "other03" type = "generic" >
+    <scalar name = "value"  type = "double"/>
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "pvname">root</scalar>
+        <scalar name = "process">false</scalar>
+    </structure>
+</record>
+
+
+</database>

@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.util.IOCExecutor;
+import org.epics.pvData.misc.Executor;
 /**
  * Interface for monitoring channel data.
  * @author mrk
@@ -42,9 +42,9 @@ public interface CDMonitor {
     /**
      * Start monitoring for changes and send notification of changes but not the data.
      * @param queueSize The queueSize. This must be at least 3.
-     * @param iocExecutor iocExecutor for calling requester.
+     * @param executor executor for calling requester.
      */
-    void start(int queueSize, IOCExecutor iocExecutor);   
+    void start(int queueSize, Executor executor);   
     /**
      * Stop monitoring.
      */

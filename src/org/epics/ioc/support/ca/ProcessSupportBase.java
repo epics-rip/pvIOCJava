@@ -5,15 +5,17 @@
  */
 package org.epics.ioc.support.ca;
 
-import org.epics.ioc.ca.ChannelProcess;
-import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.support.ProcessCallbackRequester;
-import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
 
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
 /**
  * Implementation for a channel access output link.
  * @author mrk
@@ -25,10 +27,10 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param dbStructure The dbStructure for the field being supported.
+     * @param pvStructure The pvStructure for the field being supported.
      */
-    public ProcessSupportBase(String supportName,DBStructure dbStructure) {
-        super(supportName,dbStructure);
+    public ProcessSupportBase(String supportName,PVStructure pvStructure) {
+        super(supportName,pvStructure);
        
     }
     private ChannelProcess channelProcess = null;
@@ -42,18 +44,18 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             channelProcess = channel.createChannelProcess(this);
-            dbRecord.lock();
+            pvRecord.lock();
             try {
                 isReady = true;
             } finally {
-                dbRecord.unlock();
+                pvRecord.unlock();
             }
         } else {
-            dbRecord.lock();
+            pvRecord.lock();
             try {
                 isReady = false;
             } finally {
-                dbRecord.unlock();
+                pvRecord.unlock();
             }
             if(channelProcess!=null) channelProcess.destroy();
             channelProcess = null;

@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<database>
+
+<structure name = "byteLimit">
+    <scalar name = "low" type = "byte" />
+    <scalar name = "high" type = "byte" />
+</structure>
+
+<structure name = "shortLimit">
+    <scalar name = "low" type = "short" />
+    <scalar name = "high" type = "short" />
+</structure>
+
+<structure name = "intLimit">
+    <scalar name = "low" type = "int" />
+    <scalar name = "high" type = "int" />
+</structure>
+
+<structure name = "longLimit">
+    <scalar name = "low" type = "long" />
+    <scalar name = "high" type = "long" />
+</structure>
+
+<structure name = "floatLimit">
+    <scalar name = "low" type = "float" />
+    <scalar name = "high" type = "float" />
+</structure>
+
+<structure name = "doubleLimit">
+    <scalar name = "low" type = "double" />
+    <scalar name = "high" type = "double" />
+</structure>
+
+</database>

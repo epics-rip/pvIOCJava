@@ -6,7 +6,7 @@
 package org.epics.ioc.support;
 
 import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.Requester;
+import org.epics.pvData.pv.Requester;
 
 /**
  * An interface that must be implemented by code that calls RecordProcess.setRecordProcessRequester().

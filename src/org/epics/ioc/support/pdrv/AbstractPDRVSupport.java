@@ -5,9 +5,7 @@
  */
 package org.epics.ioc.support.pdrv;
 
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
+
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
@@ -18,28 +16,26 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.DriverUser;
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.pv.PVBoolean;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
+
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
+import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
-import org.epics.ioc.support.alarm.AlarmFactory;
+import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.support.alarm.AlarmSupport;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.MessageType;
+
 import org.epics.ioc.util.RequestResult;
+
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.ioc.support.*;
+
+import org.epics.ioc.util.*;
 
 /**
  * Abstract link support base class for PDRV links.
@@ -61,25 +57,19 @@ RecordProcessRequester
      * @param supportName The support name.
      * @param dbStructure The link interface.
      */
-    protected AbstractPDRVSupport(String supportName,DBStructure dbStructure) {
-        super(supportName,dbStructure);
+    protected AbstractPDRVSupport(String supportName,PVStructure pvStructure) {
+        super(supportName,pvStructure);
         this.supportName = supportName;
-        this.dbStructure = dbStructure;
-        pvStructure = dbStructure.getPVStructure();
+        this.pvStructure = pvStructure;
         fullName = pvStructure.getFullName();
-        dbRecord = dbStructure.getDBRecord();
-        pvRecord = dbRecord.getPVRecord();
+        pvRecord = pvStructure.getPVRecord();
         recordName = pvRecord.getRecordName();
-        recordProcess = dbRecord.getRecordProcess();
     }      
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     protected static final String emptyString = "";
     protected String supportName;
-    protected DBStructure dbStructure;
     protected PVStructure pvStructure;
-    protected DBField valueDBField = null;
     protected PVField valuePVField = null;
-    protected DBRecord dbRecord = null;
     protected PVRecord pvRecord = null;
     protected String recordName = null;
     protected String fullName = null;
@@ -107,15 +97,15 @@ RecordProcessRequester
     
     private boolean isProcessor = false;
     
-    public void initialize() {
+    public void initialize(RecordSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+        recordProcess = recordSupport.getRecordProcess();
         valuePVField = pvProperty.findPropertyViaParent(pvStructure,"value");
         if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
             return;
         }
-        valueDBField = dbStructure.getDBRecord().findDBField(valuePVField);
-        alarmSupport = AlarmFactory.findAlarmSupport(dbStructure);
+        alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
         pvPortName = pvStructure.getStringField("portName");
         if(pvPortName==null) return;
         pvDeviceName = pvStructure.getStringField("deviceName");
@@ -131,7 +121,7 @@ RecordProcessRequester
         int index = structure.getFieldIndex("drvParams");
         PVField pvField = null;
         if(index>=0) pvField = pvFields[index];
-        if(pvField!=null && pvField.getField().getType()==Type.pvStructure) {
+        if(pvField!=null && pvField.getField().getType()==Type.structure) {
             pvDrvParams = (PVStructure)pvField;
         }
         pvProcess = pvStructure.getBooleanField("process");
@@ -229,11 +219,11 @@ RecordProcessRequester
      * @see org.epics.ioc.support.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
     public void message(String message,MessageType messageType) {
-        dbRecord.lock();
+        pvRecord.lock();
         try {
             pvStructure.message(message, messageType);
         } finally {
-            dbRecord.unlock();
+            pvRecord.unlock();
         }
     }
     /* (non-Javadoc)

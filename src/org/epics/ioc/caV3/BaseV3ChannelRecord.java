@@ -45,50 +45,34 @@ import gov.aps.jca.event.GetListener;
 
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelMonitorRequester;
-import org.epics.ioc.db.DBD;
-import org.epics.ioc.db.DBDFactory;
-import org.epics.ioc.db.DBDStructure;
-import org.epics.ioc.pv.Convert;
-import org.epics.ioc.pv.ConvertFactory;
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.FieldCreate;
-import org.epics.ioc.pv.FieldFactory;
-import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVDataCreate;
-import org.epics.ioc.pv.PVDataFactory;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVEnumerated;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVLong;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.PVStructure;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.AlarmSeverity;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.pvData.test.RequesterForTesting;
+import org.epics.pvData.xml.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
 
 /**
  * @author mrk
  *
  */
 public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable {
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
+    private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     protected static final Convert convert = ConvertFactory.getConvert();
-    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private static DBD dbd = DBDFactory.getMasterDBD();
+    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static enum DBRProperty {none,status,time,graphic,control};
     
     private V3Channel v3Channel;
-    private IOCExecutor iocExecutor = null;
+    private Executor executor = null;
     
     private DBRType nativeDBRType = null;
     private PVRecord pvRecord = null;
@@ -104,7 +88,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
      */
     public BaseV3ChannelRecord(V3Channel v3Channel) {
         this.v3Channel = v3Channel;
-        iocExecutor = v3Channel.getIOCExecutor();
+        executor = v3Channel.getExecutor();
     }
     /**
      * Create a PVRecord for the Channel.
@@ -119,10 +103,10 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         int elementCount = jcaChannel.getElementCount();
         nativeDBRType = jcaChannel.getFieldType();
         if(nativeDBRType.isENUM()) {
-            Type type = v3Channel.getEnumRequestType();
-            if(type==Type.pvInt) {
+            ScalarType type = v3Channel.getEnumRequestScalarType();
+            if(type==ScalarType.pvInt) {
                 nativeDBRType = DBRType.INT;
-            } else if(type==Type.pvString) {
+            } else if(type==ScalarType.pvString) {
                 nativeDBRType = DBRType.STRING;
             }
         }
@@ -149,37 +133,38 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 }
             }
         }
-        Type type = null;
+        Type type = Type.scalar;
+        ScalarType scalarType = null;
         if(nativeDBRType.isBYTE()) {
-            type = Type.pvByte;
+            scalarType = ScalarType.pvByte;
         } else if(nativeDBRType.isSHORT()) {
-            type= Type.pvShort;
+            scalarType= ScalarType.pvShort;
         } else if(nativeDBRType.isINT()) {
-            type = Type.pvInt;
+            scalarType = ScalarType.pvInt;
         } else if(nativeDBRType.isFLOAT()) {
-            type = Type.pvFloat;
+            scalarType = ScalarType.pvFloat;
         } else if(nativeDBRType.isDOUBLE()) {
-            type = Type.pvDouble;
+            scalarType = ScalarType.pvDouble;
         } else if(nativeDBRType.isSTRING()) {
-            type = Type.pvString;
+            scalarType = ScalarType.pvString;
         } else if(nativeDBRType.isENUM()) {
             valueChoicesData = new StringArrayData();
-            type = Type.pvStructure;
+            type = Type.structure;
         }
         Type elementType = null;
         Field valueField = null;
-        if(type==Type.pvStructure) {
-            DBDStructure dbdEnumerated = dbd.getStructure("enumerated");
+        if(type==Type.structure) {
+            PVStructure dbdEnumerated = masterPVDatabase.findStructure("enumerated");
             Field[] valueFields = dbdEnumerated.getFields();
             valueField = fieldCreate.createStructure(valueFieldName, "value", valueFields);
             if(dbrProperty==DBRProperty.control || dbrProperty==DBRProperty.graphic) {
                 dbrProperty= DBRProperty.time;
             }
         } else if(elementCount<2) {
-            valueField = fieldCreate.createField(valueFieldName, type);
+            valueField = fieldCreate.createField(valueFieldName, scalarType);
         } else {
-            elementType = type;
-            type = Type.pvArray;
+            elementType = scalarType;
+            scalarType = Type.pvArray;
             valueField = fieldCreate.createArray(valueFieldName, elementType);
         }
         Field[] fields = new Field[propertyNames.length + 1];
@@ -187,7 +172,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         int index = 1;
         int notUsed = 0;
         for(String propertyName : propertyNames) {
-            if(type==Type.pvStructure) {
+            if(scalarType==Type.pvStructure) {
                 if(propertyName.equals("control")) {
                     notUsed++;
                     continue;
@@ -1045,7 +1030,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             toRecord(fromDBR,null);
             requestResult = RequestResult.success;
         }
-        iocExecutor.execute(this);
+        executor.execute(this);
     }
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()

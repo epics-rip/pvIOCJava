@@ -5,9 +5,9 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.Field;
-import org.epics.ioc.pv.PVEnumerated;
-import org.epics.ioc.pv.PVField;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.PVField;
 
 /**
  * Interface for a field of a channel.
@@ -25,10 +25,6 @@ public interface ChannelField {
      * @return The PVField interface.
      */
     PVField getPVField();
-    /**
-     * The client has put data to channelField.
-     */
-    void postPut();
     /**
      * Find the channelField for propertyName.
      * @param propertyName The name of the property.
@@ -51,7 +47,7 @@ public interface ChannelField {
      * Get the Enumerated interface if the field is an enumereated structure.
      * @return The interface or null if the field is not an enumerated structure.
      */
-    PVEnumerated getEnumerated();
+    Enumerated getEnumerated();
     /**
      * Get the access rights for the field.
      * @return The access rights.

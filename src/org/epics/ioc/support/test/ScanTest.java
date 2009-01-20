@@ -7,21 +7,20 @@ package org.epics.ioc.support.test;
 
 import junit.framework.TestCase;
 
-import org.epics.ioc.db.DBD;
-import org.epics.ioc.db.DBDFactory;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.db.IOCDBFactory;
-import org.epics.ioc.db.XMLToIOCDBFactory;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.Structure;
-import org.epics.ioc.util.EventScanner;
-import org.epics.ioc.util.IOCFactory;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.PeriodicScanner;
-import org.epics.ioc.util.Requester;
-import org.epics.ioc.util.ScannerFactory;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.factory.*;
+import org.epics.pvData.property.*;
+import org.epics.pvData.test.RequesterForTesting;
+import org.epics.pvData.xml.*;
+import org.epics.ioc.support.*;
+import org.epics.ioc.support.alarm.*;
+
+import org.epics.ioc.util.*;
+
+
+import org.epics.ioc.ca.*;
+
 
 /**
  * JUnit test for scan test.
@@ -29,29 +28,38 @@ import org.epics.ioc.util.ScannerFactory;
  *
  */
 public class ScanTest extends TestCase {
-    private static Requester iocRequester = null;
+    private static PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static MessageType maxMessageType = MessageType.info;
     /**
      * test scan.
      */
-    private static MessageType maxError = MessageType.info;
     public static void testScan() {
-        iocRequester = new Listener();
-        DBD dbd = DBDFactory.getMasterDBD();
-        IOCDB iocdbMaster = IOCDBFactory.getMaster();
-        XMLToIOCDBFactory.convert(dbd,iocdbMaster,
-                "dbd/dbd.xml",
-                iocRequester);
+        PVRecord[] pvRecords = null;
+        Requester iocRequester = new RequesterForTesting("scanTest");
+        XMLToPVDatabaseFactory.convert(masterPVDatabase,"${PVDATA}/xml/structures.xml", iocRequester);
+        if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
+        XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester);
+        if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
+        boolean ok = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanPV.xml", iocRequester);
+        if(!ok) {
+            System.out.printf("\nrecords\n");
+            pvRecords = masterPVDatabase.getRecords();
+            for(PVRecord pvRecord: pvRecords) {
+                System.out.print(pvRecord.toString());
+            }
+            return;
+        }
+        try {
+            Thread.sleep(1000);
+            System.out.println();
+        } catch (InterruptedException e) {}
         
-        boolean initOK = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanDB.xml",iocRequester);
-        if(!initOK) return;
-        
-//        Map<String,DBRecord> recordMap  recordMap = iocdbAdd.getRecordMap();
-//        Set<String> keys = recordMap.keySet();
-//        for(String key: keys) {
-//            RecordProcess recordProcess = 
-//                recordMap.get(key).getRecordProcess();
-//            recordProcess.setTrace(true);
+//        System.out.printf("\nrecords\n");
+//        pvRecords = masterPVDatabase.getRecords();
+//        for(PVRecord pvRecord: pvRecords) {
+//            System.out.println(pvRecord.toString());
 //        }
+        
         PeriodicScanner periodicScanner = ScannerFactory.getPeriodicScanner();
         String list = periodicScanner.toString();
         System.out.println(list);
@@ -59,31 +67,30 @@ public class ScanTest extends TestCase {
         list = eventScanner.toString();
         System.out.println(list);
         
-        DBRecord dbRecord = null;
-        dbRecord = iocdbMaster.findRecord("counterPush");
-        assertNotNull(dbRecord);
-        PVRecord pvRecord = dbRecord.getPVRecord();
+        PVRecord pvRecord = null;
+        pvRecord = masterPVDatabase.findRecord("counterPush");
+        assertNotNull(pvRecord);
         Structure structure = (Structure)pvRecord.getField();
         PVField[] pvData = pvRecord.getPVFields();        
         int index = structure.getFieldIndex("value");
         PVField counterPushValue = pvData[index];
-        dbRecord = iocdbMaster.findRecord("doubleReceive09");
-        assertNotNull(dbRecord);
-        pvRecord = dbRecord.getPVRecord();
+        pvRecord = masterPVDatabase.findRecord("doubleReceive09");
+        assertNotNull(pvRecord);
+        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField doubleReceive09Value = pvData[index];
-        dbRecord = iocdbMaster.findRecord("counterEvent0");
-        assertNotNull(dbRecord);
-        pvRecord = dbRecord.getPVRecord();
+        pvRecord = masterPVDatabase.findRecord("counterEvent0");
+        assertNotNull(pvRecord);
+        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterEvent0Value = pvData[index];
-        dbRecord = iocdbMaster.findRecord("counterEvent1");
-        assertNotNull(dbRecord);
-        pvRecord = dbRecord.getPVRecord();
+        pvRecord = masterPVDatabase.findRecord("counterEvent1");
+        assertNotNull(pvRecord);
+        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
@@ -99,11 +106,10 @@ public class ScanTest extends TestCase {
             } catch (InterruptedException e) {
             }
         }
-        initOK = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanAddDB.xml",iocRequester);
-        if(!initOK) {
-            System.out.println("IOCFactory.initDatabase failed");
-        }
-        String[] recordList = iocdbMaster.recordList(".*");
+        ok = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanAddPV.xml", iocRequester);
+        if(!ok) return;
+       
+        String[] recordList = masterPVDatabase.recordList(".*");
         System.out.print("record list");
         for(int i=0; i<recordList.length; i++) {
             if((i+1)%5 == 0) {
@@ -115,16 +121,16 @@ public class ScanTest extends TestCase {
             System.out.print(recordList[i]);
         }
         System.out.println();
-        dbRecord = iocdbMaster.findRecord("counter");
-        assertNotNull(dbRecord);
-        pvRecord = dbRecord.getPVRecord();
+        pvRecord = masterPVDatabase.findRecord("counter");
+        assertNotNull(pvRecord);
+        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterValue = pvData[index];
-        dbRecord = iocdbMaster.findRecord("double02");
-        assertNotNull(dbRecord);
-        pvRecord = dbRecord.getPVRecord();
+        pvRecord = masterPVDatabase.findRecord("double02");
+        assertNotNull(pvRecord);
+        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
@@ -145,13 +151,18 @@ public class ScanTest extends TestCase {
             }
         }
     }
-       
-    private static class Listener implements Requester {
+    
+    private static class RequesterForTesting implements Requester {
+        private String requesterName = null;
+        
+        RequesterForTesting(String requesterName) {
+            this.requesterName = requesterName;
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequestorName()
          */
         public String getRequesterName() {
-            return "ScanTest";
+            return requesterName;
         }
 
         /* (non-Javadoc)
@@ -159,7 +170,8 @@ public class ScanTest extends TestCase {
          */
         public void message(String message, MessageType messageType) {
             System.out.println(message);
-            if(messageType.ordinal()>maxError.ordinal()) maxError = messageType;
+            if(messageType.ordinal()>maxMessageType.ordinal()) maxMessageType = messageType;
         }
     }
+
 }

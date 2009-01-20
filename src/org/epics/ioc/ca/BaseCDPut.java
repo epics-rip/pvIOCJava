@@ -8,9 +8,9 @@ package org.epics.ioc.ca;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
 
 
 /**
@@ -109,7 +109,7 @@ public class BaseCDPut implements CDPut, ChannelPutRequester, ChannelGetRequeste
         for(int i=0; i<length; i++) {
             if(cdFields[i].getChannelField()==channelField) {
                 CDField cdField = cdFields[i];
-                cdField.get(pvField,true);
+                cdField.get(pvField);
                 return false;
             }
         }

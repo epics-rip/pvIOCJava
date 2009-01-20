@@ -5,15 +5,13 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ioc.create.Create;
-import org.epics.ioc.create.Enumerated;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVStringArray;
+import org.epics.pvData.pv.StringArrayData;
+
 
 
 /**
@@ -65,24 +63,10 @@ public enum SupportState {
      * @return The Enumerated interface only if dbField has an Enumerated interface and defines
      * the supportState choices.
      */
-    public static Enumerated getSupportState(DBField dbField) {
-        PVField pvField = dbField.getPVField();
-        if(pvField.getField().getType()!=Type.pvStructure) {
-            pvField.message("field is not a structure", MessageType.error);
-            return null;
-        }
-        DBStructure dbStructure = (DBStructure)dbField;
-        Create create = dbStructure.getCreate();
-        if(create==null) {
-            pvField.message("interface Create not found", MessageType.error);
-            return null;
-        }
-        if(create==null || !(create instanceof Enumerated)) {
-            pvField.message("interface Create is not instanceof Enumerated", MessageType.error);
-            return null;
-        }
-        Enumerated enumerated = (Enumerated)create;
-        PVStringArray pvChoices = enumerated.getChoicesField();
+    public static Enumerated getSupportState(PVField pvField) {
+        Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
+        if(enumerated==null) return null;
+        PVStringArray pvChoices = enumerated.getChoices();
         int len = pvChoices.getLength();
         if(len!=supportStateChoices.length) {
             pvField.message("not an supportState structure", MessageType.error);

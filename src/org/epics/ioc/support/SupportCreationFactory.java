@@ -9,23 +9,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.epics.ioc.db.DBArray;
-import org.epics.ioc.db.DBArrayArray;
-import org.epics.ioc.db.DBD;
-import org.epics.ioc.db.DBDFactory;
-import org.epics.ioc.db.DBDSupport;
-import org.epics.ioc.db.DBField;
-import org.epics.ioc.db.DBRecord;
-import org.epics.ioc.db.DBStructure;
-import org.epics.ioc.db.DBStructureArray;
-import org.epics.ioc.db.IOCDB;
-import org.epics.ioc.pv.Array;
-import org.epics.ioc.pv.PVArray;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.MessageType;
-import org.epics.ioc.util.Requester;
+import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVAuxInfo;
+import org.epics.pvData.pv.PVDatabase;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
+
 
 /**
  * A factory for creating RecordProcess support for record instances.
@@ -38,45 +34,51 @@ public class SupportCreationFactory {
      * @param iocdb the iocdb associated with the record processing.
      * @return the SupportCreation.
      */
-    static public SupportCreation createSupportCreation(IOCDB iocdb,Requester requester) {
-        return new SupportCreationImpl(iocdb,requester);
+    static public SupportCreation createSupportCreation(SupportDatabase supportDatabase,Requester requester) {
+        return new SupportCreationImpl(supportDatabase,requester);
     }
     
-    static public boolean createSupport(DBField dbField) {
-        return createSupportPvt(dbField.getPVField(),dbField);
+    static public boolean createSupport(Requester requester,RecordSupport recordSupport,PVField pvField) {
+        return createSupportPvt(requester,recordSupport,pvField);
     }
+    
+    private static PVDatabase masterDatabase = PVDatabaseFactory.getMaster();
     
     static private class SupportCreationImpl implements SupportCreation{
-        private IOCDB iocdb;
-        private Requester requester;
-        private DBRecord[] records;
         
-        private SupportCreationImpl(IOCDB iocdbin,Requester requester) {
-            iocdb = iocdbin;
+        private SupportDatabase supportDatabase;
+        private Requester requester;
+        private PVRecord[] pvRecords;
+        // Muast keep private copy of recordSupport so that merge can be implement
+        private RecordSupport[] recordSupports;
+        
+        private SupportCreationImpl(SupportDatabase supportDatabase,Requester requester) {
+            this.supportDatabase = supportDatabase;
             this.requester = requester;
-            records = iocdb.getDBRecords();
+            pvRecords = supportDatabase.getPVDatabase().getRecords();
+            recordSupports = new RecordSupport[pvRecords.length];
+            for(int i=0; i<pvRecords.length; i++) {
+                recordSupports[i] = supportDatabase.getRecordSupport(pvRecords[i]);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportCreation#createSupport()
          */
         public boolean createSupport() {
             boolean result = true;
-            for(DBRecord record : records) {
-                if(!createRecordSupport(record)) {
-                    PVRecord pvRecord = record.getPVRecord();
-                    printError(requester,pvRecord,
-                            "no record support for record " + pvRecord.getRecordName());
-                    result = false;
-                } else {
-                    if(record.getRecordProcess()!=null) continue;
+            for(PVRecord pvRecord : pvRecords) {
+                RecordSupport recordSupport = supportDatabase.getRecordSupport(pvRecord);
+                if(recordSupport.getRecordProcess()!=null) continue;
+                result = SupportCreationFactory.createSupportPvt(requester,recordSupport,pvRecord);
+                if(!result) return result;
+                    if(recordSupport.getRecordProcess()!=null) continue;
                     RecordProcess recordProcess =
-                        RecordProcessFactory.createRecordProcess(record);
-                    record.setRecordProcess(recordProcess);
-                }
+                        RecordProcessFactory.createRecordProcess(recordSupport,pvRecord);
+                    recordSupport.setRecordProcess(recordProcess);
             }
-            for(DBRecord record : records) {
-                DBStructure dbStructure = record.getDBStructure();
-                if(!createStructureSupport(dbStructure)) result = false;
+            for(PVRecord pvRecord : pvRecords) {
+                RecordSupport recordSupport = supportDatabase.getRecordSupport(pvRecord);
+                if(!createStructureSupport(recordSupport,pvRecord)) result = false;
             }
             return result;
         }
@@ -86,10 +88,10 @@ public class SupportCreationFactory {
          */
         public boolean initializeSupport() {
             boolean result = true;
-            for(DBRecord record : records) {
-                PVRecord pvRecord = record.getPVRecord();
-                Support support = record.getDBStructure().getSupport();
-                RecordProcess process = record.getRecordProcess();
+            for(PVRecord pvRecord : pvRecords) {
+                RecordSupport recordSupport = supportDatabase.getRecordSupport(pvRecord);
+                Support support = recordSupport.getSupport(pvRecord);
+                RecordProcess process = recordSupport.getRecordProcess();
                 process.initialize();
                 SupportState supportState = support.getSupportState();
                 if(supportState!=SupportState.readyForStart) {
@@ -107,22 +109,23 @@ public class SupportCreationFactory {
          */
         public boolean startSupport() {
             boolean result = true;
-            for(DBRecord record : records) {
-                PVRecord pvRecord = record.getPVRecord();
-                Support support = record.getDBStructure().getSupport();
-                RecordProcess process = record.getRecordProcess();
+            for(int i=0; i<pvRecords.length; i++) {
+                PVRecord pvRecord = pvRecords[i];
+                RecordSupport recordSupport = recordSupports[i];
+                Support support = recordSupport.getSupport(pvRecord);
+                RecordProcess process = recordSupport.getRecordProcess();
                 process.start();
                 SupportState supportState = support.getSupportState();
                 if(supportState!=SupportState.ready) {
                     printError(requester,pvRecord,
-                            " state " + supportState.toString()
-                            + " but should be ready");
+                        " state " + supportState.toString()
+                        + " but should be ready");
                     result = false;
                 }
             }
             if(result) {
-                for(DBRecord record : records) {
-                    RecordProcess process = record.getRecordProcess();
+                for(RecordSupport recordSupport : recordSupports) {
+                    RecordProcess process = recordSupport.getRecordProcess();
                     process.allSupportStarted();
                 }
             }
@@ -133,8 +136,9 @@ public class SupportCreationFactory {
          * @see org.epics.ioc.process.SupportCreation#stopSupport()
          */
         public void stopSupport() {
-            for(DBRecord record : records) {
-                RecordProcess process = record.getRecordProcess();
+            for(PVRecord pvRecord : pvRecords) {
+                RecordSupport recordSupport = supportDatabase.getRecordSupport(pvRecord);
+                RecordProcess process = recordSupport.getRecordProcess();
                 process.stop();
             }
         }
@@ -142,68 +146,27 @@ public class SupportCreationFactory {
          * @see org.epics.ioc.process.SupportCreation#uninitializeSupport()
          */
         public void uninitializeSupport() {
-            for(DBRecord record : records) {
-                RecordProcess process = record.getRecordProcess();
+            for(PVRecord pvRecord : pvRecords) {
+                RecordSupport recordSupport = supportDatabase.getRecordSupport(pvRecord);
+                RecordProcess process = recordSupport.getRecordProcess();
                 process.uninitialize();
             }
         }
   
-        private boolean createRecordSupport(DBRecord dbRecord) {
-            DBStructure dbStructure = dbRecord.getDBStructure();
-            PVRecord pvRecord = dbRecord.getPVRecord();
-            if(dbStructure.getSupport()!=null) return true;
-            String supportName = pvRecord.getSupportName();
-            if(supportName==null) {
-                requester.message(
-                    pvRecord.getRecordName() + " no support found",
-                    MessageType.fatalError);
-                return false;
-            }
-            boolean result = SupportCreationFactory.createSupportPvt(requester,dbStructure);
-            if(!result) return result;
-            return true;
-        }
+            
         
         
-        private boolean createStructureSupport(DBField dbField) {
-            boolean result = SupportCreationFactory.createSupportPvt(requester,dbField);
-            DBStructure dbStructure = (DBStructure)dbField;
-            DBField[] dbFields = dbStructure.getDBFields();
-            for(DBField field : dbFields) {
-                Type type = field.getPVField().getField().getType();
-                if(type==Type.pvStructure) {
-                    if(!createStructureSupport(field)) result = false;
-                } else if(type==Type.pvArray) {
-                    if(!createArraySupport(field)) result = false;
+        private boolean createStructureSupport(RecordSupport recordSupport,PVStructure pvStructure) {
+            boolean result = SupportCreationFactory.createSupportPvt(requester,recordSupport,pvStructure);
+            PVField[] pvFields = pvStructure.getPVFields();
+            for(PVField pvField : pvFields) {
+                Type type = pvField.getField().getType();
+                if(type==Type.structure) {
+                    if(!createStructureSupport(recordSupport,(PVStructure)pvField)) result = false;
                 } else {
-                    if(!SupportCreationFactory.createSupportPvt(requester,field)) result = false;
+                    if(!SupportCreationFactory.createSupportPvt(requester,recordSupport,pvField)) result = false;
                 }
             }
-            return result;
-        }
-        
-        private boolean createArraySupport(DBField dbField) {
-            boolean result = true;
-            PVArray pvArray = (PVArray)dbField.getPVField();
-            if(!SupportCreationFactory.createSupportPvt(requester,dbField)) result = false;
-            Array array = (Array)pvArray.getField();
-            Type elementType = array.getElementType();
-            if(elementType.isScalar()) return result;
-            if(elementType==Type.pvArray) {
-                DBArrayArray dbArrayArray = (DBArrayArray)dbField;
-                DBArray[] dbFields = dbArrayArray.getElementDBArrays();
-                for(DBField dbf : dbFields) {
-                    if(dbf==null) continue;
-                    if(!createArraySupport(dbf)) result = false;
-                }
-            } else if(elementType==Type.pvStructure) {
-                DBStructureArray dbStructureArray = (DBStructureArray)dbField;
-                DBStructure[] dbFields = dbStructureArray.getElementDBStructures();
-                for(DBField dbf : dbFields) {
-                    if(dbf==null) continue;
-                    if(!createStructureSupport(dbf)) result = false;
-                }
-            } 
             return result;
         }
     }
@@ -214,21 +177,29 @@ public class SupportCreationFactory {
                 MessageType.error);
     }
     
-    private static boolean createSupportPvt(Requester requester,DBField dbField) {
-        if(dbField.getSupport()!=null) return true;
-        String supportName = dbField.getSupportName();
+    private static boolean createSupportPvt(Requester requester,RecordSupport recordSupport,PVField pvField) {
+        if(recordSupport.getSupport(pvField)!=null) return true;
+        PVAuxInfo pvAuxInfo = pvField.getPVAuxInfo();
+        PVScalar pvAuxField = pvAuxInfo.getInfo("supportFactory");
+        if(pvAuxField==null) return true;
+        if(pvAuxField.getScalar().getScalarType()!=ScalarType.pvString) {
+            printError(requester,pvField,"pvAuxInfo for support is not a string");
+            return false;
+        }
+        PVString pvString = (PVString)pvAuxField;
+        String supportName = pvString.get();
         if(supportName==null) return true;
         if(supportName.length()<=0) return true;
         if(supportName.equals("null")) return true;
         String factoryName = null;
-        PVField pvField = dbField.getPVField();
-        DBD dbd = DBDFactory.getMasterDBD();       
-        DBDSupport dbdSupport = dbd.getSupport(supportName);
-        if(dbdSupport==null) {
+        PVStructure pvStructure = masterDatabase.findStructure(supportName);
+        if(pvStructure==null) {
             printError(requester,pvField,"support " + supportName + " does not exist");
             return false;
         }
-        factoryName = dbdSupport.getFactoryName();
+        PVString factoryNamePV = pvStructure.getStringField("supportFactory");
+        if(factoryNamePV==null) return false;
+        factoryName = factoryNamePV.get();
         if(factoryName==null) {
             printError(requester,pvField,"support " + supportName + " does not define a factory name");
             return false;
@@ -247,12 +218,12 @@ public class SupportCreationFactory {
         }
         String data = null;
         Type type = pvField.getField().getType();
-        if (type==Type.pvStructure) {
-            data = "DBStructure";
+        if (type==Type.structure) {
+            data = "PVStructure";
         } else {
-            data = "DBField";
+            data = "PVField";
         }
-        data = "org.epics.ioc.db." + data;
+        data = "org.epics.pvData.pv." + data;
         try {
             method = supportClass.getDeclaredMethod("create",
                     Class.forName(data));    
@@ -279,30 +250,30 @@ public class SupportCreationFactory {
             return false;
         }
         try {
-            support = (Support)method.invoke(null,dbField);
+            support = (Support)method.invoke(null,pvField);
         } catch(IllegalAccessException e) {
             printError(requester,pvField,
                     "support "
                     + supportName
-                    + " create IllegalAccessException "
+                    + " invoke IllegalAccessException "
                     + e.getLocalizedMessage());
             return false;
         } catch(IllegalArgumentException e) {
             printError(requester,pvField,
                     "support "
                     + supportName
-                    + " create IllegalArgumentException "
+                    + " invoke IllegalArgumentException "
                     + e.getLocalizedMessage());
             return false;
         } catch(InvocationTargetException e) {
             printError(requester,pvField,
                     "support "
                     + supportName
-                    + " create InvocationTargetException "
+                    + " invoke InvocationTargetException "
                     + e.getLocalizedMessage());
             return false;
         }
-        dbField.setSupport(support);
+        recordSupport.setSupport(pvField, support);
         return true;
     }
     

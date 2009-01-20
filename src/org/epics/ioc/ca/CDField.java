@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.ioc.pv.PVField;
+import org.epics.pvData.pv.PVField;
+
 
 /**
  * CDField - Data for a field of a CDRecord (Channel Data Record)
@@ -62,9 +63,8 @@ public interface CDField {
     /**
      * Get data from the CDField and put it into the pvField.
      * @param pvField The pvField into which to put the data.
-     * @param postPut Should channelField.postPut be called?
      */
-    void get(PVField pvField,boolean postPut);
+    void get(PVField pvField);
     /**
      * Put the pvData into the CDField.
      * @param pvField The pvField containing the data to put into the CDField.
