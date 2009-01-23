@@ -21,9 +21,11 @@ import org.epics.ioc.ca.ChannelGet;
 import org.epics.ioc.ca.ChannelGetRequester;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+
+
 
 /**
  * Base class that implements ChannelGet for communicating with a V3 IOC.

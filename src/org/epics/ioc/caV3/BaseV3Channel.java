@@ -26,17 +26,20 @@ import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutGet;
 import org.epics.ioc.ca.ChannelPutGetRequester;
 import org.epics.ioc.ca.ChannelPutRequester;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVProperty;
-import org.epics.ioc.pv.PVPropertyFactory;
-import org.epics.ioc.pv.PVRecord;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.IOCExecutor;
-import org.epics.ioc.util.IOCExecutorFactory;
-import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
-import org.epics.ioc.util.ScanPriority;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
+
+
 
 /**
  * Base class that implements V3Channel.
@@ -46,8 +49,8 @@ import org.epics.pvData.pv.ScalarType;
 public class BaseV3Channel extends AbstractChannel
 implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
-    private static IOCExecutor iocExecutor
-        = IOCExecutorFactory.create("caV3Connect", ScanPriority.low);
+    private static Executor iocExecutor
+        = ExecutorFactory.create("caV3Connect", ThreadPriority.low);
     
     private boolean isCreatingChannel = false;
     private boolean synchCreateChannel = false;
@@ -57,7 +60,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     private String recordName = null;
     private String valueFieldName = null;
     private String[] propertyNames = null;
-    private Type enumRequestType = null;
+    private ScalarType enumRequestType = null;
 
     
     private gov.aps.jca.Channel jcaChannel = null;
@@ -69,7 +72,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
      * @param options A string containing options.
      * @param enumRequestType Request type for ENUM native type.
      */
-    public BaseV3Channel(ChannelListener listener,String options,Type enumRequestType)
+    public BaseV3Channel(ChannelListener listener,String options,ScalarType enumRequestType)
     {
         super(listener,options);
         this.enumRequestType = enumRequestType;
@@ -122,9 +125,9 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
         return valueFieldName;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#getIOCExecutor()
+     * @see org.epics.ioc.caV3.V3Channel#getExecutor()
      */
-    public IOCExecutor getExecutor() {
+    public Executor getExecutor() {
         return iocExecutor;
     }
     /* (non-Javadoc)
@@ -317,12 +320,6 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
             this.pvField = pvField;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelField#postPut()
-         */
-        public void postPut() {
-            // nothing to do
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelField#findProperty(java.lang.String)
          */
         public ChannelField findProperty(String propertyName) {
@@ -334,7 +331,9 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
          * @see org.epics.ioc.ca.ChannelField#createChannelField(java.lang.String)
          */
         public ChannelField createChannelField(String fieldName) {
-            PVField pvf = pvField.getSubField(fieldName);
+            if(pvField.getField().getType()!=Type.structure) return null;
+            PVStructure pvStructure = (PVStructure)pvField;
+            PVField pvf = pvStructure.getSubField(fieldName);
             if (pvf == null) return null;
             return new ChannelFieldImpl(pvf);
         }

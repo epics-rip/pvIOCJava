@@ -15,13 +15,9 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractOctet;
 import org.epics.ioc.pdrv.interfaces.Octet;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVStructure;
 /**
  * The factory for octetDriver.
  * octetDriver is a portDriver for testing PDRV components.

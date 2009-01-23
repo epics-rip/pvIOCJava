@@ -19,28 +19,29 @@ import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
 import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutRequester;
-import org.epics.ioc.pv.ByteArrayData;
-import org.epics.ioc.pv.DoubleArrayData;
-import org.epics.ioc.pv.FloatArrayData;
-import org.epics.ioc.pv.IntArrayData;
-import org.epics.ioc.pv.PVByte;
-import org.epics.ioc.pv.PVByteArray;
-import org.epics.ioc.pv.PVDouble;
-import org.epics.ioc.pv.PVDoubleArray;
-import org.epics.ioc.pv.PVEnumerated;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.pv.PVFloat;
-import org.epics.ioc.pv.PVFloatArray;
-import org.epics.ioc.pv.PVInt;
-import org.epics.ioc.pv.PVIntArray;
-import org.epics.ioc.pv.PVShort;
-import org.epics.ioc.pv.PVShortArray;
-import org.epics.ioc.pv.PVString;
-import org.epics.ioc.pv.PVStringArray;
-import org.epics.ioc.pv.ShortArrayData;
-import org.epics.ioc.pv.StringArrayData;
-import org.epics.ioc.util.MessageType;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.pv.ByteArrayData;
+import org.epics.pvData.pv.DoubleArrayData;
+import org.epics.pvData.pv.FloatArrayData;
+import org.epics.pvData.pv.IntArrayData;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVByte;
+import org.epics.pvData.pv.PVByteArray;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVDoubleArray;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVFloat;
+import org.epics.pvData.pv.PVFloatArray;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVIntArray;
+import org.epics.pvData.pv.PVShort;
+import org.epics.pvData.pv.PVShortArray;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStringArray;
+import org.epics.pvData.pv.ShortArrayData;
+import org.epics.pvData.pv.StringArrayData;
 
 /**
  * Base class that implements ChannelPut for communicating with a V3 IOC.
@@ -125,8 +126,8 @@ implements ChannelPut,PutListener,ChannelProcessRequester,ConnectionListener
                 message("array of ENUM not supported",MessageType.error);
                 return false;
             }
-            PVEnumerated pvEnumerated = pvField.getPVEnumerated();
-            pvIndex = pvEnumerated.getIndexField();
+            Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
+            pvIndex = enumerated.getIndex();
         }
         if(process) {
             channelProcess = v3Channel.createChannelProcess(this);

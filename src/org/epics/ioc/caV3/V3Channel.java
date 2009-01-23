@@ -6,20 +6,8 @@
 package org.epics.ioc.caV3;
 
 import org.epics.ioc.ca.Channel;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.pvData.test.RequesterForTesting;
-import org.epics.pvData.xml.*;
-import org.epics.ioc.support.*;
-import org.epics.ioc.support.alarm.*;
-
-import org.epics.ioc.util.*;
-
-
-import org.epics.ioc.ca.*;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.pv.ScalarType;
 
 
 /**

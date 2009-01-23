@@ -18,8 +18,9 @@ import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelMonitor;
 import org.epics.ioc.ca.ChannelMonitorRequester;
-import org.epics.ioc.pv.PVField;
-import org.epics.ioc.util.MessageType;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+
 
 /**
  * Base class that implements ChannelMonitor for communicating with a V3 IOC.

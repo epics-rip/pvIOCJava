@@ -32,13 +32,15 @@ import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Scalar;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 /**
  * A shell for monitoring a channel.
  * @author mrk

@@ -20,11 +20,12 @@ import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProvider;
-import org.epics.ioc.pv.Type;
-import org.epics.ioc.util.RunnableReady;
-import org.epics.ioc.util.ThreadCreate;
-import org.epics.ioc.util.ThreadCreateFactory;
-import org.epics.ioc.util.ThreadReady;
+import org.epics.pvData.misc.RunnableReady;
+import org.epics.pvData.misc.ThreadCreate;
+import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadReady;
+import org.epics.pvData.pv.ScalarType;
+
 
 /**
  * Factory and implementation of Channel Access V3 client. This provides communication
@@ -88,16 +89,16 @@ public class ClientFactory  {
                 }
             }
             String remoteFieldName = null;
-            Type enumRequestType = Type.pvStructure;
+            ScalarType enumRequestType = null;
             if(fieldName!=null) {
                 if(fieldName.equals("value")) {
                     remoteFieldName = "VAL";
                 } else if(fieldName.equals("value.index")) {
-                    enumRequestType = Type.pvInt;
+                    enumRequestType = ScalarType.pvInt;
                     fieldName = "value";
                     remoteFieldName = "VAL";
                 } else if(fieldName.equals("value.choice")) {
-                    enumRequestType = Type.pvString;
+                    enumRequestType = ScalarType.pvString;
                     fieldName = "value";
                     remoteFieldName = "VAL";
                 } else if(fieldName.equals("VAL")) {

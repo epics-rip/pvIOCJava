@@ -20,14 +20,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.IOCFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.Requester;
 
 /**
  * A shell for loading a new Database Definition or Record Instance into a running JavaIOC.

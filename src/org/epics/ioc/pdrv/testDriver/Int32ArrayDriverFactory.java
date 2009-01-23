@@ -5,13 +5,6 @@
  */
 package org.epics.ioc.pdrv.testDriver;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
-
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
 import org.epics.ioc.pdrv.Factory;
@@ -21,6 +14,18 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractInt32Array;
+import org.epics.pvData.factory.FieldFactory;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.FieldCreate;
+import org.epics.pvData.pv.IntArrayData;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Structure;
 
 
 /**

@@ -14,13 +14,12 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractInt32;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Structure;
 /**
  * The factory for int32Driver.
  * int32Driver is a portDriver for testing the int32 support in org.epics.ioc.pdrv.support.

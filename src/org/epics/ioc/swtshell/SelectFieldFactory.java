@@ -17,11 +17,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Type;
 
 /**
  * Factory which implements SelectField.
