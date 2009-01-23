@@ -5,14 +5,8 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.ioc.support.*;
-import org.epics.ioc.support.alarm.*;
-
-import org.epics.ioc.util.*;
+import org.epics.ioc.support.Support;
+import org.epics.pvData.pv.PVStructure;
 
 
 /**

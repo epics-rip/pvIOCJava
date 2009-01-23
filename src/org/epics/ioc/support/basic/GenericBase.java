@@ -10,6 +10,7 @@ import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
+import org.epics.ioc.support.alarm.*;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
@@ -25,7 +26,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     private String processRequesterName = null;
     private PVBoolean[] pvWaits = null;
     private Support[] supports = null;
-           
+    private AlarmSupport alarmSupport = null;
     private SupportProcessRequester supportProcessRequester;
     private int nextLink;
     private int numberWait;
@@ -65,11 +66,18 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
             // alarm is a special case
             if(fieldName.equals("alarm")) {
                 Support support = recordSupport.getSupport(pvField);
-                if(support==null) continue;
-                support.initialize(recordSupport);
+                if(support!=null && support instanceof AlarmSupport) {
+                    alarmSupport = (AlarmSupport)support;
+                }
                 continue;
             }
             if(recordSupport.getSupport(pvFields[i])!=null) numberSupport++;
+        }
+        if(alarmSupport!=null) {
+            alarmSupport.initialize(recordSupport);
+            if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
+                return;
+            }
         }
         pvWaits = new PVBoolean[numberSupport];
         supports = new Support[numberSupport];
@@ -105,6 +113,10 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
      */
     public void start() {
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
+        if(alarmSupport!=null) {
+            alarmSupport.start();
+            if(alarmSupport.getSupportState()!=SupportState.ready) return;
+        }
         for(Support support : supports) support.start();
         setSupportState(SupportState.ready);
     }
@@ -113,6 +125,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
      */
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
+        if(alarmSupport!=null) alarmSupport.stop();
         for(Support support : supports) support.stop();
         setSupportState(SupportState.readyForStart);
     }
@@ -121,7 +134,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
      */
     public void uninitialize() {
         if(super.getSupportState()==SupportState.ready) stop();
-        if(super.getSupportState()!=SupportState.readyForStart) return;
+        if(alarmSupport!=null) alarmSupport.uninitialize();
         if(supports!=null) for(Support support: supports) support.uninitialize();
         setSupportState(SupportState.readyForInitialize);
     }       
@@ -140,6 +153,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
+        if(alarmSupport!=null) alarmSupport.beginProcess();
         this.supportProcessRequester = supportProcessRequester;
         nextLink = 0;
         finalResult = RequestResult.success;
@@ -159,6 +173,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
         if(nextLink<supports.length) {
             callSupport();
         } else {
+            if(alarmSupport!=null) alarmSupport.endProcess();
             supportProcessRequester.supportProcessDone(finalResult);
         }
     }

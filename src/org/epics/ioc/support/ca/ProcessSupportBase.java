@@ -5,17 +5,14 @@
  */
 package org.epics.ioc.support.ca;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.ioc.support.*;
-import org.epics.ioc.support.alarm.*;
-
-import org.epics.ioc.util.*;
-
-
-import org.epics.ioc.ca.*;
+import org.epics.ioc.ca.ChannelProcess;
+import org.epics.ioc.ca.ChannelProcessRequester;
+import org.epics.ioc.support.ProcessCallbackRequester;
+import org.epics.ioc.support.ProcessContinueRequester;
+import org.epics.ioc.support.SupportProcessRequester;
+import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.pv.PVStructure;
 /**
  * Implementation for a channel access output link.
  * @author mrk

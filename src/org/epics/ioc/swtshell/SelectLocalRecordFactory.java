@@ -15,11 +15,10 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
+import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.pv.PVDatabase;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.Requester;
 /**
  * Factory which implements SelectLocalRecord.
  * @author mrk

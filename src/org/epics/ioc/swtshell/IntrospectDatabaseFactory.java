@@ -23,20 +23,30 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
-
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportDatabase;
 import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.support.SupportState;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.EventScanner;
+import org.epics.ioc.util.PeriodicScanner;
+import org.epics.ioc.util.RequestResult;
+import org.epics.ioc.util.ScannerFactory;
+import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.property.TimeStamp;
+import org.epics.pvData.property.TimeStampFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDatabase;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Requester;
 
 /**
  * A shell for introspecting a JavaIOC Database.

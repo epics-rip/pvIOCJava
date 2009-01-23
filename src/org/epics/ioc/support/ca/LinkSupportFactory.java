@@ -5,17 +5,13 @@
  */
 package org.epics.ioc.support.ca;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.ioc.support.*;
-import org.epics.ioc.support.alarm.*;
-
-import org.epics.ioc.util.*;
-
-
-import org.epics.ioc.ca.*;
+import org.epics.ioc.support.Support;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVAuxInfo;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarType;
 
 /**
  * Factory to create support for Channel Access links.

@@ -12,13 +12,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.pvData.misc.RunnableReady;
+import org.epics.pvData.misc.ThreadCreate;
+import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadReady;
 
 
 /**

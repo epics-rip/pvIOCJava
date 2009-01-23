@@ -1,18 +1,17 @@
 /* generated code */
 package org.epics.ioc.support.calc.example;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.ioc.support.*;
-import org.epics.ioc.support.alarm.*;
-
-import org.epics.ioc.util.*;
-
-
-import org.epics.ioc.ca.*;
-import org.epics.ioc.support.calc.*;
+import org.epics.ioc.support.Support;
+import org.epics.ioc.support.SupportProcessRequester;
+import org.epics.ioc.support.calc.AbstractCalculatorSupport;
+import org.epics.ioc.support.calc.ArgType;
+import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.pv.DoubleArrayData;
+import org.epics.pvData.pv.PVDoubleArray;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 
 public class ArrayAddCalculatorFactory {
     public static Support create(PVStructure pvStructure) {

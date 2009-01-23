@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
 import org.epics.ioc.pdrv.ConnectException;
 import org.epics.ioc.pdrv.ConnectExceptionListener;
 import org.epics.ioc.pdrv.Device;
@@ -32,13 +31,7 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.TraceOptionChangeListener;
 import org.epics.ioc.pdrv.User;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.pvData.pv.MessageType;
 
 /**
  * A shell for introspecting a JavaIOC Database.
