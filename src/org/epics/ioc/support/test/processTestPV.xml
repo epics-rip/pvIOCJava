@@ -2,9 +2,9 @@
 <database>
 <record name = "counter" type = "generic">
 <!--
+-->
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
--->
     <scalar name = "value" type = "double" />
     <structure name = "display" type = "display"/>
     <structure name = "input" type = "calculation" >
@@ -24,9 +24,9 @@
 </record>
 <record name = "double01" type = "generic">
 <!--
+-->
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
--->
     <scalar name = "value" type = "double" />
     <structure name = "display" type = "display" />
     <structure name = "input" type = "inputSupport">
@@ -37,9 +37,9 @@
 </record>
 <record name = "double02" type = "generic">
 <!--
+-->
   <structure name = "alarm" type = "alarm" />
   <structure name = "timeStamp" type = "timeStamp" />
--->
   <scalar name = "value" type = "double" />
 </record>
 

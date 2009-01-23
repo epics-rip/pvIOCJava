@@ -5,19 +5,17 @@
  */
 package org.epics.ioc.support.calc;
 
-import java.util.List;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.ioc.support.*;
-import org.epics.ioc.support.alarm.*;
-
-import org.epics.ioc.util.*;
-
-
-import org.epics.ioc.ca.*;
+import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.RecordSupport;
+import org.epics.ioc.support.Support;
+import org.epics.ioc.support.SupportState;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Type;
 
 /**
  * @author mrk
