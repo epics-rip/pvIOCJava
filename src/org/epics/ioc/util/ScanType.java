@@ -5,8 +5,13 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVStringArray;
+import org.epics.pvData.pv.StringArrayData;
+import org.epics.pvData.pv.Type;
 
 /**
  * Defines that scan types, i.e. what causes a record to process.

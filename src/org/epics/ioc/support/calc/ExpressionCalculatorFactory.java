@@ -13,17 +13,37 @@ package org.epics.ioc.support.calc;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.ioc.support.*;
-import org.epics.ioc.support.alarm.*;
-
-import org.epics.ioc.util.*;
-
-
-import org.epics.ioc.ca.*;
+import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.RecordSupport;
+import org.epics.ioc.support.Support;
+import org.epics.ioc.support.SupportProcessRequester;
+import org.epics.ioc.support.SupportState;
+import org.epics.ioc.support.alarm.AlarmSupport;
+import org.epics.ioc.support.alarm.AlarmSupportFactory;
+import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVBoolean;
+import org.epics.pvData.pv.PVByte;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVFloat;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVLong;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVShort;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Scalar;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 
 
 
@@ -1519,13 +1539,13 @@ public abstract class ExpressionCalculatorFactory  {
                         printExpression(arg,"  " + prefix);
                     }
                 }
-                PVField pvResult = expression.pvResult;
+                PVScalar pvResult = expression.pvResult;
                 if(pvResult==null) {
                     System.out.println(prefix + "pvResult is null");
                     return;
                 }
-                Field field = pvResult.getField();
-                System.out.println(prefix + field.getFieldName() + " " + field.getType().name());
+                Scalar scalar = pvResult.getScalar();
+                System.out.println(prefix + scalar.getFieldName() + " " + scalar.getScalarType().name());
                 return;
             }
         }
@@ -2313,10 +2333,10 @@ public abstract class ExpressionCalculatorFactory  {
             public boolean createPVResult(String fieldName) {
                 Expression expressionArgument = operatorExpression.expressionArguments[0];
                 arg0PV = expressionArgument.pvResult;
-                Type arg0Type = arg0PV.getField().getType();
+                ScalarType arg0Type = arg0PV.getScalar().getScalarType();
                 expressionArgument = operatorExpression.expressionArguments[1];
                 arg1PV = expressionArgument.pvResult;
-                Type arg1Type = arg1PV.getField().getType();
+                ScalarType arg1Type = arg1PV.getScalar().getScalarType();
                 if(!convert.isCopyScalarCompatible(arg0PV.getScalar(),arg1PV.getScalar())) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
