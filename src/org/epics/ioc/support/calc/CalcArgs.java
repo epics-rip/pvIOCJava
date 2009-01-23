@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.calc;
 
-import org.epics.pvData.pv.*;
 import org.epics.ioc.support.Support;
+import org.epics.pvData.pv.PVField;
 
 /**
  * Interface implemented by CalcArgArrayFactory
