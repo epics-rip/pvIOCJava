@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.support.calc;
 
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 
 /**
  * The name and type for an argument for a calculation.
