@@ -23,12 +23,15 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.epics.ioc.ca.CDField;
 import org.epics.ioc.ca.CDRecord;
 import org.epics.ioc.ca.CDStructure;
-import org.epics.ioc.ca.CDArray;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 
 /**
  * Factory which implements CDGet.

@@ -24,14 +24,11 @@ import org.epics.ioc.ca.ChannelAccess;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProvider;
-
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.ca.*;
+import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDatabase;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.Requester;
 
 /**
  * @author mrk

@@ -21,13 +21,12 @@ import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.Requester;
 
 /**
  * Shell for processing a channel.
