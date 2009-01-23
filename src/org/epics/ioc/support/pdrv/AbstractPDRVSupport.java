@@ -16,7 +16,6 @@ import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.DriverUser;
 import org.epics.ioc.pdrv.interfaces.Interface;
-
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
@@ -24,18 +23,22 @@ import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
-import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.support.alarm.AlarmSupport;
-
+import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.util.RequestResult;
-
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-import org.epics.ioc.support.*;
-
-import org.epics.ioc.util.*;
+import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVBoolean;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Structure;
+import org.epics.pvData.pv.Type;
 
 /**
  * Abstract link support base class for PDRV links.

@@ -5,8 +5,17 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVBoolean;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
 
 
 

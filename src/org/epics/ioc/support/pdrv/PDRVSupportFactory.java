@@ -5,11 +5,6 @@
  */
 package org.epics.ioc.support.pdrv;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
-import org.epics.pvData.factory.*;
-import org.epics.pvData.property.*;
-
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64;
@@ -25,11 +20,33 @@ import org.epics.ioc.pdrv.interfaces.Octet;
 import org.epics.ioc.pdrv.interfaces.OctetInterruptListener;
 import org.epics.ioc.pdrv.interfaces.UInt32Digital;
 import org.epics.ioc.pdrv.interfaces.UInt32DigitalInterruptListener;
-
-import org.epics.ioc.support.*;
+import org.epics.ioc.support.RecordSupport;
+import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
-import org.epics.ioc.util.*;
+import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.PVProperty;
+import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVAuxInfo;
+import org.epics.pvData.pv.PVBoolean;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStringArray;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 
 /**
  * Factory to create portDriver link support.

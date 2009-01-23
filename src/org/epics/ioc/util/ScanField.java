@@ -5,8 +5,11 @@
  */
 package org.epics.ioc.util;
 
-import org.epics.pvData.pv.*;
-import org.epics.pvData.misc.*;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.PVBoolean;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVString;
 
 
 /**

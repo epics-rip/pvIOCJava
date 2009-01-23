@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
