@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <include addPath = "${JAVAIOC}/test/powerSupply" />
 <include href = "psAll.xml" />
@@ -8,4 +8,4 @@
 -->
 <include removePath = "${JAVAIOC}/test/powerSupply" />
 
-</IOCDatabase>
+</database>

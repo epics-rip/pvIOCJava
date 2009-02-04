@@ -177,10 +177,10 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
      * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
      */
     public void processContinue() {
+        alarmSupport.beginProcess();
         post();
-        if(alarmIsProperty) {
-            if(alarmSupport!=null) alarmSupport.setAlarm(alarmMessage, alarmSeverity);
-        }
+        if(alarmIsProperty) alarmSupport.setAlarm(alarmMessage, alarmSeverity);
+        alarmSupport.endProcess();
         supportProcessRequester.supportProcessDone(requestResult);
     }        
     /* (non-Javadoc)

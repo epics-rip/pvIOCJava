@@ -13,12 +13,11 @@ import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.*;
 import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
-import org.epics.ioc.support.basic.GenericBase;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
@@ -43,7 +42,7 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-abstract class AbstractLinkSupport extends GenericBase
+abstract class AbstractLinkSupport extends AbstractSupport
 implements ChannelListener,ChannelFieldGroupListener {
     /**
      * The convert implementation.
@@ -170,7 +169,20 @@ implements ChannelListener,ChannelFieldGroupListener {
             break;
         }
         recordProcess = recordSupport.getRecordProcess();
-        alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+        PVField pvAlarm = pvProperty.findProperty(pvStructure,"alarm");
+        if(pvAlarm==null) {
+            pvStructure.message("must have alarm", MessageType.error);
+            return;
+        }
+        alarmSupport = AlarmSupportFactory.getAlarmSupport(pvAlarm,recordSupport);
+        if(alarmSupport==null) {
+            pvStructure.message("must have alarm with alarmSupport", MessageType.error);
+            return;
+        }
+        alarmSupport.initialize(recordSupport);
+        if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
+            return;
+        }
         providerPV = pvStructure.getStringField("providerName");
         if(providerPV==null) return;
         pvnamePV = pvStructure.getStringField("pvname");
@@ -188,7 +200,8 @@ implements ChannelListener,ChannelFieldGroupListener {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         String providerName = providerPV.get();
         String pvname = pvnamePV.get();
-        
+        alarmSupport.start();
+        if(alarmSupport.getSupportState()!=SupportState.ready) return;
         if(propertyNamesPV!=null) {
             String value = propertyNamesPV.get();
             if(value!=null) {
@@ -207,7 +220,7 @@ implements ChannelListener,ChannelFieldGroupListener {
                 if(propertyName.equals("alarm")) {
                     PVField pvField = pvStructure.getSubField("alarm");
                     if(pvField==null) {
-                        pvStructure.message("does not have fieldalarm", MessageType.warning);
+                        pvStructure.message("does not have field alarm", MessageType.warning);
                         continue;
                     }
                     Alarm alarm = AlarmFactory.getAlarm(pvField);
@@ -256,6 +269,7 @@ implements ChannelListener,ChannelFieldGroupListener {
         }
         channel = channelAccess.createChannel(pvname,propertyNames, providerName, this);
         if(channel==null) {
+            alarmSupport.stop();
             message("providerName " + providerName + " pvname " + pvname + " not found",MessageType.error);
             return;
         }
@@ -267,6 +281,7 @@ implements ChannelListener,ChannelFieldGroupListener {
     public void stop() {
         channel.destroy();
         channel = null;
+        alarmSupport.stop();
         alarmIsProperty = false;
         alarmMessagePV = null;
         alarmSeverityIndexPV = null;
@@ -276,6 +291,15 @@ implements ChannelListener,ChannelFieldGroupListener {
         propertyPVFields = null;
         super.stop();
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.AbstractSupport#uninitialize()
+     */
+    public void uninitialize() {
+        if(super.getSupportState()==SupportState.ready) stop();
+        alarmSupport.uninitialize();
+        super.uninitialize();
+    }
+
     /* (non-Javadoc)
      * @see org.epics.ioc.process.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
      */

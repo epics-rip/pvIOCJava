@@ -140,7 +140,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
      */
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!isReady) {
-            if(alarmSupport!=null) alarmSupport.setAlarm(
+            alarmSupport.setAlarm(
                     pvStructure.getFullFieldName() + " not connected",
                     AlarmSeverity.major);
             supportProcessRequester.supportProcessDone(RequestResult.success);
@@ -195,7 +195,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
      */
     public void processContinue() {
         if(requestResult!=RequestResult.success) {
-            if(alarmSupport!=null) alarmSupport.setAlarm(
+            alarmSupport.setAlarm(
                     pvStructure.getFullFieldName() + ": put request failed",
                     AlarmSeverity.major);
         }

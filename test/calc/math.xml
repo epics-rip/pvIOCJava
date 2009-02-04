@@ -2,1189 +2,1177 @@
 <IOCDatabase>
 <substitute fromTo = "checkRecord=absInt,checkType=int,checkValue=4" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "int" >-4</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.abs(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "int" >-4</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.abs(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=absLong,checkType=long,checkValue=4" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "long">-4</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.abs(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "int" >-4</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.abs(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=absFloat,checkType=float,checkValue=4" />
 <record name = "${checkRecord}">
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "float">-4.0F</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.abs(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "float" >-4.0F</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.abs(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=absDouble,checkType=double,checkValue=3.9999999" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">-4.0D</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.abs(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >-4.0D</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.abs(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=acos,checkType=double,checkValue=180" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">-1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.toDegrees(Math.acos(a))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >-1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.toDegrees(Math.acos(a))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=asin,checkType=double,checkValue=90" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.toDegrees(Math.asin(a))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.toDegrees(Math.asin(a))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=atan,checkType=double,checkValue=45" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.toDegrees(Math.atan(a))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.toDegrees(Math.atan(a))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=atan2,checkType=double,checkValue=45" />
 <record name = "${checkRecord}">
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.toDegrees(Math.atan2(a,b))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.toDegrees(Math.atan2(a,b))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 
 <substitute fromTo = "checkRecord=cbrt,checkType=double,checkValue=3" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">27.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.cbrt(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >27.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.cbrt(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=ceil,checkType=double,checkValue=28" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">27.5</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.ceil(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >27.5</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.ceil(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=cos,checkType=double,checkValue=-1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.cos(Math.PI*a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.cos(Math.PI*a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=cosh,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">0.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.cosh(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >0.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.cosh(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=exp,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.log(Math.exp(a))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.log(Math.exp(a))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=expm1,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.log(Math.expm1(a)+1)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.log(Math.expm1(a)+1)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=floor,checkType=double,checkValue=27" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">27.5</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.floor(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >27.5</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.floor(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=hypot,checkType=double,checkValue=5" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">3.0</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">4.0</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.hypot(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >3.0</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >4.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.hypot(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 
 <substitute fromTo = "checkRecord=IEEEremainder,checkType=double,checkValue=0.065" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">4.265</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">2.1</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.IEEEremainder(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >4.265</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >2.1</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.IEEEremainder(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 
 <substitute fromTo = "checkRecord=log,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.log(Math.E*a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.log(Math.E*a))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=log10,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">10.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.log10(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >10.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.log10(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=log1p,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.log1p(Math.E*a-1)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.log1p(Math.E*a-1)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=maxInt,checkType=int,checkValue=2" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "int">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "int">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.max(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "int" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "int" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.max(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=maxLong,checkType=long,checkValue=2" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "long">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "long">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.max(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "long" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "long" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.max(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=maxFloat,checkType=float,checkValue=2" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "float">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "float">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.max(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "float" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "float" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.max(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=maxDouble,checkType=double,checkValue=2" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.max(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.max(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=minInt,checkType=int,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "int">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "int">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.min(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+     <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "int" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "int" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.min(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=minLong,checkType=long,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "long">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "long">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.min(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "long" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "long" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.min(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=minFloat,checkType=float,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "float">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "float">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.min(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "float" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "float" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.min(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=minDouble,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">2</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.min(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.min(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=pow,checkType=double,checkValue=27" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">3</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">3</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.pow(a,b)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >3</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >3</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.pow(a,b)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <record name = "powBig" >
-    <value type = "double" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">3</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">3</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.pow(a,Math.pow(a,b))
-        </expression>
-      </calculator>
-    </input>
+    <scalar name = "value" type = "double" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >3</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >3</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.pow(a,Math.pow(a,b))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
 </record>
 
 <record name = "powBigInfinite">
-    <value type = "double" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">3</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">3</value>
-            <name>b</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.pow(a,Math.pow(a,Math.pow(a,b)))
-        </expression>
-      </calculator>
-    </input>
+    <scalar name = "value" type = "double" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >3</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >3</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.pow(a,Math.pow(a,Math.pow(a,b)))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
 </record>
 
 <record name = "random" >
-    <value type = "double" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calculator >
-        <expression>
-            Math.random()
-        </expression>
-      </calculator>
-    </input>
+    <scalar name = "value" type = "double" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.random()
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
 </record>
 
 <substitute fromTo = "checkRecord=rint,checkType=double,checkValue=11" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">10.67895</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.rint(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >10.67895</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.rint(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=roundInt,checkType=int,checkValue=4" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "float">4.3456</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.round(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "float" >4.3456</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.round(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=roundLong,checkType=long,checkValue=-4" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">-4.3456</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.round(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >4.3456</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.round(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=signumFloat,checkType=float,checkValue=-1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "float">-4.3456</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.signum(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "float" >4.3456</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.signum(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=signumDouble,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">4.3456</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.signum(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >4.3456</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.signum(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=sin,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">0.5</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.sin(Math.PI*a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >-1.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.sin(Math.PI*a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=sinh,checkType=double,checkValue=0" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.sinh(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+     <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >0.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.sinh(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=sqrt,checkType=double,checkValue=5" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">25.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.sqrt(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >0.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.sqrt(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=tan,checkType=double,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">0.25</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.tan(Math.PI*a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >0.25</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.tan(Math.PI*a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=tanh,checkType=double,checkValue=0" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.tanh(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.tanh(Math.PI*a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=toDegrees,checkType=double,checkValue=180" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calculator >
-        <expression>
-            Math.toDegrees(Math.PI)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.toDegrees(Math.PI)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=toRadians,checkType=double,checkValue=180" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">180.0</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.toDegrees(Math.toRadians(a))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >180.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.toDegrees(Math.toRadians(a))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=ulpFloat,checkType=float,checkValue=4.76837e-07" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "float">-4.3456</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.ulp(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "float" >-4.3456</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.ulp(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=ulpDouble,checkType=double,checkValue=8.88178e-16" />
 <record name = "ulpDouble" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">-4.3456</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.ulp(a)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >-4.3456</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.ulp(a)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 

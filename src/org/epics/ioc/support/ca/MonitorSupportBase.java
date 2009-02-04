@@ -6,6 +6,9 @@
 package org.epics.ioc.support.ca;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.ca.CD;
 import org.epics.ioc.ca.CDField;
@@ -81,7 +84,7 @@ implements CDMonitorRequester,RecordProcessRequester
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static Executor executor = ExecutorFactory.create("caLinkMonitor", ThreadPriority.low);
     private PVInt monitorTypeAccess = null;
-    private PVDouble deapvandAccess = null;
+    private PVDouble deadbandAccess = null;
     private PVInt queueSizeAccess = null;
     private PVBoolean reportOverrunAccess = null;
     private PVBoolean processAccess = null;  
@@ -90,18 +93,13 @@ implements CDMonitorRequester,RecordProcessRequester
     
     private String channelFieldName = null;
     private MonitorType monitorType = null;
-    private double deapvand = 0.0;
+    private double deadband = 0.0;
     private int queueSize = 0;
     private boolean reportOverrun = false;
     private boolean isRecordProcessRequester = false;
     private boolean process = false;
-    private boolean valueChanged = false;
-    private boolean valueIndexChanged = false;
-    private int newValueIndex = 0;
-    private boolean valueChoicesChanged = false;
-    private String[] newValueChoices = null;
+   
     private StringArrayData stringArrayData = null;
-    private boolean[] propertyValueChanged = null;
           
     private CDMonitor cdMonitor = null;
     private ChannelField valueChannelField = null;
@@ -111,9 +109,11 @@ implements CDMonitorRequester,RecordProcessRequester
     private ChannelFieldGroup channelFieldGroup = null;
     private ChannelField[] propertyChannelFields = null;
     
-    private AlarmSeverity alarmSeverity = AlarmSeverity.none;
-    private String alarmMessage = null;
     private int numberOverrun = 0;
+    private ReentrantLock lock = new ReentrantLock();
+    private Condition waitForCopied = lock.newCondition();
+    private volatile boolean cdCopied = false;
+    private CD cd = null;
    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
@@ -127,8 +127,8 @@ implements CDMonitorRequester,RecordProcessRequester
         if(monitorTypeAccess==null) {
             uninitialize(); return;
         }
-        deapvandAccess = pvStructure.getDoubleField("deapvand");
-        if(deapvandAccess==null)  {
+        deadbandAccess = pvStructure.getDoubleField("deadband");
+        if(deadbandAccess==null)  {
             uninitialize(); return;
         }
         queueSizeAccess = pvStructure.getIntField("queueSize");
@@ -144,7 +144,7 @@ implements CDMonitorRequester,RecordProcessRequester
             uninitialize(); return;
         }
         PVStructure pvParent = pvStructure.getParent();
-        PVField valuePVField = null;
+        valuePVField = null;
         while(pvParent!=null) {
             valuePVField = pvProperty.findProperty(pvParent,"value");
             if(valuePVField!=null) break;
@@ -163,7 +163,7 @@ implements CDMonitorRequester,RecordProcessRequester
         if(super.getSupportState()!=SupportState.ready) return;
         int index = monitorTypeAccess.get();
         monitorType = MonitorType.getType(index);
-        deapvand = deapvandAccess.get();
+        deadband = deadbandAccess.get();
         queueSize = queueSizeAccess.get();
         if(queueSize<=1) {
             pvStructure.message("queueSize being put to 2", MessageType.warning);
@@ -197,20 +197,11 @@ implements CDMonitorRequester,RecordProcessRequester
      */
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!channel.isConnected()) {
-            if(alarmSupport!=null) alarmSupport.setAlarm("Support not connected",
-                AlarmSeverity.invalid);
+            alarmSupport.setAlarm("Support not connected",AlarmSeverity.invalid);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
-        if(alarmIsProperty) {
-            if(alarmSupport!=null) alarmSupport.setAlarm(alarmMessage, alarmSeverity);
-        } else if(numberOverrun>0) {
-            if(alarmSupport!=null) alarmSupport.setAlarm(
-                    "missed " + Integer.toString(numberOverrun) + " notifications",
-                    AlarmSeverity.none);
-            numberOverrun = 0;
-        }
-        if(process) post();
+        getCD();
         supportProcessRequester.supportProcessDone(RequestResult.success);
     } 
     /* (non-Javadoc)
@@ -249,87 +240,59 @@ implements CDMonitorRequester,RecordProcessRequester
      * @see org.epics.ioc.ca.CDMonitorRequester#monitorCD(org.epics.ioc.ca.CD)
      */
     public void monitorCD(CD cd) {
+        this.cd = cd;
+        if(process) {
+            cdCopied = false;
+            if(recordProcess.process(this, false, null)) {
+                if(isRecordProcessRequester) {
+                    lock.lock();
+                    try {
+                        if(!cdCopied) waitForCopied.await(10, TimeUnit.SECONDS);
+                    } catch(InterruptedException e) {
+                        System.err.println(
+                                e.getMessage()
+                                + " thread did not call ready");
+                    } finally {
+                        lock.unlock();
+                    }
+                    return;
+                } else if(recordProcess.processSelfRequest(this)) {
+                    recordProcess.processSelfProcess(this, false);
+                    lock.lock();
+                    try {
+                        if(!cdCopied) waitForCopied.await(10, TimeUnit.SECONDS);
+                    } catch(InterruptedException e) {
+                        System.err.println(
+                                e.getMessage()
+                                + " thread did not call ready");
+                    } finally {
+                        lock.unlock();
+                    }
+                    return;
+                }
+            }
+        }
         pvRecord.lock();
         try {
-            ChannelFieldGroup channelFieldGroup = cd.getChannelFieldGroup();
-            List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            CDStructure cdStructure = cd.getCDRecord().getCDStructure();
-            CDField[] cdFields = cdStructure.getCDFields();
-            for(int i=0;i<cdFields.length; i++) {
-                CDField cdField = cdFields[i];
-                ChannelField channelField = channelFieldList.get(i);
-                PVField targetPVField = cdField.getPVField();
-                if(channelField==alarmChannelField) {
-                    PVStructure pvStructure = (PVStructure)targetPVField;
-                    PVInt targetPVInt = (PVInt)pvProperty.findProperty(pvStructure,"severity.index");
-                    alarmSeverity = AlarmSeverity.getSeverity(targetPVInt.get());
-                    PVString pvString = (PVString)pvProperty.findProperty(pvStructure,"message");
-                    alarmMessage = pvString.get();
-                    continue;
-                }
-                if(cdField.getMaxNumPuts()==0) continue;
-                if(channelField==valueChannelField) {
-                    if(copy(targetPVField,valuePVField)) valueChanged = true;
-                } else if(channelField==valueIndexChannelField){
-                    PVInt pvInt = (PVInt)targetPVField;
-                    newValueIndex = pvInt.get();
-                    valueIndexChanged = true;
-                } else if(channelField==valueChoicesChannelField){
-                    PVStringArray pvStringArray = (PVStringArray)targetPVField;
-                    if(stringArrayData==null) stringArrayData = new StringArrayData();
-                    int len = pvStringArray.getLength();
-                    pvStringArray.get(0, len, stringArrayData);
-                    valueChoicesChanged = true;
-                    newValueChoices = stringArrayData.data;
-                } else if(gotAdditionalPropertys){
-                    boolean foundIt = false;
-                    for(int j=0; j<propertyChannelFields.length; j++) {
-                        ChannelField propertyChannelField = propertyChannelFields[j];
-                        if(channelField==propertyChannelField) {
-                            if(copy(targetPVField,propertyPVFields[j])) {
-                                propertyValueChanged[j] = true;
-                            }
-                            foundIt = true;
-                            break;
-                        }
-                    }
-                    if(!foundIt) {
-                        pvStructure.message(
-                                "Logic error in MonitorSupport",
-                                MessageType.error);
-                    }
-                } else {
-                    pvStructure.message(
-                            "Logic error in MonitorSupport",
-                            MessageType.fatalError);
-                }
-            }
-            if(!process) {
-                post();
-            }
+            getCD();
+            return;
         } finally {
             pvRecord.unlock();
         }
-        if(process) {
-            if(isRecordProcessRequester) {
-                if(recordProcess.process(this, false, null)) return;
-            } else if(recordProcess.processSelfRequest(this)) {
-                recordProcess.processSelfProcess(this, false);
-                return;
-            }
-            pvRecord.lock();
-            try {
-                post();
-            } finally {
-                pvRecord.unlock();
-            }
-        }
     }
+    
+
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
      */
     public void recordProcessComplete() {
-        // nothing to do
+        lock.lock();
+        try {
+            cdCopied = true;
+            waitForCopied.signal();
+        } finally {
+            lock.unlock();
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
@@ -380,9 +343,9 @@ implements CDMonitorRequester,RecordProcessRequester
             case change:
                 cdMonitor.lookForChange(valueChannelField, true); break;
             case absoluteChange:
-                cdMonitor.lookForAbsoluteChange(valueChannelField, deapvand); break;
+                cdMonitor.lookForAbsoluteChange(valueChannelField, deadband); break;
             case percentageChange:
-                cdMonitor.lookForPercentageChange(valueChannelField, deapvand); break;
+                cdMonitor.lookForPercentageChange(valueChannelField, deadband); break;
             }
         }
         if(alarmIsProperty) {
@@ -396,10 +359,8 @@ implements CDMonitorRequester,RecordProcessRequester
         }
         if(gotAdditionalPropertys) {
             int length = propertyPVFields.length;
-            propertyValueChanged = new boolean[length];
             propertyChannelFields = new ChannelField[length];
             for(int i=0; i<length; i++) {
-                propertyValueChanged[i] = false;
                 ChannelField channelField = channel.createChannelField(
                     propertyPVFields[i].getField().getFieldName());
                 propertyChannelFields[i] = channelField;
@@ -408,6 +369,71 @@ implements CDMonitorRequester,RecordProcessRequester
             }
         }
         cdMonitor.start(queueSize,executor);
+    }
+    
+    private void getCD() {
+        alarmSupport.beginProcess();
+        ChannelFieldGroup channelFieldGroup = cd.getChannelFieldGroup();
+        List<ChannelField> channelFieldList = channelFieldGroup.getList();
+        CDStructure cdStructure = cd.getCDRecord().getCDStructure();
+        CDField[] cdFields = cdStructure.getCDFields();
+        for(int i=0;i<cdFields.length; i++) {
+            CDField cdField = cdFields[i];
+            ChannelField channelField = channelFieldList.get(i);
+            PVField targetPVField = cdField.getPVField();
+            if(channelField==alarmChannelField) {
+                if(alarmIsProperty) {
+                PVStructure pvStructure = (PVStructure)targetPVField;
+                PVInt targetPVInt = (PVInt)pvProperty.findProperty(pvStructure,"severity.index");
+                AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(targetPVInt.get());
+                PVString pvString = (PVString)pvProperty.findProperty(pvStructure,"message");
+                String alarmMessage = pvString.get();
+                alarmSupport.setAlarm(alarmMessage, alarmSeverity);
+                }
+                continue;
+            }
+            if(cdField.getMaxNumPuts()==0) continue;
+            if(channelField==valueChannelField) {
+                copy(targetPVField,valuePVField);
+            } else if(channelField==valueIndexChannelField){
+                PVInt pvInt = (PVInt)targetPVField;
+                int newValueIndex = pvInt.get();
+                valueIndexPV.put(newValueIndex);
+            } else if(channelField==valueChoicesChannelField){
+                PVStringArray pvStringArray = (PVStringArray)targetPVField;
+                if(stringArrayData==null) stringArrayData = new StringArrayData();
+                int len = pvStringArray.getLength();
+                pvStringArray.get(0, len, stringArrayData);
+                String[] newValueChoices = stringArrayData.data;
+                valueChoicesPV.put(0, newValueChoices.length, newValueChoices, 0);
+            } else if(gotAdditionalPropertys){
+                boolean foundIt = false;
+                for(int j=0; j<propertyChannelFields.length; j++) {
+                    ChannelField propertyChannelField = propertyChannelFields[j];
+                    if(channelField==propertyChannelField) {
+                        copy(targetPVField,propertyPVFields[j]);
+                        foundIt = true;
+                        break;
+                    }
+                }
+                if(!foundIt) {
+                    pvStructure.message(
+                            "Logic error in MonitorSupport",
+                            MessageType.error);
+                }
+            } else {
+                pvStructure.message(
+                        "Logic error in MonitorSupport",
+                        MessageType.fatalError);
+            }
+        }
+        if(numberOverrun>0) {
+            alarmSupport.setAlarm(
+                    "missed " + Integer.toString(numberOverrun) + " notifications",
+                    AlarmSeverity.none);
+            numberOverrun = 0;
+        }
+        alarmSupport.endProcess();
     }
     
     private boolean checkCompatibility(Field targetField) {
@@ -453,29 +479,6 @@ implements CDMonitorRequester,RecordProcessRequester
             return false;
         }
         return true;
-    }
-    
-    private void post() {
-        if(valueChanged) {
-            valueChanged = false;
-        }
-        if(valueIndexChanged) {
-            valueIndexPV.put(newValueIndex);
-            valueIndexChanged = false;
-            newValueIndex = 0;
-        }
-        if(valueChoicesChanged) {
-            valueChoicesPV.put(0, newValueChoices.length, newValueChoices, 0);
-            valueChoicesChanged = false;
-            newValueChoices = null;
-        }
-        if(gotAdditionalPropertys){
-            for(int j=0; j<propertyChannelFields.length; j++) {
-                if(propertyValueChanged[j]) {
-                    propertyValueChanged[j] = false;
-                }
-            }
-        }
     }
     
     private void disconnect() {
