@@ -1,12 +1,10 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
- <supportArray elementType = "structure" supportName = "supportArray">
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>${checkRecord}Check.input.calcArgArray[0].value</pvname>
-                <process>true</process>
-            </link>
-        </element>
-    </supportArray>
-</IOCDatabase>
+<database>
+    <structure name = "output" type = "generic">
+        <scalar name = "wait" type = "boolean" >true</scalar>
+        <structure name = "link" type = "outputSupport">
+            <scalar name = "pvname">${checkRecord}Check.input.calcArgs.a.value</scalar>
+            <scalar name = "process">true</scalar>
+        </structure>
+    </structure>
+</database>

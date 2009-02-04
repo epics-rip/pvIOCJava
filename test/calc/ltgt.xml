@@ -1,67 +1,65 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <substitute fromTo = "checkRecord=ltgtBoolean,checkType=boolean,checkValue=true" />
 <record name = "${checkRecord}">
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "int" >1</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "int" >2</value>
-            <name>b</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double" >1.1</value>
-            <name>c</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double" >2.2</value>
-            <name>d</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-       (a&lt;b &amp;&amp; a&lt;=a &amp;&amp; c&lt;d &amp;&amp; d&lt;=d)
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "int" >1</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "int" >2</scalar>
+          </structure>
+          <structure name = "c">
+            <scalar name = "value" type = "double" >1.1</scalar>
+          </structure>
+          <structure name = "d">
+            <scalar name = "value" type = "double" >2.2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+         (a&lt;b &amp;&amp; a&lt;=a &amp;&amp; c&lt;d &amp;&amp; d&lt;=d)
        &amp;&amp;
        (b&gt;a &amp;&amp; b&gt;=b &amp;&amp; d&gt;c &amp;&amp; d&gt;=d)
         </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkBoolean.xml" />
 
 <substitute fromTo = "checkRecord=ltgtBooleanConstant,checkType=boolean,checkValue=true" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan  structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calculator >
-        <expression>
-       (1&lt;2 &amp;&amp; 1&lt;=1 &amp;&amp; 1.0&lt;2.0 &amp;&amp; 1.0&lt;=1.0)
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calculator">
+         <scalar name = "expression">
+         (1&lt;2 &amp;&amp; 1&lt;=1 &amp;&amp; 1.0&lt;2.0 &amp;&amp; 1.0&lt;=1.0)
        &amp;&amp;
        (2&gt;1 &amp;&amp; 2&gt;=2 &amp;&amp; 2.0&gt;1.0 &amp;&amp; 2.0&gt;=2.0)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "processAfterStart">true</scalar>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkBoolean.xml" />
 
 <!--
 -->
 
-</IOCDatabase>
+</database>

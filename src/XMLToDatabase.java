@@ -158,7 +158,7 @@ public class XMLToDatabase {
     
     static void dumpRecords() {
         PVRecord[] pvRecords = masterPVDatabase.getRecords();
-        if(pvRecords.length>0) System.out.printf("\n\nstructures");
+        if(pvRecords.length>0) System.out.printf("\n\nrecords");
         for(PVRecord pvRecord : pvRecords) {
             System.out.print(pvRecord.toString());
         }

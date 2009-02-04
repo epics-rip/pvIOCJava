@@ -11,6 +11,7 @@ import java.util.TimerTask;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -52,9 +53,14 @@ public class DelayFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordProcess)
          */
-        public void initialize(RecordProcess recordProcess) {
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         */
+        @Override
+        public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            this.recordProcess = recordProcess;
+            this.recordProcess = recordSupport.getRecordProcess();
             minAccess = pvStructure.getLongField("min");
             if(minAccess==null) return;
             maxAccess = pvStructure.getLongField("max");

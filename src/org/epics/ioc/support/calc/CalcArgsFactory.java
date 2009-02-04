@@ -39,7 +39,7 @@ public class CalcArgsFactory {
         private String processRequesterName = null;
         private PVStructure pvStructure;
         private PVField[] valuePVFields;
-        private PVString[] namePVFields;
+        private String[] argNames;
         private Support[] supports = null;
         private int numSupports = 0;
               
@@ -60,9 +60,8 @@ public class CalcArgsFactory {
             if(super.getSupportState()==SupportState.readyForInitialize) {
                 throw new IllegalStateException("getPVField called but not initialized");
             }
-            for(int i=0; i<namePVFields.length; i++) {
-                PVString pvString = (PVString)namePVFields[i];
-                String name = pvString.get();
+            for(int i=0; i<argNames.length; i++) {
+                String name = argNames[i];
                 if(name.equals(argName)) {
                     return valuePVFields[i];
                 }
@@ -84,7 +83,7 @@ public class CalcArgsFactory {
             PVField[] pvFields = pvStructure.getPVFields();
             int length = pvFields.length;
             valuePVFields = new PVField[length];
-            namePVFields = new PVString[length];
+            argNames = new String[length];
             supports = new Support[length];
             numSupports = 0;
             for(int i=0; i< length; i++) {
@@ -96,12 +95,10 @@ public class CalcArgsFactory {
                 PVStructure pvStructure = (PVStructure)pvField;
                 valuePVFields[i] = pvStructure.getSubField("value");
                 if(valuePVFields[i]==null) {
-                    pvField.message("CalcArgs requires this to have a valuefield", MessageType.error);
+                    pvField.message("CalcArgs requires this to have a value field", MessageType.error);
                     return;
                 }
-                namePVFields[i] = pvStructure.getStringField("name");
-                if(namePVFields[i]==null) return;
-                
+                argNames[i] = valuePVFields[i].getParent().getField().getFieldName();
                 Support support = recordSupport.getSupport(pvField);
                 supports[i] = support;
                 if(support==null) continue;

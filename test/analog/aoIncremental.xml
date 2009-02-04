@@ -1,41 +1,44 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <record name = "aoIncremental">
-    <value type = "double" />
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <scan structureName = "scan">
-        <type><choice>periodic</choice></type>
-        <rate>1.0</rate>
-    </scan>
-    <desired structureName = "incrementalDouble" >
-        <value createName = "controlLimit" />
-        <rateOfChange>.02</rateOfChange>
-        <incremental>true</incremental>
-        <control structureName = "control" >
-            <limit>
-                <low>0.0</low>
-                <high>8.0</high>
-            </limit>
-        </control>
-    </desired>
-    <output structureName = "linearConvertOutput" >
-        <linearConvert>
-            <engUnitsLow>0.0</engUnitsLow>
-            <engUnitsHigh>10.0</engUnitsHigh>
-            <deviceLow>0</deviceLow>
-            <deviceHigh>4096</deviceHigh>
-        </linearConvert>
-    </output>
-    <display structureName = "display" >
-        <units>volts</units>
-        <limit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </limit>
-    </display>
+    <scalar name = "value" type = "double" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "desired" type = "incrementalDouble" >
+        <scalar name = "value">
+            <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+        </scalar>
+        <scalar name = "rateOfChange">.02</scalar>
+        <scalar name = "incremental">true</scalar>
+        <structure name = "control" type = "control" >
+            <structure name = "limit">
+                <scalar name = "low">0.0</scalar>
+                <scalar name = "high">8.0</scalar>
+            </structure>
+        </structure>
+    </structure>
+    <structure name = "output" type = "linearConvertOutput">
+        <structure name = "linearConvert">
+            <scalar name = "deviceHigh">4095</scalar>
+            <scalar name = "deviceLow">0</scalar>
+            <scalar name = "engUnitsLow">0.0</scalar>
+            <scalar name = "engUnitsHigh">10.0</scalar>
+        </structure>
+        
+    </structure>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">10.0</scalar>
+        </structure>
+    </structure>
 </record>
 
 
-</IOCDatabase>
+</database>

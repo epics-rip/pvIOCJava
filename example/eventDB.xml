@@ -1,28 +1,31 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <record name = "eventCounter">
-    <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator>
-        <expression>value+1</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>event</choice></type>
-        <eventName>eventTest</eventName>
-    </scan>
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">value+1</scalar>
+      </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">event</scalar></structure>
+        <scalar name = "eventName">eventTest</scalar>
+    </structure>
 </record>
 
 <record name = "event">
-    <value type = "string" supportName = "event">eventTest</value>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <scan structureName = "scan">
-        <type><choice>periodic</choice></type>
-        <rate>1.0</rate>
-    </scan>
+    <scalar name = "value" type = "string" >
+        <auxInfo name = "supportFactory" type = "string">eventFactory</auxInfo>
+        eventTest
+    </scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
 </record>
 
-</IOCDatabase>
+</database>

@@ -1,30 +1,26 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <record name = "${checkRecord}Check">
-    <value type = "boolean" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "${checkType}" />
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <name>b</name>
-            <value type = "${checkType}">${checkValue}</value>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            (a==b) ? true : false
-        </expression>
-      </calculator>
-    </input>
-    <valueAlarm structureName = "booleanAlarm" >
-       <active>true</active>
-       <falseMessage>checkExpression Failure</falseMessage>
-       <falseAlarm><choice>major</choice></falseAlarm>
-    </valueAlarm>
+    <scalar name = "value" type = "boolean" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "${checkType}" />
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "${checkType}" >${checkValue}</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(a==b) ? true : false</scalar>
+       </structure>
+    </structure>
+    <structure name = "valueAlarm" type = "booleanAlarm" >
+       <scalar name = "active">true</scalar>
+       <scalar name = "falseMessage">checkExpression Failure</scalar>
+       <structure name ="falseAlarm"><scalar name = "choice">major</scalar></structure>
+    </structure>
 </record>
-</IOCDatabase>
+</database>

@@ -32,9 +32,31 @@ public class AlarmSupportFactory {
      * @return The support or null if the alarm field is improperly defined.
      */
     public static Support create(PVStructure pvStructure) {
-        return new AlarmSupportImpl(pvStructure);
+        AlarmSupportImpl impl = new AlarmSupportImpl(pvStructure);
+        if(impl.isAlarmSupport()) return impl;
+        return null;
     }
-    
+    /**
+     * If pvField has AlarmSupport return it.
+     * @param pvField The field.
+     * @param recordSupport The recordSupport;
+     * @return
+     */
+    public static AlarmSupport getAlarmSupport(PVField pvField,RecordSupport recordSupport) {
+        Support support = recordSupport.getSupport(pvField);
+        if(support!=null && (support instanceof AlarmSupportImpl)) {
+            return (AlarmSupport)support;
+        }
+        return null;
+    }
+    /**
+     * Find alarm support.
+     * Look first in startPVField if it is a structure.
+     * If not found look up the parent tree.
+     * @param startPVField The starting field.
+     * @param recordSupport The recordSupport.
+     * @return
+     */
     public static AlarmSupport findAlarmSupport(PVField startPVField,RecordSupport recordSupport) {
         if(startPVField==null) return null;
         PVField parentPVField;
@@ -85,22 +107,27 @@ public class AlarmSupportFactory {
         private AlarmSupportImpl(PVStructure pvAlarm) {
             super(alarmSupportName,pvAlarm);
             this.pvAlarm = pvAlarm;
+            
+        }
+        
+        private boolean isAlarmSupport (){
             pvMessage = pvAlarm.getStringField("message");
             if(pvMessage==null) {
                 pvAlarm.message("field message does not exist", MessageType.error);
-                return;
+                return false;
             }
             PVStructure pvStructure = pvAlarm.getStructureField("severity");
             if(pvStructure==null) {
                 pvAlarm.message("field severity does not exist", MessageType.error);
-                return;
+                return false;
             }
             pvSeverity = pvStructure.getIntField("index");
             if(pvSeverity==null) {
                 pvStructure.message("field index does not exist", MessageType.error);
-                return;
+                return false;
             }
-        }  
+            return true;
+        }
        
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)

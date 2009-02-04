@@ -42,7 +42,8 @@ public class SupportCreationFactory {
         return createSupportPvt(requester,recordSupport,pvField);
     }
     
-    private static PVDatabase masterDatabase = PVDatabaseFactory.getMaster();
+    private static final PVDatabase masterDatabase = PVDatabaseFactory.getMaster();
+    private static final String supportFactory = "supportFactory";
     
     static private class SupportCreationImpl implements SupportCreation{
         
@@ -180,8 +181,13 @@ public class SupportCreationFactory {
     private static boolean createSupportPvt(Requester requester,RecordSupport recordSupport,PVField pvField) {
         if(recordSupport.getSupport(pvField)!=null) return true;
         PVAuxInfo pvAuxInfo = pvField.getPVAuxInfo();
-        PVScalar pvAuxField = pvAuxInfo.getInfo("supportFactory");
-        if(pvAuxField==null) return true;
+        PVScalar pvAuxField = pvAuxInfo.getInfo(supportFactory);
+        if(pvAuxField==null) {
+            if(pvField!=pvField.getPVRecord()) return true;
+            pvAuxField = pvAuxInfo.createInfo(supportFactory, ScalarType.pvString);
+            PVString pvString = (PVString)pvAuxField;
+            pvString.put("genericFactory");
+        }
         if(pvAuxField.getScalar().getScalarType()!=ScalarType.pvString) {
             printError(requester,pvField,"pvAuxInfo for support is not a string");
             return false;

@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
-<include addPath = "test/analog" />
+<database>
+<include addPath = "${JAVAIOC}/test/analog" />
 
 <include href = "ai.xml" />
 <include href = "ao.xml" />
 <include href = "aoIncremental.xml" />
+<include removePath = "${JAVAIOC}/test/analog" />
 <!--
 -->
-</IOCDatabase>
+</database>

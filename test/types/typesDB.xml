@@ -1,13 +1,14 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <include addPath = "${JAVAIOC}/test/types" />
 <include href = "array.xml" />
-<include href = "allTypes.xml" />
 <include href = "dataOnly.xml" />
 <include href = "string.xml" />
 <include href = "scalar.xml" />
 <include href = "booleanArray.xml" />
-<!--
--->
 <include removePath = "${JAVAIOC}/test/types" />
-</IOCDatabase>
+
+<include addPath = "${PVDATA}/test/types" />
+<include href = "allTypes.xml" />
+<include removePath = "${PVDATA}/test/types" />
+</database>

@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
+<include addPath = "${PVDATA}/test/example" />
+<include removePath = "${PVDATA}/test/example" />
 <include addPath = "${JAVAIOC}/example" />
 <include href = "counterDB.xml" />
 <include href = "eventDB.xml" />
-<!--
--->
 <include removePath = "${JAVAIOC}/example" />
-</IOCDatabase>
+</database>

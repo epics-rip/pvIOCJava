@@ -1,69 +1,41 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
-
-<record name = "voltage1">
-    <value type = "double" >1.0</value>
-</record>
-
-<record name = "voltage2" >
-    <value type = "double">2.0</value>
-</record>
-
-<record name = "current1" >
-  <value type = "double" />
-</record>
-
-<record name = "current2" >
-  <value type = "double" />
-</record>
+<database>
 
 <record name = "powerSupplyArray" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <supply elementType = "structure" capacity = "2" >
-        <element>
-            <alarm structureName = "alarm" />
-            <voltage type = "structure">
-                 <value type = "double" />
-                 <alarm structureName = "alarm" />
-                 <input  supportName = "inputSupport" structureName = "inputSupport">
-                      <pvname>voltage1</pvname>
-                      <process>false</process>
-                 </input>
-            </voltage>
-            <current type = "structure">
-                 <value type = "double" />
-                 <alarm structureName = "alarm" />
-                 <input structureName = "null" supportName = "powerSupplyCurrent" />
-                 <output supportName = "outputSupport" structureName = "outputSupport">
-                     <pvname>current1</pvname>
-                     <process>true</process>
-                 </output>
-            </current>
-            <power type = "structure"><value type = "double" /></power>
-        </element>
-        <element>
-            <alarm structureName = "alarm" />
-            <voltage type = "structure">
-                 <value type = "double" />
-                 <alarm structureName = "alarm" />
-                 <input  supportName = "inputSupport" structureName = "inputSupport">
-                      <pvname>voltage2</pvname>
-                      <process>false</process>
-                 </input>
-            </voltage>
-            <current type = "structure">
-                 <value type = "double" />
-                 <alarm structureName = "alarm" />
-                 <input structureName = "null" supportName = "powerSupplyCurrent" />
-                 <output supportName = "outputSupport" structureName = "outputSupport">
-                     <pvname>current2</pvname>
-                     <process>true</process>
-                 </output>
-            </current>
-            <power type = "structure"><value type = "double" /></power>
-        </element>
-    </supply>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "supply">
+        <structure name = "0" type = "generic" >
+            <structure name = "alarm" type = "alarm" />
+            <structure name = "voltage" type = "generic">
+                 <scalar name = "value" type = "double">1.0</scalar>
+            </structure>
+            <structure name = "current" type = "generic">
+                 <scalar name = "value" type = "double">
+                    <auxInfo name = "supportFactory" type = "string">powerSupplyCurrentFactory</auxInfo>
+                 </scalar>
+                 <structure name = "alarm" type = "alarm" />
+            </structure>
+            <structure name = "power">
+                <scalar name = "value" type = "double" />
+            </structure>
+        </structure>
+        <structure name = "1" type = "generic" >
+            <structure name = "alarm" type = "alarm" />
+            <structure name = "voltage" type = "generic">
+                 <scalar name = "value" type = "double">2.0</scalar>
+            </structure>
+            <structure name = "current" type = "generic">
+                 <scalar name = "value" type = "double">
+                    <auxInfo name = "supportFactory" type = "string">powerSupplyCurrentFactory</auxInfo>
+                 </scalar>
+                 <structure name = "alarm" type = "alarm" />
+            </structure>
+            <structure name = "power">
+                <scalar name = "value" type = "double" />
+            </structure>
+        </structure>
+    </structure>
 </record>
 
-</IOCDatabase>
+</database>
