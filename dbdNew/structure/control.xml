@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<database>
-
-<structure name = "control">
-    <structure name = "limit" type = "doubleLimit" />
-    <scalar name = "minStep" type = "double" />
-</structure>
-
-</database>
