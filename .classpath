@@ -5,8 +5,8 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/pvData"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/CAJ"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/JCA"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/remotetea"/>
+	<classpathentry kind="lib" path="/home/mrk/workspace/javaIOC/jar/CAJ.jar"/>
+	<classpathentry kind="lib" path="/home/mrk/workspace/javaIOC/jar/JCA.jar"/>
+	<classpathentry kind="lib" path="/home/mrk/workspace/javaIOC/jar/remoteTea.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
