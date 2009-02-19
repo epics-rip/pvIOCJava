@@ -57,7 +57,7 @@ public class BooleanArrayToggleCalculatorFactory {
              for(int i=0; i<valueLength; i++) {
                  value[i] = (value[i] ? false : true);
              }
-  
+             valuePV.postPut();
         }
     }
 }
