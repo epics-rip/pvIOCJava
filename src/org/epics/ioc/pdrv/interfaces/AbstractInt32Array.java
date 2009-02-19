@@ -19,8 +19,7 @@ import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadReady;
-import org.epics.pvData.pv.Array;
-import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.PVIntArray;
 
 
 
@@ -42,6 +41,7 @@ import org.epics.pvData.pv.PVStructure;
  */
 public abstract class AbstractInt32Array extends AbstractArrayInterface implements Int32Array{
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
+    private PVIntArray pvIntArray;
     private  ReentrantLock lock = new ReentrantLock();
     private List<Int32ArrayInterruptListener> interruptlistenerList =
         new LinkedList<Int32ArrayInterruptListener>();
@@ -51,23 +51,19 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
     private Interrupt interrupt = new Interrupt();
     /**
      * Constructor.
-     * This registers the interface with the device.
-     * @param parent The parent for the array.
-     * @param array The Array interface.
-     * @param capacity The capacity for the array.
-     * @param capacityMutable Can the capacity be changed.
+     * @param pvIntArray the data.
      * @param device The device.
      */
-    protected AbstractInt32Array(
-        PVStructure parent,Array array,int capacity,boolean capacityMutable,Device device)
+    protected AbstractInt32Array(PVIntArray pvIntArray,Device device)
     {
-        super(parent,array,device,"int32Array");
+        super(device,"int32Array");
+        this.pvIntArray = pvIntArray;
     }    
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVIntArray#share(org.epics.ioc.pv.PVIntArray)
+     * @see org.epics.ioc.pdrv.interfaces.Int32Array#getPVIntArray()
      */
-    public boolean share(int[] value, int length) {
-        return false;
+    public PVIntArray getPVIntArray() {
+        return pvIntArray;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endRead(org.epics.ioc.pdrv.User)
@@ -94,8 +90,8 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
     public Status startWrite(User user) {
         return Status.success;
     }
-    /**
-     * Announce an interrupt.
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.interfaces.Int32Array#interruptOccured()
      */
     public void interruptOccured() {
         if(interruptActive) {

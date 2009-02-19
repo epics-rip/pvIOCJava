@@ -132,6 +132,7 @@ public class ProcessControlFactory {
             recordName = pvRecordName.get();
             if(recordName==null || recordName.equals("")) {
                 pvMessage.put("recordName is null");
+                pvMessage.postPut();
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
@@ -236,21 +237,26 @@ public class ProcessControlFactory {
          */
         public void processContinue() {
             pvMessage.put(message);
+            pvMessage.postPut();
             if(trace!=pvTrace.get()) {
                 pvTrace.put(trace);
+                pvTrace.postPut();
             }
             if(enable!=pvEnable.get()) {
                 pvEnable.put(enable);
+                pvEnable.postPut();
             }
             
             if(supportState!=null) {
                 int index = supportState.ordinal();
                 if(index!=supportStatePVInt.get()) {
                     supportStatePVInt.put(index);
+                    supportStatePVInt.postPut();
                 }
             }
             if(supportStateCommandPVInt.get()!=0) {
                 supportStateCommandPVInt.put(0);
+                supportStateCommandPVInt.postPut();
             }
             supportProcessRequester.supportProcessDone(requestResult);
         }

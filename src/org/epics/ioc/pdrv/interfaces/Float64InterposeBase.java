@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
+import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
 
@@ -15,15 +16,15 @@ import org.epics.ioc.pdrv.User;
  * @author mrk
  *
  */
-public class Float64InterposeBase extends AbstractInterface implements Float64 {
+public class Float64InterposeBase extends AbstractFloat64 {
     private Float64 float64;
     
     /**
      * Constructor
      * @param float64 The interface to the lower level implementation.
      */
-    protected Float64InterposeBase(Float64 float64) {
-    	super(float64.getDevice(),float64.getInterfaceName());
+    protected Float64InterposeBase(Device device,Float64 float64) {
+    	super(device);
         this.float64 = float64;
     }
     /* (non-Javadoc)

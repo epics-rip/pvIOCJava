@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<database>
+
+
+<record name = "aiRaw">
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "process" type = "generic">
+        <structure name = "link" type = "processSupport">
+            <scalar name = "pvname">ai</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record name = "ai">
+    <scalar name = "value" type = "double" />
+    <structure name = "alarm" type = "alarm" />
+</record>
+</database>

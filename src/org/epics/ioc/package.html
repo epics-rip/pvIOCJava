@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>EPICS JavaIOC: Start </title>
+</head>
+
+<body>
+<h1 style="text-align: center">EPICS JavaIOC: Start <br />
+2009.02.18 </h1>
+
+<p>This package has a single class called Start. It's purpose is to start a
+JavaIOC.</p>
+
+<p>NOTE: The environment variables PVDATA and JAVAIOC must be defined.</p>
+
+<p>JavaIOC is developed as an eclipse project. The following assumes that you
+have eclipse installed and have imported JavaIOC into a project named
+"javaIOC". In addition project pvData must also exist as an eclipse project.
+In the future it will be possible to start a JavaIOC without using
+eclipse.</p>
+
+<p>Start does the following:</p>
+<ul>
+  <li>Reads Database files.</li>
+  <li>Dumps the resulting structure and record definitions.</li>
+  <li>Starts servers.</li>
+  <li>Invokes swtshell, which is a Graphical User Interface (GUI) shell that
+    interacts with a running JavaIOC.</li>
+</ul>
+
+<p>The arguments to Start can be any combination of:</p>
+<ul>
+  <li>-pv <br />
+    followed by filenames of files containing XML database definitions.<br />
+  </li>
+  <li>-dumpStructures<br />
+    dump the structure, create, and support definitions</li>
+  <li>-dumpRecords<br />
+    dump the record instances</li>
+  <li>-server 
+    <p>followed by a filenames. Each field is a list of servers to start.</p>
+  </li>
+  <li>-swtshell<br />
+    Start swtshell.</li>
+</ul>
+
+</body>
+</html>

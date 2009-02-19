@@ -42,14 +42,14 @@ import org.epics.pvData.pv.Type;
 public class DigitalFactory {
     /**
      * Create the support.
-     * @param dbField The field for which to create support.
+     * @param pvStructure The field for which to create support.
      * @return The support instance.
      */
     public static Support create(PVStructure pvStructure) {
         PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
-        PVScalar pvScalar = pvAuxInfo.getInfo("support");
+        PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
-            pvStructure.message("no pvAuxInfo with name support. Why??", MessageType.error);
+            pvStructure.message("no pvAuxInfo with name supportFactory. Why??", MessageType.error);
             return null;
         }
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
@@ -66,8 +66,8 @@ public class DigitalFactory {
         return support;
     }
     
-    private static final String digitalInputName = "digitalInput";
-    private static final String digitalOutputName = "digitalOutput";
+    private static final String digitalInputName = "digitalInputFactory";
+    private static final String digitalOutputName = "digitalOutputFcatory";
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static PVDatabase pvDatabaseMaster = PVDatabaseFactory.getMaster();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
@@ -129,7 +129,6 @@ public class DigitalFactory {
                 parentPVField.message("value field of type int not found", MessageType.error);
                 return;
             }
-            pvRegisterValue = (PVInt)pvField;
             if(!initFields()) {
                 super.message("DigitalFactory: initialize failed", MessageType.error);
                 return;
@@ -164,6 +163,7 @@ public class DigitalFactory {
             int nstates = pvStatesFields.length;
             if(nstates<1) return false;
             String[] names = new String[nstates];
+            values = new int[nstates];
             PVStructure pvEnumeratedAlarmState = pvDatabaseMaster.findStructure("enumeratedAlarmState");
             Field[] pvValueAlarmStateAlarmFields = pvEnumeratedAlarmState.getStructure().getFields();
             for(int indState=0; indState<nstates; indState++) {
@@ -205,13 +205,11 @@ public class DigitalFactory {
                 PVStructure pvNew = pvDataCreate.createPVStructure(
                     pvValueAlarmStateAlarm,
                     String.valueOf(indState),
-                    pvValueAlarmStateAlarmFields);
+                    pvStructure.getStructure().getFields());
                 convert.copyStructure(pvStructure,pvNew);
                 pvValueAlarmStateAlarm.appendPVField(pvNew);
-                EnumeratedFactory.replacePVField(pvNew);
             }          
             pvValueChoices.put(0, nstates, names, 0);
-            
             return true;
         } 
     }
@@ -231,6 +229,7 @@ public class DigitalFactory {
                 for(int i=0; i< values.length; i++) {
                     if(values[i]==newValue) {
                         pvValueIndex.put(i);
+                        pvValueIndex.postPut();
                         break;
                     }
                 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <database>
+
 <record name = "getPutCounter">
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
@@ -8,13 +9,6 @@
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=10.0 ? value+1 : 0.0</scalar>
       </structure>
-    </structure>
-    <structure name = "link1" type = "processSupport">
-            <scalar name = "pvname">getFromCounter</scalar>
-    </structure>
-    <structure name = "link2" type = "outputSupport">
-        <scalar name = "pvname">putFromCounter</scalar>
-         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "valueAlarm" type = "doubleAlarm">
           <scalar name = "active">true</scalar>
@@ -49,26 +43,9 @@
           <scalar name = "hystersis">0.3</scalar>
     </structure> 
     <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"><scalar name = "choice">passive</scalar></structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
 </record>
-
-<record name = "getFromCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">getPutCounter</scalar>
-        <scalar name = "process">false</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
-    </structure>
-</record>
-<record name = "putFromCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-</record>
-
 
 </database>

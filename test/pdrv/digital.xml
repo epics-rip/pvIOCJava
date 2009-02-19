@@ -1,321 +1,298 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
-<record name = "syncDigitalPort" structureName = "portCreate">
-    <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>syncDigitalPort</portName>
-    <driverParameters structureName = "uint32DigitalDriver" >
-        <delay>0.0</delay>
-        <numberRegisters>2</numberRegisters>
-    </driverParameters>
+<record name = "syncDigitalPort" type = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</scalar>
+    <scalar name = "portName">syncDigitalPort</scalar>
+    <structure name = "driverParameters" type = "uint32DigitalDriver" >
+        <scalar name = "delay">0.0</scalar>
+        <scalar name = "numberRegisters">2</scalar>
+    </structure>
 </record>
 
-<record name = "syncDigitalPortControl" structureName = "portDeviceControl" >
-    <portName>syncDigitalPort</portName>
-    <deviceName>0</deviceName>
+<record name = "syncDigitalPortControl" type = "portDeviceControl" >
+    <scalar name = "portName">syncDigitalPort</scalar>
+    <scalar name = "deviceName">0</scalar>
 <!--
-    <traceMask><value>0xfff</value></traceMask>
-    <traceIOMask><value>0xfff</value></traceIOMask>
+    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
+    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
 -->
 </record>
 
 <record name = "syncDigitalCounter">
-    <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator>
-        <expression>(value+1)&lt;=15 ? value+1 : 0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type> 
-        <rate>0.5</rate>
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>syncDigitalOut</pvname>
-                <process>true</process>
-            </link>
-        </element>
-    </supportArray>
-    <display structureName = "display" >
-        <units>counts</units>
-        <limit>
-            <low>0.0</low>
-            <high>15.0</high>
-        </limit>
-    </display>
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=15 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "link" type = "outputSupport">
+         <scalar name = "pvname">syncDigitalOut</scalar>
+         <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">counts</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">15.0</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "syncDigitalOut">
-    <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>syncDigitalPort</portName>
-        <deviceName>0</deviceName>
-        <mask>15</mask>
-        <timeout>.2</timeout>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncDigitalIn1</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncDigitalIn2</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncDigitalIn3</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncDigitalIn4</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncDigitalIn5</pvname>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalOutputFactory</auxInfo>
+        <scalar name = "portName">syncDigitalPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">15</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "link1" type = "processSupport">
+         <scalar name = "pvname">syncDigitalIn1</scalar>
+         <scalar name = "wait" type = "boolean">false</scalar>
+    </structure>
+    <structure name = "link2" type = "processSupport">
+         <scalar name = "pvname">syncDigitalIn2</scalar>
+         <scalar name = "wait" type = "boolean">false</scalar>
+    </structure>
+    <structure name = "link3" type = "processSupport">
+         <scalar name = "pvname">syncDigitalIn3</scalar>
+         <scalar name = "wait" type = "boolean">false</scalar>
+    </structure>
+    <structure name = "link3" type = "processSupport">
+         <scalar name = "pvname">syncDigitalIn4</scalar>
+         <scalar name = "wait" type = "boolean">false</scalar>
+    </structure>
+    <structure name = "link3" type = "processSupport">
+         <scalar name = "pvname">syncDigitalIn5</scalar>
+    </structure>
 </record>
 
 <record name = "syncDigitalIn1">
-    <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "digital" >
-        <alarm structureName = "alarm" />
-        <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalPort</portName>
-            <deviceName>0</deviceName>
-            <mask>0x1</mask>
-            <timeout>.2</timeout>
-        </input>  
-        <states supportName = "digitalInput" >
-             <element structureName = "digitalState">
-                 <name>off</name>
-                 <value>0</value>
-                 <severity><choice>none</choice></severity>
-             </element>
-             <element structureName = "digitalState">
-                 <name>on</name>
-                 <value>1</value>
-                 <severity><choice>minor</choice></severity>
-                 <message>on is minor alarm</message>
-             </element>
-         </states>
-    </input>
-    <valueAlarm structureName = "enumeratedAlarm">
-            <active>true</active>
-            <changeStateAlarm>
-                 <severity><choice>none</choice></severity>
-                 <message>Change State</message>
-             </changeStateAlarm>
-    </valueAlarm>
+    <structure name = "value" type = "enumerated"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncDigitalPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x1</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "states">
+            <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
+            <structure name = "0" type = "digitalState">
+                <scalar name = "name">off</scalar>
+                <scalar name = "value">0</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+            <structure name = "1" type = "digitalState">
+                <scalar name = "name">on</scalar>
+                <scalar name = "value">1</scalar>
+                <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                <scalar name = "message">on is minor alarm</scalar>
+            </structure>
+       </structure>
+    </structure>
+    <structure name = "valueAlarm" type = "enumeratedAlarm">
+            <scalar name = "active">true</scalar>
+            <structure name = "changeStateAlarm">
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                 <scalar name = "message">Change State</scalar>
+             </structure>
+    </structure>
 </record>
 
 <record name = "syncDigitalIn2">
-    <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "digital">
-        <alarm structureName = "alarm" />
-        <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalPort</portName>
-            <deviceName>0</deviceName>
-            <mask>0x2</mask>
-            <timeout>.2</timeout>
-        </input>  
-            <states supportName = "digitalInput" >
-                 <element structureName = "digitalState">
-                     <name>off</name>
-                     <value>0</value>
-                     <severity><choice>none</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>on</name>
-                     <value>1</value>
-                     <severity><choice>minor</choice></severity>
-                     <message>on is minor alarm</message>
-                 </element>
-            </states>
-    </input>
-    <valueAlarm structureName = "enumeratedAlarm">
-            <active>true</active>
-            <changeStateAlarm>
-                 <severity><choice>none</choice></severity>
-                 <message>Change State</message>
-             </changeStateAlarm>
-    </valueAlarm>
+    <structure name = "value" type = "enumerated"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncDigitalPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x2</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "states">
+            <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
+            <structure name = "0" type = "digitalState">
+                <scalar name = "name">off</scalar>
+                <scalar name = "value">0</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+            <structure name = "1" type = "digitalState">
+                <scalar name = "name">on</scalar>
+                <scalar name = "value">1</scalar>
+                <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                <scalar name = "message">on is minor alarm</scalar>
+            </structure>
+       </structure>
+    </structure>
+    <structure name = "valueAlarm" type = "enumeratedAlarm">
+            <scalar name = "active">true</scalar>
+            <structure name = "changeStateAlarm">
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                 <scalar name = "message">Change State</scalar>
+             </structure>
+    </structure>
 </record>
 
 <record name = "syncDigitalIn3">
-    <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "digital">
-        <alarm structureName = "alarm" />
-        <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalPort</portName>
-            <deviceName>0</deviceName>
-            <mask>0x3</mask>
-            <timeout>.2</timeout>
-        </input>  
-            <states supportName = "digitalInput" >
-                 <element structureName = "digitalState">
-                     <name>zero</name>
-                     <value>0x0</value>
-                     <severity><choice>none</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>one</name>
-                     <value>0x1</value>
-                     <severity><choice>minor</choice></severity>
-                     <message>one is minor alarm</message>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>two</name>
-                     <value>0x2</value>
-                     <severity><choice>major</choice></severity>
-                     <message>two is major alarm</message>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>three</name>
-                    <value>0x3</value>
-                    <severity><choice>none</choice></severity>
-                 </element>
-            </states>
-    </input>
-    <valueAlarm structureName = "enumeratedAlarm">
-            <active>true</active>
-            <changeStateAlarm>
-                 <severity><choice>none</choice></severity>
-                 <message>Change State</message>
-             </changeStateAlarm>
-    </valueAlarm>
-
+    <structure name = "value" type = "enumerated"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncDigitalPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x3</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "states">
+            <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
+            <structure name = "0" type = "digitalState">
+                <scalar name = "name">zero</scalar>
+                <scalar name = "value">0</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+            <structure name = "1" type = "digitalState">
+                <scalar name = "name">one</scalar>
+                <scalar name = "value">0x1</scalar>
+                <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                <scalar name = "message">one is minor alarm</scalar>
+            </structure>
+            <structure name = "2" type = "digitalState">
+                <scalar name = "name">two</scalar>
+                <scalar name = "value">0x2</scalar>
+                <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                <scalar name = "message">two is major alarm</scalar>
+            </structure>
+            <structure name = "3" type = "digitalState">
+                <scalar name = "name">three</scalar>
+                <scalar name = "value">0x3</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+       </structure>
+    </structure>
+     <structure name = "valueAlarm" type = "enumeratedAlarm">
+            <scalar name = "active">true</scalar>
+            <structure name = "changeStateAlarm">
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                 <scalar name = "message">Change State</scalar>
+             </structure>
+    </structure>
 </record>
 
 <record name = "syncDigitalIn4">
-    <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "digital">
-        <alarm structureName = "alarm" />
-        <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalPort</portName>
-            <deviceName>0</deviceName>
-            <mask>0xc</mask>
-            <timeout>.2</timeout>
-        </input>   
-            <states supportName = "digitalInput" >
-                 <element structureName = "digitalState">
-                     <name>zero</name>
-                     <value>0x0</value>
-                     <severity><choice>none</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>one</name>
-                     <value>0x1</value>
-                     <severity><choice>minor</choice></severity>
-                     <message>one is minor alarm</message>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>two</name>
-                     <value>0x2</value>
-                     <severity><choice>major</choice></severity>
-                     <message>two is major alarm</message>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>three</name>
-                    <value>0x3</value>
-                    <severity><choice>none</choice></severity>
-                 </element>
-            </states>
-    </input>
-    <valueAlarm structureName = "enumeratedAlarm">
-            <active>true</active>
-            <changeStateAlarm>
-                 <severity><choice>none</choice></severity>
-                 <message>Change State</message>
-             </changeStateAlarm>
-    </valueAlarm>
+    <structure name = "value" type = "enumerated"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncDigitalPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0xc</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "states">
+            <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
+            <structure name = "0" type = "digitalState">
+                <scalar name = "name">zero</scalar>
+                <scalar name = "value">0</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+            <structure name = "1" type = "digitalState">
+                <scalar name = "name">one</scalar>
+                <scalar name = "value">0x1</scalar>
+                <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                <scalar name = "message">one is minor alarm</scalar>
+            </structure>
+            <structure name = "2" type = "digitalState">
+                <scalar name = "name">two</scalar>
+                <scalar name = "value">0x2</scalar>
+                <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                <scalar name = "message">two is major alarm</scalar>
+            </structure>
+            <structure name = "3" type = "digitalState">
+                <scalar name = "name">three</scalar>
+                <scalar name = "value">0x3</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+       </structure>
+    </structure>
+    <structure name = "valueAlarm" type = "enumeratedAlarm">
+            <scalar name = "active">true</scalar>
+            <structure name = "changeStateAlarm">
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                 <scalar name = "message">Change State</scalar>
+             </structure>
+    </structure>
 </record>
 
 
 <record name = "syncDigitalIn5">
-    <value structureName = "enumerated"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "digital">
-        <alarm structureName = "alarm" />
-        <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-            <portName>syncDigitalPort</portName>
-            <deviceName>0</deviceName>
-            <mask>0xf</mask>
-            <timeout>.2</timeout>
-        </input>  
-            <states supportName = "digitalInput" >
-                 <element structureName = "digitalState">
-                     <name>zero</name>
-                     <value>0x0</value>
-                     <severity><choice>none</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>one</name>
-                     <value>0x1</value>
-                     <severity><choice>minor</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>two</name>
-                     <value>0x2</value>
-                     <severity><choice>major</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>three</name>
-                    <value>0x3</value>
-                    <severity><choice>none</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>four</name>
-                     <value>0x4</value>
-                     <severity><choice>major</choice></severity>
-                 </element>
-                 <element structureName = "digitalState">
-                     <name>eight</name>
-                     <value>8</value>
-                     <severity><choice>none</choice></severity>
-                 </element>
-            </states>
-    </input>
-    <valueAlarm structureName = "enumeratedAlarm">
-            <active>true</active>
-            <changeStateAlarm>
-                 <severity><choice>none</choice></severity>
-                 <message>Change State</message>
-             </changeStateAlarm>
-    </valueAlarm>
-
+    <structure name = "value" type = "enumerated"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncDigitalPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0xc</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "states">
+            <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
+            <structure name = "0" type = "digitalState">
+                <scalar name = "name">zero</scalar>
+                <scalar name = "value">0</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+            <structure name = "1" type = "digitalState">
+                <scalar name = "name">one</scalar>
+                <scalar name = "value">0x1</scalar>
+                <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                <scalar name = "message">one is minor alarm</scalar>
+            </structure>
+            <structure name = "2" type = "digitalState">
+                <scalar name = "name">two</scalar>
+                <scalar name = "value">0x2</scalar>
+                <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                <scalar name = "message">two is major alarm</scalar>
+            </structure>
+            <structure name = "3" type = "digitalState">
+                <scalar name = "name">three</scalar>
+                <scalar name = "value">0x3</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+            <structure name = "4" type = "digitalState">
+                <scalar name = "name">four</scalar>
+                <scalar name = "value">0x4</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+            <structure name = "5" type = "digitalState">
+                <scalar name = "name">eight</scalar>
+                <scalar name = "value">0x8</scalar>
+                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+            </structure>
+       </structure>
+    </structure>
+    <structure name = "valueAlarm" type = "enumeratedAlarm">
+            <scalar name = "active">true</scalar>
+            <structure name = "changeStateAlarm">
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                 <scalar name = "message">Change State</scalar>
+             </structure>
+    </structure>
 </record>
 
 <!--
 -->
 
 
-</IOCDatabase>
+</database>

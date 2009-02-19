@@ -1,148 +1,142 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <substitute fromTo = "checkRecord=constantExpression,checkType=double,checkValue=18.0" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator >
-        <expression>
-            ((Math.abs(-(1.0 + 2.0*3.0 + 4*2 + 3.0))))
-        </expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calculator">
+         <scalar name = "expression">
+             ((Math.abs(-(1.0 + 2.0*3.0 + 4*2 + 3.0))))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=constantExpression1,checkType=double,checkValue=18.0" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calculator >
-        <expression>
-            Math.abs(-(((1.0 + (2.0*3.0)) + (4*2)) + 3.0))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.abs(-(((1.0 + (2.0*3.0)) + (4*2)) + 3.0))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=cosPI,checkType=double,checkValue=-1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calculator >
-        <expression>
-            Math.cos(Math.PI)
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.cos(Math.PI)
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=calcExample,checkType=double,checkValue=18.0" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">1.0</value>
-            <name>a</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">2.0</value>
-            <name>b</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">3.0</value>
-            <name>c</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">4.0</value>
-            <name>d</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">2.0</value>
-            <name>e</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>
-            Math.abs(-(a + b*c + d*e + 3.0))
-        </expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "double" >1.0</scalar>
+          </structure>
+          <structure name = "b">
+            <scalar name = "value" type = "double" >2.0</scalar>
+          </structure>
+          <structure name = "c">
+            <scalar name = "value" type = "double" >3.0</scalar>
+          </structure>
+          <structure name = "d">
+            <scalar name = "value" type = "double" >4.0</scalar>
+          </structure>
+          <structure name = "e">
+            <scalar name = "value" type = "double" >2.0</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             Math.abs(-(a + b*c + d*e + 3.0))
+         </scalar>
+       </structure>
+    </structure>
+     <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <record name = "calcSimpleCounter" >
-    <value type = "int" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator >
-        <expression>value+1&lt;=10?value+1:0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>1.0</rate>
-    </scan>
+    <scalar name = "value" type = "int" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calculator">
+         <scalar name = "expression">
+             value+1&lt;=10?value+1:0
+         </scalar>
+       </structure>
+    </structure>
+     <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
 </record>
 
 <record name = "calcCounter">
-    <value  type = "double" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "double">0.0</value>
-            <name>min</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">10.0</value>
-            <name>max</name>
-        </element>
-        <element structureName = "calcArg">
-            <value type = "double">0.5</value>
-            <name>inc</name>
-        </element>
-      </calcArgArray>
-      <calculator>
-        <expression>((value+inc)&lt;=max)?(value+inc):min</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>1.0</rate>
-    </scan>
+    <scalar name = "value"  type = "double" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" type = "double" >0.0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" type = "double" >10.0</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" type = "double" >0.5</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             ((value+inc)&lt;=max)?(value+inc):min
+         </scalar>
+       </structure>
+    </structure>
+     <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
 </record>
 <!--
 -->
 
-</IOCDatabase>
+</database>

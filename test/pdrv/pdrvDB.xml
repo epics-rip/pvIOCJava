@@ -1,8 +1,9 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <record name = "processControl" structureName = "processControl" />
 <record name = "portDeviceControl" structureName = "portDeviceControl" />
 <include addPath = "test/pdrv" />
+
 <include href = "boolean.xml" />
 <include href = "digital.xml" />
 <include href = "int32.xml" />
@@ -10,8 +11,7 @@
 <include href = "string.xml" />
 <include href = "int32Array.xml" />
 <include href = "float64Array.xml" />
-<!--
--->
+
 <include removePath = "test/pdrv" />
-</IOCDatabase>
+</database>
 

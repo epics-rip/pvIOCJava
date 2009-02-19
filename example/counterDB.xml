@@ -23,17 +23,17 @@
               </structure>
               <structure name = "1" type = "intAlarmInterval">
                   <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">LOW</scalar>
               </structure>
               <structure name = "2" type = "intAlarmInterval">
                   <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
                   <scalar name = "message">none</scalar>
               </structure>
               <structure name = "3" type = "intAlarmInterval">
                   <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">HIGH</scalar>
               </structure>
               <structure name = "4" type = "intAlarmInterval">
@@ -100,17 +100,17 @@
               </structure>
               <structure name = "1" type = "doubleAlarmInterval">
                   <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">LOW</scalar>
               </structure>
               <structure name = "2" type = "doubleAlarmInterval">
                   <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
                   <scalar name = "message">none</scalar>
               </structure>
               <structure name = "3" type = "doubleAlarmInterval">
                   <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">HIGH</scalar>
               </structure>
               <structure name = "4" type = "doubleAlarmInterval">
@@ -170,7 +170,7 @@
    </structure>
 </record>
 
-<record name = "counterDouble">
+<record name = "addTwoArgs">
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />

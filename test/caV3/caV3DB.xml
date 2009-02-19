@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <include addPath = "test/caV3" />
 <substitute from = "num" to = "01" />
+
 <include href = "scalar.xml" />
 <include href = "array.xml" />
 <!--
@@ -13,5 +14,5 @@
 <include href = "scalar.xml" />
 <include href = "array.xml" />
 -->
-</IOCDatabase>
+</database>
 

@@ -5,19 +5,4 @@
    org.epics.ioc.support.calc.example.CounterCalculatorFactory</scalar>
 </structure>
 
-<structure name = "arrayIncrementCalculatorFactory">
- <scalar name = "supportFactory" type = "string">
-   org.epics.ioc.support.calc.example.ArrayIncrementCalculatorFactory</scalar>
-</structure>
-
-<structure name = "booleanArrayToggleCalculatorFactory">
- <scalar name = "supportFactory" type = "string">
-   org.epics.ioc.support.calc.example.BooleanArrayToggleCalculatorFactory</scalar>
-</structure>
-
-<structure name = "arrayAddCalculatorFactory">
- <scalar name = "supportFactory" type = "string">
-   org.epics.ioc.support.calc.example.ArrayAddCalculatorFactory</scalar>
-</structure>
-
 </database>

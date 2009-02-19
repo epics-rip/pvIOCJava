@@ -12,8 +12,6 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -61,7 +59,6 @@ public class IncrementalFactory {
     static private class IncrementalImpl extends AbstractSupport
     {
         private static String supportName = "incremental";
-        private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
         private PVBoolean pvIncremental = null;
         private PVScalar pvValue = null;
         private PVScalar pvDesiredValue = null;
@@ -81,8 +78,8 @@ public class IncrementalFactory {
          */
         public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            PVStructure parent = pvIncremental.getParent().getParent();
-            PVField pvField = parent.getSubField("value");
+            PVStructure parent = pvIncremental.getParent();
+            PVField pvField = parent.getParent().getSubField("value");
             if(pvField==null || pvField.getField().getType()!=Type.scalar) {
                 parent.message("does not have a scalar field named value", MessageType.error);
                 return;

@@ -146,9 +146,9 @@ public class BaseCDField implements CDField {
         setMaxNumPuts(numPuts);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.CDField#putSubfield(org.epics.pvData.pv.PVField)
      */
-    public void put(PVField pvField, PVField pvSubField) {
+    public void putSubfield(PVField pvSubField) {
         throw new IllegalStateException("Logic error.");
     }
     /* (non-Javadoc)

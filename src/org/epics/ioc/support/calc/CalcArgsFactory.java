@@ -13,7 +13,6 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
@@ -24,8 +23,8 @@ import org.epics.pvData.pv.Type;
  */
 public class CalcArgsFactory {
     /**
-     * Create support for an array of calcArg structures.
-     * @param pvField The array which must be an array of links.
+     * Create support for structure which has  calcArg structure fields.
+     * @param pvStructure The structure which mist have calcArg structure fields.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
     public static Support create(PVStructure pvStructure) {

@@ -1,207 +1,195 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
-<record name = "syncFloat64Port" structureName = "portCreate">
-    <factoryName>org.epics.ioc.pdrv.testDriver.Float64DriverFactory</factoryName>
-    <portName>syncFloat64Port</portName>
-    <driverParameters structureName = "float64Driver" >
-        <delay>0.0</delay>
-        <numberRegisters>2</numberRegisters>
-    </driverParameters>
+<record name = "syncFloat64Port" type = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Float64DriverFactory</scalar>
+    <scalar name = "portName">syncFloat64Port</scalar>
+    <structure name = "driverParameters" type = "float64Driver" >
+        <scalar name = "delay">0.0</scalar>
+        <scalar name = "numberRegisters">2</scalar>
+    </structure>
 </record>
 
-<record name = "syncFloat64DeviceControl" structureName = "portDeviceControl" >
-    <portName>syncFloat64Port</portName>
-    <deviceName>0</deviceName>
+<record name = "syncFloat64DeviceControl" type = "portDeviceControl" >
+    <scalar name = "portName">syncFloat64Port</scalar>
+    <scalar name = "deviceName">0</scalar>
 <!--
-    <traceMask><value>0xfff</value></traceMask>
-    <traceIOMask><value>0xfff</value></traceIOMask>
+    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
+    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
 -->
 </record>
 
 <record name = "syncFloat64Counter">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator>
-        <expression>(value+.5)&lt;=10.0? value+.5 : -10.0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>0.5</rate>
-    </scan>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>syncFloat64Out</pvname>
-                <process>true</process>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "link" type = "outputSupport">
+         <scalar name = "pvname">syncFloat64Out</scalar>
+         <scalar name = "process">true</scalar>
+    </structure>
 </record>
 
 <record name = "syncFloat64Out">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
-        <portName>syncFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <timeout>.2</timeout>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncFloat64In</pvname>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64OutputFactory</auxInfo>
+        <scalar name = "portName">syncFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "link1" type = "processSupport">
+         <scalar name = "pvname">syncFloat64In</scalar>
+    </structure>
 </record>
 
 <record name = "syncFloat64In">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
-        <portName>syncFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <timeout>.2</timeout>
-        <size>20</size>
-    </input>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InputFactory</auxInfo>
+        <scalar name = "portName">syncFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <scalar name = "size" >20</scalar>
+    </structure>
 </record>
 
 <record name = "syncFloat64InInterrupt">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
-        <portName>syncFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <process>true</process>
-        <size>20</size>
-    </input>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InterruptInputFactory</auxInfo>
+        <scalar name = "portName">syncFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "size" >20</scalar>
+        <scalar name = "process" >true</scalar>
+    </structure>
 </record>
 
 <record name = "syncFloat64InAverage">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
-        <portName>syncFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <size>20</size>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>5.0</rate>
-    </scan>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64AverageInputFactory</auxInfo>
+        <scalar name = "portName">syncFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "size" >20</scalar>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">5.0</scalar>
+    </structure>
 </record>
 
-<record name = "asynFloat64Port" structureName = "portCreate">
-    <factoryName>org.epics.ioc.pdrv.testDriver.Float64DriverFactory</factoryName>
-    <portName>asynFloat64Port</portName>
-    <driverParameters structureName = "float64Driver" >
-        <delay>0.1</delay>
-        <numberRegisters>2</numberRegisters>
-    </driverParameters>
+<record name = "asynFloat64Port" type = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Float64DriverFactory</scalar>
+    <scalar name = "portName">asynFloat64Port</scalar>
+    <structure name = "driverParameters" type = "float64Driver" >
+        <scalar name = "delay">0.1</scalar>
+        <scalar name = "numberRegisters">2</scalar>
+    </structure>
 </record>
 
-<record name = "asynFloat64DeviceControl" structureName = "portDeviceControl" >
-    <portName>asynFloat64Port</portName>
-    <deviceName>0</deviceName>
+<record name = "asynFloat64DeviceControl" type = "portDeviceControl" >
+    <scalar name = "portName">asynFloat64Port</scalar>
+    <scalar name = "deviceName">0</scalar>
 <!--
-    <traceMask><value>0xfff</value></traceMask>
-    <traceIOMask><value>0xfff</value></traceIOMask>
+    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
+    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
 -->
 </record>
 
 <record name = "asynFloat64Counter">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator>
-        <expression>(value+.5)&lt;=10.0? value+.5 : -10.0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>0.5</rate>
-    </scan>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>asynFloat64Out</pvname>
-                <process>true</process>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "link" type = "outputSupport">
+         <scalar name = "pvname">asynFloat64Out</scalar>
+         <scalar name = "process">true</scalar>
+    </structure>
 </record>
 
 <record name = "asynFloat64Out">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <output supportName = "pdrvFloat64Output" structureName = "pdrvSupport">
-        <portName>asynFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <timeout>.2</timeout>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>asynFloat64In</pvname>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64OutputFactory</auxInfo>
+        <scalar name = "portName">asynFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "link1" type = "processSupport">
+         <scalar name = "pvname">asynFloat64In</scalar>
+    </structure>
 </record>
 
 <record name = "asynFloat64In">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvFloat64Input" structureName = "pdrvSupport">
-        <portName>asynFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <timeout>.2</timeout>
-        <size>20</size>
-    </input>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InputFactory</auxInfo>
+        <scalar name = "portName">asynFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <scalar name = "size" >20</scalar>
+    </structure>
 </record>
 
 <record name = "asynFloat64InInterrupt">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvFloat64InterruptInput" structureName = "pdrvSupport">
-        <portName>asynFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <process>true</process>
-        <size>20</size>
-    </input>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InterruptInputFactory</auxInfo>
+        <scalar name = "portName">asynFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "size" >20</scalar>
+        <scalar name = "process" >true</scalar>
+    </structure>
 </record>
 
 <record name = "asynFloat64InAverage">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvFloat64AverageInput" structureName = "pdrvSupport">
-        <portName>asynFloat64Port</portName>
-        <deviceName>0</deviceName>
-        <size>20</size>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>5.0</rate>
-    </scan>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvFloat64AverageInputFactory</auxInfo>
+        <scalar name = "portName">asynFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "size" >20</scalar>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">5.0</scalar>
+    </structure>
 </record>
 <!--
 -->
 
 
-</IOCDatabase>
+</database>

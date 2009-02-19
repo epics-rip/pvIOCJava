@@ -19,8 +19,7 @@ import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadReady;
-import org.epics.pvData.pv.Array;
-import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.PVDoubleArray;
 
 
 
@@ -42,6 +41,7 @@ import org.epics.pvData.pv.PVStructure;
  */
 public abstract class AbstractFloat64Array extends AbstractArrayInterface implements Float64Array{
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
+    private PVDoubleArray pvDoubleArray;
     private  ReentrantLock lock = new ReentrantLock();
     private List<Float64ArrayInterruptListener> interruptlistenerList =
         new LinkedList<Float64ArrayInterruptListener>();
@@ -51,25 +51,18 @@ public abstract class AbstractFloat64Array extends AbstractArrayInterface implem
     private Interrupt interrupt = new Interrupt();
     /**
      * Constructor.
-     * This registers the interface with the device.
-     * @param parent The parent for the array.
-     * @param array The Array interface.
-     * @param capacity The capacity for the array.
-     * @param capacityMutable Can the capacity be changed.
-     * @param device The device.
-     * @param interfaceName The interface name.
+     * @param pvDoubleArray the data.
      */
-    protected AbstractFloat64Array(
-            PVStructure parent,Array array,int capacity,boolean capacityMutable,
-            Device device)
+    protected AbstractFloat64Array(PVDoubleArray pvDoubleArray,Device device)
     {
-        super(parent,array,device,"float64Array");
+        super(device,"float64Array");
+        this.pvDoubleArray = pvDoubleArray;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVDoubleArray#share(org.epics.ioc.pv.PVDoubleArray)
+     * @see org.epics.ioc.pdrv.interfaces.Float64Array#getPVDoubleArray()
      */
-    public boolean share(double[] value, int length) {
-        return false;
+    public PVDoubleArray getPVDoubleArray() {
+        return pvDoubleArray;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#endRead(org.epics.ioc.pdrv.User)
@@ -96,8 +89,8 @@ public abstract class AbstractFloat64Array extends AbstractArrayInterface implem
     public Status startWrite(User user) {
         return Status.success;
     }
-    /**
-     * Announce an interrupt.
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.interfaces.Float64Array#interruptOccured()
      */
     public void interruptOccured() {
         if(interruptActive) {

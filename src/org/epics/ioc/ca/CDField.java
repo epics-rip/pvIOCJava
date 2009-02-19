@@ -73,12 +73,10 @@ public interface CDField {
     void put(PVField pvField);
     /**
      * A put to a subfield of a CDField has occured. 
-     * @param pvField The pvField 
-     * This must be the PVField for the ChannelField.
      * @param pvSubField The pvField containing the data to put into the subfield opf the CDField. 
      * This must be the PVField for ChannelField that is a subfield of ChannelField.
      */
-    void put(PVField pvField,PVField pvSubField);
+    void putSubfield(PVField pvSubField);
     /**
      * Report current state.
      * @return A String describing the state.

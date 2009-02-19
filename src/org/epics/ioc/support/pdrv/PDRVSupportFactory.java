@@ -39,8 +39,10 @@ import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVIntArray;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
@@ -56,7 +58,7 @@ import org.epics.pvData.pv.Type;
 public class PDRVSupportFactory {
     /**
      * Create support for portDriver.
-     * @param dbStructure The field for which to create support.
+     * @param pvStructure The field for which to create support.
      * @return A LinkSupport interface or null failure.
      */
     public static Support create(PVStructure pvStructure) {
@@ -114,26 +116,26 @@ public class PDRVSupportFactory {
         pvStructure.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
-    private static final String pdrvOctetInputSupportName = "pdrvOctetInput";
-    private static final String pdrvOctetInterruptInputSupportName = "pdrvOctetInterruptInput";
-    private static final String pdrvOctetOutputSupportName = "pdrvOctetOutput";
-    private static final String pdrvInt32InputSupportName = "pdrvInt32Input";
-    private static final String pdrvInt32InterruptInputSupportName = "pdrvInt32InterruptInput";
-    private static final String pdrvInt32AverageInputSupportName = "pdrvInt32AverageInput";
-    private static final String pdrvInt32OutputSupportName = "pdrvInt32Output";
-    private static final String pdrvInt32ArrayInputSupportName = "pdrvInt32ArrayInput";
-    private static final String pdrvInt32ArrayInterruptInputSupportName = "pdrvInt32ArrayInterruptInput";
-    private static final String pdrvInt32ArrayOutputSupportName = "pdrvInt32ArrayOutput";
-    private static final String pdrvFloat64InputSupportName = "pdrvFloat64Input";
-    private static final String pdrvFloat64InterruptInputSupportName = "pdrvFloat64InterruptInput";
-    private static final String pdrvFloat64AverageInputSupportName = "pdrvFloat64AverageInput";
-    private static final String pdrvFloat64OutputSupportName = "pdrvFloat64Output";
-    private static final String pdrvFloat64ArrayInputSupportName = "pdrvFloat64ArrayInput";
-    private static final String pdrvFloat64ArrayInterruptInputSupportName = "pdrvFloat64ArrayInterruptInput";
-    private static final String pdrvFloat64ArrayOutputSupportName = "pdrvFloat64ArrayOutput";
-    private static final String pdrvUInt32DigitalInputSupportName = "pdrvUInt32DigitalInput";
-    private static final String pdrvUInt32DigitalInterruptInputSupportName = "pdrvUInt32DigitalInterruptInput";
-    private static final String pdrvUInt32DigitalOutputSupportName = "pdrvUInt32DigitalOutput";
+    private static final String pdrvOctetInputSupportName = "pdrvOctetInputFactory";
+    private static final String pdrvOctetInterruptInputSupportName = "pdrvOctetInterruptInputFactory";
+    private static final String pdrvOctetOutputSupportName = "pdrvOctetOutputFactory";
+    private static final String pdrvInt32InputSupportName = "pdrvInt32InputFactory";
+    private static final String pdrvInt32InterruptInputSupportName = "pdrvInt32InterruptInputFactory";
+    private static final String pdrvInt32AverageInputSupportName = "pdrvInt32AverageInputFactory";
+    private static final String pdrvInt32OutputSupportName = "pdrvInt32OutputFactory";
+    private static final String pdrvInt32ArrayInputSupportName = "pdrvInt32ArrayInputFactory";
+    private static final String pdrvInt32ArrayInterruptInputSupportName = "pdrvInt32ArrayInterruptInputFactory";
+    private static final String pdrvInt32ArrayOutputSupportName = "pdrvInt32ArrayOutputFactory";
+    private static final String pdrvFloat64InputSupportName = "pdrvFloat64InputFactory";
+    private static final String pdrvFloat64InterruptInputSupportName = "pdrvFloat64InterruptInputFactory";
+    private static final String pdrvFloat64AverageInputSupportName = "pdrvFloat64AverageInputFactory";
+    private static final String pdrvFloat64OutputSupportName = "pdrvFloat64OutputFactory";
+    private static final String pdrvFloat64ArrayInputSupportName = "pdrvFloat64ArrayInputFactory";
+    private static final String pdrvFloat64ArrayInterruptInputSupportName = "pdrvFloat64ArrayInterruptInputFactory";
+    private static final String pdrvFloat64ArrayOutputSupportName = "pdrvFloat64ArrayOutputFactory";
+    private static final String pdrvUInt32DigitalInputSupportName = "pdrvUInt32DigitalInputFactory";
+    private static final String pdrvUInt32DigitalInterruptInputSupportName = "pdrvUInt32DigitalInterruptInputFactory";
+    private static final String pdrvUInt32DigitalOutputSupportName = "pdrvUInt32DigitalOutputFactory";
     
     private static Convert convert = ConvertFactory.getConvert();
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
@@ -231,8 +233,6 @@ public class PDRVSupportFactory {
                     String string = String.copyValueOf(charArray, 0, nbytes);
                     convert.fromString((PVScalar)valuePVField, string);
                 }
-                deviceTrace.print(Trace.FLOW,
-                    "%s:%s processContinue calling postPut",fullName,supportName);
             } else {
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
@@ -373,7 +373,7 @@ public class PDRVSupportFactory {
                 convert.fromString((PVScalar)valuePVField, string);
             }
             deviceTrace.print(Trace.FLOW,
-                "%s:%s putData and  calling postPut",fullName,supportName);
+                "%s:%s putData ",fullName,supportName);
         }
     }
     
@@ -657,7 +657,7 @@ public class PDRVSupportFactory {
         private void putData() {
             convert.fromInt((PVScalar)valuePVField, value);
             deviceTrace.print(Trace.FLOW,
-                "%s:%s putData and  calling postPut",fullName,supportName);
+                "%s:%s putData",fullName,supportName);
         }
     }
     
@@ -890,7 +890,8 @@ public class PDRVSupportFactory {
         				"%s:%s int32Array.startRead failed", fullName,supportName);
         		return;
         	}
-        	convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
+        	PVIntArray pvIntArray = int32Array.getPVIntArray();
+        	convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
         	int32Array.endRead(user);
         }
     }
@@ -961,18 +962,20 @@ public class PDRVSupportFactory {
         		alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
         		return;
         	}
-        	convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
+        	PVIntArray pvIntArray = int32Array.getPVIntArray();
+            convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
         	int32Array.endRead(user);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.interfaces.Int32ArrayInterruptListener#interrupt(org.epics.ioc.pv.PVIntArray)
          */
         public void interrupt(Int32Array int32Array) {
+            PVIntArray pvIntArray = int32Array.getPVIntArray();
             if(super.isProcess()) {
                 recordProcess.setActive(this);
                 Status status = int32Array.startRead(user);
                 if(status==Status.success) {
-                    convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
+                    convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
                     int32Array.endRead(user);
                 }
                 recordProcess.process(this, false, null);
@@ -981,7 +984,7 @@ public class PDRVSupportFactory {
                 try {
                     Status status = int32Array.startRead(user);
                     if(status==Status.success) {
-                        convert.copyArray(int32Array, 0, valuePVArray, 0, int32Array.getLength());
+                        convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
                         int32Array.endRead(user);
                     } else {
                         alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
@@ -1037,7 +1040,8 @@ public class PDRVSupportFactory {
                 super.stop();
                 return;
             }
-            int32Array = (Int32Array)iface;
+            int32Array = (Int32Array)iface;PVIntArray pvIntArray = int32Array.getPVIntArray();
+            convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#stop()
@@ -1058,7 +1062,8 @@ public class PDRVSupportFactory {
         				"%s:%s int32Array.startWrite failed", fullName,supportName);
         		return;
         	}
-        	convert.copyArray(valuePVArray, 0, int32Array, 0, valuePVArray.getLength());
+        	PVIntArray pvIntArray = int32Array.getPVIntArray();
+        	convert.copyArray(valuePVArray, 0, pvIntArray, 0, valuePVArray.getLength());
         	int32Array.endWrite(user);
         }
     }
@@ -1129,6 +1134,7 @@ public class PDRVSupportFactory {
             	if(choices!=null) {
             		PVStringArray pvStringArray = enumerated.getChoices();
             		pvStringArray.put(0, choices.length, choices, 0);
+            		pvStringArray.postPut();
             	}
             }
             if(valueScalarType!=null) {
@@ -1166,9 +1172,11 @@ public class PDRVSupportFactory {
                 boolean newValue = ((value==0) ? false : true);
                 if(oldValue!=newValue) {
                     valuePVBoolean.put(newValue);
+                    valuePVBoolean.postPut();
                 }
             } else if(pvIndex!=null)  {
                 pvIndex.put(value);
+                pvIndex.postPut();
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
@@ -1258,6 +1266,7 @@ public class PDRVSupportFactory {
             	if(choices!=null) {
             		PVStringArray pvStringArray = enumerated.getChoices();
             		pvStringArray.put(0, choices.length, choices, 0);
+            		pvStringArray.postPut();
             	}
             }
             if(valueScalarType!=null) {
@@ -1324,8 +1333,10 @@ public class PDRVSupportFactory {
         	}
             if(valuePVBoolean!=null) {
                 valuePVBoolean.put((value==0) ? false : true);
+                valuePVBoolean.postPut();
             } else if(pvIndex!=null)  {
                 pvIndex.put(value);
+                pvIndex.postPut();
             } else {
                 pvStructure.message(" logic error", MessageType.fatalError);
             }
@@ -1399,6 +1410,7 @@ public class PDRVSupportFactory {
             	if(choices!=null) {
             		PVStringArray pvStringArray = enumerated.getChoices();
             		pvStringArray.put(0, choices.length, choices, 0);
+            		pvStringArray.postPut();
             	}
             }
             if(valueScalarType!=null) {
@@ -1527,13 +1539,16 @@ public class PDRVSupportFactory {
             if(pvUnits!=null && (pvUnits.get()==null || pvUnits.get().length()==0)) {
             	String units = float64.getUnits(user);
             	pvUnits.put(units);
+            	pvUnits.postPut();
             }
             if(pvLowLimit!=null && pvHighLimit!=null) {
             	if(pvLowLimit.get()==pvHighLimit.get()) {
             		double[] limits = float64.getDisplayLimits(user);
             		if(limits!=null) {
             		    pvLowLimit.put(limits[0]);
+            		    pvLowLimit.postPut();
             		    pvHighLimit.put(limits[1]);
+            		    pvHighLimit.postPut();
             		}
             	}
             }
@@ -1648,13 +1663,16 @@ public class PDRVSupportFactory {
             if(pvUnits!=null && (pvUnits.get()==null || pvUnits.get().length()==0)) {
             	String units = float64.getUnits(user);
             	pvUnits.put(units);
+            	pvUnits.postPut();
             }
             if(pvLowLimit!=null && pvHighLimit!=null) {
             	if(pvLowLimit.get()==pvHighLimit.get()) {
             		double[] limits = float64.getDisplayLimits(user);
             		if(limits!=null) {
             		    pvLowLimit.put(limits[0]);
+            		    pvLowLimit.postPut();
             		    pvHighLimit.put(limits[1]);
+            		    pvHighLimit.postPut();   
             		}
             	}
             }
@@ -1702,7 +1720,7 @@ public class PDRVSupportFactory {
         private void putData() {
             convert.fromDouble((PVScalar)valuePVField, value);
             deviceTrace.print(Trace.FLOW,
-                "%s:%s putData and  calling postPut",fullName,supportName);
+                "%s:%s putData ",fullName,supportName);
         }
     }
     
@@ -1930,7 +1948,8 @@ public class PDRVSupportFactory {
         				"%s:%s float64Array.startRead failed", fullName,supportName);
         		return;
         	}
-        	convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
+        	PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
+        	convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
         	float64Array.endRead(user);
         }
         /* (non-Javadoc)
@@ -2009,7 +2028,8 @@ public class PDRVSupportFactory {
         public void queueCallback() {
             Status status = float64Array.startRead(user);
             if(status==Status.success) {
-                convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
+                PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
+                convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
                 float64Array.endRead(user);
             } else {
                 alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
@@ -2020,11 +2040,12 @@ public class PDRVSupportFactory {
          * @see org.epics.ioc.pdrv.interfaces.Float64ArrayInterruptListener#interrupt(org.epics.ioc.pdrv.interfaces.Float64Array)
          */
         public void interrupt(Float64Array float64Array) {
+            PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
             if(super.isProcess()) {
                 recordProcess.setActive(this);
                 Status status = float64Array.startRead(user);
                 if(status==Status.success) {
-                    convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
+                    convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
                     float64Array.endRead(user);
                 }
                 recordProcess.process(this, false, null);
@@ -2034,7 +2055,7 @@ public class PDRVSupportFactory {
 
                     Status status = float64Array.startRead(user);
                     if(status==Status.success) {
-                        convert.copyArray(float64Array, 0, valuePVArray, 0, float64Array.getLength());
+                        convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
                         float64Array.endRead(user);
                     } else {
                         alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
@@ -2112,7 +2133,8 @@ public class PDRVSupportFactory {
         public void queueCallback() {
             Status status = float64Array.startWrite(user);
             if(status==Status.success) {
-                convert.copyArray(valuePVArray, 0, float64Array, 0, valuePVArray.getLength());
+                PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
+                convert.copyArray(valuePVArray, 0, pvDoubleArray, 0, valuePVArray.getLength());
                 float64Array.endWrite(user);
             }
         }

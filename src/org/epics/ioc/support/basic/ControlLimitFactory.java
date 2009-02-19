@@ -9,7 +9,12 @@ import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
-import org.epics.pvData.factory.AbstractPVScalar;
+import org.epics.pvData.factory.BasePVByte;
+import org.epics.pvData.factory.BasePVDouble;
+import org.epics.pvData.factory.BasePVFloat;
+import org.epics.pvData.factory.BasePVInt;
+import org.epics.pvData.factory.BasePVLong;
+import org.epics.pvData.factory.BasePVShort;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.property.AlarmSeverity;
@@ -140,7 +145,7 @@ public class ControlLimitFactory {
             }
         }
         
-        private class ByteValue extends AbstractPVScalar implements PVByte {
+        private class ByteValue extends BasePVByte implements PVByte {
             private PVScalar lowPVField;
             private PVScalar highPVField;
             private byte value;
@@ -174,7 +179,7 @@ public class ControlLimitFactory {
             }
         }
         
-        private class ShortValue extends AbstractPVScalar implements PVShort {
+        private class ShortValue extends BasePVShort implements PVShort {
             private PVScalar lowPVField;
             private PVScalar highPVField;
             private short value;
@@ -207,7 +212,7 @@ public class ControlLimitFactory {
                 super.postPut();
             }
         }
-        private class IntValue extends AbstractPVScalar implements PVInt {
+        private class IntValue extends BasePVInt implements PVInt {
             private PVScalar lowPVField;
             private PVScalar highPVField;
             private int value;
@@ -240,7 +245,7 @@ public class ControlLimitFactory {
                 super.postPut();
             }
         }
-        private class LongValue extends AbstractPVScalar implements PVLong {
+        private class LongValue extends BasePVLong implements PVLong {
             private PVScalar lowPVField;
             private PVScalar highPVField;
             private long value;
@@ -273,7 +278,7 @@ public class ControlLimitFactory {
                 super.postPut();
             }
         }
-        private class FloatValue extends AbstractPVScalar implements PVFloat {
+        private class FloatValue extends BasePVFloat implements PVFloat {
             private PVScalar lowPVField;
             private PVScalar highPVField;
             private float value;
@@ -306,7 +311,7 @@ public class ControlLimitFactory {
                 super.postPut();
             }
         }
-        private class DoubleValue extends AbstractPVScalar implements PVDouble {
+        private class DoubleValue extends BasePVDouble implements PVDouble {
             private PVScalar lowPVField;
             private PVScalar highPVField;
             private double value;

@@ -319,6 +319,7 @@ public class ServerFactory {
                     enumLabels = new String[count];
                     int num = pvChoices.get(0, count, data);
                     System.arraycopy(data.data, 0, enumLabels, 0, num);
+                    dbrType = DBRType.ENUM;
                     return;
                 }
             }
@@ -1043,7 +1044,7 @@ public class ServerFactory {
                 channelData.clearNumPuts();
             }
             private boolean nextGetField(Channel channel, ChannelField channelField, PVField pvField) {
-                channelData.put(pvField);
+                channelData.put(channelField,pvField);
                 return false;
             }
 

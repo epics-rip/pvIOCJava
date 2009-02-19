@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <structure name = "vxi11Driver">
-    <field name = "hostName" type = "string" />
-    <field name = "vxiName" type = "string" />
-    <field name = "lockTimeout" type = "int" />
+    <scalar name = "hostName" type = "string" />
+    <scalar name = "vxiName" type = "string" />
+    <scalar name = "lockTimeout" type = "int" />
 </structure>
 
-</IOCDatabase>
+</database>

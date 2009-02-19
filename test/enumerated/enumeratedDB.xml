@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <include addPath = "${JAVAIOC}/test/enumerated" />
 <include href = "enumerated.xml" />
 <!--
 -->
 <include removePath = "${JAVAIOC}/test/enumerated" />
-</IOCDatabase>
+</database>

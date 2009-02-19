@@ -7,16 +7,13 @@ package org.epics.ioc.pdrv.interfaces;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Trace;
-import org.epics.pvData.factory.AbstractPVArray;
-import org.epics.pvData.pv.Array;
-import org.epics.pvData.pv.PVStructure;
 
 /**
  * Abstract base class for array interfaces.
  * @author mrk
  *
  */
-public abstract class AbstractArrayInterface extends AbstractPVArray implements Interface {
+public abstract class AbstractArrayInterface implements Interface {
     protected Device device;
     protected String interfaceName; 
     protected Trace trace;
@@ -26,10 +23,8 @@ public abstract class AbstractArrayInterface extends AbstractPVArray implements 
 	 * @param device The device
 	 * @param interfaceName The interfaceName.
 	 */
-	protected AbstractArrayInterface(
-			PVStructure parent,Array array,Device device,String interfaceName)
+	protected AbstractArrayInterface(Device device,String interfaceName)
     {
-		super(parent,array);
 		this.device = device;
 		this.interfaceName = interfaceName;
 		trace = device.getTrace();

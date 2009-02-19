@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.pv.MessageType;
 
 
@@ -24,7 +23,7 @@ public class CDFactory {
     public static CD createCD(
          Channel channel,ChannelFieldGroup channelFieldGroup)
      {
-        return new BaseCD(channel,channelFieldGroup,PVDataFactory.getPVDataCreate());
+        return new BaseCD(channel,channelFieldGroup);
      }
     
      /**

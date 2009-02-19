@@ -7,36 +7,36 @@
 <record name = "simpleCounter" >
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "int" />
+    <scalar name = "value" type = "double" />
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
-        <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
+        <scalar name ="expression">(value+1)&lt;=10.0 ? value+1 : 0.0</scalar>
       </structure>
     </structure>
-    <structure name = "valueAlarm" type = "intAlarm">
+    <structure name = "valueAlarm" type = "doubleAlarm">
           <scalar name = "active">true</scalar>
           <structure name = "interval">
-              <structure name = "2" type = "intAlarmInterval">
+              <structure name = "0" type = "doubleAlarmInterval">
                   <scalar name = "value">2</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">LOWLOW</scalar>
               </structure>
-              <structure name = "4" type = "intAlarmInterval">
+              <structure name = "1" type = "doubleAlarmInterval">
                   <scalar name = "value">4</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">LOW</scalar>
               </structure>
-              <structure name = "6" type = "intAlarmInterval">
+              <structure name = "2" type = "doubleAlarmInterval">
                   <scalar name = "value">6</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">none</scalar>
               </structure>
-              <structure name = "8" type = "intAlarmInterval">
+              <structure name = "3" type = "doubleAlarmInterval">
                   <scalar name = "value">8</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">HIGH</scalar>
               </structure>
-              <structure name = "10" type = "intAlarmInterval">
+              <structure name = "4" type = "doubleAlarmInterval">
                   <scalar name = "value">10</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">HIGHHIGH</scalar>
@@ -44,177 +44,6 @@
           </structure>
           <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
     </structure> 
-</record>
-
-<record name = "counter">
-    <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
-        <scalar name = "rate">1.0</scalar>
-    </structure>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <structure name = "input" type = "calculation" >
-       <structure name = "calcArgs">
-          <structure name = "min">
-            <scalar name = "value" type = "double" >0.0</scalar>
-          </structure>
-          <structure name = "max">
-            <scalar name = "value" type = "double" >10.0</scalar>
-          </structure>
-          <structure name = "inc">
-            <scalar name = "value" type = "double" >0.5</scalar>
-          </structure>
-       </structure>
-       <structure name = "calculator">
-         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
-       </structure>
-    </structure>
-    <structure name = "supportSequence" type = "generic" >
-        <structure name = "0" type = "supportSequenceElement">
-            <scalar name = "wait">false</scalar>
-            <structure name = "link" type = "outputSupport">
-                <scalar name = "pvname">counterOutput</scalar>
-                <scalar name = "process">true</scalar>
-            </structure>
-        </structure>
-        <structure name = "1" type = "supportSequenceElement">
-            <scalar name = "wait">true</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">counterInput</scalar>
-            </structure>
-        </structure>
-    </structure>
-    <structure name = "supportSequence" type = "generic" >
-        <structure name = "0" type = "generic">
-            <scalar name = "wait" type = "boolean" >true</scalar>
-            <structure name = "link" type = "outputSupport">
-                <scalar name = "pvname">counterOutput</scalar>
-                <scalar name = "process">true</scalar>
-            </structure>
-        </structure>
-        <structure name = "1" type = "generic">
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">counterInput</scalar>
-            </structure>
-        </structure>
-    </structure>
-</record>
-
-<record name = "counterOutput" >
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <valueAlarm structureName = "doubleAlarm">
-          <active>true</active>
-          <interval>
-              <element structureName = "doubleAlarmInterval">
-                  <value>2.0</value>
-                  <severity><choice>major</choice></severity>
-                  <message>LOWLOW</message>
-              </element>
-              <element structureName = "doubleAlarmInterval">
-                  <value>4.0</value>
-                  <severity><choice>minor</choice></severity>
-                  <message>LOW</message>
-              </element>
-              <element structureName = "doubleAlarmInterval">
-                  <value>6.0</value>
-                  <severity><choice>none</choice></severity>
-              </element>
-              <element structureName = "doubleAlarmInterval">
-                  <value>8.0</value>
-                  <severity><choice>minor</choice></severity>
-                  <message>HIGH</message>
-              </element>
-              <element structureName = "doubleAlarmInterval">
-                  <value>10.0</value>
-                  <severity><choice>major</choice></severity>
-                  <message>HIHI</message>
-              </element>
-          </interval>
-          <outOfRange><choice>invalid</choice></outOfRange>
-          <hystersis>0.1</hystersis>
-    </valueAlarm>
-    <display structureName = "display" >
-        <description>Sample Description</description>
-        <format>%f</format>
-        <resolution>1</resolution>
-        <units>volts</units>
-        <limit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </limit>
-    </display>
-    <control structureName = "control" >
-        <limit>
-            <low>0.0</low>
-            <high>10.0</high>
-        </limit>
-        <minStep>.1</minStep>
-    </control>
-</record>
-
-<record name = "counterInput">
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input structureName = "inputSupport">
-        <pvname>counterOutput</pvname>
-        <process>false</process>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-</record>
-
-<record name = "counterMonitor">
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <display structureName = "display" />
-    <control structureName = "control" />
-    <input structureName = "monitorSupport">
-        <pvname>counterOutput</pvname>
-        <process>true</process>
-        <propertyNames>alarm,display,control</propertyNames>
-    </input>
-    <structure name = "delay" type = "delay"> 
-         <scalar name = "min">100</scalar>
-         <scalar name = "max">1000</scalar>
-         <scalar name = "inc">100</scalar>
-   </structure>
-</record>
-
-<record name = "counterDouble">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <scalar name = "value" type = "double" />
-            <name>arg0</name>
-            <structure name = "alarm" type = "alarm" />
-            <input structureName = "monitorSupport">
-              <pvname>counterOutput</pvname>
-              <process>true</process>
-              <propertyNames>alarm</propertyNames>
-             </input>
-        </element>
-        <element structureName = "calcArg">
-            <scalar name = "value" type = "double" />
-            <name>arg1</name>
-            <input supportName = "inputSupport"
-                   structureName = "inputSupport">
-               <pvname>counterOutput</pvname>
-            </input>
-        </element>
-      </calcArgArray>
-      <calculator structureName = "expressionCalculator" >
-        <expression>arg0+arg1</expression>
-      </calculator>
-    </input>
 </record>
 
 </database>

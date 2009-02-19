@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <include addPath = "test/channelAccess" />
 <!--
 <include href = "caV3.xml" />
 -->
 <include href = "getPut.xml" />
 <include href = "monitor.xml" />
-</IOCDatabase>
+</database>
 

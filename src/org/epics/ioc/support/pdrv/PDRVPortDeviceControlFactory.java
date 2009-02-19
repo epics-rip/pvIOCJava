@@ -36,7 +36,7 @@ import org.epics.pvData.pv.PVStructure;
 public class PDRVPortDeviceControlFactory {
     /**
      * Create the record support for creating a port driver.
-     * @param dbStructure The structure for a port record.
+     * @param pvStructure The structure for a port record.
      * @return The record support.
      */
     public static Support create(PVStructure pvStructure) {
@@ -182,25 +182,32 @@ public class PDRVPortDeviceControlFactory {
         public void processContinue() {
             if(message!=emptyMessage) {
                 pvMessage.put(message);
+                pvMessage.postPut();
                 message = emptyMessage;
             }
             if(connect!=pvConnect.get()) {
                 pvConnect.put(connect);
+                pvConnect.postPut();
             }
             if(enable!=pvEnable.get()) {
                 pvEnable.put(enable);
+                pvEnable.postPut();
             }
             if(autoConnect!=pvAutoConnect.get()) {
                 pvAutoConnect.put(autoConnect);
+                pvAutoConnect.postPut();
             }
             if(traceMask!=pvTraceMask.get()) {
                 pvTraceMask.put(traceMask);
+                pvTraceMask.postPut();
             }
             if(traceIOMask!=pvTraceIOMask.get()) {
                 pvTraceIOMask.put(traceIOMask);
+                pvTraceIOMask.postPut();
             }
             if(traceIOTruncateSize!=pvTraceIOTruncateSize.get()) {
                 pvTraceIOTruncateSize.put(traceIOTruncateSize);
+                pvTraceIOTruncateSize.postPut();
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }

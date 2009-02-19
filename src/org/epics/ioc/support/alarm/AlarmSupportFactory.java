@@ -40,7 +40,7 @@ public class AlarmSupportFactory {
      * If pvField has AlarmSupport return it.
      * @param pvField The field.
      * @param recordSupport The recordSupport;
-     * @return
+     * @return The AlarmSupport or null if not found.
      */
     public static AlarmSupport getAlarmSupport(PVField pvField,RecordSupport recordSupport) {
         Support support = recordSupport.getSupport(pvField);
@@ -55,7 +55,7 @@ public class AlarmSupportFactory {
      * If not found look up the parent tree.
      * @param startPVField The starting field.
      * @param recordSupport The recordSupport.
-     * @return
+     * @return The AlarmSupport or null if not found.
      */
     public static AlarmSupport findAlarmSupport(PVField startPVField,RecordSupport recordSupport) {
         if(startPVField==null) return null;
@@ -178,8 +178,10 @@ public class AlarmSupportFactory {
                 }
             }
             if(currentIndex!=beginIndex || messageChange) {
-                pvSeverity.put(currentIndex);                
+                pvSeverity.put(currentIndex);
+                pvSeverity.postPut();
                 pvMessage.put(currentMessage);
+                pvMessage.postPut();
             }
         }
         
@@ -193,8 +195,12 @@ public class AlarmSupportFactory {
                     beginProcess();
                 } else { // record is not being processed
                     if(newIndex>0) { // raise alarm
-                        pvSeverity.put(newIndex);                
+                        pvSeverity.getPVRecord().beginGroupPut();
+                        pvSeverity.put(newIndex);
+                        pvSeverity.postPut();
                         pvMessage.put(message);
+                        pvMessage.postPut();
+                        pvSeverity.getPVRecord().endGroupPut();
                         return true;
                     } else { // no alarm just return false
                         return false;

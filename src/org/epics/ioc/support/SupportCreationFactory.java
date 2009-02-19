@@ -31,7 +31,8 @@ import org.epics.pvData.pv.Type;
 public class SupportCreationFactory {
     /**
      * create a process database.
-     * @param iocdb the iocdb associated with the record processing.
+     * @param supportDatabase The supportDatabase.
+     * @param requester The requester.
      * @return the SupportCreation.
      */
     static public SupportCreation createSupportCreation(SupportDatabase supportDatabase,Requester requester) {
@@ -50,7 +51,7 @@ public class SupportCreationFactory {
         private SupportDatabase supportDatabase;
         private Requester requester;
         private PVRecord[] pvRecords;
-        // Muast keep private copy of recordSupport so that merge can be implement
+        // Must keep private copy of recordSupport so that merge can be implement
         private RecordSupport[] recordSupports;
         
         private SupportCreationImpl(SupportDatabase supportDatabase,Requester requester) {

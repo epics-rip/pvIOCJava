@@ -232,6 +232,7 @@ public class ScanFactory {
                 }
                 if(!result && pvScanTypeIndex!=null) {
                     pvScanTypeIndex.put(0);
+                    pvScanTypeIndex.postPut();
                 }
                 update(!result);
             }
@@ -241,6 +242,7 @@ public class ScanFactory {
                 try {
                     if(setPassive) {
                         pvScanTypeIndex.put(0);
+                        pvScanTypeIndex.postPut();
                     }
                     scanType = scanField.getScanType();
                     scanRate = scanField.getRate();

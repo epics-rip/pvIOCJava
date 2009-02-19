@@ -16,17 +16,19 @@
         </structure> 
         <scalar name = "rate">1.0</scalar>
         <scalar name = "processAfterStart">true</scalar>
-    </scalar>
-    <structure name = "supportSequence" supportName = "generic" >
-        <structure name = "0" type = "outputSupport">
-            <auxInfo name = "supportFactory" type = "string">outputSupportFactory</auxInfo>
-            <scalar name = "pvname">enumerated.value.index</scalar>
-            <scalar name = "process">true</scalar>
-        </structure>
-        <structure name = "0" type = "processSupport">
-            <scalar name = "wait">false</scalar>
-            <scalar name = "pvname">enumeratedInput</scalar>
-        </structure>
+    </structure>
+    <structure name = "output" type = "outputSupport">
+        <scalar name = "pvname">enumerated.value.index</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "process0" type = "processSupport">
+        <scalar name = "pvname">enumeratedInput</scalar>
+    </structure>
+    <structure name = "process1" type = "processSupport">
+        <scalar name = "pvname">enumeratedInputIndex</scalar>
+    </structure>
+    <structure name = "process2" type = "processSupport">
+        <scalar name = "pvname">enumeratedInputChoice</scalar>
     </structure>
 </record>
 
@@ -37,7 +39,8 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "digital">
         <structure name = "alarm" type = "alarm" />
-        <structure name = "states" type = "digitalOutput" >
+        <structure name = "states" >
+             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
              <structure name = "0" type = "digitalState">
                  <scalar name = "name">zero</scalar>
                  <scalar name = "value">0</scalar>
@@ -79,70 +82,70 @@
 
 
 <record name = "enumeratedInput" >
-    <value structureName = "enumerated"/>
+    <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <pvname>enumerated.value</pvname>
-        <process>false</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "pvname">enumerated.value</scalar>
+        <scalar name = "process">false</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 
 <record name = "enumeratedMonitor" >
-    <value structureName = "enumerated"/>
+    <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>enumerated.value</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">enumerated.value</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "enumeratedInputIndex">
-    <value type = "int"/>
+    <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>enumerated.value.index</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "pvname">enumerated.value.index</scalar>
+        <scalar name = "process">false</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "enumeratedMonitorIndex">
-    <value type = "int"/>
+    <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>enumerated.value.index</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">enumerated.value.index</scalar>
+        <scalar name = "process">false</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "enumeratedInputChoice">
-    <value type = "string"/>
+    <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>enumerated.value.choice</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "pvname">enumerated.value.choice</scalar>
+        <scalar name = "process">false</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "enumeratedMonitorChoice">
-    <value type = "string"/>
+    <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>enumerated.value.choice</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">enumerated.value.choice</scalar>
+        <scalar name = "process">false</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 
@@ -150,4 +153,4 @@
 -->
 
 
-</IOCDatabase>
+</database>

@@ -14,7 +14,12 @@ import org.epics.pvData.pv.PVIntArray;
  * @author mrk
  *
  */
-public interface Int32Array extends Interface, PVIntArray{
+public interface Int32Array extends Interface{
+    /**
+     * Get the interface to the data.
+     * @return The interface.
+     */
+    PVIntArray getPVIntArray();
     /**
      * Start a read.
      * @param user The user
@@ -53,4 +58,8 @@ public interface Int32Array extends Interface, PVIntArray{
      * @return If the request fails, than user.message() describes the problem.
      */
     Status removeInterruptUser(User user,Int32ArrayInterruptListener int32ArrayListener);
+    /**
+     * An interrupt has occured.
+     */
+    void interruptOccured();
 }

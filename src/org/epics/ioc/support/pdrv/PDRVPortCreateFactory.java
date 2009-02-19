@@ -65,8 +65,8 @@ public class PDRVPortCreateFactory {
             supportClass = Class.forName(factoryName);
             parameterClasses[0] = Class.forName("java.lang.String");
             parameterClasses[1] = boolean.class;
-            parameterClasses[2] = Class.forName("org.epics.ioc.util.ScanPriority");
-            parameterClasses[3] = Class.forName("org.epics.ioc.pv.PVStructure");
+            parameterClasses[2] = Class.forName("org.epics.pvData.misc.ThreadPriority");
+            parameterClasses[3] = Class.forName("org.epics.pvData.pv.PVStructure");
             
         }catch (ClassNotFoundException e) {
             throw new IllegalStateException(

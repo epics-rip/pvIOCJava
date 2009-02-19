@@ -8,7 +8,6 @@ package org.epics.ioc.ca;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
 
 
@@ -31,13 +30,12 @@ public class BaseCD implements CD
      * Constructor.
      * @param channel The channel for which to create a CD.
      * @param channelFieldGroup The channelFieldGroup for whicg to cobstruct a CDRecord.
-     * @param pvDataCreate Factory to create PVField objects.
      */
-    public BaseCD(Channel channel,ChannelFieldGroup channelFieldGroup,PVDataCreate pvDataCreate)
+    public BaseCD(Channel channel,ChannelFieldGroup channelFieldGroup)
     {
         this.channel = channel;
         this.channelFieldGroup = channelFieldGroup;
-        cdRecord = new BaseCDRecord(pvDataCreate,channel.getChannelName(),channelFieldGroup);
+        cdRecord = new BaseCDRecord(channel.getChannelName(),channelFieldGroup);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CD#destroy()
@@ -83,14 +81,14 @@ public class BaseCD implements CD
         cdRecord.getCDStructure().clearNumPuts();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#get(org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.CD#get(org.epics.ioc.ca.ChannelField, org.epics.pvData.pv.PVField)
      */
-    public boolean get(PVField pvField) {
+    public boolean get(ChannelField channelField, PVField pvField) {
         CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
         int length = cdFields.length;
         for(int i=0; i<length; i++) {
             CDField cdField = cdFields[i];
-            if(cdField.getChannelField().getPVField()==pvField) {
+            if(cdField.getChannelField()==channelField) {
                 cdField.get(pvField);
                 return true;
             }
@@ -98,24 +96,30 @@ public class BaseCD implements CD
         return false;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.CD#put(org.epics.ioc.ca.ChannelField, org.epics.pvData.pv.PVField)
      */
-    public boolean put(PVField pvField, PVField pvSubField) {
-        CDField cdField = cdRecord.findCDField(pvField);
-        if(cdField==null) return false;
-        cdField.put(pvField, pvSubField);
-        return true;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CD#put(org.epics.ioc.pv.PVField)
-     */
-    public boolean put(PVField pvField) {
+    public boolean put(ChannelField channelField, PVField pvField) {
         CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
         int length = cdFields.length;
         for(int i=0; i<length; i++) {
             CDField cdField = cdFields[i];
-            if(cdField.getChannelField().getPVField()==pvField) {
+            if(cdField.getChannelField()==channelField) {
                 cdField.put(pvField);
+                return true;
+            }
+        }
+        return false;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.CD#putSubfield(org.epics.ioc.ca.ChannelField, org.epics.pvData.pv.PVField)
+     */
+    public boolean putSubfield(ChannelField channelField, PVField pvSubField) {
+        CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
+        int length = cdFields.length;
+        for(int i=0; i<length; i++) {
+            CDField cdField = cdFields[i];
+            if(cdField.getChannelField()==channelField) {
+                cdField.putSubfield(pvSubField);
                 return true;
             }
         }

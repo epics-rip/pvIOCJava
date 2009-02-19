@@ -6,10 +6,7 @@
 package org.epics.ioc.ca;
 
 import org.epics.pvData.pv.Field;
-import org.epics.pvData.pv.PVArray;
-import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 /**
@@ -29,43 +26,20 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
      * @param parent The parent cdField.
      * @param cdRecord The cdRecord that contains this field.
      * @param pvStructure The pvStructure that this CDField references.
+     * @param channelField The channelField.
      * @param channelFields The ChannelField array.
      */
     public BaseCDStructure(
-        CDField parent,CDRecord cdRecord,PVStructure pvStructure,ChannelField[] channelFields)
+        CDField parent,CDRecord cdRecord,PVStructure pvStructure,ChannelField channelField,ChannelField[] channelFields)
     {
-        super(parent,cdRecord,pvStructure,null);
+        super(parent,cdRecord,pvStructure,channelField);
         this.pvStructure = pvStructure;
         this.cdRecord = cdRecord;
         this.channelFields = channelFields;
         createFields();
         pvFields = this.pvStructure.getPVFields();
     }
-    /**
-     * Constructor.
-     * @param parent The parent cdField.
-     * @param cdRecord The cdRecord that contains this field.
-     * @param pvStructure The pvStructure for this CDField.
-     * @param channelField The channelField.
-     */
-    public BaseCDStructure(
-        CDField parent,CDRecord cdRecord,PVStructure pvStructure,ChannelField channelField)
-    {
-        super(parent,cdRecord,pvStructure,channelField);
-        this.pvStructure = pvStructure;
-        this.cdRecord = cdRecord;
-        PVStructure sourcePVStructure = (PVStructure)channelField.getPVField();
-        PVField[] sourcePVFields = sourcePVStructure.getPVFields();
-        int length = sourcePVFields.length;
-        channelFields = new ChannelField[length];
-        for(int i=0; i<length; i++) {
-            String fieldName = sourcePVFields[i].getField().getFieldName();
-            channelFields[i] = channelField.createChannelField(fieldName);
-            
-        }
-        createFields(); 
-        pvFields = this.pvStructure.getPVFields();
-    }
+    
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDStructure#findCDField(org.epics.ioc.pv.PVField)
      */
@@ -156,11 +130,10 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
         }
         super.incrementNumPuts();
     }
-    
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.CDField#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+     * @see org.epics.ioc.ca.BaseCDField#putSubfield(org.epics.pvData.pv.PVField)
      */
-    public void put(PVField requested, PVField target) {
+    public void putSubfield(PVField target) {
         CDField targetCDField = findSourceCDField(target);
         if(targetCDField==null) {
             throw new IllegalStateException("Logic error");
@@ -176,80 +149,40 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
         }
         cdFields = new CDField[length];
         for(int i=0; i<length; i++) {
+            ChannelField channelField = channelFields[i];
             PVField pvField = pvFields[i];
             Field field = pvField.getField();
             Type type = field.getType();
             switch(type) {
             case scalar:
-                cdFields[i] = new BaseCDField(this,cdRecord,pvField,channelFields[i]);
-                break;
             case scalarArray:
-                 cdFields[i] = new BaseCDField(this,cdRecord,pvField,channelFields[i]);
+                 cdFields[i] = new BaseCDField(this,cdRecord,pvField,channelField);
                  break;
             case structure: {
-                PVStructure myStructure = checkStructureField(i);
-                //PVStructure myStructure = (PVStructure)pvField;
+                ChannelField[] subFields = createChannelFields(channelField);
                 cdFields[i] = new BaseCDStructure(
-                    this,cdRecord,myStructure,channelFields[i]);
+                    this,cdRecord,(PVStructure)pvField,channelField,subFields);
                 }
                 break;
             default:
                 throw new IllegalStateException("Logic error");
             }
+            
         }
         super.clearNumPuts();
     }
     
-    private PVStructure checkStructureField(int index) {
-        PVField[] pvFields = pvStructure.getPVFields();
-        PVStructure pvStructure = (PVStructure)pvFields[index];
-        PVStructure sourcePVStructure = (PVStructure)channelFields[index].getPVField();
-        PVField[] my = pvStructure.getPVFields();
-        PVField[] source = sourcePVStructure.getPVFields();
-        int length = my.length;
-        if(length==source.length) {
-            boolean isOK = true;
-            for(int j=0; j<length; j++) {
-                if(my[j].getField()!=source[j].getField()) {
-                    isOK = false;
-                    break;
-                }
-            }
-            if(isOK) return pvStructure;
-        }
-        PVDataCreate pvDataCreate = cdRecord.getPVDataCreate();
-        PVStructure newPVStructure = pvDataCreate.createPVStructure(
-                pvStructure.getParent(),
-                pvStructure.getField().getFieldName(),
-                pvStructure.getStructure().getFields());
-        pvFields[index].replacePVField(newPVStructure);
-        pvFields[index] = newPVStructure;
+    private ChannelField[] createChannelFields(ChannelField channelField) {
+        PVStructure sourcePVStructure = (PVStructure)channelField.getPVField();
+        PVField[] sourcePVFields = sourcePVStructure.getPVFields();
+        int length = sourcePVFields.length;
+        ChannelField[] channelFields = new ChannelField[length];
         for(int i=0; i<length; i++) {
-            Field newField = source[i].getField();
-            Type type = newField.getType();
-            PVField newPVField = null;
-            if(type==Type.scalar) {
-                PVScalar pvScalar = (PVScalar)source[i];
-                newPVField = pvDataCreate.createPVScalar(
-                        newPVStructure,
-                        pvScalar.getField().getFieldName(),
-                        pvScalar.getScalar().getScalarType());
-            } else  if(type==Type.scalarArray) {
-                PVArray pvArray = (PVArray)source[i];
-                newPVField = pvDataCreate.createPVArray(
-                    newPVStructure,
-                    pvArray.getField().getFieldName(),
-                    pvArray.getArray().getElementType());
-            } else {
-                PVStructure pvStruct = (PVStructure)source[i];
-                newPVField = pvDataCreate.createPVStructure(
-                    newPVStructure,
-                    pvStruct.getField().getFieldName(),
-                    pvStruct);
-            }
-            my[i].replacePVField(newPVField);
+            String fieldName = sourcePVFields[i].getField().getFieldName();
+            channelFields[i] = channelField.createChannelField(fieldName);
+            
         }
-        
-        return newPVStructure;
+        return channelFields;
     }
+   
 }

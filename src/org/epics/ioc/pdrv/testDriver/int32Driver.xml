@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <structure name = "int32Driver">
-    <field name = "delay" type = "double" />
-    <field name = "numberRegisters" type = "int" default = "1" />
+    <scalar name = "delay" type = "double" />
+    <scalar name = "numberRegisters" type = "int" >1</scalar>
     <!-- low and high adc range -->
-    <field name = "low" type = "int" />
-    <field name = "high" type = "int" />
+    <scalar name = "low" type = "int" />
+    <scalar name = "high" type = "int" />
 </structure>
 
-</IOCDatabase>
+</database>

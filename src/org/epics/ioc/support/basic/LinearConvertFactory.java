@@ -35,7 +35,7 @@ public class LinearConvertFactory {
      */
     public static Support create(PVStructure pvStructure) {
         PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
-        PVScalar pvScalar = pvAuxInfo.getInfo("support");
+        PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
             pvStructure.message("no pvAuxInfo with name support. Why??", MessageType.error);
             return null;
@@ -63,8 +63,8 @@ public class LinearConvertFactory {
         return new LinearConvertInput(pvStructure);
     }
     
-    private static final String linearConvertInput = "linearConvertInput";
-    private static final String linearConvertOutput = "linearConvertOutput";
+    private static final String linearConvertInput = "linearConvertInputFactory";
+    private static final String linearConvertOutput = "linearConvertOutputFcatory";
     
     private static abstract class LinearConvertBase extends AbstractSupport
     {
@@ -95,23 +95,23 @@ public class LinearConvertFactory {
         @Override
         public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,linearConvertInput)) return;
-            PVStructure parentPVField = pvStructure.getParent();
-            pvRawValue = getInt(pvStructure,"value");
+            PVStructure pvParent = pvStructure.getParent();
+            pvRawValue = getInt(pvParent,"value");
             if(pvRawValue==null) return;
-            parentPVField = parentPVField.getParent();
-            pvValue = getDouble(parentPVField,"value");
+            pvParent = pvParent.getParent();
+            pvValue = getDouble(pvParent,"value");
             if(pvValue==null) return;
-            pvEngUnitsLow = getDouble(pvStructure,"pvEngUnitsLow");
+            pvEngUnitsLow = getDouble(pvStructure,"engUnitsLow");
             if(pvEngUnitsLow==null) return;
-            pvEngUnitsHigh = getDouble(pvStructure,"pvEngUnitsHigh");
+            pvEngUnitsHigh = getDouble(pvStructure,"engUnitsHigh");
             if(pvEngUnitsHigh==null) return;
-            pvDeviceLow = getInt(pvStructure,"pvDeviceLow");
+            pvDeviceLow = getInt(pvStructure,"deviceLow");
             if(pvDeviceLow==null) return;
-            pvDeviceHigh = getInt(pvStructure,"pvDeviceHigh");
+            pvDeviceHigh = getInt(pvStructure,"deviceHigh");
             if(pvDeviceHigh==null) return;
-            pvSlope = getDouble(pvStructure,"pvSlope");
+            pvSlope = getDouble(pvStructure,"slope");
             if(pvSlope==null) return;
-            pvIntercept = getDouble(pvStructure,"pvIntercept");
+            pvIntercept = getDouble(pvStructure,"intercept");
             if(pvIntercept==null) return;
             super.setSupportState(SupportState.readyForStart);
         }
@@ -145,7 +145,9 @@ public class LinearConvertFactory {
                 intercept = (deviceHigh*engUnitsLow - deviceLow*engUnitsHigh)
                     /(deviceHigh - deviceLow);
                 pvSlope.put(slope);
+                pvSlope.postPut();
                 pvIntercept.put(intercept);
+                pvIntercept.postPut();
             }
             super.setSupportState(SupportState.ready);
         }
@@ -204,6 +206,7 @@ public class LinearConvertFactory {
             double rawValue = (double)pvRawValue.get();
             double value = rawValue*slope + intercept;
             pvValue.put(value);
+            pvValue.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         
@@ -221,6 +224,7 @@ public class LinearConvertFactory {
             double value = pvValue.get();
             double rawValue = (value -intercept)/slope;
             pvRawValue.put((int)rawValue);
+            pvRawValue.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         

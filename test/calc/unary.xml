@@ -1,76 +1,79 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <substitute fromTo = "checkRecord=unaryBoolean,checkType=boolean,checkValue=true" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "boolean">false</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>!a</expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "boolean" >false</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             !a
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkBoolean.xml" />
 
 <substitute fromTo = "checkRecord=unaryByte,checkType=byte,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "byte">2</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>+~-a</expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "byte" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             +~-a
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=unaryByte1,checkType=byte,checkValue=1" />
 <record name = "${checkRecord}" >
-    <value type = "${checkType}" />
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <scan structureName = "scan" >
-        <processAfterStart>true</processAfterStart>
-    </scan>
-    <input structureName = "calculation" >
-      <calcArgArray>
-        <element structureName = "calcArg">
-            <value type = "byte">2</value>
-            <name>a</name>
-        </element>
-      </calcArgArray>
-      <calculator >
-        <expression>+(~(-a))</expression>
-      </calculator>
-    </input>
-<include href = "checkLink.xml" />
+    <scalar name = "value" type = "${checkType}" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "a">
+            <scalar name = "value" type = "byte" >2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">
+             +(~(-a))
+         </scalar>
+       </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <scalar name = "processAfterStart">true</scalar>
+    </structure>
+    <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <!--
 -->
 
-</IOCDatabase>
+</database>

@@ -44,24 +44,20 @@ import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
 
 import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.ca.ChannelMonitorRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.factory.PVReplaceFactory;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVDouble;
@@ -82,7 +78,6 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable {
-    private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     protected static final Convert convert = ConvertFactory.getConvert();
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
@@ -94,8 +89,22 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     
     private DBRType nativeDBRType = null;
     private PVRecord pvRecord = null;
-    private StringArrayData alarmSeverityData = new StringArrayData();
+    private PVStructure pvAlarm = null;
+    private PVString pvAlarmMessage = null;
+    private PVInt pvAlarmIndex = null;
+    private PVString pvAlarmChoice = null;
+    private PVStringArray pvAlarmChoices = null;
+    private String[] alarmChoices = null;
+    private PVStructure pvTimeStamp = null;
+    private PVLong pvSeconds = null;
+    private PVInt pvNanoSeconds = null;
     private StringArrayData valueChoicesData = null;
+    private PVScalar pvScalarValue = null;
+    private PVArray pvArrayValue = null;
+    // Following not null if nativeDBRType.isENUM(
+    private PVInt pvIndex = null;
+    private PVString pvChoice = null;
+    private PVStringArray pvChoices = null;
     
     private V3ChannelRecordRequester v3ChannelRecordRequester = null;
     private RequestResult requestResult = null;
@@ -199,12 +208,12 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     continue;
                 }
             }
-            PVStructure dbdStructure = masterPVDatabase.findStructure(propertyName);
-            if(dbdStructure==null) {
+            PVStructure pvStructure = masterPVDatabase.findStructure(propertyName);
+            if(pvStructure==null) {
                 notUsed++;
                 continue;
             }
-            Field[] propertyFields = dbdStructure.getStructure().getFields();
+            Field[] propertyFields = pvStructure.getStructure().getFields();
             fields[index++] = fieldCreate.createStructure(propertyName, propertyFields);
         }
         if(notUsed>0) {
@@ -219,7 +228,47 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         }
         pvRecord = pvDataCreate.createPVRecord(recordName,fields);
         if(nativeDBRType.isENUM()) {
-            PVReplaceFactory.replace(masterPVDatabase, pvRecord);
+            PVStructure pvStructure = (PVStructure)pvRecord.getPVFields()[0];
+            PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
+            PVString pvString = (PVString)pvAuxInfo.createInfo("pvReplaceFactory", ScalarType.pvString);
+            pvString.put("enumeratedFactory");
+            PVReplaceFactory.replace(masterPVDatabase, pvStructure);
+        }
+        for(PVField pvField : pvRecord.getPVFields()) {
+            if(pvField.getField().getFieldName().equals("alarm")) {
+                pvAlarm = (PVStructure)pvField;
+                pvAlarmMessage = pvAlarm.getStringField("message");
+                PVStructure pvStruct = pvAlarm.getStructureField("severity");
+                if(pvStruct!=null) {
+                    pvAlarmIndex = pvStruct.getIntField("index");
+                    pvAlarmChoice = pvStruct.getStringField("choice");
+                    pvAlarmChoices = (PVStringArray)pvStruct.getArrayField("choices", ScalarType.pvString);
+                    PVStructure alarmSevr = masterPVDatabase.findStructure("alarmSeverity");
+                    PVStringArray pvStringArray = (PVStringArray)alarmSevr.getArrayField("choices", ScalarType.pvString);
+                    StringArrayData stringArrayData = new StringArrayData();
+                    pvStringArray.get(0, pvStringArray.getLength(), stringArrayData);
+                    alarmChoices = stringArrayData.data;
+                    pvAlarmChoices.put(0, pvStringArray.getLength(), alarmChoices,0);
+                }
+                if(pvAlarmMessage==null || pvAlarmIndex==null || pvAlarmChoice==null ) {
+                    throw new RuntimeException("bad alarm structure");    
+                }
+            }
+            if(pvField.getField().getFieldName().equals("timeStamp")) {
+                pvTimeStamp = (PVStructure)pvField;
+                pvSeconds = pvTimeStamp.getLongField("secondsPastEpoch");
+                pvNanoSeconds = pvTimeStamp.getIntField("nanoSeconds");
+                if(pvSeconds==null || pvNanoSeconds==null) {
+                    throw new RuntimeException("bad timeStamp structure");
+                }
+            }
+        }
+        PVField pvValue = pvRecord.getPVFields()[0];
+        if(nativeDBRType.isENUM()) {
+            PVStructure pvStructure = (PVStructure)pvRecord.getPVFields()[0];
+            pvIndex = pvStructure.getIntField("index");
+            pvChoice = pvStructure.getStringField("choice");
+            pvChoices =(PVStringArray)pvStructure.getArrayField("choices", ScalarType.pvString);
             String message = null;
             try {
                 jcaChannel.get(DBRType.CTRL_ENUM,1,this);
@@ -233,6 +282,11 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 return false;
             }
         } else {
+            if(elementCount<2) {
+                pvScalarValue = (PVScalar)pvValue;
+            } else {
+                pvArrayValue = (PVArray)pvValue;
+            }
             DBRType requestDBRType = null;
             switch(dbrProperty) {
             case none:
@@ -320,6 +374,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 return false;
             }
         }
+        
         return true;
     }
     /* (non-Javadoc)
@@ -335,50 +390,34 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         return nativeDBRType;
     }
     
-    private void setAlarm(AlarmSeverity alarmSeverity,String message,ChannelMonitorRequester channelMonitorRequester) {
-        PVStructure pvStructure = pvRecord.getStructureField("alarm");
-        if(pvStructure!=null) {
-            PVString pvMessage = pvStructure.getStringField("message");
-            if(message==null || !message.equals(pvMessage.get())) {
-                pvMessage.put(message);
-                if(channelMonitorRequester!=null) {
-                    channelMonitorRequester.dataPut(pvStructure, pvMessage);
-                }
+    private void setAlarm(AlarmSeverity alarmSeverity,String message) {
+        int index = alarmSeverity.ordinal();
+        if(pvAlarm!=null && index<alarmChoices.length) {
+            String oldMessage = pvAlarmMessage.get();
+            if(oldMessage!=message || (message!=null &&(!message.equals(oldMessage)))) {
+                pvAlarmMessage.put(message);
+                pvAlarmMessage.postPut();
             }
-            PVStructure pvStruct = pvStructure.getStructureField("severity");
-            Enumerated enumerated = EnumeratedFactory.getEnumerated(pvStruct);
-            int index = alarmSeverity.ordinal();
-            PVStringArray pvChoices = enumerated.getChoices();
-            int len = pvChoices.get(0, pvChoices.getLength(), alarmSeverityData);
-            if(index<0 || index>=len) {
-                throw new IllegalStateException("Logic error");
-            }
-            PVInt pvIndex = enumerated.getIndex();
-            if(pvIndex.get()!=alarmSeverity.ordinal()) {
-                // must set both index and choice because no alarm support
-                pvIndex.put(index);
-                PVString pvChoice = enumerated.getChoice();
-                pvChoice.put(alarmSeverityData.data[index]);
-                if(channelMonitorRequester!=null) {
-                    channelMonitorRequester.dataPut(pvStructure, pvIndex);
-                    channelMonitorRequester.dataPut(pvStructure, pvChoice);
-                }
+            if(pvAlarmIndex.get()!=index) {
+                pvAlarmIndex.put(index);
+                pvAlarmIndex.postPut();
             }
         } else {
             System.err.println(
-                pvRecord.getRecordName()
-                + " v3Ca error " + message
-                + " severity " + alarmSeverity.toString());
+                    pvRecord.getRecordName()
+                    + " v3Ca error " + message
+                    + " severity " + alarmSeverity.toString());
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3ChannelRecord#toRecord(gov.aps.jca.dbr.DBR, org.epics.ioc.ca.ChannelMonitorRequester)
+     * @see org.epics.ioc.caV3.V3ChannelRecord#toRecord(gov.aps.jca.dbr.DBR)
      */
-    public void toRecord(DBR fromDBR,ChannelMonitorRequester channelMonitorRequester) {
+    public void toRecord(DBR fromDBR) {
         if(fromDBR==null) {
-            setAlarm(AlarmSeverity.invalid,"fromDBR is null",channelMonitorRequester);
+            setAlarm(AlarmSeverity.invalid,"fromDBR is null");
             return;
         }
+        pvRecord.beginGroupPut();
         gov.aps.jca.dbr.Status status = null;
         gov.aps.jca.dbr.TimeStamp timeStamp = null;
         gov.aps.jca.dbr.Severity severity = null;
@@ -392,78 +431,28 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         String units = null;
         int precision = -1;
         DBRType requestDBRType = fromDBR.getType();
-        PVField pvValueField = pvProperty.findProperty(pvRecord, v3Channel.getValueFieldName());
         if(nativeDBRType.isENUM()) {
-            if(elementCount!=1) {
-                setAlarm(AlarmSeverity.invalid,
-                        "DBRType is ENUM but elementCount is "
-                        + elementCount,
-                        channelMonitorRequester);
-                return;
-            }
-            Enumerated enumerated = EnumeratedFactory.getEnumerated(pvValueField);
-            if(enumerated==null) {
-                setAlarm(AlarmSeverity.invalid,
-                        "DBRType is ENUM but "
-                        + pvValueField.getFullFieldName()
-                        + " is not an enumerated structure",channelMonitorRequester);
-                return;
-            }
-            PVInt pvIndex = enumerated.getIndex();
-            PVString pvChoice = enumerated.getChoice();
-            PVStringArray pvChoices = enumerated.getChoices();
-            int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
+            int index = pvIndex.get();
             if(requestDBRType==DBRType.CTRL_ENUM) {
                 DBR_CTRL_Enum dbr = (DBR_CTRL_Enum)fromDBR;
                 String[] labels = dbr.getLabels();
                 pvChoices.put(0, labels.length, labels, 0);
-                int index = dbr.getEnumValue()[0];
-                numChoices = pvChoices.get(0, labels.length, valueChoicesData);
-                pvIndex.put(index);
-                pvChoice.put(valueChoicesData.data[index]);
-                if(channelMonitorRequester!=null) {
-                    channelMonitorRequester.dataPut(pvValueField, pvChoices);
-                    channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                    channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                }
+                pvChoices.postPut();
+                index = dbr.getEnumValue()[0];
             } else if(requestDBRType==DBRType.INT) {
                 DBR_Int dbr = (DBR_Int)fromDBR;
-                int index = dbr.getIntValue()[0];
-                if(index!=pvIndex.get()) {
-                    pvIndex.put(index);
-                    pvChoice.put(valueChoicesData.data[index]);
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                        channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                    }
-                }
+                index = dbr.getIntValue()[0];
             } else if(requestDBRType==DBRType.STS_INT) {
                 DBR_STS_Int dbr = (DBR_STS_Int)fromDBR;
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
-                int index = dbr.getIntValue()[0];
-                if(index!=pvIndex.get()) {
-                    pvIndex.put(index);
-                    pvChoice.put(valueChoicesData.data[index]);
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                        channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                    }
-                }
+                index = dbr.getIntValue()[0];
             } else if(requestDBRType==DBRType.TIME_INT) {
                 DBR_TIME_Int dbr = (DBR_TIME_Int)fromDBR;
                 status = dbr.getStatus();
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
-                int index = dbr.getIntValue()[0];
-                if(index!=pvIndex.get()) {
-                    pvIndex.put(index);
-                    pvChoice.put(valueChoicesData.data[index]);
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                        channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                    }
-                }
+                index = dbr.getIntValue()[0];
             } else if(requestDBRType==DBRType.GR_INT) {
                 DBR_GR_Int dbr = (DBR_GR_Int)fromDBR;
                 status = dbr.getStatus();
@@ -472,15 +461,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 units = dbr.getUnits();
                 displayLow = dbr.getLowerDispLimit().doubleValue();
                 displayHigh = dbr.getUpperDispLimit().doubleValue();
-                int index = dbr.getIntValue()[0];
-                if(index!=pvIndex.get()) {
-                    pvIndex.put(index);
-                    pvChoice.put(valueChoicesData.data[index]);
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                        channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                    }
-                }
+                index = dbr.getIntValue()[0];
             } else if(requestDBRType==DBRType.CTRL_INT) {
                 DBR_CTRL_Int dbr = (DBR_CTRL_Int)fromDBR;
                 status = dbr.getStatus();
@@ -491,34 +472,21 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 displayHigh = dbr.getUpperDispLimit().doubleValue();
                 controlLow = dbr.getLowerCtrlLimit().doubleValue();
                 controlHigh = dbr.getUpperCtrlLimit().doubleValue();
-                int index = dbr.getIntValue()[0];
-                if(index!=pvIndex.get()) {
-                    pvIndex.put(index);
-                    pvChoice.put(valueChoicesData.data[index]);
-                    if(channelMonitorRequester!=null) {
-                        channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                        channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                    }
-                }
+                index = dbr.getIntValue()[0];
             }  else if(requestDBRType==DBRType.STRING) {
                 DBR_String dbr = (DBR_String)fromDBR;
                 String choice = dbr.getStringValue()[0];
                 if(!choice.equals(pvChoice.get())) {
-                    int index = -1;
+                    index = -1;
+                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
-                            pvIndex.put(index);
-                            pvChoice.put(valueChoicesData.data[index]);
-                            if(channelMonitorRequester!=null) {
-                                channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                                channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                            }
                             break;
                         }
                     }
                     if(index==-1) {
-                        setAlarm(AlarmSeverity.major,"Invalid choice",channelMonitorRequester);
+                        setAlarm(AlarmSeverity.major,"Invalid choice");
                     }
                 }
             } else if(requestDBRType==DBRType.STS_STRING) {
@@ -527,21 +495,16 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
                 if(!choice.equals(pvChoice.get())) {
-                    int index = -1;
+                    index = -1;
+                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
-                            pvIndex.put(index);
-                            pvChoice.put(valueChoicesData.data[index]);
-                            if(channelMonitorRequester!=null) {
-                                channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                                channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                            }
                             break;
                         }
                     }
                     if(index==-1) {
-                        setAlarm(AlarmSeverity.major,"Invalid choice",channelMonitorRequester);
+                        setAlarm(AlarmSeverity.major,"Invalid choice");
                     } 
                 }
             } else if(requestDBRType==DBRType.TIME_STRING) {
@@ -551,21 +514,16 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
                 if(!choice.equals(pvChoice.get())) {
-                    int index = -1;
+                    index = -1;
+                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
-                            pvIndex.put(index);
-                            pvChoice.put(valueChoicesData.data[index]);
-                            if(channelMonitorRequester!=null) {
-                                channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                                channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                            }
                             break;
                         }
                     }
                     if(index==-1) {
-                        setAlarm(AlarmSeverity.major,"Invalid choice",channelMonitorRequester);
+                        setAlarm(AlarmSeverity.major,"Invalid choice");
                     } 
                 }
             } else if(requestDBRType==DBRType.GR_STRING) {
@@ -575,21 +533,16 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
                 if(!choice.equals(pvChoice.get())) {
-                    int index = -1;
+                    index = -1;
+                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
-                            pvIndex.put(index);
-                            pvChoice.put(valueChoicesData.data[index]);
-                            if(channelMonitorRequester!=null) {
-                                channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                                channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                            }
                             break;
                         }
                     }
                     if(index==-1) {
-                        setAlarm(AlarmSeverity.major,"Invalid choice",channelMonitorRequester);
+                        setAlarm(AlarmSeverity.major,"Invalid choice");
                     } 
                 }
             } else if(requestDBRType==DBRType.CTRL_STRING) {
@@ -599,45 +552,43 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
                 if(!choice.equals(pvChoice.get())) {
-                    int index = -1;
+                    index = -1;
+                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
-                            pvIndex.put(index);
-                            pvChoice.put(valueChoicesData.data[index]);
-                            if(channelMonitorRequester!=null) {
-                                channelMonitorRequester.dataPut(pvValueField, pvIndex);
-                                channelMonitorRequester.dataPut(pvValueField, pvChoice);
-                            }
                             break;
                         }
                     }
                     if(index==-1) {
-                        setAlarm(AlarmSeverity.major,"Invalid choice",channelMonitorRequester);
+                        setAlarm(AlarmSeverity.major,"Invalid choice");
                     } 
                 }
             } else {
                 setAlarm(AlarmSeverity.invalid,
-                        " unsupported DBRType " + requestDBRType.getName(),
-                        channelMonitorRequester);
+                        " unsupported DBRType " + requestDBRType.getName());
                 return;
+            }
+            if(index!=pvIndex.get()) {
+                pvIndex.put(index);
+                pvIndex.postPut();
             }
         } else {
             if(requestDBRType==DBRType.DOUBLE) {
                 DBR_Double dbr = (DBR_Double)fromDBR;
                 if(elementCount==1) {
-                    convert.fromDouble((PVScalar)pvValueField, dbr.getDoubleValue()[0]);
+                    convert.fromDouble(pvScalarValue, dbr.getDoubleValue()[0]);
                 } else {
-                    convert.fromDoubleArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                    convert.fromDoubleArray(pvArrayValue, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
                 }
             } else if(requestDBRType==DBRType.STS_DOUBLE) {
                 DBR_STS_Double dbr = (DBR_STS_Double)fromDBR;
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromDouble((PVScalar)pvValueField, dbr.getDoubleValue()[0]);
+                    convert.fromDouble(pvScalarValue, dbr.getDoubleValue()[0]);
                 } else {
-                    convert.fromDoubleArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                    convert.fromDoubleArray(pvArrayValue, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
                 }
             } else if(requestDBRType==DBRType.TIME_DOUBLE) {
                 DBR_TIME_Double dbr = (DBR_TIME_Double)fromDBR;
@@ -645,25 +596,25 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromDouble((PVScalar)pvValueField, dbr.getDoubleValue()[0]);
+                    convert.fromDouble(pvScalarValue, dbr.getDoubleValue()[0]);
                 } else {
-                    convert.fromDoubleArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                    convert.fromDoubleArray(pvArrayValue, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
                 }
             } else if(requestDBRType==DBRType.SHORT) {
                 DBR_Short dbr = (DBR_Short)fromDBR;
                 if(elementCount==1) {
-                    convert.fromShort((PVScalar)pvValueField, dbr.getShortValue()[0]);
+                    convert.fromShort(pvScalarValue, dbr.getShortValue()[0]);
                 } else {
-                    convert.fromShortArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                    convert.fromShortArray(pvArrayValue, 0, dbr.getCount(), dbr.getShortValue(), 0);
                 }
             } else if(requestDBRType==DBRType.STS_SHORT) {
                 DBR_STS_Short dbr = (DBR_STS_Short)fromDBR;
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromShort((PVScalar)pvValueField, dbr.getShortValue()[0]);
+                    convert.fromShort(pvScalarValue, dbr.getShortValue()[0]);
                 } else {
-                    convert.fromShortArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                    convert.fromShortArray(pvArrayValue, 0, dbr.getCount(), dbr.getShortValue(), 0);
                 }
             } else if(requestDBRType==DBRType.TIME_SHORT) {
                 DBR_TIME_Short dbr = (DBR_TIME_Short)fromDBR;
@@ -671,25 +622,25 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromShort((PVScalar)pvValueField, dbr.getShortValue()[0]);
+                    convert.fromShort(pvScalarValue, dbr.getShortValue()[0]);
                 } else {
-                    convert.fromShortArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                    convert.fromShortArray(pvArrayValue, 0, dbr.getCount(), dbr.getShortValue(), 0);
                 }
             } else if(requestDBRType==DBRType.INT) {
                 DBR_Int dbr = (DBR_Int)fromDBR;
                 if(elementCount==1) {
-                    convert.fromInt((PVScalar)pvValueField, dbr.getIntValue()[0]);
+                    convert.fromInt(pvScalarValue, dbr.getIntValue()[0]);
                 } else {
-                    convert.fromIntArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                    convert.fromIntArray(pvArrayValue, 0, dbr.getCount(), dbr.getIntValue(), 0);
                 }
             } else if(requestDBRType==DBRType.STS_INT) {
                 DBR_STS_Int dbr = (DBR_STS_Int)fromDBR;
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromInt((PVScalar)pvValueField, dbr.getIntValue()[0]);
+                    convert.fromInt(pvScalarValue, dbr.getIntValue()[0]);
                 } else {
-                    convert.fromIntArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                    convert.fromIntArray(pvArrayValue, 0, dbr.getCount(), dbr.getIntValue(), 0);
                 }
             } else if(requestDBRType==DBRType.TIME_INT) {
                 DBR_TIME_Int dbr = (DBR_TIME_Int)fromDBR;
@@ -697,25 +648,25 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromInt((PVScalar)pvValueField, dbr.getIntValue()[0]);
+                    convert.fromInt(pvScalarValue, dbr.getIntValue()[0]);
                 } else {
-                    convert.fromIntArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                    convert.fromIntArray(pvArrayValue, 0, dbr.getCount(), dbr.getIntValue(), 0);
                 }
             } else if(requestDBRType==DBRType.BYTE) {
                 DBR_Byte dbr = (DBR_Byte)fromDBR;
                 if(elementCount==1) {
-                    convert.fromByte((PVScalar)pvValueField, dbr.getByteValue()[0]);
+                    convert.fromByte(pvScalarValue, dbr.getByteValue()[0]);
                 } else {
-                    convert.fromByteArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                    convert.fromByteArray(pvArrayValue, 0, dbr.getCount(), dbr.getByteValue(), 0);
                 }
             } else if(requestDBRType==DBRType.STS_BYTE) {
                 DBR_STS_Byte dbr = (DBR_STS_Byte)fromDBR;
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromByte((PVScalar)pvValueField, dbr.getByteValue()[0]);
+                    convert.fromByte(pvScalarValue, dbr.getByteValue()[0]);
                 } else {
-                    convert.fromByteArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                    convert.fromByteArray(pvArrayValue, 0, dbr.getCount(), dbr.getByteValue(), 0);
                 }
             } else if(requestDBRType==DBRType.TIME_BYTE) {
                 DBR_TIME_Byte dbr = (DBR_TIME_Byte)fromDBR;
@@ -723,9 +674,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromByte((PVScalar)pvValueField, dbr.getByteValue()[0]);
+                    convert.fromByte(pvScalarValue, dbr.getByteValue()[0]);
                 } else {
-                    convert.fromByteArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                    convert.fromByteArray(pvArrayValue, 0, dbr.getCount(), dbr.getByteValue(), 0);
                 }
             } else if(requestDBRType==DBRType.GR_BYTE) {
                 DBR_GR_Byte dbr = (DBR_GR_Byte)fromDBR;
@@ -736,9 +687,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 displayLow = dbr.getLowerDispLimit().doubleValue();
                 displayHigh = dbr.getUpperDispLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromByte((PVScalar)pvValueField, dbr.getByteValue()[0]);
+                    convert.fromByte(pvScalarValue, dbr.getByteValue()[0]);
                 } else {
-                    convert.fromByteArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                    convert.fromByteArray(pvArrayValue, 0, dbr.getCount(), dbr.getByteValue(), 0);
                 }
             } else if(requestDBRType==DBRType.CTRL_BYTE) {
                 DBR_CTRL_Byte dbr = (DBR_CTRL_Byte)fromDBR;
@@ -751,9 +702,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 controlLow = dbr.getLowerCtrlLimit().doubleValue();
                 controlHigh = dbr.getUpperCtrlLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromByte((PVScalar)pvValueField, dbr.getByteValue()[0]);
+                    convert.fromByte(pvScalarValue, dbr.getByteValue()[0]);
                 } else {
-                    convert.fromByteArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getByteValue(), 0);
+                    convert.fromByteArray(pvArrayValue, 0, dbr.getCount(), dbr.getByteValue(), 0);
                 }
             } else if(requestDBRType==DBRType.GR_SHORT) {
                 DBR_GR_Short dbr = (DBR_GR_Short)fromDBR;
@@ -764,9 +715,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 displayLow = dbr.getLowerDispLimit().doubleValue();
                 displayHigh = dbr.getUpperDispLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromShort((PVScalar)pvValueField, dbr.getShortValue()[0]);
+                    convert.fromShort(pvScalarValue, dbr.getShortValue()[0]);
                 } else {
-                    convert.fromShortArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                    convert.fromShortArray(pvArrayValue, 0, dbr.getCount(), dbr.getShortValue(), 0);
                 }
             } else if(requestDBRType==DBRType.CTRL_SHORT) {
                 DBR_CTRL_Short dbr = (DBR_CTRL_Short)fromDBR;
@@ -779,9 +730,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 controlLow = dbr.getLowerCtrlLimit().doubleValue();
                 controlHigh = dbr.getUpperCtrlLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromShort((PVScalar)pvValueField, dbr.getShortValue()[0]);
+                    convert.fromShort(pvScalarValue, dbr.getShortValue()[0]);
                 } else {
-                    convert.fromShortArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getShortValue(), 0);
+                    convert.fromShortArray(pvArrayValue, 0, dbr.getCount(), dbr.getShortValue(), 0);
                 }
             } else if(requestDBRType==DBRType.GR_INT) {
                 DBR_GR_Int dbr = (DBR_GR_Int)fromDBR;
@@ -792,9 +743,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 displayLow = dbr.getLowerDispLimit().doubleValue();
                 displayHigh = dbr.getUpperDispLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromInt((PVScalar)pvValueField, dbr.getIntValue()[0]);
+                    convert.fromInt(pvScalarValue, dbr.getIntValue()[0]);
                 } else {
-                    convert.fromIntArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                    convert.fromIntArray(pvArrayValue, 0, dbr.getCount(), dbr.getIntValue(), 0);
                 }
             } else if(requestDBRType==DBRType.CTRL_INT) {
                 DBR_CTRL_Int dbr = (DBR_CTRL_Int)fromDBR;
@@ -807,25 +758,25 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 controlLow = dbr.getLowerCtrlLimit().doubleValue();
                 controlHigh = dbr.getUpperCtrlLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromInt((PVScalar)pvValueField, dbr.getIntValue()[0]);
+                    convert.fromInt(pvScalarValue, dbr.getIntValue()[0]);
                 } else {
-                    convert.fromIntArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getIntValue(), 0);
+                    convert.fromIntArray(pvArrayValue, 0, dbr.getCount(), dbr.getIntValue(), 0);
                 }
             } else if(requestDBRType==DBRType.FLOAT) {
                 DBR_Float dbr = (DBR_Float)fromDBR;
                 if(elementCount==1) {
-                    convert.fromFloat((PVScalar)pvValueField, dbr.getFloatValue()[0]);
+                    convert.fromFloat(pvScalarValue, dbr.getFloatValue()[0]);
                 } else {
-                    convert.fromFloatArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                    convert.fromFloatArray(pvArrayValue, 0, dbr.getCount(), dbr.getFloatValue(), 0);
                 }
             } else if(requestDBRType==DBRType.STS_FLOAT) {
                 DBR_STS_Float dbr = (DBR_STS_Float)fromDBR;
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromFloat((PVScalar)pvValueField, dbr.getFloatValue()[0]);
+                    convert.fromFloat(pvScalarValue, dbr.getFloatValue()[0]);
                 } else {
-                    convert.fromFloatArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                    convert.fromFloatArray(pvArrayValue, 0, dbr.getCount(), dbr.getFloatValue(), 0);
                 }
             } else if(requestDBRType==DBRType.TIME_FLOAT) {
                 DBR_TIME_Float dbr = (DBR_TIME_Float)fromDBR;
@@ -833,9 +784,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromFloat((PVScalar)pvValueField, dbr.getFloatValue()[0]);
+                    convert.fromFloat(pvScalarValue, dbr.getFloatValue()[0]);
                 } else {
-                    convert.fromFloatArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                    convert.fromFloatArray(pvArrayValue, 0, dbr.getCount(), dbr.getFloatValue(), 0);
                 }
             } else if(requestDBRType==DBRType.GR_FLOAT) {
                 DBR_GR_Float dbr = (DBR_GR_Float)fromDBR;
@@ -846,9 +797,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 displayLow = dbr.getLowerDispLimit().doubleValue();
                 displayHigh = dbr.getUpperDispLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromFloat((PVScalar)pvValueField, dbr.getFloatValue()[0]);
+                    convert.fromFloat(pvScalarValue, dbr.getFloatValue()[0]);
                 } else {
-                    convert.fromFloatArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                    convert.fromFloatArray(pvArrayValue, 0, dbr.getCount(), dbr.getFloatValue(), 0);
                 }
             } else if(requestDBRType==DBRType.CTRL_FLOAT) {
                 DBR_CTRL_Float dbr = (DBR_CTRL_Float)fromDBR;
@@ -861,9 +812,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 controlLow = dbr.getLowerCtrlLimit().doubleValue();
                 controlHigh = dbr.getUpperCtrlLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromFloat((PVScalar)pvValueField, dbr.getFloatValue()[0]);
+                    convert.fromFloat(pvScalarValue, dbr.getFloatValue()[0]);
                 } else {
-                    convert.fromFloatArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getFloatValue(), 0);
+                    convert.fromFloatArray(pvArrayValue, 0, dbr.getCount(), dbr.getFloatValue(), 0);
                 }
             } else if(requestDBRType==DBRType.GR_DOUBLE) {
                 DBR_GR_Double dbr = (DBR_GR_Double)fromDBR;
@@ -875,9 +826,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 displayLow = dbr.getLowerDispLimit().doubleValue();
                 displayHigh = dbr.getUpperDispLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromDouble((PVScalar)pvValueField, dbr.getDoubleValue()[0]);
+                    convert.fromDouble(pvScalarValue, dbr.getDoubleValue()[0]);
                 } else {
-                    convert.fromDoubleArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                    convert.fromDoubleArray(pvArrayValue, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
                 }
             } else if(requestDBRType==DBRType.CTRL_DOUBLE) {
                 DBR_CTRL_Double dbr = (DBR_CTRL_Double)fromDBR;
@@ -891,25 +842,25 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 controlLow = dbr.getLowerCtrlLimit().doubleValue();
                 controlHigh = dbr.getUpperCtrlLimit().doubleValue();
                 if(elementCount==1) {
-                    convert.fromDouble((PVScalar)pvValueField, dbr.getDoubleValue()[0]);
+                    convert.fromDouble(pvScalarValue, dbr.getDoubleValue()[0]);
                 } else {
-                    convert.fromDoubleArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
+                    convert.fromDoubleArray(pvArrayValue, 0, dbr.getCount(), dbr.getDoubleValue(), 0);
                 }
             } else if(requestDBRType==DBRType.STRING) {
                 DBR_String dbr = (DBR_String)fromDBR;
                 if(elementCount==1) {
-                    convert.fromString((PVScalar)pvValueField, dbr.getStringValue()[0]);
+                    convert.fromString(pvScalarValue, dbr.getStringValue()[0]);
                 } else {
-                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                    convert.fromStringArray(pvArrayValue, 0, dbr.getCount(), dbr.getStringValue(), 0);
                 }
             } else if(requestDBRType==DBRType.STS_STRING) {
                 DBR_STS_String dbr = (DBR_STS_String)fromDBR;
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromString((PVScalar)pvValueField, dbr.getStringValue()[0]);
+                    convert.fromString(pvScalarValue, dbr.getStringValue()[0]);
                 } else {
-                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                    convert.fromStringArray(pvArrayValue, 0, dbr.getCount(), dbr.getStringValue(), 0);
                 }
             } else if(requestDBRType==DBRType.TIME_STRING) {
                 DBR_TIME_String dbr = (DBR_TIME_String)fromDBR;
@@ -917,9 +868,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromString((PVScalar)pvValueField, dbr.getStringValue()[0]);
+                    convert.fromString(pvScalarValue, dbr.getStringValue()[0]);
                 } else {
-                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                    convert.fromStringArray(pvArrayValue, 0, dbr.getCount(), dbr.getStringValue(), 0);
                 }
             } else if(requestDBRType==DBRType.GR_STRING) {
                 DBR_GR_String dbr = (DBR_GR_String)fromDBR;
@@ -927,9 +878,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromString((PVScalar)pvValueField, dbr.getStringValue()[0]);
+                    convert.fromString(pvScalarValue, dbr.getStringValue()[0]);
                 } else {
-                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                    convert.fromStringArray(pvArrayValue, 0, dbr.getCount(), dbr.getStringValue(), 0);
                 }
             } else if(requestDBRType==DBRType.CTRL_STRING) {
                 DBR_CTRL_String dbr = (DBR_CTRL_String)fromDBR;
@@ -937,44 +888,31 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 if(elementCount==1) {
-                    convert.fromString((PVScalar)pvValueField, dbr.getStringValue()[0]);
+                    convert.fromString(pvScalarValue, dbr.getStringValue()[0]);
                 } else {
-                    convert.fromStringArray((PVArray)pvValueField, 0, dbr.getCount(), dbr.getStringValue(), 0);
+                    convert.fromStringArray(pvArrayValue, 0, dbr.getCount(), dbr.getStringValue(), 0);
                 }
             } else {
                 setAlarm(AlarmSeverity.invalid,
-                        " unsupported DBRType " + requestDBRType.getName(),
-                        channelMonitorRequester);
+                        " unsupported DBRType " + requestDBRType.getName());
                 return;
-            }
-            if(channelMonitorRequester!=null) {
-                channelMonitorRequester.dataPut(pvValueField);
             }
         }
 
         PVStructure pvStructure = null;
-        if(timeStamp!=null) {
-            pvStructure = pvRecord.getStructureField("timeStamp");
-            if(pvStructure!=null) {
-                PVLong pvSeconds = pvStructure.getLongField("secondsPastEpoch");
-                long seconds = timeStamp.secPastEpoch();
-                seconds += 7305*86400;
-                pvSeconds.put(seconds);
-                PVInt pvNano = pvStructure.getIntField("nanoSeconds");
-                pvNano.put((int)timeStamp.nsec());
-                if(channelMonitorRequester!=null) {
-                    channelMonitorRequester.dataPut(pvStructure);
-                }
-            }
+        if(timeStamp!=null&&pvTimeStamp!=null) {
+            long seconds = timeStamp.secPastEpoch();
+            seconds += 7305*86400;
+            pvSeconds.put(seconds);
+            pvNanoSeconds.put((int)timeStamp.nsec());
+            pvSeconds.postPut();
+            pvNanoSeconds.postPut();
         }
-        if(severity!=null) {
-            pvStructure = pvRecord.getStructureField("alarm");
-            if(pvStructure!=null) {
-                int index = severity.getValue();
-                AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(index);
-                String message = status.getName();
-                setAlarm(alarmSeverity,message,channelMonitorRequester);
-            }
+        if(severity!=null && pvAlarm!=null) {
+            int index = severity.getValue();
+            AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(index);
+            String message = status.getName();
+            setAlarm(alarmSeverity,message);
         }
         if(displayLow<displayHigh) {
             pvStructure = pvRecord.getStructureField("display");
@@ -983,18 +921,14 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     PVString pvUnits = pvStructure.getStringField("units");
                     if(pvUnits!=null) {
                         pvUnits.put(units.toString());
-                        if(channelMonitorRequester!=null) {
-                            channelMonitorRequester.dataPut(pvStructure,pvUnits);
-                        }
+                        pvUnits.postPut();
                     }
                 }
                 if(precision>=0) {
                     PVInt pvResolution = pvStructure.getIntField("resolution");
                     if(pvResolution!=null) {
                         pvResolution.put(precision);
-                        if(channelMonitorRequester!=null) {
-                            channelMonitorRequester.dataPut(pvStructure,pvResolution);
-                        }
+                        pvResolution.postPut();
                     }
                 }
                 PVStructure pvLimits = pvStructure.getStructureField("limit");
@@ -1003,11 +937,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     PVDouble pvHigh = pvLimits.getDoubleField("high");
                     if(pvLow!=null && pvHigh!=null) {
                         pvLow.put(displayLow);
+                        pvLow.postPut();
                         pvHigh.put(displayHigh);
-                        if(channelMonitorRequester!=null) {
-                            channelMonitorRequester.dataPut(pvStructure,pvLow);
-                            channelMonitorRequester.dataPut(pvStructure,pvHigh);
-                        }
+                        pvHigh.postPut();
                     }
                 }
             }
@@ -1021,11 +953,14 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     PVDouble pvHigh = pvStructure.getDoubleField("high");
                     if(pvLow!=null && pvHigh!=null) {
                         pvLow.put(controlLow);
+                        pvLow.postPut();
                         pvHigh.put(controlHigh);
+                        pvHigh.postPut();
                     }
                 }
             }
         }
+        pvRecord.endGroupPut();
     }
     /* (non-Javadoc)
      * @see gov.aps.jca.event.GetListener#getCompleted(gov.aps.jca.event.GetEvent)
@@ -1042,7 +977,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }
             requestResult = RequestResult.failure;
         } else {
-            toRecord(fromDBR,null);
+            toRecord(fromDBR);
             requestResult = RequestResult.success;
         }
         executor.execute(this);

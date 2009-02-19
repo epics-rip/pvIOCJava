@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.ca;
 
-import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
 
@@ -37,9 +36,4 @@ public interface CDRecord {
      * @return The CDStructure interface.
      */
     CDStructure getCDStructure();
-    /**
-     * Get the factory for creating PVField instances.
-     * @return The PVDataCreate interface.
-     */
-    PVDataCreate getPVDataCreate();
 }

@@ -85,7 +85,7 @@ public class ArrayAddCalculatorFactory {
            for(int i=0; i<valueLength; i++) {
                value[i] = Math.abs(a[i] + b[i]);
            }
-  
+           valuePV.postPut();
         }
     }
 }

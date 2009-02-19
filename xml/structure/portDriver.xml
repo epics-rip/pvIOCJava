@@ -95,14 +95,14 @@
      org.epics.ioc.support.pdrv.PDRVSupportFactory</scalar>
 </structure>
 
-<structure name = "portCreateFactoryFactory">
+<structure name = "portCreateFactory">
   <scalar name = "supportFactory" type = "string">
-     org.epics.ioc.support.pdrv.PDRVPortCreateFactory"</scalar>
+     org.epics.ioc.support.pdrv.PDRVPortCreateFactory</scalar>
 </structure>
 
-<structure name = "portDeviceControlFcatory">
+<structure name = "portDeviceControlFactory">
   <scalar name = "supportFactory" type = "string">
-     org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory"</scalar>
+     org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory</scalar>
 </structure>
 
 

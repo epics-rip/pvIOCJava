@@ -40,6 +40,7 @@ implements ChannelGet,ChannelProcessRequester,GetListener,ConnectionListener
     private static enum DBRProperty {none,status,time,graphic,control};
     
     private ChannelFieldGroup channelFieldGroup = null;
+    private ChannelField[] channelFields = null;
     private ChannelGetRequester channelGetRequester = null;
     private boolean process;
     
@@ -65,6 +66,7 @@ implements ChannelGet,ChannelProcessRequester,GetListener,ConnectionListener
             ChannelGetRequester channelGetRequester,boolean process)
     {
         this.channelFieldGroup = channelFieldGroup;
+        channelFields = channelFieldGroup.getArray();
         this.channelGetRequester = channelGetRequester;
         this.process = process;
     }
@@ -276,7 +278,7 @@ implements ChannelGet,ChannelProcessRequester,GetListener,ConnectionListener
             }
             return;
         }
-        v3Channel.getV3ChannelRecord().toRecord(fromDBR,null);
+        v3Channel.getV3ChannelRecord().toRecord(fromDBR);
         ChannelField[] channelFields = channelFieldGroup.getArray();
         for(ChannelField channelField : channelFields) {
             channelGetRequester.nextGetField(channelField, channelField.getPVField());

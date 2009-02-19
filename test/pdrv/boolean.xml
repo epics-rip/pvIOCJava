@@ -1,274 +1,247 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
-<record name = "syncBooleanPort" structureName = "portCreate">
-    <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>syncBooleanPort</portName>
-    <driverParameters structureName = "uint32DigitalDriver" >
-        <delay>0.0</delay>
-        <numberRegisters>2</numberRegisters>
-    </driverParameters>
+<record name = "syncBooleanPort" type = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</scalar>
+    <scalar name = "portName">syncBooleanPort</scalar>
+    <structure name = "driverParameters" type = "uint32DigitalDriver" >
+        <scalar name = "delay">0.0</scalar>
+        <scalar name = "numberRegisters">2</scalar>
+    </structure>
 </record>
 
-<record name = "syncBooleanDeviceControl" structureName = "portDeviceControl" >
-    <portName>syncBooleanPort</portName>
-    <deviceName>0</deviceName>
+<record name = "syncBooleanDeviceControl" type = "portDeviceControl" >
+    <scalar name = "portName">syncBooleanPort</scalar>
+    <scalar name = "deviceName">0</scalar>
 <!--
-    <traceMask><value>0xfff</value></traceMask>
-    <traceIOMask><value>0xfff</value></traceIOMask>
+    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
+    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
 -->
 </record>
 
 <record name = "syncBooleanCounter">
-    <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator>
-        <expression>(value+1)&lt;=7 ? value+1 : 0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan">
-        <type><choice>periodic</choice></type>
-<!--
--->
-        <rate>0.5</rate>
-    </scan>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>syncBooleanOut</pvname>
-                <process>true</process>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "link" type = "outputSupport">
+         <scalar name = "pvname">syncBooleanOut</scalar>
+         <scalar name = "process">true</scalar>
+    </structure>
 </record>
 
 <record name = "syncBooleanOut">
-    <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>syncBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>32767</mask>
-        <timeout>.2</timeout>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncBooleanIn1</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncBooleanIn2</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>syncBooleanIn3</pvname>
-            </link>
-        </element>
-
-    </supportArray>
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalOutputFactory</auxInfo>
+        <scalar name = "portName">syncBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">32767</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "link1" type = "processSupport">
+         <scalar name = "pvname">syncBooleanIn1</scalar>
+         <scalar name = "wait" type = "boolean">false</scalar>
+    </structure>
+    <structure name = "link2" type = "processSupport">
+         <scalar name = "pvname">syncBooleanIn2</scalar>
+         <scalar name = "wait" type = "boolean">false</scalar>
+    </structure>
+    <structure name = "link3" type = "processSupport">
+         <scalar name = "pvname">syncBooleanIn3</scalar>
+    </structure>
 </record>
 
 <record name = "syncBooleanIn1">
-    <value type = "boolean"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>0x1</mask>
-        <timeout>.2</timeout>
-    </input>
-    <valueAlarm structureName = "booleanAlarm">
-      <active>true</active>
-      <falseAlarm><choice>minor</choice></falseAlarm>
-      <falseMessage>false alarm</falseMessage>
-      <trueAlarm><choice>major</choice></trueAlarm>
-      <trueMessage>true alarm</trueMessage>
-    </valueAlarm>
+    <scalar name = "value" type = "boolean"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x1</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "valueAlarm" type = "booleanAlarm">
+      <scalar name = "active">true</scalar>
+      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
+      <scalar name = "falseMessage">false alarm</scalar>
+      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
+      <scalar name = "falseMessage">true alarm</scalar>
+    </structure>
 </record>
 
 <record name = "syncBooleanIn2">
-    <value type = "boolean"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>0x2</mask>
-        <timeout>.2</timeout>
-    </input>
-    <valueAlarm structureName = "booleanAlarm">
-      <active>true</active>
-      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
-      <changeStateMessage>change state alarm</changeStateMessage>
-      <trueAlarm><choice>major</choice></trueAlarm>
-      <trueMessage>true alarm</trueMessage>
-    </valueAlarm>
+    <scalar name = "value" type = "boolean"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x2</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "valueAlarm" type = "booleanAlarm">
+      <scalar name = "active">true</scalar>
+      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
+      <scalar name = "falseMessage">false alarm</scalar>
+      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
+      <scalar name = "falseMessage">true alarm</scalar>
+    </structure>
 </record>
 
 <record name = "syncBooleanIn3">
-    <value type = "boolean"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>syncBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>0x4</mask>
-        <timeout>.2</timeout>
-    </input>
-    <valueAlarm structureName = "booleanAlarm">
-      <active>true</active>
-      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
-      <changeStateMessage>change state alarm</changeStateMessage>
-      <trueAlarm><choice>major</choice></trueAlarm>
-      <trueMessage>true alarm</trueMessage>
-    </valueAlarm>
+    <scalar name = "value" type = "boolean"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">syncBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x4</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "valueAlarm" type = "booleanAlarm">
+      <scalar name = "active">true</scalar>
+      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
+      <scalar name = "falseMessage">false alarm</scalar>
+      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
+      <scalar name = "falseMessage">true alarm</scalar>
+    </structure>
 </record>
 
-<record name = "asynBooleanPort" structureName = "portCreate">
-    <factoryName>org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</factoryName>
-    <portName>asynBooleanPort</portName>
-    <driverParameters structureName = "uint32DigitalDriver" >
-        <delay>0.1</delay>
-        <numberRegisters>2</numberRegisters>
-    </driverParameters>
+<record name = "asynBooleanPort" type = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</scalar>
+    <scalar name = "portName">asynBooleanPort</scalar>
+    <structure name = "driverParameters" type = "uint32DigitalDriver" >
+        <scalar name = "delay">0.1</scalar>
+        <scalar name = "numberRegisters">2</scalar>
+    </structure>
 </record>
 
-<record name = "asynBooleanDeviceControl" structureName = "portDeviceControl" >
-    <portName>asyncBooleanPort</portName>
-    <deviceName>0</deviceName>
+<record name = "asynBooleanDeviceControl" type = "portDeviceControl" >
+    <scalar name = "portName">asyncBooleanPort</scalar>
+    <scalar name = "deviceName">0</scalar>
 <!--
-    <traceMask><value>0xfff</value></traceMask>
-    <traceIOMask><value>0xfff</value></traceIOMask>
+    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
+    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
 -->
 </record>
 
 <record name = "asynBooleanCounter">
-    <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator>
-        <expression>(value+1)&lt;=7 ? value+1 : 0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>0.5</rate>
-    </scan>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                <pvname>asynBooleanOut</pvname>
-                <process>true</process>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "link" type = "outputSupport">
+         <scalar name = "pvname">asynBooleanOut</scalar>
+         <scalar name = "process">true</scalar>
+    </structure>
 </record>
 
 <record name = "asynBooleanOut">
-    <value type = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <output supportName = "pdrvUInt32DigitalOutput" structureName = "pdrvSupport">
-        <portName>asynBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>32767</mask>
-        <timeout>.2</timeout>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>asynBooleanIn1</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>asynBooleanIn2</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                <pvname>asynBooleanIn3</pvname>
-            </link>
-        </element>
-
-
-    </supportArray>
+    <scalar name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalOutputFactory</auxInfo>
+        <scalar name = "portName">asynBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">32767</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "link1" type = "processSupport">
+         <scalar name = "pvname">asynBooleanIn1</scalar>
+    </structure>
+    <structure name = "link2" type = "processSupport">
+         <scalar name = "pvname">asynBooleanIn2</scalar>
+    </structure>
+    <structure name = "link3" type = "processSupport">
+         <scalar name = "pvname">asynBooleanIn3</scalar>
+    </structure>
 </record>
 
 <record name = "asynBooleanIn1">
-    <value type = "boolean"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>0x1</mask>
-        <timeout>.2</timeout>
-    </input>
-    <valueAlarm structureName = "booleanAlarm">
-      <active>true</active>
-      <falseAlarm><choice>minor</choice></falseAlarm>
-      <falseMessage>false alarm</falseMessage>
-      <trueAlarm><choice>major</choice></trueAlarm>
-      <trueMessage>true alarm</trueMessage>
-    </valueAlarm>
+    <scalar name = "value" type = "boolean"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">asynBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x1</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "valueAlarm" type = "booleanAlarm">
+      <scalar name = "active">true</scalar>
+      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
+      <scalar name = "falseMessage">false alarm</scalar>
+      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
+      <scalar name = "falseMessage">true alarm</scalar>
+    </structure>
 </record>
 
 <record name = "asynBooleanIn2">
-    <value type = "boolean"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>0x2</mask>
-        <timeout>.2</timeout>
-    </input>
-    <valueAlarm structureName = "booleanAlarm">
-      <active>true</active>
-      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
-      <changeStateMessage>change state alarm</changeStateMessage>
-      <trueAlarm><choice>major</choice></trueAlarm>
-      <trueMessage>true alarm</trueMessage>
-    </valueAlarm>
+    <scalar name = "value" type = "boolean"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">asynBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x1</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "valueAlarm" type = "booleanAlarm">
+      <scalar name = "active">true</scalar>
+      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
+      <scalar name = "falseMessage">false alarm</scalar>
+      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
+      <scalar name = "falseMessage">true alarm</scalar>
+    </structure>
 </record>
 <record name = "asynBooleanIn3">
-    <value type = "boolean"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvUInt32DigitalInput" structureName = "pdrvSupport">
-        <portName>asynBooleanPort</portName>
-        <deviceName>0</deviceName>
-        <mask>0x4</mask>
-        <timeout>.2</timeout>
-    </input>
-    <valueAlarm structureName = "booleanAlarm">
-      <active>true</active>
-      <changeStateAlarm><choice>minor</choice></changeStateAlarm>
-      <changeStateMessage>change state alarm</changeStateMessage>
-      <trueAlarm><choice>major</choice></trueAlarm>
-      <trueMessage>true alarm</trueMessage>
-    </valueAlarm>
+    <scalar name = "value" type = "boolean"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <scalar name = "portName">asynBooleanPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "mask">0x1</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "valueAlarm" type = "booleanAlarm">
+      <scalar name = "active">true</scalar>
+      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
+      <scalar name = "falseMessage">false alarm</scalar>
+      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
+      <scalar name = "falseMessage">true alarm</scalar>
+    </structure>
 </record>
 
 <!--
 -->
 
 
-</IOCDatabase>
+</database>

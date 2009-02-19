@@ -57,11 +57,10 @@ public abstract class AbstractInt32 extends AbstractInterface implements Int32 {
     protected AbstractInt32(Device device) {
     	super(device,"int32");
     }
-    /**
-     * Announce an interrupt.
-     * @param data The new data.
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.interfaces.Int32#interruptOccured(int)
      */
-    protected void interruptOccured(int data) {
+    public void interruptOccured(int data) {
         if(interruptActive) {
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;

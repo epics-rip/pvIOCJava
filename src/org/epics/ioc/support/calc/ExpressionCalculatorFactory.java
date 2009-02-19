@@ -27,7 +27,6 @@ import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.property.PVProperty;
 import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
-import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVByte;

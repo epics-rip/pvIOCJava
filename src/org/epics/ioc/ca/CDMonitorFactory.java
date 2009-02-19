@@ -19,10 +19,13 @@ import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVFloat;
 import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVListener;
 import org.epics.pvData.pv.PVLong;
+import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVShort;
 import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Scalar;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
@@ -49,7 +52,7 @@ public class CDMonitorFactory {
     private static Convert convert = ConvertFactory.getConvert();
 
     private static class CDMonitorImpl
-    implements CDMonitor, ChannelMonitorRequester, ChannelFieldGroupListener
+    implements CDMonitor,ChannelMonitorRequester, PVListener, ChannelFieldGroupListener
     {
 
         private CDMonitorImpl(Channel channel,CDMonitorRequester cdMonitorRequester)
@@ -66,9 +69,12 @@ public class CDMonitorFactory {
         private ChannelMonitor channelMonitor = null;
         private ArrayList<ChannelField> channelFieldList = new ArrayList<ChannelField>();
         private ArrayList<MonitorField> monitorFieldList = new ArrayList<MonitorField>();
-        private ChannelFieldGroup channelFieldGroup;
+        private ChannelFieldGroup channelFieldGroup = null;;
+        private ChannelField[] channelFields = null;
+        private MonitorField[] monitorFields;
         private CD cd = null;
         private boolean monitorOccured = true;
+        private boolean groupPutActive = false;
         
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.CDMonitor#lookForAbsoluteChange(org.epics.ioc.ca.ChannelField, double)
@@ -150,15 +156,23 @@ public class CDMonitorFactory {
             for(int i=0; i<channelFieldList.size(); i++) {
                 channelFieldGroup.addChannelField(channelFieldList.get(i));
             }
+            channelFields = channelFieldGroup.getArray();
+            monitorFields = new MonitorField[channelFields.length];
+            for(int i=0; i<monitorFields.length; i++) monitorFields[i] = monitorFieldList.get(i);
             cdQueue = CDFactory.createCDQueue(queueSize, channel, channelFieldGroup);
             this.executor = executor;
             callRequester = new CallRequester();
-            
-            channelMonitor = channel.createChannelMonitor(this);
-            channelMonitor.setFieldGroup(channelFieldGroup);
             cd = cdQueue.getFree(true);
             cd.clearNumPuts();
+            channelMonitor = channel.createChannelMonitor(this);
+            channelMonitor.setFieldGroup(channelFieldGroup);
             monitorOccured = false;
+            PVRecord pvRecord = channel.getPVRecord();
+            pvRecord.registerListener(this);
+            for(ChannelField channelField : channelFields) {
+                PVField pvField = channelField.getPVField();
+                pvField.addListener(this);
+            }
             channelMonitor.start();
         }
         /* (non-Javadoc)
@@ -168,6 +182,8 @@ public class CDMonitorFactory {
             if(channelMonitor!=null) channelMonitor.stop();
             channelFieldGroup = null;
             channelMonitor = null;
+            PVRecord pvRecord = channel.getPVRecord();
+            pvRecord.unregisterListener(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -182,62 +198,95 @@ public class CDMonitorFactory {
             cdMonitorRequester.message(message, messageType);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequester#beginPut()
+         * @see org.epics.ioc.ca.ChannelMonitorRequester#initialDataAvailable()
          */
-        public void beginPut() {
+        @Override
+        public void initialDataAvailable() {
+            for(int i=0; i<channelFields.length; i++) {
+                ChannelField channelField = channelFields[i];
+                cd.put(channelField,channelField.getPVField());
+            }
+            getNewCD();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.pv.PVListener#beginGroupPut(org.epics.pvData.pv.PVRecord)
+         */
+        public void beginGroupPut(PVRecord pvRecord) {
+            groupPutActive = true;
             monitorOccured = false;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequester#dataPut(org.epics.ioc.pv.PVField, org.epics.ioc.pv.PVField)
+         * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVField)
          */
-        public void dataPut(PVField requestedPVField, PVField modifiedPVField) {
-            boolean result = cd.put(requestedPVField, modifiedPVField);
-            // following allows for client monitoring a direct subfield of a field
-            // This is common for enumerated fields
-            if(!result) {
-                String fieldName = modifiedPVField.getField().getFieldName();
-                if(fieldName!=null) {
-                int index =cd.getCDRecord().getPVRecord().getStructure().getFieldIndex(fieldName);
-                   if(index>=0) result = cd.put(modifiedPVField);
+        public void dataPut(PVField pvField) {
+            int index = -1;
+            ChannelField channelField = null;
+            for(int i=0; i<channelFields.length; i++) {
+                channelField = channelFields[i];
+                if(channelField.getPVField()==pvField) {
+                    index = i; break;
                 }
             }
-            if(result) {
+            if(index==-1) throw new IllegalStateException("Logic error. Unexpected dataPut");
+            boolean result = cd.put(channelField,pvField);
+            if(!result) return;
+            MonitorField monitorField = monitorFields[index];
+            result = monitorField.newField(pvField);
+            if(!result) return;
+            if(groupPutActive) {
                 monitorOccured = true;
+                return;
             }
+            getNewCD();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequester#dataPut(org.epics.ioc.pv.PVField)
+         * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVField)
          */
-        public void dataPut(PVField modifiedPVField) {
-            boolean result = cd.put(modifiedPVField);
-            if(result) for(int i=0; i < channelFieldList.size(); i++) {
-                ChannelField channelField = channelFieldList.get(i);
-                PVField data = channelField.getPVField();
-                if(data==modifiedPVField) {
-                    MonitorField monitorField = monitorFieldList.get(i);
-                    result = monitorField.newField(modifiedPVField);
-                    if(result) monitorOccured = true;
-                    return;
+        public void dataPut(PVStructure requested, PVField pvField) {
+            int index = -1;
+            ChannelField channelField = null;
+            for(int i=0; i<channelFields.length; i++) {
+                channelField = channelFields[i];
+                if(channelField.getPVField()==requested) {
+                    index = i; break;
                 }
             }
-            message("Logic error: newField did not find pvField.",MessageType.error);
+            if(index==-1) throw new IllegalStateException("Logic error. Unexpected dataPut");
+            boolean result = cd.putSubfield(channelField, pvField);
+            if(!result) return;
+            if(groupPutActive) {
+                monitorOccured = true;
+                return;
+            }
+            getNewCD();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequester#endPut()
+         * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
          */
-        public void endPut() {
-            if(monitorOccured) {
-                CD initial = cd;
-                cd = cdQueue.getFree(true);
-                List<ChannelField> initialList = initial.getChannelFieldGroup().getList();
-                for(int i=0; i<initialList.size(); i++) {
-                    cd.put(initialList.get(i).getPVField());
-                    
-                }
-                cd.clearNumPuts();
-                cdQueue.setInUse(initial);
-                callRequester.call();
+        public void endGroupPut(PVRecord pvRecord) {
+            if(monitorOccured) getNewCD();
+            monitorOccured = false;
+            groupPutActive = false;
+        }
+        
+        private void getNewCD() {
+            CD initial = cd;
+            cd = cdQueue.getFree(true);
+            List<ChannelField> initialList = initial.getChannelFieldGroup().getList();
+            for(ChannelField channelField: initialList) {
+                cd.put(channelField, channelField.getPVField());
             }
+            cd.clearNumPuts();
+            cdQueue.setInUse(initial);
+            callRequester.call();
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.pvData.pv.PVListener#unlisten(org.epics.pvData.pv.PVRecord)
+         */
+        public void unlisten(PVRecord pvRecord) {
+            stop();
+            channel.getChannelListener().destroy(channel);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)

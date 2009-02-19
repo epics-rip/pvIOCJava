@@ -4,7 +4,6 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.ca;
-
 /**
  * Monitor data from a channel.
  * @author mrk
@@ -12,15 +11,10 @@ package org.epics.ioc.ca;
  */
 public interface ChannelMonitor {
     /**
-     * Specify the group of fields to momnitor.
+     * Specify the group of fields to monitor.
      * @param channelFieldGroup The field group to monitor.
      */
     void setFieldGroup(ChannelFieldGroup channelFieldGroup);
-    /**
-     * Get data and put it into the CD (ChannelData).
-     * @param cd The ChannelData into which the data is put.
-     */
-    void getData(CD cd);
     /**
      * Start monitoring.
      */

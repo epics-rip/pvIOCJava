@@ -70,11 +70,10 @@ public abstract class AbstractFloat64 extends AbstractInterface implements Float
 	public String getUnits(User user) {
 		return null;
 	}
-	/**
-     * Announce an interrupt.
-     * @param data The new data.
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.interfaces.Float64#interruptOccured(double)
      */
-    protected void interruptOccured(double data) {
+    public void interruptOccured(double data) {
         if(interruptActive) {
             super.print(Trace.FLOW ,
                     "new interrupt while interruptActive");

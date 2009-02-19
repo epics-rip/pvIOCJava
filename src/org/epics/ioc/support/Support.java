@@ -33,7 +33,7 @@ public interface Support extends Requester{
      * Initialize.
      * Perform initialization related to record instance but
      * do not connect to I/O or other records.
-     * @param recordProcess The recordProcess for this record.
+     * @param recordSupport The recordSupport for this record.
      */
     void initialize(RecordSupport recordSupport);
     /**

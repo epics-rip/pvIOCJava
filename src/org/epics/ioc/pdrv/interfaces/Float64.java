@@ -62,4 +62,9 @@ public interface Float64 extends Interface {
      * than user.message() describes the problem.
      */
     Status removeInterruptUser(User user,Float64InterruptListener float64InterruptListener);
+    /**
+     * An interrupt has occured.
+     * @param data The data.
+     */
+    void interruptOccured(double data);
 }

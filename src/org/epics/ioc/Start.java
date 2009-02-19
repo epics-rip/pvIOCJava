@@ -3,6 +3,8 @@
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
+package org.epics.ioc;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,13 +21,29 @@ import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 
+
+
 /**
- * read and dump a Database Definition and Record Instance Files.
+ * The main program to start a JavaIOC.
+ * The program is started with a command line of
+ * java org.epics.ioc.Start 
+ * The command line options are:
+ * <pre>
+ *     -pv pvList
+ *             pvList is a list of PVData  xml files. Each is parsed and put into the master database
+ *     -dumpStructures
+ *             Dump all structures in the master database
+ *     -dumpRecords
+ *             Dump all record instances in the master database
+ *     -server serverFile
+ *             Start the server specified in the serverFile
+ *     -swtshell
+ *             Starts the JavaIOC running under swtshell
+ *            
  * @author mrk
  *
  */
-
-public class XMLToDatabase {
+public class Start {
     private enum State {
         dbFile,
         servers

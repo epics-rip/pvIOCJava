@@ -82,39 +82,39 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
         setValuePVField(valuePVField);
         PVField pvField = pvProperty.findProperty(pvParent,"calcArgArray");
         if(pvField==null) {
-            pvStructure.message("calcArgArray field not found", MessageType.error);
-            return;
-        }
-        Support support = recordSupport.getSupport(pvField);
-        if(!(support instanceof CalcArgs)) {
-            pvStructure.message("calcArgArraySupport not found", MessageType.error);
-            return;
-        }
-        CalcArgs calcArgArraySupport = (CalcArgs)support;
-        ArgType[] argTypes = getArgTypes();
-        int num = argTypes.length;
-        PVField[] pvFields = new PVField[num];
-        for(int i=0; i<num; i++) {
-            ArgType argType = argTypes[i];
-            pvField = calcArgArraySupport.getPVField(argType.name);
-            if(pvField==null) {
-                pvStructure.message("field " + argType.name + " not found", MessageType.error);
+            setArgPVFields(null);;
+        } else {
+            Support support = recordSupport.getSupport(pvField);
+            if(!(support instanceof CalcArgs)) {
+                pvStructure.message("calcArgArraySupport not found", MessageType.error);
                 return;
             }
-            if(pvField.getField().getType()!=argType.type) {
-                pvStructure.message("field " + argType.name + " has illegal type", MessageType.error);
-                return;
-            }
-            if(argType.type==Type.scalarArray) {
-                Array array = (Array)pvField.getField();
-                if(array.getElementType()!=argType.elementType) {
-                    pvStructure.message("field " + argType.name + " has illegal element type", MessageType.error);
+            CalcArgs calcArgArraySupport = (CalcArgs)support;
+            ArgType[] argTypes = getArgTypes();
+            int num = argTypes.length;
+            PVField[] pvFields = new PVField[num];
+            for(int i=0; i<num; i++) {
+                ArgType argType = argTypes[i];
+                pvField = calcArgArraySupport.getPVField(argType.name);
+                if(pvField==null) {
+                    pvStructure.message("field " + argType.name + " not found", MessageType.error);
                     return;
                 }
+                if(pvField.getField().getType()!=argType.type) {
+                    pvStructure.message("field " + argType.name + " has illegal type", MessageType.error);
+                    return;
+                }
+                if(argType.type==Type.scalarArray) {
+                    Array array = (Array)pvField.getField();
+                    if(array.getElementType()!=argType.elementType) {
+                        pvStructure.message("field " + argType.name + " has illegal element type", MessageType.error);
+                        return;
+                    }
+                }
+                pvFields[i] = pvField;
             }
-            pvFields[i] = pvField;
+            setArgPVFields(pvFields);
         }
-        setArgPVFields(pvFields);
         setSupportState(SupportState.readyForStart);
     }
 }

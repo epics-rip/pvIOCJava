@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2008.02.12</h1>
+2009.02.11</h1>
 CONTENTS 
 
 <div class="toc">
@@ -27,8 +27,8 @@ CONTENTS
       <li><a href="#ChannelFie2">ChannelFieldGroup</a></li>
       <li><a href="#ChannelMon">ChannelMonitorRequester</a></li>
       <li><a href="#ChannelMon1">ChannelMonitor</a></li>
-      <li><a href="#ChannelFac">ChannelAccess</a></li>
-      <li><a href="#ChannelFac">ChannelAccessFactory</a></li>
+      <li><a href="#ChannelAcc">ChannelAccess</a></li>
+      <li><a href="#ChannelAcc1">ChannelAccessFactory</a></li>
       <li><a href="#ChannelPro">ChannelProvider</a></li>
     </ul>
   </li>
@@ -63,8 +63,6 @@ CONTENTS
       <li><a href="#CDRecord">CDRecord</a></li>
       <li><a href="#CDStructur">CDStructure</a></li>
       <li><a href="#CDArray">CDArray</a></li>
-      <li><a href="#CDStructur1">CDStructureArray</a></li>
-      <li><a href="#CDArrayArr">CDArrayArray</a></li>
       <li><a href="#Base">Base CD Classes</a></li>
     </ul>
   </li>
@@ -121,13 +119,21 @@ underlying data is presented as PVData via a ChannelField. The client can
 access multiple ChannelFields via a ChannelFieldGroup.</p>
 
 <p>CD (ChannelData) is a facility that, given a ChannelFieldGroup, creates a
-PVRecord that contains a PVData for each ChannelField as well as a reference
+PVRecord that contains a PVField for each ChannelField as well as a reference
 to the ChannelField. </p>
 
 <p>A channelProvider must implement the following: Channel, ChannelProvider,
 ChannelGet, ChannelPut, ChannelPutGet, and ChannelMonitor. All other
 interfaces, i.e. ChannelMonitorNotify and all the CD interfaces are generic,
 i.e. implemented by factories provided by the package.</p>
+
+<h3>PROBLEMS</h3>
+<dl>
+  <dt>channel.getProperty</dt>
+    <dd>This is a bad name for this method. It really means to make up a name
+      to use for use with PVProperty. For example if the field name is null
+      then it returns "value".</dd>
+</dl>
 <hr />
 
 <h2 style="text-align: center" id="Channel">Channel Definitions</h2>
@@ -206,7 +212,6 @@ databases.</p>
     interface ChannelField {
         Field getField();
         PVField getPVField();
-        void postPut();
         ChannelField findProperty(String propertyName);
         ChannelField createChannelField(String fieldName);
         String[] getPropertyNames();
@@ -228,8 +233,8 @@ databases.</p>
     interface ChannelMonitorRequester extends Requester{
         void beginPut();
         void endPut();
-        void dataPut(PVField modifiedPVField);
-        void dataPut(PVField requestedPVField,PVField modifiedPVField);
+        void dataPut(ChannelField channelField,PVField modifiedPVField);
+        void dataSubFieldPut(ChannelField channelField,PVField modifiedPVField);
     }
     
     interface ChannelMonitor {
@@ -351,8 +356,6 @@ specific field in a channel.</p>
       org.epics.ioc.pv for details.</dd>
   <dt style="font-family: courier;">getPVField</dt>
     <dd>Gets the PVField that holds the data.</dd>
-  <dt style="font-family: courier;">postPut</dt>
-    <dd>When a client does a put to the PVField, this muset be called.</dd>
   <dt style="font-family: courier;">findProperty</dt>
     <dd>Find a ChannelField for the specified propertyName.</dd>
   <dt style="font-family: courier;">getPropertyNames</dt>
@@ -404,12 +407,13 @@ methods:</p>
       beginPut and endPut a set of dataPut calls are made. </dd>
   <dt style="font-family: courier;">endPut</dt>
     <dd>This is called when at the end of a new set of monitored data.</dd>
-  <dt style="font-family: courier;">dataPut(PVField modifiedPVField);</dt>
-    <dd>A put to the modifiedPVField has occured.</dd>
-  <dt style="font-family: courier;">dataPut(PVField requestedPVField,PVField
+  <dt style="font-family: courier;">dataPut(ChannelField channelField,PVField
   modifiedPVField);</dt>
-    <dd>A put to the modifiedPVField has occured. The requestedPVField is the
-      PVField in an associated ChannelField. </dd>
+    <dd>A put to the modifiedPVField has occured.</dd>
+  <dt style="font-family: courier;">void dataSubFieldPut(ChannelField
+  channelField,PVField modifiedPVField);</dt>
+    <dd>A put to the modifiedPVField has occured. It is a subField of the
+      channelField. </dd>
 </dl>
 
 <h3 id="ChannelMon1">ChannelMonitor</h3>
@@ -427,7 +431,7 @@ methods:</p>
     <dd>Stop monitoring.</dd>
 </dl>
 
-<h3 id="ChannelFac">ChannelAccess</h3>
+<h3 id="ChannelAcc">ChannelAccess</h3>
 
 <p>A channelFactory creates a channel. A channel is either local, i.e. code
 running in an IOC is accessing a field in the local IOC database, or remote,
@@ -454,7 +458,7 @@ support for remote access.</p>
     <dd>Does providerName provide a channel for channelName</dd>
 </dl>
 
-<h3 id="ChannelFac">ChannelAccessFactory</h3>
+<h3 id="ChannelAcc1">ChannelAccessFactory</h3>
 
 <p>ChannelAccessFactory provides the single method:</p>
 <dl>
@@ -723,7 +727,13 @@ client request to:</p>
            ChannelFieldGroupListener listener);
     }
 
-    public class BaseChannelField implements ChannelField { ... }
+    public abstract class AbstractChannelField implements ChannelField {
+         protected AbstractChannelField(PVField pvField);
+         ... 
+         public abstract ChannelField findProperty(String propertyName);
+         public abstract ChannelField createChannelField(String fieldName);
+         ...
+    }
     public class BaseChannelFieldGroup implements ChannelFieldGroup { ... }</pre>
 
 <p>AbstractChannel is for use by Channel Providers. The public methods are
@@ -732,9 +742,8 @@ must call the add and remove methods whenever the corresponding interface is
 implemented or destroyed. When destroy is called AbstractChannel calls the
 destroy method of each of the process/get/put/putGet/monitor interfaces.</p>
 
-<p>BaseChannelField implements all ChannelField methods. However the provider
-must provide a PVField interface to the constructor and often needs to
-override some of the methods.</p>
+<p>AbstractChannelField implements all ChannelField methods except
+findProperty and createChannelField, which are declared abstract.</p>
 
 <p>BaseChannelFieldGroup implements all ChannelFieldGroup methods. A provider
 normally can use BaseChannelFieldGroup without overriding any of the
@@ -808,9 +817,9 @@ and associated subfields, which are described in the next section.</p>
         ChannelFieldGroup getChannelFieldGroup();
         CDRecord getCDRecord();
         void clearNumPuts();
-        boolean get(PVField pvField);
-        boolean put(PVField pvField);
-        boolean put(PVField pvField,PVField pvSubField);
+        boolean get(ChannelField channelField,PVField pvField);
+        boolean put(ChannelField channelField,PVField pvField);
+        boolean putSubField(ChannelField channelField,PVField pvSubField);
         CDGet createCDGet(
             CDGetRequester channelCDGetRequester,
             boolean process);
@@ -842,8 +851,7 @@ and associated subfields, which are described in the next section.</p>
     class BaseCD { ... }
     class BaseCDQueue { ... }
     class BaseCDPut { ... }
-    class BaseCDGet { ... }
-</pre>
+    class BaseCDGet { ... }</pre>
 
 <h3 id="CD">CD</h3>
 
@@ -866,12 +874,12 @@ and associated subfields, which are described in the next section.</p>
     <dd>Get data from the CD and put it into pvField. It returns (false,true)
       if data (was not, was) put into the CDField. </dd>
   <dt style="font-family: courier;">put</dt>
-    <dd>The PVField has been modified. Two versions are provided. One is if a
+  <dt style="font-family: courier;">putSubField</dt>
+    <dd>Put data into a CDField Two versions are provided. One is if a
       ChannelField is connected to the PVField itself and the other if the
       PVField is a subfield of the PVStructure to which the ChannelField is
-      connected. NOTE that the pvFields are from the ChannelField NOT the
-      pvField from the CD. Each returns (false,true) if data (was not, was)
-      put into a ChannelField. </dd>
+      connected. Each returns (false,true) if data (was not, was) put into a
+      ChannelField. </dd>
   <dt style="font-family: courier;">createCDGet</dt>
     <dd>Create a CDGet.</dd>
   <dt style="font-family: courier;">destroy(CDGet channelCDGet)</dt>
@@ -957,9 +965,9 @@ to determine how often each PVField was written.</p>
         int getMaxNumPuts();
         void setMaxNumPuts(int numPuts);
         void clearNumPuts();
-        void get(PVField pvField,boolean postPut);
+        void get(PVField pvField);
         void put(PVField pvField);
-        void put(PVField pvField,PVField pvSubField);
+        void putSubfield(PVField pvSubField);
         String toString();
         String toString(int indentLevel);
     }
@@ -969,7 +977,6 @@ to determine how often each PVField was written.</p>
         CDField findSourceCDField(PVField sourcePVField);
         PVRecord getPVRecord();
         CDStructure getCDStructure();
-        PVDataCreate getPVDataCreate();
     }
     
     interface CDStructure extends CDField {
@@ -983,24 +990,10 @@ to determine how often each PVField was written.</p>
         PVArray getPVArray();
     }
     
-    interface CDArrayArray extends CDArray {
-        CDField findCDField(PVField pvField);
-        CDField findSourceCDField(PVField sourcePVField);
-        CDArray[] getElementCDArrays();
-    }
-
-    interface CDStructureArray extends CDArray {
-        CDField findCDField(PVField pvField);
-        CDField findSourceCDField(PVField sourcePVField);
-        CDStructure[] getElementCDStructures();
-    }
-
     class BaseCDRecord { ... }
     class BaseCDField { ... }
     class BaseCDArray { ... }
-    class BaseCDStructure { ... }
-    class BaseCDStructureArray { ... }
-    class BaseCDArrayArray { ... }</pre>
+    class BaseCDStructure { ... }</pre>
 
 <h3 id="CDField2">CDField</h3>
 
@@ -1032,10 +1025,12 @@ CDField or an extension. CDField has the methods:</p>
   <dt style="font-family: courier;">clearNumPuts</dt>
     <dd>Set all number of puts to 0.</dd>
   <dt style="font-family: courier;">get</dt>
-    <dd>Get data from the CDField and put it into pvField. If postPut is true
-      channelField.postPut is called if the data is written.</dd>
-  <dt style="font-family: courier;">get</dt>
-    <dd>Put the CDField PVField with data from pvField or pvSubField.</dd>
+    <dd>Get data from the CDField and put it into pvField.</dd>
+  <dt style="font-family: courier;">put</dt>
+    <dd>Put data into the CDField PVField with data from pvField.</dd>
+  <dt style="font-family: courier;">putSubfield</dt>
+    <dd>Put data into a subfield of the CDField PVField with data from
+      pvField.</dd>
 </dl>
 
 <h3 id="CDRecord">CDRecord</h3>
@@ -1085,32 +1080,6 @@ CDField or an extension. CDField has the methods:</p>
 
 <p>CDArray is associated with a PVArray. It has the method:</p>
 
-<h3 id="CDStructur1">CDStructureArray</h3>
-
-<p>CDStructureArray is associated with a PVArray with structure elements.</p>
-<dl>
-  <dt style="font-family: courier;">findCDField</dt>
-    <dd>Given a pvField find the ChannelField that holds the pvField.</dd>
-  <dt style="font-family: courier;">findSourceCDField</dt>
-    <dd>Given a pvField find the ChannelField that references the source
-      pvField.</dd>
-  <dt style="font-family: courier;">getElementCDStructures</dt>
-    <dd>Get the CDStructure array.</dd>
-</dl>
-
-<h3 id="CDArrayArr">CDArrayArray</h3>
-
-<p>CDArrayArray is associated with a PVArray with array elements.</p>
-<dl>
-  <dt style="font-family: courier;">findCDField</dt>
-    <dd>Given a pvField find the ChannelField that holds the pvField.</dd>
-  <dt style="font-family: courier;">findSourceCDField</dt>
-    <dd>Given a pvField find the ChannelField that references the source
-      pvField.</dd>
-  <dt style="font-family: courier;">getElementCDArrays</dt>
-    <dd>Get the CDArray array.</dd>
-</dl>
-
 <h3 id="Base">Base CD Classes</h3>
 
 <p>The BaseCD classes provide implementations of the CD interraces. These
@@ -1153,7 +1122,7 @@ methods:</p>
     }
     
     public interface CDPutRequester extends Requester{
-        void getDone();
+        void getDone(RequestResult requestResult);
         void putDone(RequestResult requestResult);
     }</pre>
 
@@ -1192,7 +1161,7 @@ IOC database. The notification includes data.</p>
         void lookForChange(ChannelField channelField, boolean causeMonitor);
         void lookForAbsoluteChange(ChannelField channelField,double value);
         void lookForPercentageChange(ChannelField channelField,double value);
-        void start(int queueSize,IOCExecutor iocExecutor);
+        void start(int queueSize,Executor executor);
         void stop();
     }
     
@@ -1504,8 +1473,11 @@ example gets from a record after the record is no longer locked.</p>
             message(channel,message,messageType);
         }
 
-        public boolean nextGetField(Channel channel, ChannelField field, PVField pvField) {
-            valueData.nextGetField(channel, field, pvField);
+        public boolean nextGetField(ChannelField field, PVField pvField) {
+            // assume double
+            PVDouble pvTo = (PVDouble)field.getPVField();
+            PVDouble pvFrom = (PVDouble)pvField;
+            pvTo.put(pvFrom.get());
             return false;
         }
 
@@ -1602,7 +1574,7 @@ example gets from a record after the record is no longer locked.</p>
             message(channel,message,messageType);
         }
 
-        public boolean nextPutField(Channel channel, ChannelField field, PVField pvField) {
+        public boolean nextPutField(ChannelField field, PVField pvField) {
             PVDouble pvDouble = (PVDouble)pvField;
             pvDouble.put(value);
             return false;

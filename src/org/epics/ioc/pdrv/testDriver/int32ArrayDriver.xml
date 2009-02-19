@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <structure name = "int32ArrayDriver">
-    <field name = "delay" type = "double" />
-    <field name = "maxSegmentSize" type = "int" />
+    <scalar name = "delay" type = "double" />
+    <scalar name = "maxSegmentSize" type = "int" />
 </structure>
 
-</IOCDatabase>
+</database>

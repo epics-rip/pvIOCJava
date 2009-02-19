@@ -6,7 +6,6 @@
 package org.epics.ioc.support.device;
 
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportDatabase;
 import org.epics.ioc.support.SupportDatabaseFactory;
@@ -17,11 +16,12 @@ import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.property.PVProperty;
 import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
@@ -35,26 +35,35 @@ import org.epics.pvData.pv.Type;
 public class PowerSupplyFactory {
     /**
      * Create the support for the record or structure.
-     * @param pvStructure The structure or record for which to create support.
+     * @param pvField The structure or record for which to create support.
      * @return The support instance.
      */
-    public static Support create(PVStructure pvStructure) {
-        PVRecord pvRecord = pvStructure.getPVRecord();
-        RecordSupport recordSupport = masterSupportDatabase.getRecordSupport(pvRecord);
-        String supportName = recordSupport.getSupport(pvStructure).getSupportName();
-        if(!supportName.equals(powerSupplyCurrentName)) {
-            pvStructure.message("no support for " + supportName, MessageType.fatalError);
+    public static Support create(PVField pvField) {
+        PVAuxInfo pvAuxInfo = pvField.getPVAuxInfo();
+        PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
+        if(pvScalar==null) {
+            pvField.message("no pvAuxInfo with name support. Why??", MessageType.error);
+            return null;
+        }
+        if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
+            pvField.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
+            return null;
+        }
+        String supportName = ((PVString)pvScalar).get();
+       
+        if(!supportName.equals(powerSupplyFactory)) {
+            pvField.message("no support for " + supportName, MessageType.fatalError);
             return null;
         }
         // we want the parent of the parent
-        PVStructure pvParent = pvStructure.getParent();
+        PVStructure pvParent = pvField.getParent();
         if(pvParent==null) {
-            pvStructure.message("no parent", MessageType.fatalError);
+            pvField.message("no parent", MessageType.fatalError);
             return null;
         }
         pvParent = pvParent.getParent();
         if(pvParent==null) {
-            pvStructure.message("no parent of the parent", MessageType.fatalError);
+            pvField.message("no parent of the parent", MessageType.fatalError);
             return null;
         }
         PVDouble pvCurrent = getPVDouble(pvParent,"current.value");
@@ -64,7 +73,7 @@ public class PowerSupplyFactory {
         PVDouble pvPower = getPVDouble(pvParent,"power.value");
         if(pvPower==null) return null;
        
-        return new PowerSupplyCurrentImpl(pvStructure,pvCurrent,pvVoltage,pvPower);
+        return new PowerSupplyCurrentImpl(pvField,pvCurrent,pvVoltage,pvPower);
     }
     
     private static PVDouble getPVDouble(PVStructure pvParent,String fieldName) {
@@ -87,7 +96,7 @@ public class PowerSupplyFactory {
     
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final SupportDatabase masterSupportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
-    private static final String powerSupplyCurrentName = "powerSupplyCurrent";
+    private static final String powerSupplyFactory = "powerSupplyFactory";
     private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     
@@ -101,8 +110,8 @@ public class PowerSupplyFactory {
         private double voltage;
         private double current;
         
-        private PowerSupplyCurrentImpl(PVStructure pvStructure,PVDouble currentPVField, PVDouble voltagePVField, PVDouble powerPVField) {
-            super(powerSupplyCurrentName,pvStructure);
+        private PowerSupplyCurrentImpl(PVField pvStructure,PVDouble currentPVField, PVDouble voltagePVField, PVDouble powerPVField) {
+            super(powerSupplyFactory,pvStructure);
             this.powerPVField = powerPVField;
             this.currentPVField = currentPVField;
             this.voltagePVField = voltagePVField;
@@ -123,6 +132,7 @@ public class PowerSupplyFactory {
                 current = power/voltage;
             }
             currentPVField.put(current);
+            currentPVField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
     }

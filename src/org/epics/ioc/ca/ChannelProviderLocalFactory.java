@@ -19,7 +19,6 @@ import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVListener;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
@@ -888,18 +887,11 @@ public class ChannelProviderLocalFactory  {
             }
         }
         
-        private class MonitorImpl implements ChannelMonitor,PVListener
+        private class MonitorImpl implements ChannelMonitor
         {
-            private Channel channel;
             private ChannelMonitorRequester channelMonitorRequester;
-            private boolean isStarted = false;
-            private ChannelFieldGroup channelFieldGroup = null;
-            private boolean processActive = false;
-            private boolean putStructureActive = false;
-            
             
             private MonitorImpl(Channel channel,ChannelMonitorRequester channelMonitorRequester) {
-                this.channel = channel;
                 this.channelMonitorRequester = channelMonitorRequester;
             }
             /* (non-Javadoc)
@@ -910,137 +902,19 @@ public class ChannelProviderLocalFactory  {
                 ChannelImpl.this.remove(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelMonitor#getData(org.epics.ioc.ca.CD)
-             */
-            public void getData(CD cd) {
-                List<ChannelField> channelFieldList = channelFieldGroup.getList();
-                for(ChannelField cf : channelFieldList) {
-                    ChannelField channelField = (ChannelField)cf;
-                    PVField pvField = channelField.getPVField();
-                    cd.put(pvField);
-                }
-            }
-            /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelMonitor#setFieldGroup(org.epics.ioc.ca.ChannelFieldGroup)
              */
-            public void setFieldGroup(ChannelFieldGroup channelFieldGroup) {
-                this.channelFieldGroup = channelFieldGroup;
-            }
+            public void setFieldGroup(ChannelFieldGroup channelFieldGroup) {}
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelMonitor#start()
              */
             public void start() {
-                if(isStarted) {
-                    message("illegal request. monitor active",MessageType.error);
-                    return;
-                }
-                if(channelFieldGroup==null) {
-                    throw new IllegalStateException("setFieldGroup was not called"); 
-                }
-                isStarted = true;
-                processActive = false;
-                channelMonitorRequester.beginPut();
-                List<ChannelField> channelFieldList = channelFieldGroup.getList();
-                for(ChannelField cf : channelFieldList) {
-                    ChannelField channelField = (ChannelField)cf;
-                    PVField pvField = channelField.getPVField();
-                    PVField targetPVField = getRequestedPVField(pvField);
-                    channelMonitorRequester.dataPut(targetPVField);
-                }
-                channelMonitorRequester.endPut();
-                pvRecord.registerListener(this);
-                channelFieldList = channelFieldGroup.getList();
-                for(ChannelField cf : channelFieldList) {
-                    ChannelField channelField = (ChannelField)cf;
-                    PVField pvField = channelField.getPVField();
-                    pvField.addListener(this);
-                }
+                channelMonitorRequester.initialDataAvailable();
             }
-
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelMonitor#stop()
              */
-            public void stop() {
-                if(!isStarted) return;
-                isStarted = false;
-                pvRecord.unregisterListener(this);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.pvData.pv.PVListener#beginGroupPut(org.epics.pvData.pv.PVRecord)
-             */
-            public void beginGroupPut(PVRecord pvRecord) {
-                if(!isStarted) return;
-                processActive = true;
-                channelMonitorRequester.beginPut();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
-             */
-            public void endGroupPut(PVRecord pvRecord) {
-                if(!isStarted) return;
-                processActive = false;
-                channelMonitorRequester.endPut();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.PVListener#beginPut(org.epics.ioc.pv.PVStructure)
-             */
-            public void beginPut(PVStructure pvStructure) {
-                if(!isStarted) return;
-                if(processActive) return;
-                putStructureActive = true;
-                channelMonitorRequester.beginPut();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.PVListener#endPut(org.epics.ioc.pv.PVStructure)
-             */
-            public void endPut(PVStructure pvStructure) {
-                if(!isStarted) return;
-                if(processActive) return;
-                if(!putStructureActive) return;
-                putStructureActive = false;
-                channelMonitorRequester.endPut();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVField)
-             */
-            public void dataPut(PVStructure requested, PVField pvField) {
-                PVField pvRequested = getRequestedPVField(requested);
-                boolean beginEnd = (!processActive&&!putStructureActive) ? true : false;
-                if(beginEnd) channelMonitorRequester.beginPut();
-                channelMonitorRequester.dataPut(pvRequested, pvField);                
-                if(beginEnd) {
-                    channelMonitorRequester.endPut();
-                }
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pv.PVListener#dataPut(org.epics.ioc.pv.PVField)
-             */
-            public void dataPut(PVField pvField) {
-                PVField targetPVField = getRequestedPVField(pvField);
-                boolean beginEnd = (!processActive&&!putStructureActive) ? true : false;
-                if(beginEnd) channelMonitorRequester.beginPut();
-                channelMonitorRequester.dataPut(targetPVField);
-                if(beginEnd){
-                    channelMonitorRequester.endPut();
-                }
-            }
-            
-            private PVField getRequestedPVField(PVField requestedPVField) {
-                List<ChannelField> channelFieldList = channelFieldGroup.getList();
-                for(ChannelField cf : channelFieldList) {
-                    PVField pvField = cf.getPVField();
-                    if(pvField==requestedPVField) return pvField;
-                }
-                throw new IllegalStateException("Logic error. Unexpected dataPut"); 
-            }
-            /* (non-Javadoc)
-             * @see org.epics.pvData.pv.PVListener#unlisten(org.epics.pvData.pv.PVRecord)
-             */
-            public void unlisten(PVRecord pvRecord) {
-                stop();
-                channel.getChannelListener().destroy(channel);
-            }   
+            public void stop() {}
         }
     }
 }

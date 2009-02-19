@@ -1,300 +1,267 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <record name = "arrayIncrementer${num}">
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "double" capacity = "5">
-        <element>0.0 1.0 2.0 3.0 4.0</element>
-    </value>
-    <input structureName = "calculation" >
-        <calculator supportName = "arrayIncrementCalculator" />
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type>
-        <rate>1.0</rate>
-    </scan>
-    <display structureName = "display" >
-        <description>Sample Description</description>
-        <format>%f</format>
-        <resolution>1</resolution>
-        <units>volts</units>
-    </display>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "double" capacity = "5">
+        0.0 1.0 2.0 3.0 4.0
+    </array>
+    <structure name = "input" type = "calculation" >
+        <structure name = "calculator" type = "null">
+            <auxInfo name = "supportFactory" type = "string">arrayIncrementCalculatorFactory</auxInfo>
+        </structure>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "display" type = "display" >
+        <scalar name = "description">Sample Description</scalar>
+        <scalar name = "format">%f</scalar>
+        <scalar name = "resolution">1</scalar>
+        <scalar name = "units">volts</scalar>
+    </structure>
 </record>
 
 <record name = "byteArrayOut${num}" >
-    <value elementType = "byte"/>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>arrayIncrementer${num}</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>byteArray${num}</pvname>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>byteArrayIn${num}</pvname>
-            </link>
-        </element>
-    </supportArray>
-
+    <array name = "value" type = "byte"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">arrayIncrementer${num}</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "output" type = "outputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">byteArray${num}</scalar>
+    </structure>
+    <structure name = "process" type = "processSupport">
+      <scalar name = "pvname">byteArrayIn${num}</scalar>
+    </structure>
 </record>
 
 <record name = "byteArrayIn${num}">
-    <value elementType = "byte"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>byteArray${num}</pvname>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "byte"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">byteArray${num}</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "byteArrayMonitor${num}">
-    <value elementType = "byte"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>byteArray${num}</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "byte"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">byteArray${num}</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "shortArrayOut${num}" >
-    <value elementType = "short"/>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>arrayIncrementer${num}</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>shortArray${num}</pvname>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>shortArrayIn${num}</pvname>
-            </link>
-        </element>
-    </supportArray>
-
+    <array name = "value" type = "short"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">arrayIncrementer${num}</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "output" type = "outputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">shortArray${num}</scalar>
+    </structure>
+    <structure name = "process" type = "processSupport">
+      <scalar name = "pvname">shortArrayIn${num}</scalar>
+    </structure>
 </record>
 
 <record name = "shortArrayIn${num}">
-    <value elementType = "short"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>shortArray${num}</pvname>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "short"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">shortArray${num}</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "shortArrayMonitor${num}">
-    <value elementType = "short"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>shortArray${num}</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "short"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">shortArray${num}</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "intArrayOut${num}" >
-    <value elementType = "int"/>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>arrayIncrementer${num}</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>intArray${num}</pvname>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>intArrayIn${num}</pvname>
-            </link>
-        </element>
-    </supportArray>
-
+    <array name = "value" type = "int"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">arrayIncrementer${num}</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "output" type = "outputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">intArray${num}</scalar>
+    </structure>
+    <structure name = "process" type = "processSupport">
+      <scalar name = "pvname">intArrayIn${num}</scalar>
+    </structure>
 </record>
 
 <record name = "intArrayIn${num}">
-    <value elementType = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>intArray${num}</pvname>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">intArray${num}</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "intArrayMonitor${num}">
-    <value elementType = "int"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>intArray${num}</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "int"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">intArray${num}</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "floatArrayOut${num}" >
-    <value elementType = "float"/>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>arrayIncrementer${num}</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>floatArray${num}</pvname>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>floatArrayIn${num}</pvname>
-            </link>
-        </element>
-    </supportArray>
-
+    <array name = "value" type = "float"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">arrayIncrementer${num}</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "output" type = "outputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">floatArray${num}</scalar>
+    </structure>
+    <structure name = "process" type = "processSupport">
+      <scalar name = "pvname">floatArrayIn${num}</scalar>
+    </structure>
 </record>
 
 <record name = "floatArrayIn${num}">
-    <value elementType = "float"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>floatArray${num}</pvname>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "float"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">floatArray${num}</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "floatArrayMonitor${num}">
-    <value elementType = "float"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>floatArray${num}</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "float"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+     <structure name = "input" type = "monitorSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">floatArray${num}</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "doubleArrayOut${num}">
-    <value elementType = "double"/>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>arrayIncrementer${num}</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>doubleArray${num}</pvname>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>doubleArrayIn${num}</pvname>
-            </link>
-        </element>
-    </supportArray>
-
+    <array name = "value" type = "double"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">arrayIncrementer${num}</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "output" type = "outputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">doubleArray${num}</scalar>
+    </structure>
+    <structure name = "process" type = "processSupport">
+      <scalar name = "pvname">doubleArrayIn${num}</scalar>
+    </structure>
 </record>
 
 <record name = "doubleArrayIn${num}">
-    <value elementType = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>doubleArray${num}</pvname>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">doubleArray${num}</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "doubleArrayMonitor${num}">
-    <value elementType = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>doubleArray${num}</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">doubleArray${num}</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "stringArrayOut${num}" >
-    <value elementType = "string"/>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <pvname>arrayIncrementer${num}</pvname>
-        <process>true</process>
-    </input>
-    <output supportName = "outputSupport" structureName = "outputSupport">
-        <providerName>caV3</providerName>
-        <pvname>stringArray${num}</pvname>
-    </output>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport"  structureName = "processSupport">
-                <pvname>stringArrayIn${num}</pvname>
-            </link>
-        </element>
-    </supportArray>
-
+    <array name = "value" type = "string"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">arrayIncrementer${num}</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+    <structure name = "output" type = "outputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">stringArray${num}</scalar>
+    </structure>
+    <structure name = "process" type = "processSupport">
+      <scalar name = "pvname">stringArrayIn${num}</scalar>
+    </structure>
 </record>
 
 <record name = "stringArrayIn${num}">
-    <value elementType = "string"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>stringArray${num}</pvname>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "string"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">stringArray${num}</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 <record name = "stringArrayMonitor${num}" >
-    <value elementType = "string"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-        <providerName>caV3</providerName>
-        <pvname>stringArray${num}</pvname>
-        <process>true</process>
-        <propertyNames>alarm</propertyNames>
-    </input>
+    <array name = "value" type = "string"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">stringArray${num}</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
-
-</IOCDatabase>
+<!--
+-->
+</database>

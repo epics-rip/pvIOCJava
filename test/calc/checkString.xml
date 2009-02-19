@@ -14,7 +14,7 @@
           </structure>
        </structure>
        <structure name = "calculator">
-         <scalar name = "expression">(a==b ? true : false</scalar>
+         <scalar name = "expression">(a==b) ? true : false</scalar>
        </structure>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm" >

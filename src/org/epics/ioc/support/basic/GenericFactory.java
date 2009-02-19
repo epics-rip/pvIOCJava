@@ -20,8 +20,8 @@ public class GenericFactory {
     /**
      * Create support for a structure that can have fields with support.
      * The support for each field that has support is called.
-     * @param dbField The array which must be an array of structures.
-     * @return An interface to the support or null if the supportName was not "supportArray".
+     * @param pvStructure The structure.
+     * @return An interface to the support.
      */
     public static Support create(PVStructure pvStructure) {
         return new GenericBase(supportName,pvStructure);

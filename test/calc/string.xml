@@ -24,7 +24,6 @@
        </structure>
     </structure>
     <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />

@@ -5,32 +5,28 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
+import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
-import org.epics.pvData.pv.DoubleArrayData;
+import org.epics.pvData.pv.PVDoubleArray;
 
 /**
  * Base for interposing a Float64Array.
  * @author mrk
  *
  */
-public class Float64ArrayInterposeBase extends AbstractArrayInterface implements Float64Array {
+public class Float64ArrayInterposeBase extends AbstractFloat64Array {
     private Float64Array float64Array;
     
     /**
      * Constructor
-     * @param arg The interface to the lower level implementation.
+     * @param pvIntArray data array.
+     * @param device The device.
+     * @param float64Array The lower level interface.
      */
-    protected Float64ArrayInterposeBase(Float64Array arg) {
-        super(arg.getParent(),arg.getArray(),
-        	arg.getDevice(),arg.getInterfaceName());
-        this.float64Array = arg;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVDoubleArray#share(org.epics.ioc.pv.PVDoubleArray)
-     */
-    public boolean share(double[] value, int length) {
-        return false;
+    protected Float64ArrayInterposeBase(PVDoubleArray pvDoubleArray,Device device,Float64Array float64Array) {
+        super(pvDoubleArray,device);
+        this.float64Array = float64Array;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#endRead(org.epics.ioc.pdrv.User)
@@ -67,29 +63,5 @@ public class Float64ArrayInterposeBase extends AbstractArrayInterface implements
      */
     public Status removeInterruptUser(User user, Float64ArrayInterruptListener float64ArrayListener) {
         return float64Array.removeInterruptUser(user, float64ArrayListener);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
-     */
-    public String getInterfaceName() {
-        return float64Array.getInterfaceName();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVDoubleArray#get(int, int, org.epics.ioc.pv.DoubleArrayData)
-     */
-    public int get(int offset, int len, DoubleArrayData data) {
-        return float64Array.get(offset, len, data);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVDoubleArray#put(int, int, double[], int)
-     */
-    public int put(int offset, int len, double[] from, int fromOffset) {
-        return float64Array.put(offset, len, from, fromOffset);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVArray#setCapacity(int)
-     */
-    public void setCapacity(int capacity) {
-        float64Array.setCapacity(capacity);
     }
 }

@@ -59,7 +59,7 @@ public enum SupportState {
     };
     /**
      * Convenience method for code that accesses a supportState structure.
-     * @param dbField A field which is potentially a supportState structure.
+     * @param pvField A field which is potentially a supportState structure.
      * @return The Enumerated interface only if dbField has an Enumerated interface and defines
      * the supportState choices.
      */

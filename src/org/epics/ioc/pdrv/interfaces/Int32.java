@@ -61,4 +61,9 @@ public interface Int32 extends Interface {
      * than user.message() describes the problem.
      */
     Status removeInterruptUser(User user,Int32InterruptListener int32InterruptListener);
+    /**
+     * An interrupt has occured.
+     * @param data The data.
+     */
+    void interruptOccured(int data);
 }

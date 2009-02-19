@@ -10,7 +10,7 @@ import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
-import org.epics.ioc.support.alarm.*;
+import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;

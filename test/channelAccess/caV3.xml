@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <record name = "aiExample">
-    <value type = "double"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-        <providerName>caV3</providerName>
-        <pvname>mrkHost:aiExample</pvname>
-        <process>false</process>
-        <inheritSeverity>true</inheritSeverity>
-    </input>
+    <scalar name = "value" type = "double"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">mrkHost:aiExample<</scalar>
+        <scalar name = "process">false</scalar>
+        <scalar name = "inheritSeverity">true</scalar>
+    </structure>
 </record>
 
-</IOCDatabase>
+</database>

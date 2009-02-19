@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
+import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
 
@@ -15,15 +16,15 @@ import org.epics.ioc.pdrv.User;
  * @author mrk
  *
  */
-public class Int32InterposeBase extends AbstractInterface implements Int32 {
+public class Int32InterposeBase extends AbstractInt32 {
     private Int32 int32;
     
     /**
      * Constructor
      * @param int32 The interface to the lower level implementation.
      */
-    protected Int32InterposeBase(Int32 int32) {
-    	super(int32.getDevice(),int32.getInterfaceName());
+    protected Int32InterposeBase(Device device,Int32 int32) {
+    	super(device);
         this.int32 = int32;
     }
     /* (non-Javadoc)

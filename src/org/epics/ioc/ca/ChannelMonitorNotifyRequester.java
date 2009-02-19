@@ -17,4 +17,8 @@ public interface ChannelMonitorNotifyRequester extends Requester{
      * A monitor event has occured.
      */
     void monitorEvent();
+    /**
+     * unlisten 
+     */
+    void unlisten();
 }

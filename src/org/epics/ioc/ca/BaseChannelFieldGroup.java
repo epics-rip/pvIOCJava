@@ -39,7 +39,7 @@ public class BaseChannelFieldGroup implements ChannelFieldGroup {
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelFieldGroup#getArray()
      */
-    public ChannelField[] getArray() {
+    public synchronized ChannelField[] getArray() {
         int length = fieldList.size();
         ChannelField[] channelFields = new ChannelField[length];
         for(int i=0; i<length; i++) {

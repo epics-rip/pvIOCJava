@@ -14,7 +14,12 @@ import org.epics.pvData.pv.PVDoubleArray;
  * @author mrk
  *
  */
-public interface Float64Array extends Interface, PVDoubleArray{
+public interface Float64Array extends Interface {
+    /**
+     * Get the interface to the data.
+     * @return The interface.
+     */
+    PVDoubleArray getPVDoubleArray();
     /**
      * Start a read.
      * @param user The user
@@ -53,4 +58,8 @@ public interface Float64Array extends Interface, PVDoubleArray{
      * @return If the request fails, than user.message() describes the problem.
      */
     Status removeInterruptUser(User user,Float64ArrayInterruptListener float64ArrayListener);
+    /**
+     * An interrupt has occured.
+     */
+    void interruptOccured();
 }

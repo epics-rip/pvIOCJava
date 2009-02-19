@@ -5,33 +5,28 @@
  */
 package org.epics.ioc.pdrv.interfaces;
 
+import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.User;
-import org.epics.pvData.pv.IntArrayData;
+import org.epics.pvData.pv.PVIntArray;
 
 /**
- * Base for interposing a Int32Array.
- * @param int32Array The interface to the lower level implementation.
+ * Base for interposing an Int32Array
  * @author mrk
  *
  */
-public class Int32ArrayInterposeBase extends AbstractArrayInterface implements Int32Array {
+public class Int32ArrayInterposeBase extends AbstractInt32Array {
     private Int32Array int32Array;
     
     /**
      * Constructor
-     * @param arg The interface to the lower level implementation.
+     * @param pvIntArray data array.
+     * @param device The device.
+     * @param int32Array The lower level interface.
      */
-    protected Int32ArrayInterposeBase(Int32Array arg) {
-        super(arg.getParent(),arg.getArray(),
-        		arg.getDevice(),arg.getInterfaceName());
-        this.int32Array = arg;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVIntArray#share(org.epics.ioc.pv.PVIntArray)
-     */
-    public boolean share(int[] value, int length) {
-        return false;
+    protected Int32ArrayInterposeBase(PVIntArray pvIntArray,Device device,Int32Array int32Array) {
+        super(pvIntArray,device);
+        this.int32Array = int32Array;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endRead(org.epics.ioc.pdrv.User)
@@ -68,29 +63,5 @@ public class Int32ArrayInterposeBase extends AbstractArrayInterface implements I
      */
     public Status removeInterruptUser(User user, Int32ArrayInterruptListener int32ArrayListener) {
         return int32Array.removeInterruptUser(user, int32ArrayListener);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.Interface#getInterfaceName()
-     */
-    public String getInterfaceName() {
-        return int32Array.getInterfaceName();
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVIntArray#get(int, int, org.epics.ioc.pv.IntArrayData)
-     */
-    public int get(int offset, int len, IntArrayData data) {
-        return int32Array.get(offset, len, data);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.PVIntArray#put(int, int, double[], int)
-     */
-    public int put(int offset, int len, int[] from, int fromOffset) {
-        return int32Array.put(offset, len, from, fromOffset);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pv.AbstractPVArray#setCapacity(int)
-     */
-    public void setCapacity(int capacity) {
-        int32Array.setCapacity(capacity);
     }
 }

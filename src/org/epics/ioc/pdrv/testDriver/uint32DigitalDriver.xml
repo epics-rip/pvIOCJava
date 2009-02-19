@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <structure name = "uint32DigitalDriver">
-     <field name = "delay" type = "double" />
-    <field name = "numberRegisters" type = "int" default = "1" />
+     <scalar name = "delay" type = "double" />
+    <scalar name = "numberRegisters" type = "int" default = "1" >1</scalar>
 </structure>
 
-</IOCDatabase>
+</database>

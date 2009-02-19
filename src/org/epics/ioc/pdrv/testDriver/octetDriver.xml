@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <structure name = "octetDriver">
-    <field name = "delay" type = "double" />
+    <scalar name = "delay" type = "double" />
 </structure>
 
-</IOCDatabase>
+</database>

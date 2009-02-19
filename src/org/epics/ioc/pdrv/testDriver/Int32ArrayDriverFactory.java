@@ -14,6 +14,7 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractInt32Array;
+import org.epics.pvData.factory.BasePVIntArray;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.Array;
@@ -23,6 +24,7 @@ import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVIntArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Structure;
@@ -135,7 +137,8 @@ public class Int32ArrayDriverFactory {
                 this.device = device;
                 trace = device.getTrace();
                 Array array = fieldCreate.createArray("drvPrivate", ScalarType.pvInt);
-                new Int32ArrayImpl(parent,array,device);
+                PVIntArray pvIntArray = new PVIntArrayImpl(parent,array,device);
+                new Int32ArrayImpl(pvIntArray,device);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -171,24 +174,9 @@ public class Int32ArrayDriverFactory {
             }
             
             private class Int32ArrayImpl extends AbstractInt32Array{
-                private int[] value = new int[0];
                 
-                private Int32ArrayImpl(PVStructure parent,Array array,Device device) {
-                    super(parent,array,0,true,device);
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.pv.AbstractPVArray#setCapacity(int)
-                 */
-                public void setCapacity(int len) {
-                    if(!capacityMutable) {
-                        super.message("not capacityMutable", MessageType.error);
-                        return;
-                    }
-                    if(length>len) length = len;
-                    int[]newarray = new int[len];
-                    if(length>0) System.arraycopy(value,0,newarray,0,length);
-                    value = newarray;
-                    capacity = len;
+                private Int32ArrayImpl(PVIntArray pvIntArray,Device device) {
+                    super(pvIntArray,device);
                 }
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.AbstractInt32Array#startRead(org.epics.ioc.pdrv.User)
@@ -213,7 +201,7 @@ public class Int32ArrayDriverFactory {
                         trace.print(Trace.ERROR,device.getFullName() + " startWrite but not connected");
                         return Status.error;
                     }
-                    if(!super.isMutable()) {
+                    if(!super.getPVIntArray().isMutable()) {
                         trace.print(Trace.ERROR,device.getFullName() + " put but notMutable");
                         user.setMessage("not mutable");
                         return Status.error;
@@ -225,6 +213,32 @@ public class Int32ArrayDriverFactory {
                     }
                     return super.startWrite(user);
                 }              
+            }
+            
+            private class PVIntArrayImpl extends BasePVIntArray{
+                private Device device;
+                
+                private PVIntArrayImpl(PVStructure parent,Array array,Device device) {
+                    super(parent,array);
+                    this.device = device;
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.factory.BasePVIntArray#setCapacity(int)
+                 */
+                public void setCapacity(int len) {
+                    if(!capacityMutable) {
+                        super.message("not capacityMutable", MessageType.error);
+                        return;
+                    }
+                    if(length>len) length = len;
+                    int[]newarray = new int[len];
+                    if(length>0) System.arraycopy(value,0,newarray,0,length);
+                    value = newarray;
+                    capacity = len;
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.factory.BasePVIntArray#get(int, int, org.epics.pvData.pv.IntArrayData)
+                 */
                 public int get(int offset,int len, IntArrayData data) {
                     if(!device.isConnected()) {
                         trace.print(Trace.ERROR,device.getFullName() + " get but not connected");
@@ -244,7 +258,9 @@ public class Int32ArrayDriverFactory {
                     data.offset = offset;
                     return n;
                 }
-                
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.factory.BasePVIntArray#put(int, int, int[], int)
+                 */
                 public int put(int offset, int len, int[] from, int fromOffset) {
                     if(!super.isMutable()) {
                         return 0;
@@ -273,13 +289,6 @@ public class Int32ArrayDriverFactory {
                     }
                     System.arraycopy(from,fromOffset,value,offset,len);                       
                     return len;
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.pv.AbstractPVField#toString(int)
-                 */
-                public String toString(int indentLevel) {
-                    return convert.getString(this, indentLevel)
-                    + super.toString(indentLevel);
                 }
             }
         }

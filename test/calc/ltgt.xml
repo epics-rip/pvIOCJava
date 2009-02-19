@@ -26,12 +26,10 @@
          (a&lt;b &amp;&amp; a&lt;=a &amp;&amp; c&lt;d &amp;&amp; d&lt;=d)
        &amp;&amp;
        (b&gt;a &amp;&amp; b&gt;=b &amp;&amp; d&gt;c &amp;&amp; d&gt;=d)
-        </expression>
          </scalar>
        </structure>
     </structure>
     <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -53,8 +51,8 @@
        </structure>
     </structure>
     <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "processAfterStart">true</scalar>
+   </structure>
     <include href = "checkLink.xml" />
 </record>
 <include href = "checkBoolean.xml" />

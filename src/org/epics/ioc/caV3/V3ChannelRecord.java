@@ -8,7 +8,6 @@ package org.epics.ioc.caV3;
 import gov.aps.jca.dbr.DBR;
 import gov.aps.jca.dbr.DBRType;
 
-import org.epics.ioc.ca.ChannelMonitorRequester;
 import org.epics.pvData.pv.PVRecord;
 
 
@@ -29,9 +28,8 @@ public interface V3ChannelRecord {
      */
     DBRType getNativeDBRType();
     /**
-     * Update the DBRecord with data from a DBR.
+     * Update the PVRecord with data from a DBR.
      * @param fromDBR The DBR that holds the new data.
-     * @param channelMonitorRequester channelMonitorRequester or null.
      */
-    void toRecord(DBR fromDBR,ChannelMonitorRequester channelMonitorRequester);
+    void toRecord(DBR fromDBR);
 }

@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2008.09.23 </h1>
+2009.02.18 </h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -28,69 +28,41 @@ interface called Support. One of the methods of Support is named process.
 When a process request is made the process method of each field support is
 called. Support is what makes the database a "smart" database.</p>
 
-<p>An Extensible Markup Language (XML) parser is provided for creating a
-JavaIOC Database (DB). The DB contains definitions of the following:
-structure, support, create, and record instance. A structure defines an
-ordered set of fields. A support provides the name of a Java factory that
-creates support for a field. A create provides the name of a Java factory
-that replaces the default PVField implementation for a field..</p>
+<p>The JavaIOC project uses project PVData, which provides the database and
+Channel Access. This package assumes that you are familiar with PVData.</p>
 
-<p>A simple example of a record instance is:</p>
+<p>An Extensible Markup Language (XML) parser is provided with PVData for
+creating a Database (DB). The JavaIOC adds support that allows a PV Database
+to become a smart soft realtime database. The JavaIOC attaches support code
+to every record and optionally to any field of a record. The support is
+configured via xml definitions. A structure defining support provides the
+name of a Java factory that creates support for a field.</p>
+
+<p>The pvData overview gives a simple example of a record instance is:</p>
 <pre>&lt;record name = "simple"&gt;
-  &lt;value type = "double" /&gt;
+  &lt;scalar name = "value" type = "double" /&gt;
 &lt;/record&gt;</pre>
 
-<p>This is actually the same as:</p>
-<pre>&lt;record name = "simple" structureName = "generic"&gt;
-  &lt;value type = "double"/&gt;
+<p>For the JavaIOC, this is actually the same as if the following was
+defined.</p>
+<pre>&lt;record name = "simple" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "value" type = "double"/&gt;
 &lt;/record&gt;</pre>
 
-<p>When the parser reads the XML record tag, it looks for a structure named
-generic in the database. This structure has the definition:</p>
-<pre>&lt;structure name = "generic" supportName = "generic" /&gt;
-&lt;support name = "generic"
-   factoryName = "org.epics.ioc.support.basic.GenericFactory" /&gt;</pre>
+<p>When the ioc is started it looks for support. If it does not find support
+for a record itseld, it assigns generic support to it. The definition for
+generic is:</p>
+<pre>&lt;structure name = "genericFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.GenericFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "generic"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+&lt;/structure&gt;</pre>
 
 <p>Thus generic is a structure that has no fields and support named generic.
-The parser creates a new record consisting of a structure with no fields.
-When it reads the XML <span style="font-family:courier">value</span> tag it
-looks to see if it is already in the current structure. It is not found so it
-looks for an XML attribute named <span
-style="font-family:courier">type</span>. It finds it, creates a field named
-value with type double and appends the field to the current stucture. Since
-the next XML tag is the closing record tag, the result is a record with a
-single field named value.</p>
-
-<p>As a more complicated example consider the following:</p>
-<pre>&lt;record name = "notQuiteAsSimple"&gt;
-    &lt;value type = "double" /&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;display structureName = "display" /&gt;
-    &lt;input structureName = "inputSupport"&gt;
-        &lt;pvname&gt;somePV&lt;/pvname&gt;
-    &lt;/input&gt;
-    &lt;scan structureName = "scan"&gt;
-        &lt;type&gt;&lt;choice&gt;periodic&lt;/choice&gt;&lt;/type&gt;
-        &lt;rate&gt;1.0&lt;/rate&gt;
-    &lt;/scan&gt;
-&lt;/record&gt;</pre>
-
-<p>This example has the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>A scalar field of type double</dd>
-  <dt style="font-family: courier;">alarm</dt>
-    <dd>A structure field with support for alarms.</dd>
-  <dt style="font-family: courier;">timeStamp</dt>
-    <dd>A structure that holds a timeStamp.</dd>
-  <dt style="font-family: courier;">input</dt>
-    <dd>A structure with support that reads data from another record named
-      somePV.</dd>
-  <dt style="font-family: courier;">scan</dt>
-    <dd>A structure with support that will ask this record to process once a
-      second.</dd>
-</dl>
+</p>
 
 <p>This document has three parts:</p>
 <ul>
@@ -117,61 +89,33 @@ single field named value.</p>
       <li><a href="#Package">Package Summary</a>
         <ul>
           <li><a href="#default">default - JavaIOC/src</a></li>
-          <li><a href="#org.epics.">org.epics.ioc.swtshell </a></li>
-          <li><a href="#JavaIOC">JavaIOC/dbd</a></li>
+          <li><a href="#org.epics.">org.epics.ioc </a></li>
+          <li><a href="#org.epics.1">org.epics.ioc.swtshell </a></li>
+          <li><a href="#JavaIOC">JavaIOC/xml</a></li>
           <li><a href="#JavaIOC1">JavaIOC/example</a></li>
-          <li><a href="#org.epics.1">org.epics.ioc.pv </a></li>
           <li><a href="#JavaIOC2">JavaIOC/test</a></li>
-          <li><a href="#org.epics.2">org.epics.ioc.db </a></li>
-          <li><a href="#org.epics.3">org.epics.ioc.support </a></li>
-          <li><a href="#org.epics.4">org.epics.ioc.support.basic </a></li>
-          <li><a href="#org.epics.5">org.epics.ioc.support.alarm </a></li>
-          <li><a href="#org.epics.6">org.epics.ioc.support.ca </a></li>
-          <li><a href="#org.epics.7">org.epics.ioc.support.calc </a></li>
-          <li><a href="#org.epics.8">org.epics.ioc.support.device </a></li>
-          <li><a href="#org.epics.9">org.epics.ioc.ca </a></li>
-          <li><a href="#org.epics.10">org.epics.ioc.caV3 </a></li>
-          <li><a href="#org.epics.11">org.epics.ioc.util </a></li>
-          <li><a href="#org.epics.12">org.epics.ioc.create </a></li>
-          <li><a href="#org.epics.13">org.epics.ioc.pdrv </a></li>
-          <li><a href="#org.epics.14">org.epics.ioc.pdrv.interfaces </a></li>
-          <li><a href="#org.epics.15">org.epics.ioc.pdrv.testDriver </a></li>
-          <li><a href="#org.epics.16">org.epics.ioc.pdrv.vxi11 </a></li>
+          <li><a href="#org.epics.2">org.epics.ioc.support </a></li>
+          <li><a href="#org.epics.3">org.epics.ioc.support.basic </a></li>
+          <li><a href="#org.epics.4">org.epics.ioc.support.alarm </a></li>
+          <li><a href="#org.epics.5">org.epics.ioc.support.ca </a></li>
+          <li><a href="#org.epics.6">org.epics.ioc.support.calc </a></li>
+          <li><a href="#org.epics.7">org.epics.ioc.support.device </a></li>
+          <li><a href="#org.epics.8">org.epics.ioc.ca </a></li>
+          <li><a href="#org.epics.9">org.epics.ioc.caV3 </a></li>
+          <li><a href="#org.epics.10">org.epics.ioc.util </a></li>
+          <li><a href="#org.epics.11">org.epics.ioc.create </a></li>
+          <li><a href="#org.epics.12">org.epics.ioc.pdrv </a></li>
+          <li><a href="#org.epics.13">org.epics.ioc.pdrv.interfaces </a></li>
+          <li><a href="#org.epics.14">org.epics.ioc.pdrv.testDriver </a></li>
+          <li><a href="#org.epics.15">org.epics.ioc.pdrv.vxi11 </a></li>
         </ul>
       </li>
-      <li><a href="#Database">Database Syntax</a>
-        <ul>
-          <li><a href="#Database1">Database Definition</a>
-            <ul>
-              <li><a href="#Basic">Basic Syntax</a></li>
-              <li><a href="#Field">Field Syntax</a></li>
-              <li><a href="#Example">Example structure, create, and support
-                Definitions</a></li>
-            </ul>
-          </li>
-          <li><a href="#Record">Record Instance Definition</a>
-            <ul>
-              <li><a href="#Syntax">Syntax</a></li>
-              <li><a href="#Example1">Example</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><a href="#PVData">PVData</a>
-        <ul>
-          <li><a href="#Field1">Field Types</a></li>
-          <li><a href="#PVData1">PVData Reflection</a></li>
-          <li><a href="#PVData2">PVData Interfaces</a></li>
-          <li><a href="#Example2">Example: Database Access via
-          Reflection</a></li>
-        </ul>
-      </li>
-      <li><a href="#Data">DB Data</a></li>
+      <li><a href="#Database">Database Syntax For JavaIOC</a></li>
       <li><a href="#Channel">Channel Access</a></li>
-      <li><a href="#Record1">Record Processing</a></li>
-      <li><a href="#Database2">Database Examples</a>
+      <li><a href="#Record">Record Processing</a></li>
+      <li><a href="#Database1">Database Examples</a>
         <ul>
-          <li><a href="#Record2">Record Instance Examples</a>
+          <li><a href="#Record1">Record Instance Examples</a>
             <ul>
               <li><a href="#doubleInpu">doubleInput</a></li>
               <li><a href="#doubleOutp">doubleOutput</a></li>
@@ -191,37 +135,29 @@ single field named value.</p>
       <li><a href="#Summary">Summary</a></li>
       <li><a href="#JavaIOC3">JavaIOC Data Model</a>
         <ul>
-          <li><a href="#Basic1">Basic Concept</a></li>
-          <li><a href="#getPropety">getPropety</a></li>
+          <li><a href="#Basic">Basic Concept</a></li>
+          <li><a href="#PVPropety">PVPropety</a></li>
         </ul>
       </li>
-      <li><a href="#Definition">Definitions for Standard Properties</a>
-        <ul>
-          <li><a href="#timeStamp">timeStamp</a></li>
-          <li><a href="#alarm">alarm</a></li>
-          <li><a href="#display">display</a></li>
-          <li><a href="#control">control</a></li>
-          <li><a href="#history">history</a></li>
-        </ul>
-      </li>
+      <li><a href="#Definition">Definitions for Standard Properties</a></li>
     </ul>
   </li>
   <li><a href="#Part2">Part III: JavaIOC - Database Definition</a>
     <ul>
       <li><a href="#Overview1">Overview Of Part III</a></li>
-      <li><a href="#JavaIOC4">JavaIOC/dbd</a>
+      <li><a href="#JavaIOC4">JavaIOC/xml/structures.xml</a>
         <ul>
           <li><a href="#dbd.xml">dbd.xml</a></li>
         </ul>
       </li>
-      <li><a href="#structure">dbd/structure/alarm.xml</a>
+      <li><a href="#structure">xml/structure/alarm.xml</a>
         <ul>
           <li><a href="#numeric">numeric alarms</a></li>
           <li><a href="#boolean">boolean alarms</a></li>
           <li><a href="#enumerated">enumerated alarms</a></li>
         </ul>
       </li>
-      <li><a href="#structure1">dbd/structure/analog.xml</a>
+      <li><a href="#structure1">xml/structure/analog.xml</a>
         <ul>
           <li><a href="#linearConv">linearConvert</a></li>
           <li><a href="#linearConv1">linearConvertInput</a></li>
@@ -248,18 +184,14 @@ single field named value.</p>
           <li><a href="#digital">digital</a></li>
         </ul>
       </li>
-      <li><a href="#structures">dbd/structures/display.xml</a></li>
-      <li><a href="#structure12">dbd/structure/enumerated.xml</a></li>
       <li><a href="#structure5">dbd/structure/event.xml</a></li>
-      <li><a href="#structure7">dbd/structure/generic.xml</a></li>
-      <li><a href="#structure8">dbd/structure/limit.xml</a></li>
+      <li><a href="#structure6">dbd/structure/generic.xml</a></li>
       <li><a href="#structure13">dbd/structure/portDriver.xml</a>
         <ul>
           <li><a href="#pdrvSuppor">pdrvSupport</a></li>
         </ul>
       </li>
       <li><a href="#recordType7">dbd/recordType/processControl.xml</a></li>
-      <li><a href="#structure6">dbd/structure/supportArray.xml</a></li>
       <li><a href="#structure12">dbd/structure/supportState.xml</a></li>
     </ul>
   </li>
@@ -300,64 +232,56 @@ have support.</p>
 have eclipse installed and have imported JavaIOC into a project named
 "JavaIOC".</p>
 
-<p>In order to use the examples in the JavaIOC, the environment variable
-JAVAIOC must be defined so that it references the JavaIOC project. For
-example on linux define:</p>
-<pre>export JAVAIOC=${HOME}/workspace/JavaIOC</pre>
+<p>In order to use the examples in the JavaIOC, the environment variables
+PVDATA and JAVAIOC must be defined. For example on linux define:</p>
+<pre>export PVDATA=${HOME}/workspace/pvData
+export JAVAIOC=${HOME}/workspace/javaIOC</pre>
 
-<p>The default package ( <span
-style="font-family: courier;">JavaIOC/src</span> ) has a Java program, <span
-style="font-family: courier;">XMLToDatabase</span>, that:</p>
+<p>Package <span style="font-family: courier;">org.epics.ioc</span> has a
+Java program, <span style="font-family: courier;">Start</span>, that:</p>
+
+<p>Start does the following:</p>
 <ul>
   <li>Reads Database files.</li>
-  <li>Dumps the resulting DBD and DB definitions.</li>
+  <li>Dumps the resulting structure and record definitions.</li>
   <li>Starts servers.</li>
-  <li>Starts an ioc.</li>
   <li>Invokes swtshell, which is a Graphical User Interface (GUI) shell that
     interacts with a running JavaIOC.</li>
 </ul>
 
-<p>Run <span
-style="font-family: courier;">${JavaIOC}/src/XMLToDatabase</span> as an <span
-style="font-weight:bold;">eclipse SWT application.</span></p>
-
-<p>The arguments to XMLToDatabase can be any combination of:</p>
+<p>The arguments to Start can be any combination of:</p>
 <ul>
-  <li>-db <br />
+  <li>-pv <br />
     followed by filenames of files containing XML database definitions.<br />
   </li>
-  <li>-dumpDBD<br />
+  <li>-dumpStructures<br />
     dump the structure, create, and support definitions</li>
   <li>-dumpRecords<br />
     dump the record instances</li>
   <li>-server 
     <p>followed by a filenames. Each field is a list of servers to start.</p>
   </li>
-  <li>-startIOC<br />
-    Starts a JavaIOC.</li>
   <li>-swtshell<br />
     Start swtshell.</li>
 </ul>
 
 <p>For example:</p>
-<pre>    -db dbd/dbd.xml example/exampleDB.xml -dumpDBD -dumpDB</pre>
+<pre>    -pv xml/structures.xml example/exampleDB.xml -dumpStructures -dumpRecords</pre>
 
-<p>Reads a set of database definition and record instance files and then
-dumps the database definitions and record instances.</p>
+<p>Reads a set of files creating structures and records and then dumps the
+structures and records.</p>
 
 <p>As a first example specify the arguments as:</p>
-<pre>    -db dbd/dbd.xml example/exampleDB.xml \
+<pre>    -pv xml/structures.xml example/exampleDB.xml \
     -server server/beforeStartIOC.txt \
-    -startIOC \
-    -server server/afterStartIOC.txt \
-    -swtshell</pre>
+    -swtshell \
+    -server server/afterStartIOC.txt </pre>
 
 <p>This:</p>
 <ul>
-  <li>Loads a set of structure, create, and support definitions and then a
-    set of record instances.</li>
+  <li>Loads a set of structures then a set of record instances.</li>
   <li>Starts a ChannelAccess Client that communicates with EPICS IOCs.</li>
-  <li>Starts the JavaIOC.</li>
+  <li>Starts the swtshell and also starts the ioc.</li>
   <li>Starts a Channel Access server for EPICS Channel Access clients.</li>
   <li>Starts the swtshell.</li>
 </ul>
@@ -474,15 +398,17 @@ has a package.html overview document. The packages that currently exists
 are:</p>
 
 <h4 id="default">default - JavaIOC/src</h4>
-
-<p>This package contains:</p>
 <ul>
-  <li>The overview package.html document you are now reading.</li>
-  <li>XMLToDatabase, which is the example program which was discussed in the
-    getting started section.</li>
+  <li>This package contains the overview package.html document you are now
+    reading.</li>
 </ul>
 
 <h4 id="org.epics."><a
+href="org/epics/ioc/package-summary.html">org.epics.ioc</a> </h4>
+
+<p>This package has the Start class.</p>
+
+<h4 id="org.epics.1"><a
 href="org/epics/ioc/swtshell/package-summary.html">org.epics.ioc.swtshell</a>
 </h4>
 
@@ -490,26 +416,15 @@ href="org/epics/ioc/swtshell/package-summary.html">org.epics.ioc.swtshell</a>
 Toolkit. Getting Started explains how to invoke it. See the package overview
 for a description of swtshell.</p>
 
-<h4 id="JavaIOC">JavaIOC/dbd</h4>
+<h4 id="JavaIOC">JavaIOC/xml</h4>
 
-<p>This directory and it's sub-directories, provides database definition
-files for the recordTypes and support supplied with the JavaIOC. part III
-describes these files.</p>
+<p>This directory and the structures subdirectory contains the xml structure
+definitions for the JavaIOC. It also loads the xml definitions from
+PVData.</p>
 
 <h4 id="JavaIOC1">JavaIOC/example</h4>
 
 <p>This directory contains the example xml files.</p>
-
-<h4 id="org.epics.1"><a
-href="org/epics/ioc/pv/package-summary.html">org.epics.ioc.pv</a> </h4>
-
-<p>A JavaIOC has a Process Variable (PV) Database, which is a "smart" real
-time database. It is smart because each record instance has processing
-code.</p>
-
-<p>This package defines definitions for the data that JavaIOC supports. This
-is a combination of data and reflection interfaces. Read the package overview
-for details. A brief description appears below.</p>
 
 <h4 id="JavaIOC2">JavaIOC/test</h4>
 
@@ -518,29 +433,6 @@ the JavaIOC code. They are also a good example of how to create record
 instances.</p>
 
 <h4 id="org.epics.2"><a
-href="org/epics/ioc/db/package-summary.html">org.epics.ioc.db</a> </h4>
-
-<p>This package provides a factory for creating JavaIOC databases. It
-provides methods so that:</p>
-<ul>
-  <li>Database Definitions (DBD) can be accessed. A DBD is one of the
-    following: 
-    <ul>
-      <li>structure - an ordered set of fields</li>
-      <li>create - A factory that replaces the default implementation for a
-        PVField.</li>
-      <li>support - A factory that creates support for a field. </li>
-    </ul>
-  </li>
-  <li>Support can be attached to records and fields.</li>
-  <li>Record instances can be locked.</li>
-  <li>Fields of records can be monitored for changes.</li>
-</ul>
-
-<p>This package implements an XML parser that creates record instances and
-puts them into an IOC Database (IOCDB).</p>
-
-<h4 id="org.epics.3"><a
 href="org/epics/ioc/support/package-summary.html">org.epics.ioc.support</a>
 </h4>
 
@@ -549,26 +441,26 @@ The subpackages of this package provide support that uses the framework. Each
 record instance must have associated support and each field of a record
 instance can optionally have support. </p>
 
-<h4 id="org.epics.4"><a
+<h4 id="org.epics.3"><a
 href="org/epics/ioc/support/basic/package-summary.html">org.epics.ioc.support.basic</a>
 </h4>
 
 <p>This provides basic support such as noop, generic, etc.</p>
 
-<h4 id="org.epics.5"><a
+<h4 id="org.epics.4"><a
 href="org/epics/ioc/support/alarm/package-summary.html">org.epics.ioc.support.alarm</a>
 </h4>
 
 <p>This provides support for alarms.</p>
 
-<h4 id="org.epics.6"><a
+<h4 id="org.epics.5"><a
 href="org/epics/ioc/support/ca/package-summary.html">org.epics.ioc.support.ca</a>
 </h4>
 
 <p>This provides for channel access links, i.e. it allows records to
 get/put/monitor data in other records.</p>
 
-<h4 id="org.epics.7"><a
+<h4 id="org.epics.6"><a
 href="org/epics/ioc/support/calc/package-summary.html">org.epics.ioc.support.calc</a>
 </h4>
 
@@ -577,18 +469,18 @@ produces a result that is assigned to a value field. Included is support
 named expressionCalculator, which supports scalar expressions that have
 standard Java syntax.</p>
 
-<h4 id="org.epics.8"><a
+<h4 id="org.epics.7"><a
 href="org/epics/ioc/support/device/package-summary.html">org.epics.ioc.support.device</a>
 </h4>
 
 <p>This contains examples of support for "device" abstractions.</p>
 
-<h4 id="org.epics.9"><a
+<h4 id="org.epics.8"><a
 href="org/epics/ioc/ca/package-summary.html">org.epics.ioc.ca</a> </h4>
 
 <p>This package is Channel Access for a JavaIOC.</p>
 
-<h4 id="org.epics.10"><a
+<h4 id="org.epics.9"><a
 href="org/epics/ioc/caV3/package-summary.html">org.epics.ioc.caV3</a> </h4>
 
 <p>This package is Channel Access V3, e.g. channel access Version 3. Server
@@ -596,7 +488,7 @@ support was implemented by Matej Sekoranja (COSYLAB). Client support is also
 implemented. Both the client and server require JCA/CAJ, which is supplied by
 COSYLAB..</p>
 
-<h4 id="org.epics.11"><a
+<h4 id="org.epics.10"><a
 href="org/epics/ioc/util/package-summary.html">org.epics.ioc.util</a> </h4>
 This package provides utility code for a JavaIOC: 
 <dl>
@@ -618,7 +510,7 @@ This package provides utility code for a JavaIOC:
       implements macro substitution and include.</dd>
 </dl>
 
-<h4 id="org.epics.12"><a
+<h4 id="org.epics.11"><a
 href="org/epics/ioc/create/package-summary.html">org.epics.ioc.create</a>
 </h4>
 
@@ -627,7 +519,7 @@ field is declared to have a createName. Support that implements Create
 replaces the data interface for the field at the time the field is
 created.</p>
 
-<h4 id="org.epics.13"><a
+<h4 id="org.epics.12"><a
 href="org/epics/ioc/pdrv/package-summary.html">org.epics.ioc.pdrv</a> </h4>
 
 <p>These packages implement portDriver, which is support for accessing and
@@ -635,19 +527,19 @@ controlling hardware. It is modeled after the EPICS asynDriver and thus
 provides support for synchronous and asynchronous devices. Each device is
 accessed via a port. Each port provides access to one or more devices.</p>
 
-<h4 id="org.epics.14"><a
+<h4 id="org.epics.13"><a
 href="org/epics/ioc/pdrv/interfaces/package-summary.html">org.epics.ioc.pdrv.interfaces</a>
 </h4>
 
 <p>This directory defines the interfaces for portDriver.</p>
 
-<h4 id="org.epics.15"><a
+<h4 id="org.epics.14"><a
 href="org/epics/ioc/pdrv/testDriver/package-summary.html">org.epics.ioc.pdrv.testDriver</a>
 </h4>
 
 <p>This directory contains test port drivers.</p>
 
-<h4 id="org.epics.16"><a
+<h4 id="org.epics.15"><a
 href="org/epics/ioc/pdrv/vxi11/package-summary.html">org.epics.ioc.pdrv.vxi11</a>
 </h4>
 
@@ -657,372 +549,18 @@ href="org/epics/ioc/pdrv/vxi11/package-summary.html">org.epics.ioc.pdrv.vxi11</a
 <hr />
 <hr />
 
-<h3 style="text-align: center" id="Database">Database Syntax</h3>
+<h3 style="text-align: center" id="Database">Database Syntax For JavaIOC</h3>
 <hr />
 
-<p>The syntax for both Database Definitions (structure, create, and support)
-and record instances is XML based. In addition XML based macro substitution
-and include is supported. Package <span><a
-href="org/epics/ioc/db/package-summary.html">org.epics.ioc.db</a></span>
-describes the XML syntax. This section provides a brief tutorial.</p>
+<p>The syntax for both structure and record definitions XML based. In
+addition XML based macro substitution and include is supported. Projet PVData
+describes the XML syntax. This section gives definitions for a JavaIOC
+application.</p>
 
-<h4 style="text-align: center" id="Database1">Database Definition</h4>
-
-<h5 id="Basic">Basic Syntax</h5>
-
-<p>Database definitions consist of the following definition types: <span
-style="font-family: courier;"></span> <span
-style="font-family: courier;">structure</span>, <span
-style="font-family: courier;">create</span>, and <span
-style="font-family: courier;">support</span></p>
-
-<p>An example structure definition is:</p>
-<pre>    &lt;structure name = "doubleLimit"&gt;
-        &lt;field name = "low" type = "double" /&gt;
-        &lt;field name = "high" type = "double" /&gt;
-    &lt;/structure&gt;</pre>
-
-<h5 id="Field">Field Syntax</h5>
-
-<p>A structure definition defines a set of field definitions. A field
-definition has the format:</p>
-<pre>    &lt;field name = "value"  ...&gt;</pre>
-where "..." represents other attributes. The basic attributes are: 
-<dl>
-  <dt style="font-family: courier;">name</dt>
-    <dd>the field name. This must be defined.</dd>
-  <dt style="font-family: courier;">type</dt>
-    <dd>The field type must be one of:<br />
-      boolean,byte,short,int,long,float,double,string,enum,menu,link,structure,array.
-      If thus name,value pair is not present than either structureName or
-      elementType must be defined.</dd>
-  <dt style="font-family: courier;">createName</dt>
-    <dd>The name of a create. A create is called at the time a field is being
-      created. Normally it replaces the default data implementation.</dd>
-  <dt style="font-family: courier;">supportName</dt>
-    <dd>The name of support for the field. A matching support definition must
-      be available during IOC initialization.</dd>
-  <dt style="font-family: courier;">structureName</dt>
-    <dd>Can be given if the type is structure. If not given the structure
-      must be specified when a field instance is created. If this is given
-      and type is not specified the type is "structure".</dd>
-  <dt style="font-family: courier;">elementType</dt>
-    <dd>Must be specified if the type is array. It can be any of the
-      supported types. If this is given and type is not specified the type is
-      "array".</dd>
-</dl>
-
-<p>Additional name/value pairs will be saved by the parser as PVAttributes
-for the field. The following are recognized by the JavaIOC database.</p>
-<dl>
-  <dt><span style="font-family: courier">default</span></dt>
-    <dd>Default value for an instance of this field, using the Record
-      Instance Syntax. A default can only be specified if the field type is
-      primitive or string. If a default is not specified, the field will
-      initialize to all zero bits.</dd>
-  <dt><span style="font-family: courier">readonly</span></dt>
-    <dd>Can this field be modified via channel access? If not the field is
-      not modifable at run time or is handled by database access. Takes the
-      value false if not specified.</dd>
-</dl>
-
-<h5 id="Example">Example structure, create, and support Definitions</h5>
-
-<p>The third part of this document provides the definitions supported by the
-JavaIOC. Look at it for examples.</p>
-
-<h4 style="text-align: center" id="Record">Record Instance Definition</h4>
-
-<h5 id="Syntax">Syntax</h5>
-
-<p>The syntax for a record instance is:</p>
-<pre>&lt;record name = "recordName" structureName = "structureName" supportName = "supportName"&gt;
-    &lt;!-- fieldAssignment --&gt;
-    ...
-&lt;/record&gt;</pre>
-
-<p>If structureName is not specified "generic" is assumed. If supportName is
-not specified the support defined in structureName is used.</p>
-
-<p>A <span style="font-family: courier">fieldAssignment</span> has the
-format:</p>
-<pre>    &lt;fieldName ...&gt;
-        &lt;!-- initializer --&gt;
-    &lt;/fieldName&gt;</pre>
-
-<p>If the fieldName already exists in the current structure it's definition
-is used. If it does not exist a new field is created and appended to the
-current structure. To create a new field one of the following attributes must
-be specified: type, structureName, or elementType. They have the same syntax
-and meaning as for defining a DBD structure.</p>
-
-<h5 id="Example1">Example</h5>
-<pre>&lt;record name = "double01"&gt;
-    &lt;value type = "double" /&gt;
-    &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
-        &lt;pvname&gt;counterCounter&lt;/pvname&gt;
-        &lt;process&gt;false&lt;/process&gt;
-    &lt;/input&gt;
-    &lt;valueAlarm structureName = "doubleAlarm"&gt;
-          &lt;active&gt;true&lt;/active&gt;
-          &lt;interval&gt;
-              &lt;element structureName = "doubleAlarmInterval"&gt;
-                  &lt;value&gt;2.0&lt;/value&gt;
-                  &lt;severity&gt;&lt;choice&gt;major&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/element&gt;
-              &lt;element structureName = "doubleAlarmInterval"&gt;
-                  &lt;value&gt;4.0&lt;/value&gt;
-                  &lt;severity&gt;&lt;choice&gt;minor&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/element&gt;
-              &lt;element structureName = "doubleAlarmInterval"&gt;
-                  &lt;value&gt;6.0&lt;/value&gt;
-                  &lt;severity&gt;&lt;choice&gt;none&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/element&gt;
-              &lt;element structureName = "doubleAlarmInterval"&gt;
-                  &lt;value&gt;8.0&lt;/value&gt;
-                  &lt;severity&gt;&lt;choice&gt;minor&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/element&gt;
-              &lt;element structureName = "doubleAlarmInterval"&gt;
-                  &lt;value&gt;10.0&lt;/value&gt;
-                  &lt;severity&gt;&lt;choice&gt;major&lt;/choice&gt;&lt;/severity&gt;
-              &lt;/element&gt;
-          &lt;/interval&gt;
-          &lt;outOfRange&gt;&lt;choice&gt;invalid&lt;/choice&gt;&lt;/outOfRange&gt;
-          &lt;hystersis&gt;0.1&lt;/hystersis&gt;
-    &lt;/valueAlarm&gt;
-    &lt;display structureName = "display" &gt;
-        &lt;units&gt;volts&lt;/units&gt;
-        &lt;limit&gt;
-            &lt;low&gt;0.0&lt;/low&gt;
-            &lt;high&gt;10.0&lt;/high&gt;
-        &lt;/limit&gt;
-    &lt;/displayCharacteristics&gt;
-
-&lt;/record&gt;</pre>
-<hr />
-
-<h3 style="text-align: center" id="PVData">PVData</h3>
-<hr />
-
-<p>JavaIOC data is stored in a Process Variable Database (called a DB), which
-is a collection of record instances. A record instance is a structured set of
-fields. A JavaIOC implements interfaces for accessing fields of database
-records. The interfaces are a combination of reflection ( what is a field)
-and data (what a field has) interfaces. Each field has a type as defined in
-the next section. See the package overview for org.epics.ioc.pv for more
-information. This section just gives a brief summary.</p>
-
-<h4 id="Field1">Field Types</h4>
-
-<p>A Java enum defines the supported types.</p>
-<pre>    public enum Type {
-        pvBoolean,
-        pvByte,
-        pvShort,
-        pvInt,
-        pvLong,
-        pvFloat,
-        pvDouble,
-        pvString,
-        pvStructure,
-        pvArray;
-    }</pre>
-
-<h4 id="PVData1">PVData Reflection</h4>
-
-<p>The reflection interfaces for PVData are:</p>
-<pre>    
-    public interface FieldAttribute {
-        void setAttributes(Map&lt;String,String&gt; attributes,String[] exclude);
-        String setAttribute(String key,String value);
-        Map&lt;String,String&gt; getAttributes();
-        String getAttribute(String key);
-        String toString();
-        String toString(int indentLevel);
-    }
-
-    interface Field{
-        String getFieldName();
-        Type getType();
-        String getSupportName();
-        void setSupportName(String name);
-        String getCreateName();
-        void setCreateName(String name);
-        FieldAttribute getFieldAttribute();
-        FieldAttribute getFieldAttribute();
-        String toString();
-        String toString(int indentLevel);
-    }
-
-    interface Structure extends Field{
-        String getStructureName();
-        String[] getFieldNames();
-        Field getField(String fieldName);
-        int getFieldIndex(String fieldName);
-        Field[] getFields();
-    }
-
-    interface Array extends Field{
-        Type getElementType();
-    }</pre>
-
-<h4 id="PVData2">PVData Interfaces</h4>
-
-<p>The following describe the interfaces for accessing the data a field
-contains.</p>
-
-<p>The interfaces for accessing data are:</p>
-<pre>    interface PVField {
-         boolean isMutable();
-         void setMutable(boolean value);
-         String getFullFieldName();
-         String getFullName(); // recordName + fullFieldName
-         Field getField(); // get the reflection interface
-         PVField getParent();
-         PVRecord getPVRecord();
-         PVField getSubField(String fieldName);
-         PVEnumerated getPVEnumerated();
-         void replacePVField(PVField newPVField);
-         String getSupportName();
-         String setSupportName(String name);
-         String getCreateName();
-         String setCreateName(String name);
-         void asynAccessCallListener(boolean begin);
-         boolean asynAccessStart(AsynAccessListener asynAccessListener);
-         void asynAccessEnd(AsynAccessListener asynAccessListener);
-         boolean isAsynAccessActive();
-         String toString();
-         String toString(int indentLevel);
-    }
-    interface PVProperty {
-        PVField findProperty(PVField pvField,String fieldName);
-        PVField findPropertyViaParent(PVField pvField,String propertyName);
-        String[] getPropertyNames(PVField pvField);
-    }
-    class PVPropertyFactory {
-        public static PVProperty getPVProperty();
-    }
-    interface PVBoolean extends PVField{
-        boolean get();
-        void put(boolean value);
-    }
-    //   similar interfaces for other primitve types
-    interface PVString extends PVField{
-        String get();
-        void put(String value);
-    }
-    interface PVStructure extends PVField {
-        Structure getStructure();
-        PVField[] getFieldPVFields();
-    }
-    interface PVArray extends PVField{
-        Array getArray();
-        int getLength();
-        void setLength(int len);
-        int getCapacity();
-        void setCapacity(int len);
-    }
-    public class BooleanArrayData {
-        public boolean[] data;
-        public int offset;
-    }
-    interface PVBooleanArray extends PVArray{
-        int get(int offset, int len, BooleanArrayData data);
-        int put(int offset, int len, boolean[]from, int fromOffset);
-    }
-    // ... for arrays of other pv Types
-    public interface PVRecord extends PVStructure {
-        String getRecordName();
-        void message(String message, MessageType messageType);
-    }</pre>
-
-<h4 id="Example2">Example: Database Access via Reflection</h4>
-An interface IOCDB provides a method that locates the interface for a record
-instance. For example, to locate the ai record the call is: 
-<pre>    DBRecord dbRecord = iocdb.findRecord("ai");</pre>
-
-<p>Starting with this the data in the value field can be read as follows:</p>
-<pre>    PVRecord pvRecord = dbRecord.getPVRecord();
-    PVField[] pvField = pvRecord.getPVStructure().getFieldPVFields();
-    Structure structure = (Structure)pvRecord.getField();
-    int index = structure.getFieldIndex("value");
-    assert(pvField[index].getField().getType==Type.dbDouble);
-    PVDouble valueData= (PVDouble)pvField[index];
-    double value = valueData.get();</pre>
-
-<h3 style="text-align: center" id="Data">DB Data</h3>
-
-<p>See package org.epics.ioc.db for details about the interfaces shown in
-this section, which just shows the interfaces.</p>
-
-<p>The DB Data interfaces provide:</p>
-<ul>
-  <li>Access to the PV interfaces</li>
-  <li>Access to Support interfaces</li>
-  <li>Record locking</li>
-  <li>Record monitoring</li>
-</ul>
-
-<p>The interfaces are:</p>
-<pre>    public interface DBField {
-        DBRecord getDBRecord();
-        DBField getParent();
-        PVField getPVField();
-        void replacePVField(PVField newPVField);
-        String getSupportName();
-        String setSupportName(String name);
-        Create getCreate();
-        void setCreate(Create create);
-        Support getSupport();
-        void setSupport(Support support);
-        void postPut();
-        void addListener(RecordListener recordListener);
-        void removeListener(RecordListener recordListener);
-        String toString();
-        String toString(int indentLevel);
-    }
-
-    public interface DBListener {
-        void dataPut(DBField dbField);
-        void dataPut(DBField requested,DBField dbField);
-        void beginProcess();
-        void endProcess();
-        void unlisten(RecordListener listener);
-    }
-
-    public interface DBStructure extends DBField {
-        PVStructure getPVStructure();
-        DBField[] getFieldDBFields();
-    }
-
-    public interface DBArray extends DBField{
-        PVArray getPVArray();
-    }
-
-    public interface DBStructureArray extends DBArray{
-        PVStructureArray getPVStructureArray();
-        DBStructure[] getElementDBStructures();
-    }
-
-    public interface DBArrayArray extends DBArray{
-        PVArrayArray getPVArrayArray();
-        DBArray[] getElementDBArrays();
-    }
-
-    interface DBRecord {
-        DBField findDBField(PVField pvField);
-        PVRecord getPVRecord();
-        DBStructure getDBStructure();
-        void lock();
-        void unlock();
-        void lockOtherRecord(DBRecord otherRecord);
-        RecordProcess getRecordProcess();
-        boolean setRecordProcess(RecordProcess recordProcess);
-        void beginProcess();
-        void endProcess();
-        RecordListener createRecordListener(DBListener listener);
-        void removeRecordListener(RecordListener listener);
-    }</pre>
+<p>Support is defined via a structure definition. Support is assigned to a
+field via an auxInfo attached to the field. For example the definition for
+alarm support is:</p>
+<pre>xx</pre>
 <hr />
 
 <h3 style="text-align: center" id="Channel">Channel Access</h3>
@@ -1053,7 +591,7 @@ for details. Some features are:</p>
 </ul>
 <hr />
 
-<h3 style="text-align: center" id="Record1">Record Processing</h3>
+<h3 style="text-align: center" id="Record">Record Processing</h3>
 <hr />
 
 <p>Package org.epics.ioc.process describes and implements code directly
@@ -1167,11 +705,11 @@ the next support is called. If any support fails, it does not call any
 additional support. </p>
 <hr />
 
-<h3 style="text-align: center" id="Database2">Database Examples</h3>
+<h3 style="text-align: center" id="Database1">Database Examples</h3>
 <hr />
 
-<p>JavaIOC/dbd and it's subdirectories has the database definitions for all
-the DBD definitions supplied with JavaIOC. Applications can add new database
+<p>JavaIOC/xml the structure definitions for the JavaIOC. It also includes
+the xml definitions from PVData. Applications can add new structure
 definitions and support. This section just gives a few example of using these
 database definitions. The complete set of definitions are described in the
 second part of this document.</p>
@@ -1209,7 +747,7 @@ the following support</p>
     <dd>JavaIOC implements channel access links between records</dd>
 </dl>
 
-<h4 style="text-align: center" id="Record2">Record Instance Examples</h4>
+<h4 style="text-align: center" id="Record1">Record Instance Examples</h4>
 
 <h5 id="doubleInpu">doubleInput</h5>
 
@@ -1247,22 +785,22 @@ record because output is initialized to a Channel Access outputLink.</p>
 read via channelAccess support and converted via linearConvertInput
 support.</p>
 <pre>&lt;record name = "ai"&gt;
-    &lt;value type = "double" /&gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;input structureName = "linearConvertInput"&gt;
-        &lt;linearConvert&gt;
-            &lt;deviceHigh&gt;2047&lt;/deviceHigh&gt;
-            &lt;deviceLow&gt;-2048&lt;/deviceLow&gt;
-            &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
-            &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
-        &lt;/linearConvert&gt;
-        &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
-                &lt;pvname&gt;aiRaw&lt;/pvname&gt;
-                &lt;process&gt;false&lt;/process&gt;
-        &lt;/input&gt;
-
-    &lt;/input&gt;
+    &lt;scalar name = "value" type = "double" /&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "input" type = "linearConvertInput"&gt;
+        &lt;structure name = "linearConvert"&gt;
+            &lt;scalar name = "deviceHigh"&gt;2047&lt;/scalar&gt;
+            &lt;scalar name = "deviceLow"&gt;-2048&lt;/scalar&gt;
+            &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
+            &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
+        &lt;/structure&gt;
+        &lt;structure name = "input" type = "inputSupport"&gt;
+            &lt;scalar name = "pvname"&gt;aiRaw&lt;/scalar&gt;
+            &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
+            &lt;scalar name = "propertyNames"&gt;alarm,display&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
 <h5 id="ao">ao</h5>
@@ -1271,41 +809,47 @@ support.</p>
 via linearConvertOutput support to a rawValue which is written via portDriver
 support.</p>
 <pre>&lt;record name = "ao"&gt;
-    &lt;value type = "double" /&gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;output structureName = "linearConvertOutput"&gt;
-        &lt;linearConvert&gt;
-            &lt;deviceHigh&gt;2047&lt;/deviceHigh&gt;
-            &lt;deviceLow&gt;-2048&lt;/deviceLow&gt;
-            &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
-            &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
-        &lt;/linearConvert&gt;
-        &lt;output supportName = "outputSupport" structureName = "outputSupport"&gt;
-                &lt;pvname&gt;aoRaw&lt;/pvname&gt;
-                &lt;process&gt;true&lt;/process&gt;
-        &lt;/output&gt;
-
-    &lt;/output&gt;
+    &lt;scalar name = "value" type = "double" /&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "output" type = "linearConvertOutput"&gt;
+        &lt;structure name = "linearConvert"&gt;
+            &lt;scalar name = "deviceHigh"&gt;2047&lt;/scalar&gt;
+            &lt;scalar name = "deviceLow"&gt;-2048&lt;/scalar&gt;
+            &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
+            &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
+        &lt;/structure&gt;
+        &lt;structure name = "output" type = "outputSupport"&gt;
+            &lt;scalar name = "pvname"&gt;aoRaw&lt;/scalar&gt;
+            &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
 <h5 id="psSimple">psSimple</h5>
 
 <p>The following creates a powerSupply instance that does no input or output.
 The power.value must be set via channel access.</p>
-<pre>&lt;record name = "psSimple"&gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;voltage type = "structure"&gt;
-      &lt;value type = "double"&gt;10.0&lt;/value&gt;
-    &lt;/voltage&gt;
-    &lt;current type = "structure"&gt;
-        &lt;value type = "double" /&gt;
-        &lt;input structureName = "null" supportName = "powerSupplyCurrent" /&gt;
-    &lt;/current&gt;
-    &lt;power type = "structure"&gt;
-        &lt;value type = "double" /&gt;
-    &lt;/power&gt;
+<pre>&lt;database&gt;
+
+&lt;record name = "psSimple" &gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "voltage"&gt;
+       &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "current"&gt;
+       &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+       &lt;scalar name = "value" type = "double"&gt;
+         &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+       &lt;/scalar&gt;
+    &lt;/structure&gt;
+     &lt;structure name = "power"&gt;
+      &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "scan" type = "scan"&gt;
+        &lt;scalar name = "processAfterStart"&gt;true&lt;/scalar&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
 <h5 id="psLinked">psLinked</h5>
@@ -1313,68 +857,72 @@ The power.value must be set via channel access.</p>
 <p>The following creates a powerSupply record that gets its voltage and
 writes its current via channel access.</p>
 <pre>&lt;record name = "psLinked" &gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;voltage type = "structure"&gt;
-        &lt;value type = "double" /&gt;
-        &lt;input  supportName = "inputSupport" structureName = "inputSupport"&gt;
-            &lt;pvname&gt;voltage&lt;/pvname&gt;
-            &lt;process&gt;true&lt;/process&gt;
-        &lt;/input&gt;
-    &lt;/voltage&gt;
-    &lt;current type = "structure"&gt;
-       &lt;value type = "double" /&gt;
-       &lt;input structureName = "null" supportName = "powerSupplyCurrent" /&gt;
-       &lt;output supportName = "outputSupport" structureName = "outputSupport"&gt;
-          &lt;pvname&gt;current&lt;/pvname&gt;
-          &lt;process&gt;true&lt;/process&gt;
-       &lt;/output&gt;
-    &lt;/current&gt;
-    &lt;power type = "structure"&gt;&lt;value type = "double" /&gt;&lt;/power&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "voltage" type = "generic"&gt;
+        &lt;scalar name = "value" type = "double" /&gt;
+        &lt;structure name = "input" type = "inputSupport"&gt;
+            &lt;scalar name = "pvname"&gt;adcVoltageSupported&lt;/scalar&gt;
+            &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "current" type = "generic"&gt;
+        &lt;scalar name = "value" type = "double" &gt;
+           &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+        &lt;/scalar&gt;
+        &lt;structure name = "output" type = "outputSupport"&gt;
+            &lt;scalar name = "pvname"&gt;current&lt;/scalar&gt;
+            &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "power"&gt;
+        &lt;scalar name = "value" type = "double" /&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
 <h5 id="psEmbeded">psEmbeded</h5>
 
 <p>The following creates a powerSupply record that gets its voltage and
 writes its current via embeded support.</p>
-<pre>&lt;&lt;record name = "psEmbeded"&gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;voltage type = "structure"&gt;
-        &lt;value type = "double" /&gt;
-        &lt;input structureName = "linearConvertInput"&gt;
-            &lt;value type = "int" /&gt;
-            &lt;linearConvert&gt;
-                &lt;deviceHigh&gt;4095&lt;/deviceHigh&gt;
-                &lt;deviceLow&gt;0&lt;/deviceLow&gt;
-                &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
-                &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
-            &lt;/linearConvert&gt;
-            &lt;input supportName = "pdrvInt32Input" structureName = "pdrvSupport"&gt;
-                &lt;portName&gt;adcPort&lt;/portName&gt;
-                &lt;deviceName&gt;1&lt;/deviceName&gt;
-            &lt;/input&gt;
-        &lt;/input&gt;
-    &lt;/voltage&gt;
-    &lt;current type = "structure"&gt;
-        &lt;value type = "double" /&gt;
-        &lt;alarm structureName = "alarm" /&gt;
-        &lt;input structureName = "null" supportName = "powerSupplyCurrent" /&gt;
-        &lt;output structureName = "linearConvertOutput"&gt;
-            &lt;value type = "int" /&gt;
-            &lt;linearConvert&gt;
-                &lt;deviceHigh&gt;4095&lt;/deviceHigh&gt;
-                &lt;deviceLow&gt;0&lt;/deviceLow&gt;
-                &lt;engUnitsLow&gt;0.0&lt;/engUnitsLow&gt;
-                &lt;engUnitsHigh&gt;10.0&lt;/engUnitsHigh&gt;
-            &lt;/linearConvert&gt;
-            &lt;output  supportName = "pdrvInt32Output" structureName = "pdrvSupport"&gt;
-                &lt;portName&gt;dacPort&lt;/portName&gt;
-                &lt;deviceName&gt;3&lt;/deviceName&gt;
-            &lt;/output&gt;
-        &lt;/output&gt;
-    &lt;/current&gt;
-    &lt;power type = "structure"&gt;&lt;value type = "double" /&gt;&lt;/power&gt;
+<pre>&lt;record name = "psEmbeded"&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "voltage" type = "generic"&gt;
+        &lt;scalar name = "value" type = "double" /&gt;
+        &lt;structure name = "alarm" type = "alarm" /&gt;
+        &lt;structure name = "input" type = "linearConvertInput"&gt;
+            &lt;structure name = "linearConvert"&gt;
+                &lt;scalar name = "deviceHigh"&gt;4095&lt;/scalar&gt;
+                &lt;scalar name = "deviceLow"&gt;0&lt;/scalar&gt;
+                &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
+                &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
+            &lt;/structure&gt;
+            &lt;structure name = "input" type = "inputSupport"&gt;
+                &lt;scalar name = "pvname"&gt;adcVoltageEmbeded&lt;/scalar&gt;
+                &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
+            &lt;/structure&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "current" type = "generic"&gt;
+        &lt;scalar name = "value" type = "double"&gt;
+            &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+        &lt;/scalar&gt;
+        &lt;structure name = "output" type = "linearConvertOutput"&gt;
+            &lt;structure name = "linearConvert"&gt;
+                &lt;scalar name = "deviceHigh"&gt;4095&lt;/scalar&gt;
+                &lt;scalar name = "deviceLow"&gt;0&lt;/scalar&gt;
+                &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
+                &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
+            &lt;/structure&gt;
+            &lt;structure name = "output" type = "outputSupport"&gt;
+                &lt;scalar name = "pvname"&gt;dacCurrentEmbeded&lt;/scalar&gt;
+                &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
+            &lt;/structure&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "power"&gt;
+        &lt;scalar name = "value" type = "double" /&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 <hr />
 <hr />
@@ -1404,40 +952,45 @@ hieraracy above the value field it is considered a property</p>
 
 <p>For example the following record has a single value field. The value field
 has propertys alarm, timeStamp, and display.</p>
-<pre>&lt;record name = "counterOutput" &gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;value type = "double" /&gt;
-    &lt;display structureName = "display" &gt;
-        &lt;description&gt;Sample Description&lt;/description&gt;
-        &lt;format&gt;%f&lt;/format&gt;
-        &lt;resolution&gt;1&lt;/resolution&gt;
-        &lt;units&gt;volts&lt;/units&gt;
-        &lt;limit&gt;
-            &lt;low&gt;0.0&lt;/low&gt;
-            &lt;high&gt;10.0&lt;/high&gt;
-        &lt;/limit&gt;
-    &lt;/display&gt;
+<pre>&lt;record name = "someRcord" &gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;scalar name = "value" type = "double" /&gt;
+    &lt;structure name = "display" type = "display" &gt;
+        &lt;scalar name = "description"&gt;Sample Description&lt;/scalar&gt;
+        &lt;scalar name = "format"&gt;%f&lt;/scalar&gt;
+        &lt;scalar name = "resolution"&gt;1&lt;/scalar&gt;
+        &lt;scalar name = "units"&gt;volts&lt;/scalar&gt;
+        &lt;structure name = "limit"&gt;
+            &lt;scalar name = "low"&gt;0.0&lt;/scalar&gt;
+            &lt;scalar name = "high"&gt;10.0&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
 <p>The following example has three value fields each with propertys alarm and
 timeStamp.</p>
 <pre>&lt;record name = "psSimple"&gt;
-    &lt;timeStamp structureName = "timeStamp" /&gt;
-    &lt;alarm structureName = "alarm" /&gt;
-    &lt;voltage type = "structure"&gt;
-      &lt;value type = "double"&gt;10.0&lt;/value&gt;
-      &lt;alarm structureName = "alarm" /&gt;
-    &lt;/voltage&gt;
-    &lt;current type = "structure"&gt;
-        &lt;value type = "double" /&gt;
-        &lt;alarm structureName = "alarm" /&gt;
-        &lt;input structureName = "null" supportName = "powerSupplyCurrent" /&gt;
-    &lt;/current&gt;
-    &lt;power type = "structure"&gt;
-        &lt;value type = "double" /&gt;
-        &lt;alarm structureName = "alarm" /&gt;
-    &lt;/power&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "voltage"&gt;
+       &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
+       &lt;structure name = "alarm" type = "alarm" /&gt;
+       &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "current"&gt;
+       &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+       &lt;scalar name = "value" type = "double"&gt;
+         &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+       &lt;/scalar&gt;
+       &lt;structure name = "alarm" type = "alarm" /&gt;
+       &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;/structure&gt;
+     &lt;structure name = "power"&gt;
+       &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
+       &lt;structure name = "alarm" type = "alarm" /&gt;
+       &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
 <p>A client could ask for power.value, current.value, or voltage.value.</p>
@@ -1451,7 +1004,7 @@ structure. For example a client could ask for an entire record. </p>
 <h3 style="text-align: center" id="JavaIOC3">JavaIOC Data Model</h3>
 <hr />
 
-<h4 id="Basic1">Basic Concept</h4>
+<h4 id="Basic">Basic Concept</h4>
 
 <p>A JavaIOC structure follows the JavaIOC Data Model if it has a set of
 fields that have names and types that support the data model. It can have
@@ -1524,29 +1077,20 @@ structures that support the JavaIOC data model. For example a powerSupport
 record can have fields power, voltage, current that each support the JavaIOC
 data model. </p>
 
-<h4 id="getPropety">getPropety</h4>
+<h4 id="PVPropety">PVPropety</h4>
 
-<p>Interface PVProperty has two methods that make it easy to locate fields of
-interest:</p>
-<pre>     PVField PVField.getProperty(PVField pvField,String fieldName);
+<p>Interface PVProperty, which is supported by package PVData has a method
+that make it easy to locate fields of interest:</p>
+<pre>     PVField PVField.findProperty(PVField pvField,String fieldName);
      PVField[] PVField.getPropertys(PVField pvField);</pre>
 
 <p>where</p>
-<dl>
-  <dt>getProperty</dt>
-    <dd>Locates a "property" associated with the PVField.</dd>
-  <dt>getPropertys</dt>
-    <dd>PVField is a value field than the value field itself will not be in
-      the PVField[].</dd>
-</dl>
 
-<p>getProperty locates a field relative to the PVField. It can search down
-the structure hierarchy and handles value and timeStamp as a special case.
-getProperty does the following:</p>
+<p>findtProperty locates a field relative to the PVField. It can search down
+the structure hierarchy and handles value and timeStamp as a special case:</p>
 <ul>
-  <li>The fieldName is of the form item.item... where item is a "name" or a
-    "name[index]". (Note multiple levels of index are allowed)</li>
-  <li>getProperty locates each item starting from the left. If any item is
+  <li>The fieldName is of the form item.item... where item is a "name".</li>
+  <li>findProperty locates each item starting from the left. If any item is
     not found it returns null. It it finds all items it returns the interface
     to the last item. </li>
   <li>For each item it locates name as follows: 
@@ -1558,13 +1102,9 @@ getProperty does the following:</p>
         selected</li>
       <li>If a field has not been found but "name" is timeStamp than a search
         up the parent tree is made to locate a field named timeStamp.</li>
-      <li>If no field is found than getProperty returns null.</li>
+      <li>If no field is found than getProperty returns null..</li>
     </ul>
   </li>
-  <li>If [index] is specified than the field found for name must be an array
-    with elementType array or structure. If the array has an element
-    corresponding to the index than that element becomes the current item. In
-    all other cases getProperty returns null.</li>
 </ul>
 
 <p>The following example assume that pvField is set to a structure or
@@ -1584,7 +1124,7 @@ structure or record.</p>
 
 <p>The following example assume that pvField is a structure with a field
 named supply that is an array of powerSupply structures.</p>
-<pre>    PVField valuePVField = pvProperty.getProperty(pvField,"supply[2].power.value");
+<pre>    PVField valuePVField = pvProperty.getProperty(pvField,"supply.2.power.value");
     if(valuePVField==null) { /* do something */ }
     PVField timeStampPVField = pvProperty.getProperty(valuePVField,"timeStamp");
     PVField displayPVField = pvProperty.getProperty(valuePVField,"display");</pre>
@@ -1594,56 +1134,8 @@ named supply that is an array of powerSupply structures.</p>
 Properties</h3>
 <hr />
 
-<p>The following are the set of structures for standard properties for
-general purpose client tools. </p>
-
-<h4 id="timeStamp">timeStamp</h4>
-<pre>&lt;structure name = "timeStamp"&gt;
-  &lt;field name = "secondsPastEpoch" type = "long" /&gt;
-  &lt;field name = "nanoSeconds" type = "int" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4 id="alarm">alarm</h4>
-<pre>&lt;structure name = "alarm" supportName = "alarm" &gt;
-  &lt;field name = "severity" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "ackTransient" type = "boolean" /&gt;
-  &lt;field name = "ackSeverity" structureName = "alarmSeverity" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4 id="display">display</h4>
-<pre>&lt;structure name = "display"&gt;
-    &lt;field name = "description" type = "string" /&gt;
-    &lt;field name = "format" type = "string" /&gt;
-    &lt;field name = "units" type = "string" /&gt;
-    &lt;field name = "resolution" type = "int" /&gt;
-    &lt;field name = "limit" structureName = "doubleLimit" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4 id="control">control</h4>
-<pre>&lt;structure name = "control"&gt;
-    &lt;field name = "limit" structureName = "doubleLimit" /&gt;
-    &lt;field name = "minStep" type = "double" /&gt;
-&lt;/structure&gt;</pre>
-
-<h4 id="history">history</h4>
-
-<p>The following is a possible structure for history for a double value
-field. Definitions will also appear for booleanHistory, byteHistory, ...,
-stringHistory.</p>
-<pre>&lt;structure name = "doubleHistory" &gt;
-    &lt;field name = "timeStamp" type = "structure" structureName = "timeStamp" /&gt;
-    &lt;field name = "value" type = "double" /&gt;
-    &lt;field name = "alarm" type = "structure"
-         structureName = "alarm" supportName = "null" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "history" supportName = "doubleHistory" &gt;
-    &lt;field name = "size" type = "int" /&gt;
-    &lt;!-- other fields are needed. TODO --&gt;
-    &lt;!-- support will make this an array of doubleHistory structures --&gt;
-    &lt;field name = "data" type = "array" elementType = "structure" /&gt;
-&lt;/structure&gt;</pre>
+<p>The set of structures for standard properties for general purpose client
+tools are defined in PVData.</p>
 <hr />
 <hr />
 
@@ -1662,10 +1154,10 @@ Definition</h2>
 addition a set of structure definitions that use the support are provided. A
 brief summary is:</p>
 <dl>
-  <dt style="font-family: courier;">JavaIOC/dbd</dt>
+  <dt style="font-family: courier;">JavaIOC/xml</dt>
     <dd>This directory has a file <span
-      style="font-family: courier;">dbd.xml</span> ,which includes all the
-      definitions from dbd/structure.</dd>
+      style="font-family: courier;">structures.xml</span> ,which includes all
+      the definitions from xml/structure.</dd>
   <dt style="font-family: courier;">JavaIOC/dbd/structure</dt>
     <dd>This directory has the following files. 
       <dl>
@@ -1686,10 +1178,6 @@ brief summary is:</p>
             method is called. It is normally only used for testing.</dd>
         <dt style="font-family: courier;">digital.xml</dt>
           <dd>Support for digital I/O.</dd>
-        <dt style="font-family: courier;">display.xml</dt>
-          <dd>Defines display characteristics.</dd>
-        <dt style="font-family: courier;">enumerated.xml</dt>
-          <dd>Defines an enumerated structure and create for enumerated</dd>
         <dt style="font-family: courier;">event.xml</dt>
           <dd>Support that announces an event when the process method is
             called.</dd>
@@ -1697,38 +1185,23 @@ brief summary is:</p>
           <dd>Support code that can be used to support many recordTypes and
             or structures. It just looks for fields that have associated
             support and calls the support.</dd>
-        <dt style="font-family: courier;">limit.xml</dt>
-          <dd>Contains a structure definition for each numeric type. Each
-            structure contains two fields: low and high.</dd>
         <dt style="font-family: courier;">portDriver.xml</dt>
           <dd>Definitions for portDriver support for the JavaIOC</dd>
         <dt style="font-family: courier;">processControl.xml</dt>
           <dd>Definitions for support for changing the process state of a
             record.</dd>
-        <dt style="font-family: courier;">supportArray.xml</dt>
-          <dd>Support for an array of structures that have support. It is
-            used with many record types.</dd>
         <dt style="font-family: courier;">supportState.xml</dt>
           <dd>Defines the current state of support for a record or field.</dd>
       </dl>
     </dd>
 </dl>
 
-<p>An application can include all the support defined in this package by
-using the following xml file:</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;include addPath = "dbd" /&gt;
-&lt;include href = "dbd.xml" /&gt;
-&lt;include removePath = "dbd" /&gt;
-&lt;/IOCDatabase&gt;</pre>
-
 <p>This package overview does not discuss the algorithms implemented by the
 support implementations. See package org.epics.ioc.support and sub-packages
 for details.</p>
 <hr />
 
-<h3 style="text-align: center;" id="JavaIOC4">JavaIOC/dbd</h3>
+<h3 style="text-align: center;" id="JavaIOC4">JavaIOC/xml/structures.xml</h3>
 <hr />
 
 <h4 id="dbd.xml">dbd.xml</h4>
@@ -1736,16 +1209,15 @@ for details.</p>
 <p>This file includes all definitions needed for the support provided by
 JavaIOC.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;include addPath = "${JAVAIOC}/dbd/structure" /&gt;
-&lt;include href = "limit.xml" /&gt;
-&lt;include href = "display.xml" /&gt;
-&lt;include href = "control.xml" /&gt;
-&lt;include href = "enumerated.xml" /&gt;
-&lt;include href = "commonFields.xml" /&gt;
-&lt;include href = "alarm.xml" /&gt;
+&lt;database&gt;
+&lt;include addPath = "${PVDATA}/xml" /&gt;
+&lt;include href = "structures.xml" /&gt;
+&lt;include removePath = "${PVDATA}/xml" /&gt;
+&lt;include addPath = "${JAVAIOC}/xml/structure" /&gt;
 &lt;include href = "generic.xml" /&gt;
-&lt;include href = "supportArray.xml" /&gt;
+&lt;include href = "commonFields.xml" /&gt;
+&lt;include href = "control.xml" /&gt;
+&lt;include href = "alarm.xml" /&gt;
 &lt;include href = "supportState.xml" /&gt;
 &lt;include href = "channelAccess.xml" /&gt;
 &lt;include href = "analog.xml" /&gt;
@@ -1754,21 +1226,20 @@ JavaIOC.</p>
 &lt;include href = "calc.xml" /&gt;
 &lt;include href = "delay.xml" /&gt;
 &lt;include href = "processControl.xml" /&gt;
+&lt;include href = "powerSupply.xml" /&gt;
 &lt;include href = "portDriver.xml" /&gt;
-&lt;include removePath = "${JAVAIOC}/dbd/structure" /&gt;
+&lt;include removePath = "${JAVAIOC}/xml/structure" /&gt;
 &lt;include addPath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" /&gt;
 &lt;include href = "exampleCalculatorSupport.xml" /&gt;
 &lt;include removePath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" /&gt;
-&lt;!-- following is for tests --&gt;
-&lt;support name = "powerSupplyCurrent"
-    factoryName = "org.epics.ioc.support.device.PowerSupplyFactory" /&gt;
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 <hr />
 
-<h3 style="text-align: center" id="structure">dbd/structure/alarm.xml</h3>
+<h3 style="text-align: center" id="structure">xml/structure/alarm.xml</h3>
 <hr />
 
-<p>This file contains database definitions related to alarms.</p>
+<p>This file contains database definitions related to alarms. Note that
+PVData also defines alarms as seen by general purpose tools.</p>
 
 <p>See package org.epics.ioc.support.alarm for a description of the algorithm
 for raising alarms.</p>
@@ -1788,145 +1259,158 @@ all lower level alarms.</p>
 Definitions and support are available for the numeric types, boolean, and
 enumerated. </p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "alarmSeverity" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" type = "array" elementType = "string"
-    default = "none minor major invalid" /&gt;
+&lt;database&gt;
+
+
+&lt;structure name = "alarmSupportFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.AlarmSupportFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
+&lt;structure name = "booleanAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.BooleanAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "byteAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.ByteAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "shortAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.ShortAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "intAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.IntAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "longAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.LongAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "floatAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.FloatAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "doubleAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.DoubleAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "enumeratedAlarmFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.alarm.EnumeratedAlarmFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 &lt;structure name = "alarm" supportName = "alarm" &gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "ackTransient" type = "boolean" /&gt;
-  &lt;field name = "ackSeverity" type = "structure" structureName = "alarmSeverity" /&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;alarmSupportFactory&lt;/auxInfo&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "byteAlarmInterval"&gt;
-  &lt;field name = "value" type = "byte" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "value" type = "byte" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
 &lt;structure name = "byteAlarm" supportName = "byteAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "byte" /&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;byteAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" type = "byte" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "shortAlarmInterval"&gt;
-  &lt;field name = "value" type = "short" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "value" type = "short" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
-&lt;structure name = "shortAlarm" supportName = "shortAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "short" /&gt;
+&lt;structure name = "shortAlarm" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;shortAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" type = "short" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "intAlarmInterval"&gt;
-  &lt;field name = "value" type = "int" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "value" type = "int" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
-&lt;structure name = "intAlarm" supportName = "intAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "int" /&gt;
+&lt;structure name = "intAlarm" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;intAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" type = "int" /&gt;
 &lt;/structure&gt;
-
 &lt;structure name = "longAlarmInterval"&gt;
-  &lt;field name = "value" type = "long" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "value" type = "long" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
-&lt;structure name = "longAlarm" supportName = "longAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "long" /&gt;
+&lt;structure name = "longAlarm"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;longAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" type = "long" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "floatAlarmInterval"&gt;
-  &lt;field name = "value" type = "float" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "value" type = "float" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
-&lt;structure name = "floatAlarm" supportName = "floatAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "float" /&gt;
+&lt;structure name = "floatAlarm"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;floatAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" type = "float" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "doubleAlarmInterval"&gt;
-  &lt;field name = "value" type = "double" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "value" type = "double" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
-&lt;structure name = "doubleAlarm" supportName = "doubleAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "double" /&gt;
+&lt;structure name = "doubleAlarm" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;doubleAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" type = "double" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "booleanAlarm"  supportName = "booleanAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "falseAlarm" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "falseMessage" type = "string" /&gt;
-  &lt;field name = "trueAlarm" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "trueMessage" type = "string" /&gt;
-  &lt;field name = "changeStateAlarm" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "changeStateMessage" type = "string" /&gt;
+&lt;structure name = "booleanAlarm"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;booleanAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "falseAlarm" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "falseMessage" type = "string" /&gt;
+  &lt;structure name = "trueAlarm" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "trueMessage" type = "string" /&gt;
+  &lt;structure name = "changeStateAlarm" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "changeStateMessage" type = "string" /&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "enumeratedAlarmState"&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
+&lt;/structure&gt;
+&lt;structure name = "enumeratedAlarm"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;enumeratedAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+   &lt;!-- each stateAlarm field must be structure enumeratedAlarmState --&gt;
+  &lt;structure name = "stateAlarm"/&gt;
+  &lt;structure name = "changeStateAlarm" type = "enumeratedAlarmState" /&gt;
 &lt;/structure&gt;
 
-
-&lt;structure name = "enumeratedAlarm"  supportName = "enumeratedAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-   &lt;!-- each array element must have structureName enumeratedAlarmState --&gt;
-  &lt;field name = "stateAlarm" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "changeStateAlarm" type = "structure"
-      structureName = "enumeratedAlarmState" /&gt;
-&lt;/structure&gt;
-
-&lt;support name = "alarm"
-  factoryName = "org.epics.ioc.support.alarm.AlarmFactory" /&gt;
-
-&lt;support name = "booleanAlarm"
-  factoryName = "org.epics.ioc.support.alarm.BooleanAlarmFactory" /&gt;
-
-&lt;support name = "byteAlarm"
-  factoryName = "org.epics.ioc.support.alarm.ByteAlarmFactory" /&gt;
-
-&lt;support name = "shortAlarm"
-  factoryName = "org.epics.ioc.support.alarm.ShortAlarmFactory" /&gt;
-
-&lt;support name = "intAlarm"
-  factoryName = "org.epics.ioc.support.alarm.IntAlarmFactory" /&gt;
-
-&lt;support name = "longAlarm"
-  factoryName = "org.epics.ioc.support.alarm.LongAlarmFactory" /&gt;
-
-&lt;support name = "floatAlarm"
-  factoryName = "org.epics.ioc.support.alarm.FloatAlarmFactory" /&gt;
-
-&lt;support name = "doubleAlarm"
-  factoryName = "org.epics.ioc.support.alarm.DoubleAlarmFactory" /&gt;
-
-&lt;support name = "enumeratedAlarm"
-  factoryName = "org.epics.ioc.support.alarm.EnumeratedAlarmFactory" /&gt;
-
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="numeric">numeric alarms</h4>
 
@@ -1989,55 +1473,68 @@ Except for the data type it also is valid for the other types.</p>
 </dl>
 <hr />
 
-<h3 style="text-align: center" id="structure1">dbd/structure/analog.xml</h3>
+<h3 style="text-align: center" id="structure1">xml/structure/analog.xml</h3>
 <hr />
 
 <p>This is the support for analog I/O. See org.epics.ioc.support.basic for
 details.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
+&lt;database&gt;
+
+&lt;structure name = "linearConvertInputFactory"&gt;
+ &lt;scalar name = "supportFactory" type = "string"&gt;
+   org.epics.ioc.support.basic.LinearConvertFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "linearConvertOutputFactory"&gt;
+ &lt;scalar name = "supportFactory" type = "string"&gt;
+   org.epics.ioc.support.basic.LinearConvertFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "incrementalFactory"&gt;
+ &lt;scalar name = "supportFactory" type = "string"&gt;
+   org.epics.ioc.support.basic.IncrementalFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
 &lt;structure name = "linearConvert" &gt;
-  &lt;field name = "engUnitsLow" type = "double" /&gt;
-  &lt;field name = "engUnitsHigh" type = "double" /&gt;
-  &lt;field name = "deviceHigh" type = "int" /&gt;
-  &lt;field name = "deviceLow" type = "int" /&gt;
-  &lt;field name = "slope" type = "double" /&gt;
-  &lt;field name = "intercept" type = "double" /&gt;
+  &lt;scalar name = "engUnitsLow" type = "double" /&gt;
+  &lt;scalar name = "engUnitsHigh" type = "double" /&gt;
+  &lt;scalar name = "deviceHigh" type = "int" /&gt;
+  &lt;scalar name = "deviceLow" type = "int" /&gt;
+  &lt;scalar name = "slope" type = "double" /&gt;
+  &lt;scalar name = "intercept" type = "double" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "linearConvertInput" supportName = "generic"&gt;
-  &lt;field name = "value" type = "int" /&gt;
-  &lt;field name = "alarm" structureName = "alarm"/&gt;
-  &lt;field name = "input" structureName = "generic" /&gt;
-  &lt;field name = "linearConvert"
-     structureName = "linearConvert" supportName = "linearConvertInput" /&gt;
+&lt;structure name = "linearConvertInput"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "value" type = "int" /&gt;
+  &lt;structure name = "alarm" type = "alarm"/&gt;
+  &lt;structure name = "input" type = "generic" /&gt;
+  &lt;structure name = "linearConvert" type = "linearConvert"&gt;
+    &lt;auxInfo name = "supportFactory" type = "string"&gt;linearConvertInputFactory&lt;/auxInfo&gt;
+  &lt;/structure&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "linearConvertOutput" supportName = "generic"&gt;
-  &lt;field name = "value" type = "int" /&gt;
-  &lt;field name = "alarm" structureName = "alarm"/&gt;
-  &lt;field name = "linearConvert"
-     structureName = "linearConvert" supportName = "linearConvertOutput" /&gt;
+&lt;structure name = "linearConvertOutput"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "value" type = "int" /&gt;
+  &lt;structure name = "alarm" type = "alarm"/&gt;
+  &lt;structure name = "input" type = "generic" /&gt;
+  &lt;structure name = "linearConvert" type = "linearConvert"&gt;
+    &lt;auxInfo name = "supportFactory" type = "string"&gt;linearConvertOutputFactory&lt;/auxInfo&gt;
+  &lt;/structure&gt;
 &lt;/structure&gt;
-
-&lt;structure name = "incrementalDouble" supportName = "generic" &gt;
-  &lt;field name = "alarm" structureName = "alarm"/&gt;
-  &lt;field name = "value" type = "double" /&gt;
-  &lt;field name = "input" structureName = "generic" /&gt;
-  &lt;field name = "incremental" type = "boolean" supportName = "incremental"/&gt;
-  &lt;field name = "rateOfChange" type = "double" /&gt;
+&lt;structure name = "incrementalDouble" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "value" type = "double" /&gt;
+  &lt;structure name = "alarm" type = "alarm"/&gt;
+  &lt;structure name = "input" type = "generic" /&gt;
+  &lt;scalar name = "incremental" type = "boolean"&gt;
+   &lt;auxInfo name = "supportFactory" type = "string"&gt;incrementalFactory&lt;/auxInfo&gt;
+  &lt;/scalar&gt;
+  &lt;scalar name = "rateOfChange" type = "double" /&gt;
 &lt;/structure&gt;
-
-&lt;support name = "linearConvertInput"
-  factoryName = "org.epics.ioc.support.basic.LinearConvertFactory" /&gt;
-
-&lt;support name = "linearConvertOutput"
-  factoryName = "org.epics.ioc.support.basic.LinearConvertFactory" /&gt;
-
-&lt;support name = "incremental"
-   factoryName = "org.epics.ioc.support.basic.IncrementalFactory" /&gt;
-
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="linearConv">linearConvert</h4>
 
@@ -2115,29 +1612,55 @@ the desired value. The structure has the fields:</p>
 <p>This is the support for calculations. See org.epics.ioc.support.calc for
 details. Note that expressionCalculator is the default calculator.. </p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "calcArg" supportName = "generic" &gt;
+&lt;&lt;database&gt;
+
+&lt;structure name = "calcArgsFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.calc.CalcArgsFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "expressionCalculatorFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.calc.ExpressionCalculatorFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "arrayIncrementCalculatorFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.calc.example.ArrayIncrementCalculatorFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "arrayAddCalculatorFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.calc.example.ArrayAddCalculatorFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "booleanArrayToggleCalculatorFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.calc.example.BooleanArrayToggleCalculatorFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+
+&lt;structure name = "calcArg" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
   &lt;!-- instance must define value --&gt;
-  &lt;field name = "name" type = "string" /&gt;
+  &lt;scalar name = "name" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "expressionCalculator" supportName = "expressionCalculator" &gt;
-  &lt;field name = "expression" type = "string" /&gt;
+&lt;structure name = "expressionCalculator" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;expressionCalculatorFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "expression" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "calculation" supportName = "generic" &gt;
-  &lt;field name = "calcArgArray" elementType = "structure" supportName = "calcArgArray" /&gt;
-  &lt;field name = "calculator" structureName = "expressionCalculator" /&gt;
-  &lt;field name = "alarm" structureName = "alarm" /&gt;
+&lt;structure name = "calculation" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+  &lt;structure name = "calcArgs"&gt;
+     &lt;!-- each field of calcArgs must be a calcArg structure --&gt;
+     &lt;auxInfo name = "supportFactory" type = "string"&gt;calcArgsFactory&lt;/auxInfo&gt;
+  &lt;/structure&gt;
+  &lt;structure name = "calculator" type = "expressionCalculator" /&gt;
+  &lt;structure name = "alarm" type = "alarm" /&gt;
 &lt;/structure&gt;
-
-&lt;support name = "calcArgArray"
- factoryName = "org.epics.ioc.support.calc.CalcArgArrayFactory" /&gt;
-
-&lt;support name = "expressionCalculator"
- factoryName = "org.epics.ioc.support.calc.ExpressionCalculatorFactory" /&gt;
-
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 <hr />
 
 <h3 style="text-align: center"
@@ -2147,61 +1670,82 @@ id="support6">dbd/structure/channelAccess.xml</h3>
 <p>This is the support for a links to other records. See
 org.epics.ioc.support.ca for details.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "monitorType" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" type = "array" elementType = "string"
-     default = "put change absoluteChange percentageChange" /&gt; 
+&lt;structure name = "processSupportFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+    org.epics.ioc.support.ca.LinkSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "monitorSupportFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+    org.epics.ioc.support.ca.LinkSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "monitorNotifySupportFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+    org.epics.ioc.support.ca.LinkSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "inputSupportFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+    org.epics.ioc.support.ca.LinkSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "outputSupportFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+    org.epics.ioc.support.ca.LinkSupportFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "processSupport" supportName = "processSupport" &gt;
-  &lt;field name = "providerName" type = "string" default = "local" /&gt;
-  &lt;field name = "pvname" type = "string" link = "true" /&gt;
+&lt;structure name = "monitorType"&gt;
+  &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;enumeratedFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "index" type = "int" /&gt;
+  &lt;scalar name = "choice" type = "string" /&gt;
+  &lt;array name = "choices" type = "string"&gt;
+     put,change,absoluteChange,percentageChange&lt;/array&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "monitorSupport" supportName = "monitorSupport" &gt;
-  &lt;field name = "providerName" type = "string" default = "local" /&gt;
-  &lt;field name = "pvname" type = "string" link = "true" /&gt;
-  &lt;field name = "type" structureName = "monitorType" default = "put" /&gt;
-  &lt;field name = "deadband" type = "double" /&gt;
-  &lt;field name = "queueSize" type = "int"  default = "3" /&gt;
-  &lt;field name = "reportOverrun" type = "boolean" /&gt;
-  &lt;field name = "process" type = "boolean"&gt;
+&lt;structure name = "processSupport"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;processSupportFactory&lt;/auxInfo&gt;
+  &lt;structure name = "alarm" type = "alarm" /&gt;
+  &lt;scalar name = "providerName" type = "string"&gt;local&lt;/scalar&gt;
+  &lt;scalar name = "pvname" type = "string" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "monitorSupport" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;monitorSupportFactory&lt;/auxInfo&gt;
+  &lt;structure name = "alarm" type = "alarm" /&gt;
+  &lt;scalar name = "providerName" type = "string"&gt;local&lt;/scalar&gt;
+  &lt;scalar name = "pvname" type = "string" link = "true" /&gt;
+  &lt;structure name = "type" type = "monitorType"/&gt;
+  &lt;scalar name = "deadband" type = "double" /&gt;
+  &lt;scalar name = "queueSize" type = "int"  &gt;3&lt;/scalar&gt;
+  &lt;scalar name = "reportOverrun" type = "boolean" /&gt;
+  &lt;scalar name = "process" type = "boolean"&gt;
       &lt;!-- process this record when monitor occurs --&gt;
-  &lt;/field&gt;
-  &lt;field name = "propertyNames" type = "string" /&gt;
+  &lt;/scalar&gt;
+  &lt;scalar name = "propertyNames" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "monitorNotifySupport" supportName = "monitorNotifySupport" &gt;
-  &lt;field name = "providerName" type = "string" default = "local" /&gt;
-  &lt;field name = "pvname" type = "string" link = "true" /&gt;
+&lt;structure name = "monitorNotifySupport" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;monitorNotifySupportFactory&lt;/auxInfo&gt;
+  &lt;structure name = "alarm" type = "alarm" /&gt;
+  &lt;scalar name = "providerName" type = "string"&gt;local&lt;/scalar&gt;
+  &lt;scalar name = "pvname" type = "string" link = "true" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "inputSupport" supportName = "inputSupport" &gt;
-  &lt;field name = "providerName" type = "string" default = "local" /&gt;
-  &lt;field name = "pvname" type = "string" link = "true" /&gt;
-  &lt;field name = "process" type = "boolean" /&gt;
-  &lt;field name = "propertyNames" type = "string" /&gt;
+&lt;structure name = "inputSupport" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;inputSupportFactory&lt;/auxInfo&gt;
+  &lt;structure name = "alarm" type = "alarm" /&gt;
+  &lt;scalar name = "providerName" type = "string" &gt;local&lt;/scalar&gt;
+  &lt;scalar name = "pvname" type = "string" /&gt;
+  &lt;scalar name = "process" type = "boolean" /&gt;
+  &lt;scalar name = "propertyNames" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "outputSupport" supportName = "outputSupport" &gt;
-  &lt;field name = "providerName" type = "string" default = "local" /&gt;
-  &lt;field name = "pvname" type = "string" link = "true" /&gt;
-  &lt;field name = "process" type = "boolean" /&gt;
+&lt;structure name = "outputSupport"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;outputSupportFactory&lt;/auxInfo&gt;
+  &lt;structure name = "alarm" type = "alarm" /&gt;
+  &lt;scalar name = "providerName" type = "string" &gt;local&lt;/scalar&gt;
+  &lt;scalar name = "pvname" type = "string" /&gt;
+  &lt;scalar name = "process" type = "boolean" /&gt;
 &lt;/structure&gt;
 
-&lt;support name = "processSupport"
-  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
-&lt;support name = "monitorSupport"
-  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
-&lt;support name = "monitorNotifySupport"
-  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
-&lt;support name = "inputSupport"
-  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
-&lt;support name = "outputSupport"
-  factoryName = "org.epics.ioc.support.ca.LinkSupportFactory" /&gt;
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="processSup">processSupport</h4>
 
@@ -2292,40 +1836,39 @@ id="structures2">dbd/structures/commonFields.xml</h3>
 
 <p>This file contains database definitions for fields scan and timeStamp.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "scanPriority" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int"/&gt;
-  &lt;field name = "choice" type = "string" default = "low"/&gt;
-  &lt;field name = "choices" elementType = "string"
-      default = "lowest lower low middle high higher highest" /&gt;
+&lt;database&gt;
+&lt;structure name = "scanFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.ScanFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "scanType"  createName = "enumerated" &gt;
-  &lt;field name = "index"  type = "int"/&gt;
-  &lt;field name = "choice" type = "string"/&gt;
-  &lt;field name = "choices" elementType = "string"
-      default = "passive event periodic" /&gt;
+&lt;structure name = "scanPriority" &gt;
+  &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;enumeratedFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "index" type = "int"/&gt;
+  &lt;scalar name = "choice" type = "string"&gt;low&lt;/scalar&gt;
+  &lt;array name = "choices" type = "string"&gt;
+      lowest,lower,low,middle,high,higher,highest&lt;/array&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "timeStamp"&gt;
-  &lt;field name = "secondsPastEpoch" type = "long" /&gt;
-  &lt;field name = "nanoSeconds" type = "int" /&gt;
+&lt;structure name = "scanType"&gt;
+  &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;enumeratedFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "index"  type = "int"/&gt;
+  &lt;scalar name = "choice" type = "string"/&gt;
+  &lt;array name = "choices" type = "string"&gt;passive,event,periodic&lt;/array&gt;
 &lt;/structure&gt;
 
 &lt;structure name = "scan" supportName = "scan"&gt;
-  &lt;field name = "priority" structureName = "scanPriority" /&gt;
-  &lt;field name = "type" structureName = "scanType" /&gt;
-  &lt;field name = "rate" type = "double"  default = "1.0" /&gt;
-  &lt;field name = "eventName" type = "string" /&gt;
-  &lt;field name = "processSelf" type = "boolean" /&gt;
-  &lt;field name = "processAfterStart" type = "boolean" default = "false" /&gt;
-  &lt;field name = "maxConsecutiveActive" type = "int" default = "1" /&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;scanFactory&lt;/auxInfo&gt;
+  &lt;structure name = "priority" type = "scanPriority" /&gt;
+  &lt;structure name = "type" type = "scanType" /&gt;
+  &lt;scalar name = "rate" type = "double"  default = "1.0" /&gt;
+  &lt;scalar name = "eventName" type = "string" /&gt;
+  &lt;scalar name = "processSelf" type = "boolean" /&gt;
+  &lt;scalar name = "processAfterStart" type = "boolean"&gt;false&lt;/scalar&gt;
+  &lt;scalar name = "maxConsecutiveActive" type = "int"&gt;1&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;support name = "scan"
-  factoryName = "org.epics.ioc.support.basic.ScanFactory" /&gt;
-
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 
 <p>Definitions for the following structuress:</p>
 <dl>
@@ -2390,17 +1933,12 @@ id="structures2">dbd/structures/control.xml</h3>
 
 <p>This is a structure and support for control limits.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-
-&lt;structure name = "control"&gt;
-    &lt;field name = "limit" structureName = "doubleLimit" /&gt;
-    &lt;field name = "minStep" type = "double" /&gt;
+&lt;database&gt;
+&lt;structure name = "controlLimitFactory"&gt;
+  &lt;scalar name = "pvReplaceFactory" type = "string"&gt;
+    org.epics.ioc.support.basic.ControlLimitFactory&lt;/scalar&gt;
 &lt;/structure&gt;
-
-&lt;!-- the following is for a value field with a parent that has a field named control that is a control--&gt;
-&lt;create name = "controlLimit"
-  factoryName = "org.epics.ioc.create.ControlLimitFactory" /&gt;
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 
 <p>where</p>
 <hr />
@@ -2411,19 +1949,21 @@ id="structures2">dbd/structures/control.xml</h3>
 <p>This is the support that delays before completing. It is used for testing.
 See org.epics.ioc.support.basic for details.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
+&lt;database&gt;
 
-&lt;structure name = "delay"&gt;
-    &lt;!-- min, max, inc are delay in milliseconds --&gt;
-    &lt;field name = "min" type = "long" /&gt;
-    &lt;field name = "max" type = "long" /&gt;
-    &lt;field name = "inc" type = "long" /&gt;
+&lt;structure name = "delayFactory"&gt;
+ &lt;scalar name = "supportFactory" type = "string"&gt;
+   org.epics.ioc.support.basic.DelayFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;support name = "delay"
-    factoryName = "org.epics.ioc.support.basic.DelayFactory" /&gt;
-
-&lt;/IOCDatabase&gt;</pre>
+&lt;structure name = "delay"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;delayFactory&lt;/auxInfo&gt;
+  &lt;!-- min, max, inc are delay in milliseconds --&gt;
+  &lt;scalar name = "min" type = "long" /&gt;
+  &lt;scalar name = "max" type = "long" /&gt;
+  &lt;scalar name = "inc" type = "long" /&gt;
+&lt;/structure&gt;
+&lt;/database&gt;</pre>
 <hr />
 
 <h3 style="text-align: center" id="structure4">dbd/structure/digital.xml</h3>
@@ -2434,29 +1974,35 @@ details. It reads a registerValue. The raw value is the low order
 numberOfBits of the registerValue. This value deterrmines the digitalState.
 </p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
+&lt;database&gt;
+&lt;structure name = "digitalInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.DigitalFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "digitalOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.DigitalFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+
 &lt;structure name = "digitalState"&gt;
-  &lt;field name = "name" type = "string" /&gt;
-  &lt;field name = "value" type = "int" /&gt;
-  &lt;field name = "severity" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "name" type = "string" /&gt;
+  &lt;scalar name = "value" type = "int" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "digital" supportName = "generic" &gt;
-  &lt;field name = "value" type = "int" /&gt;
-  &lt;field name = "input" type = "structure" /&gt;
-  &lt;!-- each structureName must be digitalState --&gt;
+&lt;structure name = "digital"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "value" type = "int" /&gt;
+  &lt;structure name = "input" type = "generic"/&gt;
+  &lt;!-- each field of states must be as digitalState structure --&gt;
   &lt;!-- supportName can be digitalInput or digitalOutput --&gt;
-  &lt;field name = "states" elementType = "structure" /&gt;
+  &lt;structure name = "states"  /&gt;
 &lt;/structure&gt;
 
-&lt;support name = "digitalInput"
-   factoryName = "org.epics.ioc.support.basic.DigitalFactory" /&gt;
-
-&lt;support name = "digitalOutput"
-   factoryName = "org.epics.ioc.support.basic.DigitalFactory" /&gt;
-
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="digitalSta">digitalState</h4>
 
@@ -2474,39 +2020,7 @@ numberOfBits of the registerValue. This value deterrmines the digitalState.
 
 <p>This is the structure required by the digital support. The field states,
 which must be an array of digitalState structures, is the field that is
-supported by digitalInput or digitalOutput.</p>
-<hr />
-
-<h3 style="text-align: center" id="structures">dbd/structures/display.xml</h3>
-<hr />
-
-<p>This section defines the display characteristics for a value field.</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "display"&gt;
-    &lt;field name = "description" type = "string" /&gt;
-    &lt;field name = "format" type = "string" /&gt;
-    &lt;field name = "units" type = "string" /&gt;
-    &lt;field name = "resolution" type = "int" /&gt;
-    &lt;field name = "limit" structureName = "doubleLimit" /&gt;
-&lt;/structure&gt;
-&lt;/IOCDatabase&gt;</pre>
-<hr />
-
-<h3 style="text-align: center"
-id="structure12">dbd/structure/enumerated.xml</h3>
-<hr />
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "enumerated" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" elementType = "string" /&gt;
-&lt;/structure&gt;
-
-&lt;create name = "enumerated"
-  factoryName = "org.epics.ioc.create.EnumeratedFactory" /&gt;
-&lt;/IOCDatabase&gt;</pre>
+supported by </p>
 <hr />
 
 <h3 style="text-align: center" id="structure5">dbd/structure/event.xml</h3>
@@ -2521,56 +2035,27 @@ for details.</p>
 &lt;/IOCDatabase&gt;</pre>
 <hr />
 
-<h3 style="text-align: center" id="structure7">dbd/structure/generic.xml</h3>
+<h3 style="text-align: center" id="structure6">dbd/structure/generic.xml</h3>
 <hr />
 
 <p>Generic is the default support for many record types. It just calls the
 support for any fields that have support. See org.epics.ioc.support.basic for
 details.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "generic" supportName = "generic" /&gt;
-&lt;support name = "generic"
-   factoryName = "org.epics.ioc.support.basic.GenericFactory" /&gt;
-&lt;support name = "noop"
-  factoryName = "org.epics.ioc.support.basic.NoopFactory" /&gt;
+&lt;database&gt;
+&lt;structure name = "genericFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.GenericFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "noopFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.NoopFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
-&lt;/IOCDatabase&gt;</pre>
-<hr />
-
-<h3 style="text-align: center" id="structure8">dbd/structure/limit.xml</h3>
-<hr />
-
-<p>This contains structure definitions for limits for each of the numeric
-types. No default support is provided. Each structure has just two fields:
-low and high.</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "byteLimit"&gt;
-    &lt;field name = "low" type = "byte" /&gt;
-    &lt;field name = "high" type = "byte" /&gt;
+&lt;structure name = "generic"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
 &lt;/structure&gt;
-&lt;structure name = "shortLimit"&gt;
-    &lt;field name = "low" type = "short" /&gt;
-    &lt;field name = "high" type = "short" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "intLimit"&gt;
-    &lt;field name = "low" type = "int" /&gt;
-    &lt;field name = "high" type = "int" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "longLimit"&gt;
-    &lt;field name = "low" type = "long" /&gt;
-    &lt;field name = "high" type = "long" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "floatLimit"&gt;
-    &lt;field name = "low" type = "float" /&gt;
-    &lt;field name = "high" type = "float" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "doubleLimit"&gt;
-    &lt;field name = "low" type = "double" /&gt;
-    &lt;field name = "high" type = "double" /&gt;
-&lt;/structure&gt;
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 <hr />
 
 <h3 style="text-align: center"
@@ -2580,89 +2065,132 @@ id="structure13">dbd/structure/portDriver.xml</h3>
 <p>This is the support for portDriver. See org.epics.ioc.support.pdrv and
 org.epics.ioc.portDriver for details.</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
+&lt;database&gt;
 &lt;structure name = "pdrvSupport"&gt;
-  &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "deviceName" type = "string" /&gt;
-  &lt;field name = "timeout" type = "double" /&gt;
-  &lt;field name = "mask" type = "int" /&gt;
-  &lt;field name = "size" type = "int" /&gt;
-  &lt;field name = "process" type = "boolean" default = "false" /&gt;
+  &lt;scalar name = "portName" type = "string" /&gt;
+  &lt;scalar name = "deviceName" type = "string" /&gt;
+  &lt;scalar name = "timeout" type = "double" /&gt;
+  &lt;scalar name = "mask" type = "int" /&gt;
+  &lt;scalar name = "size" type = "int" /&gt;
+  &lt;scalar name = "process" type = "boolean" default = "false" /&gt;
 &lt;/structure&gt;
 
-&lt;support name = "pdrvOctetInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetInterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvInt32Input" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32InterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32AverageInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32Output" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvInt32ArrayInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayInterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvFloat64Input"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64InterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64AverageInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64Output"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvFloat64ArrayInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayInterruptInput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-
-&lt;support name = "pdrvUInt32DigitalInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalInterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-
-&lt;structure name = "portCreate" supportName = "portCreate" &gt;
-  &lt;field name = "factoryName" type = "string" /&gt;
-  &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "autoConnect" type = "boolean" default = "true" /&gt;
-  &lt;field name = "priority" type = "structure" structureName = "scanPriority" /&gt;
+&lt;structure name = "pdrvOctetInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvOctetInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvOctetOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "portDeviceControl" supportName = "portDeviceControl" &gt;
-  &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "deviceName" type = "string" /&gt;
-  &lt;field name = "connect" type = "boolean"  /&gt;
-  &lt;field name = "enable" type = "boolean"   /&gt;
-  &lt;field name = "autoConnect" type = "boolean" /&gt;
-  &lt;field name = "traceMask" type = "int"  /&gt;
-  &lt;field name = "traceIOMask" type = "int" /&gt;
-  &lt;field name = "traceIOTruncateSize" type = "int" /&gt;
-  &lt;field name = "report" type = "boolean" /&gt;
-  &lt;field name = "reportDetails" type = "int" /&gt;
+&lt;structure name = "pdrvInt32InputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32InterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32AverageInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32OutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;support name = "portCreate"
-   factoryName = "org.epics.ioc.support.pdrv.PDRVPortCreateFactory" /&gt;
+&lt;structure name = "pdrvInt32ArrayInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32ArrayInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32ArrayOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
-&lt;support name = "portDeviceControl"
-   factoryName = "org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory" /&gt;
+&lt;structure name = "pdrvFloat64InputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64InterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64AverageInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64OutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
+&lt;structure name = "pdrvFloat64ArrayInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64ArrayInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64ArrayOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvUInt32DigitalInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvUInt32DigitalInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvUInt32DigitalOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "portCreateFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVPortCreateFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "portDeviceControlFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "portCreate"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;portCreateFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "factoryName" type = "string" /&gt;
+  &lt;scalar name = "portName" type = "string" /&gt;
+  &lt;scalar name = "autoConnect" type = "boolean"&gt;true&lt;/scalar&gt;
+  &lt;structure name = "priority" type = "scanPriority" /&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "portDeviceControl"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;portDeviceControlFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
+  &lt;scalar name = "portName" type = "string" /&gt;
+  &lt;scalar name = "deviceName" type = "string" /&gt;
+  &lt;scalar name = "connect" type = "boolean"  /&gt;
+  &lt;scalar name = "enable" type = "boolean"   /&gt;
+  &lt;scalar name = "autoConnect" type = "boolean" /&gt;
+  &lt;scalar name = "traceMask" type = "int"  /&gt;
+  &lt;scalar name = "traceIOMask" type = "int" /&gt;
+  &lt;scalar name = "traceIOTruncateSize" type = "int" /&gt;
+  &lt;scalar name = "report" type = "boolean" /&gt;
+  &lt;scalar name = "reportDetails" type = "int" /&gt;
+&lt;/structure&gt;
 
 &lt;include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" /&gt;
 &lt;include href = "octetDriver.xml" /&gt;
@@ -2677,7 +2205,7 @@ org.epics.ioc.portDriver for details.</p>
 &lt;include href = "vxi11Driver.xml" /&gt;
 &lt;include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" /&gt;
 
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="pdrvSuppor">pdrvSupport</h4>
 
@@ -2737,72 +2265,49 @@ following features:</p>
 <p>processControl.xml describes the fields contained in a processControl
 record. It has the definitions:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "supportStateCommand" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" elementType = "string"
-    default = "idle initialize start stop uninitialize" /&gt;
-&lt;/structure&gt;
-&lt;structure name = "processControl" supportName = "processControl" &gt;
- &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "recordName" type = "string" /&gt;
-  &lt;field name = "trace" type = "boolean" /&gt;
-  &lt;field name = "enable" type = "boolean" /&gt;
-  &lt;field name = "supportState" structureName = "supportState" /&gt;
-  &lt;field name = "supportStateCommand" structureName = "supportStateCommand" /&gt;  
+&lt;&lt;database&gt;
+
+&lt;structure name = "processControlFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.ProcessControlFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;support name = "processControl"
-   factoryName = "org.epics.ioc.support.basic.ProcessControlFactory" /&gt;
-&lt;/IOCDatabase&gt;</pre>
-<hr />
 
-<h3 style="text-align: center"
-id="structure6">dbd/structure/supportArray.xml</h3>
-<hr />
-
-<p>This is the support for an array of links, which is part of many record
-types. See org.epics.ioc.support for details.</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;structure name = "supportArrayElement"&gt;
-  &lt;field name = "wait" type = "boolean" /&gt;
-  &lt;field name = "link" structureName = "generic" /&gt;
+&lt;structure name = "supportStateCommand"&gt;
+  &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;enumeratedFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "index" type = "int" /&gt;
+  &lt;scalar name = "choice" type = "string" /&gt;
+  &lt;array name = "choices" type = "string"&gt;
+    idle ,initialize,start,stop,uninitialize&lt;/array&gt;
 &lt;/structure&gt;
 
-&lt;support name = "supportArray"
-  factoryName = "org.epics.ioc.support.basic.SupportArrayFactory" /&gt;
-&lt;/IOCDatabase&gt;</pre>
-<dl>
-  <dt>supportArrayElement</dt>
-    <dd><dl>
-        <dt>wait</dt>
-          <dd>After this link is started should supportArraySupport wait for
-            completion of all links currently started before starting the
-            next link.</dd>
-        <dt>link</dt>
-          <dd>A database link</dd>
-        <dt>name</dt>
-          <dd>A name that can be used is desired. For example a calculation
-            record (not implemented) could use it.</dd>
-      </dl>
-    </dd>
-</dl>
+&lt;structure name = "processControl" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;processControlFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
+  &lt;scalar name = "recordName" type = "string" /&gt;
+  &lt;scalar name = "trace" type = "boolean" /&gt;
+  &lt;scalar name = "enable" type = "boolean" /&gt;
+  &lt;structure name = "supportState" type = "supportState" /&gt;
+  &lt;structure name = "supportStateCommand" type = "supportStateCommand" /&gt;
+&lt;/structure&gt;
+
+&lt;/database&gt;</pre>
 <hr />
 
 <h3 style="text-align: center"
 id="structure12">dbd/structure/supportState.xml</h3>
 <hr />
-<pre>&lt;IOCDatabase&gt;
-&lt;structure name = "supportState" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" elementType = "string"
-    default = "readyForInitialize readyForStart ready zombie" /&gt;
+<pre>&lt;database&gt;
+
+&lt;structure name = "supportState" &gt;
+  &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;enumeratedFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "index" type = "int" /&gt;
+  &lt;scalar name = "choice" type = "string" /&gt;
+  &lt;array name = "choices" type = "string"&gt;
+    readyForInitialize,readyForStart,ready,zombie&lt;/array&gt;
 &lt;/structure&gt;
 
-&lt;/IOCDatabase&gt;</pre>
+&lt;/database&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="License">License Agreement</h2>
