@@ -111,5 +111,12 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
             return;
         }
         isActive = recordProcess.process(this, false, null);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelMonitorNotifyRequester#unlisten()
+     */
+    @Override
+    public void unlisten() {
+        stop();
     } 
 }

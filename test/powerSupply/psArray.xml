@@ -12,7 +12,7 @@
             </structure>
             <structure name = "current" type = "generic">
                  <scalar name = "value" type = "double">
-                    <auxInfo name = "supportFactory" type = "string">powerSupplyCurrentFactory</auxInfo>
+                    <auxInfo name = "supportFactory" type = "string">powerSupplyFactory</auxInfo>
                  </scalar>
                  <structure name = "alarm" type = "alarm" />
             </structure>
@@ -27,7 +27,7 @@
             </structure>
             <structure name = "current" type = "generic">
                  <scalar name = "value" type = "double">
-                    <auxInfo name = "supportFactory" type = "string">powerSupplyCurrentFactory</auxInfo>
+                    <auxInfo name = "supportFactory" type = "string">powerSupplyFactory</auxInfo>
                  </scalar>
                  <structure name = "alarm" type = "alarm" />
             </structure>

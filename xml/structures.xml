@@ -1,5 +1,8 @@
 <?xml version="1.0" ?>
 <database>
+<include addPath = "${PVDATA}/xml" />
+<include href = "structures.xml" />
+<include removePath = "${PVDATA}/xml" />
 <include addPath = "${JAVAIOC}/xml/structure" />
 <include href = "generic.xml" />
 <include href = "commonFields.xml" />
@@ -13,22 +16,13 @@
 <include href = "calc.xml" />
 <include href = "delay.xml" />
 <include href = "processControl.xml" />
-
-<!--
+<include href = "powerSupply.xml" />
 <include href = "portDriver.xml" />
 <include removePath = "${JAVAIOC}/xml/structure" />
 <include addPath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" />
 <include href = "exampleCalculatorSupport.xml" />
 <include removePath = "${JAVAIOC}/src/org/epics/ioc/support/calc/example" />
+<!--
 -->
-
-<!-- following is for tests -->
-<structure name = "powerSupplyCurrentFactory">
-  <scalar name = "supportFactory" type = "string">
-     org.epics.ioc.support.device.PowerSupplyFactory</scalar>
-</structure>
-
-
-<include removePath = "${JAVAIOC}/xml/structure" />
 </database>
 

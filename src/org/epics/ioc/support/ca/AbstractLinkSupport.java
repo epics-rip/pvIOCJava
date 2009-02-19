@@ -13,7 +13,8 @@ import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.support.*;
+import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.alarm.AlarmSupport;
@@ -344,6 +345,7 @@ implements ChannelListener,ChannelFieldGroupListener {
                         int len = fromPVArray.getLength();
                         fromPVArray.get(0, len, stringArrayData);
                         valueChoicesPV.put(0, len, stringArrayData.data, 0);
+                        valueChoicesPV.postPut();
                     }
                 }
                 if(gotAdditionalPropertys) {

@@ -8,9 +8,9 @@
        <scalar name = "value" type = "double">10.0</scalar>
     </structure>
     <structure name = "current">
+       <auxInfo name = "supportFactory" type = "string">genericFactory</auxInfo>
        <scalar name = "value" type = "double">
-         <auxInfo name = "supportFactory" type = "string">powerSupplyCurrentFactory</auxInfo>
-         10.0
+         <auxInfo name = "supportFactory" type = "string">powerSupplyFactory</auxInfo>
        </scalar>
     </structure>
      <structure name = "power">

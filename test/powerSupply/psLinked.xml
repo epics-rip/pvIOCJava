@@ -40,7 +40,9 @@
         </structure>
     </structure>
     <structure name = "current" type = "generic">
-        <scalar name = "value" type = "double" />
+        <scalar name = "value" type = "double" >
+           <auxInfo name = "supportFactory" type = "string">powerSupplyFactory</auxInfo>
+        </scalar>
         <structure name = "output" type = "outputSupport">
             <scalar name = "pvname">current</scalar>
             <scalar name = "process">true</scalar>

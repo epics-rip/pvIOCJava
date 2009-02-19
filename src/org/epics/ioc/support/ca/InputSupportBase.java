@@ -57,7 +57,6 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
     private boolean valueChoicesChanged = false;
     private String[] newValueChoices = null;
     private StringArrayData stringArrayData = null;
-    private boolean[] propertyValueChanged = null;
     
     private boolean isReady = false;
     private SupportProcessRequester supportProcessRequester = null;
@@ -224,9 +223,7 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
                     for(int j=0; j<propertyChannelFields.length; j++) {
                         ChannelField propertyChannelField = propertyChannelFields[j];
                         if(channelField==propertyChannelField) {
-                            if(copy(targetPVField,propertyPVFields[j])) {
-                                propertyValueChanged[j] = true;
-                            }
+                            copy(targetPVField,propertyPVFields[j]);
                             foundIt = true;
                             break;
                         }
@@ -300,10 +297,8 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
         }
         if(gotAdditionalPropertys) {
             int length = propertyPVFields.length;
-            propertyValueChanged = new boolean[length];
             propertyChannelFields = new ChannelField[length];
             for(int i=0; i<length; i++) {
-                propertyValueChanged[i] = false;
                 String fieldName = propertyPVFields[i].getField().getFieldName();
                 ChannelField channelField = channel.createChannelField(fieldName);
                 if(channelField==null) {
@@ -373,20 +368,15 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
         }
         if(valueIndexChanged) {
             valueIndexPV.put(newValueIndex);
+            valueIndexPV.postPut();
             valueIndexChanged = false;
             newValueIndex = 0;
         }
         if(valueChoicesChanged) {
             valueChoicesPV.put(0, newValueChoices.length, newValueChoices, 0);
+            valueChoicesPV.postPut();
             valueChoicesChanged = false;
             newValueChoices = null;
-        }
-        if(gotAdditionalPropertys){
-            for(int j=0; j<propertyChannelFields.length; j++) {
-                if(propertyValueChanged[j]) {
-                    propertyValueChanged[j] = false;
-                }
-            }
         }
     }
     

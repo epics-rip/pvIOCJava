@@ -57,7 +57,7 @@ public class ArrayIncrementCalculatorFactory {
            for(int i=0; i<valueLength; i++) {
                value[i] = value[i] + 1.0;
            }
-  
+           valuePV.postPut();
         }
     }
 }
