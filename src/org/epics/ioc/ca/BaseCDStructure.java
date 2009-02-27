@@ -136,7 +136,7 @@ public class BaseCDStructure extends BaseCDField implements CDStructure {
     public void putSubfield(PVField target) {
         CDField targetCDField = findSourceCDField(target);
         if(targetCDField==null) {
-            throw new IllegalStateException("Logic error");
+            return;
         }
         targetCDField.put(target);
     }
