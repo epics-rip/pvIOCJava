@@ -3,14 +3,6 @@
 <record name = "arrayIncrementer${num}">
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "double" capacity = "5">
-        0.0 1.0 2.0 3.0 4.0
-    </array>
-    <structure name = "input" type = "calculation" >
-        <structure name = "calculator" type = "null">
-            <auxInfo name = "supportFactory" type = "string">arrayIncrementCalculatorFactory</auxInfo>
-        </structure>
-    </structure>
     <structure name = "scan" type = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
@@ -20,6 +12,14 @@
         <scalar name = "format">%f</scalar>
         <scalar name = "resolution">1</scalar>
         <scalar name = "units">volts</scalar>
+    </structure>
+    <array name = "value" type = "double" capacity = "5">
+        0.0 1.0 2.0 3.0 4.0
+    </array>
+    <structure name = "input" type = "calculation" >
+        <structure name = "calculator" type = "null">
+            <auxInfo name = "supportFactory" type = "string">arrayIncrementCalculatorFactory</auxInfo>
+        </structure>
     </structure>
 </record>
 

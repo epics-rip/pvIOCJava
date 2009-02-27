@@ -517,13 +517,6 @@ public class PDRVSupportFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
         public void start() {
@@ -593,13 +586,6 @@ public class PDRVSupportFactory {
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
@@ -683,13 +669,6 @@ public class PDRVSupportFactory {
             return;
         }      
         /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
         public void start() {
@@ -770,13 +749,6 @@ public class PDRVSupportFactory {
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
@@ -1471,7 +1443,6 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
 
-        private PVField valuePVField = null;
         private Float64 float64 = null;
         private double value;
         private Status status = Status.success;
@@ -1516,13 +1487,6 @@ public class PDRVSupportFactory {
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
@@ -1595,7 +1559,6 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
 
-        private PVField valuePVField = null;
         private Float64 float64 = null;
         private double value;
         private Status status = Status.success;
@@ -1640,13 +1603,6 @@ public class PDRVSupportFactory {
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
@@ -1730,7 +1686,6 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
 
-        private PVField valuePVField = null;
         private Float64 float64 = null;
         private int numValues = 0;
         private double sum = 0.0;
@@ -1745,13 +1700,6 @@ public class PDRVSupportFactory {
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */
@@ -1818,7 +1766,6 @@ public class PDRVSupportFactory {
             super(supportName,pvStructure);
         }
 
-        private PVField valuePVField = null;
         private Float64 float64 = null;
         private double value;
         private Status status = Status.success;
@@ -1833,13 +1780,6 @@ public class PDRVSupportFactory {
             pvStructure.message("value field is not a scalar type", MessageType.fatalError);
             return;
         }      
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#uninitialize()
-         */
-        public void uninitialize() {
-            super.uninitialize();
-            valuePVField = null;
-        }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
          */

@@ -27,8 +27,6 @@ import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVDouble;
@@ -68,7 +66,6 @@ RecordProcessRequester
         pvRecord = pvStructure.getPVRecord();
         recordName = pvRecord.getRecordName();
     }      
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     protected static final String emptyString = "";
     protected String supportName;
     protected PVStructure pvStructure;
@@ -103,7 +100,7 @@ RecordProcessRequester
     public void initialize(RecordSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
         recordProcess = recordSupport.getRecordProcess();
-        valuePVField = pvProperty.findPropertyViaParent(pvStructure,"value");
+        valuePVField = pvStructure.getParent().getSubField("value");
         if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
             return;
@@ -136,12 +133,16 @@ RecordProcessRequester
             stop();
         }
         if(super.getSupportState()!=SupportState.readyForStart) return;
+        pvProcess = null;
         pvDrvParams = null;
         pvTimeout = null;
+        pvSize = null;
+        pvMask = null;
         pvDeviceName = null;
         pvPortName = null;
-        pvStructure = null;
         alarmSupport = null;
+        valuePVField = null;
+        recordProcess = null;
         setSupportState(SupportState.readyForInitialize);
     }
     

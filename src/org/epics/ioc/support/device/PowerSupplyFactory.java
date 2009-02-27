@@ -7,14 +7,10 @@ package org.epics.ioc.support.device;
 
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportDatabase;
-import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVDatabase;
@@ -77,7 +73,7 @@ public class PowerSupplyFactory {
     }
     
     private static PVDouble getPVDouble(PVStructure pvParent,String fieldName) {
-        PVField pvField = pvProperty.findProperty(pvParent, fieldName);
+        PVField pvField = pvParent.getSubField(fieldName);
         if(pvField==null) {
             pvParent.message(fieldName + " does not exist", MessageType.fatalError);
             return null;
@@ -95,9 +91,7 @@ public class PowerSupplyFactory {
     }
     
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final SupportDatabase masterSupportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
     private static final String powerSupplyFactory = "powerSupplyFactory";
-    private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     
     static private class PowerSupplyCurrentImpl extends AbstractSupport

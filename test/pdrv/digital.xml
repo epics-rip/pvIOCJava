@@ -14,8 +14,8 @@
     <scalar name = "portName">syncDigitalPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
-    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
-    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
 -->
 </record>
 
@@ -23,18 +23,14 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
-      <structure name = "calculator">
-        <scalar name ="expression">(value+1)&lt;=15 ? value+1 : 0</scalar>
-      </structure>
-    </structure>
     <structure name = "scan" type = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
-    <structure name = "link" type = "outputSupport">
-         <scalar name = "pvname">syncDigitalOut</scalar>
-         <scalar name = "process">true</scalar>
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=15 ? value+1 : 0</scalar>
+      </structure>
     </structure>
     <structure name = "display" type = "display" >
         <scalar name = "units">counts</scalar>
@@ -42,6 +38,10 @@
             <scalar name = "low">0.0</scalar>
             <scalar name = "high">15.0</scalar>
         </structure>
+    </structure>
+    <structure name = "link" type = "outputSupport">
+         <scalar name = "pvname">syncDigitalOut</scalar>
+         <scalar name = "process">true</scalar>
     </structure>
 </record>
 
@@ -56,24 +56,26 @@
         <scalar name = "mask">15</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link1" type = "processSupport">
-         <scalar name = "pvname">syncDigitalIn1</scalar>
-         <scalar name = "wait" type = "boolean">false</scalar>
-    </structure>
-    <structure name = "link2" type = "processSupport">
-         <scalar name = "pvname">syncDigitalIn2</scalar>
-         <scalar name = "wait" type = "boolean">false</scalar>
-    </structure>
-    <structure name = "link3" type = "processSupport">
-         <scalar name = "pvname">syncDigitalIn3</scalar>
-         <scalar name = "wait" type = "boolean">false</scalar>
-    </structure>
-    <structure name = "link3" type = "processSupport">
-         <scalar name = "pvname">syncDigitalIn4</scalar>
-         <scalar name = "wait" type = "boolean">false</scalar>
-    </structure>
-    <structure name = "link3" type = "processSupport">
-         <scalar name = "pvname">syncDigitalIn5</scalar>
+    <structure name = "link" type = "generic">
+        <structure name = "1" type = "processSupport">
+             <scalar name = "pvname">syncDigitalIn1</scalar>
+             <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "2" type = "processSupport">
+             <scalar name = "pvname">syncDigitalIn2</scalar>
+             <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "3" type = "processSupport">
+             <scalar name = "pvname">syncDigitalIn3</scalar>
+             <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "4" type = "processSupport">
+             <scalar name = "pvname">syncDigitalIn4</scalar>
+             <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "5" type = "processSupport">
+             <scalar name = "pvname">syncDigitalIn5</scalar>
+        </structure>
     </structure>
 </record>
 
@@ -81,12 +83,14 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
-        <scalar name = "portName">syncDigitalPort</scalar>
-        <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x1</scalar>
-        <scalar name = "timeout">.2</scalar>
+    <structure name = "input" type = "digital">
+        <structure name = "input" type = "pdrvSupport">
+            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+            <scalar name = "portName">syncDigitalPort</scalar>
+            <scalar name = "deviceName">0</scalar>
+            <scalar name = "mask">0x1</scalar>
+            <scalar name = "timeout">.2</scalar>
+        </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
             <structure name = "0" type = "digitalState">
@@ -115,12 +119,14 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
-        <scalar name = "portName">syncDigitalPort</scalar>
-        <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x2</scalar>
-        <scalar name = "timeout">.2</scalar>
+    <structure name = "input" type = "digital">
+        <structure name = "input" type = "pdrvSupport">
+            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+            <scalar name = "portName">syncDigitalPort</scalar>
+            <scalar name = "deviceName">0</scalar>
+            <scalar name = "mask">0x2</scalar>
+            <scalar name = "timeout">.2</scalar>
+        </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
             <structure name = "0" type = "digitalState">
@@ -149,12 +155,14 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
-        <scalar name = "portName">syncDigitalPort</scalar>
-        <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x3</scalar>
-        <scalar name = "timeout">.2</scalar>
+    <structure name = "input" type = "digital">
+        <structure name = "input" type = "pdrvSupport">
+            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+            <scalar name = "portName">syncDigitalPort</scalar>
+            <scalar name = "deviceName">0</scalar>
+            <scalar name = "mask">0x3</scalar>
+            <scalar name = "timeout">.2</scalar>
+        </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
             <structure name = "0" type = "digitalState">
@@ -194,12 +202,14 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
-        <scalar name = "portName">syncDigitalPort</scalar>
-        <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0xc</scalar>
-        <scalar name = "timeout">.2</scalar>
+    <structure name = "input" type = "digital">
+        <structure name = "input" type = "pdrvSupport">
+            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+            <scalar name = "portName">syncDigitalPort</scalar>
+            <scalar name = "deviceName">0</scalar>
+            <scalar name = "mask">0xc</scalar>
+            <scalar name = "timeout">.2</scalar>
+        </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
             <structure name = "0" type = "digitalState">
@@ -240,12 +250,14 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
-        <scalar name = "portName">syncDigitalPort</scalar>
-        <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0xc</scalar>
-        <scalar name = "timeout">.2</scalar>
+    <structure name = "input" type = "digital">
+        <structure name = "input" type = "pdrvSupport">
+            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+            <scalar name = "portName">syncDigitalPort</scalar>
+            <scalar name = "deviceName">0</scalar>
+            <scalar name = "mask">0xf</scalar>
+            <scalar name = "timeout">.2</scalar>
+        </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
             <structure name = "0" type = "digitalState">
@@ -273,7 +285,7 @@
             <structure name = "4" type = "digitalState">
                 <scalar name = "name">four</scalar>
                 <scalar name = "value">0x4</scalar>
-                <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                <structure name = "severity"><scalar name = "choice">major</scalar></structure>
             </structure>
             <structure name = "5" type = "digitalState">
                 <scalar name = "name">eight</scalar>

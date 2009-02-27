@@ -13,8 +13,8 @@
     <scalar name = "portName">syncStringPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
-    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
-    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
 -->
 </record>
 
@@ -22,14 +22,14 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
       </structure>
-    </structure>
-     <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
-        <scalar name = "rate">0.5</scalar>
     </structure>
     <structure name = "link" type = "outputSupport">
          <scalar name = "pvname">syncStringOut</scalar>
@@ -47,7 +47,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link1" type = "processSupport">
+    <structure name = "link" type = "processSupport">
          <scalar name = "pvname">syncStringIn</scalar>
     </structure>
 </record>
@@ -90,8 +90,8 @@
     <scalar name = "portName">asynStringPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
-    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
-    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
 -->
 </record>
 
@@ -99,14 +99,14 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
       </structure>
-    </structure>
-    <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
-        <scalar name = "rate">0.5</scalar>
     </structure>
     <structure name = "link" type = "outputSupport">
          <scalar name = "pvname">asynStringOut</scalar>
@@ -124,7 +124,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link1" type = "processSupport">
+    <structure name = "link" type = "processSupport">
          <scalar name = "pvname">asynStringIn</scalar>
     </structure>
 </record>

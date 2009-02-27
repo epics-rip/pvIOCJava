@@ -14,8 +14,8 @@
     <scalar name = "portName">syncBooleanPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
-    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
-    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
 -->
 </record>
 
@@ -23,14 +23,14 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
       </structure>
-    </structure>
-    <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
-        <scalar name = "rate">0.5</scalar>
     </structure>
     <structure name = "link" type = "outputSupport">
          <scalar name = "pvname">syncBooleanOut</scalar>
@@ -49,16 +49,18 @@
         <scalar name = "mask">32767</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link1" type = "processSupport">
-         <scalar name = "pvname">syncBooleanIn1</scalar>
-         <scalar name = "wait" type = "boolean">false</scalar>
-    </structure>
-    <structure name = "link2" type = "processSupport">
-         <scalar name = "pvname">syncBooleanIn2</scalar>
-         <scalar name = "wait" type = "boolean">false</scalar>
-    </structure>
-    <structure name = "link3" type = "processSupport">
-         <scalar name = "pvname">syncBooleanIn3</scalar>
+    <structure name = "link" type = "generic">
+        <structure name = "1" type = "processSupport">
+             <scalar name = "pvname">syncBooleanIn1</scalar>
+             <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "2" type = "processSupport">
+             <scalar name = "pvname">syncBooleanIn2</scalar>
+             <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "3" type = "processSupport">
+             <scalar name = "pvname">syncBooleanIn3</scalar>
+        </structure>
     </structure>
 </record>
 
@@ -78,7 +80,7 @@
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
       <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "falseMessage">true alarm</scalar>
+      <scalar name = "trueMessage">true alarm</scalar>
     </structure>
 </record>
 
@@ -98,7 +100,7 @@
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
       <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "falseMessage">true alarm</scalar>
+      <scalar name = "trueMessage">true alarm</scalar>
     </structure>
 </record>
 
@@ -114,11 +116,11 @@
         <scalar name = "timeout">.2</scalar>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
-      <scalar name = "active">true</scalar>
-      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
-      <scalar name = "falseMessage">false alarm</scalar>
-      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "falseMessage">true alarm</scalar>
+        <scalar name = "active">true</scalar>
+        <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
+        <scalar name = "falseMessage">false alarm</scalar>
+        <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
+        <scalar name = "trueMessage">true alarm</scalar>
     </structure>
 </record>
 
@@ -135,8 +137,8 @@
     <scalar name = "portName">asyncBooleanPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
-    <structure name = "traceMask"><scalar name ="value">0xfff</scalar></structure>
-    <structure name = "traceIOMask"><scalar name ="value">0xfff</scalar></structure>
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
 -->
 </record>
 
@@ -144,14 +146,14 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
       </structure>
-    </structure>
-    <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
-        <scalar name = "rate">0.5</scalar>
     </structure>
     <structure name = "link" type = "outputSupport">
          <scalar name = "pvname">asynBooleanOut</scalar>
@@ -170,14 +172,16 @@
         <scalar name = "mask">32767</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link1" type = "processSupport">
-         <scalar name = "pvname">asynBooleanIn1</scalar>
-    </structure>
-    <structure name = "link2" type = "processSupport">
-         <scalar name = "pvname">asynBooleanIn2</scalar>
-    </structure>
-    <structure name = "link3" type = "processSupport">
-         <scalar name = "pvname">asynBooleanIn3</scalar>
+    <structure name = "link" type = "generic">
+        <structure name = "link1" type = "processSupport">
+             <scalar name = "pvname">asynBooleanIn1</scalar>
+        </structure>
+        <structure name = "link2" type = "processSupport">
+             <scalar name = "pvname">asynBooleanIn2</scalar>
+        </structure>
+        <structure name = "link3" type = "processSupport">
+             <scalar name = "pvname">asynBooleanIn3</scalar>
+        </structure>
     </structure>
 </record>
 
@@ -197,7 +201,7 @@
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
       <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "falseMessage">true alarm</scalar>
+      <scalar name = "trueMessage">true alarm</scalar>
     </structure>
 </record>
 
@@ -209,7 +213,7 @@
         <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x1</scalar>
+        <scalar name = "mask">0x2</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
@@ -217,7 +221,7 @@
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
       <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "falseMessage">true alarm</scalar>
+      <scalar name = "trueMessage">true alarm</scalar>
     </structure>
 </record>
 <record name = "asynBooleanIn3">
@@ -228,7 +232,7 @@
         <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x1</scalar>
+        <scalar name = "mask">0x4</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
@@ -236,7 +240,7 @@
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
       <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "falseMessage">true alarm</scalar>
+      <scalar name = "trueMessage">true alarm</scalar>
     </structure>
 </record>
 

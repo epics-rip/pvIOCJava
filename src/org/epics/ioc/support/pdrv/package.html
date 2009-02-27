@@ -10,19 +10,19 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support.pdrv<br />
-2008.09.12</h1>
-CONTENTS 
+2009.02.25</h1>
+CONTENTS
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#portDriver">portDriver Support</a> 
+  <li><a href="#portDriver">portDriver Support</a>
     <ul>
       <li><a href="#Java">Java Definitions</a></li>
       <li><a href="#PDRVSuppor">PDRVSupport</a></li>
     </ul>
   </li>
-  <li><a href="#AbstractPD">AbstractPDRVSupport</a> 
+  <li><a href="#AbstractPD">AbstractPDRVSupport</a>
     <ul>
       <li><a href="#PDRVSuppor1">PDRVSupportFactory</a></li>
     </ul>
@@ -31,6 +31,8 @@ CONTENTS
   <li><a href="#PDRVPortDe">PDRVPortDeviceControlFactory</a></li>
 </ul>
 </div>
+
+<p> </p>
 <hr />
 
 <h2 style="text-align: center" id="Overview">Overview</h2>
@@ -78,21 +80,18 @@ portDriver support.</p>
     }
 
     public class PDRVSupportFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }
     
     public abstract class AbstractPDRVSupportSupport extends AbstractSupport implements
     ProcessContinueRequester,QueueRequestCallback,
-    PDRVSupportSupport,
+    PDRVSuppor,
     RecordProcessRequester
     {
-        protected AbstractPDRVSupportSupport(String supportName,DBStructure dbStructure);
+        protected AbstractPDRVSupportSupport(String supportName,PVStructure pvStructure);
         protected String supportName;
-        protected DBStructure dbStructure;
         protected PVStructure pvStructure;
-        protected DBField valueDBField = null;
         protected PVField valuePVField = null;
-        protected DBRecord dbRecord = null;
         protected PVRecord pvRecord = null;
         protected String recordName = null;
         protected String fullName = null;
@@ -117,7 +116,7 @@ portDriver support.</p>
         protected DriverUser driverUser = null;
     
         protected SupportProcessRequester supportProcessRequester = null;
-        public void initialize();
+        public void initialize(RecordSupport recordSupport);
         public void uninitialize();
         public void start();
         public void stop();
@@ -132,11 +131,11 @@ portDriver support.</p>
     }
 
     public class PDRVPortCreateFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }
 
     public class PDRVPortDeviceControlFactory {
-        public static Support create(DBStructure dbStructure)
+        public static Support create(PVStructure pvStructure)
     }</pre>
 
 <h3 id="PDRVSuppor">PDRVSupport</h3>
@@ -169,78 +168,120 @@ PDRVSupportFactory for how to use the abstract support.</p>
 <h3 id="PDRVSuppor1">PDRVSupportFactory</h3>
 
 <p>This implements all of the link support defined in .xml file
-javaIOC/dbd/structures/portDriver.xml.</p>
+javaIOC/xml/structures/portDriver.xml.</p>
 <pre>&lt;structure name = "pdrvSupport"&gt;
-  &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "addr" type = "int" /&gt;
-  &lt;field name = "timeout" type = "double" /&gt;
-  &lt;field name = "mask" type = "int" /&gt;
-  &lt;field name = "size" type = "int" /&gt;
-  &lt;field name = "process" type = "boolean" default = "false" /&gt;
-  &lt;field name = "drvParams" type = "structure" /&gt;
+  &lt;scalar name = "portName" type = "string" /&gt;
+  &lt;scalar name = "deviceName" type = "string" /&gt;
+  &lt;scalar name = "timeout" type = "double" /&gt;
+  &lt;scalar name = "mask" type = "int" /&gt;
+  &lt;scalar name = "size" type = "int" /&gt;
+  &lt;scalar name = "process" type = "boolean" default = "false" /&gt;
 &lt;/structure&gt;
 
-&lt;support name = "pdrvOctetInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetInterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvOctetOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;structure name = "pdrvOctetInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvOctetInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvOctetOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
-&lt;support name = "pdrvInt32Input" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32InterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32AverageInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32Output" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;structure name = "pdrvInt32InputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32InterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32AverageInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32OutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
-&lt;support name = "pdrvInt32ArrayInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayInterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvInt32ArrayOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;structure name = "pdrvInt32ArrayInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32ArrayInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvInt32ArrayOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
-&lt;support name = "pdrvFloat64Input"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64InterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64AverageInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64Output"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;structure name = "pdrvFloat64InputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64InterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64AverageInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64OutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
-&lt;support name = "pdrvFloat64ArrayInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayInterruptInput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvFloat64ArrayOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
+&lt;structure name = "pdrvFloat64ArrayInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64ArrayInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvFloat64ArrayOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
 
-&lt;support name = "pdrvUInt32DigitalInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalInterruptInput"
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;
-&lt;support name = "pdrvUInt32DigitalOutput" 
-  factoryName = "org.epics.ioc.support.pdrv.PDRVSupportFactory" /&gt;</pre>
+&lt;structure name = "pdrvUInt32DigitalInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvUInt32DigitalInterruptInputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;
+&lt;structure name = "pdrvUInt32DigitalOutputFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVSupportFactory&lt;/scalar&gt;
+&lt;/structure&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="PDRVPortCr">PDRVPortCreateFactory</h2>
 <hr />
 
-<p>This implements support for the portRecord which has the definition:</p>
-<pre>&lt;structure name = "portCreate" supportName = "portCreate" &gt;
-  &lt;field name = "factoryName" type = "string" /&gt;
-  &lt;field name = "portName" type = "string" /&gt;
-  &lt;field name = "autoConnect" type = "boolean" default = "true" /&gt;
-  &lt;field name = "priority" type = "structure" structureName = "scanPriority" /&gt;
-  &lt;field name = "driverParameters" type = "structure" structureName = "null"/&gt;
+<p>This implements support for the portCreate structure which has the
+definition:</p>
+<pre>&lt;structure name = "portCreateFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVPortCreateFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;support name = "portCreate"
-   factoryName = "org.epics.ioc.support.pdrv.PDRVPortCreateFactory" /&gt;</pre>
+&lt;structure name = "portCreate"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;portCreateFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "factoryName" type = "string" /&gt;
+  &lt;scalar name = "portName" type = "string" /&gt;
+  &lt;scalar name = "autoConnect" type = "boolean"&gt;true&lt;/scalar&gt;
+  &lt;structure name = "priority" type = "scanPriority" /&gt;
+&lt;/structure&gt;</pre>
 
 <p>This is support for a record or structure that initializes a portDriver
 port.</p>
@@ -252,20 +293,24 @@ id="PDRVPortDe">PDRVPortDeviceControlFactory</h2>
 
 <p>This implements support for the portDeviceControl which has the
 definition:</p>
-<pre>&lt;structure name = "portDeviceControl" supportName = "portDeviceControl" &gt;
-  &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "portDevice" type = "string" /&gt;
-  &lt;field name = "connect" type = "structure" structureName = "booleanState"  /&gt;
-  &lt;field name = "enable" type = "structure" structureName = "booleanState"   /&gt;
-  &lt;field name = "autoConnect" type = "structure" structureName = "booleanState" /&gt;
-  &lt;field name = "traceMask" type = "structure" structureName = "intState"  /&gt;
-  &lt;field name = "traceIOMask" type = "structure" structureName = "intState" /&gt;
-  &lt;field name = "traceIOTruncateSize" type = "structure" structureName = "intState" /&gt;
-  &lt;field name = "report" type = "boolean" /&gt;
-  &lt;field name = "reportDetails" type = "int" /&gt;
+<pre>&lt;structure name = "portDeviceControlFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;support name = "portDeviceControl"
-   factoryName = "org.epics.ioc.support.pdrv.PDRVPortDeviceControlFactory" /&gt;</pre>
+&lt;structure name = "portDeviceControl"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;portDeviceControlFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
+  &lt;scalar name = "portName" type = "string" /&gt;
+  &lt;scalar name = "deviceName" type = "string" /&gt;
+  &lt;scalar name = "connect" type = "boolean"  /&gt;
+  &lt;scalar name = "enable" type = "boolean"   /&gt;
+  &lt;scalar name = "autoConnect" type = "boolean" /&gt;
+  &lt;scalar name = "traceMask" type = "int"  /&gt;
+  &lt;scalar name = "traceIOMask" type = "int" /&gt;
+  &lt;scalar name = "traceIOTruncateSize" type = "int" /&gt;
+  &lt;scalar name = "report" type = "boolean" /&gt;
+  &lt;scalar name = "reportDetails" type = "int" /&gt;
+&lt;/structure&gt;</pre>
 </body>
 </html>
