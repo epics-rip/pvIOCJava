@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: basic support<br />
 package: org.epics.ioc.support.basic<br />
-2008.08.26</h1>
+2009.02.25</h1>
 CONTENTS 
 
 <div class="toc">
@@ -20,21 +20,21 @@ CONTENTS
   <li><a href="#Noop">Noop Support</a></li>
   <li><a href="#ScanSuppor">ScanSupport</a></li>
   <li><a href="#ProcessCon">ProcessControl Support</a></li>
-  <li><a href="#Linear">Linear Conversion</a> 
+  <li><a href="#Control">Control Limit</a></li>
+  <li><a href="#Linear">Linear Conversion</a>
     <ul>
       <li><a href="#linearConv">linearConversion</a></li>
       <li><a href="#LinearConv">LinearConvertInputFactory</a></li>
       <li><a href="#LinearConv1">LinearConvertOutputFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Digital">Digital Support</a> 
+  <li><a href="#Digital">Digital Support</a>
     <ul>
       <li><a href="#Java">Java Definitions</a></li>
     </ul>
   </li>
   <li><a href="#Incrementa">Incremental Support</a></li>
   <li><a href="#Event">Event Support</a></li>
-  <li><a href="#SupportArr">SupportArray Support</a></li>
   <li><a href="#DelaySuppo">DelaySupport Support</a></li>
 </ul>
 </div>
@@ -69,6 +69,8 @@ services.</p>
           <dd>Support for linear conversion of output fields.</dd>
       </dl>
     </dd>
+  <dt>ControlLimit</dt>
+    <dd>Enforce control limits.</dd>
   <dt>DigitalFactory</dt>
     <dd>Support for a record or structure that has fields appropriate for
       Digital I/O.</dd>
@@ -76,8 +78,6 @@ services.</p>
     <dd>Support for incremental outputs.</dd>
   <dt>EventFactory</dt>
     <dd>Support for a string field that is the name of an event.</dd>
-  <dt>SupportArrayFactory</dt>
-    <dd>Support for an array of structures that have support.</dd>
   <dt>DelayFactory</dt>
     <dd>It just causes an asynchronous delay before completing
     successfully.</dd>
@@ -87,42 +87,29 @@ services.</p>
 <h2 style="text-align: center" id="Generic">Generic Support</h2>
 <hr />
 <pre>    public class GenericFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }</pre>
 Generic Support is used for many record/structure definitions . It is often
 used because it just looks for fields that have associated support and calls
 the support. It also has a few conventions so that it works with a variety of
-support modules.  It implements the following semantics:
+support modules. It implements the following semantics: 
 <dl>
-  <dt>scan</dt>
+  <dt style="font-family: courier;">scan,timeStamp</dt>
     <dd>It does not call the support for field scan or timeStamp because
       recordProcess handles these fields.</dd>
   <dt style="font-family: courier;">alarm</dt>
     <dd>If field alarm is present and has AlarmSupport then it is handled
       properly.</dd>
+  <dt style="font-family: courier;">wait</dt>
+    <dd>If a subfield is a structure that has a boolean field named wait,
+      then generic support gets the PVBoolean interface for then wait field.
+      It uses the value to decide if it must want for the associated support
+      to complete before it processes the next support. If no wait field is
+      defined it waits.</dd>
   <dt>fields with associated support.</dt>
     <dd>For each field with support, the support methods are called, i.e.
       initialize,start,stop,uninitialize, and process. Each process must
       complete before process for the next support module is called.</dd>
-</dl>
-
-<p>The above rules allow the generic support to be used for many record types
-and embeded versions of these record types. Lets consider an example which
-has the following fields with support.:</p>
-<dl>
-  <dt style="font-family: courier;">input</dt>
-    <dd>This is a link field. If support is defined then the record instance
-      becomes an input record. The support gets a value and puts it into the
-      value field.</dd>
-  <dt style="font-family: courier;">output</dt>
-    <dd>This is a link field. If support is defined then the record instance
-      becomes an output record. The support gets data from the value field
-      and sends it somewhere.</dd>
-  <dt style="font-family: courier;">valueAlarm</dt>
-    <dd>This is a link field. If support is defined it is expected to check
-      the value field for alarm conditions.</dd>
-  <dt style="font-family: courier;">supportArray</dt>
-    <dd>If the supportArray support is defined it is called.</dd>
 </dl>
 
 <p>The generic support does not force the support for input to do input, the
@@ -136,8 +123,8 @@ of support.</p>
 <h2 style="text-align: center" id="Noop">Noop Support</h2>
 <hr />
 <pre>    public class NoopFactory {
-        public static Support create(DBField dbField);
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVField pvField);
+        public static Support create(PVStructure pvStructure);
     }</pre>
 
 <p>This can be used for record types that just hold data. It can also be used
@@ -171,7 +158,7 @@ methods.</p>
         void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
     }
     public class ScanFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVtructure pvStructure);
     }</pre>
 
 <p><span style="font-family: courier;">ScanSupport</span>, which MUST only be
@@ -232,31 +219,29 @@ following features:</p>
 
 <p>processControl.html describes the fields contained in a processControl
 record. It has the definitions:</p>
-<pre>&lt;structure name = "supportStateCommand" createName = "enumerated" &gt;
-  &lt;field name = "index" type = "int" /&gt;
-  &lt;field name = "choice" type = "string" /&gt;
-  &lt;field name = "choices" type = "array" elementType = "string"
-    default = "idle initialize start stop uninitialize" /&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "processControl" supportName = "processControl" &gt;
-  &lt;field name = "message" type = "string" /&gt;
-  &lt;field name = "recordName" type = "string" /&gt;
-  &lt;field name = "trace" type = "structure" structureName = "booleanState" /&gt;
-  &lt;field name = "enable" type = "structure" structureName = "booleanState" /&gt;
-  &lt;field name = "supportStateRecord" type = "structure" structureName = "supportState" /&gt;
-  &lt;field name = "supportStateCommandRecord" type = "structure" structureName = "supportStateCommand" /&gt;
-  &lt;!-- remaining fields refer to a field of the record --&gt;
-  &lt;field name = "fieldName" type = "structure" structureName = "stringState"  /&gt;
-  &lt;field name = "supportState" type = "structure" structureName = "supportState" /&gt;
-  &lt;field name = "supportStateCommand" type = "structure" structureName = "supportStateCommand" /&gt;
-  &lt;field name = "supportName" type = "structure" structureName = "stringState" /&gt;
-  &lt;field name = "structureName" type = "structure" structureName = "stringState" /&gt;
+<pre>&lt;structure name = "processControlFactory"&gt;
+  &lt;scalar name = "supportFactory" type = "string"&gt;
+     org.epics.ioc.support.basic.ProcessControlFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
 
-&lt;support name = "processControl"
-   factoryName = "org.epics.ioc.support.ProcessControlFactory" /&gt;</pre>
+&lt;structure name = "supportStateCommand"&gt;
+  &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;enumeratedFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "index" type = "int" /&gt;
+  &lt;scalar name = "choice" type = "string" /&gt;
+  &lt;array name = "choices" type = "string"&gt;
+    idle ,initialize,start,stop,uninitialize&lt;/array&gt;
+&lt;/structure&gt;
+
+&lt;structure name = "processControl" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;processControlFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
+  &lt;scalar name = "recordName" type = "string" /&gt;
+  &lt;scalar name = "trace" type = "boolean" /&gt;
+  &lt;scalar name = "enable" type = "boolean" /&gt;
+  &lt;structure name = "supportState" type = "supportState" /&gt;
+  &lt;structure name = "supportStateCommand" type = "supportStateCommand" /&gt;
+&lt;/structure&gt;</pre>
 
 <p>Structure supportStateCommand is an enumerated structure with the
 following choices</p>
@@ -274,47 +259,35 @@ following choices</p>
     <dd>Call the uninitialize method of the support.</dd>
 </dl>
 
-<p>recordType processControl has fields trace, enable, fieldName,
-supportName, and structureName. Each is a structure field with the following
-fields:</p>
+<p>structure processControl has fields trace, enable, recordName,
+supportState, and supportStateCommand.</p>
 <dl>
-  <dt style="font-family: courier;">value</dt>
-    <dd>This holds the current value.</dd>
-  <dt style="font-family: courier;">desiredValue</dt>
-    <dd>This is set by the user to give the desired value.</dd>
-  <dt style="font-family: courier;">setValue</dt>
-    <dd>This is a boolean field. The user sets this to true to request the
-      the value be set to the dersired value. processControl sets this back
-      to false after processing.</dd>
-</dl>
-
-<p>recordType processControl has the following fields:</p>
-<dl>
-  <dt style="font-family: courier;">message</dt>
-    <dd>If processControl encounters any problems it puts a value in this
-      field. </dd>
   <dt style="font-family: courier;">recordName</dt>
-    <dd>The name of the attached record. It must be a local record.</dd>
-  <dt style="font-family: courier;">trace</dt>
-    <dd>A structure for setting and reporting record tracing.</dd>
-  <dt style="font-family: courier;">enable</dt>
-    <dd>A structure for setting and reporting record enabling.</dd>
-  <dt style="font-family: courier;">supportStateRecord</dt>
-    <dd>A structure for reporting the support state of the record</dd>
-  <dt style="font-family: courier;">supportStateCommandRecord</dt>
-    <dd>A structure for changing the support state for the record.</dd>
-  <dt style="font-family: courier;">fieldName</dt>
-    <dd>A structure for setting and reporting the field of the record for the
-      following fields.</dd>
-  <dt style="font-family: courier;">supportState</dt>
-    <dd>A structure for reporting the support state of the field.</dd>
-  <dt style="font-family: courier;">supportStateCommand</dt>
-    <dd>A structure for changing the support state for the field.</dd>
-  <dt style="font-family: courier;">supportName</dt>
-    <dd>A structure for changing the support for the field.</dd>
-  <dt style="font-family: courier;">structureName</dt>
-    <dd>A structure for changing the structure for the field.</dd>
+    <dd>This record to control.</dd>
+  <dt style="font-family: courier;">trace,enable</dt>
+    <dd>Set true or false.</dd>
+  <dt style="font-family: courier;">supportState,supportStateCommand</dt>
+    <dd>Show and set the support state for recordName.</dd>
 </dl>
+<hr />
+
+<h2 style="text-align: center" id="Control">Control Limit</h2>
+<hr />
+
+<p>This is code to enforce control limits. It handles the following type of
+definitions:</p>
+<pre>&lt;record name = "aoIncremental"&gt;
+    &lt;scalar name = "value" type = "double"&gt;
+        &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;controlLimitFactory&lt;/auxInfo&gt;
+    &lt;/scalar&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "control" type = "control" &gt;
+        &lt;structure name = "limit"&gt;
+            &lt;scalar name = "low"&gt;0.0&lt;/scalar&gt;
+            &lt;scalar name = "high"&gt;8.0&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;</pre>
 <hr />
 
 <h2 style="text-align: center" id="Linear">Linear Conversion</h2>
@@ -352,13 +325,14 @@ lineraConversion:</p>
 </dl>
 
 <h3 id="LinearConv">LinearConvertInputFactory</h3>
-<pre>    public class LinearConvertInputFactory {
-        public static Support create(DBStructure dbStructure);
+<pre>    public class LinearConvertFactory {
+        public static Support create(PVStructure pvStructure);
     }</pre>
 
 <p>This is the factory that implements linear input conversion, i.e. it
-converts a rawValue to engineering units. A field for linear conversion for
-input is a structure containing the following fields:</p>
+converts a rawValue to engineering units. The auxInfo must have supportName
+"linearConvertInputFactory" .A field for linear conversion for input is a
+structure containing the following fields:</p>
 <dl>
   <dt style="font-family: courier;">rawValue</dt>
     <dd>The raw value which is obtained via the support attached to the input
@@ -371,13 +345,14 @@ input is a structure containing the following fields:</p>
 </dl>
 
 <h3 id="LinearConv1">LinearConvertOutputFactory</h3>
-<pre>    public class LinearConvertOutputFactory {
-        public static Support create(DBStructure dbStructure);
+<pre>    public class LinearConvertFactory {
+        public static Support create(PVStructure pvStructure);
     }</pre>
 
 <p>This is the factory that implements linear output conversion, i.e. it
-converts a value in engineering units to a rawValue. A field for linear
-conversion for output is a structure containing the following fields:</p>
+converts a value in engineering units to a rawValue.The auxInfo must have
+supportName "linearConvertOutputFactory". A field for linear conversion for
+output is a structure containing the following fields:</p>
 <dl>
   <dt style="font-family: courier;">rawValue</dt>
     <dd>The raw value which is obtained via the support attached to the input
@@ -397,12 +372,12 @@ conversion for output is a structure containing the following fields:</p>
 
 <h3 id="Java">Java Definitions</h3>
 <pre>    public class DigitalFactory {
-        public static Support create(DBField dbField);
+        public static Support create(PVStructure pvStructure);
     }</pre>
 
-<p>The dbField must be an array of digitalState structures. The enumerated
-value field must be in the parent of the parent of dbField. The register
-value must be in the parent of dbField. During initialization it sets the
+<p>The pvField must be an array of digitalState structures. The enumerated
+value field must be in the parent of the parent of pvField. The register
+value must be in the parent of pvField. During initialization it sets the
 array of choices for the value field. It uses the name fields in the states
 array to create the choices.</p>
 <hr />
@@ -410,40 +385,45 @@ array to create the choices.</p>
 <h2 style="text-align: center" id="Incrementa">Incremental Support</h2>
 <hr />
 
-<p>This is support for incremental outputs.For example it supports an
-incremental output record.</p>
+<p>This is support for incremental outputs.For example it supports a record
+that has the following structure:</p>
+<pre>&lt;record name = "aoIncremental"&gt;
+    &lt;scalar name = "value" type = "double" /&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;structure name = "desired" type = "incrementalDouble" &gt;
+        &lt;scalar name = "value"&gt;
+            &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;controlLimitFactory&lt;/auxInfo&gt;
+        &lt;/scalar&gt;
+        &lt;scalar name = "rateOfChange"&gt;.02&lt;/scalar&gt;
+        &lt;scalar name = "incremental"&gt;true&lt;/scalar&gt;
+        &lt;structure name = "control" type = "control" &gt;
+            &lt;structure name = "limit"&gt;
+                &lt;scalar name = "low"&gt;0.0&lt;/scalar&gt;
+                &lt;scalar name = "high"&gt;8.0&lt;/scalar&gt;
+            &lt;/structure&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
+&lt;/record&gt;</pre>
 
 <p>This uses the Java definitions:</p>
-<pre>    public interface IncrementalSupport extends Support{
-        void setDesiredField(DBField dbField);
-    }
-
+<pre>    
     public class IncrementalFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVField pvField);
     }</pre>
 
 <p>This supports the following fields:</p>
 <dl>
   <dt style="font-family: courier;">value</dt>
     <dd>The value field.</dd>
-  <dt style="font-family: courier;">desiredValue</dt>
-    <dd>This must be a double field. It can either be a field named in the
-      record or structure being supported or it can be a field passed as an
-      argument to the double support setDesiredField method. When this field
-      changes the support changes the value field until it has the desired
-      value. If control limits are specified then the desired value is forced
-      to be within the control limits. If incrementalOutput is true then each
-      time the record is processed the value field is changed by rateOfChange
-      until the desired value is reached.</dd>
-  <dt style="font-family: courier;">input</dt>
-    <dd>If this field exists and has support it is called to get the
-      desiredValue.</dd>
-  <dt style="font-family: courier;">controlLimit</dt>
-    <dd>This field is optional. If present it must be a structure that has
-      two double fields named. If the low value is strictly less that the
-      high value then limits are enforced, i.e. the desired value is forced
-      to be within the control limits.</dd>
-  <dt style="font-family: courier;">incrementalOutput</dt>
+  <dt style="font-family: courier;">desired.value</dt>
+    <dd>This must be a double field. When this field changes the support
+      changes the value field until it has the desired value. If control
+      limits are specified then the desired value is forced to be within the
+      control limits. If incrementalOutput is true then each time the record
+      is processed the value field is changed by rateOfChange until the
+      desired value is reached.</dd>
+  <dt style="font-family: courier;">incremental</dt>
     <dd>This field is optional. If the record/structure has a field named
       then it must be have type boolean. If not present the default is true.
       If this has the value true the output is adjusted by rateOfChange
@@ -458,7 +438,7 @@ incremental output record.</p>
 <h2 style="text-align: center" id="Event">Event Support</h2>
 <hr />
 <pre>    public class EventFactory {
-        public static Support create(DBField dbField);
+        public static Support create(PVField pvField);
     }</pre>
 
 <p>EventFactory implements record or structure support for announcing a scan
@@ -474,20 +454,6 @@ support announces an event. All event scanned records with the event name
 associated with the value field are processed. Each time process is called,
 the event support checks to see if the event name has changed.</p>
 <hr />
-
-<h2 style="text-align: center;" id="SupportArr">SupportArray Support</h2>
-<hr />
-<pre>    public class SupportArrayFactory {
-        public static Support create(DBField dbField);
-    }</pre>
-
-<p>This is a factory that provides support for an array of structures. The
-supportName is SupportArray. If any of the array elements has support, the
-support is called. If the structure is a</p>
-
-<p>supportArrayElement structure then it also supports the wait field, which
-if true, waits for all the previous supports to complete before calling the
-support for the link field.</p>
 <hr />
 
 <h2 style="text-align: center;" id="DelaySuppo">DelaySupport Support</h2>
@@ -495,15 +461,18 @@ support for the link field.</p>
 
 <p>This is link support that simulates asynchronous support. It uses a
 configStructure that has the definition:</p>
-<pre>&lt;structure name = "delay" supportName = "delay"&gt;
-  &lt;!-- min, max, inc are delay in milliseconds --&gt;
-  &lt;field name = "min" type = "long" /&gt;
-  &lt;field name = "max" type = "long" /&gt;
-  &lt;field name = "inc" type = "long" /&gt;
+<pre>&lt;structure name = "delayFactory"&gt;
+ &lt;scalar name = "supportFactory" type = "string"&gt;
+   org.epics.ioc.support.basic.DelayFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;support name = "delay"
-  factoryName = "org.epics.ioc.support.DelayFactory" /&gt;</pre>
+&lt;structure name = "delay"&gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;delayFactory&lt;/auxInfo&gt;
+  &lt;!-- min, max, inc are delay in milliseconds --&gt;
+  &lt;scalar name = "min" type = "long" /&gt;
+  &lt;scalar name = "max" type = "long" /&gt;
+  &lt;scalar name = "inc" type = "long" /&gt;
+&lt;/structure&gt;</pre>
 
 <p>where</p>
 <dl>
@@ -522,7 +491,7 @@ of min.</p>
 
 <p>The factory definition is:</p>
 <pre>    public class DelaySupportFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }</pre>
 </body>
 </html>
