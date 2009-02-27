@@ -28,8 +28,8 @@ public class ArrayAddCalculatorFactory {
 
 
         private ArgType[] argTypes = new ArgType[] {
-            new ArgType("a",Type.scalar,ScalarType.pvDouble),
-            new ArgType("b",Type.scalar,ScalarType.pvDouble)
+            new ArgType("a",Type.scalarArray,ScalarType.pvDouble),
+            new ArgType("b",Type.scalarArray,ScalarType.pvDouble)
         };
         private PVDoubleArray aPV = null;
         private DoubleArrayData aData = new DoubleArrayData();
