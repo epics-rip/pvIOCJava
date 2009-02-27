@@ -37,8 +37,6 @@ import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -63,7 +61,6 @@ public class IntrospectDatabaseFactory {
     private static final Executor executor = ExecutorFactory.create("swtshell:introspectDatabase",ThreadPriority.low);
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final SupportDatabase masterSupportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
-    private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static final String newLine = String.format("%n");
     
     /**
@@ -274,10 +271,10 @@ public class IntrospectDatabaseFactory {
                 boolean isEnabled = recordProcess.isEnabled();
                 boolean isTrace = recordProcess.isTrace();
                 String alarmSeverity = null;
-                PVField pvField = pvProperty.findProperty(pvRecord,"alarm.severity.choice");
+                PVField pvField = pvRecord.getSubField("alarm.severity.choice");
                 if(pvField!=null) alarmSeverity = pvField.toString();
                 String alarmMessage = null;
-                pvField = pvProperty.findProperty(pvRecord,"alarm.message");
+                pvField = pvRecord.getSubField("alarm.message");
                 if(pvField!=null) alarmMessage = pvField.toString();
                 consoleText.append(pvRecord.getPVRecord().getRecordName() + newLine);
                 consoleText.append(
@@ -327,10 +324,10 @@ public class IntrospectDatabaseFactory {
                     boolean isEnabled = recordProcess.isEnabled();
                     SupportState supportState = recordProcess.getSupportState();
                     String alarmSeverity = null;
-                    PVField pvField = pvProperty.findProperty(pvRecord,"alarm.severity.choice");
+                    PVField pvField = pvRecord.getSubField("alarm.severity.choice");
                     if(pvField!=null) alarmSeverity = pvField.toString();
                     String alarmMessage = null;
-                    pvField = pvProperty.findProperty(pvRecord,"alarm.message");
+                    pvField = pvRecord.getSubField("alarm.message");
                     if(pvField!=null) alarmMessage = pvField.toString();
                     String status = "";
                     if(isActive) status += " isActive";

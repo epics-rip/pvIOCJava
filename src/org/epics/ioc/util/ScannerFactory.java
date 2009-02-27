@@ -21,8 +21,6 @@ import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -40,7 +38,6 @@ public class ScannerFactory {
     private static SupportDatabase supportDatabase = SupportDatabaseFactory.get(PVDatabaseFactory.getMaster());
     private static PeriodicScanner periodicScanner = new PeriodicScannerImpl();
     private static EventScanner eventScanner = new EventScannerImpl();
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
 
     /**
      * Get the interface for the periodic scanner.
@@ -76,7 +73,7 @@ public class ScannerFactory {
             this.name = name;
             this.recordProcess = recordProcess;
             pvRecord = recordProcess.getRecord();
-            PVField pvField = pvProperty.findProperty(pvRecord,"scan.maxConsecutiveActive");
+            PVField pvField = pvRecord.getSubField("scan.maxConsecutiveActive");
             if(pvField!=null && (pvField instanceof PVInt)) {
                 pvMaxConsecutiveActive = (PVInt)pvField;
             }

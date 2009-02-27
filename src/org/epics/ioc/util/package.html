@@ -10,63 +10,29 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: util<br />
 package: org.epics.ioc.util<br />
-2008.06.19</h1>
+2009.02.25</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Message">Message Support</a> 
+  <li><a href="#Scan">Scan Field Support</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
-      <li><a href="#Requester">Requester</a></li>
-      <li><a href="#MessageTyp">MessageType</a></li>
-      <li><a href="#RequestRes">RequestResult</a></li>
-      <li><a href="#MessageQue">MessageQueue</a></li>
-    </ul>
-  </li>
-  <li><a href="#Time">Time Stamp Support</a> 
-    <ul>
-      <li><a href="#Definition1">Definitions</a></li>
-      <li><a href="#TimeStamp">TimeStamp</a></li>
-      <li><a href="#TimeUtilit">TimeUtility</a></li>
-      <li><a href="#PVTimeStam">PVTimeStamp</a></li>
-    </ul>
-  </li>
-  <li><a href="#Alarm">Alarm Severity Support</a></li>
-  <li><a href="#Scan">Scan Field Support</a> 
-    <ul>
-      <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#ScanField">ScanField</a></li>
-      <li><a href="#ScanPriori">ScanPriority</a></li>
       <li><a href="#ScanType">ScanType</a></li>
       <li><a href="#ScanFieldF">ScanFieldFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Periodic">Periodic and Event Scanners</a> 
+  <li><a href="#Periodic">Periodic and Event Scanners</a>
     <ul>
-      <li><a href="#Definition3">Definitions</a></li>
+      <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#EventAnnou">EventAnnounce</a></li>
       <li><a href="#EventScann">EventScanner</a></li>
       <li><a href="#PeriodicSc">PeriodicScanner</a></li>
     </ul>
   </li>
   <li><a href="#IOCFactory">IOCFactory</a></li>
-  <li><a href="#Include">XML Include and Macro Substitution</a> 
-    <ul>
-      <li><a href="#Include1">Include and Substitution Syntax</a></li>
-      <li><a href="#Example">Example Include and Macro Substitution
-      Syntax</a></li>
-      <li><a href="#Example1">Example XML Application</a></li>
-      <li><a href="#IOCXML">IOCXML Interface and Factory Definitions</a></li>
-    </ul>
-  </li>
-  <li><a href="#Thread">Thread Support</a> 
-    <ul>
-      <li><a href="#ThreadCrea">ThreadCreate</a></li>
-      <li><a href="#IOCExecuto">IOCExecutor</a></li>
-    </ul>
-  </li>
 </ul>
 </div>
 <hr />
@@ -76,293 +42,23 @@ CONTENTS
 
 <p>This package provides utility code for a javaIOC:</p>
 <dl>
-  <dt>Message Support</dt>
-    <dd>This is an interface for passing messages to a requester of some
-      service.</dd>
-  <dt>Time Stamp Support</dt>
-    <dd>Support is provided to make it easier to work with time stamps.</dd>
-  <dt>Scan Field Support</dt>
-    <dd>Support that makes it easier to access the scan field of a
+  <dt>Scan Field</dt>
+    <dd>Interface that makes it easier to access the scan field of a
     record.</dd>
-  <dt>Alarm Severity Support</dt>
-    <dd>Convenience support for the severity field.</dd>
   <dt>Periodic and Event Scanners</dt>
     <dd>Support for records that are periodic or event scanned.</dd>
   <dt>IOCFactory</dt>
     <dd>A factory for creating and initializing IOC records. This can be used
       at IOC initialization or for on-line add of new record instances.</dd>
-  <dt>XML Reader</dt>
-    <dd>Support for reading XML Database Definition and Record Instance
-      files. It is an abstraction above Java SAX (Simple API for XML). It
-      implements macro substitution and include.</dd>
-  <dt>Thread Support</dt>
-    <dd>ThreadCreate and IOCExecutor</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center;" id="Message">Message Support</h2>
-<hr />
-
-<h3 id="Definition">Definitions</h3>
-<pre>    public interface Requester {
-        String getRequesterName();
-        void message(String message, MessageType messageType);
-    }
-    
-    public enum MessageType {
-        info,
-        warning,
-        error,
-        fatalError
-    }
-    
-    public enum RequestResult {
-        zombie,
-        success,
-        failure
-    }
-
-    public class MessageNode {
-        public String message;
-        public MessageType messageType;
-    }
-
-    public interface MessageQueue {
-        void lock();
-        void unlock();
-        MessageNode get();
-        boolean put(String message,MessageType messageType);
-        boolean isEmpty();
-        boolean isFull();
-        void replaceFirst(String message,MessageType messageType);
-        void replaceLast(String message,MessageType messageType);
-        int getClearOverrun();
-    }
-    
-    public class MessageQueueFactory {
-        public static MessageQueue create(int size);
-    }</pre>
-
-<h3 id="Requester">Requester</h3>
-
-<p>Many javaIOC interfaces extend interface Requester, which has just two
-methods:</p>
-<dl>
-  <dt style="font-family: courier;">getRequesterName</dt>
-    <dd>Returns the name of the requester.</dd>
-  <dt style="font-family: courier;">message</dt>
-    <dd>This is for passing messages to a requester.</dd>
-</dl>
-
-<h3 id="MessageTyp">MessageType</h3>
-
-<p>Each message has a message type argument, which is one of the
-following:</p>
-<dl>
-  <dt style="font-family: courier;">info</dt>
-    <dd>The message is informational only.</dd>
-  <dt style="font-family: courier;">warning</dt>
-    <dd>A problem is possible/</dd>
-  <dt style="font-family: courier;">error</dt>
-    <dd>An error has occured.</dd>
-  <dt style="font-family: courier;">fatal</dt>
-    <dd>The support can not implement the request.</dd>
-</dl>
-
-<h3 id="RequestRes">RequestResult</h3>
-
-<p>Both recordProcess and support code report a result by passing a
-RequestResult to the requester. The result is one of:</p>
-<dl>
-  <dt style="font-family: courier;">zombie</dt>
-    <dd>The support has been asked to destroy itself. Thus the requester
-      should disconnect from the support.</dd>
-  <dt style="font-family: courier;">success</dt>
-    <dd>The request was successful.</dd>
-  <dt style="font-family: courier;">failure</dt>
-    <dd>The request failed. In this case requester.message is called to
-      report the reason for the failure.</dd>
-</dl>
-
-<h3 id="MessageQue">MessageQueue</h3>
-
-<p>This is for use by code that wants to handle messages without blocking
-higher priority threads.</p>
-
-<p>A messageNode is a class with two public data members:</p>
-<dl>
-  <dt style="font-family: courier;">message</dt>
-    <dd>The message.</dd>
-  <dt style="font-family: courier;">messageType</dt>
-    <dd>The message type.</dd>
-</dl>
-
-<p>A messageQueue is an interface with methods:</p>
-<dl>
-  <dt style="font-family: courier;">lock</dt>
-  <dt style="font-family: courier;">unlock</dt>
-    <dd>lock/unlock must surround all calls to the other methods.</dd>
-  <dt style="font-family: courier;">put</dt>
-    <dd>Put a new message into the queue. False is returned if the queue was
-      full and true otherwise.</dd>
-  <dt style="font-family: courier;">isEmpty</dt>
-    <dd>Is the queue empty?</dd>
-  <dt style="font-family: courier;">isFull</dt>
-    <dd>Is the queue full?</dd>
-  <dt style="font-family: courier;">replaceFirst</dt>
-    <dd>Replace the oldest member in the queue.</dd>
-  <dt style="font-family: courier;">replaceLast</dt>
-    <dd>Replace the newest member in the queue.</dd>
-  <dt style="font-family: courier;">getClearOverrun</dt>
-    <dd>Get the number of times replaceFirst or replaceLast have been called
-      since the last call to getClearOverrun. The internal counter is reset
-      to 0.</dd>
-</dl>
-
-<p>MessageQueueFactory provides the public method:</p>
-<dl>
-  <dt style="font-family: courier;">create</dt>
-    <dd>Create a MessageQueue and return the interface.</dd>
-</dl>
-
-<p>An example is:</p>
-<pre>    public void message(final String message, MessageType messageType) {
-        boolean execute = false;
-        messageQueue.lock();
-        try {
-            if(messageQueue.isEmpty()) execute = true;
-            if(messageQueue.isFull()) {
-                messageQueue.replaceLast(message, messageType);
-            } else {
-                messageQueue.put(message, messageType);
-            }
-        } finally {
-            messageQueue.unlock();
-        }
-        if(syncExec) {
-            iocExecutor.execute(this);
-        }
-    }
-    ...
-    public run() { // handle messages
-        while(true) {
-            String message = null;
-            int numOverrun = 0;
-            messageQueue.lock();
-            try {
-                MessageNode messageNode = messageQueue.get();
-                numOverrun = messageQueue.getClearOverrun();
-                if(messageNode==null &amp;&amp; numOverrun==0) break;
-                message = messageNode.message;
-            } finally {
-                messageQueue.unlock();
-            }
-            if(numOverrun&gt;0) {
-                System.out.printf(String.format("%n%d missed messages&amp;n", numOverrun));
-            }
-            if(message!=null) {
-               System.out.printf(String.format("%s%n",message));
-            }
-        }
-    }</pre>
-<hr />
-
-<h2 style="text-align: center;" id="Time">Time Stamp Support</h2>
-<hr />
-
-<p style="font-weight:bold;">Questions:</p>
-<ol>
-  <li>Should TimeUtility and PVTimeStamp be interfaces?</li>
-  <li>Should PVTimeStamp extend PVStructure?</li>
-</ol>
-
-<h3 id="Definition1">Definitions</h3>
-<pre>    public class TimeStamp {
-        public long secondsPastEpoch;
-        public int nanoSeconds;
-    }
-    
-    public class TimeUtility {
-        public static long getMillis(TimeStamp timeStamp);
-        public static void set(TimeStamp timeStamp,long millis)
-    }
-    
-    public class PVTimeStamp {
-        public static PVTimeStamp create(DBField dbField);
-        public static PVTimeStamp create(PVField pvField);
-        public void get(TimeStamp timeStamp);
-        public void put(TimeStamp timeStamp);
-    }</pre>
-
-<h3 id="TimeStamp">TimeStamp</h3>
-
-<p>This is a class that has two public data fields and no methods:</p>
-<dl>
-  <dt style="font-family: courier;">secondsPastEpoch</dt>
-    <dd>This is the number of seconds since January 1, 1970 UTC, which is the
-      same as what Java POSIX uses.</dd>
-  <dt style="font-family: courier;">nanoSeconds</dt>
-    <dd>The number of nanoseconds within the second.</dd>
-</dl>
-
-<h3 id="TimeUtilit">TimeUtility</h3>
-
-<p>This is a class with the following static members:</p>
-<dl>
-  <dt style="font-family: courier;">getMillis</dt>
-    <dd>This converts the time stamp to milliseconds.</dd>
-  <dt style="font-family: courier;">set</dt>
-    <dd>This converts milliseconds to a time stamp.</dd>
-</dl>
-
-<h3 id="PVTimeStam">PVTimeStamp</h3>
-
-<p>This has the following methods:</p>
-<dl>
-  <dt style="font-family: courier;">create</dt>
-    <dd>A static factory methods to create a PVTimeStamp from a PVField or a
-      DBField. If the PVField does not reference a timeStamp structure a null
-      is returned.</dd>
-  <dt style="font-family: courier;">get</dt>
-    <dd>Reads the PVField into the timeStamp provided by the caller.</dd>
-  <dt style="font-family: courier;">put</dt>
-    <dd>Takes the timeStamp supplied by the caller and puts it into the
-      PVField. If the PVTimeStamp was created with a DBField, a dbPost is
-      issued.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center;" id="Alarm">Alarm Severity Support</h2>
-<hr />
-
-<p>The following defines alarm severities:</p>
-<pre>    public enum AlarmSeverity {
-       none,
-       minor,
-       major,
-       invalid;
-       public static AlarmSeverity getSeverity(int value);
-       public static Enumerated getAlarmSeverity(DBField dbField);
-    }</pre>
-
-<p>The methods are:</p>
-<dl>
-  <dt style="font-family: courier;">getSeverity</dt>
-    <dd>A static factory method that returns the AlarmSeverity for the
-      specified index. It throws an exception if value is illegal.</dd>
-  <dt style="font-family: courier;">getAlarmSeverity</dt>
-    <dd>If dbField has an Enumerated Create interface and if the choices
-      match the AlarmSeverity enum names than it returns the Enumerated
-      interface. Otherwise it returns null.</dd>
 </dl>
 <hr />
 
 <h2 style="text-align: center;" id="Scan">Scan Field Support</h2>
 <hr />
 
-<h3 id="Definition2">Definitions</h3>
+<h3 id="Definition">Definitions</h3>
 <pre>    public interface ScanField {
-        ScanPriority getPriority();
+        ThreadPriority getPriority();
         PVInt getPriorityIndexPV();
         ScanType getScanType();
         PVInt getScanTypeIndexPV();
@@ -375,54 +71,22 @@ higher priority threads.</p>
         boolean getProcessAfterStart();
         PVBoolean getProcessAfterStartPV();
     }
-    
-    public enum ScanPriority {
-        lowest,
-        lower,
-        low,
-        middle,
-        high,
-        higher,
-        highest;
-        public static final int[] javaPriority;
-        public int getJavaPriority();
-        public static int getJavaPriority(ScanPriority scanPriority);
-        public static Enumerated getScanPriority(DBField dbField);
-    }
-    
+     
     public enum ScanType {
         passive,
         event,
         periodic;
-        public static Enumerated getScanType(DBField dbField);
+        public static Enumerated getScanType(PVField dbField);
     }
     
     public class ScanFieldFactory {
-        public static ScanField create(DBRecord dbRecord);
+        public static ScanField create(PVRecord dbRecord);
     }</pre>
 
 <h3 id="ScanField">ScanField</h3>
 
 <p>ScanField is a convenience interface for accessing the scan field of a
 record. </p>
-
-<h3 id="ScanPriori">ScanPriority</h3>
-
-<p>This is a Java enum that defines the priority of the thread that processes
-event or periodically scanned records.</p>
-
-<p>The methods are:</p>
-<dl>
-  <dt style="font-family: courier;">javaPriority</dt>
-    <dd>A static factory method that returns an array of int that is the
-      indexes corresponding to the priorities.</dd>
-  <dt style="font-family: courier;">getJavaPriority</dt>
-    <dd>Gets the index for the javaPriority.</dd>
-  <dt style="font-family: courier;">getScanPriority</dt>
-    <dd>If dbField has an Enumerated Create interface and if the choices
-      match the ScanPriority enum names than it returns the Enumerated
-      interface. Otherwise it returns null.</dd>
-</dl>
 
 <h3 id="ScanType">ScanType</h3>
 
@@ -462,24 +126,24 @@ event or periodically scanned records.</p>
 <h2 style="text-align: center;" id="Periodic">Periodic and Event Scanners</h2>
 <hr />
 
-<h3 id="Definition3">Definitions</h3>
+<h3 id="Definition1">Definitions</h3>
 <pre>    public interface EventAnnounce {
         void announce();
     }
     public interface EventScanner {
-        boolean addRecord(DBRecord dbRecord);
-        boolean removeRecord(DBRecord dbRecord);
+        boolean addRecord(PVRecord pvRecord);
+        boolean removeRecord(PVRecord pvRecord,String eventName,ThreadPriority scanPriority));
         EventAnnounce addEventAnnouncer(String eventName,String announcer);
         void removeEventAnnouncer(EventAnnounce eventAnnounce,String announcer);
         String show(String eventName);
     }
     
     public interface PeriodicScanner {
-        boolean addRecord(DBRecord dbRecord);
-        boolean removeRecord(DBRecord dbRecord);
-        String show(ScanPriority priority);
+        boolean addRecord(PVRecord pvRecord);
+        boolean removeRecord(PVRecord pvRecord,double rate,ThreadPriority threadPriority);
+        String show(ThreadPriority priority);
         String show(double rate);
-        String show(double rate,ScanPriority priority);
+        String show(double rate,ThreadPriority priority);
     }
     
     public class ScannerFactory {
@@ -532,12 +196,12 @@ ScannerFactory. It implements the methods:</p>
 
 <p>This has the definition:</p>
 <pre>    public class IOCFactory {
-        public static boolean initDatabase(String dbFile,Requester requester) {
+        public static boolean initDatabase(String file,Requester requester) {
     }</pre>
 
 <p>where</p>
 <dl>
-  <dt style="font-family: courier;">dbFile</dt>
+  <dt style="font-family: courier;">file</dt>
     <dd>A file containing xml record instance definitions.</dd>
   <dt style="font-family: courier;">requester</dt>
     <dd>A listener for any messages generated while initDatabase is
@@ -549,291 +213,6 @@ instances, i.e. if any record names are already in the master IOC Database,
 the request will fails. Each new record is then initialized. All record
 instances must initialize, i.e. enter the readyForStart state or else the
 request fails. If all records initialize the records are merged into the
-master IOCDB and then started.</p>
-<hr />
-
-<h2 style="text-align: center;" id="Include">XML Include and Macro
-Substitution</h2>
-<hr />
-
-<p>Support is provided for processing XML files with the following
-features:</p>
-<ul>
-  <li>Include and Macro Substitution are handled automatically.<br />
-    NOTE: include and substitute are reserved words.</li>
-  <li>xml namespaces are not support.</li>
-  <li>Although the implementation uses SAX, the user code only implements
-    IOCXMLListener and uses IOCXMLReader.</li>
-  <li>The support is used by XMLToDBDFactory and by XMLToIOCDBFactory and can
-    be used by other code.</li>
-</ul>
-
-<h3 id="Include1">Include and Substitution Syntax</h3>
-
-<p>An xml file can include other xml files. All files must be valid xml files
-and must have the same root element name. An include statement has the
-format:</p>
-<pre>&lt;include addPath = "path" removePath = "path" href = "filename" /&gt;</pre>
-
-<p>Where</p>
-<dl>
-  <dt style="font-family: courier;">href</dt>
-    <dd>The <span style="font-family: courier;">filename</span>, which must
-      be a valid XML Record Instance file, is processed. If any addPaths have
-      been defined the last one specified is prefixed to the filename.</dd>
-  <dt style="font-family: courier;">addPath</dt>
-    <dd>Add a path.</dd>
-  <dt style="font-family: courier;">removePath</dt>
-    <dd>Remove a path.</dd>
-</dl>
-
-<p>Macro substitution replaces a string of the form "${from}" with some other
-text. The syntax is:</p>
-<pre>    &lt;substitute from = "fromString" to = "toString" fromTo = "from=to,from=to,..."/&gt;</pre>
-
-<p>Where:</p>
-<dl>
-  <dt style="font-family: courier;">from</dt>
-    <dd><span style="font-family: courier;">fromString</span> is the string
-      that appears in ${from}. If <span
-      style="font-family: courier;">from</span> is specified then <span
-      style="font-family: courier;">to</span> must also be specified.</dd>
-  <dt style="font-family: courier;">to</dt>
-    <dd><span style="font-family: courier;">toString</span> replaces
-    ${from}</dd>
-  <dt style="font-family: courier;">toFrom</dt>
-    <dd>The attribute value is a series of "from=to" pairs separated by
-      commas.</dd>
-</dl>
-
-<p>Macro substitution can be performed on the foillowing:</p>
-<ol>
-  <li>Any attribute value in any element definition.</li>
-  <li>The content of any element definition.</li>
-</ol>
-
-<h3 id="Example">Example Include and Macro Substitution Syntax</h3>
-
-<p>The following is a template file:</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;record name = "ai${recordExtension}Record" type = "double"&gt;
-    &lt;input structureName = "linearConvertInput" &gt;
-        &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
-            &lt;pvname&gt;${pvname}&lt;/pvname&gt;
-            &lt;wait&gt;true&lt;/wait&gt;
-        &lt;/input&gt;
-        &lt;linearConvert&gt;
-            &lt;engUnitsLow&gt;${engUnitsLow}&lt;/engUnitsLow&gt;
-            &lt;engUnitsHigh&gt;${engUnitsHigh}&lt;/engUnitsHigh&gt;
-        &lt;/linearConvert&gt;
-    &lt;/input&gt;
-    &lt;doubleDisplayCharacteristics&gt;
-        &lt;units&gt;volts&lt;/units&gt;
-        &lt;limit&gt;
-            &lt;low&gt;${displayLow}&lt;/low&gt;
-            &lt;high&gt;${displayHigh}&lt;/high&gt;
-        &lt;/limit&gt;
-    &lt;/doubleDisplayCharacteristics&gt;
-&lt;/record&gt;
-&lt;/IOCDatabase&gt;</pre>
-
-<p>The following creates two instance files from the template:</p>
-<pre>&lt;?xml version="1.0" ?&gt;
-&lt;IOCDatabase&gt;
-&lt;include addPath = "src/org/epics/ioc/dbAccess/example" /&gt;
-&lt;substitute from = "recordExtension" to = "01" /&gt;
-&lt;substitute from = "pvname" to = "nameFor01" /&gt;
-&lt;substitute from = "displayLow" to = "0.0" /&gt;
-&lt;substitute from = "displayHigh" to = "10.0" /&gt;
-&lt;substitute from = "engUnitsLow" to = "0.0" /&gt;
-&lt;substitute from = "engUnitsHigh" to = "9.0" /&gt;
-&lt;include href = "protoAiDB.xml" /&gt;
-&lt;substitute fromTo = "recordExtension=02,pvname=nameFor02" /&gt;
-&lt;include href = "protoAiDB.xml" /&gt;
-&lt;/IOCDatabase&gt;</pre>
-
-<h3 id="Example1">Example XML Application</h3>
-
-<p>The following code will report any syntax errors found when an xml file is
-processed.</p>
-<pre>   public class ExampleXMLRead {
-        private static IOCXMLReader reader;
-
-        public static void read(String rootElementName,String fileName)
-        {
-            reader = IOCXMLReaderFactory.getReader();
-            IOCXMLListener listener = new Listener();
-            reader.parse(rootElementName,fileName,listener);
-        }
-
-        private static class Listener implements IOCXMLListener
-        {
-
-            public void endDocument() {
-            }
-
-            public void startElement(String name,Map&lt;String,String&gt; attributes)
-            {
-            }
-
-            public void endElement(String name)
-            {
-            }
-
-            public void characters(char[] ch, int start, int length)
-            {
-            }
-
-            public void errorMessage(String message) {
-                System.out.println(message);
-                noErrors = false;
-            }
-        }
-    }</pre>
-
-<p>When ExampleXMLRead.read is called it:</p>
-<ul>
-  <li>locates the IOCXMLReader</li>
-  <li>Creates an IOCXMLListener</li>
-  <li>Calls reader.parse</li>
-</ul>
-
-<p>IOCXMLReader.parse does the following:</p>
-<ul>
-  <li>Automatically handles all include and macro substitutions.</li>
-  <li>Calls listener startElement when it detects a new xml element. It
-    passes the element name and a Map of the xml attributes</li>
-  <li>Calls listener.endElement when it detects the end of an xml
-  element.</li>
-  <li>Calls listener.errorMessage whenever an error occurs. The message also
-    shows the location in the xml files when the error occured.</li>
-  <li>Calls listener.endDocument when all xml files have been processed.</li>
-</ul>
-
-<h3 id="IOCXML">IOCXML Interface and Factory Definitions</h3>
-
-<p>IOCXMLListener is an interface that must be implemented by code that used
-IOCXMLReader.</p>
-<pre>    public interface IOCXMLListener {
-        void endDocument();
-        void startElement(String name, Map&lt;String,String&gt; attributes);
-        void characters(char[] ch, int start, int length);
-        void endElement(String name);
-        void message(String message,MessageType messageType);
-    }</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">endDocument</dt>
-    <dd>Called when the fileName passed to IOCXMLReader.parse and any
-      fincluded files have all been completely parsed.</dd>
-  <dt style="font-family: courier;">startElement</dt>
-    <dd>Called whenever a new xml element is detected exxept for an include
-      statement, which is handled automatically. 
-      <ul>
-        <li>name is the xml element name, i.e. the tag name.</li>
-        <li>attributes is a map containing name,value pairs os each of the
-          xml attributes specified in xml element. Maco sybstitution on the
-          value is performed before calling startElement.</li>
-      </ul>
-    </dd>
-  <dt style="font-family: courier;">characters</dt>
-    <dd>Characters that appear between startElement and endElement. This can
-      be called multiple times between startElement and endElement. Macro
-      substitution is performed before calling characters, i.e. the listener
-      only sees the final result.</dd>
-  <dt style="font-family: courier;">endElement</dt>
-    <dd>Called whenever the end of an xml element is detected exxept for an
-      include statement, which is handled automatically.</dd>
-  <dt style="font-family: courier;">errorMessage</dt>
-    <dd>Called whenever IOCXMLReader detects an error or one of its message
-      methods is called. This should not called by the listener. Instead the
-      listener should call one of the IOCXMLReader message methods because
-      they add location information.</dd>
-</dl>
-
-<p>IOCXMLReader is the interface implemented by IOCXMLReaderFactory.</p>
-<pre>    public interface IOCXMLReader {
-        void parse(String rootElementName,String fileName, IOCXMLListener listener);
-        void message(String message,MessageType messageType);
-    }</pre>
-
-<p>where</p>
-<dl>
-  <dt style="font-family: courier;">parse</dt>
-    <dd>Parses fileName and calls the listener 
-      <ul>
-        <li>rootElementName is the root xml element name. Any included files
-          must also have the same root name.</li>
-        <li>fileName is the xml file.</li>
-        <li>listener is the interface implemented by the caller.</li>
-      </ul>
-      <p>If the reader is already busy it calls listener.errorMessage and
-      returns.</p>
-    </dd>
-  <dt style="font-family: courier;">warningMessage</dt>
-    <dd>A warning message. This together with the current location in the xml
-      files is passed to listener.errorMessage.</dd>
-  <dt style="font-family: courier;">errorMessage</dt>
-    <dd>An error message. This together with the current location in the xml
-      files is passed to listener.errorMessage.</dd>
-  <dt style="font-family: courier;">fatalMessage</dt>
-    <dd>A fatal error message. This together with the current location in the
-      xml files is passed to listener.errorMessage.</dd>
-</dl>
-<pre>    public class IOCXMLReaderFactory {
-        static public IOCXMLReader getReader();
-    }</pre>
-
-<p>where</p>
-<dl>
-  <dt>getReader</dt>
-    <dd>Get the single instance of IOCXMLReader.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center;" id="Thread">Thread Support</h2>
-<hr />
-
-<h3 id="ThreadCrea">ThreadCreate</h3>
-<pre>    interface ThreadReady {
-        void ready();
-    }
-
-    interface 
- {
-        void run(ThreadReady threadReady);
-    }
-
-    interface ThreadCreate {
-        Thread create(String name, int priority, RunnableReady runnableReady);
-        Thread[] getThreads();
-    }
-    
-    public class ThreadCreateFactory {
-        public static ThreadCreate getThreadCreate();
-    }</pre>
-
-<p>ThreadCreate provides two features:</p>
-<ol>
-  <li>Create does not return until ReadyRunnable.run calls
-    ThreadReady.ready().</li>
-  <li>A list of all active threads is kept. getThreads provides access to the
-    list.</li>
-</ol>
-
-<h3 id="IOCExecuto">IOCExecutor</h3>
-<pre>    public interface IOCExecutor {
-        void execute(Runnable command);
-    }
-    public class IOCExecutorFactory {
-        static public IOCExecutor create(String name,ScanPriority priority);
-    }</pre>
-
-<p>An IOCExecutor is a thread that can execute any object that implements the
-Java Runnable interface. The user can request that a single command be
-executed. If the command is already in the list of commands to be executed it
-is NOT added to the list.</p>
+master database and then started.</p>
 </body>
 </html>
