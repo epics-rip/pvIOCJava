@@ -5,9 +5,9 @@
 </record>
 
 <record name = "simpleCounter" type = "generic">
+    <scalar name = "value" type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "int" />
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
@@ -16,9 +16,9 @@
 </record>
 
 <record name = "counterWithAlarm" type = "generic">
+    <scalar name = "value" type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "int" />
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
@@ -59,67 +59,50 @@
 
 
 <record name = "counterWithLinks" type = "generic">
-    <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "int" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
       </structure>
     </structure>
-    <structure name = "supportSequence" type = "generic" >
-        <structure name = "1" >
+    <structure name = "link" type = "generic" >
+        <structure name = "process1" type = "processSupport">
+            <scalar name = "pvname">link1</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link1</scalar>
-            </structure>
         </structure>
-        <structure name = "2" >
+        <structure name = "process2" type = "processSupport">
+            <scalar name = "pvname">link2</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link2</scalar>
-            </structure>
         </structure>
-        <structure name = "3" >
+        <structure name = "process3" type = "processSupport">
+            <scalar name = "pvname">link3</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link3</scalar>
-            </structure>
         </structure>
-        <structure name = "4" >
+        <structure name = "process4" type = "processSupport">
+            <scalar name = "pvname">link4</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link4</scalar>
-            </structure>
         </structure>
-        <structure name = "5" >
+        <structure name = "process5" type = "processSupport">
+            <scalar name = "pvname">link5</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link5</scalar>
-            </structure>
         </structure>
-        <structure name = "6" >
+        <structure name = "process6" type = "processSupport">
+            <scalar name = "pvname">link6</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link6</scalar>
-            </structure>
         </structure>
-        <structure name = "7" >
+        <structure name = "process7" type = "processSupport">
+            <scalar name = "pvname">link7</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link7</scalar>
-            </structure>
         </structure>
-        <structure name = "8" >
+        <structure name = "process8" type = "processSupport">
+            <scalar name = "pvname">link8</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link8</scalar>
-            </structure>
         </structure>
-        <structure name = "9" >
+        <structure name = "process9" type = "processSupport">
+            <scalar name = "pvname">link9</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">link9</scalar>
-            </structure>
         </structure>
     </structure>
 </record>

@@ -1,7 +1,0 @@
-<?xml version="1.0" ?>
-<DBDefinition>
-<include addPath = "${JAVAIOC}/dbd" />
-<include href = "structure.xml" />
-<include href = "recordType.xml" />
-<include removePath = "${JAVAIOC}/dbd" />
-</DBDefinition>

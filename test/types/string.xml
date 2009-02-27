@@ -1,64 +1,63 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
-<record name = "syncStringDriver" structureName = "portCreate">
-    <factoryName>org.epics.ioc.pdrv.testDriver.OctetDriverFactory</factoryName>
-    <portName>syncOctetDriver</portName>
-    <driverParameters structureName = "octetDriver" >
-        <delay>0.0</delay>
-    </driverParameters>
+<record name = "syncStringDriver" type = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.OctetDriverFactory</scalar>
+    <scalar name = "portName">syncOctetPort</scalar>
+    <structure name = "driverParameters" type = "octetDriver" >
+        <scalar name = "delay">0.0</scalar>
+    </structure>
 </record>
 
 <record name = "stringCounter">
-    <value type = "byte"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input structureName = "calculation" >
-      <calculator structureName = "expressionCalculator" >
-        <expression>(value+1&lt;=10)?(value+1):0</expression>
-      </calculator>
-    </input>
-    <scan structureName = "scan" >
-        <type><choice>periodic</choice></type> 
-        <rate>1.0</rate>
-    </scan>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                    <pvname>stringOut</pvname>
-                    <process>true</process>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>true</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                    <pvname>stringIn</pvname>
-            </link>
-        </element>
-    </supportArray>
+    <scalar name = "value" type = "byte"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1&lt;=10)?(value+1):0</scalar>
+      </structure>
+    </structure>
+     <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "link" type = "generic" >
+        <structure name = "1" type = "outputSupport">
+            <scalar name = "wait" type = "boolean" >true</scalar>
+            <scalar name = "pvname">stringOut</scalar>
+            <scalar name = "process">true</scalar>
+        </structure>
+        <structure name = "2" type = "processSupport">
+            <scalar name = "wait" type = "boolean" >false</scalar>
+            <scalar name = "pvname">stringIn</scalar>
+        </structure>
+    </structure>
 </record>
 
+
 <record name = "stringOut">
-    <value type = "string"/>
-    <timeStamp structureName = "timeStamp" />
-    <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
-            <portName>syncOctetDriver</portName>
-            <deviceName>0</deviceName>
-            <timeout>.1</timeout>
-    </output>
+    <scalar name = "value" type = "string"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvOctetOutputFactory</auxInfo>
+        <scalar name = "portName">syncOctetPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
 </record>
 
 <record name = "stringIn">
-    <value type = "string"/>
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
-            <portName>syncOctetDriver</portName>
-            <deviceName>0</deviceName>
-            <timeout>.1</timeout>
-            <size>20</size>
-    </input>
+    <scalar name = "value" type = "string"/>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvOctetInputFactory</auxInfo>
+        <scalar name = "portName">syncOctetPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <scalar name = "size" >20</scalar>
+    </structure>
 </record>
 
 
-</IOCDatabase>
+</database>

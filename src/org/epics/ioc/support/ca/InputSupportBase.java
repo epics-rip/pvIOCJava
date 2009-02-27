@@ -15,12 +15,14 @@ import org.epics.ioc.ca.CDGetRequester;
 import org.epics.ioc.ca.CDStructure;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
@@ -44,8 +46,19 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class InputSupportBase extends AbstractLinkSupport
-implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
+implements CDGetRequester,Runnable,ProcessContinueRequester
 {
+    /**
+     * The constructor.
+     * @param supportName The supportName.
+     * @param pvStructure The pvStructure for the field being supported.
+     */
+    public InputSupportBase(String supportName,PVStructure pvStructure) {
+        super(supportName,pvStructure);
+        executor = ExecutorFactory.create(pvStructure.getFullName(), ThreadPriority.lower);
+    }
+    
+    private Executor executor = null;
     private PVBoolean processAccess = null;  
     private PVField valuePVField;
     
@@ -75,14 +88,7 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
     private String alarmMessage = null;
     
     
-    /**
-     * The constructor.
-     * @param supportName The supportName.
-     * @param pvStructure The pvStructure for the field being supported.
-     */
-    public InputSupportBase(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
-    }
+    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
@@ -136,7 +142,7 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
             return;
         }
         this.supportProcessRequester = supportProcessRequester;
-        recordProcess.requestProcessCallback(this);
+        executor.execute(this);
         return;
     }
     /* (non-Javadoc)
@@ -163,10 +169,11 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
             disconnect();
         }
     }
+   
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.ProcessCallbackRequester#processCallback()
+     * @see java.lang.Runnable#run()
      */
-    public void processCallback() {
+    public void run() {
         requestResult = RequestResult.success;
         alarmSeverity = AlarmSeverity.none;
         cd.clearNumPuts();
@@ -198,9 +205,9 @@ implements CDGetRequester,ProcessCallbackRequester,ProcessContinueRequester
                 PVField targetPVField = cdField.getPVField();
                 if(channelField==alarmChannelField) {
                     PVStructure pvStructure = (PVStructure)targetPVField;
-                    PVInt targetPVInt = (PVInt)pvProperty.findProperty(pvStructure,"severity.index");
+                    PVInt targetPVInt = (PVInt)pvStructure.getSubField("severity.index");
                     alarmSeverity = AlarmSeverity.getSeverity(targetPVInt.get());
-                    PVString pvString = (PVString)pvProperty.findProperty(pvStructure,"message");
+                    PVString pvString = (PVString)pvStructure.getSubField("message");
                     alarmMessage = pvString.get();
                     continue;
                 }

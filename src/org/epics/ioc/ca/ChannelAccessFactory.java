@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.epics.ioc.caLocal.ChannelProviderLocalFactory;
 import org.epics.pvData.pv.MessageType;
 
 /**

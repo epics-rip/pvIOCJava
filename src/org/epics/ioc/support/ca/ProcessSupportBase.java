@@ -7,10 +7,12 @@ package org.epics.ioc.support.ca;
 
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.PVStructure;
 /**
@@ -19,7 +21,7 @@ import org.epics.pvData.pv.PVStructure;
  *
  */
 public class ProcessSupportBase extends AbstractLinkSupport
-implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequester
+implements Runnable,ProcessContinueRequester, ChannelProcessRequester
 {
     /**
      * The constructor.
@@ -28,8 +30,10 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
      */
     public ProcessSupportBase(String supportName,PVStructure pvStructure) {
         super(supportName,pvStructure);
-       
+        executor = ExecutorFactory.create(pvStructure.getFullName(), ThreadPriority.lower);
     }
+    
+    private Executor executor = null;
     private ChannelProcess channelProcess = null;
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult;
@@ -86,12 +90,12 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
             return;
         }
         this.supportProcessRequester = supportProcessRequester;
-        recordProcess.requestProcessCallback(this);
+        executor.execute(this);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.ProcessCallbackRequester#processCallback()
+     * @see java.lang.Runnable#run()
      */
-    public void processCallback() {            
+    public void run() {
         channelProcess.process();
     }
     

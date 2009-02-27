@@ -54,10 +54,11 @@ public interface Channel extends Requester{
      */
     boolean isConnected();
     /**
-     * Get the propertyName for the channel.
-     * @return The name which can be passed to channel.getPVRecord.findProperty();
+     * Get the primary field name for the channel.
+     * This is the name usually passed to the first call to channel.createChannelField.
+     * @return The name.
      */
-    String getPropertyName();
+    String getPrimaryFieldName();
     /**
      * Get the fieldName for the channel.
      * @return The name which can be passed to channel.getPVRecord.getField();

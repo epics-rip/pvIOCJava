@@ -255,9 +255,9 @@ public abstract class AbstractChannel implements Channel{
         return options;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.Channel#getPropertyName()
+     * @see org.epics.ioc.ca.Channel#getPrimaryFieldName()
      */
-    public synchronized String getPropertyName() {
+    public synchronized String getPrimaryFieldName() {
         if(fieldName==null||fieldName.length()<=0) return "value";
         PVField pvField = pvProperty.findProperty(pvRecord,fieldName);
         if(pvField!=null && pvField.getField().getType()==Type.structure) {

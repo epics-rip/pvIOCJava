@@ -12,15 +12,15 @@ import org.epics.ioc.ca.CDPut;
 import org.epics.ioc.ca.CDPutRequester;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
@@ -40,7 +40,7 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class OutputSupportBase extends AbstractLinkSupport
-implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
+implements Runnable,ProcessContinueRequester,CDPutRequester
 {
     /**
      * The constructor.
@@ -49,8 +49,10 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
      */
     public OutputSupportBase(String supportName,PVStructure pvStructure) {
         super(supportName,pvStructure);
+        executor = ExecutorFactory.create(pvStructure.getFullName(), ThreadPriority.lower);
     }
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
+    
+    private Executor executor = null;
     private PVBoolean processAccess = null;
     private PVField valuePVField = null;
     
@@ -105,10 +107,10 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
             uninitialize();
             return;
         }
-        PVField pvParent = pvStructure.getParent();
+        PVStructure pvParent = pvStructure.getParent();
         valuePVField = null;
         while(pvParent!=null) {
-            valuePVField = pvProperty.findProperty(pvParent,"value");
+            valuePVField = pvParent.getSubField("value");
             if(valuePVField!=null) break;
             pvParent = pvParent.getParent();
         }
@@ -181,13 +183,13 @@ implements ProcessCallbackRequester,ProcessContinueRequester,CDPutRequester
             return;
         }
         this.supportProcessRequester = supportProcessRequester;
-        recordProcess.requestProcessCallback(this);
+        executor.execute(this);
         return;
     }       
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.ProcessCallbackRequester#processCallback()
+     * @see java.lang.Runnable#run()
      */
-    public void processCallback() {
+    public void run() {
         cdPut.put(cd);            
     }   
     /* (non-Javadoc)

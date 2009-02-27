@@ -3,7 +3,7 @@
 <include addPath = "${PVDATA}/test/example" />
 <include removePath = "${PVDATA}/test/example" />
 <include addPath = "${JAVAIOC}/example" />
-<include href = "counterDB.xml" />
-<include href = "eventDB.xml" />
+<include href = "counter.xml" />
+<include href = "event.xml" />
 <include removePath = "${JAVAIOC}/example" />
 </database>

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: channel Access<br />
 package: org.epics.ioc.ca<br />
-2009.02.11</h1>
+2009.02.25</h1>
 CONTENTS 
 
 <div class="toc">
@@ -47,7 +47,6 @@ CONTENTS
       <li><a href="#ChannelMon3">ChannelMonitorNotify</a></li>
     </ul>
   </li>
-  <li><a href="#Local">Local Channel Provider</a></li>
   <li><a href="#Channel3">CD - Channel Data</a> 
     <ul>
       <li><a href="#Definition2">CD Definitions</a></li>
@@ -123,17 +122,9 @@ PVRecord that contains a PVField for each ChannelField as well as a reference
 to the ChannelField. </p>
 
 <p>A channelProvider must implement the following: Channel, ChannelProvider,
-ChannelGet, ChannelPut, ChannelPutGet, and ChannelMonitor. All other
-interfaces, i.e. ChannelMonitorNotify and all the CD interfaces are generic,
-i.e. implemented by factories provided by the package.</p>
-
-<h3>PROBLEMS</h3>
-<dl>
-  <dt>channel.getProperty</dt>
-    <dd>This is a bad name for this method. It really means to make up a name
-      to use for use with PVProperty. For example if the field name is null
-      then it returns "value".</dd>
-</dl>
+ChannelProcess,ChannelGet, ChannelPut, ChannelPutGet, and ChannelMonitor. All
+other interfaces, i.e. ChannelMonitorNotify and all the CD interfaces are
+generic, i.e. implemented by factories provided by this package.</p>
 <hr />
 
 <h2 style="text-align: center" id="Channel">Channel Definitions</h2>
@@ -153,8 +144,8 @@ a provider should support the following syntax:</p>
 is all characters after the first '.' up to the optional '{'. If the '{' is
 present than all characters between the braces are the options. These
 conventions are supported by the ChannelProviderLocalFactory, which provides
-access to the local DB database. Other providers may optionally support the
-same conventions.</p>
+access to a local JavaIOC database. Other providers may optionally support
+the same conventions.</p>
 
 <p>For a javaIOC a channelName is a recordName. This is also true for EPICS
 databases.</p>
@@ -172,7 +163,7 @@ databases.</p>
         PVRecord getPVRecord();
         ChannelListener getChannelListener();
         boolean isConnected();
-        String getPropertyName();
+        String getPrimaryFieldName();
         String getFieldName();
         String getOptions();
         ChannelField createChannelField(String name);
@@ -270,6 +261,9 @@ databases.</p>
 <p>A channel provides access to an arbitrary number of fields in the record.
 The methods are:</p>
 <dl>
+  <dt style="font-family: courier;">message</dt>
+    <dd>Channel Access code calls this to report errors and/or diagnostic
+      information.</dd>
   <dt style="font-family: courier;">connect</dt>
     <dd>Connect to the data source.</dd>
   <dt style="font-family: courier;">disconnect</dt>
@@ -283,14 +277,11 @@ The methods are:</p>
     <dd>Get the PVRecord this channel holds.</dd>
   <dt style="font-family: courier;">getChannelListener</dt>
     <dd>Get the ChannelListener.</dd>
-  <dt style="font-family: courier;">message</dt>
-    <dd>Channel Access code calls this to report errors and/or diagnostic
-      information.</dd>
   <dt style="font-family: courier;">isConnected</dt>
     <dd>Is the channel connected?</dd>
-  <dt style="font-family: courier;">getPropertyName</dt>
+  <dt style="font-family: courier;">getPrimaryFieldName</dt>
     <dd>Get the propertyName for this channel. This name can be passed to
-      channel.getPVRecord.findProperty().</dd>
+      first call to channel.createChannelField().</dd>
   <dt style="font-family: courier;">getFieldName</dt>
     <dd>Get the fieldName. This name can be passed to
       channel.getPVRecord.getField().</dd>
@@ -761,31 +752,13 @@ IOC database. The notification does not include data.</p>
     
     interface ChannelMonitorNotifyRequester extends Requester{
         void monitorEvent();
+        void unlisten();
     }
     
     class ChannelMonitorNotifyFactory {
         ChannelMonitorNotify create(Channel channel,
             ChannelMonitorNotifyRequester monitorNotifyRequestor);
     } </pre>
-<hr />
-
-<h2 style="text-align: center;" id="Local">Local Channel Provider</h2>
-<hr />
-
-<p>An implementation of a channel access client for accessing records in the
-IOC database is provided. It has the name "local" This is created
-automatically by <span
-style="font-family: courier;">ChannelProviderLocalFactory</span> . The
-factory creates a single instance of an implementation of a channel access
-client for accessing local records. <span
-style="font-family: courier;">ChannelProviderLocalFactory</span> has only one
-public method.</p>
-<pre>    public class ChannelProviderLocalFactory  {
-        static public void register();
-    }</pre>
-
-<p>This method is called by ChannelFactory when it is called before a local
-Channel Access is registered.</p>
 <hr />
 
 <h2 style="text-align: center" id="Channel3">CD - Channel Data</h2>
@@ -993,7 +966,10 @@ to determine how often each PVField was written.</p>
     class BaseCDRecord { ... }
     class BaseCDField { ... }
     class BaseCDArray { ... }
-    class BaseCDStructure { ... }</pre>
+    class BaseCDStructure { ... }
+    class BaseCDGet { ... }
+    class BaseCDPut { ... }
+    class BaseChannelFieldGroup { ... }</pre>
 
 <h3 id="CDField2">CDField</h3>
 
@@ -1082,7 +1058,7 @@ CDField or an extension. CDField has the methods:</p>
 
 <h3 id="Base">Base CD Classes</h3>
 
-<p>The BaseCD classes provide implementations of the CD interraces. These
+<p>The BaseCD classes provide implementations of the CD interfaces. These
 provide complete imnplementations and should rarely need to be extended.</p>
 <hr />
 

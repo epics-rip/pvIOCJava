@@ -1,251 +1,256 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
 <record name = "boolean" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value type = "boolean" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <scalar name = "value" type = "boolean" />
 </record>
 
 <record name = "byte" >
-    <value type = "byte" createName = "controlLimit">1</value>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
-    <control structureName = "control" >
-        <limit>
-            <low>1</low>
-            <high>9</high>
-        </limit>
-    </control>
+    <scalar name = "value" type = "byte">
+        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+        1
+    </scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
+    <structure name = "control" type = "control" >
+        <structure name = "limit">
+            <scalar name = "low">1</scalar>
+            <scalar name = "high">9</scalar>
+        </structure>
+    </structure>
 </record>
 
-<record name = "short">
-    <value type = "short" createName = "controlLimit">1</value>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
-    <control structureName = "control" >
-        <limit>
-            <low>1</low>
-            <high>9</high>
-        </limit>
-    </control>
+<record name = "short" >
+    <scalar name = "value" type = "short">
+        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+        1
+    </scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
+    <structure name = "control" type = "control" >
+        <structure name = "limit">
+            <scalar name = "low">1</scalar>
+            <scalar name = "high">9</scalar>
+        </structure>
+    </structure>
 </record>
 
-<record name = "int">
-    <value type = "int" createName = "controlLimit">1</value>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
-    <control structureName = "control" >
-        <limit>
-            <low>1</low>
-            <high>9</high>
-        </limit>
-    </control>
+<record name = "int" >
+    <scalar name = "value" type = "int">
+        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+        1
+    </scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
+    <structure name = "control" type = "control" >
+        <structure name = "limit">
+            <scalar name = "low">1</scalar>
+            <scalar name = "high">9</scalar>
+        </structure>
+    </structure>
 </record>
 
-
-<record name = "long">
-    <value type = "long" createName = "controlLimit">1</value>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
-    <control structureName = "control" >
-        <limit>
-            <low>1</low>
-            <high>9</high>
-        </limit>
-    </control>
+<record name = "long" >
+    <scalar name = "value" type = "long">
+        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+        1
+    </scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
+    <structure name = "control" type = "control" >
+        <structure name = "limit">
+            <scalar name = "low">1</scalar>
+            <scalar name = "high">9</scalar>
+        </structure>
+    </structure>
 </record>
 
-<record name = "float">
-    <value type = "float" createName = "controlLimit">1</value>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>5</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
-    <control structureName = "control" >
-        <limit>
-            <low>1</low>
-            <high>9</high>
-        </limit>
-    </control>
+<record name = "float" >
+    <scalar name = "value" type = "float">
+        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+        1
+    </scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
+    <structure name = "control" type = "control" >
+        <structure name = "limit">
+            <scalar name = "low">1</scalar>
+            <scalar name = "high">9</scalar>
+        </structure>
+    </structure>
 </record>
 
-<record name = "double">
-    <value type = "double" createName = "controlLimit">1</value>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>5</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
-    <control structureName = "control" >
-        <limit>
-            <low>1</low>
-            <high>9</high>
-        </limit>
-    </control>
+<record name = "double" >
+    <scalar name = "value" type = "double">
+        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+        1
+    </scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
+    <structure name = "control" type = "control" >
+        <structure name = "limit">
+            <scalar name = "low">1</scalar>
+            <scalar name = "high">9</scalar>
+        </structure>
+    </structure>
 </record>
 
-<record name = "string">
-    <value type = "string" />
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
+<record name = "string" >
+    <scalar name = "value" type = "string">a string</scalar>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
 </record>
 
 <record name = "booleanArray">
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "boolean" capacity = "3">
-        <element>false false false</element>
-    </value>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "boolean">
+        false false false
+    </array>
 </record>
 
 <record name = "byteArray">
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "byte" capacity = "3">
-        <element>0 0 0</element>
-    </value>
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "byte">0 0 0</array>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "intArray" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "int" capacity = "3">
-        <element>0 0 0</element>
-    </value>
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "int">0 0 0</array>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "shortArray" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "short" capacity = "3">
-        <element>0 0 0</element>
-    </value>
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "short">0 0 0</array>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "longArray" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "long" capacity = "3">
-        <element>0 0 0</element>
-    </value>
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>0</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "long">0 0 0</array>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "floatArray" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "float" capacity = "3">
-        <element>0 0 0</element>
-    </value>
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>5</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "float">0 0 0</array>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "doubleArray" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "double" capacity = "3">
-        <element>0 0 0</element>
-    </value>
-    <display structureName = "display" >
-        <units>volts</units>
-        <resolution>5</resolution>
-        <limit>
-            <low>0</low>
-            <high>10</high>
-        </limit>
-    </display>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "double">0 0 0</array>
+    <structure name = "display" type = "display" >
+        <scalar name = "units">volts</scalar>
+        <scalar name = "resolution">0</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">10</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "stringArray" >
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value elementType = "string" capacity = "3">
-        <element>"one" "two" "three"</element>
-    </value>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "string">
+        one," two with blanks ",three
+    </array>
 </record>
 
-</IOCDatabase>
+</database>
 
 

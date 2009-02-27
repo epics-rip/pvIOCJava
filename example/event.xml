@@ -4,14 +4,14 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
+     <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">event</scalar></structure>
+        <scalar name = "eventName">eventTest</scalar>
+    </structure>
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">value+1</scalar>
       </structure>
-    </structure>
-    <structure name = "scan" type = "scan">
-        <structure name = "type"><scalar name = "choice">event</scalar></structure>
-        <scalar name = "eventName">eventTest</scalar>
     </structure>
 </record>
 

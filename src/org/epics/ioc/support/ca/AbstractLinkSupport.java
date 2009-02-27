@@ -24,8 +24,6 @@ import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.property.Alarm;
 import org.epics.pvData.property.AlarmFactory;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -49,10 +47,6 @@ implements ChannelListener,ChannelFieldGroupListener {
      * The convert implementation.
      */
     protected static final Convert convert = ConvertFactory.getConvert();
-    /**
-     * A pvProperty for use by AbstractLinkSupport and derived classes.
-     */
-    protected static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     /**
      * The channelRequesterName.
      */
@@ -170,7 +164,7 @@ implements ChannelListener,ChannelFieldGroupListener {
             break;
         }
         recordProcess = recordSupport.getRecordProcess();
-        PVField pvAlarm = pvProperty.findProperty(pvStructure,"alarm");
+        PVField pvAlarm = pvStructure.getSubField("alarm");
         if(pvAlarm==null) {
             pvStructure.message("must have alarm", MessageType.error);
             return;
@@ -188,7 +182,7 @@ implements ChannelListener,ChannelFieldGroupListener {
         if(providerPV==null) return;
         pvnamePV = pvStructure.getStringField("pvname");
         if(pvnamePV==null) return;
-        if(pvProperty.findProperty(pvStructure,"propertyNames")!=null) {
+        if(pvStructure.getSubField("propertyNames")!=null) {
             propertyNamesPV = pvStructure.getStringField("propertyNames");
             if(propertyNamesPV==null) return;
         }
@@ -237,7 +231,7 @@ implements ChannelListener,ChannelFieldGroupListener {
                     PVField pvField = null;
                     PVStructure parent = pvStructure.getParent();
                     if(parent!=null) {
-                        pvField = pvProperty.findProperty(parent,propertyName);
+                        pvField =parent.getSubField(propertyName);
                     }
                     if(pvField==null) {
                         pvStructure.message(

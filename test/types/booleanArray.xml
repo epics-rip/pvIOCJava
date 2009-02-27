@@ -1,58 +1,55 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 <record name = "booleanArrayToggle">
-    <value elementType = "boolean"/>
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <value capacity = "3">
-        <element>false true false</element>
-    </value>
-    <input structureName = "calculation" >
-       <calculator supportName = "booleanArrayToggleCalculator" />
-    </input>
-    <supportArray elementType = "structure" supportName = "supportArray" >
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "processSupport" structureName = "processSupport">
-                    <pvname>booleanArray1FromToggle</pvname>
-            </link>
-        </element>
-        <element structureName = "supportArrayElement">
-            <wait>false</wait>
-            <link  supportName = "outputSupport" structureName = "outputSupport">
-                    <pvname>booleanArray2FromToggle</pvname>
-                    <process>true</process>
-            </link>
-        </element>
-    </supportArray>
-    <scan structureName = "scan">
-        <type><choice>periodic</choice></type>
-        <rate>1.0</rate>
-    </scan>
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <array name = "value" type = "boolean">
+        false true false
+    </array>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator" type = "generic">
+          <auxInfo name = "supportFactory" type = "string">booleanArrayToggleCalculatorFactory</auxInfo>
+      </structure>
+    </structure>
+    <structure name = "link" type = "generic" >
+        <structure name = "1" type = "processSupport">
+            <scalar name = "wait" type = "boolean" >false</scalar>
+            <scalar name = "pvname">booleanArray1FromToggle</scalar>
+        </structure>
+        <structure name = "2" type = "outputSupport">
+            <scalar name = "wait" type = "boolean" >false</scalar>
+            <scalar name = "pvname">booleanArray2FromToggle</scalar>
+            <scalar name = "process">true</scalar>
+        </structure>
+    </structure>
 </record>
 
 <record name = "booleanArray1FromToggle">
-    <value elementType = "boolean" />
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "inputSupport" structureName = "inputSupport">
-            <pvname>booleanArrayToggle</pvname>
-            <process>false</process>
-    </input>
-</record>
-<record name = "booleanArray2FromToggle">
-    <value elementType = "boolean" />
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-</record>
-<record name = "booleanArray3FromToggle">
-    <value elementType = "boolean" />
-    <timeStamp structureName = "timeStamp" />
-    <alarm structureName = "alarm" />
-    <input supportName = "monitorSupport" structureName = "monitorSupport">
-            <pvname>booleanArrayToggle</pvname>
-            <process>true</process>
-    </input>
+    <array name = "value" type = "boolean" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "inputSupport">
+        <scalar name = "pvname">booleanArrayToggle</scalar>
+    </structure>
 </record>
 
-</IOCDatabase>
+<record name = "booleanArray2FromToggle" >
+    <array name = "value" type = "boolean" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+</record>
+<record name = "booleanArray3FromToggle">
+    <array name = "value" type = "boolean" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "input" type = "monitorSupport">
+        <scalar name = "pvname">booleanArrayToggle</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+</record>
+
+</database>

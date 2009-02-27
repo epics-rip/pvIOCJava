@@ -29,8 +29,6 @@ import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
@@ -81,7 +79,6 @@ implements CDMonitorRequester,RecordProcessRequester
                 + ((Integer)value).toString() + " is not a valid MonitorType");
         }
     }
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static Executor executor = ExecutorFactory.create("caLinkMonitor", ThreadPriority.low);
     private PVInt monitorTypeAccess = null;
     private PVDouble deadbandAccess = null;
@@ -146,7 +143,7 @@ implements CDMonitorRequester,RecordProcessRequester
         PVStructure pvParent = pvStructure.getParent();
         valuePVField = null;
         while(pvParent!=null) {
-            valuePVField = pvProperty.findProperty(pvParent,"value");
+            valuePVField =pvParent.getSubField("value");
             if(valuePVField!=null) break;
             pvParent = pvParent.getParent();
         }
@@ -384,9 +381,9 @@ implements CDMonitorRequester,RecordProcessRequester
             if(channelField==alarmChannelField) {
                 if(alarmIsProperty) {
                 PVStructure pvStructure = (PVStructure)targetPVField;
-                PVInt targetPVInt = (PVInt)pvProperty.findProperty(pvStructure,"severity.index");
+                PVInt targetPVInt = (PVInt)pvStructure.getSubField("severity.index");
                 AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(targetPVInt.get());
-                PVString pvString = (PVString)pvProperty.findProperty(pvStructure,"message");
+                PVString pvString = (PVString)pvStructure.getSubField("message");
                 String alarmMessage = pvString.get();
                 alarmSupport.setAlarm(alarmMessage, alarmSeverity);
                 }

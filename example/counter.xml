@@ -70,26 +70,39 @@
          <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
        </structure>
     </structure>
-    <structure name = "supportSequence" type = "generic" >
-        <structure name = "0" type = "generic">
+    <structure name = "link" type = "generic" >
+        <structure name = "0" type = "outputSupport">
             <scalar name = "wait" type = "boolean" >true</scalar>
-            <structure name = "link" type = "outputSupport">
-                <scalar name = "pvname">counterOutput</scalar>
-                <scalar name = "process">true</scalar>
-            </structure>
+             <scalar name = "pvname">counterOutput</scalar>
+             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "1" type = "generic">
-            <structure name = "link" type = "processSupport">
-                <scalar name = "pvname">counterInput</scalar>
-            </structure>
+        <structure name = "1" type = "processSupport">
+            <scalar name = "pvname">counterInput</scalar>
         </structure>
     </structure>
 </record>
 
 <record name = "counterOutput" >
+    <scalar name = "value" type = "double" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
+    <structure name = "display" type = "display" >
+        <scalar name = "description">Sample Description</scalar>
+        <scalar name = "format">%f</scalar>
+        <scalar name = "resolution">1</scalar>
+        <scalar name = "units">volts</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">10.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "control" type = "control" >
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">10.0</scalar>
+        </structure>
+        <scalar name = "minStep">.1</scalar>
+    </structure>
     <structure name = "valueAlarm" type = "doubleAlarm">
           <scalar name = "active">true</scalar>
           <structure name = "interval">
@@ -122,23 +135,7 @@
           <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
     </structure> 
     
-    <structure name = "display" type = "display" >
-        <scalar name = "description">Sample Description</scalar>
-        <scalar name = "format">%f</scalar>
-        <scalar name = "resolution">1</scalar>
-        <scalar name = "units">volts</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">10.0</scalar>
-        </structure>
-    </structure>
-    <structure name = "control" type = "control" >
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">10.0</scalar>
-        </structure>
-        <scalar name = "minStep">.1</scalar>
-    </structure>
+    
 </record>
 
 <record name = "counterInput">

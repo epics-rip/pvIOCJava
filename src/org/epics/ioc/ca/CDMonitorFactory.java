@@ -254,6 +254,9 @@ public class CDMonitorFactory {
             if(index==-1) throw new IllegalStateException("Logic error. Unexpected dataPut");
             boolean result = cd.putSubfield(channelField, pvField);
             if(!result) return;
+            MonitorField monitorField = monitorFields[index];
+            result = monitorField.causeMonitor();
+            if(!result) return;
             if(groupPutActive) {
                 monitorOccured = true;
                 return;
@@ -338,7 +341,7 @@ public class CDMonitorFactory {
         private static class MonitorField {
             private MonitorType monitorType;
             private ScalarType scalarType = null;
-            private boolean causeMonitor;
+            private boolean causeMonitor = false;
             
             private boolean lastBooleanValue;
             private byte lastByteValue;
@@ -419,6 +422,9 @@ public class CDMonitorFactory {
                 lastMonitorValue = convert.toDouble((PVScalar)pvField);
             }
             
+            private boolean causeMonitor() {
+                return causeMonitor;
+            }
             private boolean newField(PVField pvField) {
                 if(monitorType==MonitorType.onPut) {
                     if(causeMonitor) return true;
