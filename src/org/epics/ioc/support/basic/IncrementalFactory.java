@@ -79,7 +79,7 @@ public class IncrementalFactory {
         public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure parent = pvIncremental.getParent();
-            PVField pvField = parent.getParent().getSubField("value");
+            PVField pvField = parent.getSubField("value");
             if(pvField==null || pvField.getField().getType()!=Type.scalar) {
                 parent.message("does not have a scalar field named value", MessageType.error);
                 return;

@@ -622,7 +622,7 @@ public class RecordProcessFactory {
         private void traceMessage(String message) {
             String time = "";
             if(timeStamp!=null) {
-                long milliPastEpoch = timeStamp.getMilliSeconds();
+                long milliPastEpoch = System.currentTimeMillis();
                 Date date = new Date(milliPastEpoch);
                 time = String.format("%tF %tT.%tL ", date,date,date);
             }

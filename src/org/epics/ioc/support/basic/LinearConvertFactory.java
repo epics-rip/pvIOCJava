@@ -64,7 +64,7 @@ public class LinearConvertFactory {
     }
     
     private static final String linearConvertInput = "linearConvertInputFactory";
-    private static final String linearConvertOutput = "linearConvertOutputFcatory";
+    private static final String linearConvertOutput = "linearConvertOutputFactory";
     
     private static abstract class LinearConvertBase extends AbstractSupport
     {

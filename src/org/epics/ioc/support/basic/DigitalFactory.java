@@ -14,13 +14,11 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.factory.PVReplaceFactory;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
-import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVDataCreate;
@@ -68,7 +66,6 @@ public class DigitalFactory {
     
     private static final String digitalInputName = "digitalInputFactory";
     private static final String digitalOutputName = "digitalOutputFcatory";
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static PVDatabase pvDatabaseMaster = PVDatabaseFactory.getMaster();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static Convert convert = ConvertFactory.getConvert();
@@ -101,7 +98,7 @@ public class DigitalFactory {
         public void initialize(RecordSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure parentPVField = pvStates.getParent().getParent();
-            PVField pvField = pvProperty.findProperty(parentPVField, "value");
+            PVField pvField = parentPVField.getSubField("value");
             if(pvField==null) {
                 super.message("parent does not have a value field", MessageType.error);
                 return;
@@ -118,7 +115,7 @@ public class DigitalFactory {
                 super.message("valueAlarm does not exist", MessageType.error);
                 return;
             }
-            pvValueAlarmStateAlarm = pvValueAlarm.getStructureField("changeStateAlarm");
+            pvValueAlarmStateAlarm = pvValueAlarm.getStructureField("stateAlarm");
             if(pvValueAlarmStateAlarm==null) {
                 pvValueAlarm.message("valueAlarm does not have a stateAlarm field. Why???", MessageType.error);
                 return;
@@ -165,7 +162,6 @@ public class DigitalFactory {
             String[] names = new String[nstates];
             values = new int[nstates];
             PVStructure pvEnumeratedAlarmState = pvDatabaseMaster.findStructure("enumeratedAlarmState");
-            Field[] pvValueAlarmStateAlarmFields = pvEnumeratedAlarmState.getStructure().getFields();
             for(int indState=0; indState<nstates; indState++) {
                 PVField pvField = pvStatesFields[indState];
                 if(pvField.getField().getType()!=Type.structure) {
@@ -205,8 +201,11 @@ public class DigitalFactory {
                 PVStructure pvNew = pvDataCreate.createPVStructure(
                     pvValueAlarmStateAlarm,
                     String.valueOf(indState),
-                    pvStructure.getStructure().getFields());
-                convert.copyStructure(pvStructure,pvNew);
+                    pvEnumeratedAlarmState);
+                PVReplaceFactory.replace(pvDatabaseMaster,pvNew);
+                Enumerated enumTo = AlarmSeverity.getAlarmSeverity(pvNew.getSubField("severity"));
+                enumTo.getIndex().put(enumerated.getIndex().get());
+                convert.copyScalar(pvMessage, pvNew.getStringField("message"));
                 pvValueAlarmStateAlarm.appendPVField(pvNew);
             }          
             pvValueChoices.put(0, nstates, names, 0);

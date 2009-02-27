@@ -18,8 +18,6 @@ import org.epics.pvData.factory.BasePVShort;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVByte;
@@ -42,7 +40,6 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class ControlLimitFactory {
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
     private static PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     
     /**
@@ -59,23 +56,19 @@ public class ControlLimitFactory {
             pvField.message("replacePVField field is not a numeric scalar", MessageType.error);
             return;
         }
-        PVField pvControl = pvProperty.findProperty(pvField, "control");
-        if(pvControl==null) {
-            pvField.message("replacePVField control is not a property", MessageType.error);
-            return;
-        }
-        PVField pvLow = pvProperty.findProperty(pvControl,"limit.low");
-        PVField pvHigh = pvProperty.findProperty(pvControl,"limit.high");
+        PVStructure pvParent = pvField.getParent();
+        PVField pvLow = pvParent.getSubField("control.limit.low");
+        PVField pvHigh = pvParent.getSubField("control.limit.high");
         if(pvLow==null || pvHigh==null) {
-            pvField.message("replacePVField invalid control structure", MessageType.error);
+            pvParent.message("replacePVField missing or invalid control structure", MessageType.error);
             return;
         }
         if(pvLow.getField().getType()!=Type.scalar) {
-            pvLow.message("replacePVField is not a scalar", MessageType.error);
+            pvLow.message("is not a scalar", MessageType.error);
             return;
         }
         if(pvHigh.getField().getType()!=Type.scalar) {
-            pvLow.message("replacePVField is not a scalar", MessageType.error);
+            pvLow.message("is not a scalar", MessageType.error);
             return;
         }
         new ControlLimitImpl((PVScalar)pvField,(PVScalar)pvLow,(PVScalar)pvHigh);
@@ -166,16 +159,16 @@ public class ControlLimitFactory {
             public void put(byte value) {
                 byte lowValue = convert.toByte(lowPVField);
                 byte highValue = convert.toByte(highPVField);
-                if(lowValue>highValue) return;
-                if(value<lowValue) {
-                    value = lowValue;
-                    raiseAlarm(false);
-                } else if(value>highValue) {
-                    value = highValue;
-                    raiseAlarm(true);
+                if(lowValue<highValue) {
+                    if(value<lowValue) {
+                        value = lowValue;
+                        raiseAlarm(false);
+                    } else if(value>highValue) {
+                        value = highValue;
+                        raiseAlarm(true);
+                    }
                 }
                 this.value = value;
-                super.postPut();
             }
         }
         
@@ -200,16 +193,16 @@ public class ControlLimitFactory {
             public void put(short value) {
                 short lowValue = convert.toShort(lowPVField);
                 short highValue = convert.toShort(highPVField);
-                if(lowValue>highValue) return;
-                if(value<lowValue) {
-                    value = lowValue;
-                    raiseAlarm(false);
-                } else if(value>highValue) {
-                    value = highValue;
-                    raiseAlarm(true);
+                if(lowValue<highValue) {
+                    if(value<lowValue) {
+                        value = lowValue;
+                        raiseAlarm(false);
+                    } else if(value>highValue) {
+                        value = highValue;
+                        raiseAlarm(true);
+                    }
                 }
                 this.value = value;
-                super.postPut();
             }
         }
         private class IntValue extends BasePVInt implements PVInt {
@@ -233,16 +226,16 @@ public class ControlLimitFactory {
             public void put(int value) {
                 int lowValue = convert.toInt(lowPVField);
                 int highValue = convert.toInt(highPVField);
-                if(lowValue>highValue) return;
-                if(value<lowValue) {
-                    value = lowValue;
-                    raiseAlarm(false);
-                } else if(value>highValue) {
-                    value = highValue;
-                    raiseAlarm(true);
+                if(lowValue<highValue) {
+                    if(value<lowValue) {
+                        value = lowValue;
+                        raiseAlarm(false);
+                    } else if(value>highValue) {
+                        value = highValue;
+                        raiseAlarm(true);
+                    }
                 }
                 this.value = value;
-                super.postPut();
             }
         }
         private class LongValue extends BasePVLong implements PVLong {
@@ -266,16 +259,16 @@ public class ControlLimitFactory {
             public void put(long value) {
                 long lowValue = convert.toLong(lowPVField);
                 long highValue = convert.toLong(highPVField);
-                if(lowValue>highValue) return;
-                if(value<lowValue) {
-                    value = lowValue;
-                    raiseAlarm(false);
-                } else if(value>highValue) {
-                    value = highValue;
-                    raiseAlarm(true);
+                if(lowValue<highValue) {
+                    if(value<lowValue) {
+                        value = lowValue;
+                        raiseAlarm(false);
+                    } else if(value>highValue) {
+                        value = highValue;
+                        raiseAlarm(true);
+                    }
                 }
                 this.value = value;
-                super.postPut();
             }
         }
         private class FloatValue extends BasePVFloat implements PVFloat {
@@ -299,16 +292,16 @@ public class ControlLimitFactory {
             public void put(float value) {
                 float lowValue = convert.toFloat(lowPVField);
                 float highValue = convert.toFloat(highPVField);
-                if(lowValue>highValue) return;
-                if(value<lowValue) {
-                    value = lowValue;
-                    raiseAlarm(false);
-                } else if(value>highValue) {
-                    value = highValue;
-                    raiseAlarm(true);
+                if(lowValue<highValue) {
+                    if(value<lowValue) {
+                        value = lowValue;
+                        raiseAlarm(false);
+                    } else if(value>highValue) {
+                        value = highValue;
+                        raiseAlarm(true);
+                    }
                 }
                 this.value = value;
-                super.postPut();
             }
         }
         private class DoubleValue extends BasePVDouble implements PVDouble {
@@ -332,16 +325,16 @@ public class ControlLimitFactory {
             public void put(double value) {
                 double lowValue = convert.toDouble(lowPVField);
                 double highValue = convert.toDouble(highPVField);
-                if(lowValue>highValue) return;
-                if(value<lowValue) {
-                    value = lowValue;
-                    raiseAlarm(false);
-                } else if(value>highValue) {
-                    value = highValue;
-                    raiseAlarm(true);
+                if(lowValue<highValue) {
+                    if(value<lowValue) {
+                        value = lowValue;
+                        raiseAlarm(false);
+                    } else if(value>highValue) {
+                        value = highValue;
+                        raiseAlarm(true);
+                    }
                 }
                 this.value = value;
-                super.postPut();
             }
         }
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright - See the COPYRIGHT that is included with this disctibution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS JavaIOC is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
@@ -13,26 +13,26 @@ package org.epics.ioc.support;
  */
 public interface SupportCreation {
     /**
-     * Create support for all records in the iocdb.
+     * Create support for all records in the supportDatabase.
      * @return (false,true) if all necessary support (was not, was) created.
      */
     boolean createSupport();
     /**
-     * Initialize all records in the iocdb.
+     * Initialize all records in the supportDatabase.
      * @return (false,true) if all record support entered state SupportState.readyForStart.
      */
     boolean initializeSupport();
     /**
-     * Start all records in the iocdb
+     * Start all records in the supportDatabase
      * @return (false,true) if all record support entered state SupportState.ready.
      */
     boolean  startSupport();
     /**
-     * Unintialize all records in the iocdb.
+     * Unintialize all records in the supportDatabase.
      */
     void uninitializeSupport();
     /**
-     * Stop all records in the iocdb.
+     * Stop all records in the supportDatabase.
      */
     void stopSupport();
 }
