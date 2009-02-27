@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: caV3<br />
 Channel Access Version 3<br />
 package: org.epics.ioc.caV3<br />
-2008.02.02</h1>
+2008.02.25</h1>
 CONTENTS 
 
 <div class="toc">
@@ -109,7 +109,7 @@ be processed. The value is written before the record is processed.</p>
 <pre>     caget -d 20 double.{getProcess=true}</pre>
 
 <p>This gets the value field of record double. The record is processed.</p>
-<pre>    caput powerSupplyArray.supply[1].power{putProcess=true} 2</pre>
+<pre>    caput powerSupplyArray.supply.1.power{putProcess=true} 2</pre>
 
 <p>This writes the value 2 to the power.value field of the second supply of
 the powerSupplyArray record.</p>

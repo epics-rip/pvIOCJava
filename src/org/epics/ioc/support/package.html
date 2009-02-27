@@ -10,18 +10,18 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2008.08.27</h1>
+2009.02.25</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a> 
+  <li><a href="#Overview">Overview</a>
     <ul>
       <li><a href="#RecordProc">RecordProcess</a></li>
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Record">Record Processing Theory of Operation</a> 
+  <li><a href="#Record">Record Processing Theory of Operation</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requester">Requester Examples</a></li>
@@ -32,7 +32,7 @@ CONTENTS
       <li><a href="#Support1">Support Overview</a></li>
     </ul>
   </li>
-  <li><a href="#Record1">Record Process</a> 
+  <li><a href="#Record1">Record Process</a>
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#RecordProc2">RecordProcess - General Purpose
@@ -49,22 +49,25 @@ CONTENTS
       <li><a href="#RecordProc7">RecordProcessFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Support2">Support</a> 
+  <li><a href="#Support2">Support</a>
     <ul>
       <li><a href="#Support3">Support State</a></li>
       <li><a href="#Support4">Support</a></li>
+      <li><a href="#Record2">Record Support</a></li>
     </ul>
   </li>
-  <li><a href="#AbstractSu">AbstractSupport</a> 
+  <li><a href="#AbstractSu">AbstractSupport</a>
     <ul>
       <li><a href="#AbstractSu1">AbstractSupport</a></li>
       <li><a href="#Definition2">Definitions</a></li>
     </ul>
   </li>
-  <li><a href="#Support5">Support Creation</a> 
+  <li><a href="#Support5">Support Database and Creation</a>
     <ul>
       <li><a href="#Definition3">Definitions:</a></li>
-      <li><a href="#Support6">Support Creation</a></li>
+      <li><a href="#Support6">Support Database</a></li>
+      <li><a href="#Support7">Support Database</a></li>
+      <li><a href="#Support8">Support Creation</a></li>
       <li><a href="#Factory">Factory</a></li>
     </ul>
   </li>
@@ -94,12 +97,22 @@ field can optionally have an associated Support instance. </p>
     recordProcess.requestProcessCallback.</dd>
   <dt><span style="font-family: courier;">ProcessContinueRequester</span></dt>
     <dd>Implemented by code that calls recordProcess.processContinue.</dd>
+  <dt><span style="font-family: courier;">SupportCreation</span></dt>
+    <dd>Implemented by SupportCreationFactory. It is used to create support
+      for a supportDatabase.</dd>
+  <dt><span style="font-family: courier;">SupportDatabase</span></dt>
+    <dd>Provides access to the PVDatabase and RecordSupport and allows the
+      supportDatabase to be merged into the master.</dd>
 </dl>
 
-<p>In addition the following class is provided:</p>
+<p>In addition the following classes are provided:</p>
 <dl>
   <dt><span style="font-family: courier;">RecordProcessFactory</span></dt>
     <dd>Implements RecordProcess.</dd>
+  <dt><span style="font-family: courier;">SupportDatabaseFactory</span></dt>
+    <dd>Implements SupportDatabase.</dd>
+  <dt><span style="font-family: courier;">SupportCreationFactory</span></dt>
+    <dd>Implements SupportCreation.</dd>
 </dl>
 
 <h3 id="Support">Support</h3>
@@ -396,32 +409,28 @@ record:</p>
 fields:</p>
 <dl>
   <dt>value</dt>
-    <dd>A DBDouble field, i.e. a field that holds a double value.</dd>
+    <dd>A PVDouble field, i.e. a field that holds a double value.</dd>
   <dt>input</dt>
-    <dd>A DBStructure field which is by default a null structure, i.e. it has
+    <dd>A PVStructure field which is by default a null structure, i.e. it has
       no fields and no support. A record instance can override this to be any
       structure defined in the master Database Definition Database. The
       default support can also be overridden.</dd>
   <dt>output</dt>
-    <dd>Also a null DBStructure field.</dd>
+    <dd>Also a null PVStructure field.</dd>
   <dt>valueAlarm</dt>
-    <dd>Also a null DBStructure field.</dd>
+    <dd>Also a null PVStructure field.</dd>
   <dt>supportArray</dt>
     <dd>An array field with the elementType set to structure and the
       supportName set to supportArray.</dd>
   <dt>...</dt>
-    <dd>Several other null DBStructure fields are present.</dd>
+    <dd>Several other null PVStructure fields are present.</dd>
 </dl>
 
 <p>In addition the following support modules are available.</p>
 <dl>
   <dt>generic</dt>
-    <dd>The record support module. It's process method calls two other
-      support modules: The first must be support for a link that can input a
-      double value. The second must support an array of links. The support
-      must be able to call link support for each element of the array. Each
-      element support can either require no input or a single value that is a
-      double.</dd>
+    <dd>Support for a structure. For each field in the structure that has
+      support, generic calls it. </dd>
   <dt>inputLink</dt>
     <dd>A link support modules that supports channel access input links, i.e.
       a link that gets input from another IOC record.</dd>
@@ -431,37 +440,32 @@ fields:</p>
   <dt>outputLink</dt>
     <dd>A link support module that supports channel access output links, i.e.
       a link that can put data to another record.</dd>
-  <dt>linkArray</dt>
-    <dd>A support module for an array on links. For each array element it
-      knows how to use the associated link support module.</dd>
   <dt>...</dt>
     <dd>Support modules are also available that can be attached to other null
-      DBStructure fields.</dd>
+      PVStructure fields.</dd>
 </dl>
 
 <p>Assume a record instance is defined as follows:</p>
-<pre>&lt;record name = "double01" type = "doubleRecord"&gt;
-    &lt;input supportName = "inputSupport" structureName = "inputSupport"&gt;
-            &lt;pvname&gt;recordForInput&lt;/pvname&gt;
-            &lt;process&gt;false&lt;/process&gt;
-    &lt;/input&gt;
-
-    &lt;supportArray&gt;
-        &lt;value structureName = "supportArrayElement"&gt;
-            &lt;wait&gt;false&lt;/wait&gt;
-            &lt;link  supportName = "processSupport" structureName = "processSupport"&gt;
-                &lt;pvname&gt;processRecord&lt;/pvname&gt;
-            &lt;/link&gt;
-        &lt;/value&gt;
-        &lt;value structureName = "supportArrayElement"&gt;
-            &lt;wait&gt;false&lt;/wait&gt;
-            &lt;link  supportName = "outputSupport" structureName = "outputSupport"&gt;
-                &lt;pvname&gt;outputRecord&lt;/pvname&gt;
-                &lt;process&gt;true&lt;/process&gt;
-            &lt;/link&gt;
-        &lt;/value&gt;
-    &lt;/supportArray&gt;
-
+<pre>&lt;record name = "double01" type = "generic"&gt;
+    &lt;structure name = "alarm" type = "alarm" /&gt;
+    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+    &lt;scalar name = "value" type = "double" /&gt;
+    &lt;structure name = "display" type = "display" /&gt;
+    &lt;structure name = "input" type = "inputSupport"&gt;
+        &lt;scalar name = "pvname"&gt;recordForInput&lt;/scalar&gt;
+        &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
+        &lt;scalar name = "propertyNames"&gt;alarm,display&lt;/scalar&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "link" type = "generic" &gt;
+        &lt;structure name = "process" type = "processSupport"&gt;
+            &lt;scalar name = "pvname"&gt;processRecord&lt;/scalar&gt;
+            &lt;scalar name = "wait" type = "boolean" &gt;false&lt;/scalar&gt;
+        &lt;/structure&gt;
+        &lt;structure name = "output" type = "outputSupport"&gt;
+             &lt;scalar name = "pvname"&gt;outputRecord&lt;/scalar&gt;
+             &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
+        &lt;/structure&gt;
+    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
 <p>When the record is processed, via a call to recordProcess.process, the
@@ -470,7 +474,9 @@ following happens:</p>
   <li>recordProcess locks the record, prepares it for processing and sets it
     active. The record will remain active until the record is completely
     processed.</li>
-  <li>recordProcess calls doubleRecord.process</li>
+  <li>recordProcess calls doubleRecord.process, which is actually generic
+    support. For this example it will be called doubleRecord so that it is
+    not confused with the generic support for field link</li>
   <li>doubleRecord calls inputSupport.process.</li>
   <li>Assuming the recordForInput is local and since process is false, the
     input support just: 
@@ -481,12 +487,12 @@ following happens:</p>
       <li>notifys doubleRecord that it has completed.</li>
     </ul>
   </li>
-  <li>doubleRecord calls supportArray.process.</li>
-  <li>supportArray calls recordProcess.requestProcessCallback.</li>
+  <li>doubleRecord calls link.process.</li>
+  <li>generic calls recordProcess.requestProcessCallback.</li>
   <li>doubleRecord returns.</li>
-  <li>recordProcess unlocks the record and calls
-    supportArray.processCallback.<br />
-    supportArray calls the process method of both processSupport and
+  <li>recordProcess unlocks the record and calls generic.processCallback.<br
+    />
+    generic calls the process method of both processSupport and
     outputSupport. 
     <p>processSupport does the following:</p>
     <ul>
@@ -498,7 +504,7 @@ following happens:</p>
       <li>processDone calls recordProcess.processContinue, which calls the
         processContinue method of processSupport.</li>
       <li>processContinue calls supportProcessRequester.supportProcessDone,
-        which is a method of supportArray.</li>
+        which is a method of generic.</li>
     </ul>
     <p>outputSupport does the following.</p>
     <ul>
@@ -511,14 +517,14 @@ following happens:</p>
       <li>processDone calls recordProcess.processContinue, which calls the
         processContinue method of processSupport.</li>
       <li>processContinue calls supportProcessRequester.supportProcessDone,
-        which is a method of supportArray.</li>
+        which is a method of generic.</li>
     </ul>
-    <p>supportArray keeps track of each support it calls. When all have
-    called supportProcessDone then supportArray is also done.</p>
+    <p>generic keeps track of each support it calls. When all have called
+    supportProcessDone then supportArray is also done.</p>
   </li>
-  <li>supportArray, when done, calls recordSupport.processContinue.</li>
-  <li>recordSupport calls supportArray.processContinue</li>
-  <li>supportArray calls doubleRecord.supportProcessDone.</li>
+  <li>generic, when done, calls recordSupport.processContinue.</li>
+  <li>recordSupport calls generic.processContinue</li>
+  <li>generic calls doubleRecord.supportProcessDone.</li>
   <li>doubleRecord calls recordProcess.supportProcessDone</li>
   <li>recordProcess completes record processing 
     <ul>
@@ -589,27 +595,10 @@ try {
 <p>The methods initialize, start, stop, and uninitialize provide the ability
 to dynamically modify a record.</p>
 
-<p>Support can be asociated with a record in a record via the following:</p>
-<ul>
-  <li>structure or recordType Database Definitions<br />
-    One of the attributes is supportName. If this is defined then when the
-    database definition is used in a record instance it will be the default
-    support definiotion.</li>
-  <li>record instance definition<br />
-    If the supportName attribute is defined for a field it determines the
-    support.</li>
-  <li>PVField.setSupportName(String supportName)<br />
-    After a record is created, this changes the support name. If this is
-    called the record must be in the uinitialized state and createSupport
-    must be called.</li>
-  <li>DBField.setSupport(Support support)<br />
-    After a record is created, this changes the support. If this is called
-    the record must be in the uinitialized state and createSupport must be
-    called.</li>
-</ul>
-
-<p>The first for ways require that supportName be found in the Support
-Database Definition Database.</p>
+<p>Support is associated with a structure, record, or field definition via an
+auxInfo definition that has a name of "supportFactory". In addition there
+must be a structure definition for the factory itself. Look at the xml
+structure definitions that come with the javaIOC for examples.</p>
 <hr />
 
 <h2 style="text-align: center;" id="Record1">Record Process</h2>
@@ -618,12 +607,17 @@ Database Definition Database.</p>
 <h3 id="Definition1">Definitions</h3>
 
 <p>The following are the interfaces for record processing:</p>
-<pre>    public interface RecordProcess {
+<pre>    public interface RecordProcessRequester extends Requester{
+        void recordProcessResult(RequestResult requestResult);
+        void recordProcessComplete();
+    }
+
+    public interface RecordProcess {
         // general purpose methods
         boolean isEnabled();
         boolean setEnabled(boolean value);
         boolean isActive();
-        DBRecord getRecord();
+        PVRecord getRecord();
         boolean isTrace();
         boolean setTrace(boolean value);
         SupportState getSupportState();
@@ -877,7 +871,8 @@ style="font-family: courier;">processContinue</span> is running.</p>
 <p>A factory is provided to create an instance of RecordProcess for a record
 instance. It has the method:</p>
 <pre>public class RecordProcessFactory {
-    static public RecordProcess createRecordProcess(DBRecord dbRecord);
+    static public RecordProcess createRecordProcess(
+          RecordSupport recordSupport,PVRecord pvRecord);
 }</pre>
 <hr />
 
@@ -903,7 +898,7 @@ just report failure.</p>
     }
 
     public static SupportState getSupportState(int value);
-    public static Enumerated getSupportState(DBField dbField);</pre>
+    public static Enumerated getSupportState(PVField pvField);</pre>
 
 <p><span style="font-family: courier;">SupportState</span> has the following
 values:</p>
@@ -926,9 +921,10 @@ values:</p>
 and any other support code that is involved with record processing:</p>
 <pre>    
     public interface Support extends Requester {
+        String getSupportName();
         SupportState getSupportState();
-        DBField getDBField();
-        void initialize();
+        PVField getPVField();
+        void initialize(RecordSupport recordSupport));
         void start();
         void stop();
         void uninitialize();
@@ -942,6 +938,8 @@ and any other support code that is involved with record processing:</p>
 
 <p><span style="font-family: courier;">Support</span> has the methods:</p>
 <dl>
+  <dt><span style="font-family: courier">getSupportName</span></dt>
+    <dd>Get the support name.</dd>
   <dt style="font-family: courier;">getRequesterName</dt>
     <dd>A requester method to get the name of the support.</dd>
   <dt style="font-family: courier;">message</dt>
@@ -949,8 +947,8 @@ and any other support code that is involved with record processing:</p>
     support.</dd>
   <dt style="font-family: courier;">getSupportState</dt>
     <dd>Get the support state.</dd>
-  <dt style="font-family: courier;">getDBField</dt>
-    <dd>Get the <span style="font-family: courier;">DBField</span> interface
+  <dt style="font-family: courier;">getPVField</dt>
+    <dd>Get the <span style="font-family: courier;">PVField</span> interface
       for the field that is being supported. For record support this will be
       the record itself. <span style="font-family: courier;"></span></dd>
   <dt style="font-family: courier;">initialize</dt>
@@ -985,6 +983,16 @@ method:</p>
       wants to process other records must implement this interface. This MUST
       be called with either process or processContinue running.</dd>
 </dl>
+
+<h3 id="Record2">Record Support</h3>
+
+<p>Every record instance has an attached RecordSupport:</p>
+<pre>    public interface RecordSupport {
+        RecordProcess getRecordProcess();
+        void setRecordProcess(RecordProcess recordProcess);
+        Support getSupport(PVField pvField);
+        void setSupport(PVField pvField,Support support);
+    }</pre>
 <hr />
 
 <h2 style="text-align: center" id="AbstractSu">AbstractSupport</h2>
@@ -994,15 +1002,16 @@ method:</p>
 
 <h3 id="Definition2">Definitions</h3>
 <pre>    public abstract class AbstractSupport implements Support {
-        protected AbstractSupport(String name,DBField dbField);
+        protected String supportName;
+        protected AbstractSupport(String name,PVField pvField);
         // methods from Requester
         public String getRequesterName();
         public void message(String message, MessageType messageType);
         // methods that are rarely overridden
         public SupportState getSupportState();
-        public DBField getDBField();
+        public PVField getPVField();
         // following normally overridden
-        public void initialize();
+        public void initialize(RecordSupport recordSupport);
         public void start();
         public void stop();
         public void uninitialize();
@@ -1025,11 +1034,11 @@ methods it needs.</p>
   <dt style="font-family: courier;">getRequesterName</dt>
     <dd>The returns the name passed to constructor.</dd>
   <dt style="font-family: courier;">message</dt>
-    <dd>Calls dbField.message.</dd>
+    <dd>Calls pvField.message.</dd>
   <dt style="font-family: courier;">getSupportState</dt>
     <dd>Gets the current support state.</dd>
-  <dt style="font-family: courier;">getDBField</dt>
-    <dd>Returns dbField.</dd>
+  <dt style="font-family: courier;">getPVField</dt>
+    <dd>Returns pvField.</dd>
   <dt style="font-family: courier;">initialize</dt>
     <dd>Normally overridden. The default version always succeeds, i.e. enters
       state readyForStart.</dd>
@@ -1053,17 +1062,26 @@ methods it needs.</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center;" id="Support5">Support Creation</h2>
+<h2 style="text-align: center;" id="Support5">Support Database and
+Creation</h2>
 <hr />
 
 <p>This is called to create all support for all fields of all records in the
 IOC database passed to createSupportCreation. It creates an instance of
 RecordProcess for each record instance and creates the support for every
 field with a non null supportName. The supportName must be defined in the
-Database Definition Database.</p>
+Database Definition Database. Note that org.epics.ioc.util.IOCFactory calls
+the factories described below and takes care of all creation and
+initialization.</p>
 
 <h3 id="Definition3">Definitions:</h3>
-<pre>    public interface SupportCreation {
+<pre>    public interface SupportDatabase {
+        PVDatabase getPVDatabase();
+        void mergeIntoMaster();
+        RecordSupport getRecordSupport(PVRecord pvRecord);
+    }
+
+    public interface SupportCreation {
         boolean createSupport();
         boolean initializeSupport();
         boolean  startSupport();
@@ -1071,13 +1089,48 @@ Database Definition Database.</p>
         void stopSupport();
     }
 
+    public class SupportDatabaseFactory {
+        public static SupportDatabase create(PVDatabase pvDatabase);
+        public static  SupportDatabase get(PVDatabase pvDatabase);
+    }
+
     public class SupportCreationFactory
         static public SupportCreation createSupportCreation(
-            IOCDB iocdb,Requester requester);
-        static public boolean createSupport(DBField dbField);
+            SupportDatabase supportDatabase,Requester requester);
+        static public boolean createSupport(
+            Requester requester,RecordSupport recordSupport,PVField pvField));
     }</pre>
 
-<h3 id="Support6">Support Creation</h3>
+<h3 id="Support6">Support Database</h3>
+
+<p>A support database is created for a PVDatabase. In order to dynamically
+add a new database to a running javaIOC, the following must be done:</p>
+<ul>
+  <li>Create a new PVDatabase.</li>
+  <li>Create a new SupportDatabase for the PVDatabase.</li>
+  <li>Create a SupportCreation for the support database.</li>
+  <li>Create the support and initialize the support. If both of these are
+    succesful then merge the support database into the master support
+    database. Next merge the pvDatabase into the master. Finally start the
+    support.</li>
+</ul>
+
+<p>Note that org.epics.ioc.util.IOCFactory.initDatabase does all of the
+above.</p>
+
+<h3 id="Support7">Support Database</h3>
+
+<p>SupportDatabase has the methods:</p>
+<dl>
+  <dt style="font-family: courier;">getPVDatabase</dt>
+    <dd>Get the PVDatabase to which this support database is attached.</dd>
+  <dt style="font-family: courier;">mergeIntoMaster</dt>
+    <dd>Merge the support database into the master support database.</dd>
+  <dt style="font-family: courier;">getRecordSupport</dt>
+    <dd>Get the record support for the specified record.</dd>
+</dl>
+
+<h3 id="Support8">Support Creation</h3>
 
 <p>SupportCreation has the methods:</p>
 <dl>
@@ -1101,7 +1154,9 @@ Database Definition Database.</p>
 <p>SupportCreationFactory has the method:</p>
 <dl>
   <dt>createSupportCreation</dt>
-    <dd>Create a SupportCreation database.</dd>
+    <dd>Create a SupportCreation for the supportDatabase.</dd>
+  <dt>createSupport</dt>
+    <dd>Create the support for the field.</dd>
 </dl>
 </body>
 </html>

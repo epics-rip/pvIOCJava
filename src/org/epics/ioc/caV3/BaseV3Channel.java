@@ -175,7 +175,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
         }
         PVRecord pvRecord = v3ChannelRecord.getPVRecord();
         if(name==null || name.length()<=0) return new ChannelFieldImpl(pvRecord);
-        PVField pvField = pvProperty.findProperty(pvRecord, name);
+        PVField pvField = pvRecord.getSubField(name);
         return new ChannelFieldImpl(pvField);               
     }
     /* (non-Javadoc)

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: portDriver<br />
 package: org.epics.ioc.pdrv<br />
-2008.09.25</h1>
+2009.02.25</h1>
 CONTENTS 
 
 <div class="toc">
@@ -18,11 +18,11 @@ CONTENTS
   <li><a href="#Purpose">Purpose</a></li>
   <li><a href="#Status">Status</a></li>
   <li><a href="#Acknowledg">Acknowledgments</a></li>
-  <li><a href="#Overview">Overview of PDRV</a>
+  <li><a href="#Overview">Overview of portDriver</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
-      <li><a href="#PDRV">PDRV Interfaces</a></li>
-      <li><a href="#PDRV1">PDRV Factory</a></li>
+      <li><a href="#PDRV">portDriver Interfaces</a></li>
+      <li><a href="#PDRV1">portDriver Factory</a></li>
       <li><a href="#Generic">Generic I/O Interfaces</a></li>
       <li><a href="#Connection">Connection Management</a></li>
       <li><a href="#Protecting">Protecting a Thread from Blocking</a></li>
@@ -32,13 +32,13 @@ CONTENTS
       <li><a href="#Requesting">Requesting access to a port</a></li>
     </ul>
   </li>
-  <li><a href="#PortDriver">PortDriver Record Types</a>
+  <li><a href="#PortDriver">PortDriver Record Types</a> 
     <ul>
       <li><a href="#portCreate">portCreate record</a></li>
       <li><a href="#portDevice">portDeviceControl record</a></li>
     </ul>
   </li>
-  <li><a href="#PDRV2">PDRV Factory</a>
+  <li><a href="#PDRV2">portDriver Factory</a> 
     <ul>
       <li><a href="#createUser">createUser</a></li>
       <li><a href="#createPort">createPort</a></li>
@@ -46,7 +46,7 @@ CONTENTS
       <li><a href="#getPort">getPort</a></li>
     </ul>
   </li>
-  <li><a href="#User">User</a>
+  <li><a href="#User">User</a> 
     <ul>
       <li><a href="#Status1">Status</a></li>
       <li><a href="#REASON">REASON</a></li>
@@ -66,7 +66,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Connect">Connect Exception</a></li>
-  <li><a href="#Port">Port</a>
+  <li><a href="#Port">Port</a> 
     <ul>
       <li><a href="#User7">User Locate Device</a></li>
       <li><a href="#User8">User Connection Methods</a></li>
@@ -76,7 +76,7 @@ CONTENTS
       <li><a href="#LockPortNo">LockPortNotify</a></li>
     </ul>
   </li>
-  <li><a href="#Device">Device</a>
+  <li><a href="#Device">Device</a> 
     <ul>
       <li><a href="#User9">User findInterface</a></li>
       <li><a href="#User10">User Connection Methods</a></li>
@@ -86,7 +86,7 @@ CONTENTS
       <li><a href="#Driver3">Driver Methods</a></li>
     </ul>
   </li>
-  <li><a href="#Trace">Trace</a>
+  <li><a href="#Trace">Trace</a> 
     <ul>
       <li><a href="#Trace1">Trace Mask Options</a></li>
       <li><a href="#TraceIO">TraceIO Options</a></li>
@@ -95,7 +95,7 @@ CONTENTS
       <li><a href="#Generating">Generating Trace Messages</a></li>
     </ul>
   </li>
-  <li><a href="#Driver4">Driver</a>
+  <li><a href="#Driver4">Driver</a> 
     <ul>
       <li><a href="#PortDriver1">PortDriver</a></li>
       <li><a href="#DeviceDriv">DeviceDriver</a></li>
@@ -109,23 +109,23 @@ CONTENTS
 <h2 style="text-align: center" id="Purpose">Purpose</h2>
 <hr />
 
-<p><b>portDriver</b> (PDRV) is a general purpose facility for interfacing
-support code to low level drivers. Devices are accessed via a port. PDRV
-allows non-blocking support that works with both blocking and non-blocking
+<p><b>portDriver</b> is a general purpose facility for interfacing support
+code to low level drivers. Devices are accessed via a port. portDriver allows
+non-blocking support that works with both blocking and non-blocking
 drivers.</p>
 
-<p>A primary target for PDRV is support for fields of JavaIOC records.
-However much of it is independent of EPICS.</p>
+<p>A primary target for portDriver is support for fields of JavaIOC records.
+However much of it is independent of the javaIOC.</p>
 
-<p>PDRV has the following key concepts:</p>
+<p>portDriver has the following key concepts:</p>
 <ul>
   <li>A port is a communication path to one or more devices, i.e. a device is
     accessed via a port.</li>
   <li>A driver implements interfaces PortDriver, DeviceDriver and I/O
     interfaces.</li>
-  <li>PDRV implements interfaces User, Port, Device, and Trace.</li>
-  <li>Interface User is an interface for support code to access PDRV and
-    drivers.</li>
+  <li>portDriver implements interfaces User, Port, Device, and Trace.</li>
+  <li>Interface User is an interface for support code to access portDriver
+    and drivers.</li>
   <li>Interface Trace provides a general purpose diagnostic facility. 
     <p>Rules are defined for providing diagnostic messages. Provided support
     and drivers follow the rules, a user can obtain several levels of
@@ -157,10 +157,10 @@ However much of it is independent of EPICS.</p>
     enable/disable the port or device. The user can set autoConnect,
     traceMask, and traceIOMask. The user can request a report. </li>
   <li>Extensive Serial Support - NOT IMPLEMENTED 
-    <p>PDRV provides many facilities for communicating with RS232, RS485,
-    GPIB, and ethernet.</p>
+    <p>portDriver provides many facilities for communicating with RS232,
+    RS485, GPIB, and ethernet.</p>
   </li>
-  <li>PDRVLinkSupport</li>
+  <li>portDriverLinkSupport</li>
 </ul>
 <hr />
 
@@ -173,15 +173,16 @@ However much of it is independent of EPICS.</p>
   <li>Standard interfaces: Standard message and register based interfaces are
     defined. Low Level Drivers implement standard interfaces. Support
     communicates with low level drivers via standard interfaces.</li>
-  <li>PDRVLinkSupport: Generic support for javaIOC records. This is part of
-    package org.epics.ioc.support.</li>
+  <li>portDriverLinkSupport: Generic support for javaIOC records. This is
+    part of package org.epics.ioc.support.</li>
 </ul>
 
 <p>No hardware support is currently ready for use. The plans are to do the
 following:</p>
 <ul>
   <li>Java Support for VXI-11 network devices has been written but not
-    tested. As soon as I have access to hardware it will be tested.</li>
+    tested. The CLS (Canadian Light Source) has kindly lent me some xvi11
+    based hardware. I hope to be able to start testing soon. </li>
   <li>Develop Java support for STREAMS, which is Dirk Zimoch's protocol
     file-based support for commuinicating with message based devices such as
     serial, GPIB, andCAN. </li>
@@ -197,7 +198,7 @@ following:</p>
 <h2 style="text-align: center" id="Acknowledg">Acknowledgments</h2>
 <hr />
 
-<p>PDRV is modeled after asynDriver. See <a
+<p>portDriver is modeled after asynDriver. See <a
 href="http://www.aps.anl.gov/epics/modules/soft/asyn/">asynDriver</a>. for
 details about asynDriver.</p>
 
@@ -205,17 +206,17 @@ details about asynDriver.</p>
 contributions to asynDriver and to Dirk Zimoch for developing STEAMS.</p>
 <hr />
 
-<h2 style="text-align: center" id="Overview">Overview of PDRV</h2>
+<h2 style="text-align: center" id="Overview">Overview of portDriver</h2>
 <hr />
 
 <h3 id="Definition">Definitions</h3>
 
-<p>PDRV is a software layer between support code, e.g. javaIOC support, and
-drivers that communicate with devices. It supports both blocking and
+<p>portDriver is a software layer between support code, e.g. javaIOC support,
+and drivers that communicate with devices. It supports both blocking and
 non-blocking communication and can be used with both register and message
-based devices. PDRV uses the following terminology:</p>
+based devices. portDriver uses the following terminology:</p>
 <ul>
-  <li>PDRV <br />
+  <li>portDriver <br />
     The name for the code described in this package. </li>
   <li>port <br />
     A physical or logical entity which provides access to a device. A port
@@ -240,12 +241,13 @@ based devices. PDRV uses the following terminology:</p>
   <li>DeviceDriver <br />
     Interface implemented by a driver for a device connected to a port. </li>
   <li>support <br />
-    The code that users PDRV. For example PDRVLinkSupport is PDRV support
-    code for javaIOC records. </li>
+    The code that users portDriver. For example portDriverLinkSupport is
+    portDriver support code for javaIOC records. </li>
   <li>User <br />
-    An interface implemented by PDRV and used by support. It provide access
-    to PDRV itself and driver I/O interfaces. It also allows a driver to pass
-    error messages and other auxillary information to support code. </li>
+    An interface implemented by portDriver and used by support. It provide
+    access to portDriver itself and driver I/O interfaces. It also allows a
+    driver to pass error messages and other auxillary information to support
+    code. </li>
   <li>Trace <br />
     An interface for diagnostic messages. </li>
   <li>portThread <br />
@@ -268,7 +270,8 @@ based devices. PDRV uses the following terminology:</p>
     An interface for performing Input or Output to a device. An I/O interface
     is implement by a DeviceDriver. </li>
   <li>interrupt <br />
-    As implemented by PDRV, interrupt just means "I have a new value". </li>
+    As implemented by portDriver, interrupt just means "I have a new value".
+  </li>
   <li>interpose <br />
     Multiple layers can exist between support code and a port driver. A
     software layer calls interposeInterface in order to be placed between
@@ -290,18 +293,18 @@ attached to a GPIB port.</p>
 
 <p>A device driver can implement multiple interfaces.</p>
 
-<p>PDRV uses some features of the javaIOC but it can be used by other code,
-e.g. a sequence program when one is created for the javaIOC.</p>
+<p>portDriver uses some features of the javaIOC but it can be used by other
+code, e.g. a sequence program when one is created for the javaIOC.</p>
 
-<h3 id="PDRV">PDRV Interfaces</h3>
+<h3 id="PDRV">portDriver Interfaces</h3>
 
-<p>The following are interfaces defined in org.epics.ioc.pdrv:</p>
+<p>The following are interfaces defined in org.epics.ioc.portDriver:</p>
 <dl>
   <dt style="font-weight: bold">User</dt>
-    <dd>A "handle" that support code uses to access PDRV. It is create by
-      Factory. A user can call queueRequest or lockPort.unlockPort to receive
-      exclusive access for performing I/O. It also allows a driver to pass
-      error messages and other auxillary data to the user.</dd>
+    <dd>A "handle" that support code uses to access portDriver. It is create
+      by Factory. A user can call queueRequest or lockPort.unlockPort to
+      receive exclusive access for performing I/O. It also allows a driver to
+      pass error messages and other auxillary data to the user.</dd>
   <dt style="font-weight: bold">Port</dt>
     <dd>An interface that provides many services to a user.</dd>
   <dt style="font-weight: bold">PortDriver</dt>
@@ -320,7 +323,7 @@ e.g. a sequence program when one is created for the javaIOC.</p>
       style="font-weight: bold">user.queueRequest.</span></dd>
 </dl>
 
-<h3 id="PDRV1">PDRV Factory</h3>
+<h3 id="PDRV1">portDriver Factory</h3>
 
 <p>This implements Port, Device, User, and Trace. It has static methods
 to:</p>
@@ -334,8 +337,8 @@ to:</p>
 
 <h3 id="Generic">Generic I/O Interfaces</h3>
 
-<p>Package org.epics.ioc.pdrv.interfaces defines the following generic I/O
-interfaces:.</p>
+<p>Package org.epics.ioc.portDriver.interfaces defines the following generic
+I/O interfaces:.</p>
 <dl>
   <dt style="font-weight: bold">Octet</dt>
     <dd>methods for message based devices</dd>
@@ -397,11 +400,11 @@ lockPort/unlockPort.</p>
 
 <h3 id="portThread">portThread</h3>
 
-<p>If a driver calls Factory.createPort with canBlock true, then PDRV creates
-a thread for the port. Each portThread has its own set of queues for the
-calls to queueRequest. Three queues are maintained which provide different
-priorities: low, medium, and high. portThread runs forever implementing the
-following algorithm:</p>
+<p>If a driver calls Factory.createPort with canBlock true, then portDriver
+creates a thread for the port. Each portThread has its own set of queues for
+the calls to queueRequest. Three queues are maintained which provide
+different priorities: low, medium, and high. portThread runs forever
+implementing the following algorithm:</p>
 <ol>
   <li>Wait for for an event. Other code such as queueRequest signals the
     event.</li>
@@ -447,12 +450,12 @@ multi-drip user has access.</p>
 <p>During initialization, drivers register each communication port as well as
 all supported interfaces.</p>
 
-<p>Support code creates a User, which is a "handle" for accessing PDRV
+<p>Support code creates a User, which is a "handle" for accessing portDriver
 facilities, by calling</p>
 <pre>    Factory.createUser(QueueRequestCallback);</pre>
 An User has the following features: 
 <ul>
-  <li>An User is the means by which PDRV manages multiple requests for
+  <li>An User is the means by which portDriver manages multiple requests for
     accessing a port.</li>
   <li>QueueRequestCallback, which is used by queueRequest described below,
     has a single method which is the callback that is called when a request
@@ -463,7 +466,7 @@ An User has the following features:
     record instance. instance.</li>
   <li>Support should NOT try to share a User between multiple sources of
     requests for access to a port. If this is done then support must itself
-    handle contention issues that are already handled by PDRV.</li>
+    handle contention issues that are already handled by portDriver.</li>
 </ul>
 
 <p>User code connects to a low level driver via a call to</p>
@@ -507,7 +510,7 @@ port. The recordType has the following fields:</p>
     <dd>(false,true) if port (should not,should) auto connect. The default is
       true.</dd>
   <dt style="font-family: courier;">priority</dt>
-    <dd>The priority. This field is a scanPriority structure.</dd>
+    <dd>The priority. This field is a threadPriority structure.</dd>
   <dt style="font-family: courier;">driverParameters</dt>
     <dd>Driver specific parameters. This is a structure field. The default is
       a null structure but can be overridden for a port instance.</dd>
@@ -515,7 +518,7 @@ port. The recordType has the following fields:</p>
 
 <p>The following is an example port instance.</p>
 <pre>&lt;record name = "asynInt32Driver" type = "portCreate"&gt;
-    &lt;factoryName&gt;org.epics.ioc.pdrv.testDriver.Int32DriverFactory&lt;/factoryName&gt;
+    &lt;factoryName&gt;org.epics.ioc.portDriver.testDriver.Int32DriverFactory&lt;/factoryName&gt;
     &lt;portName&gt;asynInt32Driver&lt;/portName&gt;
     &lt;autoConnect&gt;false&lt;/autoConnect&gt;
     &lt;priority&gt;&lt;choice&gt;high&lt;/choice&gt;&lt;/priority&gt;
@@ -562,15 +565,15 @@ following fields:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="PDRV2">PDRV Factory</h2>
+<h2 style="text-align: center" id="PDRV2">portDriver Factory</h2>
 <hr />
 
-<p>This is the factory for creating PDRV objects.</p>
+<p>This is the factory for creating portDriver objects.</p>
 <pre>public class Factory {
     public static User createUser(QueueRequestCallback asynQueueRequestCallback);
     public static Port createPort(
-            String portName,PortDriver PDRV,String driverName,
-            boolean canBlock,boolean autoConnect,ScanPriority priority);
+            String portName,PortDriver portDriver,String driverName,
+            boolean canBlock,boolean autoConnect,ThreadPriority priority);
     public static String[] getPortNames();
     public static Port getPort(String portName);
 }</pre>
@@ -592,7 +595,7 @@ the devices connected to the port.</p>
 <h3 id="createPort">createPort</h3>
 <pre>    Port createPort(
             String portName,PortDriver portDriver,String driverName,
-            boolean canBlock,boolean autoConnect,ScanPriority priority);</pre>
+            boolean canBlock,boolean autoConnect,ThreadPriority priority);</pre>
 
 <p>Create a port. This is called by a driver to register a new port. The Port
 interface is created and returned.</p>
@@ -662,7 +665,7 @@ Factory and used by client code. </p>
     String getMessage();
     void setTimeout(double timeout);
     double getTimeout();
-    void setPortDriverPvt(Object PDRVPvt);
+    void setPortDriverPvt(Object portDriverPvt);
     Object getPortDriverPvt();
     void setDeviceDriverPvt(Object deviceDriverPvt);
     Object getDeviceDriverPvt();
@@ -849,13 +852,13 @@ then call getMessage to find the reason.</p>
 
 <p>Asynchronous I/O operations can block forever. For example a serial line
 could break. Each user that makes asynchronous request must call setTimeout.
-A timeout value of &lt;= 0.0 means infinity. A PDRV or deviceDriver calls
-getTimeout to get the timeout. It is the timeout for an individual I/O
+A timeout value of &lt;= 0.0 means infinity. A portDriver or deviceDriver
+calls getTimeout to get the timeout. It is the timeout for an individual I/O
 request. For example for a serial driver it could mean the time to read/write
 a single byte.</p>
 
 <h3 id="Driver1">Driver Private</h3>
-<pre>    void setPortDriverPvt(Object PDRVPvt);
+<pre>    void setPortDriverPvt(Object portDriverPvt);
     Object getPortDriverPvt();
     void setDeviceDriverPvt(Object deviceDriverPvt);
     Object getDeviceDriverPvt();</pre>
@@ -863,8 +866,8 @@ a single byte.</p>
 <p>These are methods for the port or device driver. Some drivers may have to
 keep data for each user. If a driver does than it must implement interface
 <span style="font-family: courier;">package
-org.epics.ioc.pdrv.interfaces.DriverUser</span> and the user must find and
-use it. It has the methods:</p>
+org.epics.ioc.portDriver.interfaces.DriverUser</span> and the user must find
+and use it. It has the methods:</p>
 <pre>    void create(User user,PVStructure drvParams);
     void dispose(User user);</pre>
 
@@ -888,9 +891,10 @@ the user.</p>
 Normally it is the driver that calls a set method and the user that calls a
 get method but the reverse is also possible. Both user and driver must
 understand when the methods are used. The interfaces defined in <span
-style="font-family: courier;">package org.epics.ioc.pdrv.interfaces</span>
-make use of these methods. For example the octet interface use setInt to tell
-the user how many elements were transfered.</p>
+style="font-family: courier;">package
+org.epics.ioc.portDriver.interfaces</span> make use of these methods. For
+example the octet interface use setInt to tell the user how many elements
+were transfered.</p>
 <hr />
 
 <h2 style="text-align: center" id="Connect">Connect Exception</h2>
@@ -994,8 +998,8 @@ queueRequest or call lockPort/unlockPort to call these methods.</p>
   <dt style="font-family: courier;">getDevices</dt>
     <dd>Get an array of the devices connected to the port.</dd>
   <dt style="font-family: courier;">getInterfaces</dt>
-    <dd>Get an array of the interfaces implemented by the PDRV. Note that
-      most drivers do not implement port interfaces but only device
+    <dd>Get an array of the interfaces implemented by the portDriver. Note
+      that most drivers do not implement port interfaces but only device
       interfaces.</dd>
   <dt style="font-family: courier;">getDriverName</dt>
     <dd>Get the driver name.</dd>
@@ -1241,7 +1245,7 @@ void unblockOtherUsers(User user);</pre>
 <p>where</p>
 <dl>
   <dt style="font-family: courier;">registerInterface</dt>
-    <dd>A PDRV must call this for each interface it implements.</dd>
+    <dd>A portDriver must call this for each interface it implements.</dd>
   <dt style="font-family: courier;">exceptionConnect</dt>
     <dd>When a port connects it must calls this.</dd>
   <dt style="font-family: courier;">exceptionDisconnect</dt>
@@ -1293,10 +1297,10 @@ public class TraceFactory {
     public static Trace create() {
         return new TraceImpl();
     }
-}
-</pre>
-<p>TraceFactory is a factory that implements Trace. It can be used independent
-of portDriver.</p>
+}</pre>
+
+<p>TraceFactory is a factory that implements Trace. It can be used
+independent of portDriver.</p>
 
 <h3 id="Trace1">Trace Mask Options</h3>
 
@@ -1480,17 +1484,17 @@ messages and also the value of octet data.</p>
 <hr />
 
 <p>The following is a complete list of all the Java definitions for <span
-style="font-family: courier;">package org.epics.ioc.pdrv. </span></p>
+style="font-family: courier;">package org.epics.ioc.portDriver. </span></p>
 
 <p>The I/O interfaces implemented by drivers (port or device) are defined in
 package <span style="font-family: courier;">package
-org.epics.ioc.pdrv.interfaces</span></p>
+org.epics.ioc.portDriver.interfaces</span></p>
 <pre>public class Factory {
     public static User createUser(QueueRequestCallback asynQueueRequestCallback);
     public static Port createPort(
-            String portName,PortDriver PDRV,
+            String portName,PortDriver portDriver,
             String driverName,boolean canBlock,
-            boolean autoConnect,ScanPriority priority);
+            boolean autoConnect,ThreadPriority priority);
     public static String[] getPortNames();
     public static Port getPort(String portName);
 }
@@ -1521,7 +1525,7 @@ public interface User {
     String getMessage();
     void setTimeout(double timeout);
     double getTimeout();
-    void setPortDriverPvt(Object PDRVPvt);
+    void setPortDriverPvt(Object portDriverPvt);
     Object getPortDriverPvt();
     void setDeviceDriverPvt(Object deviceDriverPvt);
     Object getDeviceDriverPvt();

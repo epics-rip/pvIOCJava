@@ -7,7 +7,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "calculation" >
       <structure name = "calculator">
-        <scalar name ="expression">(value+1)&lt;=3 ? value+1 : 0</scalar>
+        <scalar name ="expression">(value+1)&lt;=4 ? value+1 : 0</scalar>
       </structure>
     </structure>
     <structure name = "scan" type = "scan" >
@@ -17,18 +17,20 @@
         <scalar name = "rate">1.0</scalar>
         <scalar name = "processAfterStart">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
-        <scalar name = "pvname">enumerated.value.index</scalar>
-        <scalar name = "process">true</scalar>
-    </structure>
-    <structure name = "process0" type = "processSupport">
-        <scalar name = "pvname">enumeratedInput</scalar>
-    </structure>
-    <structure name = "process1" type = "processSupport">
-        <scalar name = "pvname">enumeratedInputIndex</scalar>
-    </structure>
-    <structure name = "process2" type = "processSupport">
-        <scalar name = "pvname">enumeratedInputChoice</scalar>
+    <structure name = "link" type = "generic">
+        <structure name = "output" type = "outputSupport">
+            <scalar name = "pvname">enumerated.value.index</scalar>
+            <scalar name = "process">true</scalar>
+        </structure>
+        <structure name = "process0" type = "processSupport">
+            <scalar name = "pvname">enumeratedInput</scalar>
+        </structure>
+        <structure name = "process1" type = "processSupport">
+            <scalar name = "pvname">enumeratedInputIndex</scalar>
+        </structure>
+        <structure name = "process2" type = "processSupport">
+            <scalar name = "pvname">enumeratedInputChoice</scalar>
+        </structure>
     </structure>
 </record>
 
@@ -121,7 +123,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "monitorSupport">
         <scalar name = "pvname">enumerated.value.index</scalar>
-        <scalar name = "process">false</scalar>
+        <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
@@ -143,7 +145,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "monitorSupport">
         <scalar name = "pvname">enumerated.value.choice</scalar>
-        <scalar name = "process">false</scalar>
+        <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>

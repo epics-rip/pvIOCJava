@@ -12,6 +12,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -64,8 +65,11 @@ public class EnumeratedAlarmFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure pvStruct = pvStructure.getParent().getStructureField("value");
             if(pvStruct==null) return;
-            Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvStruct);
-            if(enumerated==null) return;
+            Enumerated enumerated = EnumeratedFactory.getEnumerated(pvStruct);
+            if(enumerated==null) {
+                pvStruct.message(" is not an enumerated structure", MessageType.error);
+                return;
+            }
             pvValue = enumerated.getIndex();
             alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
             if(alarmSupport==null) {
@@ -103,14 +107,11 @@ public class EnumeratedAlarmFactory {
                     super.message("stateAlarm has an element that is not a structure",MessageType.error);
                     return false;
                 }
-                pvStructure = (PVStructure)pvField;
-                PVStructure pvStruct = pvStructure.getStructureField("severity");
-                if(pvStruct==null) return false;
-                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvStruct);
-                if(enumerated==null) {
-                    pvStruct.message("invalid interval severity field is not alarmSeverity", MessageType.error);
-                    return false;
-                }
+                PVStructure pvStructure = (PVStructure)pvField;
+                PVField pvSevr = pvStructure.getSubField("severity");
+                if(pvSevr==null) return false;
+                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvSevr);
+                if(enumerated==null) return false;
                 pvSeverityIndex[i] = enumerated.getIndex();
                 pvMessage[i] = pvStructure.getStringField("message");
                 if(pvMessage[i]==null) return false;

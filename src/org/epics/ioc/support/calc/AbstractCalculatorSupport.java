@@ -9,8 +9,6 @@ import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportState;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -22,7 +20,6 @@ import org.epics.pvData.pv.Type;
  *
  */
 public abstract class AbstractCalculatorSupport extends AbstractSupport {
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private String supportName = null;
     private PVStructure pvStructure = null;
     
@@ -65,11 +62,11 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
     public void initialize(RecordSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
         PVStructure pvParent = pvStructure.getParent();
-        PVField valuePVField = pvProperty.findProperty(pvParent,"value");
-        // if not found try partent of parent
+        PVField valuePVField = pvParent.getSubField("value");
+        // if not found try parent of parent
         if(valuePVField==null) {
             PVStructure pvTemp = pvParent.getParent();
-            if(pvTemp!=null) valuePVField = pvProperty.findProperty(pvTemp,"value");
+            if(pvTemp!=null) valuePVField = pvTemp.getSubField("value");
         }
         if(valuePVField==null) {
             pvStructure.message("value field not found", MessageType.error);
@@ -80,7 +77,7 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
             return;
         }
         setValuePVField(valuePVField);
-        PVField pvField = pvProperty.findProperty(pvParent,"calcArgArray");
+        PVField pvField = pvParent.getSubField("calcArgs");
         if(pvField==null) {
             setArgPVFields(null);;
         } else {

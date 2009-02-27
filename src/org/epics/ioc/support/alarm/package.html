@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: alarm support<br />
 package: org.epics.ioc.alarm.support<br />
-2008.08.27</h1>
+2009.02.25</h1>
 CONTENTS 
 
 <div class="toc">
@@ -36,7 +36,7 @@ the primitive types and for an enumerated structure.</p>
 
 <p>The following factories are provided:</p>
 <dl>
-  <dt>AlarmFactory</dt>
+  <dt>AlarmSupportFactory</dt>
     <dd>Complete support for field alarm.</dd>
   <dt>BooleanAlarmFactory</dt>
     <dd>Alarm support for boolean fields.</dd>
@@ -73,9 +73,9 @@ a severity at least as great as any of the lower level alarms.</p>
         boolean setAlarm(String message, AlarmSeverity severity);
     }
 
-    class AlarmFactory {
-        public static Support create(DBStructure dbStructure);
-        public static AlarmSupport findAlarmSupport(DBField startDBField);
+    class AlarmSupportFactory {
+        public static Support create(PVStructure pvStructure);
+        public static AlarmSupport getAlarmSupport(PVField pvField,RecordSupport recordSupport);
     }</pre>
 
 <p>AlarmSupport provides the methods:</p>
@@ -105,9 +105,9 @@ a severity at least as great as any of the lower level alarms.</p>
   <dt style="font-family: courier;">create</dt>
     <dd>Create support for a alarm field. This is called by
     SupportCreation.</dd>
-  <dt style="font-family: courier;">findAlarmSupport</dt>
-    <dd>Find an alarm field looking up the structure hierarchy. Return it or
-      retrurn null if none is found.</dd>
+  <dt style="font-family: courier;">getAlarmSupport</dt>
+    <dd>Get the alarm support for the field or return null if none is
+    found.</dd>
 </dl>
 <hr />
 
@@ -119,7 +119,7 @@ numeric, and enumerated.</p>
 
 <h3 id="Boolean">Boolean Alarms</h3>
 <pre>    public class BooleanAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }</pre>
 
 <p>This provides support for reporting alarms for boolean fields. The
@@ -142,22 +142,22 @@ fields:</p>
 
 <h3 id="Numeric">Numeric Alarms</h3>
 <pre>    public class ByteAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }
     public class ShortAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }
     public class IntAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }
     public class LongAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }
     public class FloatAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }
     public class DoubleAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }</pre>
 
 <p>The above factories provide alarm support for the associated type of
@@ -166,16 +166,18 @@ float. The support for each type except that float and double also support
 hystersis, which is described below. Each has two associated xml structure
 definitions. For example the definitions for double are:</p>
 <pre>&lt;structure name = "doubleAlarmInterval"&gt;
-  &lt;field name = "value" type = "double" /&gt;
-  &lt;field name = "severity" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "message" type = "string" /&gt;
+  &lt;scalar name = "value" type = "double" /&gt;
+  &lt;structure name = "severity" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" type = "string" /&gt;
 &lt;/structure&gt;
-&lt;structure name = "doubleAlarm" supportName = "doubleAlarm" &gt;
-  &lt;field name = "active" type = "boolean" /&gt;
-  &lt;field name = "interval" type = "array" elementType = "structure" /&gt;
-  &lt;field name = "outOfRange" type = "structure" structureName = "alarmSeverity" /&gt;
-  &lt;field name = "hystersis" type = "double" /&gt;
-&lt;/structure&gt;</pre>
+&lt;structure name = "doubleAlarm" &gt;
+  &lt;auxInfo name = "supportFactory" type = "string"&gt;doubleAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" type = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange" type = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" type = "double" /&gt;
+&lt;/structure&gt;
+</pre>
 
 <p>The first structure defines an interval for alarm checking. It has the
 fields:</p>
@@ -207,7 +209,7 @@ fields:</p>
 
 <h3 id="Enumerated">Enumerated Alarms</h3>
 <pre>    public class EnumeratedAlarmFactory {
-        public static Support create(DBStructure dbStructure);
+        public static Support create(PVStructure pvStructure);
     }</pre>
 
 <p>The above factory provides support for an enumerated structure field.</p>

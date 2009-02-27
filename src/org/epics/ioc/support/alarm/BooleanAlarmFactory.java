@@ -13,8 +13,6 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
@@ -39,8 +37,6 @@ public class BooleanAlarmFactory {
     public static Support create(PVStructure pvStructure) {
         return new BooleanAlarmImpl(pvStructure);
     }
-    
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     
     private static class BooleanAlarmImpl extends AbstractSupport
     {
@@ -69,8 +65,8 @@ public class BooleanAlarmFactory {
         public void initialize(RecordSupport recordSupport) {
             SupportState supportState = SupportState.readyForStart;
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            PVField pvParent = pvStructure.getParent();
-            PVField pvField = pvProperty.findProperty(pvParent, "value");
+            PVStructure pvParent = pvStructure.getParent();
+            PVField pvField = pvParent.getSubField("value");
             if(pvField==null) {
                 pvStructure.message("value not found", MessageType.error);
                 return;

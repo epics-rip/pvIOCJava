@@ -24,8 +24,6 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -59,7 +57,6 @@ public abstract class ExpressionCalculatorFactory  {
     }
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static Convert convert = ConvertFactory.getConvert();
-    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     private static boolean dumpTokenList = false;
     private static boolean dumpExpression = false;
     
@@ -87,11 +84,10 @@ public abstract class ExpressionCalculatorFactory  {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
-            PVField pvParent = pvStructure.getParent();
-            PVField pvValue = pvProperty.findProperty(pvParent,"value");
-            if(pvValue==null) { // try parent of parent. 
-                pvValue = pvParent.getParent();
-                if(pvValue!=null) pvValue = pvProperty.findProperty(pvValue,"value");
+            PVStructure pvParent = pvStructure.getParent();
+            PVField pvValue = pvParent.getSubField("value");
+            if(pvValue==null) { // try parent of parent. ;
+                if(pvParent.getParent()!=null) pvValue = pvParent.getParent().getSubField("value");
             }
             if(pvValue==null) {
                 pvStructure.message("value field not found", MessageType.error);
@@ -102,7 +98,7 @@ public abstract class ExpressionCalculatorFactory  {
                 return;
             }
             this.pvValue = (PVScalar)pvValue;
-            PVField pvField = pvProperty.findProperty(pvParent,"calcArgs");
+            PVField pvField = pvParent.getSubField("calcArgs");
             if(pvField==null) {
                 pvStructure.message("calcArgs field not found", MessageType.error);
                 return;

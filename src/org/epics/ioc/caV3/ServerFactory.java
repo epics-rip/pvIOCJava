@@ -288,10 +288,10 @@ public class ServerFactory {
          */
         private void initializeChannelDBRType() throws CAStatusException {
             // find value field
-            String propertyName = channel.getPropertyName();
-            valueChannelField = channel.createChannelField(propertyName); 
+            String primaryFieldName = channel.getPrimaryFieldName();
+            valueChannelField = channel.createChannelField(primaryFieldName); 
             if (valueChannelField == null)
-                throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + propertyName);
+                throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + primaryFieldName);
 
             valuePVField = valueChannelField.getPVField();
             Field field = valueChannelField.getField();
