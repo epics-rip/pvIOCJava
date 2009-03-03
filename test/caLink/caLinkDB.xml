@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
 <database>
-<include addPath = "test/channelAccess" />
+<include addPath = "test/caLink" />
 <!--
 <include href = "caV3.xml" />
 -->
 <include href = "getPut.xml" />
 <include href = "monitor.xml" />
+<include removePath = "test/caLink" />
 </database>
 

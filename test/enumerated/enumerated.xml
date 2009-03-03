@@ -18,17 +18,17 @@
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <structure name = "link" type = "generic">
-        <structure name = "output" type = "outputSupport">
+        <structure name = "output" type = "caOutputLink">
             <scalar name = "pvname">enumerated.value.index</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "process0" type = "processSupport">
+        <structure name = "process0" type = "caProcessLink">
             <scalar name = "pvname">enumeratedInput</scalar>
         </structure>
-        <structure name = "process1" type = "processSupport">
+        <structure name = "process1" type = "caProcessLink">
             <scalar name = "pvname">enumeratedInputIndex</scalar>
         </structure>
-        <structure name = "process2" type = "processSupport">
+        <structure name = "process2" type = "caProcessLink">
             <scalar name = "pvname">enumeratedInputChoice</scalar>
         </structure>
     </structure>
@@ -87,7 +87,7 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">enumerated.value</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -99,7 +99,7 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">enumerated.value</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -110,7 +110,7 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">enumerated.value.index</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -121,7 +121,7 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">enumerated.value.index</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -132,7 +132,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">enumerated.value.choice</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -143,7 +143,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">enumerated.value.choice</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>

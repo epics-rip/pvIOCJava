@@ -14,23 +14,23 @@ import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.*;
 /**
  * Implementation for a channel access output link.
  * @author mrk
  *
  */
-public class ProcessSupportBase extends AbstractLinkSupport
+public class ProcessLinkBase extends AbstractLink
 implements Runnable,ProcessContinueRequester, ChannelProcessRequester
 {
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvStructure The pvStructure for the field being supported.
+     * @param pvField The field being supported.
      */
-    public ProcessSupportBase(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
-        executor = ExecutorFactory.create(pvStructure.getFullName(), ThreadPriority.lower);
+    public ProcessLinkBase(String supportName,PVField pvField) {
+        super(supportName,pvField);
+        executor = ExecutorFactory.create(pvField.getFullName(), ThreadPriority.lower);
     }
     
     private Executor executor = null;

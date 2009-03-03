@@ -16,11 +16,11 @@
       </structure>
     </structure>
     <structure name = "link" type = "generic" >
-        <structure name = "1" type = "processSupport">
+        <structure name = "1" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">booleanArray1FromToggle</scalar>
         </structure>
-        <structure name = "2" type = "outputSupport">
+        <structure name = "2" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">booleanArray2FromToggle</scalar>
             <scalar name = "process">true</scalar>
@@ -32,7 +32,7 @@
     <array name = "value" type = "boolean" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">booleanArrayToggle</scalar>
     </structure>
 </record>
@@ -46,7 +46,7 @@
     <array name = "value" type = "boolean" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">booleanArrayToggle</scalar>
         <scalar name = "process">true</scalar>
     </structure>

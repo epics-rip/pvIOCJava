@@ -15,69 +15,69 @@
       </structure>
     </structure>
     <structure name = "link" type = "generic" >
-        <structure name = "0" type = "processSupport">
+        <structure name = "0" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">arrayAdd</scalar>
         </structure>
-        <structure name = "1" type = "processSupport">
+        <structure name = "1" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">byteArray1FromCounter</scalar>
         </structure>
-        <structure name = "2" type = "outputSupport">
+        <structure name = "2" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">byteArray2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "3" type = "processSupport">
+        <structure name = "3" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">shortArray1FromCounter</scalar>
         </structure>
-        <structure name = "4" type = "outputSupport">
+        <structure name = "4" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">shortArray2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "5" type = "processSupport">
+        <structure name = "5" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">intArray1FromCounter</scalar>
         </structure>
-        <structure name = "6" type = "outputSupport">
+        <structure name = "6" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">intArray2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "7" type = "processSupport">
+        <structure name = "7" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">longArray1FromCounter</scalar>
         </structure>
-        <structure name = "8" type = "outputSupport">
+        <structure name = "8" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">longArray2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "9" type = "processSupport">
+        <structure name = "9" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">floatArray1FromCounter</scalar>
         </structure>
-        <structure name = "10" type = "outputSupport">
+        <structure name = "10" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">floatArray2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "11" type = "processSupport">
+        <structure name = "11" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">doubleArray1FromCounter</scalar>
         </structure>
-        <structure name = "12" type = "outputSupport">
+        <structure name = "12" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">doubleArray2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "13" type = "processSupport">
+        <structure name = "13" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">stringArray1FromCounter</scalar>
         </structure>
-        <structure name = "14" type = "outputSupport">
+        <structure name = "14" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">stringArray2FromCounter</scalar>
             <scalar name = "process">true</scalar>
@@ -99,14 +99,14 @@
           <structure name = "a" type = "generic">
              <array name = "value" type = "double" />
              <structure name = "alarm" type = "alarm" />
-             <structure name = "input" type = "inputSupport">
+             <structure name = "input" type = "caInputLink">
                  <scalar name = "pvname">arrayIncrementer</scalar>
              </structure>
           </structure>
           <structure name = "b" type = "generic">
              <array name = "value" type = "double" />
              <structure name = "alarm" type = "alarm" />
-             <structure name = "input" type = "inputSupport">
+             <structure name = "input" type = "caInputLink">
                  <scalar name = "pvname">arrayIncrementer</scalar>
              </structure>
            </structure>
@@ -121,7 +121,7 @@
     <array name = "value" type = "byte" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
     </structure>
 </record>
@@ -135,7 +135,7 @@
     <array name = "value" type = "byte" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
         <scalar name = "process">true</scalar>
     </structure>
@@ -145,7 +145,7 @@
     <array name = "value" type = "short" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
     </structure>
 </record>
@@ -159,7 +159,7 @@
     <array name = "value" type = "short" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
         <scalar name = "process">true</scalar>
     </structure>
@@ -169,7 +169,7 @@
     <array name = "value" type = "int" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
     </structure>
 </record>
@@ -183,7 +183,7 @@
     <array name = "value" type = "int" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
         <scalar name = "process">true</scalar>
     </structure>
@@ -193,7 +193,7 @@
     <array name = "value" type = "long" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
     </structure>
 </record>
@@ -207,7 +207,7 @@
     <array name = "value" type = "long" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
         <scalar name = "process">true</scalar>
     </structure>
@@ -217,7 +217,7 @@
     <array name = "value" type = "float" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
     </structure>
 </record>
@@ -231,7 +231,7 @@
     <array name = "value" type = "float" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
         <scalar name = "process">true</scalar>
     </structure>
@@ -242,7 +242,7 @@
     <array name = "value" type = "double" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
     </structure>
 </record>
@@ -256,7 +256,7 @@
     <array name = "value" type = "double" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
         <scalar name = "process">true</scalar>
     </structure>
@@ -267,7 +267,7 @@
     <array name = "value" type = "string" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
     </structure>
 </record>
@@ -281,7 +281,7 @@
     <array name = "value" type = "string" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer</scalar>
         <scalar name = "process">true</scalar>
     </structure>

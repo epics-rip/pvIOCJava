@@ -9,7 +9,8 @@
 <include href = "control.xml" />
 <include href = "alarm.xml" />
 <include href = "supportState.xml" />
-<include href = "channelAccess.xml" />
+<include href = "caLink.xml" />
+<include href = "dbLink.xml" />
 <include href = "analog.xml" />
 <include href = "digital.xml" />
 <include href = "event.xml" />

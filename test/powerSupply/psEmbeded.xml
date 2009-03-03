@@ -20,7 +20,7 @@
                 <scalar name = "engUnitsLow">0.0</scalar>
                 <scalar name = "engUnitsHigh">10.0</scalar>
             </structure>
-            <structure name = "input" type = "inputSupport">
+            <structure name = "input" type = "caInputLink">
                 <scalar name = "pvname">adcVoltageEmbeded</scalar>
                 <scalar name = "process">false</scalar>
             </structure>
@@ -37,7 +37,7 @@
                 <scalar name = "engUnitsLow">0.0</scalar>
                 <scalar name = "engUnitsHigh">10.0</scalar>
             </structure>
-            <structure name = "output" type = "outputSupport">
+            <structure name = "output" type = "caOutputLink">
                 <scalar name = "pvname">dacCurrentEmbeded</scalar>
                 <scalar name = "process">true</scalar>
             </structure>

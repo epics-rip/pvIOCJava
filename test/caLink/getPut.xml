@@ -14,11 +14,11 @@
       </structure>
     </structure>
     <structure name = "link" type = "generic">
-        <structure name = "output" type = "outputSupport">
+        <structure name = "output" type = "caOutputLink">
             <scalar name = "pvname">putFromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "process" type = "processSupport">
+        <structure name = "process" type = "caProcessLink">
              <scalar name = "pvname">getFromCounter</scalar>
         </structure>
     </structure>
@@ -66,7 +66,7 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">putFromCounter</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>

@@ -23,12 +23,12 @@
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "link" type = "generic" >
-        <structure name = "1" type = "outputSupport">
+        <structure name = "1" type = "caOutputLink">
             <scalar name = "wait" type = "boolean" >true</scalar>
             <scalar name = "pvname">stringOut</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "2" type = "processSupport">
+        <structure name = "2" type = "caProcessLink">
             <scalar name = "wait" type = "boolean" >false</scalar>
             <scalar name = "pvname">stringIn</scalar>
         </structure>

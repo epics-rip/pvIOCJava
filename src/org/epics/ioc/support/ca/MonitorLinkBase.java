@@ -51,16 +51,16 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class MonitorSupportBase extends AbstractLinkSupport
+public class MonitorLinkBase extends AbstractLink
 implements CDMonitorRequester,RecordProcessRequester
 {
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvStructure The pvStructure for the field being supported.
+     * @param pvField The field being supported.
      */
-    public MonitorSupportBase(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
+    public MonitorLinkBase(String supportName,PVField pvField) {
+        super(supportName,pvField);
     }
     
     private enum MonitorType {
@@ -369,7 +369,6 @@ implements CDMonitorRequester,RecordProcessRequester
     }
     
     private void getCD() {
-        alarmSupport.beginProcess();
         ChannelFieldGroup channelFieldGroup = cd.getChannelFieldGroup();
         List<ChannelField> channelFieldList = channelFieldGroup.getList();
         CDStructure cdStructure = cd.getCDRecord().getCDStructure();
@@ -432,7 +431,6 @@ implements CDMonitorRequester,RecordProcessRequester
                     AlarmSeverity.none);
             numberOverrun = 0;
         }
-        alarmSupport.endProcess();
     }
     
     private boolean checkCompatibility(Field targetField) {

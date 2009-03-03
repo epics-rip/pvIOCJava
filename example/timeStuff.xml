@@ -58,7 +58,7 @@
 </record>
 
 
-<record name = "counterWithLinks" type = "generic">
+<record name = "counterWithCALinks" type = "generic">
     <scalar name = "value" type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
@@ -68,110 +68,225 @@
       </structure>
     </structure>
     <structure name = "link" type = "generic" >
-        <structure name = "process1" type = "processSupport">
-            <scalar name = "pvname">link1</scalar>
+        <structure name = "process1" type = "caProcessLink">
+            <scalar name = "pvname">calink1</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process2" type = "processSupport">
-            <scalar name = "pvname">link2</scalar>
+        <structure name = "process2" type = "caProcessLink">
+            <scalar name = "pvname">calink2</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process3" type = "processSupport">
-            <scalar name = "pvname">link3</scalar>
+        <structure name = "process3" type = "caProcessLink">
+            <scalar name = "pvname">calink3</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process4" type = "processSupport">
-            <scalar name = "pvname">link4</scalar>
+        <structure name = "process4" type = "caProcessLink">
+            <scalar name = "pvname">calink4</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process5" type = "processSupport">
-            <scalar name = "pvname">link5</scalar>
+        <structure name = "process5" type = "caProcessLink">
+            <scalar name = "pvname">calink5</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process6" type = "processSupport">
-            <scalar name = "pvname">link6</scalar>
+        <structure name = "process6" type = "caProcessLink">
+            <scalar name = "pvname">calink6</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process7" type = "processSupport">
-            <scalar name = "pvname">link7</scalar>
+        <structure name = "process7" type = "caProcessLink">
+            <scalar name = "pvname">calink7</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process8" type = "processSupport">
-            <scalar name = "pvname">link8</scalar>
+        <structure name = "process8" type = "caProcessLink">
+            <scalar name = "pvname">calink8</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "process9" type = "processSupport">
-            <scalar name = "pvname">link9</scalar>
+        <structure name = "process9" type = "caProcessLink">
+            <scalar name = "pvname">calink9</scalar>
             <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "link1" type = "generic">
+<record name = "calink1" type = "generic">
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
     </structure>
 </record>
 
-<record name = "link2" type = "generic">
+<record name = "calink2" type = "generic">
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
     </structure>
 </record>
 
-<record name = "link3" type = "generic">
+<record name = "calink3" type = "generic">
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
     </structure>
 </record>
-<record name = "link4" type = "generic">
+<record name = "calink4" type = "generic">
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
     </structure>
 </record>
-<record name = "link5" type = "generic">
+<record name = "calink5" type = "generic">
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
     </structure>
 </record>
-<record name = "link6" type = "generic">
+<record name = "calink6" type = "generic">
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
     </structure>
 </record>
-<record name = "link7" type = "generic">
+<record name = "calink7" type = "generic">
     <structure name = "timeStamp" type = "timeStamp" />
     <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
-    </structure>
-</record>
-
-<record name = "link8" type = "generic">
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
-    </structure>
-</record>
-<record name = "link9" type = "generic">
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <structure name = "input" type = "inputSupport">
-        <scalar name = "pvname">counterWithLinks</scalar>
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
     </structure>
 </record>
 
+<record name = "calink8" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
+    </structure>
+</record>
+<record name = "calink9" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "caInputLink">
+        <scalar name = "pvname">counterWithCALinks</scalar>
+    </structure>
+</record>
+
+<record name = "counterWithDBLinks" type = "generic">
+    <scalar name = "value" type = "int" />
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+    <structure name = "link" type = "generic" >
+        <structure name = "process1" type = "dbProcessLink">
+            <scalar name = "pvname">dblink1</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process2" type = "dbProcessLink">
+            <scalar name = "pvname">dblink2</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process3" type = "dbProcessLink">
+            <scalar name = "pvname">dblink3</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process4" type = "dbProcessLink">
+            <scalar name = "pvname">dblink4</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process5" type = "dbProcessLink">
+            <scalar name = "pvname">dblink5</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process6" type = "dbProcessLink">
+            <scalar name = "pvname">dblink6</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process7" type = "dbProcessLink">
+            <scalar name = "pvname">dblink7</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process8" type = "dbProcessLink">
+            <scalar name = "pvname">dblink8</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+        <structure name = "process9" type = "dbProcessLink">
+            <scalar name = "pvname">dblink9</scalar>
+            <scalar name = "wait" type = "boolean">false</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record name = "dblink1" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+
+<record name = "dblink2" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+
+<record name = "dblink3" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+<record name = "dblink4" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+<record name = "dblink5" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+<record name = "dblink6" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+<record name = "dblink7" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+
+<record name = "dblink8" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
+<record name = "dblink9" type = "generic">
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <structure name = "input" type = "dbInputLink">
+        <scalar name = "pvname">counterWithDBLinks</scalar>
+    </structure>
+</record>
 </database>

@@ -5,7 +5,7 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">mrkHost:aiExample<</scalar>
         <scalar name = "process">false</scalar>

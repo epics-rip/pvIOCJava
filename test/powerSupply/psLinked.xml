@@ -20,7 +20,7 @@
             <scalar name = "engUnitsLow">0.0</scalar>
             <scalar name = "engUnitsHigh">10.0</scalar>
         </structure>
-        <structure name = "input" type = "inputSupport">
+        <structure name = "input" type = "caInputLink">
             <scalar name = "pvname">adcVoltageSupported</scalar>
             <scalar name = "process">false</scalar>
         </structure>
@@ -34,7 +34,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "voltage" type = "generic">
         <scalar name = "value" type = "double" />
-        <structure name = "input" type = "inputSupport">
+        <structure name = "input" type = "caInputLink">
             <scalar name = "pvname">adcVoltageSupported</scalar>
             <scalar name = "process">true</scalar>
         </structure>
@@ -43,7 +43,7 @@
         <scalar name = "value" type = "double" >
            <auxInfo name = "supportFactory" type = "string">powerSupplyFactory</auxInfo>
         </scalar>
-        <structure name = "output" type = "outputSupport">
+        <structure name = "output" type = "caOutputLink">
             <scalar name = "pvname">current</scalar>
             <scalar name = "process">true</scalar>
         </structure>
@@ -64,7 +64,7 @@
             <scalar name = "engUnitsLow">0.0</scalar>
             <scalar name = "engUnitsHigh">10.0</scalar>
         </structure>
-        <structure name = "output" type = "outputSupport">
+        <structure name = "output" type = "caOutputLink">
             <scalar name = "pvname">dacCurrentSupported</scalar>
             <scalar name = "process">true</scalar>
         </structure>

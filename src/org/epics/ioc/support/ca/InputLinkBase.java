@@ -45,17 +45,17 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class InputSupportBase extends AbstractLinkSupport
+public class InputLinkBase extends AbstractLink
 implements CDGetRequester,Runnable,ProcessContinueRequester
 {
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvStructure The pvStructure for the field being supported.
+     * @param pvField The field being supported.
      */
-    public InputSupportBase(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
-        executor = ExecutorFactory.create(pvStructure.getFullName(), ThreadPriority.lower);
+    public InputLinkBase(String supportName,PVField pvField) {
+        super(supportName,pvField);
+        executor = ExecutorFactory.create(pvField.getFullName(), ThreadPriority.lower);
     }
     
     private Executor executor = null;
@@ -186,7 +186,6 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
         alarmSupport.beginProcess();
         post();
         if(alarmIsProperty) alarmSupport.setAlarm(alarmMessage, alarmSeverity);
-        alarmSupport.endProcess();
         supportProcessRequester.supportProcessDone(requestResult);
     }        
     /* (non-Javadoc)

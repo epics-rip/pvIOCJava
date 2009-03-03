@@ -41,7 +41,7 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-abstract class AbstractLinkSupport extends AbstractSupport
+abstract class AbstractLink extends AbstractSupport
 implements ChannelListener,ChannelFieldGroupListener {
     /**
      * The convert implementation.
@@ -124,16 +124,17 @@ implements ChannelListener,ChannelFieldGroupListener {
     
     
     /**
-     * @param supportName
-     * @param pvStructure
+     * Constructor.
+     * @param supportName The name of the support.
+     * @param pvField The field which is supported.
      */
-    protected AbstractLinkSupport(
-        String supportName,PVStructure pvStructure)
+    protected AbstractLink(
+        String supportName,PVField pvField)
     {
-        super(supportName,pvStructure);
-        this.pvStructure = pvStructure;
+        super(supportName,pvField);
+        this.pvStructure = pvField.getParent();
         pvRecord = pvStructure.getPVRecord();
-        channelRequesterName = pvStructure.getFullName();
+        channelRequesterName = pvField.getFullName();
     }
     
     /**
@@ -174,10 +175,6 @@ implements ChannelListener,ChannelFieldGroupListener {
             pvStructure.message("must have alarm with alarmSupport", MessageType.error);
             return;
         }
-        alarmSupport.initialize(recordSupport);
-        if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
-            return;
-        }
         providerPV = pvStructure.getStringField("providerName");
         if(providerPV==null) return;
         pvnamePV = pvStructure.getStringField("pvname");
@@ -195,8 +192,6 @@ implements ChannelListener,ChannelFieldGroupListener {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         String providerName = providerPV.get();
         String pvname = pvnamePV.get();
-        alarmSupport.start();
-        if(alarmSupport.getSupportState()!=SupportState.ready) return;
         if(propertyNamesPV!=null) {
             String value = propertyNamesPV.get();
             if(value!=null) {
@@ -264,7 +259,6 @@ implements ChannelListener,ChannelFieldGroupListener {
         }
         channel = channelAccess.createChannel(pvname,propertyNames, providerName, this);
         if(channel==null) {
-            alarmSupport.stop();
             message("providerName " + providerName + " pvname " + pvname + " not found",MessageType.error);
             return;
         }
@@ -276,7 +270,6 @@ implements ChannelListener,ChannelFieldGroupListener {
     public void stop() {
         channel.destroy();
         channel = null;
-        alarmSupport.stop();
         alarmIsProperty = false;
         alarmMessagePV = null;
         alarmSeverityIndexPV = null;
@@ -286,15 +279,6 @@ implements ChannelListener,ChannelFieldGroupListener {
         propertyPVFields = null;
         super.stop();
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#uninitialize()
-     */
-    public void uninitialize() {
-        if(super.getSupportState()==SupportState.ready) stop();
-        alarmSupport.uninitialize();
-        super.uninitialize();
-    }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.process.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
      */

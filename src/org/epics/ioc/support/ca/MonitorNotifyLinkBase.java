@@ -17,7 +17,7 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.*;
 
 
 /**
@@ -25,7 +25,7 @@ import org.epics.pvData.pv.PVStructure;
  * @author mrk
  *
  */
-public class MonitorNotifySupportBase extends AbstractLinkSupport
+public class MonitorNotifyLinkBase extends AbstractLink
 implements RecordProcessRequester,ChannelMonitorNotifyRequester
 {
     private ChannelMonitorNotify channelMonitorNotify = null;
@@ -34,10 +34,10 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvStructure The pvStructure for the field being supported.
+     * @param pvField The field being supported.
      */
-    public MonitorNotifySupportBase(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
+    public MonitorNotifyLinkBase(String supportName,PVField pvField) {
+        super(supportName,pvField);
     }      
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)

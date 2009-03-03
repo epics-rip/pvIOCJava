@@ -52,13 +52,13 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">put</scalar></structure>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
         <scalar name = "pvname">cachePut</scalar>
         <scalar name = "process">true</scalar>
     </structure>
@@ -77,7 +77,7 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">change</scalar></structure>
         <scalar name = "process">true</scalar>
@@ -89,7 +89,7 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">absoluteChange</scalar></structure>
         <scalar name = "deadband">1.001</scalar>
@@ -102,7 +102,7 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">percentageChange</scalar></structure>
         <scalar name = "deadband">20.0</scalar>
@@ -115,10 +115,10 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "notify" type = "monitorNotifySupport">
+    <structure name = "notify" type = "caMonitorNotifyLink">
         <scalar name = "pvname">monitorCounter</scalar>
     </structure>
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>

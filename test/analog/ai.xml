@@ -16,7 +16,7 @@
       </structure>
     </structure> 
     <structure name = "link" type = "generic">
-        <structure name = "output" type = "outputSupport">
+        <structure name = "output" type = "caOutputLink">
             <scalar name = "pvname">aiRaw</scalar>
             <scalar name = "process">true</scalar>
         </structure>
@@ -28,7 +28,7 @@
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "link" type = "generic">
-        <structure name = "process" type = "processSupport">
+        <structure name = "process" type = "caProcessLink">
             <scalar name = "pvname">ai</scalar>
         </structure>
     </structure>
@@ -45,7 +45,7 @@
             <scalar name = "engUnitsLow">0.0</scalar>
             <scalar name = "engUnitsHigh">10.0</scalar>
         </structure>
-        <structure name = "input" type = "inputSupport">
+        <structure name = "input" type = "caInputLink">
             <scalar name = "pvname">aiRaw</scalar>
             <scalar name = "process">false</scalar>
             <scalar name = "propertyNames">alarm</scalar>

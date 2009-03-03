@@ -39,17 +39,17 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class OutputSupportBase extends AbstractLinkSupport
+public class OutputLinkBase extends AbstractLink
 implements Runnable,ProcessContinueRequester,CDPutRequester
 {
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvStructure The pvStructure for the field being supported.
+     * @param pvField The field being supported.
      */
-    public OutputSupportBase(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
-        executor = ExecutorFactory.create(pvStructure.getFullName(), ThreadPriority.lower);
+    public OutputLinkBase(String supportName,PVField pvField) {
+        super(supportName,pvField);
+        executor = ExecutorFactory.create(pvField.getFullName(), ThreadPriority.lower);
     }
     
     private Executor executor = null;

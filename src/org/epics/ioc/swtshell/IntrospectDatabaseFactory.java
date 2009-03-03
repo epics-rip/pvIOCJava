@@ -33,10 +33,7 @@ import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScannerFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
-import org.epics.pvData.misc.ThreadCreateFactory;
-import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.misc.*;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -85,7 +82,6 @@ public class IntrospectDatabaseFactory {
         private Button setSupportStateButton;
         private Button releaseProcessorButton;
         private Button timeProcessButton;
-        private Text numberTimesText = null;
         private Button showBadRecordsButton;
         private Button showThreadsButton;
         private Button clearButton;
@@ -137,7 +133,7 @@ public class IntrospectDatabaseFactory {
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             composite.setLayoutData(gridData);
             layout = new GridLayout();
-            layout.numColumns = 4;
+            layout.numColumns = 5;
             composite.setLayout(layout);
             dumpButton = new Button(composite,SWT.PUSH);
             dumpButton.setText("dump");
@@ -155,22 +151,10 @@ public class IntrospectDatabaseFactory {
             setEnableButton.setText("setEnable");
             setEnableButton.setEnabled(false);
             setEnableButton.addSelectionListener(this);
-            
-            composite = new Composite(recordComposite,SWT.BORDER);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            composite.setLayoutData(gridData);
-            layout = new GridLayout();
-            layout.numColumns = 4;
-            composite.setLayout(layout);
             timeProcessButton = new Button(composite,SWT.PUSH);
             timeProcessButton.setText("timeProcess");
+            timeProcessButton.setEnabled(false);
             timeProcessButton.addSelectionListener(this);
-            new Label(composite,SWT.NONE).setText("numberTimes");
-            numberTimesText = new Text(composite,SWT.BORDER);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            gridData.minimumWidth = 100;
-            numberTimesText.setLayoutData(gridData);
-            numberTimesText.setText("100000");
             
             composite = new Composite(recordComposite,SWT.BORDER);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
@@ -253,12 +237,7 @@ public class IntrospectDatabaseFactory {
                     consoleText.append("no record"+ newLine);
                     return;
                 }
-                int ntimes = Integer.parseInt(numberTimesText.getText());
-                if(ntimes<=0) {
-                    consoleText.append("invalid numberTimes"+ newLine);
-                    return;
-                }
-                TimeProcess timeProcess = new TimeProcess(pvRecord,ntimes,this);
+                TimeProcess timeProcess = new TimeProcess(pvRecord,this);
                 consoleText.append(timeProcess.doIt() + newLine);
                 return;
             }
@@ -620,105 +599,89 @@ public class IntrospectDatabaseFactory {
             
         }
         
-        private class TimeProcess implements Runnable,RecordProcessRequester
+        private class TimeProcess 
         {   
             private Requester requester;
             private PVRecord pvRecord;
-            int ntimes = 100000;
             private RecordProcess recordProcess = null;
-            private ReentrantLock lock = new ReentrantLock();
-            private Condition waitAllDone = lock.newCondition();
-            private boolean allDone = false;
-            private Condition waitProcessDone = lock.newCondition();
-            private boolean processDone = false;
-            private String result = null;
+            private ProcessIt processIt = null;
 
-            private TimeProcess(PVRecord pvRecord,int ntimes,Requester requester) {
+
+            private TimeProcess(PVRecord pvRecord,Requester requester) {
                 this.requester = requester;
                 this.pvRecord = pvRecord;
-                this.ntimes = ntimes;
+                processIt = new ProcessIt();
             }
-            
-            String doIt() {
+
+            private String doIt() {
                 recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
-                if(!recordProcess.setRecordProcessRequester(this)) return "could not process the record";
-                allDone = false;
-                executor.execute(this);
-                lock.lock();
-                try {
-                    while(!allDone) {
-                        try {
-                        waitAllDone.await();
-                        } catch(InterruptedException e) {}
-                    }
-                }finally {
-                    lock.unlock();
-                }
-                recordProcess.releaseRecordProcessRequester(this);
+                if(!recordProcess.setRecordProcessRequester(processIt)) return "could not process the record";
+                TimeFunction timeFunction = TimeFunctionFactory.create(processIt);
+                double perCall = timeFunction.timeCall();
+                executor.stop();
+                String result =  " records/second=" + 1.0/perCall;
+                recordProcess.releaseRecordProcessRequester(processIt);
                 return result;
             }
-            /* (non-Javadoc)
-             * @see java.lang.Runnable#run()
-             */
-            public void run() {
-                TimeStamp timeStamp = TimeStampFactory.create(0,0);
-                long start = System.currentTimeMillis();
-                timeStamp.put(start);
-               for(int i=0; i<ntimes; i++) {
-                   processDone = false;
-                   recordProcess.process(this, false, timeStamp);
-                   lock.lock();
-                   try {
-                       while(!processDone) {
-                           try {
-                           waitProcessDone.await();
-                           } catch(InterruptedException e) {}
-                       }
-                   }finally {
-                       lock.unlock();
-                   }
-               }
-               long end = System.currentTimeMillis();
-               double diff = end - start;
-               diff = diff/1000.0;
-               result = "seconds/record=" + diff/ntimes + " records/second=" + ((double)ntimes)/diff;
-               lock.lock();
-               try {
-                   allDone = true;
-                   waitAllDone.signal();
-               } finally {
-                   lock.unlock();
-               }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requester#getRequesterName()
-             */
-            public String getRequesterName() {
-                return requester.getRequesterName();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-             */
-            public void message(final String message, final MessageType messageType) {
-                requester.message(message, MessageType.info);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
-             */
-            public void recordProcessComplete() {
-                lock.lock();
-                try {
-                    processDone = true;
-                    waitProcessDone.signal();
-                } finally {
-                    lock.unlock();
+            
+            private class ProcessIt implements TimeFunctionRequester, RecordProcessRequester {
+                private TimeStamp timeStamp = TimeStampFactory.create(0,0);
+                private ReentrantLock lock = new ReentrantLock();
+                private Condition waitProcessDone = lock.newCondition();
+                private boolean processDone = false;
+
+                private ProcessIt() {
+                    long start = System.currentTimeMillis();
+                    timeStamp.put(start);
                 }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
-             */
-            public void recordProcessResult(RequestResult requestResult) {
-                // nothing to do
+
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.misc.TimeFunctionRequester#function()
+                 */
+                public void function() {
+                    processDone = false;
+                    recordProcess.process(this, false, timeStamp);
+                    lock.lock();
+                    try {
+                        while(!processDone) {
+                            try {
+                                waitProcessDone.await();
+                            } catch(InterruptedException e) {}
+                        }
+                    }finally {
+                        lock.unlock();
+                    }
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.pv.Requester#getRequesterName()
+                 */
+                public String getRequesterName() {
+                    return requester.getRequesterName();
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+                 */
+                public void message(final String message, final MessageType messageType) {
+                    requester.message(message, MessageType.info);
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
+                 */
+                public void recordProcessComplete() {
+                    lock.lock();
+                    try {
+                        processDone = true;
+                        waitProcessDone.signal();
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
+                 */
+                public void recordProcessResult(RequestResult requestResult) {
+                    // nothing to do
+                }
             }
         }
     }
