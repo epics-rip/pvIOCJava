@@ -20,23 +20,23 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">enumCounter${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value.index</scalar>
     </structure>
-    <structure name = "process0" type = "processSupport">
+    <structure name = "process0" type = "caProcessLink">
        <scalar name = "wait" type = "boolean">false</scalar>
        <scalar name = "pvname">enumIn${num}</scalar>
     </structure>
-    <structure name = "process1" type = "processSupport">
+    <structure name = "process1" type = "caProcessLink">
        <scalar name = "wait" type = "boolean">false</scalar>
        <scalar name = "pvname">enumInIndex${num}</scalar>
     </structure>
-    <structure name = "process2" type = "processSupport">
+    <structure name = "process2" type = "caProcessLink">
        <scalar name = "wait" type = "boolean">false</scalar>
        <scalar name = "pvname">enumInChoice${num}</scalar>
     </structure>
@@ -46,7 +46,7 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -58,7 +58,7 @@
     <structure name = "value" type = "enumerated"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value</scalar>
         <scalar name = "process">true</scalar>
@@ -70,7 +70,7 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value.index</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -80,7 +80,7 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value.index</scalar>
         <scalar name = "process">true</scalar>
@@ -92,7 +92,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value.choice</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -103,7 +103,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value.choice</scalar>
         <scalar name = "process">true</scalar>
@@ -131,15 +131,15 @@
     <scalar name = "value" type = "byte"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">byteCounter${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byte${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
        <scalar name = "pvname">byteIn${num}</scalar>
     </structure>
 </record>
@@ -150,7 +150,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byte${num}</scalar>
         <scalar name = "propertyNames">alarm,display,control</scalar>
@@ -163,7 +163,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byte${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -175,15 +175,15 @@
     <scalar name = "value" type = "short"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">byteCounter${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">short${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
        <scalar name = "pvname">shortIn${num}</scalar>
     </structure>
 </record>
@@ -194,7 +194,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">short${num}</scalar>
         <scalar name = "propertyNames">alarm,display,control</scalar>
@@ -207,7 +207,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">short${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -219,15 +219,15 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">byteCounter${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">int${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
        <scalar name = "pvname">intIn${num}</scalar>
     </structure>
 </record>
@@ -238,7 +238,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">int${num}</scalar>
         <scalar name = "propertyNames">alarm,display,control</scalar>
@@ -251,7 +251,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">int${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -264,15 +264,15 @@
     <scalar name = "value" type = "float"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">byteCounter${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">float${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
        <scalar name = "pvname">floatIn${num}</scalar>
     </structure>
 </record>
@@ -283,7 +283,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">float${num}</scalar>
         <scalar name = "propertyNames">alarm,display,control</scalar>
@@ -296,7 +296,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">float${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -308,15 +308,15 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">byteCounter${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">double${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
        <scalar name = "pvname">doubleIn${num}</scalar>
     </structure>
 </record>
@@ -327,7 +327,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">double${num}</scalar>
         <scalar name = "propertyNames">alarm,display,control</scalar>
@@ -340,7 +340,7 @@
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "display" type = "display" />
     <structure name = "control" type = "control" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">double${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -353,15 +353,15 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">byteCounter${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">string${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
        <scalar name = "pvname">stringIn${num}</scalar>
     </structure>
 </record>
@@ -370,7 +370,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">string${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -381,7 +381,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">string${num}</scalar>
         <scalar name = "process">true</scalar>

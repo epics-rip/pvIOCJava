@@ -34,7 +34,7 @@
           <auxInfo name = "supportFactory" type = "string">arrayIncrementCalculatorFactory</auxInfo>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">syncInt32ArrayOutput</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -50,7 +50,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncInt32ArrayInput</scalar>
     </structure>
 </record>
@@ -112,7 +112,7 @@
           <auxInfo name = "supportFactory" type = "string">arrayIncrementCalculatorFactory</auxInfo>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">asynInt32ArrayOutput</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -128,7 +128,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynInt32ArrayInput</scalar>
     </structure>
 </record>

@@ -32,7 +32,7 @@
         <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">syncBooleanOut</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -50,15 +50,15 @@
         <scalar name = "timeout">.2</scalar>
     </structure>
     <structure name = "link" type = "generic">
-        <structure name = "1" type = "processSupport">
+        <structure name = "1" type = "caProcessLink">
              <scalar name = "pvname">syncBooleanIn1</scalar>
              <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "2" type = "processSupport">
+        <structure name = "2" type = "caProcessLink">
              <scalar name = "pvname">syncBooleanIn2</scalar>
              <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "3" type = "processSupport">
+        <structure name = "3" type = "caProcessLink">
              <scalar name = "pvname">syncBooleanIn3</scalar>
         </structure>
     </structure>
@@ -155,7 +155,7 @@
         <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">asynBooleanOut</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -173,13 +173,13 @@
         <scalar name = "timeout">.2</scalar>
     </structure>
     <structure name = "link" type = "generic">
-        <structure name = "link1" type = "processSupport">
+        <structure name = "link1" type = "caProcessLink">
              <scalar name = "pvname">asynBooleanIn1</scalar>
         </structure>
-        <structure name = "link2" type = "processSupport">
+        <structure name = "link2" type = "caProcessLink">
              <scalar name = "pvname">asynBooleanIn2</scalar>
         </structure>
-        <structure name = "link3" type = "processSupport">
+        <structure name = "link3" type = "caProcessLink">
              <scalar name = "pvname">asynBooleanIn3</scalar>
         </structure>
     </structure>

@@ -34,7 +34,7 @@
           <auxInfo name = "supportFactory" type = "string">arrayIncrementCalculatorFactory</auxInfo>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">syncFloat64ArrayOutput</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -50,7 +50,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncFloat64ArrayInput</scalar>
     </structure>
 </record>
@@ -112,7 +112,7 @@
           <auxInfo name = "supportFactory" type = "string">arrayIncrementCalculatorFactory</auxInfo>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">asynFloat64ArrayOutput</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -128,7 +128,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynFloat64ArrayInput</scalar>
     </structure>
 </record>

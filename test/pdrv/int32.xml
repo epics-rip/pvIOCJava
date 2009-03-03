@@ -34,7 +34,7 @@
         <scalar name ="expression">(value+100)&lt;=2047 ? value+100 : -2048</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">syncInt32Out</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -50,7 +50,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncInt32In</scalar>
     </structure>
 </record>
@@ -130,7 +130,7 @@
         <scalar name ="expression">(value+100)&lt;=4100 ? value+100 : -100</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">asynInt32Out</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -146,7 +146,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynInt32In</scalar>
     </structure>
 </record>

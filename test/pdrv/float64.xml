@@ -32,7 +32,7 @@
         <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">syncFloat64Out</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -48,7 +48,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncFloat64In</scalar>
     </structure>
 </record>
@@ -126,7 +126,7 @@
         <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">asynFloat64Out</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -142,7 +142,7 @@
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
     </structure>
-    <structure name = "link" type = "processSupport">
+    <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynFloat64In</scalar>
     </structure>
 </record>

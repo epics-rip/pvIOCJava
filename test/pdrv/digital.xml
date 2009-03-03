@@ -39,7 +39,7 @@
             <scalar name = "high">15.0</scalar>
         </structure>
     </structure>
-    <structure name = "link" type = "outputSupport">
+    <structure name = "link" type = "caOutputLink">
          <scalar name = "pvname">syncDigitalOut</scalar>
          <scalar name = "process">true</scalar>
     </structure>
@@ -57,23 +57,23 @@
         <scalar name = "timeout">.2</scalar>
     </structure>
     <structure name = "link" type = "generic">
-        <structure name = "1" type = "processSupport">
+        <structure name = "1" type = "caProcessLink">
              <scalar name = "pvname">syncDigitalIn1</scalar>
              <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "2" type = "processSupport">
+        <structure name = "2" type = "caProcessLink">
              <scalar name = "pvname">syncDigitalIn2</scalar>
              <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "3" type = "processSupport">
+        <structure name = "3" type = "caProcessLink">
              <scalar name = "pvname">syncDigitalIn3</scalar>
              <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "4" type = "processSupport">
+        <structure name = "4" type = "caProcessLink">
              <scalar name = "pvname">syncDigitalIn4</scalar>
              <scalar name = "wait" type = "boolean">false</scalar>
         </structure>
-        <structure name = "5" type = "processSupport">
+        <structure name = "5" type = "caProcessLink">
              <scalar name = "pvname">syncDigitalIn5</scalar>
         </structure>
     </structure>

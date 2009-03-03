@@ -27,15 +27,15 @@
     <array name = "value" type = "byte"/>
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
       <scalar name = "pvname">byteArrayIn${num}</scalar>
     </structure>
 </record>
@@ -44,7 +44,7 @@
     <array name = "value" type = "byte"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -55,7 +55,7 @@
     <array name = "value" type = "byte"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -67,15 +67,15 @@
     <array name = "value" type = "short"/>
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
       <scalar name = "pvname">shortArrayIn${num}</scalar>
     </structure>
 </record>
@@ -84,7 +84,7 @@
     <array name = "value" type = "short"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -95,7 +95,7 @@
     <array name = "value" type = "short"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -107,15 +107,15 @@
     <array name = "value" type = "int"/>
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
       <scalar name = "pvname">intArrayIn${num}</scalar>
     </structure>
 </record>
@@ -124,7 +124,7 @@
     <array name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -135,7 +135,7 @@
     <array name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -147,15 +147,15 @@
     <array name = "value" type = "float"/>
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
       <scalar name = "pvname">floatArrayIn${num}</scalar>
     </structure>
 </record>
@@ -164,7 +164,7 @@
     <array name = "value" type = "float"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -175,7 +175,7 @@
     <array name = "value" type = "float"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-     <structure name = "input" type = "monitorSupport">
+     <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -187,15 +187,15 @@
     <array name = "value" type = "double"/>
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
       <scalar name = "pvname">doubleArrayIn${num}</scalar>
     </structure>
 </record>
@@ -204,7 +204,7 @@
     <array name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -215,7 +215,7 @@
     <array name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
         <scalar name = "process">true</scalar>
@@ -227,15 +227,15 @@
     <array name = "value" type = "string"/>
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "pvname">arrayIncrementer${num}</scalar>
         <scalar name = "process">true</scalar>
     </structure>
-    <structure name = "output" type = "outputSupport">
+    <structure name = "output" type = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
     </structure>
-    <structure name = "process" type = "processSupport">
+    <structure name = "process" type = "caProcessLink">
       <scalar name = "pvname">stringArrayIn${num}</scalar>
     </structure>
 </record>
@@ -244,7 +244,7 @@
     <array name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -255,7 +255,7 @@
     <array name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "monitorSupport">
+    <structure name = "input" type = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
         <scalar name = "process">true</scalar>
