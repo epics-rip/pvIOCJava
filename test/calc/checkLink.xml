@@ -2,7 +2,7 @@
 <database>
     <structure name = "output" type = "generic">
         <scalar name = "wait" type = "boolean" >true</scalar>
-        <structure name = "link" type = "outputSupport">
+        <structure name = "link" type = "caOutputLink">
             <scalar name = "pvname">${checkRecord}Check.input.calcArgs.a.value</scalar>
             <scalar name = "process">true</scalar>
         </structure>

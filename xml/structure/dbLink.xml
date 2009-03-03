@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<database>
+
+<structure name = "dbProcessLinkFactory">
+  <scalar name = "supportFactory" type = "string">
+    org.epics.ioc.support.dbLink.LinkFactory</scalar>
+</structure>
+
+<structure name = "dbInputLinkFactory">
+  <scalar name = "supportFactory" type = "string">
+    org.epics.ioc.support.dbLink.LinkFactory</scalar>
+</structure>
+<structure name = "dbOutputLinkFactory">
+  <scalar name = "supportFactory" type = "string">
+    org.epics.ioc.support.dbLink.LinkFactory</scalar>
+</structure>
+
+<structure name = "dbProcessLink" type = "generic">
+  <structure name = "alarm" type = "alarm" />
+  <scalar name = "pvname" type = "string">
+      <auxInfo name = "supportFactory" type = "string">dbProcessLinkFactory</auxInfo>
+  </scalar>
+</structure>
+
+<structure name = "dbInputLink" type = "generic" >
+  <structure name = "alarm" type = "alarm" />
+  <scalar name = "pvname" type = "string">
+      <auxInfo name = "supportFactory" type = "string">dbInputLinkFactory</auxInfo>
+  </scalar>
+  <scalar name = "process" type = "boolean" />
+  <scalar name = "inheritSeverity" type = "boolean" />
+</structure>
+
+<structure name = "dbOutputLink" type = "generic">
+  <structure name = "alarm" type = "alarm" />
+  <scalar name = "pvname" type = "string">
+      <auxInfo name = "supportFactory" type = "string">dbOutputLinkFactory</auxInfo>
+  </scalar>
+  <scalar name = "process" type = "boolean" />
+</structure>
+
+</database>
