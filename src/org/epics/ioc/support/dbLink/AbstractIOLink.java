@@ -35,7 +35,7 @@ public class AbstractIOLink extends AbstractLink {
     /**
      * Constructor.
      * @param supportName The support name.
-     * @param 
+     * @param pvField The field being supported.
      */
     public AbstractIOLink(String supportName,PVField pvField) {
         super(supportName,pvField);

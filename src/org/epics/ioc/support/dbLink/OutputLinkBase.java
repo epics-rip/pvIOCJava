@@ -31,7 +31,7 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvStructure The pvStructure for the field being supported.
+     * @param pvField The pvField being supported.
      */
     public OutputLinkBase(String supportName,PVField pvField) {
         super(supportName,pvField);
