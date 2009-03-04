@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support.ca<br />
 package: org.epics.ioc.support.ca<br />
-2008.02.08</h1>
+2008.03.04</h1>
 CONTENTS 
 
 <div class="toc">
@@ -28,18 +28,18 @@ CONTENTS
 client calls to org.epics.ioc.ca. It provides an implementation of support
 for the following:</p>
 <dl>
-  <dt>processSupport</dt>
+  <dt>caProcessLink</dt>
     <dd>Support that requests that another record process without transfering
       any data.</dd>
-  <dt>inputSupport</dt>
+  <dt>caInputLink</dt>
     <dd>Support that 1) optionally requests that another record process, and
       2) transfers data from the other record this record..</dd>
-  <dt>outputSupport</dt>
+  <dt>caOutputLink</dt>
     <dd>Support that 1) transfers data to another record, and 2) optionally
       requests that the other record process.</dd>
-  <dt>monitorSupport</dt>
+  <dt>caMonitorLink</dt>
     <dd>Support for monitoring another record. A monitor returns data.</dd>
-  <dt>monitorNotifySupport</dt>
+  <dt>caMonitorNotifyLink</dt>
     <dd>Support for monitoring another record. A monitor does not return
     data.</dd>
 </dl>
@@ -69,8 +69,7 @@ call them.</p>
     <dd>The Type for the pvname.</dd>
 </dl>
 
-<p>Look at the structure definitions in
-javaIOC/dbd/structures/channelAccess.xml for a description of how the various
-structures are defined.</p>
+<p>Look at the structure definitions in javaIOC/dbd/structures/caLink.xml for
+a description of how the various structures are defined.</p>
 </body>
 </html>
