@@ -27,7 +27,7 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 /**
- * Abstract Support for Channel Access Links.
+ * Abstract Support for database Links.
  * This is nopt public since it is for use by this package.
  * @author mrk
  *

@@ -16,10 +16,11 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 /**
+ * Abstract support for database link that transfers data.
  * @author mrk
  *
  */
-public class AbstractIOLink extends AbstractLink {
+abstract class AbstractIOLink extends AbstractLink {
     protected PVBoolean pvProcess = null;
     protected Type valueType = null;
     // The following is for this field
@@ -51,7 +52,7 @@ public class AbstractIOLink extends AbstractLink {
             super.uninitialize();
             return;
         }
-        PVStructure pvParent = super.pvDatabaseLink.getParent();
+        PVStructure pvParent = super.pvDatabaseLink;
         while(pvParent!=null) {
             valuePVField = pvParent.getSubField("value");
             if(valuePVField!=null) break;
