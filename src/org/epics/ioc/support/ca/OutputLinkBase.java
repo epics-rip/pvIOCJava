@@ -39,7 +39,7 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class OutputLinkBase extends AbstractLink
+public class OutputLinkBase extends AbstractIOLink
 implements Runnable,ProcessContinueRequester,CDPutRequester
 {
     /**
@@ -54,7 +54,6 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
     
     private Executor executor = null;
     private PVBoolean processAccess = null;
-    private PVField valuePVField = null;
     
     private boolean process = false;
     
@@ -74,6 +73,7 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#connectionChange(boolean)
      */
     public void connectionChange(boolean isConnected) {
+        super.connectionChange(isConnected);
         if(isConnected) {
             channelFieldName = channel.getFieldName();
             if(channelFieldName==null) channelFieldName = "value";
@@ -104,18 +104,6 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
         if(super.getSupportState()!=SupportState.readyForStart) return;
         processAccess = pvStructure.getBooleanField("process");
         if(processAccess==null) {
-            uninitialize();
-            return;
-        }
-        PVStructure pvParent = pvStructure.getParent();
-        valuePVField = null;
-        while(pvParent!=null) {
-            valuePVField = pvParent.getSubField("value");
-            if(valuePVField!=null) break;
-            pvParent = pvParent.getParent();
-        }
-        if(valuePVField==null) {
-            pvStructure.message("value field not found", MessageType.error);
             uninitialize();
             return;
         }
@@ -152,14 +140,14 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
         CDField cdField = cdFields[0];
         PVField data = cdField.getPVField();
         Type targetType = data.getField().getType();
-        Field valueField = valuePVField.getField();
+        Field valueField = super.valuePVField.getField();
         Type valueType = valueField.getType();
         if(valueType==Type.scalar && targetType==Type.scalar) {
-            convert.copyScalar((PVScalar)valuePVField,(PVScalar)data);
+            convert.copyScalar((PVScalar)super.valuePVField,(PVScalar)data);
             cdField.incrementNumPuts();
         } else if(targetType==Type.scalarArray && valueType==Type.scalarArray) {
             PVArray targetPVArray = (PVArray)data;
-            PVArray valuePVArray = (PVArray)valuePVField;
+            PVArray valuePVArray = (PVArray)super.valuePVField;
                 int arrayLength = valuePVArray.getLength();
             int num = convert.copyArray(valuePVArray,0,targetPVArray,0,arrayLength);
             if(num!=arrayLength) message(
@@ -168,7 +156,7 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
             cdField.incrementNumPuts();
         } else if(targetType==Type.structure && valueType==Type.structure) {
             PVStructure targetPVStructure = (PVStructure)data;
-            PVStructure valuePVStructure = (PVStructure)valuePVField;
+            PVStructure valuePVStructure = (PVStructure)super.valuePVField;
             convert.copyStructure(valuePVStructure,targetPVStructure);
             cdField.incrementNumPuts();
         } else {
@@ -237,7 +225,7 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
           
     private boolean checkCompatibility(Field targetField) {
         Type targetType = targetField.getType();
-        Field valueField = valuePVField.getField();
+        Field valueField = super.valuePVField.getField();
         Type valueType = valueField.getType();
         if(valueType==Type.scalar && targetType==Type.scalar) {
             if(convert.isCopyScalarCompatible((Scalar)targetField,(Scalar)valueField)) return true;

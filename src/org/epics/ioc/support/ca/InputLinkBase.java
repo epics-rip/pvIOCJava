@@ -45,7 +45,7 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class InputLinkBase extends AbstractLink
+public class InputLinkBase extends AbstractIOLink
 implements CDGetRequester,Runnable,ProcessContinueRequester
 {
     /**
@@ -60,7 +60,6 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
     
     private Executor executor = null;
     private PVBoolean processAccess = null;  
-    private PVField valuePVField;
     
     private String channelFieldName = null;
     private boolean process = false;
@@ -97,18 +96,6 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
         if(super.getSupportState()!=SupportState.readyForStart) return;
         processAccess = pvStructure.getBooleanField("process");
         if(processAccess==null) {
-            uninitialize();
-            return;
-        }
-        PVStructure pvParent = pvStructure.getParent();
-        valuePVField = null;
-        while(pvParent!=null) {
-            valuePVField = pvParent.getSubField("value");
-            if(valuePVField!=null) break;
-            pvParent = pvParent.getParent();
-        }
-        if(valuePVField==null) {
-            pvStructure.message("value field not found", MessageType.error);
             uninitialize();
             return;
         }
@@ -149,6 +136,7 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#connectionChange(boolean)
      */
     public void connectionChange(boolean isConnected) {
+        super.connectionChange(isConnected);
         if(isConnected) {
             channelFieldName = channel.getFieldName();
             if(channelFieldName==null) channelFieldName = "value";
@@ -212,7 +200,7 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
                 }
                 if(cdField.getMaxNumPuts()==0) continue;
                 if(channelField==valueChannelField) {
-                    if(copy(targetPVField,valuePVField)) valueChanged = true;
+                    if(copy(targetPVField,super.valuePVField)) valueChanged = true;
                 } else if(channelField==valueIndexChannelField){
                     PVInt pvInt = (PVInt)targetPVField;
                     newValueIndex = pvInt.get();
@@ -325,7 +313,7 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
             
     private boolean checkCompatibility(Field targetField) {
         Type targetType = targetField.getType();
-        Field valueField = valuePVField.getField();
+        Field valueField = super.valuePVField.getField();
         Type valueType = valueField.getType();
         if(valueType==Type.scalar && targetType==Type.scalar) {
             if(convert.isCopyScalarCompatible((Scalar)targetField,(Scalar)valueField)) return true;

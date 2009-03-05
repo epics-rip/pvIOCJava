@@ -51,7 +51,7 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class MonitorLinkBase extends AbstractLink
+public class MonitorLinkBase extends AbstractIOLink
 implements CDMonitorRequester,RecordProcessRequester
 {
     /**
@@ -85,8 +85,6 @@ implements CDMonitorRequester,RecordProcessRequester
     private PVInt queueSizeAccess = null;
     private PVBoolean reportOverrunAccess = null;
     private PVBoolean processAccess = null;  
-    
-    private PVField valuePVField = null;
     
     private String channelFieldName = null;
     private MonitorType monitorType = null;
@@ -138,17 +136,6 @@ implements CDMonitorRequester,RecordProcessRequester
         }
         processAccess = pvStructure.getBooleanField("process");
         if(processAccess==null)  {
-            uninitialize(); return;
-        }
-        PVStructure pvParent = pvStructure.getParent();
-        valuePVField = null;
-        while(pvParent!=null) {
-            valuePVField =pvParent.getSubField("value");
-            if(valuePVField!=null) break;
-            pvParent = pvParent.getParent();
-        }
-        if(valuePVField==null) {
-            pvStructure.message("value field not found", MessageType.error);
             uninitialize(); return;
         }
     }
@@ -205,6 +192,7 @@ implements CDMonitorRequester,RecordProcessRequester
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#connectionChange(boolean)
      */
     public void connectionChange(boolean isConnected) {
+        super.connectionChange(isConnected);
         if(isConnected) {
             channelFieldName = channel.getFieldName();
             if(channelFieldName==null) channelFieldName = "value";
@@ -390,7 +378,7 @@ implements CDMonitorRequester,RecordProcessRequester
             }
             if(cdField.getMaxNumPuts()==0) continue;
             if(channelField==valueChannelField) {
-                copy(targetPVField,valuePVField);
+                copy(targetPVField,super.valuePVField);
             } else if(channelField==valueIndexChannelField){
                 PVInt pvInt = (PVInt)targetPVField;
                 int newValueIndex = pvInt.get();
@@ -435,7 +423,7 @@ implements CDMonitorRequester,RecordProcessRequester
     
     private boolean checkCompatibility(Field targetField) {
         Type targetType = targetField.getType();
-        Field valueField = valuePVField.getField();
+        Field valueField = super.valuePVField.getField();
         Type valueType = valueField.getType();
         if(valueType==Type.scalar && targetType==Type.scalar) {
             if(convert.isCopyScalarCompatible((Scalar)targetField,(Scalar)valueField)) return true;

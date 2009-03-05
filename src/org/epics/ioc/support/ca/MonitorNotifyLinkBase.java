@@ -17,7 +17,7 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.PVField;
 
 
 /**

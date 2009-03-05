@@ -14,7 +14,7 @@ import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.PVField;
 /**
  * Implementation for a channel access output link.
  * @author mrk
