@@ -18,8 +18,12 @@
             <scalar name = "pvname">putFromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "process" type = "dbProcessLink">
+        <structure name = "process0" type = "dbProcessLink">
              <scalar name = "pvname">getFromCounter</scalar>
+        </structure>
+        <structure name = "process1" type = "dbProcessLink">
+             <scalar name = "wait" type = "boolean">false</scalar>
+             <scalar name = "pvname">dbInput</scalar>
         </structure>
     </structure>
 </record>
@@ -73,6 +77,14 @@
     </structure>
 </record>
 
-
+<!-- really simple dbLink -->
+<record name = "dbInput" type = "dbInputLink">
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <scalar name = "pvname">putFromCounter</scalar>
+    <scalar name = "process">false</scalar>
+    <scalar name = "inheritSeverity">true</scalar>
+</record>
 
 </database>
