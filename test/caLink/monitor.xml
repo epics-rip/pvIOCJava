@@ -125,4 +125,14 @@
     </structure>
 </record>
 
+<!-- really simple monitor -->
+<record name = "caMonitor" type = "caMonitorLink">
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <scalar name = "value" type = "double" />
+    <scalar name = "pvname">monitorCounter</scalar>
+    <scalar name = "process">true</scalar>
+    <scalar name = "propertyNames">alarm</scalar>
+</record>
+
 </database>
