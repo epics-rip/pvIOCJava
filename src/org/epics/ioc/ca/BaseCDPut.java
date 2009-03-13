@@ -5,9 +5,6 @@
  */
 package org.epics.ioc.ca;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -32,10 +29,6 @@ public class BaseCDPut implements CDPut, ChannelPutRequester, ChannelGetRequeste
     private ChannelGet channelGet;
     private ChannelPut channelPut;  
     private CDField[] cdFields = null;
-    private ReentrantLock lock = new ReentrantLock();
-    private Condition moreWork = lock.newCondition();
-    private boolean isDone = false;
-    private RequestResult requestResult = null;
 
     public void destroy() {
         channelGet.destroy();
@@ -60,40 +53,14 @@ public class BaseCDPut implements CDPut, ChannelPutRequester, ChannelGetRequeste
      */
     public void get(CD cd) {
         cdFields = cd.getCDRecord().getCDStructure().getCDFields();
-        isDone = false;
-        requestResult = RequestResult.success;
         channelGet.get();
-        try {
-            lock.lock();
-            try {
-                while(!isDone) {
-                    moreWork.await();
-                }
-                cdPutRequester.getDone(requestResult);
-            }finally {
-                lock.unlock();
-            }
-        } catch(InterruptedException e) {}
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDPut#put()
      */
     public void put(CD cd) {
         cdFields = cd.getCDRecord().getCDStructure().getCDFields();
-        isDone = false;
-        requestResult = RequestResult.success;
         channelPut.put();
-        try {
-            lock.lock();
-            try {
-                while(!isDone) {
-                    moreWork.await();
-                }
-                cdPutRequester.putDone(requestResult);
-            }finally {
-                lock.unlock();
-            }
-        } catch(InterruptedException e) {}
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelPutRequester#nextDelayedPutField(org.epics.ioc.pv.PVField)
@@ -119,28 +86,14 @@ public class BaseCDPut implements CDPut, ChannelPutRequester, ChannelGetRequeste
      * @see org.epics.ioc.ca.ChannelPutRequester#putDone(org.epics.ioc.util.RequestResult)
      */
     public void putDone(RequestResult requestResult) {
-        lock.lock();
-        try {
-            isDone = true;
-            this.requestResult = requestResult;
-            moreWork.signal();
-        } finally {
-            lock.unlock();
-        }
+        cdPutRequester.putDone(requestResult);
     }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
      */
     public void getDone(RequestResult requestResult) {
-        lock.lock();
-        try {
-            isDone = true;
-            this.requestResult = requestResult;
-            moreWork.signal();
-        } finally {
-            lock.unlock();
-        }
+        cdPutRequester.getDone(requestResult);
     }
 
     /* (non-Javadoc)

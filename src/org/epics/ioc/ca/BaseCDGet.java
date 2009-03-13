@@ -5,9 +5,6 @@
  */
 package org.epics.ioc.ca;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -30,10 +27,6 @@ public class BaseCDGet implements CDGet, ChannelGetRequester {
     private CDGetRequester cdGetRequester;           
     private ChannelGet channelGet = null;
     private CDField[] cdFields = null;
-    private ReentrantLock lock = new ReentrantLock();
-    private Condition moreWork = lock.newCondition();
-    private boolean isDone = false;
-    private RequestResult requestResult = null;
 
     public void destroy() {
         channelGet.destroy();
@@ -56,34 +49,14 @@ public class BaseCDGet implements CDGet, ChannelGetRequester {
      */
     public void get(CD cd) {
         cdFields = cd.getCDRecord().getCDStructure().getCDFields();
-        isDone = false;
-        requestResult = RequestResult.success;
         channelGet.get();
-        try {
-            lock.lock();
-            try {
-                while(!isDone) {
-                    moreWork.await();
-                }
-                cdGetRequester.getDone(requestResult);
-            }finally {
-                lock.unlock();
-            }
-        } catch(InterruptedException e) {}
     }
 
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelGetRequester#getDone(org.epics.ioc.util.RequestResult)
      */
     public void getDone(RequestResult requestResult) {
-        lock.lock();
-        try {
-            isDone = true;
-            this.requestResult = requestResult;
-            moreWork.signal();
-        } finally {
-            lock.unlock();
-        }
+        cdGetRequester.getDone(requestResult);
     }
 
     /* (non-Javadoc)
