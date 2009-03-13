@@ -17,9 +17,6 @@ import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
-import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
@@ -39,8 +36,7 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class OutputLinkBase extends AbstractIOLink
-implements Runnable,ProcessContinueRequester,CDPutRequester
+public class OutputLinkBase extends AbstractIOLink implements ProcessContinueRequester,CDPutRequester
 {
     /**
      * The constructor.
@@ -49,10 +45,8 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
      */
     public OutputLinkBase(String supportName,PVField pvField) {
         super(supportName,pvField);
-        executor = ExecutorFactory.create(pvField.getFullName(), ThreadPriority.lower);
     }
     
-    private Executor executor = null;
     private PVBoolean processAccess = null;
     
     private boolean process = false;
@@ -171,15 +165,9 @@ implements Runnable,ProcessContinueRequester,CDPutRequester
             return;
         }
         this.supportProcessRequester = supportProcessRequester;
-        executor.execute(this);
+        cdPut.put(cd);  
         return;
     }       
-    /* (non-Javadoc)
-     * @see java.lang.Runnable#run()
-     */
-    public void run() {
-        cdPut.put(cd);            
-    }   
     /* (non-Javadoc)
      * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
      */

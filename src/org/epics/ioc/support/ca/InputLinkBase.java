@@ -20,9 +20,6 @@ import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
-import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
@@ -46,7 +43,7 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class InputLinkBase extends AbstractIOLink
-implements CDGetRequester,Runnable,ProcessContinueRequester
+implements CDGetRequester,ProcessContinueRequester
 {
     /**
      * The constructor.
@@ -55,10 +52,8 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
      */
     public InputLinkBase(String supportName,PVField pvField) {
         super(supportName,pvField);
-        executor = ExecutorFactory.create(pvField.getFullName(), ThreadPriority.lower);
     }
     
-    private Executor executor = null;
     private PVBoolean processAccess = null;  
     
     private String channelFieldName = null;
@@ -129,7 +124,10 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
             return;
         }
         this.supportProcessRequester = supportProcessRequester;
-        executor.execute(this);
+        requestResult = RequestResult.success;
+        alarmSeverity = AlarmSeverity.none;
+        cd.clearNumPuts();
+        cdGet.get(cd);
         return;
     }
     /* (non-Javadoc)
@@ -156,16 +154,6 @@ implements CDGetRequester,Runnable,ProcessContinueRequester
             }
             disconnect();
         }
-    }
-   
-    /* (non-Javadoc)
-     * @see java.lang.Runnable#run()
-     */
-    public void run() {
-        requestResult = RequestResult.success;
-        alarmSeverity = AlarmSeverity.none;
-        cd.clearNumPuts();
-        cdGet.get(cd);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.ProcessContinueRequester#processContinue()
