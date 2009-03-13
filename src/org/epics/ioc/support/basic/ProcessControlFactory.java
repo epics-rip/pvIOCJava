@@ -40,11 +40,11 @@ import org.epics.pvData.pv.StringArrayData;
 public class ProcessControlFactory {
     /**
      * Create support for an array of calcArg structures.
-     * @param pvField The array which must be an array of links.
+     * @param pvStructure The processControlStructure
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(PVStructure pvField) {
-        return new ProcessControlImpl(pvField);
+    public static Support create(PVStructure pvStructure) {
+        return new ProcessControlImpl(pvStructure);
     }
     
     private static final String supportName = "processControl";
@@ -76,10 +76,8 @@ public class ProcessControlFactory {
         
         private Enumerated supportStateEnumerated = null;
         private PVInt supportStatePVInt = null;
-        private PVField supportStatePVField = null;
         private Enumerated supportStateCommandEnumerated = null;
         private PVInt supportStateCommandPVInt = null;
-        private PVField supportStateCommandPVField = null;
         
         private PVRecord targetPVRecord = null;
         private RecordProcess targetRecordProcess = null;
@@ -91,8 +89,8 @@ public class ProcessControlFactory {
         private SupportState supportState = null;
         
         
-        private ProcessControlImpl(PVStructure pvField) {
-            super(ProcessControlFactory.supportName,pvField);
+        private ProcessControlImpl(PVStructure pvStructure) {
+            super(ProcessControlFactory.supportName,pvStructure);
             
         }
         /* (non-Javadoc)
@@ -100,25 +98,24 @@ public class ProcessControlFactory {
          */
         @Override
         public void initialize(RecordSupport recordSupport) {
-            PVField pvField = super.getPVField();
-            PVRecord pvRecord = pvField.getPVRecord();
+            PVStructure pvProcessControl = (PVStructure)super.getPVField();
             recordProcess = recordSupport.getRecordProcess();
-            pvMessage = pvRecord.getStringField("message");
+            pvMessage = pvProcessControl.getStringField("message");
             if(pvMessage==null) return;
-            pvRecordName = pvRecord.getStringField("recordName");
+            pvRecordName = pvProcessControl.getStringField("recordName");
             if(pvRecordName==null) return;
-            pvTrace = pvRecord.getBooleanField("trace");
+            pvTrace = pvProcessControl.getBooleanField("trace");
             if(pvTrace==null) return;
-            pvEnable = pvRecord.getBooleanField("enable");
+            pvEnable = pvProcessControl.getBooleanField("enable");
             if(pvEnable==null) return;
-            PVStructure pvStructure = pvRecord.getStructureField("supportState");
+            PVStructure pvStructure = pvProcessControl.getStructureField("supportState");
             if(pvStructure==null) return;
-            supportStateEnumerated = SupportState.getSupportState(pvField);
+            supportStateEnumerated = SupportState.getSupportState(pvStructure);
             if(supportStateEnumerated==null) return;
             supportStatePVInt = supportStateEnumerated.getIndex();
-            pvStructure = pvRecord.getStructureField("supportStateCommand");
+            pvStructure = pvProcessControl.getStructureField("supportStateCommand");
             if(pvStructure==null) return;
-            supportStateCommandEnumerated = SupportStateCommand.getSupportStateCommand(pvField);
+            supportStateCommandEnumerated = SupportStateCommand.getSupportStateCommand(pvStructure);
             if(supportStateCommandEnumerated==null) return;
             supportStateCommandPVInt = supportStateCommandEnumerated.getIndex();
             super.initialize(recordSupport);
