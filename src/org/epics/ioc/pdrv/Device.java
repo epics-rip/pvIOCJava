@@ -90,6 +90,7 @@ public interface Device {
      * @param user The user.
      * @param interfaceName The name of the interface.
      * @param interposeInterfaceOK If an interpose interface is present should it be returned.
+     * If true then User.findInterface is called first.
      * @return The Interface or null if the interface is not registered.
      */
     Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);

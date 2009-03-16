@@ -1,62 +1,65 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
+<database>
 
-<record name = "putGetPort" structureName = "portCreate">
-    <factoryName>org.epics.ioc.pdrv.vxi11.DriverFactory</factoryName>
-    <portName>putGetPort</portName>
-    <driverParameters structureName = "vxi11Driver" >
-        <hostName>192.168.1.104</hostName>
-        <vxiName>gpib0</vxiName>
-        <lockTimeout>10000</lockTimeout>
-    </driverParameters>
+<record name = "putGetPort" type = "portCreate">
+<scalar name = "factoryName">org.epics.ioc.pdrv.vxi11.DriverFactory</scalar>
+    <scalar name = "portName">putGetPort</scalar>
+    <structure name = "driverParameters" type = "vxi11Driver" >
+        <scalar name = "hostName">192.168.1.10</scalar>
+        <scalar name = "vxiName">hpib</scalar>
+        <scalar name = "lockTimeout">1000</scalar>
+    </structure>
 </record>
 
-<record name = "putGetControl" structureName = "portDeviceControl" >
-    <portName>putGetPort</portName>
-    <deviceName>0</deviceName>
-    <traceMask><value>0x0fff</value></traceMask>
-    <traceIOMask><value>0x0fff</value></traceIOMask>
+<record name = "putGetControl" type = "portDeviceControl" >
+    <scalar name = "portName">putGetPort</scalar>
+    <scalar name = "deviceName">3</scalar>
 <!--
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
 -->
 </record>
 
 <record name = "putGet">
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <put structureName = "generic" >
-      <value type = "string" />
-      <alarm structureName = "alarm" />
-      <output supportName = "pdrvOctetOutput" structureName = "pdrvSupport">
-        <portName>putGetPort</portName>
-        <deviceName>0</deviceName>
-        <timeout>.2</timeout>
-      </output>
-    </put>
-    <get structureName = "generic">
-      <value type = "string"/>
-      <alarm structureName = "alarm" />
-      <input supportName = "pdrvOctetInput" structureName = "pdrvSupport">
-        <portName>putGetPort</portName>
-        <deviceName>0</deviceName>
-        <timeout>.2</timeout>
-        <size>80</size>
-      </input>
-    </get>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "put" type = "generic" >
+      <scalar name = "value" type = "string">*IDN?</scalar>
+      <structure name = "alarm" type = "alarm" />
+      <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvOctetOutputFactory</auxInfo>
+        <scalar name = "portName">putGetPort</scalar>
+        <scalar name = "deviceName">3</scalar>
+        <scalar name = "timeout">.2</scalar>
+      </structure>
+    </structure>
+    <structure name = "get" type = "generic" >
+      <scalar name = "value" type = "string" />
+      <structure name = "alarm" type = "alarm" />
+      <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvOctetInputFactory</auxInfo>
+        <scalar name = "portName">putGetPort</scalar>
+        <scalar name = "deviceName">3</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <scalar name = "size">80</scalar>
+      </structure>
+    </structure>
 </record>
 
 <record name = "putGetInInterrupt">
-    <value type = "string"/>
-    <alarm structureName = "alarm" />
-    <timeStamp structureName = "timeStamp" />
-    <input supportName = "pdrvOctetInterruptInput" structureName = "pdrvSupport">
-        <portName>putGetPort</portName>
-        <deviceName>0</deviceName>
-        <process>true</process>
-        <size>80</size>
-    </input>
+    <scalar name = "value" type = "string"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvOctetInterruptInputFactory</auxInfo>
+        <scalar name = "portName">putGetPort</scalar>
+        <scalar name = "deviceName">3</scalar>
+        <scalar name = "size">80</scalar>
+        <scalar name = "process">true</scalar>
+      </structure>
 </record>
 <!--
 -->
 
 
-</IOCDatabase>
+</database>

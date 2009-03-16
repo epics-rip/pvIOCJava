@@ -709,7 +709,7 @@ public class VXI11Factory {
             private Device_Link lid = null;
             private boolean eoi = true;
             private int termChar = -1;
-            private int maxRecvSize;
+            private int maxRecvSize = 0;
 
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.vxi11.VXI11Device#connect(org.epics.ioc.pdrv.vxi11.VXI11User)
@@ -728,7 +728,12 @@ public class VXI11Factory {
                         return Status.error;
                     }
                     lid = clr.lid;
-                    maxRecvSize = clr.maxRecvSize;
+                    if(maxRecvSize==0) {
+                        maxRecvSize = clr.maxRecvSize;
+                    } else if (maxRecvSize!=clr.maxRecvSize) {
+                        user.setError(VXI11ErrorCode.unknown);
+                        user.setString("maxRecvSize changed");
+                    }
                     isConnected = true;
                     return Status.success;
                 } catch (OncRpcException e) {
@@ -903,54 +908,41 @@ public class VXI11Factory {
                 return Status.success;
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.pdrv.vxi11.VXI11Device#write(org.epics.ioc.pdrv.vxi11.VXI11User, byte[])
+             * @see org.epics.ioc.pdrv.vxi11.VXI11Device#write(org.epics.ioc.pdrv.vxi11.VXI11User, byte[], int)
              */
-            public Status write(VXI11User user,byte[] data) {
+            public Status write(VXI11User user,byte[] data,int nbytes) {
+                if(nbytes<=0) {
+                    user.setError(VXI11ErrorCode.noError);
+                    user.setString("request for <= 0 bytes");
+                    return Status.error;
+                }
                 Device_WriteParms dwp = new Device_WriteParms();
-                int len = data.length;
-                int sent = 0;
-                int count;
-
                 dwp.lid = lid;
                 dwp.io_timeout = ioTimeout;
                 dwp.lock_timeout = lockTimeout;
-                while (len > 0) {
-                    if ((sent == 0) && (len <= maxRecvSize)) {
-                        dwp.data = data;
-                        len = 0;
-                    }
-                    else {
-                        if (len > maxRecvSize)
-                            count = maxRecvSize;
-                        else
-                            count = len;
-                        byte btmp[] = new byte[count];
-                        System.arraycopy(data, sent, btmp, 0, count);
-                        sent += count;
-                        len -= count;
-                        dwp.data = btmp;
-                    }
-                    if ((len == 0) && eoi)
-                        dwp.flags = new Device_Flags(0x8 | (waitLock ? 1 : 0));
-                    else
-                        dwp.flags = new Device_Flags(waitLock ? 1 : 0);
-                    try {
-                        Device_WriteResp dwr = coreClient.device_write_1(dwp);
-                        VXI11ErrorCode errorCode = ErrorCode.get(dwr.error.value);
-                        if(errorCode!=VXI11ErrorCode.noError) {
-                            user.setError(errorCode);
-                            user.setString("write failure");
-                            return Status.error;
-                        }
-                    } catch (OncRpcException e) {
-                        user.setError(VXI11ErrorCode.RPCException);
-                        user.setString(e.getMessage());
-                        return Status.error;
-                    } catch (IOException e) {
-                        user.setError(VXI11ErrorCode.IOException);
-                        user.setString(e.getMessage());
+                dwp.data = new byte[nbytes];
+                System.arraycopy(data, 0, dwp.data, 0, nbytes);
+                if(eoi) {
+                    dwp.flags = new Device_Flags(0x8 | (waitLock ? 1 : 0));
+                } else {
+                    dwp.flags = new Device_Flags(waitLock ? 1 : 0);
+                }
+                try {
+                    Device_WriteResp dwr = coreClient.device_write_1(dwp);
+                    VXI11ErrorCode errorCode = ErrorCode.get(dwr.error.value);
+                    if(errorCode!=VXI11ErrorCode.noError) {
+                        user.setError(errorCode);
+                        user.setString("write failure");
                         return Status.error;
                     }
+                } catch (OncRpcException e) {
+                    user.setError(VXI11ErrorCode.RPCException);
+                    user.setString(e.getMessage());
+                    return Status.error;
+                } catch (IOException e) {
+                    user.setError(VXI11ErrorCode.IOException);
+                    user.setString(e.getMessage());
+                    return Status.error;
                 }
                 return Status.success;
             }
@@ -984,6 +976,7 @@ public class VXI11Factory {
                         }
                         int nowLength = drr.data.length;
                         System.arraycopy(drr.data, 0, data, nextByte, nowLength);
+                        nextByte += nowLength;
                         /*
                          * Quit if end received
                          * or if specified number of characters have been received.
@@ -993,7 +986,6 @@ public class VXI11Factory {
                             user.setInt(nextByte);
                             return Status.success;
                         }
-                        nextByte += nowLength;
                     }
                 } catch (OncRpcException e) {
                     user.setError(VXI11ErrorCode.RPCException);

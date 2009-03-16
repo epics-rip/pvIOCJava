@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <database>
-<record name = "processControl" structureName = "processControl" />
-<record name = "portDeviceControl" structureName = "portDeviceControl" />
+<record name = "processControl" type = "processControl" />
+<record name = "portDeviceControl" type = "portDeviceControl" />
 <include addPath = "test/pdrv" />
 
 <include href = "boolean.xml" />

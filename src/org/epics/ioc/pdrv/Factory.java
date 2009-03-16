@@ -107,7 +107,9 @@ public class Factory {
         private UserImpl(QueueRequestCallback queueRequestCallback) {
             this.queueRequestCallback = queueRequestCallback;
         }
-
+        
+        
+        private List<Interface> interposeInterfaceList = new LinkedList<Interface>();
         private QueueRequestCallback queueRequestCallback = null;
         private PortImpl port = null;
         private DeviceImpl device = null;
@@ -129,6 +131,7 @@ public class Factory {
         private QueueRequestCallback getQueueRequestCallback() {
             return queueRequestCallback;
         }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#duplicateUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.QueueRequestCallback)
          */
@@ -139,6 +142,34 @@ public class Factory {
             newUser.reason = reason;
             newUser.timeout = timeout;
             return newUser;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.User#interposeInterface(org.epics.ioc.pdrv.interfaces.Interface)
+         */
+        public Interface interposeInterface(Interface interposeInterface) {
+            String interfaceName = interposeInterface.getInterfaceName();
+            ListIterator<Interface> iter = interposeInterfaceList.listIterator();
+            while(iter.hasNext()) {
+                Interface iface = iter.next();
+                int compare = interfaceName.compareTo(iface.getInterfaceName());
+                if(compare==0) {
+                    iter.set(interposeInterface);
+                    return iface;
+                }
+            }
+            interposeInterfaceList.add(interposeInterface);
+            return null;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.User#findInterface(java.lang.String)
+         */
+        public Interface findInterface(String interfaceName) {
+            ListIterator<Interface> iter = interposeInterfaceList.listIterator();
+            while(iter.hasNext()) {
+                Interface iface = iter.next();
+                if(interfaceName.equals(iface.getInterfaceName())) return iface;
+            }
+            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#connectPort(java.lang.String)
@@ -1104,6 +1135,10 @@ public class Factory {
         public Interface findInterface(User user, String interfaceName, boolean interposeInterfaceOK) {
             deviceLock.lock();
             try {
+                if(interposeInterfaceOK) {
+                    Interface iface = user.findInterface(interfaceName);
+                    if(iface!=null) return iface;
+                }
                 ListIterator<DeviceInterface> iter = interfaceList.listIterator();
                 while(iter.hasNext()) {
                     DeviceInterface iface = iter.next();

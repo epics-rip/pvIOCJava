@@ -138,6 +138,10 @@
 <include href = "float64ArrayDriver.xml" />
 <include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
 
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/serial" />
+<include href = "IPSerialDriver.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/serial" />
+
 <include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
 <include href = "vxi11Driver.xml" />
 <include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />

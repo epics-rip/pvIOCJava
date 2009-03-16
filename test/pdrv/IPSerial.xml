@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<database>
+
+<record name = "IPSerialPort" type = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.serialDriver.IPSerialDriverFactory</scalar>
+    <scalar name = "portName">IPserialPort</scalar>
+    <structure name = "driverParameters" type = "IPSerialDriver" >
+        <scalar name = "host">192.168.1.9</scalar>
+        <scalar name = "port">4001</scalar>
+    </structure>
+</record>
+
+<record name = "IPDeviceControl" type = "portDeviceControl" >
+    <scalar name = "portName">IPserialPort</scalar>
+    <scalar name = "deviceName">0</scalar>
+<!--
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
+-->
+</record>
+
+
+<record name = "stringOut">
+    <scalar name = "value" type = "string"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "output" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvOctetOutputFactory</auxInfo>
+        <scalar name = "portName">IPserialPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+    </structure>
+    <structure name = "link" type = "caProcessLink">
+         <scalar name = "pvname">stringIn</scalar>
+    </structure>
+</record>
+
+<record name = "stringIn">
+    <scalar name = "value" type = "string"/>
+    <structure name = "alarm" type = "alarm" />
+    <structure name = "timeStamp" type = "timeStamp" />
+    <structure name = "input" type = "pdrvSupport">
+        <auxInfo name = "supportFactory" type = "string">pdrvOctetInputFactory</auxInfo>
+        <scalar name = "portName">IPserialPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <scalar name = "size">100</scalar>
+    </structure>
+</record>
+
+<!--
+-->
+
+
+</database>

@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
-<IOCDatabase>
-<record name = "processControl" structureName = "processControl" />
-<record name = "portDeviceControl" structureName = "portDeviceControl" />
+<database>
+<record name = "processControl" type = "processControl" />
+<record name = "portDeviceControl" type = "portDeviceControl" />
 <include addPath = "test/vxi11" />
 <include href = "putGet.xml" />
 <!--
 -->
 <include removePath = "test/vxi11" />
-</IOCDatabase>
+</database>
 
