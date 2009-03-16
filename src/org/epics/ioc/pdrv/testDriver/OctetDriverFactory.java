@@ -234,57 +234,6 @@ public class OctetDriverFactory {
              */
             public Status read(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,device.getFullName() +  " read but not connected");
-                    user.setMessage("not connected");
-                    return Status.error;
-                }
-                double timeout = user.getTimeout();
-                if(timeout>0.0 && delay>timeout) {
-                    user.setMessage("timeout");
-                    return Status.timeout;
-                }
-                if(delay>0.0) {
-                    try {
-                    Thread.sleep(milliseconds);
-                    } catch (InterruptedException ie) {
-                        
-                    }
-                }
-                Status status = Status.success;
-                user.setAuxStatus(Octet.EOM_END);
-                int n = size;
-                if(n>0 && eosLenInput==1) {
-                    if(buffer[n-1]==eosInput[0]) {
-                        n -= 1;
-                        user.setAuxStatus(Octet.EOM_EOS);
-                    }
-                } else if(n>1 && eosLenInput==2) {
-                    byte first = buffer[n-2];
-                    byte second = buffer[n-1];
-                    if(first==eosInput[0] && second==eosInput[1]) {
-                        n -= 2;
-                        user.setAuxStatus(Octet.EOM_EOS);
-                    }
-                }
-                if(n>nbytes) {
-                    status = Status.overflow;
-                    user.setMessage("overflow");
-                    n = nbytes;
-                    user.setAuxStatus(nbytes - nbytes);
-                }
-                user.setInt(n);
-                for(int i=0; i<n; i++) {
-                    data[i] = buffer[i];
-                }
-                trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " read");
-                size = 0;
-                return status;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#readRaw(org.epics.ioc.pdrv.User, byte[], int)
-             */
-            public Status readRaw(User user, byte[] data, int nbytes) {
-                if(!device.isConnected()) {
                     trace.print(Trace.ERROR ,device.getFullName() +  " readRaw but not connected");
                     user.setMessage("not connected");
                     return Status.error;
@@ -305,8 +254,8 @@ public class OctetDriverFactory {
                 int n = size;
                 if(n>nbytes) {
                     status = Status.overflow;
+                    user.setAuxStatus(n - nbytes);
                     n = nbytes;
-                    user.setAuxStatus(nbytes - nbytes);
                 } else {
                     user.setAuxStatus(Octet.EOM_END);
                 }
@@ -359,56 +308,6 @@ public class OctetDriverFactory {
              */
             public Status write(User user, byte[] data, int nbytes) {
                 if(!device.isConnected()) {
-                    trace.print(Trace.ERROR ,device.getFullName() + " write but not connected");
-                    user.setMessage("not connected");
-                    return Status.error;
-                }
-                double timeout = user.getTimeout();
-                if(timeout>0.0 && delay>timeout) {
-                    user.setMessage("timeout");
-                    return Status.timeout;
-                }
-                if(delay>0.0) {
-                    try {
-                    Thread.sleep(milliseconds);
-                    } catch (InterruptedException ie) {
-                        
-                    }
-                }
-                Status status = Status.success;
-                user.setAuxStatus(Octet.EOM_END);
-                int n = nbytes;
-                int maxbytes = BUFFERSIZE - eosLenOutput;
-                if(n>maxbytes) {
-                    status = Status.overflow;
-                    n = maxbytes;
-                    size = n;
-                    user.setAuxStatus(n - maxbytes);
-                } else if(eosLenInput==1) {
-                    buffer[n] = eosOutput[0];
-                    size = n + 1;
-                    user.setAuxStatus(Octet.EOM_EOS);
-                } else if(eosLenInput==2) {
-                    buffer[n] = eosOutput[0];
-                    buffer[n+1] = eosOutput[1];
-                    size = n + 2;
-                    user.setAuxStatus(Octet.EOM_EOS);
-                } else {
-                    size = n;
-                }
-                for(int i=0; i<n; i++) {
-                    buffer[i] = data[i];
-                }
-                user.setInt(n);
-                trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " write");
-                super.interruptOccured(buffer, nbytes);
-                return status;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#writeRaw(org.epics.ioc.pdrv.User, byte[], int)
-             */
-            public Status writeRaw(User user, byte[] data, int nbytes) {
-                if(!device.isConnected()) {
                     trace.print(Trace.ERROR ,device.getFullName() + " writeRaw but not connected");
                     user.setMessage("not connected");
                     return Status.error;
@@ -426,13 +325,11 @@ public class OctetDriverFactory {
                     }
                 }
                 Status status = Status.success;
-                user.setAuxStatus(Octet.EOM_END);
                 int n = nbytes;
                 int maxbytes = BUFFERSIZE;
                 if(n>maxbytes) {
                     status = Status.overflow;
                     n = maxbytes;
-                    user.setAuxStatus(n - maxbytes);
                 }
                 size = n;
                 for(int i=0; i<n; i++) {

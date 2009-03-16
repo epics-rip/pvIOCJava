@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<database>
+<record name = "temp">
+    <scalar name = "value" type = "string" >
+aa&#010;xxx</scalar>
+</record>
+
+
+</database>

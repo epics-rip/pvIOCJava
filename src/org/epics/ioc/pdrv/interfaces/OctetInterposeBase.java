@@ -57,12 +57,6 @@ public abstract class OctetInterposeBase implements Octet
         return octet.read(user, data, nbytes);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#readRaw(org.epics.ioc.pdrv.User, byte[], int)
-     */
-    public Status readRaw(User user, byte[] data, int nbytes) {
-        return octet.readRaw(user, data, nbytes);
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Octet#removeInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.OctetInterruptListener)
      */
     public Status removeInterruptUser(User user, OctetInterruptListener octetInterruptListener) {
@@ -85,12 +79,6 @@ public abstract class OctetInterposeBase implements Octet
      */
     public Status write(User user, byte[] data, int nbytes) {
         return octet.write(user, data, nbytes);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#writeRaw(org.epics.ioc.pdrv.User, byte[], int)
-     */
-    public Status writeRaw(User user, byte[] data, int nbytes) {
-        return octet.writeRaw(user, data, nbytes);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.Interface#getInterfaceName()

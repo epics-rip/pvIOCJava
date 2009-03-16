@@ -75,8 +75,9 @@ public class DriverFactory {
     }
 
     static private class PortDriverImpl implements PortDriver {
-
         private String portName;
+        private String hostName = null;
+        private String vxiName = null;
         private int lockTimeout = 1000;
         private VXI11Controller vxiController;
         private Port port = null;
@@ -89,6 +90,8 @@ public class DriverFactory {
                 String hostName,String vxiName,int lockTimeout)
         {
             this.portName = portName;
+            this.hostName = hostName;
+            this.vxiName = vxiName;
             this.lockTimeout = lockTimeout;
             vxiController = VXI11Factory.create(hostName, vxiName);
             port = Factory.createPort(portName, this, "VXI11",true, autoConnect, priority);
@@ -100,7 +103,7 @@ public class DriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#report(boolean, int)
          */
         public String report(int details) {
-            return null;
+            return "hostname " + hostName + " vxiName " + vxiName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
@@ -142,6 +145,7 @@ public class DriverFactory {
                 trace.print(Trace.ERROR ,portName + " not connected");
                 return Status.error;
             }
+            vxiController.disconnect();
             port.exceptionDisconnect();
             return Status.success;
         } 
@@ -193,6 +197,13 @@ public class DriverFactory {
                     trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
+                Status status =vxiDevice.connect(vxiUser);
+                if(status!=Status.success) {
+                    String message = vxiUser.getError().name() + " " + vxiUser.getString();
+                    user.setMessage(message);
+                    trace.print(Trace.ERROR ,portName + message);
+                    return Status.error;
+                }
                 device.exceptionConnect();
                 return Status.success;
             }
@@ -206,6 +217,7 @@ public class DriverFactory {
                     trace.print(Trace.ERROR ,device.getFullName() + " not connected");
                     return Status.error;
                 }
+                vxiDevice.disconnect();
                 device.exceptionDisconnect();
                 return Status.success;
             }
@@ -298,27 +310,6 @@ public class DriverFactory {
                     return returnStatus(user,status,"read");
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#readRaw(org.epics.ioc.pdrv.User, byte[], int)
-                 */
-                public Status readRaw(User user, byte[] data, int nbytes) {
-                    if(!device.isConnected()) {
-                        trace.print(Trace.ERROR ,device.getFullName() +  " readRaw but not connected");
-                        user.setMessage("not connected");
-                        return Status.error;
-                    }
-                    double timeout = user.getTimeout();
-                    int msec = (int)(timeout*1000.0);
-                    vxiController.setIoTimeout(msec);
-                    vxiDevice.setTermChar(vxiUser, -1);
-                    Status status = vxiDevice.read(vxiUser, data, nbytes);
-                    if(status==Status.success) {
-                        user.setAuxStatus(vxiUser.getReason());
-                        user.setInt(vxiUser.getInt());
-                        trace.printIO(Trace.DRIVER ,data,user.getInt(),device.getFullName() + " readRaw");
-                    }
-                    return returnStatus(user,status,"read");
-                }
-                /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status setInputEos(User user, byte[] eos, int eosLen) {
@@ -373,39 +364,12 @@ public class DriverFactory {
                         user.setMessage("not connected");
                         return Status.error;
                     }
-                    byte[] buffer = new byte[nbytes];
-                    System.arraycopy(data, 0, buffer, 0, nbytes);
                     trace.printIO(Trace.DRIVER ,data,nbytes,device.getFullName() + " write");
                     double timeout = user.getTimeout();
                     int msec = (int)(timeout*1000.0);
                     vxiController.setIoTimeout(msec);
                     vxiDevice.setTermChar(vxiUser, outputTermChar);
-                    Status status = vxiDevice.write(vxiUser, data);
-                    if(status==Status.success) {
-                        super.interruptOccured(buffer, nbytes);
-                    }
-                    return returnStatus(user,status,"write");
-                }
-                /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#writeRaw(org.epics.ioc.pdrv.User, byte[], int)
-                 */
-                public Status writeRaw(User user, byte[] data, int nbytes) {
-                    if(!device.isConnected()) {
-                        trace.print(Trace.ERROR ,device.getFullName() + " writeRaw but not connected");
-                        user.setMessage("not connected");
-                        return Status.error;
-                    }
-                    byte[] buffer = new byte[nbytes];
-                    System.arraycopy(data, 0, buffer, 0, nbytes);
-                    trace.printIO(Trace.DRIVER ,data,nbytes,device.getFullName() + " write");
-                    double timeout = user.getTimeout();
-                    int msec = (int)(timeout*1000.0);
-                    vxiController.setIoTimeout(msec);
-                    vxiDevice.setTermChar(vxiUser,-1);
-                    Status status = vxiDevice.write(vxiUser, data);
-                    if(status==Status.success) {
-                        super.interruptOccured(buffer, nbytes);
-                    }
+                    Status status = vxiDevice.write(vxiUser, data,nbytes);
                     return returnStatus(user,status,"write");
                 }
             }

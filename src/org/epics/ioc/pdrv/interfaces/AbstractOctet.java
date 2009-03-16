@@ -75,23 +75,11 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Octet#write(org.epics.ioc.pdrv.User, byte[], int)
      */
-    public Status write(User user,byte[] data,int nbytes) {
-        return writeRaw(user,data,nbytes);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#writeRaw(org.epics.ioc.pdrv.User, byte[], int)
-     */
-    public abstract Status writeRaw(User user,byte[] data,int nbytes);
+    public abstract Status write(User user,byte[] data,int nbytes);
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Octet#read(org.epics.ioc.pdrv.User, byte[], int)
      */
-    public Status read(User user,byte[] data,int nbytes) {
-        return readRaw(user,data,nbytes);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#readRaw(org.epics.ioc.pdrv.User, byte[], int)
-     */
-    public abstract Status readRaw(User user,byte[] data,int nbytes);
+    public abstract Status read(User user,byte[] data,int nbytes);
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Octet#flush(org.epics.ioc.pdrv.User)
      */

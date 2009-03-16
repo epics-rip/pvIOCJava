@@ -28,57 +28,37 @@ public interface Octet extends Interface {
     public static final int EOM_END = 0x0004; 
     
     /**
-     * Write an octet array and add possible terminators.
+     * Write an octet array.
+     * Interpose or driver code may add end of string terminators to the message
+     * but the extra characters are not included in the number of bytes written. 
      * @param user The user.
      * @param data The data.
      * @param nbytes The number of bytes to write. 
      * @return The status of the request.
      * If status is Status.error than user.getMessage() returns the reason.
-     * If status is Status.overflow than user.getAuxStatus() returns the number
-     * of bytes not written.
-     * If status is Status.success than user.getAuxStatus() returns
-     * the EOM_XXX and user.getInt() returns the number of bytes of data that were written.
+     * If status is Status.success or Status.overflow then
+     * user.getInt() returns the number of bytes of data that were written.
      */
     Status write(User user,byte[] data,int nbytes);
     /**
-     * Write an octet array without appending any terminators.
+     * Read an octet array.
+     * If read returns asynSuccess than eomReason
+     * (some combination of EOM_CNT, EOM_EOS, and EOM_END)
+     * tells why the read completed.
+     * Interpose or driver code may strip end of string terminators from the message.
+     * If it does the the eos characters will not be included in nbytesTransfered.
      * @param user The user.
      * @param data The data.
-     * @param nbytes The number of bytes to write. 
+     * @param nbytes The number of bytes to read. 
      * @return The status of the request.
      * If status is Status.error than user.getMessage() returns the reason.
-     * If status is Status.overflow than user.getAuxStatus() returns the number
-     * of bytes not written.
-     * If status is Status.success than user.getAuxStatus() returns
-     * the EOM_XXX and user.getInt() returns the number of bytes of data that were written.
-     */
-    Status writeRaw(User user,byte[] data,int nbytes);
-    /**
-     * Read an octet array and strip possible terminators.
-     * @param user The user.
-     * @param data The data.
-     * @param nbytes The number of bytes to write. 
-     * @return The status of the request.
-     * If status is Status.error than user.getMessage() returns the reason.
+     * If status is Status.success or Status.overflow then user.getInt returns the number of bytes that were read.
      * If status is Status.overflow than user.getAuxStatus() returns the number
      * of bytes not read.
      * If status is Status.success than user.getAuxStatus() returns
-     * the EOM_XXX and user.getInt() returns the number of bytes of data that were read.
+     * the eomMessage.
      */
     Status read(User user,byte[] data,int nbytes);
-    /**
-     * Read an octet array without stripping any terminators.
-     * @param user The user.
-     * @param data The data.
-     * @param nbytes The number of bytes to write. 
-     * @return The status of the request.
-     * If status is Status.error than user.getMessage() returns the reason.
-     * If status is Status.overflow than user.getAuxStatus() returns the number
-     * of bytes not read.
-     * If status is Status.success than user.getAuxStatus() returns
-     * the EOM_XXX and user.getInt() returns the number of bytes of data that were read.
-     */
-    Status readRaw(User user,byte[] data,int nbytes);
     /**
      * Flush any input data.
      * @param user The user.

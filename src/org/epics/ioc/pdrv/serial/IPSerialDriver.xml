@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<database>
+
+<structure name = "IPSerialDriver">
+    <scalar name = "host" type = "string" />
+    <scalar name = "port" type = "int" />
+</structure>
+
+</database>
