@@ -64,7 +64,7 @@ public interface VXI11Device {
      * If the object's EOI flag is true subsequent write operations
      * will assert the EOI line when the final byte of data is
      * transmitted to the device.
-     * The default state of the EOI flag is true<.
+     * The default state of the EOI flag is true.
      */
     void setEOI(boolean eoi);
     /**
@@ -97,13 +97,14 @@ public interface VXI11Device {
      * the EOI line asserted.
      * @param user The user.
      * @param data Array of bytes to be written to the device.
+     * @param nbytes Number of bytes to write.
      * Large arrays are sent using multiple remote procedure
      * calls to avoid exceeding the maxReceiverSize
      * of the VXI11 controller.
      * @return The status. If failure user.getError() and user.getString() report cause of failure.
      *
      */
-    Status write(VXI11User user,byte[] data);
+    Status write(VXI11User user,byte[] data,int nbytes);
     /**
      * Read from the VXI11 device until <I>maxCount</I> bytes
      * have been read or until the EOI line is asserted, or until
