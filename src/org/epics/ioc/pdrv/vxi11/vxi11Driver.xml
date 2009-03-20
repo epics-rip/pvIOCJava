@@ -5,6 +5,8 @@
     <scalar name = "hostName" type = "string" />
     <scalar name = "vxiName" type = "string" />
     <scalar name = "lockTimeout" type = "int" />
+    <scalar name = "eosInput" type = "string" />
+    <scalar name = "eosOutput" type = "string" />
 </structure>
 
 </database>
