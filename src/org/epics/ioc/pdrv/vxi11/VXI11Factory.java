@@ -934,6 +934,8 @@ public class VXI11Factory {
                         user.setError(errorCode);
                         user.setString("write failure");
                         return Status.error;
+                    } else {
+                        user.setInt(nbytes);
                     }
                 } catch (OncRpcException e) {
                     user.setError(VXI11ErrorCode.RPCException);

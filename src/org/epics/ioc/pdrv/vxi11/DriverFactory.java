@@ -370,6 +370,9 @@ public class DriverFactory {
                     vxiController.setIoTimeout(msec);
                     vxiDevice.setTermChar(vxiUser, outputTermChar);
                     Status status = vxiDevice.write(vxiUser, data,nbytes);
+                    if(status==Status.success) {
+                        user.setInt(vxiUser.getInt());
+                    }
                     return returnStatus(user,status,"write");
                 }
             }
