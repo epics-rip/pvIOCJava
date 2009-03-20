@@ -3,6 +3,8 @@
 
 <structure name = "octetDriver">
     <scalar name = "delay" type = "double" />
+    <scalar name = "eosInput" type = "string" />
+    <scalar name = "eosOutput" type = "string" />
 </structure>
 
 </database>
