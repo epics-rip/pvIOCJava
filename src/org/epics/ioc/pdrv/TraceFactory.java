@@ -211,13 +211,13 @@ public class TraceFactory {
                     while(builder.length()<truncateSize && index<len) {
                         if((iomask&Trace.IO_ASCII)!=0) {
                             char value = (char)buffer[index];
-                            builder.append(value);
+                            builder.append(String.valueOf(value));
                         } else if((iomask&Trace.IO_ESCAPE)!=0) {
                             char value = (char)buffer[index];
                             if(Character.isISOControl(value)) {
                                 builder.append(getEscaped(value));
                             } else {
-                                builder.append(buffer[index]);
+                                builder.append(String.valueOf(value));
                             }
                         } else if((iomask&Trace.IO_HEX)!=0) {
                             builder.append(String.format("%x ", buffer[index]));
@@ -272,7 +272,8 @@ public class TraceFactory {
         String getEscaped(char key) {
             String value = escapedMap.get(key);
             if(value==null) {
-                value = String.format("\\%2.2x", key);
+                value = "\\" + key;
+               
             }
             return value;
         }
