@@ -14,11 +14,12 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractInterface;
-import org.epics.ioc.pdrv.interfaces.AbstractOctet;
+import org.epics.ioc.pdrv.interfaces.AbstractSerial;
 import org.epics.ioc.pdrv.interfaces.GpibController;
 import org.epics.ioc.pdrv.interfaces.GpibDevice;
 import org.epics.ioc.pdrv.interfaces.GpibSrqHandler;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
@@ -60,20 +61,47 @@ public class DriverFactory {
     {
         PVString pvHostName = pvStructure.getStringField("hostName");
         if(pvHostName==null) {
-            throw new IllegalStateException("field hostName not found");
+            pvStructure.message("field hostName not found", MessageType.error);
+            return;
+        }
+        String string = pvHostName.get();
+        if(string==null || string.length()<1) {
+            pvStructure.message("illegal  hostName", MessageType.error);
+            return;
         }
         PVString pvVxiName = pvStructure.getStringField("vxiName");
         if(pvVxiName==null) {
-            throw new IllegalStateException("field vxiName not found");
+            pvStructure.message("field vxiName not found", MessageType.error);
+            return;
+        }
+        string = pvVxiName.get();
+        if(string==null || string.length()<1) {
+            pvStructure.message("illegal  vxiName", MessageType.error);
+            return;
         }
         PVInt pvLockTimeout = pvStructure.getIntField("lockTimeout");
         if(pvLockTimeout==null) {
-            throw new IllegalStateException("field lockTimeout not found");
+            pvStructure.message("field lockTimeout not found", MessageType.error);
+            return;
         }
+        byte[] eosInput = getEOS(pvStructure.getStringField("eosInput"));
+        byte[] eosOutput = getEOS(pvStructure.getStringField("eosOutput"));
         new PortDriverImpl(portName,autoConnect,priority,pvStructure,
-                pvHostName.get(),pvVxiName.get(),pvLockTimeout.get());
+                pvHostName.get(),pvVxiName.get(),pvLockTimeout.get(),
+                eosInput,eosOutput);
     }
-
+    
+    static byte[] getEOS(PVString pvString) {
+        if(pvString==null) return new byte[0];
+        String value = pvString.get();
+        if(value==null) return new byte[0];
+        if(value.equals("NL")) {
+            return new byte[]{'\n'};
+        }
+        pvString.message("unsupported End Of String", MessageType.error);
+        return new byte[0];
+    }
+    
     static private class PortDriverImpl implements PortDriver {
         private String portName;
         private String hostName = null;
@@ -84,15 +112,24 @@ public class DriverFactory {
         private Trace trace = null;;
         private User user = null;
         private VXI11User vxiUser = VXI11UserFactory.create();
+        private byte[] eosInput = null;
+        private int eosInputLength = 0;
+        private byte[] eosOutput = null;
+        private int eosOutputLength = 0;
 
 
         private PortDriverImpl(String portName,boolean autoConnect,ThreadPriority priority,PVStructure pvStructure,
-                String hostName,String vxiName,int lockTimeout)
+                String hostName,String vxiName,int lockTimeout,
+                byte[] eosInput,byte[] eosOutput)
         {
             this.portName = portName;
             this.hostName = hostName;
             this.vxiName = vxiName;
             this.lockTimeout = lockTimeout;
+            this.eosInput = eosInput;
+            this.eosOutput = eosOutput;
+            eosInputLength = eosInput.length;
+            eosOutputLength = eosOutput.length;
             vxiController = VXI11Factory.create(hostName, vxiName);
             port = Factory.createPort(portName, this, "VXI11",true, autoConnect, priority);
             trace = port.getTrace();
@@ -159,6 +196,12 @@ public class DriverFactory {
 
             private void init(Device device) { 
                 this.device = device;
+                if(eosInputLength==1) {
+                    inputTermChar = eosInput[0];
+                }
+                if(eosOutputLength==1) {
+                    outputTermChar = eosOutput[0];
+                }
                 String deviceName = device.getDeviceName();
                 int pad = -1;
                 int sad = -1;
@@ -233,13 +276,13 @@ public class DriverFactory {
                 return status;
             }
 
-            private class OctetImpl extends  AbstractOctet{
+            private class OctetImpl extends  AbstractSerial{
 
                 private OctetImpl(Device device) {
                     super(device);
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#flush(org.epics.ioc.pdrv.User)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#flush(org.epics.ioc.pdrv.User)
                  */
                 public Status flush(User user) {
                     if(!device.isConnected()) {
@@ -251,7 +294,7 @@ public class DriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#getInputEos(org.epics.ioc.pdrv.User, byte[])
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#getInputEos(org.epics.ioc.pdrv.User, byte[])
                  */
                 public Status getInputEos(User user, byte[] eos) {
                     if(!device.isConnected()) {
@@ -270,7 +313,7 @@ public class DriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#getOutputEos(org.epics.ioc.pdrv.User, byte[])
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#getOutputEos(org.epics.ioc.pdrv.User, byte[])
                  */
                 public Status getOutputEos(User user, byte[] eos) {
                     if(!device.isConnected()) {
@@ -289,7 +332,7 @@ public class DriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#read(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#read(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status read(User user, byte[] data, int nbytes) {
                     if(!device.isConnected()) {
@@ -310,7 +353,7 @@ public class DriverFactory {
                     return returnStatus(user,status,"read");
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status setInputEos(User user, byte[] eos, int eosLen) {
                     if(!device.isConnected()) {
@@ -333,7 +376,7 @@ public class DriverFactory {
                     return returnStatus(user,status,"setInputEos");
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status setOutputEos(User user, byte[] eos, int eosLen) {
                     if(!device.isConnected()) {
@@ -356,7 +399,7 @@ public class DriverFactory {
                     return returnStatus(user,status,"setInputEos");
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#write(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#write(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status write(User user, byte[] data, int nbytes) {
                     if(!device.isConnected()) {
