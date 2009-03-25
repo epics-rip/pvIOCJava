@@ -89,11 +89,10 @@ public interface Device {
      * Find an interface.
      * @param user The user.
      * @param interfaceName The name of the interface.
-     * @param interposeInterfaceOK If an interpose interface is present should it be returned.
      * If true then User.findInterface is called first.
      * @return The Interface or null if the interface is not registered.
      */
-    Interface findInterface(User user,String interfaceName,boolean interposeInterfaceOK);
+    Interface findInterface(User user,String interfaceName);
     /**
      * Attempt to connect.
      * This must be called with the port owned by the user.
@@ -137,14 +136,6 @@ public interface Device {
      * @param iface The Interface.
      */
     void registerInterface(Interface iface);
-    /**
-     * Interpose an interface.
-     * This must be called with the port locked.
-     * The interpose interface can take special action and also call the lower level interface if it exists.
-     * @param iface The interpose Interface.
-     * @return The lower level interface of null if none exists.
-     */
-    Interface interposeInterface(Interface iface);
     /**
      * A connect exception. This is called by the deviceDriver.
      * This must be called with no locks held and without owning the port.
