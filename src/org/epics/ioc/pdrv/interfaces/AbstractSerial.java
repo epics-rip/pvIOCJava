@@ -23,7 +23,7 @@ import org.epics.pvData.misc.ThreadReady;
 
 
 /**
- * Base interface for Octet.
+ * Base interface for Serial.
  * It provides the following features:
  * <ul>
  *    <li>registers the interface</li>
@@ -38,12 +38,12 @@ import org.epics.pvData.misc.ThreadReady;
  * @author mrk
  *
  */
-public abstract class AbstractOctet extends AbstractInterface implements Octet {
+public abstract class AbstractSerial extends AbstractInterface implements Serial {
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private  ReentrantLock lock = new ReentrantLock();
-    private List<OctetInterruptListener> interruptlistenerList =
-        new LinkedList<OctetInterruptListener>();
-    private List<OctetInterruptListener> interruptlistenerListNew = null;
+    private List<SerialInterruptListener> interruptlistenerList =
+        new LinkedList<SerialInterruptListener>();
+    private List<SerialInterruptListener> interruptlistenerListNew = null;
     private boolean interruptActive = false;
     private boolean interruptListenerListModified = false;
     private Interrupt interrupt = new Interrupt();
@@ -55,15 +55,13 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
      * This registers the interface with the device.
      * @param device The device
      */
-    protected AbstractOctet(Device device) {
-    	super(device,"octet");
+    protected AbstractSerial(Device device) {
+    	super(device,"serial");
     }
-    /**
-     * Announce an interrupt.
-     * @param data The new data.
-     * @param nbytes The number of bytes.
+    /* (non-Javadoc)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#interruptOccured(byte[], int)
      */
-    protected void interruptOccured(byte[] data,int nbytes) {
+    public void interruptOccurred(byte[] data,int nbytes) {
         if(interruptActive) {
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
@@ -73,50 +71,50 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
         interrupt.interrupt();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#write(org.epics.ioc.pdrv.User, byte[], int)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#write(org.epics.ioc.pdrv.User, byte[], int)
      */
     public abstract Status write(User user,byte[] data,int nbytes);
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#read(org.epics.ioc.pdrv.User, byte[], int)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#read(org.epics.ioc.pdrv.User, byte[], int)
      */
     public abstract Status read(User user,byte[] data,int nbytes);
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#flush(org.epics.ioc.pdrv.User)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#flush(org.epics.ioc.pdrv.User)
      */
     public abstract Status flush(User user) ;
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
      */
     public Status setInputEos(User user,byte[] eos,int eosLen) {
         user.setMessage("inputEos not supported");
         return Status.error;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#getInputEos(org.epics.ioc.pdrv.User, byte[])
+     * @see org.epics.ioc.pdrv.interfaces.Serial#getInputEos(org.epics.ioc.pdrv.User, byte[])
      */
     public Status getInputEos(User user,byte[] eos) {
         user.setAuxStatus(0);
         return Status.success;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
      */
     public Status setOutputEos(User user,byte[] eos,int eosLen) {
         user.setMessage("outputEos not supported");
         return Status.error;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#getOutputEos(org.epics.ioc.pdrv.User, byte[])
+     * @see org.epics.ioc.pdrv.interfaces.Serial#getOutputEos(org.epics.ioc.pdrv.User, byte[])
      */
     public Status getOutputEos(User user,byte[] eos) {
         user.setAuxStatus(0);
         return Status.success;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#addInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.OctetInterruptListener)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#addInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.SerialInterruptListener)
      */
     public Status addInterruptUser(User user,
-            OctetInterruptListener octetInterruptListener)
+            SerialInterruptListener serialInterruptListener)
     {
         lock.lock();
         try {
@@ -124,13 +122,13 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
                 interruptListenerListModified = true;
                 if(interruptlistenerListNew==null) {
                     interruptlistenerListNew = 
-                        new LinkedList<OctetInterruptListener>(interruptlistenerList);
+                        new LinkedList<SerialInterruptListener>(interruptlistenerList);
                 }
-                if(interruptlistenerListNew.add(octetInterruptListener)) {
+                if(interruptlistenerListNew.add(serialInterruptListener)) {
                     super.print(Trace.FLOW ,"addInterruptUser while interruptActive");
                     return Status.success;
                 }
-            } else if(interruptlistenerList.add(octetInterruptListener)) {
+            } else if(interruptlistenerList.add(serialInterruptListener)) {
                 super.print(Trace.FLOW ,"addInterruptUser");
                 return Status.success;
             }
@@ -142,22 +140,22 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.interfaces.Octet#removeInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.OctetInterruptListener)
+     * @see org.epics.ioc.pdrv.interfaces.Serial#removeInterruptUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.interfaces.SerialInterruptListener)
      */
-    public Status removeInterruptUser(User user, OctetInterruptListener octetInterruptListener) {
+    public Status removeInterruptUser(User user, SerialInterruptListener serialInterruptListener) {
         lock.lock();
         try {
             if(interruptActive) {
                 interruptListenerListModified = true;
                 if(interruptlistenerListNew==null) {
                     interruptlistenerListNew = 
-                        new LinkedList<OctetInterruptListener>(interruptlistenerList);
+                        new LinkedList<SerialInterruptListener>(interruptlistenerList);
                 }
-                if(interruptlistenerListNew.remove(octetInterruptListener)) {
+                if(interruptlistenerListNew.remove(serialInterruptListener)) {
                     super.print(Trace.FLOW ,"removeInterruptUser while interruptActive");
                     return Status.success;
                 }
-            } else if(interruptlistenerList.remove(octetInterruptListener)) {
+            } else if(interruptlistenerList.remove(serialInterruptListener)) {
                 super.print(Trace.FLOW ,"removeInterruptUser");
                 return Status.success;
             }
@@ -177,9 +175,9 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
         } finally {
             lock.unlock();
         }
-        ListIterator<OctetInterruptListener> iter = interruptlistenerList.listIterator();
+        ListIterator<SerialInterruptListener> iter = interruptlistenerList.listIterator();
         while(iter.hasNext()) {
-            OctetInterruptListener listener = iter.next();
+            SerialInterruptListener listener = iter.next();
             listener.interrupt(interruptData, interruptNumchars);
         }
         lock.lock();
@@ -202,7 +200,7 @@ public abstract class AbstractOctet extends AbstractInterface implements Octet {
         
         private Interrupt() {
             String name = device.getPort().getPortName() + "[" + device.getDeviceName() + "]";
-            name += AbstractOctet.this.getInterfaceName();
+            name += AbstractSerial.this.getInterfaceName();
             threadCreate.create(name,4, this);
         }
         

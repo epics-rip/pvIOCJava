@@ -73,7 +73,7 @@ public abstract class AbstractFloat64 extends AbstractInterface implements Float
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64#interruptOccured(double)
      */
-    public void interruptOccured(double data) {
+    public void interruptOccurred(double data) {
         if(interruptActive) {
             super.print(Trace.FLOW ,
                     "new interrupt while interruptActive");

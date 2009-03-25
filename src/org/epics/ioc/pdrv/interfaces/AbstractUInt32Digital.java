@@ -68,9 +68,8 @@ public abstract class AbstractUInt32Digital extends AbstractInterface  implement
 	/**
      * Announce an interrupt.
      * @param data The new data.
-     * @param reason The reason for the interrupt.
      */
-    protected void interruptOccured(int data) {
+    public void interruptOccurred(int data) {
         prevValue = value;
         value = data;
         if(interruptActive) {

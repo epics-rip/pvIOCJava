@@ -60,7 +60,7 @@ public abstract class AbstractInt32 extends AbstractInterface implements Int32 {
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32#interruptOccured(int)
      */
-    public void interruptOccured(int data) {
+    public void interruptOccurred(int data) {
         if(interruptActive) {
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;

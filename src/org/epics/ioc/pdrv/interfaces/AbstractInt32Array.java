@@ -39,7 +39,7 @@ import org.epics.pvData.pv.PVIntArray;
  * @author mrk
  *
  */
-public abstract class AbstractInt32Array extends AbstractArrayInterface implements Int32Array{
+public abstract class AbstractInt32Array extends AbstractInterface implements Int32Array{
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private PVIntArray pvIntArray;
     private  ReentrantLock lock = new ReentrantLock();
@@ -75,7 +75,7 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endWrite(org.epics.ioc.pdrv.User)
      */
     public Status endWrite(User user) {
-        interruptOccured();
+        interruptOccurred();
         return Status.success;
     }
     /* (non-Javadoc)
@@ -93,7 +93,7 @@ public abstract class AbstractInt32Array extends AbstractArrayInterface implemen
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#interruptOccured()
      */
-    public void interruptOccured() {
+    public void interruptOccurred() {
         if(interruptActive) {
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;

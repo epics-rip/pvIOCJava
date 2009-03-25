@@ -39,7 +39,7 @@ import org.epics.pvData.pv.PVDoubleArray;
  * @author mrk
  *
  */
-public abstract class AbstractFloat64Array extends AbstractArrayInterface implements Float64Array{
+public abstract class AbstractFloat64Array extends AbstractInterface implements Float64Array{
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private PVDoubleArray pvDoubleArray;
     private  ReentrantLock lock = new ReentrantLock();
@@ -74,7 +74,7 @@ public abstract class AbstractFloat64Array extends AbstractArrayInterface implem
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#endWrite(org.epics.ioc.pdrv.User)
      */
     public Status endWrite(User user) {
-        interruptOccured();
+        interruptOccurred();
         return Status.success;
     }
     /* (non-Javadoc)
@@ -92,7 +92,7 @@ public abstract class AbstractFloat64Array extends AbstractArrayInterface implem
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#interruptOccured()
      */
-    public void interruptOccured() {
+    public void interruptOccurred() {
         if(interruptActive) {
             super.print(Trace.FLOW ,
                     "new interrupt while interruptActive");
