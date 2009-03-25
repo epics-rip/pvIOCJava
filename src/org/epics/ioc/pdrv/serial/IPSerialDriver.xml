@@ -4,6 +4,8 @@
 <structure name = "IPSerialDriver">
     <scalar name = "host" type = "string" />
     <scalar name = "port" type = "int" />
+    <scalar name = "eosInput" type = "string" />
+    <scalar name = "eosOutput" type = "string" />
 </structure>
 
 </database>

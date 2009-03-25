@@ -20,30 +20,17 @@ import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pdrv.interfaces.AbstractOctet;
-import org.epics.ioc.pdrv.interfaces.Octet;
+import org.epics.ioc.pdrv.interfaces.AbstractSerial;
+import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.*;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 /**
- * The factory for octetDriver.
- * octetDriver is a portDriver for testing PDRV components.
- * It requires the octetDriver structure, which holds the following configuration parameters:
- * <ul>
- *    <li>multiDevice<br/>
- *       If true octetDriver supports multiple devices.
- *       If false it supports a single device.
- *     </li>
- *     <li>delay<br/>
- *       If 0.0 then octetDriver is synchronous.
- *       If > 0.0 octetDriver is asynchronous and delays delay seconds after each read/write request.
- *      </li>
- * </ul>
- * octetDriver implements interface octet by keeping an internal buffer.
- * A read request returns the value written by the previous write and
- * and also empties the buffer.
- *     
+ * Internet Protocol Serial Driver.
+ * This is a driver that connects via TCP to a network to serial server.
+ * The network server must just pass the octet stream to a serial port
+ * and pass back whatever is received from the serial port.
  * @author mrk
  *
  */
@@ -67,7 +54,26 @@ public class IPSerialDriverFactory {
         if(pvPort==null) {
             throw new IllegalStateException("field port not found");
         }
-        new IPSerialDriver(portName,autoConnect,priority,pvHost.get(),pvPort.get());
+        byte[] eosInput = getEOS(pvStructure.getStringField("eosInput"));
+        byte[] eosOutput = getEOS(pvStructure.getStringField("eosOutput"));
+        new IPSerialDriver(portName,autoConnect,priority,pvHost.get(),pvPort.get(),eosInput,eosOutput);
+    }
+    
+    static byte[] getEOS(PVString pvString) {
+        if(pvString==null) return new byte[0];
+        String value = pvString.get();
+        if(value==null) return new byte[0];
+        if(value.equals("CR")) {
+            return new byte[]{'\r'};
+        } else if(value.equals("NL")) {
+            return new byte[]{'\n'};
+        } else if(value.equals("CRNL")) {
+            return new byte[]{'\r','\n'};
+        } else if(value.equals("NLCR")) {
+            return new byte[]{'\n','\r'};
+        }
+        pvString.message("unsupported End Of String", MessageType.error);
+        return new byte[0];
     }
     
     static private class IPSerialDriver implements PortDriver {
@@ -77,13 +83,22 @@ public class IPSerialDriverFactory {
         private Port port;
         private Trace trace;
         private Socket server = null;
+        private byte[] eosInput = null;
+        private int eosInputLength = 0;
+        private byte[] eosOutput = null;
+        private int eosOutputLength = 0;
         
         private IPSerialDriver(String portName,
-            boolean autoConnect,ThreadPriority priority,String host, int ipport)
+            boolean autoConnect,ThreadPriority priority,String host, int ipport,
+            byte[] eosInput,byte[] eosOutput)
         {
             this.host = host;
             this.ipport = ipport;
             this.portName = portName;
+            this.eosInput = eosInput;
+            this.eosOutput = eosOutput;
+            eosInputLength = eosInput.length;
+            eosOutputLength = eosOutput.length;
             port = Factory.createPort(portName, this, "IPSerialDriver",true, autoConnect, priority);
             trace = port.getTrace();
         }
@@ -205,18 +220,14 @@ public class IPSerialDriverFactory {
                 return Status.success;
             }
 
-            private class IPSerialOctet extends  AbstractOctet{
+            private class IPSerialOctet extends  AbstractSerial{
                 private byte[] buffer = null;
-                private byte[] eosInput = {0,0};
-                private int eosLenInput = 0;
-                private byte[] eosOutput = {0,0};
-                private int eosLenOutput = 0;
 
                 private IPSerialOctet(Device device) {
                     super(device);
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#flush(org.epics.ioc.pdrv.User)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#flush(org.epics.ioc.pdrv.User)
                  */
                 public Status flush(User user) {
                     if(!device.isConnected()) {
@@ -228,7 +239,7 @@ public class IPSerialDriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#getInputEos(org.epics.ioc.pdrv.User, byte[])
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#getInputEos(org.epics.ioc.pdrv.User, byte[])
                  */
                 public Status getInputEos(User user, byte[] eos) {
                     if(!device.isConnected()) {
@@ -236,16 +247,20 @@ public class IPSerialDriverFactory {
                         user.setMessage("not connected");
                         return Status.error;
                     }
-                    user.setAuxStatus(eosLenInput);
-                    eos[0] = eosInput[0];
-                    eos[1] = eosInput[1];
+                    int length = eosInputLength;
+                    user.setAuxStatus(length);
+                    if(eos==null || eos.length<eosInput.length) {
+                        user.setMessage("eos.length < eosInput.length");
+                        return Status.error;
+                    }
+                    for(int i=0; i<eosInputLength; i++) eos[i] = eosInput[i];
                     trace.printIO(Trace.FLOW ,
-                            eosInput,eosLenInput,
+                            eosInput,length,
                             device.getFullName() +  " getInputEos");
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#getOutputEos(org.epics.ioc.pdrv.User, byte[])
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#getOutputEos(org.epics.ioc.pdrv.User, byte[])
                  */
                 public Status getOutputEos(User user, byte[] eos) {
                     if(!device.isConnected()) {
@@ -253,20 +268,25 @@ public class IPSerialDriverFactory {
                         user.setMessage("not connected");
                         return Status.error;
                     }
-                    user.setAuxStatus(eosLenOutput);
+                    int length = eosOutputLength;
+                    user.setAuxStatus(length);
+                    if(eos==null || eos.length<eosOutput.length) {
+                        user.setMessage("eos.length < eosOutput.length");
+                        return Status.error;
+                    }
                     eos[0] = eosOutput[0];
                     eos[1] = eosOutput[1];
                     trace.printIO(Trace.FLOW ,
-                            eosOutput,eosLenOutput,
-                            device.getFullName() + " getOutputEos");
+                            eosOutput,length,
+                            device.getFullName() +  " getOutputEos");
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#read(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#read(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status read(User user, byte[] data, int nbytes) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR ,device.getFullName() +  " readRaw but not connected");
+                        trace.print(Trace.ERROR ,device.getFullName() +  " read but not connected");
                         user.setMessage("not connected");
                         return Status.error;
                     }
@@ -286,31 +306,32 @@ public class IPSerialDriverFactory {
                         user.setMessage("IOException " + e.getMessage());
                         return Status.error;
                     }
-                    user.setAuxStatus(Octet.EOM_END);
+                    int numForUser = got;
+                    user.setAuxStatus(Serial.EOM_END);
                     if(got==nbytes) {
-                        user.setAuxStatus(Octet.EOM_CNT);
+                        user.setAuxStatus(Serial.EOM_CNT);
                     } else if(got>=1){
-                        if(eosLenInput>0) {
-                            if(eosLenInput==1) {
+                        if(eosInputLength>0) {
+                            if(eosInputLength==1) {
                                 if(data[got-1]==eosInput[0]) {
-                                    got -= 1;
-                                    user.setAuxStatus(Octet.EOM_EOS);
+                                    numForUser -= 1;
+                                    user.setAuxStatus(Serial.EOM_EOS);
                                 }
                             } else if(got>=2){
                                 if(data[got-2]==eosInput[0] && data[got-1]==eosInput[1]) {
-                                    got -= 2;
-                                    user.setAuxStatus(Octet.EOM_EOS);
+                                    numForUser -= 2;
+                                    user.setAuxStatus(Serial.EOM_EOS);
                                 }
                             }
                         }
                     }
-                    user.setInt(got);
-                    super.interruptOccured(data, got);
+                    user.setInt(numForUser);
+                    super.interruptOccurred(data, got);
                     trace.printIO(Trace.DRIVER ,data,got,device.getFullName() +  " read");
                     return status;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status setInputEos(User user, byte[] eos, int eosLen) {
                     if(!device.isConnected()) {
@@ -318,17 +339,20 @@ public class IPSerialDriverFactory {
                         user.setMessage("not connected");
                         return Status.error;
                     }
-                    if(eosLen<0 || eosLen<2) {
+                    if(eosLen<0) {
                         user.setMessage("illegal eosLen");
                         return Status.error;
                     }
-                    eosLenInput = eosLen;
+                    if(eosLen>eosInput.length) {
+                        eosInput = new byte[eosLen];
+                    }
+                    eosInputLength = eosLen;
                     for(int i=0; i<eosLen; i++) eosInput[i] = eos[i];
-                    trace.printIO(Trace.FLOW ,eosInput,eosLenInput,device.getFullName() + " setInputEos");
+                    trace.printIO(Trace.FLOW ,eosInput,eosLen,device.getFullName() + " setInputEos");
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status setOutputEos(User user, byte[] eos, int eosLen) {
                     if(!device.isConnected()) {
@@ -336,35 +360,39 @@ public class IPSerialDriverFactory {
                         user.setMessage("not connected");
                         return Status.error;
                     }
-                    if(eosLen<0 || eosLen<2) {
+                    if(eosLen<0) {
                         user.setMessage("illegal eosLen");
                         return Status.error;
                     }
-                    eosLenOutput = eosLen;
+                    if(eosLen>eosOutput.length) {
+                        eosOutput = new byte[eosLen];
+                    }
+                    eosOutputLength = eosLen;
                     for(int i=0; i<eosLen; i++) eosOutput[i] = eos[i];
-                    trace.printIO(Trace.FLOW ,eosOutput,eosLenOutput,device.getFullName() + " setOutputEos");
+                    trace.printIO(Trace.FLOW ,eosOutput,eosLen,device.getFullName() + " setInputEos");
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#write(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#write(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status write(User user, byte[] data, int nbytes) {
                     if(!device.isConnected()) {
-                        trace.print(Trace.ERROR ,device.getFullName() + " writeRaw but not connected");
-                        user.setMessage("not connected");
+                        String message = " write but not connected";
+                        trace.print(Trace.ERROR ,device.getFullName() + message);
+                        user.setMessage(message);
                         return Status.error;
                     }
                     int numout = nbytes;
-                    if(eosLenOutput>0 && nbytes < (data.length + eosLenOutput)) {
-                        if(eosLenOutput==1) {
-                            data[nbytes] = eosOutput[0];
-                            numout += 1;
-                        } else {
-                            data[nbytes] = eosOutput[0];
-                            data[nbytes+1] = eosOutput[1];
-                            numout += 2;
-                        }
+                    if(nbytes > (data.length + eosOutputLength)) {
+                        String message = " data buffer not large enough for end of string";
+                        trace.print(Trace.ERROR ,device.getFullName() + message);
+                        user.setMessage(message);
+                        return Status.error;
                     }
+                    for(int i=0; i<eosOutputLength; i++) {
+                        data[nbytes+i] = eosOutput[i];
+                    }
+                    numout = nbytes + eosOutputLength;
                     try {
                         out.write(data, 0, numout);
                     } catch (IOException e) {
@@ -372,8 +400,8 @@ public class IPSerialDriverFactory {
                         return Status.error;
                     }
                     user.setInt(nbytes);
-                    trace.printIO(Trace.DRIVER ,data,numout,device.getFullName() + " writeRaw");
-                    super.interruptOccured(buffer, nbytes);
+                    trace.printIO(Trace.DRIVER ,data,numout,device.getFullName() + " write");
+                    super.interruptOccurred(buffer, nbytes);
                     return Status.success;
                 }
             }
