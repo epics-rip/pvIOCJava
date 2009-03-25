@@ -233,7 +233,7 @@ public class UInt32DigitalDriverFactory {
                     newValue |= value&mask;
                     register[addr] = newValue;
                     trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
-                    super.interruptOccured(newValue);
+                    super.interruptOccurred(newValue);
                     return Status.success;
                 }
             }

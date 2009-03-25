@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "octetDriver">
+<structure name = "serialDriver">
     <scalar name = "delay" type = "double" />
     <scalar name = "eosInput" type = "string" />
     <scalar name = "eosOutput" type = "string" />

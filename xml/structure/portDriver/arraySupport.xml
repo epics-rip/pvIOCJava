@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<database>
+
+
+<structure name = "pdrvInt32ArrayInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.array.SupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32ArrayInput">
+  <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayInputFactory</auxInfo>
+</structure>
+
+<structure name = "pdrvInt32ArrayInterruptFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.array.SupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32ArrayInterrupt" type = "portDriverInterruptLink">
+  <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayInterruptFactory</auxInfo>
+  <scalar name = "process" type = "boolean">false</scalar>
+</structure>
+
+<structure name = "pdrvInt32ArrayOutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.array.SupportFactory</scalar>
+</structure>
+<structure name = "pdrvInt32ArrayOutput">
+  <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayOutputFactory</auxInfo>
+</structure>
+
+
+<structure name = "pdrvFloat64ArrayInputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.array.SupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64ArrayInput">
+  <auxInfo name = "supportFactory" type = "string">pdrvFloat64ArrayInputFactory</auxInfo>
+</structure>
+
+<structure name = "pdrvFloat64ArrayInterruptFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.array.SupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64ArrayInterrupt" type = "portDriverInterruptLink">
+  <auxInfo name = "supportFactory" type = "string">pdrvFloat64ArrayInterruptFactory</auxInfo>
+  <scalar name = "process" type = "boolean">false</scalar>
+</structure>
+
+<structure name = "pdrvFloat64ArrayOutputFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.array.SupportFactory</scalar>
+</structure>
+<structure name = "pdrvFloat64ArrayOutput">
+  <auxInfo name = "supportFactory" type = "string">pdrvFloat64ArrayOutputFactory</auxInfo>
+</structure>
+
+
+</database>

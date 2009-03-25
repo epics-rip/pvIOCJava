@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<database>
+
+<structure name = "portCreateFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PortCreateFactory</scalar>
+</structure>
+
+<structure name = "portDeviceControlFactory">
+  <scalar name = "supportFactory" type = "string">
+     org.epics.ioc.support.pdrv.PortDeviceControlFactory</scalar>
+</structure>
+
+<structure name = "portCreate">
+  <auxInfo name = "supportFactory" type = "string">portCreateFactory</auxInfo>
+  <scalar name = "factoryName" type = "string" />
+  <scalar name = "portName" type = "string" />
+  <scalar name = "autoConnect" type = "boolean">true</scalar>
+  <structure name = "priority" type = "scanPriority" />
+</structure>
+
+<structure name = "portDeviceControl">
+  <auxInfo name = "supportFactory" type = "string">portDeviceControlFactory</auxInfo>
+  <scalar name = "message" type = "string" />
+  <scalar name = "portName" type = "string" />
+  <scalar name = "deviceName" type = "string" />
+  <scalar name = "processAtStart" type = "boolean">false</scalar>
+  <scalar name = "connect" type = "boolean">false</scalar>
+  <scalar name = "enable" type = "boolean">true</scalar>
+  <scalar name = "autoConnect" type = "boolean">truer</scalar>
+  <scalar name = "traceMask" type = "int">1</scalar>
+  <scalar name = "traceIOMask" type = "int">0</scalar>
+  <scalar name = "traceIOTruncateSize" type = "int">80</scalar>
+  <scalar name = "report" type = "boolean">false</scalar>
+  <scalar name = "reportDetails" type = "int">3</scalar>
+</structure>
+
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
+<include href = "serialDriver.xml" />
+<include href = "int32Driver.xml" />
+<include href = "float64Driver.xml" />
+<include href = "uint32DigitalDriver.xml" />
+<include href = "int32ArrayDriver.xml" />
+<include href = "float64ArrayDriver.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
+
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/serial" />
+<include href = "IPSerialDriver.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/serial" />
+
+<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
+<include href = "vxi11Driver.xml" />
+<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
+
+</database>

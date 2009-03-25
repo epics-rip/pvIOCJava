@@ -13,42 +13,42 @@ import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pdrv.interfaces.AbstractOctet;
-import org.epics.ioc.pdrv.interfaces.Octet;
+import org.epics.ioc.pdrv.interfaces.AbstractSerial;
+import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 /**
- * The factory for octetDriver.
- * octetDriver is a portDriver for testing PDRV components.
- * It requires the octetDriver structure, which holds the following configuration parameters:
+ * The factory for serialDriver.
+ * serialDriver is a portDriver for testing PDRV components.
+ * It requires the serialDriver structure, which holds the following configuration parameters:
  * <ul>
  *    <li>multiDevice<br/>
- *       If true octetDriver supports multiple devices.
+ *       If true serialDriver supports multiple devices.
  *       If false it supports a single device.
  *     </li>
  *     <li>delay<br/>
- *       If 0.0 then octetDriver is synchronous.
- *       If > 0.0 octetDriver is asynchronous and delays delay seconds after each read/write request.
+ *       If 0.0 then serialDriver is synchronous.
+ *       If > 0.0 serialDriver is asynchronous and delays delay seconds after each read/write request.
  *      </li>
  * </ul>
- * octetDriver implements interface octet by keeping an internal buffer.
+ * serialDriver implements interface serial by keeping an internal buffer.
  * A read request returns the value written by the previous write and
  * and also empties the buffer.
  *     
  * @author mrk
  *
  */
-public class OctetDriverFactory {
+public class SerialDriverFactory {
 
     /**
-     * Create a new instance of octetDriver.
+     * Create a new instance of serialDriver.
      * @param portName The portName.
      * @param autoConnect Initial value for autoConnect.
      * @param priority The thread priority if asynchronous, i.e. delay > 0.0.
-     * @param pvStructure The interface for structure octetDriver.
+     * @param pvStructure The interface for structure serialDriver.
      */
     static public void create(
             String portName,boolean autoConnect,ThreadPriority priority,PVStructure pvStructure)
@@ -61,7 +61,7 @@ public class OctetDriverFactory {
         boolean canBlock = ((delay>0.0) ? true : false);
         byte[] eosInput = getEOS(pvStructure.getStringField("eosInput"));
         byte[] eosOutput = getEOS(pvStructure.getStringField("eosOutput"));
-        new OctetDriver(portName,autoConnect,canBlock,priority,delay,eosInput,eosOutput);
+        new SerialDriver(portName,autoConnect,canBlock,priority,delay,eosInput,eosOutput);
     }
 
     static byte[] getEOS(PVString pvString) {
@@ -70,18 +70,18 @@ public class OctetDriverFactory {
         if(value==null) return new byte[0];
         if(value.equals("CR")) {
             return new byte[]{'\r'};
-        } else if(value.equals("LF")) {
+        } else if(value.equals("NL")) {
             return new byte[]{'\n'};
-        } else if(value.equals("CRLF")) {
+        } else if(value.equals("CRNL")) {
             return new byte[]{'\r','\n'};
-        } else if(value.equals("LFCR")) {
+        } else if(value.equals("NLCR")) {
             return new byte[]{'\n','\r'};
         }
         pvString.message("unsupported End Of String", MessageType.error);
         return new byte[0];
     }
 
-    static private class OctetDriver implements PortDriver {
+    static private class SerialDriver implements PortDriver {
         private double delay;
         private String portName;
         private Port port;
@@ -91,7 +91,7 @@ public class OctetDriverFactory {
         private byte[] eosOutput = null;
         private int eosOutputLength = 0;
 
-        private OctetDriver(String portName,
+        private SerialDriver(String portName,
                 boolean autoConnect,boolean canBlock,ThreadPriority priority,double delay,
                 byte[] eosInput,byte[] eosOutput)
         {
@@ -101,7 +101,7 @@ public class OctetDriverFactory {
             this.eosOutput = eosOutput;
             eosInputLength = eosInput.length;
             eosOutputLength = eosOutput.length;
-            port = Factory.createPort(portName, this, "octetDriver",
+            port = Factory.createPort(portName, this, "serialDriver",
                     canBlock, autoConnect, priority);
             trace = port.getTrace();
         }
@@ -161,7 +161,7 @@ public class OctetDriverFactory {
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                new EchoOctet(device);
+                new EchoSerial(device);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
@@ -196,18 +196,18 @@ public class OctetDriverFactory {
                 return Status.success;
             }
 
-            private class EchoOctet extends  AbstractOctet{
+            private class EchoSerial extends  AbstractSerial{
                 private static final int BUFFERSIZE = 4096;
                 private long milliseconds;
                 private byte[] buffer = new byte[BUFFERSIZE];
                 private int size;
 
-                private EchoOctet(Device device) {
+                private EchoSerial(Device device) {
                     super(device);
                     milliseconds = (long)(delay * 1000.0);
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#flush(org.epics.ioc.pdrv.User)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#flush(org.epics.ioc.pdrv.User)
                  */
                 public Status flush(User user) {
                     if(!device.isConnected()) {
@@ -220,7 +220,7 @@ public class OctetDriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#getInputEos(org.epics.ioc.pdrv.User, byte[])
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#getInputEos(org.epics.ioc.pdrv.User, byte[])
                  */
                 public Status getInputEos(User user, byte[] eos) {
                     if(!device.isConnected()) {
@@ -237,7 +237,7 @@ public class OctetDriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#getOutputEos(org.epics.ioc.pdrv.User, byte[])
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#getOutputEos(org.epics.ioc.pdrv.User, byte[])
                  */
                 public Status getOutputEos(User user, byte[] eos) {
                     if(!device.isConnected()) {
@@ -254,7 +254,7 @@ public class OctetDriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#read(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#read(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status read(User user, byte[] data, int nbytes) {
                     if(!device.isConnected()) {
@@ -274,12 +274,12 @@ public class OctetDriverFactory {
 
                         }
                     }
-                    int auxStatus = Octet.EOM_END;
+                    int auxStatus = Serial.EOM_END;
                     int nForUser = size;
                     int nRead = size;
                     if(nbytes<size){
                         nRead = nForUser = nbytes;
-                        auxStatus = Octet.EOM_CNT;
+                        auxStatus = Serial.EOM_CNT;
                     }
                     if(eosInputLength>0) {
                         again:
@@ -291,7 +291,7 @@ public class OctetDriverFactory {
                             }
                             nForUser = i + 1;
                             nRead = nForUser + eosInputLength;
-                            auxStatus = Octet.EOM_EOS;
+                            auxStatus = Serial.EOM_EOS;
                         }
                     }
                     Status status = Status.success;
@@ -305,7 +305,7 @@ public class OctetDriverFactory {
                     return status;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#setInputEos(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status setInputEos(User user, byte[] eos, int eosLen) {
                     if(!device.isConnected()) {
@@ -323,7 +323,7 @@ public class OctetDriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#setOutputEos(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status setOutputEos(User user, byte[] eos, int eosLen) {
                     if(!device.isConnected()) {
@@ -341,7 +341,7 @@ public class OctetDriverFactory {
                     return Status.success;
                 }
                 /* (non-Javadoc)
-                 * @see org.epics.ioc.pdrv.interfaces.AbstractOctet#write(org.epics.ioc.pdrv.User, byte[], int)
+                 * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#write(org.epics.ioc.pdrv.User, byte[], int)
                  */
                 public Status write(User user, byte[] data, int nbytes) {
                     if(!device.isConnected()) {
@@ -386,7 +386,7 @@ public class OctetDriverFactory {
                     }
                     user.setInt(nbytes);
                     trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " write");
-                    super.interruptOccured(buffer, nbytes);
+                    super.interruptOccurred(buffer, nbytes);
                     return status;
                 }
             }

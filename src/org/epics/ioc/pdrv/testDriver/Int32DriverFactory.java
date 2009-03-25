@@ -268,7 +268,7 @@ public class Int32DriverFactory {
                     }
                     register[addr] = value;
                     trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
-                    super.interruptOccured(value);
+                    super.interruptOccurred(value);
                     return Status.success;
                 }
             }
