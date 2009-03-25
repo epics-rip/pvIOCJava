@@ -59,7 +59,7 @@ public interface Float64Array extends Interface {
      */
     Status removeInterruptUser(User user,Float64ArrayInterruptListener float64ArrayListener);
     /**
-     * An interrupt has occured.
+     * An interrupt has occurred.
      */
-    void interruptOccured();
+    void interruptOccurred();
 }
