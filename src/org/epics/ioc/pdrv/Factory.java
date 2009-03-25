@@ -109,7 +109,6 @@ public class Factory {
         }
         
         
-        private List<Interface> interposeInterfaceList = new LinkedList<Interface>();
         private QueueRequestCallback queueRequestCallback = null;
         private PortImpl port = null;
         private DeviceImpl device = null;
@@ -142,34 +141,6 @@ public class Factory {
             newUser.reason = reason;
             newUser.timeout = timeout;
             return newUser;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.User#interposeInterface(org.epics.ioc.pdrv.interfaces.Interface)
-         */
-        public Interface interposeInterface(Interface interposeInterface) {
-            String interfaceName = interposeInterface.getInterfaceName();
-            ListIterator<Interface> iter = interposeInterfaceList.listIterator();
-            while(iter.hasNext()) {
-                Interface iface = iter.next();
-                int compare = interfaceName.compareTo(iface.getInterfaceName());
-                if(compare==0) {
-                    iter.set(interposeInterface);
-                    return iface;
-                }
-            }
-            interposeInterfaceList.add(interposeInterface);
-            return null;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.pdrv.User#findInterface(java.lang.String)
-         */
-        public Interface findInterface(String interfaceName) {
-            ListIterator<Interface> iter = interposeInterfaceList.listIterator();
-            while(iter.hasNext()) {
-                Interface iface = iter.next();
-                if(interfaceName.equals(iface.getInterfaceName())) return iface;
-            }
-            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#connectPort(java.lang.String)
@@ -921,15 +892,6 @@ public class Factory {
             fullName = portName + "[" + deviceName + "]";
             autoConnect = port.autoConnect;
         }
-
-        private static class DeviceInterface {
-            private Interface iface;
-            private Interface interposeInterface = null;
-
-            private DeviceInterface(Interface iface) {
-                this.iface = iface;
-            }
-        }
         
         private ReentrantLock deviceLock = new ReentrantLock();
         private PortImpl port;
@@ -938,7 +900,7 @@ public class Factory {
         private String deviceName;
         private String fullName;
         private Trace trace = TraceFactory.create();
-        private List<DeviceInterface> interfaceList = new LinkedList<DeviceInterface>();
+        private List<Interface> interfaceList = new LinkedList<Interface>();
         private ConnectExceptionList exceptionList = new ConnectExceptionList();
         private boolean exceptionActive = false;
         private User blockingUser = null;
@@ -973,18 +935,13 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Device#getInterfaces()
          */
         public Interface[] getInterfaces() {
-            Interface[] interfaces = null;
             deviceLock.lock();
             try {
-                int size = interfaceList.size();
-                interfaces = new Interface[size];
-                for(int i=0; i<size; i++) {
-                    interfaces[i] = interfaceList.get(i).iface;
-                }
+                return (Interface[])interfaceList.toArray();
+               
             } finally {
                 deviceLock.unlock();
             }
-            return interfaces;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#getDeviceName()
@@ -1130,23 +1087,16 @@ public class Factory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.asyn.DeviceUser#findInterface(org.epics.ioc.asyn.User, java.lang.String, boolean)
+         * @see org.epics.ioc.pdrv.Device#findInterface(org.epics.ioc.pdrv.User, java.lang.String)
          */
-        public Interface findInterface(User user, String interfaceName, boolean interposeInterfaceOK) {
+        public Interface findInterface(User user, String interfaceName) {
             deviceLock.lock();
             try {
-                if(interposeInterfaceOK) {
-                    Interface iface = user.findInterface(interfaceName);
-                    if(iface!=null) return iface;
-                }
-                ListIterator<DeviceInterface> iter = interfaceList.listIterator();
+                
+                ListIterator<Interface> iter = interfaceList.listIterator();
                 while(iter.hasNext()) {
-                    DeviceInterface iface = iter.next();
-                    Interface asynInterface = iface.iface;
+                    Interface asynInterface = iter.next();
                     if(interfaceName.equals(asynInterface.getInterfaceName())) {
-                        if(interposeInterfaceOK && iface.interposeInterface!=null) {
-                            return iface.interposeInterface;
-                        }
                         return asynInterface;
                     }
                 }
@@ -1194,11 +1144,9 @@ public class Factory {
         public void registerInterface(Interface ifaceNew) {
             String interfaceName = ifaceNew.getInterfaceName();
             trace.print(Trace.FLOW, "%s registerInterface %s", fullName,interfaceName);
-            DeviceInterface deviceInterfaceNew = new DeviceInterface(ifaceNew);
-            ListIterator<DeviceInterface> iter = interfaceList.listIterator();
+            ListIterator<Interface> iter = interfaceList.listIterator();
             while(iter.hasNext()) {
-                DeviceInterface deviceInterface = iter.next();
-                Interface iface = deviceInterface.iface;
+                Interface iface = iter.next();
                 if(iface==ifaceNew) {
                     throw new IllegalStateException("interface already registered");
                 }
@@ -1208,33 +1156,12 @@ public class Factory {
                             "interface " + interfaceName + " already registered");
                 }
                 if(compare<0) {
-                    iter.add(deviceInterfaceNew);
+                    iter.add(ifaceNew);
                     return;
                 }
             }
-            interfaceList.add(deviceInterfaceNew);
+            interfaceList.add(ifaceNew);
 
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.asyn.DeviceDriver#interposeInterface(org.epics.ioc.asyn.Interface)
-         */
-        public Interface interposeInterface(Interface interposeInterface) {
-            String interfaceName = interposeInterface.getInterfaceName();
-            trace.print(Trace.FLOW, "%s interposeInterface %s", fullName,interfaceName);
-            ListIterator<DeviceInterface> iter = interfaceList.listIterator();
-            while(iter.hasNext()) {
-                DeviceInterface deviceInterface = iter.next();
-                Interface iface = deviceInterface.iface;
-                int compare = interfaceName.compareTo(iface.getInterfaceName());
-                if(compare==0) {
-                    Interface returnInterface = deviceInterface.interposeInterface;
-                    deviceInterface.interposeInterface = interposeInterface;
-                    if(returnInterface==null) returnInterface = iface;
-                    return returnInterface;
-                }
-            }
-            interfaceList.add(new DeviceInterface(interposeInterface));
-            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceDriver#exceptionConnect()

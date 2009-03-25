@@ -56,23 +56,6 @@ public interface User {
      */
     User duplicateUser(QueueRequestCallback queueRequestCallback);
     /**
-     * Interpose an interface.
-     * This is provided for user level support that consists of multiple layers.
-     * A lower level implements the interface and calls interposeInterface,
-     * which must be done before the higher level calls Device.findInterface.
-     * The interpose interface can take special action and also call lower level interfaces.
-     * @param iface The interpose Interface.
-     * @return The lower level interface of null if none exists.
-     */
-    Interface interposeInterface(Interface iface);
-    /**
-     * Find an interface.
-     * This will only succeed if an interface with this name has been interposed.
-     * @param interfaceName The name of the interface.
-     * @return The Interface or null if the interface is not registered.
-     */
-    Interface findInterface(String interfaceName);
-    /**
      * Connect the user to a port.
      * @param portName The portName.
      * @return An interface to the port or null if the port does not exist.
