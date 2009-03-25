@@ -6,6 +6,8 @@
     <scalar name = "portName">syncStringPort</scalar>
     <structure name = "driverParameters" type = "octetDriver" >
         <scalar name = "delay">0.0</scalar>
+        <scalar name = "eosInput">CRLF</scalar>
+        <scalar name = "eosOutput">CRLF</scalar>
     </structure>
 </record>
 
@@ -41,11 +43,11 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetOutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvOctetOutput"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncStringIn</scalar>
@@ -56,12 +58,11 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size" >20</scalar>
+        <structure name = "input" type = "pdrvOctetInput"/>
     </structure>
 </record>
 
@@ -69,11 +70,9 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetInterruptInputFactory</auxInfo>
+    <structure name = "link" type = "pdrvOctetInterrupt">
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
         <scalar name = "process">true</scalar>
     </structure>
 </record>
@@ -118,11 +117,11 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetOutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvOctetOutput"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynStringIn</scalar>
@@ -133,12 +132,11 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size">20</scalar>
+        <structure name = "input" type = "pdrvOctetInput"/>
     </structure>
 </record>
 
@@ -146,11 +144,9 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetInterruptInputFactory</auxInfo>
+    <structure name = "link" type = "pdrvOctetInterrupt">
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size">20</scalar>
         <scalar name = "process">true</scalar>
     </structure>
 </record>

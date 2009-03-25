@@ -44,11 +44,11 @@
     <array name = "value"  type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayOutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">syncInt32ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvInt32ArrayOutput"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncInt32ArrayInput</scalar>
@@ -58,23 +58,20 @@
     <array name = "value"  type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-     <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">syncInt32ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size" >20</scalar>
+        <structure name = "input" type = "pdrvInt32ArrayInput"/>
     </structure>
 </record>
-<record name = "syncInt32ArrayInputInterrupt">
+<record name = "syncInt32ArrayInterrupt">
     <array name = "value"  type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayInterruptInputFactory</auxInfo>
+    <structure name = "input" type = "pdrvInt32ArrayInterrupt">
         <scalar name = "portName">syncInt32ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
         <scalar name = "process" >true</scalar>
     </structure>
 </record>
@@ -122,11 +119,11 @@
     <array name = "value"  type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayOutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">asynInt32ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvInt32ArrayOutput"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynInt32ArrayInput</scalar>
@@ -136,23 +133,20 @@
     <array name = "value"  type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">asynInt32ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size" >20</scalar>
+        <structure name = "input" type = "pdrvInt32ArrayInput"/>
     </structure>
 </record>
-<record name = "asynInt32ArrayInputInterrupt">
+<record name = "asynInt32ArrayInterrupt">
     <array name = "value"  type = "int" />
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32ArrayInterruptInputFactory</auxInfo>
+    <structure name = "input" type = "pdrvInt32ArrayInterrupt">
         <scalar name = "portName">asynInt32ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
         <scalar name = "process" >true</scalar>
     </structure>
 </record>

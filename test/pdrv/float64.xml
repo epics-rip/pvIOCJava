@@ -42,11 +42,11 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64OutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">syncFloat64Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvFloat64Output"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncFloat64In</scalar>
@@ -57,24 +57,21 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">syncFloat64Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size" >20</scalar>
+        <structure name = "input" type = "pdrvFloat64Input"/>
     </structure>
 </record>
 
-<record name = "syncFloat64InInterrupt">
+<record name = "syncFloat64Interrupt">
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InterruptInputFactory</auxInfo>
+    <structure name = "input" type = "pdrvFloat64Interrupt">
         <scalar name = "portName">syncFloat64Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
         <scalar name = "process" >true</scalar>
     </structure>
 </record>
@@ -83,15 +80,13 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64AverageInputFactory</auxInfo>
-        <scalar name = "portName">syncFloat64Port</scalar>
-        <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
-    </structure>
     <structure name = "scan" type = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">5.0</scalar>
+    </structure>
+    <structure name = "link" type = "pdrvFloat64Average">
+        <scalar name = "portName">syncFloat64Port</scalar>
+        <scalar name = "deviceName">0</scalar>
     </structure>
 </record>
 
@@ -136,11 +131,11 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64OutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">asynFloat64Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvFloat64Output"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynFloat64In</scalar>
@@ -151,29 +146,26 @@
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">asynFloat64Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size" >20</scalar>
+        <structure name = "input" type = "pdrvFloat64Input"/>
     </structure>
 </record>
 
-<record name = "asynFloat64InInterrupt">
+<record name = "asynFloat64Interrupt">
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64InterruptInputFactory</auxInfo>
+    <structure name = "input" type = "pdrvFloat64Interrupt">
         <scalar name = "portName">asynFloat64Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
         <scalar name = "process" >true</scalar>
     </structure>
 </record>
 
-<record name = "asynFloat64InAverage">
+<record name = "asynFloat64Average">
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
@@ -181,13 +173,12 @@
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">5.0</scalar>
     </structure>
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvFloat64AverageInputFactory</auxInfo>
+    <structure name = "input" type = "pdrvFloat64Average">
         <scalar name = "portName">asynFloat64Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
     </structure>
 </record>
+
 <!--
 -->
 

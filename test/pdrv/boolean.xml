@@ -42,12 +42,13 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalOutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">32767</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvUInt32DigitalOutput">
+            <scalar name = "mask">32767</scalar>
+        </structure>    
     </structure>
     <structure name = "link" type = "generic">
         <structure name = "1" type = "caProcessLink">
@@ -68,12 +69,13 @@
     <scalar name = "value" type = "boolean"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x1</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "input" type = "pdrvUInt32DigitalInput">
+            <scalar name = "mask">0x1</scalar>
+        </structure>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
       <scalar name = "active">true</scalar>
@@ -88,12 +90,13 @@
     <scalar name = "value" type = "boolean"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x2</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "input" type = "pdrvUInt32DigitalInput">
+            <scalar name = "mask">0x2</scalar>
+        </structure>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
       <scalar name = "active">true</scalar>
@@ -108,12 +111,13 @@
     <scalar name = "value" type = "boolean"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x4</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "input" type = "pdrvUInt32DigitalInput">
+            <scalar name = "mask">0x4</scalar>
+        </structure>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
         <scalar name = "active">true</scalar>
@@ -165,12 +169,13 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalOutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">32767</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvUInt32DigitalOutput">
+            <scalar name = "mask">32767</scalar>
+        </structure>    
     </structure>
     <structure name = "link" type = "generic">
         <structure name = "link1" type = "caProcessLink">
@@ -189,12 +194,13 @@
     <scalar name = "value" type = "boolean"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x1</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "input" type = "pdrvUInt32DigitalInput">
+            <scalar name = "mask">0x1</scalar>
+        </structure>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
       <scalar name = "active">true</scalar>
@@ -209,12 +215,13 @@
     <scalar name = "value" type = "boolean"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x2</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "input" type = "pdrvUInt32DigitalInput">
+            <scalar name = "mask">0x2</scalar>
+        </structure>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
       <scalar name = "active">true</scalar>
@@ -228,12 +235,13 @@
     <scalar name = "value" type = "boolean"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">0x4</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "input" type = "pdrvUInt32DigitalInput">
+            <scalar name = "mask">0x4</scalar>
+        </structure>
     </structure>
     <structure name = "valueAlarm" type = "booleanAlarm">
       <scalar name = "active">true</scalar>

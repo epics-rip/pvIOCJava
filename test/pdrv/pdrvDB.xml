@@ -8,9 +8,11 @@
 <include href = "digital.xml" />
 <include href = "int32.xml" />
 <include href = "float64.xml" />
-<include href = "string.xml" />
 <include href = "int32Array.xml" />
 <include href = "float64Array.xml" />
+<!--
+<include href = "string.xml" />
+-->
 
 <include removePath = "test/pdrv" />
 </database>

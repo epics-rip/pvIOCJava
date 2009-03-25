@@ -44,11 +44,11 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32OutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">syncInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvInt32Output"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncInt32In</scalar>
@@ -59,24 +59,21 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32InputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">syncInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size">20</scalar>
+        <structure name = "input" type = "pdrvInt32Input"/>
     </structure>
 </record>
 
-<record name = "syncInt32InInterrupt">
+<record name = "syncInt32Interrupt">
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32InterruptInputFactory</auxInfo>
+    <structure name = "input" type = "pdrvInt32Interrupt">
         <scalar name = "portName">syncInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size">20</scalar>
         <scalar name = "process" >true</scalar>
     </structure>
 </record>
@@ -89,11 +86,9 @@
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">5.0</scalar>
     </structure>
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32AverageInputFactory</auxInfo>
+    <structure name = "link" type = "pdrvInt32Average">
         <scalar name = "portName">syncInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
     </structure>
 </record>
 
@@ -140,11 +135,11 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32OutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">asynInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvInt32Output"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynInt32In</scalar>
@@ -155,29 +150,26 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32InputFactory</auxInfo>
+    <structure name = "link" type = "portDriverLink">
         <scalar name = "portName">asynInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size" >20</scalar>
+        <structure name = "input" type = "pdrvInt32Input"/>
     </structure>
 </record>
 
-<record name = "asynInt32InInterrupt">
+<record name = "asynInt32Interrupt">
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32InterruptInputFactory</auxInfo>
+    <structure name = "input" type = "pdrvInt32Interrupt">
         <scalar name = "portName">asynInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
         <scalar name = "process" >true</scalar>
     </structure>
 </record>
 
-<record name = "asynInt32InAverage">
+<record name = "asynInt32Average">
     <scalar name = "value" type = "double"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
@@ -185,11 +177,9 @@
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">5.0</scalar>
     </structure>
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvInt32AverageInputFactory</auxInfo>
+    <structure name = "link" type = "pdrvInt32Average">
         <scalar name = "portName">asynInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "size" >20</scalar>
     </structure>
 </record>
 

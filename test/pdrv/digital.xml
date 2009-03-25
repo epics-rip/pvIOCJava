@@ -49,12 +49,13 @@
     <scalar name = "value" type = "int"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalOutputFactory</auxInfo>
+    <structure name = "outlink" type = "portDriverLink">
         <scalar name = "portName">syncDigitalPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "mask">15</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvUInt32DigitalOutput">
+            <scalar name = "mask">15</scalar>
+        </structure>    
     </structure>
     <structure name = "link" type = "generic">
         <structure name = "1" type = "caProcessLink">
@@ -84,12 +85,13 @@
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "digital">
-        <structure name = "input" type = "pdrvSupport">
-            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <structure name = "link" type = "portDriverLink">
             <scalar name = "portName">syncDigitalPort</scalar>
             <scalar name = "deviceName">0</scalar>
-            <scalar name = "mask">0x1</scalar>
             <scalar name = "timeout">.2</scalar>
+            <structure name = "input" type = "pdrvUInt32DigitalInput">
+                <scalar name = "mask">0x1</scalar>
+            </structure>
         </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
@@ -120,12 +122,13 @@
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "digital">
-        <structure name = "input" type = "pdrvSupport">
-            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <structure name = "link" type = "portDriverLink">
             <scalar name = "portName">syncDigitalPort</scalar>
             <scalar name = "deviceName">0</scalar>
-            <scalar name = "mask">0x2</scalar>
             <scalar name = "timeout">.2</scalar>
+            <structure name = "input" type = "pdrvUInt32DigitalInput">
+                <scalar name = "mask">0x2</scalar>
+            </structure>
         </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
@@ -156,12 +159,13 @@
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "digital">
-        <structure name = "input" type = "pdrvSupport">
-            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <structure name = "link" type = "portDriverLink">
             <scalar name = "portName">syncDigitalPort</scalar>
             <scalar name = "deviceName">0</scalar>
-            <scalar name = "mask">0x3</scalar>
             <scalar name = "timeout">.2</scalar>
+            <structure name = "input" type = "pdrvUInt32DigitalInput">
+                <scalar name = "mask">0x3</scalar>
+            </structure>
         </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
@@ -203,12 +207,13 @@
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "digital">
-        <structure name = "input" type = "pdrvSupport">
-            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <structure name = "link" type = "portDriverLink">
             <scalar name = "portName">syncDigitalPort</scalar>
             <scalar name = "deviceName">0</scalar>
-            <scalar name = "mask">0xc</scalar>
             <scalar name = "timeout">.2</scalar>
+            <structure name = "input" type = "pdrvUInt32DigitalInput">
+                <scalar name = "mask">0xc</scalar>
+            </structure>
         </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
@@ -251,12 +256,13 @@
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
     <structure name = "input" type = "digital">
-        <structure name = "input" type = "pdrvSupport">
-            <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
+        <structure name = "link" type = "portDriverLink">
             <scalar name = "portName">syncDigitalPort</scalar>
             <scalar name = "deviceName">0</scalar>
-            <scalar name = "mask">0xf</scalar>
             <scalar name = "timeout">.2</scalar>
+            <structure name = "input" type = "pdrvUInt32DigitalInput">
+                <scalar name = "mask">0xf</scalar>
+            </structure>
         </structure>
         <structure name = "states">
             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
