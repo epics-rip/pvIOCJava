@@ -4,6 +4,7 @@ org.epics.ioc.caLocal
 org.epics.ioc.caV3
 org.epics.ioc.pdrv
 org.epics.ioc.pdrv.interfaces
+org.epics.ioc.pdrv.serial
 org.epics.ioc.pdrv.testDriver
 org.epics.ioc.pdrv.vxi11
 org.epics.ioc.pdrv.vxi11.rpc
@@ -16,6 +17,10 @@ org.epics.ioc.support.calc.example
 org.epics.ioc.support.dbLink
 org.epics.ioc.support.device
 org.epics.ioc.support.pdrv
+org.epics.ioc.support.pdrv.array
+org.epics.ioc.support.pdrv.digital
+org.epics.ioc.support.pdrv.scalar
+org.epics.ioc.support.pdrv.serial
 org.epics.ioc.support.test
 org.epics.ioc.swtshell
 org.epics.ioc.util

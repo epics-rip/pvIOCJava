@@ -22,10 +22,6 @@ public interface Trace {
      */
     public static final int SUPPORT = 0x0002;
     /**
-     * An interpose interface MESSAGE.
-     */
-    public static final int INTERPOSE = 0x0004;
-    /**
      * A port or device driver message.
      */
     public static final int DRIVER = 0x0008;
@@ -55,7 +51,7 @@ public interface Trace {
     /**
      * Set the traceMask.
      * @param mask The mask.
-     * It must be some combination of ERROR|SUPPORT|INTERPOSE|DRIVER
+     * It must be some combination of ERROR|SUPPORT|DRIVER
      */
     void setMask(int mask);
     /**
@@ -109,20 +105,20 @@ public interface Trace {
     void optionChangeListenerRemove(User user);
     /**
      * Generate a trace message.
-     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
+     * @param reason One of ERROR|SUPPORT|DRIVER|FLOW.
      * @param message The message to print
      */
     void print(int reason,String message);
     /**
      * Generate a trace message.
-     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
+     * @param reason One of ERROR|SUPPORT|DRIVER|FLOW.
      * @param format A format.
      * @param args The data associated with the format.
      */
     void print(int reason,String format, Object... args);
     /**
      * Generate a trace message and also show data values.
-     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
+     * @param reason One of ERROR|SUPPORT|DRIVER|FLOW.
      * @param buffer The data array.
      * @param len The number of data items.
      * @param message The message to print.
@@ -130,7 +126,7 @@ public interface Trace {
     void printIO(int reason, byte[] buffer,long len,String message);
     /**
      * Generate a trace message and also show data values.
-     * @param reason One of ERROR|SUPPORT|INTERPOSE|DRIVER|FLOW.
+     * @param reason One of ERROR|SUPPORT|DRIVER|FLOW.
      * @param buffer The data array.
      * @param len The number of data items.
      * @param format A format.
