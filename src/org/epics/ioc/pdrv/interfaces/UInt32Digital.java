@@ -83,4 +83,9 @@ public interface UInt32Digital extends Interface{
      * than user.message() describes the problem.
      */
     Status removeInterruptUser(User user,UInt32DigitalInterruptListener uint32DigitalInterruptListener);
+    /**
+     * An interrupt has occurred.
+     * @param data
+     */
+    void interruptOccurred(int data);
 }
