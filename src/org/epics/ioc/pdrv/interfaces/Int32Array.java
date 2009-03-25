@@ -59,7 +59,7 @@ public interface Int32Array extends Interface{
      */
     Status removeInterruptUser(User user,Int32ArrayInterruptListener int32ArrayListener);
     /**
-     * An interrupt has occured.
+     * An interrupt has occurred.
      */
-    void interruptOccured();
+    void interruptOccurred();
 }
