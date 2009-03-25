@@ -62,8 +62,8 @@ public interface Int32 extends Interface {
      */
     Status removeInterruptUser(User user,Int32InterruptListener int32InterruptListener);
     /**
-     * An interrupt has occured.
+     * An interrupt has occurred.
      * @param data The data.
      */
-    void interruptOccured(int data);
+    void interruptOccurred(int data);
 }
