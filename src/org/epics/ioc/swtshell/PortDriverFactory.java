@@ -78,7 +78,6 @@ public class PortDriverFactory {
         private Button traceMaskDeviceButton;
         private Button traceFLOWDeviceButton;
         private Button traceDRIVERDeviceButton;
-        private Button traceINTERPOSEDeviceButton;
         private Button traceSUPPORTDeviceButton;
         private Button traceERRORDeviceButton;
         private Button traceIOMaskDeviceButton;
@@ -201,8 +200,6 @@ public class PortDriverFactory {
             traceFLOWDeviceButton.setText("FLOW");
             traceDRIVERDeviceButton = new Button(group,SWT.RADIO);
             traceDRIVERDeviceButton.setText("DRIVER");
-            traceINTERPOSEDeviceButton = new Button(group,SWT.RADIO);
-            traceINTERPOSEDeviceButton.setText("INTERPOSE");
             traceSUPPORTDeviceButton = new Button(group,SWT.RADIO);
             traceSUPPORTDeviceButton.setText("SUPPORT");
             traceERRORDeviceButton = new Button(group,SWT.RADIO);
@@ -528,7 +525,6 @@ public class PortDriverFactory {
             traceMaskDeviceButton.setEnabled(value);
             traceFLOWDeviceButton.setEnabled(value);
             traceDRIVERDeviceButton.setEnabled(value);
-            traceINTERPOSEDeviceButton.setEnabled(value);
             traceSUPPORTDeviceButton.setEnabled(value);
             traceERRORDeviceButton.setEnabled(value);
             traceIOMaskDeviceButton.setEnabled(value);
@@ -547,9 +543,6 @@ public class PortDriverFactory {
             value = ((mask&Trace.SUPPORT)==0) ? false : true;
             if(isPort) traceSUPPORTPortButton.setSelection(value);
             else traceSUPPORTDeviceButton.setSelection(value);
-            value = ((mask&Trace.INTERPOSE)==0) ? false : true;
-            if(isPort) traceINTERPOSEPortButton.setSelection(value);
-            else traceINTERPOSEDeviceButton.setSelection(value);
             value = ((mask&Trace.DRIVER)==0) ? false : true;
             if(isPort) traceDRIVERPortButton.setSelection(value);
             else traceDRIVERDeviceButton.setSelection(value);
@@ -573,8 +566,6 @@ public class PortDriverFactory {
             else mask |= (traceERRORDeviceButton.getSelection() ? Trace.ERROR : 0);
             if(isPort) mask |= (traceSUPPORTPortButton.getSelection() ? Trace.SUPPORT : 0);
             else mask |= (traceSUPPORTDeviceButton.getSelection() ? Trace.SUPPORT : 0);
-            if(isPort) mask |= (traceINTERPOSEPortButton.getSelection() ? Trace.INTERPOSE : 0);
-            else mask |= (traceINTERPOSEDeviceButton.getSelection() ? Trace.INTERPOSE : 0);
             if(isPort) mask |= (traceDRIVERPortButton.getSelection() ? Trace.DRIVER : 0);
             else mask |= (traceDRIVERDeviceButton.getSelection() ? Trace.DRIVER : 0);
             if(isPort) mask |= (traceFLOWPortButton.getSelection() ? Trace.FLOW : 0);
