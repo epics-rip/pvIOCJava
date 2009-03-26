@@ -13,7 +13,16 @@ import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Type;
 
 /**
  * @author mrk
