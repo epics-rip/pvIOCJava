@@ -23,7 +23,8 @@ import org.epics.ioc.pdrv.User;
 import org.epics.ioc.pdrv.interfaces.AbstractSerial;
 import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 /**
