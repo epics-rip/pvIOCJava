@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.pdrv;
 
-import org.epics.ioc.pdrv.interfaces.Interface;
 
 
 
