@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2009.03.04 </h1>
+2009.03.27 </h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -38,7 +38,7 @@ to every record and optionally to any field of a record. The support is
 configured via xml definitions. A structure defining support provides the
 name of a Java factory that creates support for a field.</p>
 
-<p>The pvData overview gives a simple example of a record instance is:</p>
+<p>The pvData overview gives a simple example of a record instance:</p>
 <pre>&lt;record name = "simple"&gt;
   &lt;scalar name = "value" type = "double" /&gt;
 &lt;/record&gt;</pre>
@@ -50,9 +50,9 @@ defined.</p>
   &lt;scalar name = "value" type = "double"/&gt;
 &lt;/record&gt;</pre>
 
-<p>When the ioc is started it looks for support. If it does not find support
-for a record itself, it assigns generic support to it. The definition for
-generic is:</p>
+<p>When the ioc adds a new record to the database it looks for support
+attached to the record. If it does not find any, it assigns generic support.
+The definition for generic is:</p>
 <pre>&lt;structure name = "genericFactory"&gt;
   &lt;scalar name = "supportFactory" type = "string"&gt;
      org.epics.ioc.support.basic.GenericFactory&lt;/scalar&gt;
@@ -78,15 +78,15 @@ generic is:</p>
 <div class="toc">
 <ul>
   <li><a href="#Preface">Preface</a></li>
-  <li><a href="#Part">Part I: JavaIOC - Brief Description</a>
+  <li><a href="#Part">Part I: JavaIOC - Brief Description</a> 
     <ul>
-      <li><a href="#Overview">Overview Of Part I</a>
+      <li><a href="#Overview">Overview Of Part I</a> 
         <ul>
           <li><a href="#Getting">Getting Started</a></li>
           <li><a href="#Status">Status and Remaining Tasks</a></li>
         </ul>
       </li>
-      <li><a href="#Package">Package Summary</a>
+      <li><a href="#Package">Package Summary</a> 
         <ul>
           <li><a href="#default">default - JavaIOC/src</a></li>
           <li><a href="#org.epics.">org.epics.ioc </a></li>
@@ -113,9 +113,9 @@ generic is:</p>
       <li><a href="#Database">Database Syntax For JavaIOC</a></li>
       <li><a href="#Channel">Channel Access</a></li>
       <li><a href="#Record">Record Processing</a></li>
-      <li><a href="#Database1">Database Examples</a>
+      <li><a href="#Database1">Database Examples</a> 
         <ul>
-          <li><a href="#Record1">Record Instance Examples</a>
+          <li><a href="#Record1">Record Instance Examples</a> 
             <ul>
               <li><a href="#doubleInpu">doubleInput</a></li>
               <li><a href="#doubleOutp">doubleOutput</a></li>
@@ -130,10 +130,10 @@ generic is:</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part1">Part II: JavaIOC Data Model</a>
+  <li><a href="#Part1">Part II: JavaIOC Data Model</a> 
     <ul>
       <li><a href="#Summary">Summary</a></li>
-      <li><a href="#JavaIOC3">JavaIOC Data Model</a>
+      <li><a href="#JavaIOC3">JavaIOC Data Model</a> 
         <ul>
           <li><a href="#Basic">Basic Concept</a></li>
         </ul>
@@ -141,22 +141,22 @@ generic is:</p>
       <li><a href="#Definition">Definitions for Standard Properties</a></li>
     </ul>
   </li>
-  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a>
+  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a> 
     <ul>
       <li><a href="#Overview1">Overview Of Part III</a></li>
-      <li><a href="#JavaIOC4">JavaIOC/xml/structures.xml</a>
+      <li><a href="#JavaIOC4">JavaIOC/xml/structures.xml</a> 
         <ul>
           <li><a href="#structures">structures.xml</a></li>
         </ul>
       </li>
-      <li><a href="#structure">xml/structure/alarm.xml</a>
+      <li><a href="#structure">xml/structure/alarm.xml</a> 
         <ul>
           <li><a href="#numeric">numeric alarms</a></li>
           <li><a href="#boolean">boolean alarms</a></li>
           <li><a href="#enumerated">enumerated alarms</a></li>
         </ul>
       </li>
-      <li><a href="#structure1">xml/structure/analog.xml</a>
+      <li><a href="#structure1">xml/structure/analog.xml</a> 
         <ul>
           <li><a href="#linearConv">linearConvert</a></li>
           <li><a href="#linearConv1">linearConvertInput</a></li>
@@ -165,7 +165,7 @@ generic is:</p>
         </ul>
       </li>
       <li><a href="#structure2">xml/structure/calc.xml</a></li>
-      <li><a href="#structure3">xml/structure/caLink.xml</a>
+      <li><a href="#structure3">xml/structure/caLink.xml</a> 
         <ul>
           <li><a href="#caProcessL">caProcessLink</a></li>
           <li><a href="#caMonitorL">caMonitorLink</a></li>
@@ -174,7 +174,7 @@ generic is:</p>
           <li><a href="#caOutputLi">caOutputLink</a></li>
         </ul>
       </li>
-      <li><a href="#structure4">xml/structure/dbLink.xml</a>
+      <li><a href="#structure4">xml/structure/dbLink.xml</a> 
         <ul>
           <li><a href="#dbProcessL">dbProcessLink</a></li>
           <li><a href="#caInputLin1">caInputLink</a></li>
@@ -184,7 +184,7 @@ generic is:</p>
       <li><a href="#structures1">xml/structures/commonFields.xml</a></li>
       <li><a href="#structures2">xml/structures/control.xml</a></li>
       <li><a href="#structure5">xml/structure/delay.xml</a></li>
-      <li><a href="#structure6">xml/structure/digital.xml</a>
+      <li><a href="#structure6">xml/structure/digital.xml</a> 
         <ul>
           <li><a href="#digitalSta">digitalState</a></li>
           <li><a href="#digital">digital</a></li>
@@ -192,7 +192,7 @@ generic is:</p>
       </li>
       <li><a href="#structure7">xml/structure/event.xml</a></li>
       <li><a href="#structure8">xml/structure/generic.xml</a></li>
-      <li><a href="#structure9">xml/structure/portDriver.xml</a>
+      <li><a href="#structure9">xml/structure/portDriver.xml</a> 
         <ul>
           <li><a href="#pdrvSuppor">pdrvSupport</a></li>
         </ul>
@@ -244,9 +244,8 @@ PVDATA and JAVAIOC must be defined. For example on linux define:</p>
 export JAVAIOC=${HOME}/workspace/javaIOC</pre>
 
 <p>Package <span style="font-family: courier;">org.epics.ioc</span> has a
-Java program, <span style="font-family: courier;">Start</span>, that:</p>
-
-<p>Start does the following:</p>
+Java program, <span style="font-family: courier;">Start</span>, that does the
+following:</p>
 <ul>
   <li>Reads Database files.</li>
   <li>Dumps the resulting structure and record definitions.</li>
@@ -316,8 +315,8 @@ structures and records.</p>
   <li>on swtshell window click introspectDatabase button and a new window
     appears 
     <ul>
-      <li>The menu bar at the top provides access to Database Definitions for
-        structure, create, and support. 
+      <li>The menu bar at the top provides access to the structure
+        definitons. 
         <ul>
           <li>select and look at the various definitions.</li>
         </ul>
@@ -353,8 +352,7 @@ record can link to an EPICS IOC.</p>
 as a soft IOC.</p>
 
 <p>The JavaIOC implements portDriver which provides the same functionality as
-the asynDriver module for EPICS V3. However no hardware drivers are
-implemented.</p>
+the asynDriver module for EPICS V3. </p>
 
 <p>The following JavaIOC components are desirable.</p>
 <ul>
@@ -368,8 +366,8 @@ implemented.</p>
     logMessage facility needs to be implemented. Once in place it will be
     easy to modify the existing code to use the message server.</li>
   <li>portDriver<br />
-    Hardware drivers and STREAMS. Support for VXI11 (network based GPIB like
-    devices and controllers) has been written but not tested.</li>
+    Hardware drivers. Some support is already available but lots needs to be
+    done.</li>
 </ul>
 
 <p>Additional components are also desirable:</p>
@@ -385,10 +383,6 @@ implemented.</p>
 </ul>
 
 <p>Thus lots of work has been done but lots of work remains.</p>
-
-<p>In the near furure the plan is to test the VXI11 portDriver, implement
-STREAMS support, and implement a driver for simple network based devices
-including serial support via terminal servers like MOXA. </p>
 <hr />
 
 <h3 style="text-align: center" id="Package">Package Summary</h3>
@@ -533,9 +527,8 @@ href="org/epics/ioc/pdrv/testDriver/package-summary.html">org.epics.ioc.pdrv.tes
 href="org/epics/ioc/pdrv/vxi11/package-summary.html">org.epics.ioc.pdrv.vxi11</a>
 </h4>
 
-<p>THIS HAS NOT BEEN TESTED</p>
-
-<p>This directory has a portDriver that implements the VXI11 protocal.</p>
+<p>This directory has a portDriver that implements the VXI11 protocal. Some
+testing has been done but more is required befoe it is robust.</p>
 <hr />
 <hr />
 
@@ -635,7 +628,7 @@ record can optionally have support.</p>
 <p></p>
 <pre>    public interface Support extends Requester {
         SupportState getSupportState();
-        DBField getDBField();
+        PVField getPVField();
         void initialize();
         void start();
         void stop();
@@ -646,11 +639,11 @@ record can optionally have support.</p>
 
 <p>where</p>
 <dl>
-  <dt>Requestor, getSupportState, getDBField</dt>
+  <dt>Requestor, getSupportState, getPVField</dt>
     <dd>See package org.epics.ioc.support for details.</dd>
   <dt>initialize</dt>
     <dd>Initialization related to the record itself. Support must not connect
-      to other records or to hardware.</dd>
+      to another record or to hardware.</dd>
   <dt>start</dt>
     <dd>Support can connect to other record or hardware.</dd>
   <dt>stop</dt>
@@ -688,18 +681,14 @@ structure field embeded within a record.</p>
 
 <p>Support code should not be aware of specific structure types. A support
 modules works with some set of fields that it locates at initialization.
-While processing it uses the PV and DB interfaces to access the fields. Thus
-support is generic. If a structure has the fields required by the support
-then the support can be used to help support that structure.</p>
+While processing it uses the PV interfaces to access the fields. Thus support
+is generic. If a structure has the fields required by the support then the
+support can be used to help support that structure.</p>
 
 <p>An extreme example is generic support. This can used for a record itself
-or for any field that is a stucture or an array with elementType of structure
-or array. All that it does is look at all the fields in the structure or
-array that is passed to it's initalizer. For each field that has support it
-calls the support. The supports are called in the order the fields are
-defined in the structure or array. It waits for each support to finish before
-the next support is called. If any support fails, it does not call any
-additional support. </p>
+or for any field that is a stucture. All that it does is look at all the
+fields in the structure that it supports. For each field that has support it
+calls the support.</p>
 <hr />
 
 <h3 style="text-align: center" id="Database1">Database Examples</h3>
@@ -738,7 +727,7 @@ the following support</p>
     rawValue.</dd>
 </dl>
 <ul>
-  <li>CALink</li>
+  <li>caLink</li>
 </ul>
 <dl>
     <dd>JavaIOC implements channel access links between records</dd>
@@ -755,7 +744,7 @@ record because input is initialized to a Channel Access inputLink.</p>
     &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
     &lt;scalar name = "value" type = "double" /&gt;
     &lt;structure name = "display" type = "display" /&gt;
-    &lt;structure name = "input" type = "inputSupport"&gt;
+    &lt;structure name = "input" type = "caInputLink"&gt;
         &lt;scalar name = "pvname"&gt;counter&lt;/scalar&gt;
         &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
         &lt;scalar name = "propertyNames"&gt;alarm&lt;/scalar&gt;
@@ -817,7 +806,7 @@ support.</p>
             &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
             &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
         &lt;/structure&gt;
-        &lt;structure name = "output" type = "outputSupport"&gt;
+        &lt;structure name = "output" type = "caOutPutLink"&gt;
             &lt;scalar name = "pvname"&gt;aoRaw&lt;/scalar&gt;
             &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
         &lt;/structure&gt;
