@@ -788,13 +788,26 @@ public class ServerFactory {
             */
 			//return CA
 			
+			PVField targetField = channelField.getPVField();
+			final String valueFieldName = value.getField().getFieldName(); 
+			if (valueFieldName != null &&
+				value.getField().getType() != Type.structure &&
+				targetField.getField().getType() == Type.structure)
+			{
+				// special case: only field is being sent and target is structure, find target field
+				targetField = ((PVStructure)targetField).getSubField(valueFieldName);
+				if (targetField == null)
+					// TODO find better status
+					return CAStatus.BADTYPE;
+			}
+			
             // TODO temp (no processing is done)
             final PVRecord record = channel.getPVRecord();
             record.lock();
             try
             {
     			// TODO test only...
-    			copyValue(value, channelField.getPVField(), offset);
+    			copyValue(value, targetField, offset);
             } finally {
             	record.unlock();
             }
