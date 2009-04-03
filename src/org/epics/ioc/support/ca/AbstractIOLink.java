@@ -120,8 +120,6 @@ abstract class AbstractIOLink extends AbstractLink  {
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
     public void start() {
-        super.start();
-        if(!super.checkSupportState(SupportState.ready,null)) return;
         if(propertyNamesPV!=null) {
             String value = propertyNamesPV.get();
             if(value!=null) {
@@ -187,6 +185,8 @@ abstract class AbstractIOLink extends AbstractLink  {
             }
             break;
         }
+        super.start();
+        if(!super.checkSupportState(SupportState.ready,null)) return;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#stop()
