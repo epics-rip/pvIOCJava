@@ -20,7 +20,6 @@ import org.epics.ca.CAException;
 import org.epics.ca.CAStatus;
 import org.epics.ca.CAStatusException;
 import org.epics.ca.PropertyListType;
-import org.epics.ca.core.impl.client.requests.MonitorRequest;
 import org.epics.ca.core.impl.server.ServerContextImpl;
 import org.epics.ca.core.impl.server.plugins.DefaultBeaconServerDataProvider;
 import org.epics.ca.server.ProcessVariable;
@@ -167,14 +166,13 @@ public class ServerFactory {
     private static class CAServerImpl implements Server {
 
         /* (non-Javadoc)
-         * @see gov.aps.jca.cas.Server#processVariableAttach(java.lang.String, gov.aps.jca.cas.ProcessVariableEventCallback, gov.aps.jca.cas.ProcessVariableAttachCallback)
+         * @see gov.aps.jca.cas.Server#processVariableAttach(java.lang.String, gov.aps.jca.cas.ProcessVariableAttachCallback)
          */
         public ProcessVariable processVariableAttach(String aliasName,
-                ProcessVariableValueCallback eventCallback,
                 ProcessVariableAttachCallback asyncCompletionCallback)
                 throws CAStatusException, IllegalArgumentException,
                 IllegalStateException {
-            return new ChannelProcessVariable(aliasName, eventCallback);
+            return new ChannelProcessVariable(aliasName);
         }
 
         /* (non-Javadoc)
@@ -200,23 +198,21 @@ public class ServerFactory {
 
         private final Channel channel;
         private ChannelField channelField;
-        private MonitorRequest monitorRequest = null;;
         
         /**
          * Channel PV constructor.
          * @param pvName channelName.
          * @param eventCallback event callback, can be <code>null</code>.
          */
-        public ChannelProcessVariable(String pvName, ProcessVariableValueCallback eventCallback)
+        public ChannelProcessVariable(String pvName)
             throws CAStatusException, IllegalArgumentException, IllegalStateException
         {
-            super(pvName, eventCallback);
+            super(pvName);
 
             channel = channelAccess.createChannel(pvName, DESIRED_PROPERTIES, CHANNEL_PROVIDER_NAME, this);
             if (channel == null)
                 throw new CAStatusException(CAStatus.DEFUNCT);
             channel.connect();
-            this.eventCallback = eventCallback;
             
             initialize();
         }
@@ -422,25 +418,12 @@ System.out.println("unlisten:" + pvRecord.getFullName());
     		
     	};
 
+    	
 		// TODO on change/delta change/percent change/abosulte change/
-		public void monitor(PropertyListType propertyListType, String[] propertyList) throws CAException {
+		@Override
+		public void monitor(ProcessVariableValueCallback callback, PropertyListType propertyListType, String[] propertyList) {
 
-// ioid, queueSize, monitorTrigger, monitorTriggerData, propertyListType, properties, offset, count);
-
-			ProcessVariableValueCallback pvvc = new ProcessVariableValueCallback()
-			{
-				public boolean postData(PVField data)
-				{
-					System.out.println("new data: " + data);
-					return true;
-				}
-				
-				public void canceled()
-				{
-					System.out.println("canceled");
-				}
-			};
-			PVMonitorImpl listener = new PVMonitorImpl(channel.getPVRecord(), pvvc);
+			PVMonitorImpl listener = new PVMonitorImpl(channel.getPVRecord(), callback);
         	channel.getPVRecord().registerListener(listener);
 
         	// TODO need to unregister somewhere
@@ -637,32 +620,6 @@ System.out.println("unlisten:" + pvRecord.getFullName());
 					throw new CAStatusException(CAStatus.NOSUPPORT, "type not supported");
 			}
 		}
-
-		/* (non-Javadoc)
-         * @see gov.aps.jca.cas.ProcessVariable#interestDelete()
-         */
-        @Override
-        public void interestDelete() {
-            super.interestDelete();
-            // stop monitoring
-//            monitorRequest.stop();
-        }
-
-        /* (non-Javadoc)
-         * @see gov.aps.jca.cas.ProcessVariable#interestRegister()
-         */
-        @Override
-        public void interestRegister() {
-        	/*
-            if(monitorRequest==null) {
-                monitorRequest = new MonitorRequest();
-                monitorRequest.lookForChange();
-            }
-            super.interestRegister();
-            // start monitoring
-            monitorRequest.start();
-            */
-        }
 
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
