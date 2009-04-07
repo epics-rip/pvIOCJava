@@ -419,71 +419,85 @@ System.out.println("unlisten:" + pvRecord.getFullName());
     	};
 
     	
+		/* (non-Javadoc)
+		 * @see org.epics.ca.server.ProcessVariable#createMonitor(org.epics.ca.server.ProcessVariableValueCallback, org.epics.ca.PropertyListType, java.lang.String[])
+		 */
 		// TODO on change/delta change/percent change/abosulte change/
 		@Override
-		public void monitor(ProcessVariableValueCallback callback, PropertyListType propertyListType, String[] propertyList) {
+		public Object createMonitor(ProcessVariableValueCallback callback, PropertyListType propertyListType, String[] propertyList) {
 
-			PVMonitorImpl listener = new PVMonitorImpl(channel.getPVRecord(), callback);
-        	channel.getPVRecord().registerListener(listener);
-
-        	// TODO need to unregister somewhere
-        	//channel.getPVRecord().unregisterListener(listener);
-        	
-        	
-        	
         	final PVField thisPVField = channelField.getPVField();
-			final PVRecord thisRecord = channel.getPVRecord();
+			final PVRecord record = channel.getPVRecord();
 			
-			final PVField data;
-			// "this" field
-			if (propertyListType == PropertyListType.ALL ||
-				(propertyListType == PropertyListType.VALUE && channel.getPrimaryFieldName().equals(channel.getFieldName())))
-			{
-				// get all
-				data = thisPVField;
-	        	channel.getPVRecord().addListener(listener);
-			}
-			// structure
-			else if (channel.getFieldName() == null)
-			{
-				DynamicSubsetOfPVStructure dynamicStructure = new DynamicSubsetOfPVStructure(thisRecord);
-				// subfields
-				for (String propertyName : propertyList) {
-					PVField pvField = thisRecord.getSubField(propertyName);
-					if (pvField != null) {
-						dynamicStructure.appendPVField(pvField);
-			        	channel.getPVRecord().addListener(listener);
-					}
+            record.lock();
+            try
+            {
+				final PVMonitorImpl listener = new PVMonitorImpl(record, callback);
+	        	record.registerListener(listener);
+	
+				final PVField data;
+				// "this" field
+				if (propertyListType == PropertyListType.ALL ||
+					(propertyListType == PropertyListType.VALUE && channel.getPrimaryFieldName().equals(channel.getFieldName())))
+				{
+					// get all
+					data = thisPVField;
+					record.addListener(listener);
 				}
-				data = dynamicStructure;
-			}
-			// record.value properties
-			else
-			{
-				DynamicSubsetOfPVStructure dynamicStructure = new DynamicSubsetOfPVStructure(thisRecord);
-				// properties
-				for (String propertyName : propertyList) {
-					PVField pvField = pvProperty.findProperty(thisPVField, propertyName);
-					if (pvField != null) {
-						dynamicStructure.appendPVField(pvField);
-			        	channel.getPVRecord().addListener(listener);
+				// structure
+				else if (channel.getFieldName() == null)
+				{
+					DynamicSubsetOfPVStructure dynamicStructure = new DynamicSubsetOfPVStructure(record);
+					// subfields
+					for (String propertyName : propertyList) {
+						PVField pvField = record.getSubField(propertyName);
+						if (pvField != null) {
+							dynamicStructure.appendPVField(pvField);
+							record.addListener(listener);
+						}
 					}
+					data = dynamicStructure;
 				}
-				data = dynamicStructure;
-			}
-			
-            // TODO temp (no processing is done)
+				// record.value properties
+				else
+				{
+					DynamicSubsetOfPVStructure dynamicStructure = new DynamicSubsetOfPVStructure(record);
+					// properties
+					for (String propertyName : propertyList) {
+						PVField pvField = pvProperty.findProperty(thisPVField, propertyName);
+						if (pvField != null) {
+							dynamicStructure.appendPVField(pvField);
+							record.addListener(listener);
+						}
+					}
+					data = dynamicStructure;
+				}
+
+				// TODO initial value
+            	// TODO temp (no processing is done)
+            	// this method never blocks...
+				callback.postData(data);
+
+				return listener;
+            } finally {
+            	record.unlock();
+            }
+		}
+
+
+		/* (non-Javadoc)
+		 * @see org.epics.ca.server.ProcessVariable#destroyMonitor(java.lang.Object)
+		 */
+		@Override
+		public void destroyMonitor(Object id) {
             final PVRecord record = channel.getPVRecord();
             record.lock();
             try
             {
-            	// this method never blocks...
-            	//asyncReadCallback.processVariableReadCompleted(data, CAStatus.NORMAL);
+            	record.unregisterListener((PVListener)id);
             } finally {
             	record.unlock();
             }
-            
-            // TODO start listener here... send initial data w/ response (so that PVField can be fully created)
 		}
 
 		private void copyValue(PVField from, PVField to, int offset) throws CAException
