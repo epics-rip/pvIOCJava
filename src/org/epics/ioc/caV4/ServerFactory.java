@@ -46,40 +46,14 @@ import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.property.PVProperty;
 import org.epics.pvData.property.PVPropertyFactory;
-import org.epics.pvData.pv.Array;
-import org.epics.pvData.pv.BooleanArrayData;
-import org.epics.pvData.pv.ByteArrayData;
-import org.epics.pvData.pv.DoubleArrayData;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
-import org.epics.pvData.pv.FloatArrayData;
-import org.epics.pvData.pv.IntArrayData;
-import org.epics.pvData.pv.LongArrayData;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVBoolean;
-import org.epics.pvData.pv.PVBooleanArray;
-import org.epics.pvData.pv.PVByte;
-import org.epics.pvData.pv.PVByteArray;
 import org.epics.pvData.pv.PVDataCreate;
-import org.epics.pvData.pv.PVDouble;
-import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVFloat;
-import org.epics.pvData.pv.PVFloatArray;
-import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVIntArray;
 import org.epics.pvData.pv.PVListener;
-import org.epics.pvData.pv.PVLong;
-import org.epics.pvData.pv.PVLongArray;
 import org.epics.pvData.pv.PVRecord;
-import org.epics.pvData.pv.PVShort;
-import org.epics.pvData.pv.PVShortArray;
-import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Scalar;
-import org.epics.pvData.pv.ShortArrayData;
-import org.epics.pvData.pv.StringArrayData;
 import org.epics.pvData.pv.Type;
 
 public class ServerFactory {
@@ -339,7 +313,7 @@ public class ServerFactory {
                 try
                 {
 	                // no convert...
-	    			copyValue(value, targetField, offset);
+	    			PVDataUtils.copyValue(value, targetField, offset, -1);
                 } finally {
         			if (groupPut) record.endGroupPut();
                 }
@@ -354,13 +328,22 @@ public class ServerFactory {
     	// TODO for testing only
     	static class PVMonitorImpl implements PVListener
     	{
-    		boolean group = false;
-    		DynamicSubsetOfPVStructure newData;
-    		ProcessVariableValueCallback callback;
+    		private boolean group = false;
+    		private DynamicSubsetOfPVStructure newData;
+    		private final PVStructure supersetStructure;
     		
-    		public PVMonitorImpl(PVStructure supersetStructure, ProcessVariableValueCallback callback)
+    		private final ProcessVariableValueCallback callback;
+    		private final boolean copyData;
+    		private final int offset;
+    		private final int count;
+    		
+    		public PVMonitorImpl(PVStructure supersetStructure, ProcessVariableValueCallback callback, boolean copyData, int offset, int count)
     		{
+    			this.supersetStructure = supersetStructure;
     			this.callback = callback;
+    			this.copyData = copyData;
+    			this.offset = offset;
+    			this.count = count;
     			newData = new DynamicSubsetOfPVStructure(supersetStructure);
     		}
     		
@@ -369,8 +352,12 @@ public class ServerFactory {
 			 */
 			private final void postData() {
 				final boolean consumed = callback.postData(newData);
-				if (consumed)
-					newData.clear();
+				if (consumed) {
+					if (copyData)
+						newData = new DynamicSubsetOfPVStructure(supersetStructure);	// TODO recycle !!!
+					else
+						newData.clear();
+				}
 			}
 
 			/* (non-Javadoc)
@@ -395,7 +382,20 @@ System.out.println("endGroupPut: " + pvRecord.getFullName());
 			 */
 			public void dataPut(PVField pvField) {
 System.out.println("dataPut for " + pvField.getFullName() + ":" + pvField);
-				newData.appendPVField(pvField);
+				if (copyData) {
+					// we create copy here... where it is all nicely locked :)
+					final PVField pvFieldCopy = PVDataFactory.getPVDataCreate().createPVField(pvField.getParent(), pvField.getField());
+					try {
+						PVDataUtils.copyValue(pvField, pvFieldCopy, offset, count);
+						newData.appendPVField(pvFieldCopy);
+					} catch (CAException e) {
+						// TODO
+						e.printStackTrace();
+					}
+				}
+				else
+					newData.appendPVField(pvField);
+
 				if (!group)
 					postData();
 			}
@@ -420,11 +420,12 @@ System.out.println("unlisten:" + pvRecord.getFullName());
 
     	
 		/* (non-Javadoc)
-		 * @see org.epics.ca.server.ProcessVariable#createMonitor(org.epics.ca.server.ProcessVariableValueCallback, org.epics.ca.PropertyListType, java.lang.String[])
+		 * @see org.epics.ca.server.ProcessVariable#createMonitor(org.epics.ca.server.ProcessVariableValueCallback, boolean, int, int, org.epics.ca.PropertyListType, java.lang.String[])
 		 */
 		// TODO on change/delta change/percent change/abosulte change/
 		@Override
-		public Object createMonitor(ProcessVariableValueCallback callback, PropertyListType propertyListType, String[] propertyList) {
+		public Object createMonitor(ProcessVariableValueCallback callback, boolean copyData, int offset, int count,
+				PropertyListType propertyListType, String[] propertyList) {
 
         	final PVField thisPVField = channelField.getPVField();
 			final PVRecord record = channel.getPVRecord();
@@ -432,7 +433,7 @@ System.out.println("unlisten:" + pvRecord.getFullName());
             record.lock();
             try
             {
-				final PVMonitorImpl listener = new PVMonitorImpl(record, callback);
+				final PVMonitorImpl listener = new PVMonitorImpl(record, callback, copyData, offset, count);
 	        	record.registerListener(listener);
 	
 				final PVField data;
@@ -498,141 +499,6 @@ System.out.println("unlisten:" + pvRecord.getFullName());
             } finally {
             	record.unlock();
             }
-		}
-
-		private void copyValue(PVField from, PVField to, int offset) throws CAException
-		{
-			final Field field = to.getField();
-			if (!field.equals(from.getField()))
-				// TODO better exception
-				throw new CAStatusException(CAStatus.BADTYPE, "data not compatible");
-			
-			switch (field.getType())
-			{
-				case scalar:
-					switch (((Scalar)field).getScalarType())
-					{
-					case pvBoolean:
-						((PVBoolean)to).put(((PVBoolean)from).get());
-						return;
-					case pvByte:
-						((PVByte)to).put(((PVByte)from).get());
-						return;
-					case pvDouble:
-						((PVDouble)to).put(((PVDouble)from).get());
-						return;
-					case pvFloat:
-						((PVFloat)to).put(((PVFloat)from).get());
-						return;
-					case pvInt:
-						((PVInt)to).put(((PVInt)from).get());
-						return;
-					case pvLong:
-						((PVLong)to).put(((PVLong)from).get());
-						return;
-					case pvShort:
-						((PVShort)to).put(((PVShort)from).get());
-						return;
-					case pvString:
-						((PVString)to).put(((PVString)from).get());
-						return;
-					default:
-						throw new CAStatusException(CAStatus.NOSUPPORT, "type not supported");
-					}
-				case scalarArray:
-					switch (((Array)field).getElementType())
-					{
-					case pvBoolean:
-						{
-							BooleanArrayData data = new BooleanArrayData();
-							PVBooleanArray fromArray = (PVBooleanArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVBooleanArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					case pvByte:
-						{
-							ByteArrayData data = new ByteArrayData();
-							PVByteArray fromArray = (PVByteArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVByteArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					case pvDouble:
-						{
-							DoubleArrayData data = new DoubleArrayData();
-							PVDoubleArray fromArray = (PVDoubleArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVDoubleArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					case pvFloat:
-						{
-							FloatArrayData data = new FloatArrayData();
-							PVFloatArray fromArray = (PVFloatArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVFloatArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					case pvInt:
-						{
-							IntArrayData data = new IntArrayData();
-							PVIntArray fromArray = (PVIntArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVIntArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					case pvLong:
-						{
-							LongArrayData data = new LongArrayData();
-							PVLongArray fromArray = (PVLongArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVLongArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					case pvShort:
-						{
-							ShortArrayData data = new ShortArrayData();
-							PVShortArray fromArray = (PVShortArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVShortArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					case pvString:
-						{
-							StringArrayData data = new StringArrayData();
-							PVStringArray fromArray = (PVStringArray)from;
-							final int len = fromArray.getLength();
-							fromArray.get(0, len, data);
-							((PVStringArray)to).put(offset, len, data.data, 0);
-							return;
-						}
-					default:
-						throw new CAStatusException(CAStatus.NOSUPPORT, "type not supported");
-					}
-
-				case structure:
-					PVStructure fromStructure = (PVStructure)from;
-					PVStructure toStructure = (PVStructure)to;
-					for (PVField fromField : fromStructure.getPVFields())
-					{
-						PVField toField = toStructure.getSubField(fromField.getField().getFieldName());
-						if (toField != null)
-							copyValue(fromField, toField, offset);
-						// TODO really? else do not complain here..
-					}
-					break;
-						
-				default:
-					throw new CAStatusException(CAStatus.NOSUPPORT, "type not supported");
-			}
 		}
 
         /* (non-Javadoc)
