@@ -35,17 +35,16 @@ import org.epics.ioc.ca.ChannelAccess;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelListener;
+import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
-import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.property.PVProperty;
 import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
@@ -53,7 +52,9 @@ import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVListener;
 import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Scalar;
 import org.epics.pvData.pv.Type;
 
 public class ServerFactory {
@@ -65,8 +66,8 @@ public class ServerFactory {
     }
     
     private static String CHANNEL_PROVIDER_NAME = "local";
-    
-    private static Executor executor = ExecutorFactory.create("caV4Monitor", ThreadPriority.low);
+
+    private static final Convert convert = ConvertFactory.getConvert();
     private static final ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     
@@ -325,11 +326,97 @@ public class ServerFactory {
             return CAStatus.NORMAL;
 		}
 		
-    	// TODO for testing only
+		
+		interface MonitorCondition {
+			boolean conditionCheck(PVField field);
+		}
+		
+		static final class OnPutCondition implements MonitorCondition {
+			public boolean conditionCheck(PVField field) {
+				return true;
+			}
+		}
+		
+		static final class OnChangeCondition implements MonitorCondition {
+			private final PVField monitoredField;
+			
+			private PVField lastValue;
+			
+			public OnChangeCondition(PVField monitoredField) {
+				this.monitoredField = monitoredField;
+				lastValue = pvDataFactory.createPVField(monitoredField.getParent(), monitoredField.getField());
+				try {
+					PVDataUtils.copyValue(monitoredField, lastValue, 0, -1);
+				} catch (CAException e) {
+					throw new RuntimeException("unexpected exception occured", e);
+				}
+			}
+
+			public boolean conditionCheck(PVField field) {
+				if (field != monitoredField || field.equals(lastValue))
+					return false;
+
+				try {
+					PVDataUtils.copyValue(field, lastValue, 0, -1);
+				} catch (CAException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return true;
+			}
+		}
+
+		static final class OnDiffChangeCondition implements MonitorCondition {
+			private final PVField monitoredField;
+			private final double deadband;
+			private final boolean absolute;
+			
+			private double lastValue;
+			
+			public OnDiffChangeCondition(PVField monitoredField, PVField data, boolean relative) {
+				this.monitoredField = monitoredField;
+				if (!(monitoredField instanceof PVScalar) || !((Scalar)monitoredField.getField()).getScalarType().isNumeric())
+					throw new IllegalArgumentException("monitored field is not a numeric primitive");
+				if (!(data instanceof PVScalar))
+					throw new IllegalArgumentException("monitored field is not a numeric primitive");
+				
+				this.deadband = convert.toDouble((PVScalar)data);
+				this.absolute = !relative;
+				lastValue = convert.toDouble((PVScalar)monitoredField);
+			}
+
+			public boolean conditionCheck(PVField field) {
+				if (field != monitoredField)
+					return false;
+				
+				final double value = convert.toDouble((PVScalar)field);
+				final double diff = Math.abs(lastValue - value); 
+				if (absolute)
+				{
+					if (diff < deadband)
+						return false;
+
+					lastValue = value;
+					return true;
+				}
+				
+				// relative
+                if(lastValue != 0.0) {
+                    if ((diff/Math.abs(lastValue)) < deadband)
+                    	return false;
+                }
+				
+				lastValue = value;
+				return true;
+			}
+		}
+
     	static class PVMonitorImpl implements PVListener
     	{
     		private boolean group = false;
     		private DynamicSubsetOfPVStructure newData;
+    		private final MonitorCondition condition;
+    		private boolean conditionMet = false;
     		private final PVStructure supersetStructure;
     		
     		private final ProcessVariableValueCallback callback;
@@ -337,13 +424,17 @@ public class ServerFactory {
     		private final int offset;
     		private final int count;
     		
-    		public PVMonitorImpl(PVStructure supersetStructure, ProcessVariableValueCallback callback, boolean copyData, int offset, int count)
+    		public PVMonitorImpl(PVStructure supersetStructure, ProcessVariableValueCallback callback, 
+    				boolean copyData, int offset, int count,
+    				MonitorCondition condition)
     		{
     			this.supersetStructure = supersetStructure;
     			this.callback = callback;
     			this.copyData = copyData;
     			this.offset = offset;
     			this.count = count;
+    			this.condition = condition;
+    			
     			newData = new DynamicSubsetOfPVStructure(supersetStructure);
     		}
     		
@@ -351,12 +442,17 @@ public class ServerFactory {
 			 * Post data via callback.
 			 */
 			private final void postData() {
+				// no condition met, skip this change
+				if (!conditionMet)
+					return;
+				
 				final boolean consumed = callback.postData(newData);
 				if (consumed) {
 					if (copyData)
-						newData = new DynamicSubsetOfPVStructure(supersetStructure);	// TODO recycle !!!
+						newData = new DynamicSubsetOfPVStructure(supersetStructure);
 					else
 						newData.clear();
+					conditionMet = false;
 				}
 			}
 
@@ -384,7 +480,7 @@ System.out.println("endGroupPut: " + pvRecord.getFullName());
 System.out.println("dataPut for " + pvField.getFullName() + ":" + pvField);
 				if (copyData) {
 					// we create copy here... where it is all nicely locked :)
-					final PVField pvFieldCopy = PVDataFactory.getPVDataCreate().createPVField(pvField.getParent(), pvField.getField());
+					final PVField pvFieldCopy = pvDataFactory.createPVField(pvField.getParent(), pvField.getField());
 					try {
 						PVDataUtils.copyValue(pvField, pvFieldCopy, offset, count);
 						newData.appendPVField(pvFieldCopy);
@@ -396,6 +492,9 @@ System.out.println("dataPut for " + pvField.getFullName() + ":" + pvField);
 				else
 					newData.appendPVField(pvField);
 
+				// check condition
+				conditionMet |= condition.conditionCheck(pvField);	// put case
+				
 				if (!group)
 					postData();
 			}
@@ -433,7 +532,36 @@ System.out.println("unlisten:" + pvRecord.getFullName());
             record.lock();
             try
             {
-				final PVMonitorImpl listener = new PVMonitorImpl(record, callback, copyData, offset, count);
+    			/*
+                valueChannelField = channel.createChannelField(channelFieldName);
+                if(valueChannelField==null) {
+                    pvStructure.message(
+                            "channelFieldName " + channelFieldName
+                            + " is not in channel " + channel.getChannelName(),
+                            MessageType.error);
+                    return;
+                }
+                if(!checkCompatibility(valueChannelField.getField()))return;
+                channelFieldGroup.addChannelField(valueChannelField);
+                switch(monitorType) {
+                case put:
+                    cdMonitor.lookForPut(valueChannelField, true); break;
+                case change:
+                    cdMonitor.lookForChange(valueChannelField, true); break;
+                case absoluteChange:
+                    cdMonitor.lookForAbsoluteChange(valueChannelField, deadband); break;
+                case percentageChange:
+                    cdMonitor.lookForPercentageChange(valueChannelField, deadband); break;
+                }
+        			 */
+            	// TODO for testing
+            	MonitorCondition condition = new OnPutCondition();
+            	/*
+            	PVDouble diff = (PVDouble)pvDataFactory.createPVScalar(null, "diff", ScalarType.pvDouble);
+            	diff.put(0.5);
+            	MonitorCondition condition = new OnDiffChangeCondition(thisPVField, diff, true);
+            	*/
+            	final PVMonitorImpl listener = new PVMonitorImpl(record, callback, copyData, offset, count, condition);
 	        	record.registerListener(listener);
 	
 				final PVField data;
@@ -474,7 +602,6 @@ System.out.println("unlisten:" + pvRecord.getFullName());
 					data = dynamicStructure;
 				}
 
-				// TODO initial value
             	// TODO temp (no processing is done)
             	// this method never blocks...
 				callback.postData(data);
