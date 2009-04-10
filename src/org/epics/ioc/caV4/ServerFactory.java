@@ -20,6 +20,7 @@ import org.epics.ca.CAException;
 import org.epics.ca.CAStatus;
 import org.epics.ca.CAStatusException;
 import org.epics.ca.PropertyListType;
+import org.epics.ca.client.Channel.MonitorTrigger;
 import org.epics.ca.core.impl.server.ServerContextImpl;
 import org.epics.ca.core.impl.server.plugins.DefaultBeaconServerDataProvider;
 import org.epics.ca.server.ProcessVariable;
@@ -517,50 +518,69 @@ System.out.println("unlisten:" + pvRecord.getFullName());
     		
     	};
 
+    	private static final MonitorCondition onPutCondition = new OnPutCondition();
+
+    	private PVField getMonitoredField(PropertyListType propertyListType, String[] propertyList)
+    		throws CAException
+    	{
+    		if (propertyListType == PropertyListType.ALL)
+    			return channelField.getPVField();
+    		
+    		// take first field as interest
+    		final String fieldName = propertyList[0];
+    		PVField pvField;
+			if (channel.getFieldName() == null)
+				pvField = channel.getPVRecord().getSubField(fieldName);
+			else
+				pvField = pvProperty.findProperty(channelField.getPVField(), fieldName);
+ 		
+    		if (pvField == null)
+    			// TODO better exception
+    			throw new CAStatusException(CAStatus.DEFUNCT);
+    		
+    		return pvField;
+    	}
     	
 		/* (non-Javadoc)
-		 * @see org.epics.ca.server.ProcessVariable#createMonitor(org.epics.ca.server.ProcessVariableValueCallback, boolean, int, int, org.epics.ca.PropertyListType, java.lang.String[])
+		 * @see org.epics.ca.server.ProcessVariable#createMonitor(org.epics.ca.server.ProcessVariableValueCallback, boolean, int, int, org.epics.ca.client.Channel.MonitorTrigger, org.epics.pvData.pv.PVField, org.epics.ca.PropertyListType, java.lang.String[])
 		 */
-		// TODO on change/delta change/percent change/abosulte change/
 		@Override
 		public Object createMonitor(ProcessVariableValueCallback callback, boolean copyData, int offset, int count,
-				PropertyListType propertyListType, String[] propertyList) {
+				MonitorTrigger monitorTrigger, PVField monitorTriggerData,
+				PropertyListType propertyListType, String[] propertyList)
+			throws CAException {
 
         	final PVField thisPVField = channelField.getPVField();
 			final PVRecord record = channel.getPVRecord();
+	
+			/*
+			// whole record
+			if (propertyListType == PropertyListType.ALL && channel.getFieldName() == null)
+				monitorTrigger = monitorTrigger.ON_PUT;
+			*/
 			
             record.lock();
             try
             {
-    			/*
-                valueChannelField = channel.createChannelField(channelFieldName);
-                if(valueChannelField==null) {
-                    pvStructure.message(
-                            "channelFieldName " + channelFieldName
-                            + " is not in channel " + channel.getChannelName(),
-                            MessageType.error);
-                    return;
-                }
-                if(!checkCompatibility(valueChannelField.getField()))return;
-                channelFieldGroup.addChannelField(valueChannelField);
-                switch(monitorType) {
-                case put:
-                    cdMonitor.lookForPut(valueChannelField, true); break;
-                case change:
-                    cdMonitor.lookForChange(valueChannelField, true); break;
-                case absoluteChange:
-                    cdMonitor.lookForAbsoluteChange(valueChannelField, deadband); break;
-                case percentageChange:
-                    cdMonitor.lookForPercentageChange(valueChannelField, deadband); break;
-                }
-        			 */
-            	// TODO for testing
-            	MonitorCondition condition = new OnPutCondition();
-            	/*
-            	PVDouble diff = (PVDouble)pvDataFactory.createPVScalar(null, "diff", ScalarType.pvDouble);
-            	diff.put(0.5);
-            	MonitorCondition condition = new OnDiffChangeCondition(thisPVField, diff, true);
-            	*/
+            	final MonitorCondition condition;
+            	switch (monitorTrigger)
+            	{
+	            	case ON_PUT:
+	            		condition = onPutCondition;
+	            		break;
+            		case ON_CHANGE:
+            			condition = new OnChangeCondition(getMonitoredField(propertyListType, propertyList));
+            			break;
+            		case ON_ABSOLUTE_CHANGE:
+            		case ON_RELATIVE_CHANGE:
+            			condition = new OnDiffChangeCondition(getMonitoredField(propertyListType, propertyList),
+            						monitorTriggerData, monitorTrigger == MonitorTrigger.ON_RELATIVE_CHANGE);
+            			break;
+            		case ON_EVENT_ONLY:
+            		default:
+            			throw new CAStatusException(CAStatus.NOSUPPORT);
+            	}
+
             	final PVMonitorImpl listener = new PVMonitorImpl(record, callback, copyData, offset, count, condition);
 	        	record.registerListener(listener);
 	
@@ -573,7 +593,7 @@ System.out.println("unlisten:" + pvRecord.getFullName());
 					data = thisPVField;
 					record.addListener(listener);
 				}
-				// structure
+				// whole record
 				else if (channel.getFieldName() == null)
 				{
 					DynamicSubsetOfPVStructure dynamicStructure = new DynamicSubsetOfPVStructure(record);
