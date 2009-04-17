@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.calc;
 
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportState;
 import org.epics.pvData.pv.Array;
@@ -59,7 +59,7 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
         PVStructure pvParent = pvStructure.getParent();
         PVField valuePVField = pvParent.getSubField("value");
