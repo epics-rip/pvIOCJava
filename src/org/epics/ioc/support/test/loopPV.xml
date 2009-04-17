@@ -8,11 +8,11 @@
       </structure>
     </structure>
     <structure name = "supportSequence" type = "generic" >
-        <structure name = "0" type = "processSupport">
+        <structure name = "0" type = "caProcessLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >other01</scalar>
         </structure>
-        <structure name = "1" type = "outputSupport">
+        <structure name = "1" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >other02</scalar>
             <scalar name = "process" >true</scalar>
@@ -21,7 +21,7 @@
 </record>
 <record name = "other01" type = "generic" >
     <scalar name = "value"  type = "double"/>
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">root</scalar>
         <scalar name = "process">false</scalar>
     </structure>
@@ -29,7 +29,7 @@
 <record name = "other02" type = "generic" >
     <scalar name = "value"  type = "double"/>
     <structure name = "supportSequence" type = "generic" >
-        <structure name = "0" type = "processSupport">
+        <structure name = "0" type = "caProcessLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >other03</scalar>
         </structure>
@@ -37,7 +37,7 @@
 </record>
 <record name = "other03" type = "generic" >
     <scalar name = "value"  type = "double"/>
-    <structure name = "input" type = "inputSupport">
+    <structure name = "input" type = "caInputLink">
         <scalar name = "pvname">root</scalar>
         <scalar name = "process">false</scalar>
     </structure>

@@ -12,52 +12,52 @@
       </structure>
     </structure>
     <structure name = "supportSequence" type = "generic" >
-        <structure name = "0" type = "outputSupport">
+        <structure name = "0" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive00</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "1" type = "outputSupport">
+        <structure name = "1" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive01</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "2" type = "outputSupport">
+        <structure name = "2" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive02</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "3" type = "outputSupport">
+        <structure name = "3" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive03</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "4" type = "outputSupport">
+        <structure name = "4" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive04</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "5" type = "outputSupport">
+        <structure name = "5" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive05</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "6" type = "outputSupport">
+        <structure name = "6" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive06</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "7" type = "outputSupport">
+        <structure name = "7" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive07</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "8" type = "outputSupport">
+        <structure name = "8" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive08</scalar>
             <scalar name = "process" >true</scalar>
         </structure>
-        <structure name = "9" type = "outputSupport">
+        <structure name = "9" type = "caOutputLink">
             <scalar name = "wait" type = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive09</scalar>
             <scalar name = "process" >true</scalar>

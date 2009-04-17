@@ -5,11 +5,12 @@
  */
 package org.epics.ioc.support.pdrv.serial;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.ioc.pdrv.interfaces.SerialInterruptListener;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
 import org.epics.pvData.pv.Array;
@@ -48,7 +49,7 @@ implements SerialInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#initialize()
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         pvSize = pvStructure.getIntField("size");
@@ -71,8 +72,8 @@ implements SerialInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
         size = pvSize.get();
         if(valueIsArray) charArray = new char[size];

@@ -7,8 +7,8 @@ package org.epics.ioc.support.test;
 
 import junit.framework.TestCase;
 
+import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.util.EventScanner;
-import org.epics.ioc.util.IOCFactory;
 import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.ScannerFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
@@ -35,11 +35,9 @@ public class ScanTest extends TestCase {
     public static void testScan() {
         PVRecord[] pvRecords = null;
         Requester iocRequester = new RequesterForTesting("scanTest");
-        XMLToPVDatabaseFactory.convert(masterPVDatabase,"${PVDATA}/xml/structures.xml", iocRequester);
-        if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
-        boolean ok = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanPV.xml", iocRequester);
+        boolean ok = InstallFactory.installRecords("src/org/epics/ioc/support/test/scanPV.xml", iocRequester);
         if(!ok) {
             System.out.printf("\nrecords\n");
             pvRecords = masterPVDatabase.getRecords();
@@ -105,7 +103,7 @@ public class ScanTest extends TestCase {
             } catch (InterruptedException e) {
             }
         }
-        ok = IOCFactory.initDatabase("src/org/epics/ioc/support/test/scanAddPV.xml", iocRequester);
+        ok = InstallFactory.installRecords("src/org/epics/ioc/support/test/scanAddPV.xml", iocRequester);
         if(!ok) return;
        
         String[] recordList = masterPVDatabase.recordList(".*");

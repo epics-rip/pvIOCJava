@@ -29,6 +29,7 @@ import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
@@ -210,11 +211,13 @@ public class GetFactory {
             private boolean process;
             private CD cd;
             private CDGet cdGet;
+            private ExecutorNode executorNode;
 
             private GetIt(Channel channel,Requester requester,boolean process) {
                 this.channel = channel;
                 this.requester = requester;
                 this.process = process;
+                executorNode = executor.createNode(this);
             }
 
             private void connect(ChannelField channelField,String[] propertyNames) {
@@ -237,7 +240,7 @@ public class GetFactory {
                     cd.destroy();
                     return;
                 }
-                executor.execute(this);
+                executor.execute(executorNode);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

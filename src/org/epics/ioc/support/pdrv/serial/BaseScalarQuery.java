@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.serial;
 
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Trace;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.pv.MessageType;
@@ -36,7 +36,7 @@ public class BaseScalarQuery extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()!=Type.scalar) {
