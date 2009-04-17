@@ -29,6 +29,7 @@ import org.epics.ioc.ca.ChannelPutRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.PVProperty;
 import org.epics.pvData.property.PVPropertyFactory;
@@ -49,9 +50,9 @@ import org.epics.pvData.pv.Type;
 public class BaseV3Channel extends AbstractChannel
 implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
-    private static Executor iocExecutor
+    private static Executor executor
         = ExecutorFactory.create("caV3Connect", ThreadPriority.low);
-    
+    private ExecutorNode executorNode = null;
     private boolean isCreatingChannel = false;
     private boolean synchCreateChannel = false;
     private boolean gotFirstConnection = false;
@@ -76,6 +77,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
     {
         super(listener,options);
         this.enumRequestType = enumRequestType;
+        executorNode = executor.createNode(this);
     }
     /**
      * initialize the channel.
@@ -128,7 +130,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
      * @see org.epics.ioc.caV3.V3Channel#getExecutor()
      */
     public Executor getExecutor() {
-        return iocExecutor;
+        return executor;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#getEnumRequestType()
@@ -286,7 +288,7 @@ implements V3Channel,ConnectionListener,Runnable,V3ChannelRecordRequester {
                 synchCreateChannel = true;
                 return;
             }
-            iocExecutor.execute(this);
+            executor.execute(executorNode);
         } else {
             super.message("connection lost", MessageType.warning);
         }

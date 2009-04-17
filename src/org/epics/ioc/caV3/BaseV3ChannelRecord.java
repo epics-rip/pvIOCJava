@@ -51,6 +51,7 @@ import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.factory.PVReplaceFactory;
 import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
@@ -86,6 +87,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     
     private V3Channel v3Channel;
     private Executor executor = null;
+    private ExecutorNode executorNode = null;
     
     private DBRType nativeDBRType = null;
     private PVRecord pvRecord = null;
@@ -116,6 +118,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     public BaseV3ChannelRecord(V3Channel v3Channel) {
         this.v3Channel = v3Channel;
         executor = v3Channel.getExecutor();
+        executorNode = executor.createNode(this);
     }
     /**
      * Create a PVRecord for the Channel.
@@ -980,7 +983,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             toRecord(fromDBR);
             requestResult = RequestResult.success;
         }
-        executor.execute(this);
+        executor.execute(executorNode);
     }
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
