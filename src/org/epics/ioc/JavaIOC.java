@@ -12,8 +12,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.swtshell.SwtshellFactory;
-import org.epics.ioc.util.IOCFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDatabase;
@@ -26,26 +26,29 @@ import org.epics.pvData.pv.Requester;
 /**
  * The main program to start a JavaIOC.
  * The program is started with a command line of
- * java org.epics.ioc.Start 
+ * java org.epics.ioc.JavaIOC 
  * The command line options are:
  * <pre>
- *     -pv pvList
- *             pvList is a list of PVData  xml files. Each is parsed and put into the master database
+ *     -structures list
+ *             list is a list of xml files containing structure definitions. Each is parsed and put into the master database
+ *     -records list
+ *             list is a list of xml files containing records definitions. Each is parsed and started and put into the master database 
  *     -dumpStructures
  *             Dump all structures in the master database
  *     -dumpRecords
  *             Dump all record instances in the master database
  *     -server serverFile
- *             Start the server specified in the serverFile
+ *             JavaIOC the server specified in the serverFile
  *     -swtshell
  *             Starts the JavaIOC running under swtshell
  *            
  * @author mrk
  *
  */
-public class Start {
+public class JavaIOC {
     private enum State {
-        dbFile,
+        structures,
+        records,
         servers
     }
 
@@ -61,7 +64,7 @@ public class Start {
         }
         Requester iocRequester = new Listener();
         int nextArg = 0;
-        State state = State.dbFile;
+        State state = null;
         while(nextArg<args.length) {
             String arg = args[nextArg++];
             if(arg.charAt(0) == '-') {
@@ -78,8 +81,10 @@ public class Start {
                     dumpStructures();
                 } else if(arg.equals("dumpRecords")) {
                     dumpRecords();
-                } else if(arg.equals("pv")){
-                    state = State.dbFile;
+                } else if(arg.equals("structures")){
+                    state = State.structures;
+                } else if(arg.equals("records")){
+                    state = State.records;
                 } else if(arg.equals("swtshell")) {
                     SwtshellFactory.swtshell();
                 } else if(arg.equals("server")) {
@@ -89,8 +94,10 @@ public class Start {
                     usage();
                     return;
                 }
-            } else if(state==State.dbFile){
-                parseDB(arg,iocRequester);
+            } else if(state==State.structures){
+                parseStructures(arg,iocRequester);
+            } else if(state==State.records){
+                parseRecords(arg,iocRequester);
             } else if(state==State.servers) {
                 startServer(arg);
             } else {
@@ -103,7 +110,8 @@ public class Start {
     
     static void usage() {
         System.out.println("Usage:"
-                + " -pv pvList"
+                + " -structures fileList"
+                + " -records fileList"
                 + " -dumpStructures"
                 + " -dumpRecords"
                 + " -server file"
@@ -182,10 +190,19 @@ public class Start {
         }
     }
 
-    static void parseDB(String fileName,Requester iocRequester) {
+    static void parseStructures(String fileName,Requester iocRequester) {
         System.out.printf("\nparsing PV file %s\n",fileName);
         try {
-            IOCFactory.initDatabase(fileName,iocRequester);
+            InstallFactory.installStructures(fileName,iocRequester);
+        }  catch (IllegalStateException e) {
+            System.out.println("IllegalStateException: " + e);
+        }
+    }
+    
+    static void parseRecords(String fileName,Requester iocRequester) {
+        System.out.printf("\nparsing PV file %s\n",fileName);
+        try {
+            InstallFactory.installRecords(fileName,iocRequester);
         }  catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
