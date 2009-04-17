@@ -21,7 +21,7 @@ public interface Int32Array extends Interface{
      */
     PVIntArray getPVIntArray();
     /**
-     * Start a read.
+     * JavaIOC a read.
      * @param user The user
      * @return If not Status.success then status.getMessage shows the reason the request failed.
      */
@@ -33,7 +33,7 @@ public interface Int32Array extends Interface{
      */
     Status endRead(User user);
     /**
-     * Start a write.
+     * JavaIOC a write.
      * @param user The user
      * @return If not Status.success then status.getMessage shows the reason the request failed.
      */
