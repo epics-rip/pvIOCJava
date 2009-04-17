@@ -14,17 +14,26 @@ import gov.aps.jca.event.ContextMessageEvent;
 import gov.aps.jca.event.ContextMessageListener;
 import gov.aps.jca.event.ContextVirtualCircuitExceptionEvent;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 
 import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.ca.ChannelProvider;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.AfterStartFactory;
+import org.epics.ioc.install.AfterStartNode;
+import org.epics.ioc.install.AfterStartRequester;
+import org.epics.ioc.install.NewAfterStartRequester;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.pv.ScalarType;
+
 
 
 /**
@@ -39,12 +48,51 @@ public class ClientFactory  {
     private static Context context = null;
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     /**
-     * Start. This registers the V3 ChannelProvider.
+     * JavaIOC. This registers the V3 ChannelProvider.
      */
     public static void start() {
+        AfterStartDelay afterStartDelay = new AfterStartDelay();
+        afterStartDelay.start();
         channelProvider.register();
     }
     
+    
+    private static class AfterStartDelay extends TimerTask  implements NewAfterStartRequester,AfterStartRequester {
+        private static final Timer timer = new Timer("caClientDelay");
+        private AfterStartNode afterStartNode = null;
+        private AfterStart afterStart = null;
+      
+        private AfterStartDelay() {}
+        
+        private void start() {
+            afterStartNode = AfterStartFactory.allocNode(this);
+            AfterStartFactory.NewAfterStartRegister(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.install.NewAfterStartRequester#callback(org.epics.ioc.install.AfterStart)
+         */
+        @Override
+        public void callback(AfterStart afterStart) {
+            this.afterStart = afterStart;
+            afterStart.requestCallback(afterStartNode, false, ThreadPriority.middle);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
+         */
+        @Override
+        public void callback(AfterStartNode node) {
+            timer.schedule(this, 2000);
+        }
+        /* (non-Javadoc)
+         * @see java.util.TimerTask#run()
+         */
+        @Override
+        public void run() {
+            afterStart.done(afterStartNode);
+            afterStart = null;
+        }
+        
+    }
     private static class ChannelProviderImpl
     implements ChannelProvider,ContextExceptionListener, ContextMessageListener
     {
