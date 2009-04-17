@@ -10,18 +10,18 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2009.02.25</h1>
+2009.04.17</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a>
+  <li><a href="#Overview">Overview</a> 
     <ul>
       <li><a href="#RecordProc">RecordProcess</a></li>
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Record">Record Processing Theory of Operation</a>
+  <li><a href="#Record">Record Processing Theory of Operation</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requester">Requester Examples</a></li>
@@ -32,7 +32,7 @@ CONTENTS
       <li><a href="#Support1">Support Overview</a></li>
     </ul>
   </li>
-  <li><a href="#Record1">Record Process</a>
+  <li><a href="#Record1">Record Process</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#RecordProc2">RecordProcess - General Purpose
@@ -49,25 +49,17 @@ CONTENTS
       <li><a href="#RecordProc7">RecordProcessFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Support2">Support</a>
+  <li><a href="#Support2">Support</a> 
     <ul>
       <li><a href="#Support3">Support State</a></li>
       <li><a href="#Support4">Support</a></li>
       <li><a href="#Record2">Record Support</a></li>
     </ul>
   </li>
-  <li><a href="#AbstractSu">AbstractSupport</a>
+  <li><a href="#AbstractSu">AbstractSupport</a> 
     <ul>
       <li><a href="#AbstractSu1">AbstractSupport</a></li>
       <li><a href="#Definition2">Definitions</a></li>
-    </ul>
-  </li>
-  <li><a href="#Support5">Support Database and Creation</a>
-    <ul>
-      <li><a href="#Definition3">Definitions:</a></li>
-      <li><a href="#Support6">Support Database</a></li>
-      <li><a href="#Support7">Support Database</a></li>
-      <li><a href="#Support8">Support Creation</a></li>
       <li><a href="#Factory">Factory</a></li>
     </ul>
   </li>
@@ -78,7 +70,8 @@ CONTENTS
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>This package describes how records are processed. During database creation
+<p>This package describes how records are processed. Package install
+describes how records are initialized and started. During database creation
 each record is assigned an instance of RecordProcess, which coordinates
 record processing. In addition each record has a Support instance and each
 field can optionally have an associated Support instance. </p>
@@ -97,22 +90,6 @@ field can optionally have an associated Support instance. </p>
     recordProcess.requestProcessCallback.</dd>
   <dt><span style="font-family: courier;">ProcessContinueRequester</span></dt>
     <dd>Implemented by code that calls recordProcess.processContinue.</dd>
-  <dt><span style="font-family: courier;">SupportCreation</span></dt>
-    <dd>Implemented by SupportCreationFactory. It is used to create support
-      for a supportDatabase.</dd>
-  <dt><span style="font-family: courier;">SupportDatabase</span></dt>
-    <dd>Provides access to the PVDatabase and RecordSupport and allows the
-      supportDatabase to be merged into the master.</dd>
-</dl>
-
-<p>In addition the following classes are provided:</p>
-<dl>
-  <dt><span style="font-family: courier;">RecordProcessFactory</span></dt>
-    <dd>Implements RecordProcess.</dd>
-  <dt><span style="font-family: courier;">SupportDatabaseFactory</span></dt>
-    <dd>Implements SupportDatabase.</dd>
-  <dt><span style="font-family: courier;">SupportCreationFactory</span></dt>
-    <dd>Implements SupportCreation.</dd>
 </dl>
 
 <h3 id="Support">Support</h3>
@@ -164,7 +141,10 @@ modules. The sub-packages are:</p>
     </dd>
   <dt><a href="basic/package-summary.html">ca</a></dt>
     <dd>Implements support for channel access links, i.e. links to other
-      recordss.</dd>
+      records.</dd>
+  <dt><a href="basic/package-summary.html">dbLink</a></dt>
+    <dd>Implements support for database links, i.e. links to other records in
+      the same javaIOC.</dd>
   <dt><a href="alarm/package-summary.html">alarm</a></dt>
     <dd>Raises alarms for value fields.</dd>
   <dt><a href="calc/package-summary.html">calc</a></dt>
@@ -623,7 +603,7 @@ structure definitions that come with the javaIOC for examples.</p>
         SupportState getSupportState();
         // support lifecycle methods
         void initialize();
-        void start();
+        void start(AfterStart afterStart);
         void stop();
         void uninitialize();
         // record process requester methods
@@ -924,8 +904,8 @@ and any other support code that is involved with record processing:</p>
         String getSupportName();
         SupportState getSupportState();
         PVField getPVField();
-        void initialize(RecordSupport recordSupport));
-        void start();
+        void initialize(LocateSupport locateSupport);
+        void start(AfterStart afterStart);
         void stop();
         void uninitialize();
         void allSupportStarted();
@@ -1011,8 +991,8 @@ method:</p>
         public SupportState getSupportState();
         public PVField getPVField();
         // following normally overridden
-        public void initialize(RecordSupport recordSupport);
-        public void start();
+        public void initialize(LocateSupport locateSupport);
+        public void start(AfterStart afterStart);
         public void stop();
         public void uninitialize();
         public void allSupportStarted();
@@ -1059,94 +1039,6 @@ methods it needs.</p>
   <dt style="font-family: courier;">checkSupportState</dt>
     <dd>Checks that the state is the expected state and generates an error
       message if it isn't.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center;" id="Support5">Support Database and
-Creation</h2>
-<hr />
-
-<p>This is called to create all support for all fields of all records in the
-IOC database passed to createSupportCreation. It creates an instance of
-RecordProcess for each record instance and creates the support for every
-field with a non null supportName. The supportName must be defined in the
-Database Definition Database. Note that org.epics.ioc.util.IOCFactory calls
-the factories described below and takes care of all creation and
-initialization.</p>
-
-<h3 id="Definition3">Definitions:</h3>
-<pre>    public interface SupportDatabase {
-        PVDatabase getPVDatabase();
-        void mergeIntoMaster();
-        RecordSupport getRecordSupport(PVRecord pvRecord);
-    }
-
-    public interface SupportCreation {
-        boolean createSupport();
-        boolean initializeSupport();
-        boolean  startSupport();
-        void uninitializeSupport();
-        void stopSupport();
-    }
-
-    public class SupportDatabaseFactory {
-        public static SupportDatabase create(PVDatabase pvDatabase);
-        public static  SupportDatabase get(PVDatabase pvDatabase);
-    }
-
-    public class SupportCreationFactory
-        static public SupportCreation createSupportCreation(
-            SupportDatabase supportDatabase,Requester requester);
-        static public boolean createSupport(
-            Requester requester,RecordSupport recordSupport,PVField pvField));
-    }</pre>
-
-<h3 id="Support6">Support Database</h3>
-
-<p>A support database is created for a PVDatabase. In order to dynamically
-add a new database to a running javaIOC, the following must be done:</p>
-<ul>
-  <li>Create a new PVDatabase.</li>
-  <li>Create a new SupportDatabase for the PVDatabase.</li>
-  <li>Create a SupportCreation for the support database.</li>
-  <li>Create the support and initialize the support. If both of these are
-    succesful then merge the support database into the master support
-    database. Next merge the pvDatabase into the master. Finally start the
-    support.</li>
-</ul>
-
-<p>Note that org.epics.ioc.util.IOCFactory.initDatabase does all of the
-above.</p>
-
-<h3 id="Support7">Support Database</h3>
-
-<p>SupportDatabase has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">getPVDatabase</dt>
-    <dd>Get the PVDatabase to which this support database is attached.</dd>
-  <dt style="font-family: courier;">mergeIntoMaster</dt>
-    <dd>Merge the support database into the master support database.</dd>
-  <dt style="font-family: courier;">getRecordSupport</dt>
-    <dd>Get the record support for the specified record.</dd>
-</dl>
-
-<h3 id="Support8">Support Creation</h3>
-
-<p>SupportCreation has the methods:</p>
-<dl>
-  <dt style="font-family: courier;">createSupport</dt>
-    <dd>Create the support. The return value is true only if no errors are
-      reported.</dd>
-  <dt style="font-family: courier;">initializeSupport</dt>
-    <dd>Initialize the support. The return value is true only if all record
-      instances enter the state readyForStart.</dd>
-  <dt style="font-family: courier;">startSupport</dt>
-    <dd>Start the support. The return value is true only if all record
-      instances enter the state ready.</dd>
-  <dt style="font-family: courier;">uninitializeSupport</dt>
-    <dd>Uninitialize the support.</dd>
-  <dt style="font-family: courier;">stopSupport</dt>
-    <dd>Stop the support.</dd>
 </dl>
 
 <h3 id="Factory">Factory</h3>
