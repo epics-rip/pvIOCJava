@@ -9,9 +9,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.AfterStartFactory;
+import org.epics.ioc.install.AfterStartNode;
+import org.epics.ioc.install.AfterStartRequester;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanField;
 import org.epics.ioc.util.ScanFieldFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -36,15 +42,15 @@ public class RecordProcessFactory {
      * @param pvRecord The record instance.
      * @return The interface for the newly created RecordProcess.
      */
-    static public RecordProcess createRecordProcess(RecordSupport recordSupport,PVRecord pvRecord) {
-        return new ProcessInstance(recordSupport,pvRecord);
+    static public RecordProcess createRecordProcess(LocateSupport locateSupport,PVRecord pvRecord) {
+        return new ProcessInstance(locateSupport,pvRecord);
     }
     
-    static private class ProcessInstance implements RecordProcess,SupportProcessRequester,RecordProcessRequester
+    static private class ProcessInstance implements RecordProcess,SupportProcessRequester,RecordProcessRequester,AfterStartRequester
     {
         private boolean trace = false;
         private PVRecord pvRecord;
-        private RecordSupport recordSupport;
+        private LocateSupport locateSupport;
         private String recordProcessSupportName = null;
         private boolean enabled = true;
         private Support fieldSupport = null;
@@ -52,6 +58,8 @@ public class RecordProcessFactory {
         private PVBoolean pvProcessSelf = null;
         private ProcessSelf processSelf = null;
         private PVBoolean pvProcessAfterStart = null;
+        private AfterStartNode afterStartNode;
+        private AfterStart afterStart = null;
         private Support scanSupport = null;
         
         private boolean active = false;
@@ -76,10 +84,10 @@ public class RecordProcessFactory {
         
         private TimeStamp timeStamp = null;
         
-        private ProcessInstance(RecordSupport recordSupport,PVRecord pvRecord) {
-            this.recordSupport = recordSupport;
+        private ProcessInstance(LocateSupport locateSupport,PVRecord pvRecord) {
+            this.locateSupport = locateSupport;
             this.pvRecord = pvRecord;
-            recordSupport.setRecordProcess(this);
+            locateSupport.setRecordProcess(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#isEnabled()
@@ -152,7 +160,7 @@ public class RecordProcessFactory {
                 if(trace) traceMessage(" initialize");
                 PVStructure pvStructure = pvRecord.getPVStructure();
                 recordProcessSupportName = "recordProcess(" + pvRecord.getRecordName() + ")";
-                fieldSupport = recordSupport.getSupport(pvRecord);
+                fieldSupport = locateSupport.getSupport(pvRecord);
                 if(fieldSupport==null) {
                     throw new IllegalStateException(
                         pvRecord.getRecordName() + " has no support");
@@ -166,7 +174,7 @@ public class RecordProcessFactory {
                 }
                 index = structure.getFieldIndex("scan");
                 if(index>=0) {
-                    scanSupport = recordSupport.getSupport(pvFields[index]);
+                    scanSupport = locateSupport.getSupport(pvFields[index]);
                     scanField = ScanFieldFactory.create(pvRecord);
                     if(scanField!=null) {
                         pvProcessSelf = scanField.getProcessSelfPV();
@@ -175,7 +183,7 @@ public class RecordProcessFactory {
                         pvProcessAfterStart = scanField.getProcessAfterStartPV();
                     }
                 }
-                fieldSupport.initialize(recordSupport);
+                fieldSupport.initialize(locateSupport);
             } finally {
                 pvRecord.unlock();
             }
@@ -183,17 +191,23 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             pvRecord.lock();
             try {
                 if(trace) traceMessage(" start");
-                fieldSupport.start();
-                if(scanSupport!=null) scanSupport.start();
-                if(processSelf!=null) processSelf.start();
+                fieldSupport.start(afterStart);
+                if(scanSupport!=null) scanSupport.start(afterStart);
+                if(processSelf!=null) {
+                    processSelf.start();
+                    afterStartNode = AfterStartFactory.allocNode(this);
+                    this.afterStart = afterStart;
+                    afterStart.requestCallback(afterStartNode, true, ThreadPriority.middle);
+                }
             } finally {
                 pvRecord.unlock();
             }
         }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#stop()
          */
@@ -208,6 +222,7 @@ public class RecordProcessFactory {
                 if(trace) traceMessage("stop");
                 if(scanSupport!=null) scanSupport.stop();
                 fieldSupport.stop();
+                pvRecord.removeEveryListener();
             } finally {
                 pvRecord.unlock();
             }
@@ -579,17 +594,10 @@ public class RecordProcessFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcess#allSupportStarted()
+         * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
-        public void allSupportStarted() {
-            pvRecord.lock();
-            try {
-                if(trace) traceMessage("allSupportStarted");
-                fieldSupport.allSupportStarted();
-                if(scanSupport!=null) scanSupport.allSupportStarted();   
-            } finally {
-                pvRecord.unlock();
-            }
+        // following are for processAfterStart
+        public void callback(AfterStartNode node) {
             if(pvProcessAfterStart!=null) {
                 boolean process = pvProcessAfterStart.get();
                 if(process) {
@@ -597,6 +605,7 @@ public class RecordProcessFactory {
                         boolean ok = setRecordProcessRequester(this);
                         if(ok) {
                             process(this,false,null);
+                            return;
                         } else {
                             pvRecord.message(" processAfterStart failed", MessageType.warning);
                         }
@@ -605,12 +614,19 @@ public class RecordProcessFactory {
                     }
                 }
             }
+            afterStart.done(afterStartNode);
+            afterStartNode = null;
+            afterStart = null;
         }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
          */
         public void recordProcessComplete() {
-            releaseRecordProcessRequester(this);  
+            releaseRecordProcessRequester(this);
+            afterStart.done(afterStartNode);
+            afterStartNode = null;
+            afterStart = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
@@ -618,7 +634,6 @@ public class RecordProcessFactory {
         public void recordProcessResult(RequestResult requestResult) {
             // nothing to do
         }
-        
         private void traceMessage(String message) {
             String time = "";
             if(timeStamp!=null) {
@@ -670,6 +685,7 @@ public class RecordProcessFactory {
                 if(trace) traceMessage("stop");
                 if(scanSupport!=null) scanSupport.stop();
                 fieldSupport.stop();
+                pvRecord.removeEveryListener();
                 callStopAfterActive = false;
             }
             if(callUninitializeAfterActive) {

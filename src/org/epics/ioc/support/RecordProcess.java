@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.install.AfterStart;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.pv.PVRecord;
 
@@ -60,11 +61,12 @@ public interface RecordProcess {
      */
     void initialize();
     /**
-     * Start.
+     * JavaIOC.
      * This must be called rather than directly calling record support.
      * This handles global fields like scan and then calls record support.
+     * @param afterStart interface for being called after all support has started.
      */
-    void start();
+    void start(AfterStart afterStart);
     /**
      * Stop.
      * This must be called rather than directly calling record support.
@@ -161,7 +163,7 @@ public interface RecordProcess {
      */
     boolean processSelfSetActive(RecordProcessRequester recordProcessRequester);
     /**
-     * Start processing.
+     * JavaIOC processing.
      * Similar to process since the actual recordProcessor calls process.
      * @param recordProcessRequester The recordProcessRequester.
      * @param leaveActive Leave the record active when process is done.
@@ -205,8 +207,4 @@ public interface RecordProcess {
      * @param timeStamp The current timeStamp.
      */
     void getTimeStamp(TimeStamp timeStamp);
-    /**
-     * All support in the database being loaded has started.
-     */
-    void allSupportStarted();
 }
