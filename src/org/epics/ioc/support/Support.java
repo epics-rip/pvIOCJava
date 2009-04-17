@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Requester;
 
@@ -33,13 +35,14 @@ public interface Support extends Requester{
      * Initialize.
      * Perform initialization related to record instance but
      * do not connect to I/O or other records.
-     * @param recordSupport The recordSupport for this record.
+     * @param locateSupport The locateSupport for this record.
      */
-    void initialize(RecordSupport recordSupport);
+    void initialize(LocateSupport locateSupport);
     /**
      * Invoked when it is safe to link to I/O and/or other records.
+     * @param afterStart interface for being called after all support has started.
      */
-    void start();
+    void start(AfterStart afterStart);
     /**
      * Disconnect all links to I/O and/or other records.
      */
@@ -48,10 +51,6 @@ public interface Support extends Requester{
      * Clean up any internal state created during initialize.
      */
     void uninitialize();
-    /**
-     * All support in the database being loaded has started.
-     */
-    void allSupportStarted();
     /**
      * Perform support processing.
      * @param supportProcessRequester The process requester.
