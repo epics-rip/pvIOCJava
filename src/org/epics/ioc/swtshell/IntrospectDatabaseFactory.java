@@ -23,10 +23,10 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.epics.ioc.install.IOCDatabase;
+import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.support.SupportDatabase;
-import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.PeriodicScanner;
@@ -63,7 +63,7 @@ import org.epics.pvData.pv.Requester;
 public class IntrospectDatabaseFactory {
     private static final Executor executor = ExecutorFactory.create("swtshell:introspectDatabase",ThreadPriority.low);
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final SupportDatabase masterSupportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
+    private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     private static final String newLine = String.format("%n");
     
     /**
@@ -248,7 +248,7 @@ public class IntrospectDatabaseFactory {
                 return;
             }
             if(object==showStateButton) {
-                RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 boolean processSelf = recordProcess.canProcessSelf();
                 String processRequesterName = recordProcess.getRecordProcessRequesterName();
                 SupportState supportState = recordProcess.getSupportState();
@@ -287,7 +287,7 @@ public class IntrospectDatabaseFactory {
                 return;
             }
             if(object==releaseProcessorButton) {
-                RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 if(recordProcess==null) {
                     message("recordProcess is null", MessageType.error);
                     return;
@@ -304,7 +304,7 @@ public class IntrospectDatabaseFactory {
             if(object==showBadRecordsButton) {
                 PVRecord[] pvRecords = masterPVDatabase.getRecords();
                 for(PVRecord pvRecord : pvRecords) {
-                    RecordProcess recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                    RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                     boolean isActive = recordProcess.isActive();
                     boolean isEnabled = recordProcess.isEnabled();
                     SupportState supportState = recordProcess.getSupportState();
@@ -383,7 +383,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 boolean initialState = recordProcess.isEnabled();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
@@ -443,7 +443,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 boolean initialState = recordProcess.isTrace();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
@@ -506,7 +506,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
                 GridLayout gridLayout = new GridLayout();
@@ -553,7 +553,7 @@ public class IntrospectDatabaseFactory {
                     recordProcess.initialize();
                 }
                 if(object==startButton) {
-                    recordProcess.start();
+                    recordProcess.start(null);
                 }
                 if(object==stopButton) {
                     recordProcess.stop();
@@ -620,7 +620,7 @@ public class IntrospectDatabaseFactory {
             }
 
             private String doIt() {
-                recordProcess = masterSupportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 if(!recordProcess.setRecordProcessRequester(processIt)) return "could not process the record";
                 TimeFunction timeFunction = TimeFunctionFactory.create(processIt);
                 double perCall = timeFunction.timeCall();

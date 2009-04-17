@@ -34,6 +34,7 @@ import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
@@ -60,6 +61,7 @@ public class PutFactory {
             this.display = display;
         }
 
+        private boolean isDisposed = false;
         private static Executor executor
             = ExecutorFactory.create("swtshell:put",ThreadPriority.low);
         private static String windowName = "put";
@@ -77,6 +79,7 @@ public class PutFactory {
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
+            isDisposed = true;
             if(channel!=null) channel.destroy();
         }
         /* (non-Javadoc)
@@ -95,6 +98,7 @@ public class PutFactory {
          * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
+            if(isDisposed) return;
             if(isConnected) {
                 channel = channelConnect.getChannel();
                 String fieldName = channel.getFieldName();
@@ -175,6 +179,7 @@ public class PutFactory {
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
+            if(isDisposed) return;
             Object object = arg0.getSource(); 
             if(object==putButton) {
                 boolean process = processButton.getSelection();
@@ -196,6 +201,7 @@ public class PutFactory {
             private boolean gotData = false;
             private boolean getFailed = false;
             private boolean isActive = false;
+            private ExecutorNode executorNode;
 
             private CD cd;
             private CDPut cdPut;
@@ -205,6 +211,7 @@ public class PutFactory {
                 this.channel = channel;
                 this.requester = requester;
                 this.process = process;
+                executorNode = executor.createNode(this);
             }
 
             private void connect(ChannelField channelField) {
@@ -238,7 +245,7 @@ public class PutFactory {
                 cdRecord.getCDStructure().clearNumPuts();
                 CDGet cdGet = CDGetFactory.create(shell);
                 cdGet.getValue(cdRecord);
-                executor.execute(this);
+                executor.execute(executorNode);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

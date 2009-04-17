@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.util.IOCFactory;
+import org.epics.ioc.install.InstallFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
 
@@ -165,7 +165,7 @@ public class LoadDatabaseFactory {
                     return;
                 }
                 try {
-                    boolean initOK = IOCFactory.initDatabase(fileName,this);
+                    boolean initOK = InstallFactory.installRecords(fileName,this);
                     if(!initOK) {
                         consoleText.append(String.format("IOCFactory.initDatabase failed%n"));
                     }

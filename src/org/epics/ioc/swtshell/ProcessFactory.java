@@ -24,6 +24,7 @@ import org.epics.ioc.ca.ChannelProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
@@ -50,6 +51,7 @@ public class ProcessFactory {
             this.display = display;
         }
 
+        private boolean isDisposed = false;
         private static Executor executor
             = ExecutorFactory.create("swtshell:Get",ThreadPriority.low);
         private static String windowName = "process";
@@ -65,6 +67,7 @@ public class ProcessFactory {
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
+            isDisposed = true;
             if(channel!=null) channel.destroy();
         }
         /* (non-Javadoc)
@@ -83,6 +86,7 @@ public class ProcessFactory {
          * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
+            if(isDisposed) return;
             if(isConnected) {
                 channel = channelConnect.getChannel();
                 processButton.setEnabled(true);
@@ -150,6 +154,7 @@ public class ProcessFactory {
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
+            if(isDisposed) return;
             Object object = arg0.getSource(); 
             if(object==processButton) {
                 new ProcessIt(channel,this);
@@ -161,11 +166,13 @@ public class ProcessFactory {
         {   
             final private Requester requester;
             private ChannelProcess channelProcess;
+            private ExecutorNode executorNode;
 
             private ProcessIt(Channel channel,Requester requester) {
                 this.requester = requester;
+                executorNode = executor.createNode(this);
                 channelProcess = channel.createChannelProcess(this);
-                if(channelProcess!=null) executor.execute(this);
+                if(channelProcess!=null) executor.execute(executorNode);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()

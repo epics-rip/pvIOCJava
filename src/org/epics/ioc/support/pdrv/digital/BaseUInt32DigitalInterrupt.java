@@ -5,11 +5,12 @@
  */
 package org.epics.ioc.support.pdrv.digital;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.pdrv.interfaces.UInt32Digital;
 import org.epics.ioc.pdrv.interfaces.UInt32DigitalInterruptListener;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
 import org.epics.pvData.misc.Enumerated;
@@ -50,7 +51,7 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         pvMask = pvStructure.getIntField("mask");
@@ -89,8 +90,8 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
         Interface iface = device.findInterface(user, "uint32Digital");
         if(iface==null) {

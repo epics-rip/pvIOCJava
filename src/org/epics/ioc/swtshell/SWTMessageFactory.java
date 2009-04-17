@@ -32,8 +32,7 @@ public class SWTMessageFactory {
         return new MessageImpl(name,display,consoleText);
     }
 
-    private static class MessageImpl
-    implements Requester, Runnable {
+    private static class MessageImpl implements Requester, Runnable {
 
         public MessageImpl(String name,Display display,Text consoleText) {
             this.name = name;
@@ -56,17 +55,15 @@ public class SWTMessageFactory {
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(final String message, MessageType messageType) {
+            if(display.isDisposed()) return;
             boolean syncExec = false;
-            messageQueue.lock();
-            try {
+            synchronized(messageQueue) {
                 if(messageQueue.isEmpty()) syncExec = true;
                 if(messageQueue.isFull()) {
                     messageQueue.replaceLast(message, messageType);
                 } else {
                     messageQueue.put(message, messageType);
                 }
-            } finally {
-                messageQueue.unlock();
             }
             if(syncExec) {
                 display.asyncExec(this);
@@ -77,16 +74,14 @@ public class SWTMessageFactory {
          */
         public void run() {
             while(true) {
+                if(display.isDisposed()) break;
                 String message = null;
                 int numOverrun = 0;
-                messageQueue.lock();
-                try {
+                synchronized(messageQueue) {
                     MessageNode messageNode = messageQueue.get();
                     numOverrun = messageQueue.getClearOverrun();
                     if(messageNode==null && numOverrun==0) break;
                     message = messageNode.message;
-                } finally {
-                    messageQueue.unlock();
                 }
                 if(numOverrun>0) {
                     consoleText.append(String.format("%n%d missed messages%n", numOverrun));

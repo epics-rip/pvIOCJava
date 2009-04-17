@@ -69,6 +69,7 @@ public class MonitorFactory {
             = ExecutorFactory.create("swtshellMonitor", ThreadPriority.low);
         private static String windowName = "monitor";
         private Display display;
+        private boolean isDisposed = false;
         private Shell shell = null;
         private Requester requester = null;
         private Channel channel = null;
@@ -99,6 +100,7 @@ public class MonitorFactory {
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
+            isDisposed = true;
             if(channel!=null) channel.destroy();
         }
         /* (non-Javadoc)
@@ -117,6 +119,7 @@ public class MonitorFactory {
          * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
          */
         public void channelStateChange(Channel c, boolean isConnected) {
+            if(isDisposed) return;
             if(isConnected) {
                 channel = channelConnect.getChannel();
                 String fieldName = channel.getFieldName();
@@ -239,8 +242,8 @@ public class MonitorFactory {
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
+            if(isDisposed) return;
             Object object = arg0.getSource();
-
             if(object==propertyButton) {
                 PropertyGet propertyGet = PropertyGetFactory.create(shell);
                 propertyNames = propertyGet.getPropertyNames(channelField);
@@ -305,6 +308,7 @@ public class MonitorFactory {
          * @see org.epics.ioc.ca.ChannelMonitorRequester#monitorData(org.epics.ioc.ca.CD)
          */
         public void monitorCD(final CD cD) {
+            if(isDisposed) return;
             allDone = false;
             display.asyncExec( new Runnable() {
                 public void run() {

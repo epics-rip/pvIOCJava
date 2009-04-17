@@ -11,10 +11,10 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.epics.ioc.install.IOCDatabase;
+import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.support.SupportDatabase;
-import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
@@ -35,7 +35,7 @@ import org.epics.pvData.pv.PVRecord;
  *
  */
 public class ScannerFactory {
-    private static SupportDatabase supportDatabase = SupportDatabaseFactory.get(PVDatabaseFactory.getMaster());
+    private static IOCDatabase supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
     private static PeriodicScanner periodicScanner = new PeriodicScannerImpl();
     private static EventScanner eventScanner = new EventScannerImpl();
 
@@ -385,7 +385,7 @@ public class ScannerFactory {
             } finally {
                 lock.unlock();
             }
-            RecordProcess recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+            RecordProcess recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
             processRecord = new ProcessRecord(processPeriodic.getName(),recordProcess);
             if(!recordProcess.setRecordProcessRequester(processRecord)){
                 return false;
@@ -872,7 +872,7 @@ public class ScannerFactory {
                     processEvent = new ProcessEvent(threadName,priority);
                     announce.addProcessEvent(processEvent);
                 }
-                RecordProcess recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                RecordProcess recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 ProcessRecord processRecord = new ProcessRecord(processEvent.getName(),recordProcess);
                 if(!recordProcess.setRecordProcessRequester(processRecord)){
                     return false;
