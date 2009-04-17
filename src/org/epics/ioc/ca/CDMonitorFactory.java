@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
@@ -300,8 +301,10 @@ public class CDMonitorFactory {
         
         // The calls requester via a separate thread.
         private class CallRequester implements Runnable {
-
-            private CallRequester(){}         
+            private ExecutorNode executorNode = null;
+            private CallRequester(){
+                executorNode = executor.createNode(this);
+            }         
 
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
@@ -326,7 +329,7 @@ public class CDMonitorFactory {
                 }
             }
             private void call() {
-                executor.execute(this);
+                executor.execute(executorNode);
             }
 
         }
