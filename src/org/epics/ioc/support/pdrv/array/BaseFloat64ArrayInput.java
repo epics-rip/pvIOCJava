@@ -5,11 +5,12 @@
  */
 package org.epics.ioc.support.pdrv.array;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64Array;
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.pv.MessageType;
@@ -39,7 +40,7 @@ public class BaseFloat64ArrayInput extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalarArray) {
@@ -60,8 +61,8 @@ public class BaseFloat64ArrayInput extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
         Interface iface = device.findInterface(user, "float64Array");
         if(iface==null) {

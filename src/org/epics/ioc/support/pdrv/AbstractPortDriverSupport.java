@@ -6,11 +6,12 @@
 package org.epics.ioc.support.pdrv;
 
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -77,7 +78,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.basic.GenericBase#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         PVStructure pvParent = pvStructure.getParent();
@@ -114,7 +115,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.basic.GenericBase#start()
      */
-    public void start() {
+    public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         port = user.getPort();
         if(port==null) {
@@ -131,7 +132,7 @@ implements PortDriverSupport
         for(PortDriverSupport portDriverSupport : portDriverSupports) {
             portDriverSupport.setPortDriverLink(portDriverLink);
         }
-        super.start();
+        super.start(afterStart);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#setPortDriverLink(org.epics.ioc.support.pdrv.PortDriverLink)

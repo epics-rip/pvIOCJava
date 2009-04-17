@@ -13,8 +13,8 @@ package org.epics.ioc.support.calc;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -77,7 +77,7 @@ public abstract class ExpressionCalculatorFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
             if(alarmSupport==null) {

@@ -5,10 +5,11 @@
  */
 package org.epics.ioc.support.pdrv.scalar;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.interfaces.Float64;
 import org.epics.ioc.pdrv.interfaces.Float64InterruptListener;
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
@@ -41,7 +42,7 @@ public class BaseFloat64Average extends AbstractPortDriverInterruptLink implemen
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(super.valuePVField.getField().getType()==Type.scalar) return;
@@ -52,8 +53,8 @@ public class BaseFloat64Average extends AbstractPortDriverInterruptLink implemen
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
         Interface iface = super.device.findInterface(user, "float64");
         if(iface==null) {

@@ -5,11 +5,12 @@
  */
 package org.epics.ioc.support.pdrv.scalar;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64;
 import org.epics.ioc.pdrv.interfaces.Float64InterruptListener;
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
 import org.epics.pvData.pv.MessageType;
@@ -45,7 +46,7 @@ implements Float64InterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         PVField pvDisplay = pvProperty.findProperty(valuePVField,"display");
@@ -83,8 +84,8 @@ implements Float64InterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
         Interface iface = device.findInterface(user, "float64");
         if(iface==null) {

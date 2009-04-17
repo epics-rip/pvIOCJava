@@ -5,7 +5,8 @@
  */
 package org.epics.ioc.support.dbLink;
 
-import org.epics.ioc.support.RecordSupport;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
@@ -44,7 +45,7 @@ abstract class AbstractIOLink extends AbstractLink {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         pvProcess = super.pvDatabaseLink.getBooleanField("process");
@@ -76,8 +77,8 @@ abstract class AbstractIOLink extends AbstractLink {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,null)) return;
         String name = super.pvnamePV.get();
         int ind = name.indexOf(".");

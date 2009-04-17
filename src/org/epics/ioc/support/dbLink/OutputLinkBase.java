@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support.dbLink;
 
+import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcessRequester;
@@ -39,8 +40,8 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     /* (non-Javadoc)
      * @see org.epics.ioc.support.dbLink.AbstractIOLink#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,null)) return;
         process = pvProcess.get();
         if(process) {

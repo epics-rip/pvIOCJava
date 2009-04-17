@@ -6,6 +6,8 @@
 package org.epics.ioc.support.pdrv;
 
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
@@ -16,7 +18,6 @@ import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -101,7 +102,7 @@ public class PortDeviceControlFactory {
          * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
         @Override
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             recordProcess = recordSupport.getRecordProcess();
             pvProcessAtStart = pvStructure.getBooleanField("processAtStart");
@@ -132,8 +133,8 @@ public class PortDeviceControlFactory {
          * @see org.epics.ioc.support.AbstractSupport#start()
          */
         @Override
-        public void start() {
-            super.start();
+        public void start(AfterStart afterStart) {
+            super.start(afterStart);
             if(!super.checkSupportState(SupportState.ready,supportName)) return;
             processAtStart = pvProcessAtStart.get();
             if(!processAtStart) return;

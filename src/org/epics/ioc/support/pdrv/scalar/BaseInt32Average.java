@@ -5,10 +5,11 @@
  */
 package org.epics.ioc.support.pdrv.scalar;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.interfaces.Int32;
 import org.epics.ioc.pdrv.interfaces.Int32InterruptListener;
 import org.epics.ioc.pdrv.interfaces.Interface;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
@@ -39,7 +40,7 @@ implements Int32InterruptListener
     private Int32 int32 = null;
     private int numValues = 0;
     private long sum = 0;
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(super.valuePVField.getField().getType()==Type.scalar) return;
@@ -50,8 +51,8 @@ implements Int32InterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
         Interface iface = super.device.findInterface(user, "int32");
         if(iface==null) {

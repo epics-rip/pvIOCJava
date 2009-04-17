@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.support.pdrv;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
@@ -18,7 +20,6 @@ import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -76,7 +77,7 @@ public class PortDriverLinkFactory {
         
         private SupportProcessRequester supportProcessRequester = null;
         
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             recordProcess = recordSupport.getRecordProcess();
             PVStructure pvStructure = (PVStructure)super.getPVField();
@@ -158,7 +159,7 @@ public class PortDriverLinkFactory {
             setSupportState(SupportState.readyForInitialize);
         }
         
-        public void start() {
+        public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             PVStructure pvStructure = (PVStructure)super.getPVField();
             
@@ -174,7 +175,7 @@ public class PortDriverLinkFactory {
                 return;
             }
             deviceTrace = device.getTrace();
-            alarmSupport.start();
+            alarmSupport.start(null);
             if(alarmSupport.getSupportState()!=SupportState.ready) return;
             Interface iface = device.findInterface(user, "driverUser");
             if(iface!=null) {
@@ -184,7 +185,7 @@ public class PortDriverLinkFactory {
             for(int i=0; i<portDriverSupports.length; i++) {
                 PortDriverSupport portDriverSupport = portDriverSupports[i];
                 portDriverSupport.setPortDriverLink(this);
-                portDriverSupport.start();
+                portDriverSupport.start(null);
                 if(portDriverSupport.getSupportState()!=SupportState.ready) {
                     for(int j=0; j<i-1; j++) {
                         portDriverSupports[j].stop();

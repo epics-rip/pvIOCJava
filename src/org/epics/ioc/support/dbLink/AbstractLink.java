@@ -5,11 +5,12 @@
  */
 package org.epics.ioc.support.dbLink;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.install.IOCDatabase;
+import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordSupport;
-import org.epics.ioc.support.SupportDatabase;
-import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
@@ -33,14 +34,6 @@ import org.epics.pvData.pv.Type;
  *
  */
 abstract class AbstractLink extends AbstractSupport {
-    /**
-     * master database.
-     */
-    protected static final PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
-    /**
-     * master support database
-     */
-    protected static final SupportDatabase supportDatabase = SupportDatabaseFactory.get(pvDatabase);
     /**
      * The convert implementation.
      */
@@ -89,7 +82,7 @@ abstract class AbstractLink extends AbstractSupport {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,null)) return;
         pvnamePV = (PVString)super.getPVField();
         pvDatabaseLink = pvnamePV.getParent();
@@ -103,10 +96,26 @@ abstract class AbstractLink extends AbstractSupport {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
-    public void start() {
+    public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
-        recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
-        alarmSupport = AlarmSupportFactory.findAlarmSupport(pvDatabaseLink,recordSupport);
+        IOCDatabase supportDatabase = null;
+        PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+        if(pvDatabase.findRecord(pvRecord.getRecordName())!=null) {
+            supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
+        } else {
+            pvDatabase = PVDatabaseFactory.getBeingInstalled();
+            supportDatabase = IOCDatabaseFactory.get(pvDatabase);
+        }
+        if(supportDatabase==null) {
+            super.message("can not find supportDatabase", MessageType.error);
+            return;
+        }
+        recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+        if(recordProcess==null) {
+            super.message("no recordProcess", MessageType.error);
+            return;
+        }
+        alarmSupport = AlarmSupportFactory.findAlarmSupport(pvDatabaseLink,locateSupport);
         if(alarmSupport==null) {
             super.message("no alarmSupport", MessageType.error);
             return;
@@ -119,7 +128,7 @@ abstract class AbstractLink extends AbstractSupport {
             super.message("pvname not found", MessageType.error);
             return;
         }
-        linkRecordProcess = supportDatabase.getRecordSupport(linkPVRecord).getRecordProcess();
-        super.start();
+        linkRecordProcess = supportDatabase.getLocateSupport(linkPVRecord).getRecordProcess();
+        super.start(afterStart);
     }
 }
