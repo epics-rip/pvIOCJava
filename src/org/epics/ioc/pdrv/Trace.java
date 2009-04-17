@@ -120,17 +120,17 @@ public interface Trace {
      * Generate a trace message and also show data values.
      * @param reason One of ERROR|SUPPORT|DRIVER|FLOW.
      * @param buffer The data array.
-     * @param len The number of data items.
+     * @param length The number of data items.
      * @param message The message to print.
      */
-    void printIO(int reason, byte[] buffer,long len,String message);
+    void printIO(int reason, byte[] buffer,long length,String message);
     /**
      * Generate a trace message and also show data values.
      * @param reason One of ERROR|SUPPORT|DRIVER|FLOW.
      * @param buffer The data array.
-     * @param len The number of data items.
+     * @param length The number of data items.
      * @param format A format.
      * @param args The data associated with the format.
      */
-    void printIO(int reason, byte[] buffer,long len,String format,Object... args);
+    void printIO(int reason, byte[] buffer,long length,String format,Object... args);
 }
