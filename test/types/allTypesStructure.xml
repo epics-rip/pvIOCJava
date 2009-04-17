@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<database>
+<include addPath = "${PVDATA}/test/types" />
+<include href = "allTypesStructure.xml" />
+<include removePath = "${PVDATA}/test/types" />
+</database>

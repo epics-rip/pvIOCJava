@@ -2,9 +2,9 @@
 <database>
 
 <record name = "syncStringPort" type = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.OctetDriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.SerialDriverFactory</scalar>
     <scalar name = "portName">syncStringPort</scalar>
-    <structure name = "driverParameters" type = "octetDriver" >
+    <structure name = "driverParameters" type = "serialDriver" >
         <scalar name = "delay">0.0</scalar>
         <scalar name = "eosInput">CRLF</scalar>
         <scalar name = "eosOutput">CRLF</scalar>
@@ -47,7 +47,7 @@
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "output" type = "pdrvOctetOutput"/>
+        <structure name = "output" type = "pdrvSerialOutput"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">syncStringIn</scalar>
@@ -62,7 +62,7 @@
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvOctetInput"/>
+        <structure name = "input" type = "pdrvSerialInput"/>
     </structure>
 </record>
 
@@ -70,7 +70,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "pdrvOctetInterrupt">
+    <structure name = "link" type = "pdrvSerialInterrupt">
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "process">true</scalar>
@@ -78,9 +78,9 @@
 </record>
 
 <record name = "asynStringPort" type = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.OctetDriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.SerialDriverFactory</scalar>
     <scalar name = "portName">asynStringPort</scalar>
-    <structure name = "driverParameters" type = "octetDriver" >
+    <structure name = "driverParameters" type = "serialDriver" >
         <scalar name = "delay">0.1</scalar>
     </structure>
 </record>
@@ -121,7 +121,7 @@
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "output" type = "pdrvOctetOutput"/>
+        <structure name = "output" type = "pdrvSerialOutput"/>
     </structure>
     <structure name = "link" type = "caProcessLink">
          <scalar name = "pvname">asynStringIn</scalar>
@@ -136,7 +136,7 @@
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvOctetInput"/>
+        <structure name = "input" type = "pdrvSerialInput"/>
     </structure>
 </record>
 
@@ -144,7 +144,7 @@
     <scalar name = "value" type = "string"/>
     <structure name = "alarm" type = "alarm" />
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "pdrvOctetInterrupt">
+    <structure name = "link" type = "pdrvSerialInterrupt">
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "process">true</scalar>

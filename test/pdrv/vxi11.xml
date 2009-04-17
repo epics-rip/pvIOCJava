@@ -46,6 +46,10 @@
             </structure>
         </structure>
     </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
 </record>
 
 
@@ -63,6 +67,10 @@
             <structure name = "input" type = "pdrvSerialInput"/>
         </structure>
     </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
 </record>
 
 <record name = "getIDN">
@@ -78,6 +86,10 @@
             <structure name = "output" type = "pdrvSerialOutput"/>
         </structure>
         <structure name = "input" type = "pdrvSerialInput"/>
+    </structure>
+    <structure name = "scan" type = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
     </structure>
 </record>
 

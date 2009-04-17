@@ -2,9 +2,9 @@
 <database>
 
 <record name = "syncStringDriver" type = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.OctetDriverFactory</scalar>
-    <scalar name = "portName">syncOctetPort</scalar>
-    <structure name = "driverParameters" type = "octetDriver" >
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.SerialDriverFactory</scalar>
+    <scalar name = "portName">syncSerialPort</scalar>
+    <structure name = "driverParameters" type = "serialDriver" >
         <scalar name = "delay">0.0</scalar>
     </structure>
 </record>
@@ -39,23 +39,22 @@
 <record name = "stringOut">
     <scalar name = "value" type = "string"/>
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetOutputFactory</auxInfo>
-        <scalar name = "portName">syncOctetPort</scalar>
+    <structure name = "outlink" type = "portDriverLink">
+        <scalar name = "portName">syncSerialPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
+        <structure name = "output" type = "pdrvSerialOutput"/>
     </structure>
 </record>
 
 <record name = "stringIn">
     <scalar name = "value" type = "string"/>
     <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "pdrvSupport">
-        <auxInfo name = "supportFactory" type = "string">pdrvOctetInputFactory</auxInfo>
-        <scalar name = "portName">syncOctetPort</scalar>
+    <structure name = "link" type = "portDriverLink">
+        <scalar name = "portName">syncSerialPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <scalar name = "size" >20</scalar>
+        <structure name = "input" type = "pdrvSerialInput"/>
     </structure>
 </record>
 
