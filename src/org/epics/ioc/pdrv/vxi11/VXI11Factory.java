@@ -566,7 +566,7 @@ public class VXI11Factory {
                     return Status.error;
                 }
                 /*
-                 * Start the RPC server
+                 * JavaIOC the RPC server
                  */
                 try {
                     tcpTrans =
