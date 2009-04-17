@@ -18,8 +18,12 @@ import org.epics.ioc.ca.CDMonitorRequester;
 import org.epics.ioc.ca.CDStructure;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.AfterStartFactory;
+import org.epics.ioc.install.AfterStartNode;
+import org.epics.ioc.install.AfterStartRequester;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
@@ -52,7 +56,7 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class MonitorLinkBase extends AbstractIOLink
-implements CDMonitorRequester,RecordProcessRequester
+implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
 {
     /**
      * The constructor.
@@ -84,7 +88,9 @@ implements CDMonitorRequester,RecordProcessRequester
     private PVDouble deadbandAccess = null;
     private PVInt queueSizeAccess = null;
     private PVBoolean reportOverrunAccess = null;
-    private PVBoolean processAccess = null;  
+    private PVBoolean processAccess = null;
+    private AfterStart afterStart = null;
+    private AfterStartNode afterStartNode = null;
     
     private String channelFieldName = null;
     private MonitorType monitorType = null;
@@ -113,7 +119,7 @@ implements CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(super.getSupportState()!=SupportState.readyForStart) return;
         PVStructure pvTypeStructure = pvStructure.getStructureField("type");
@@ -138,12 +144,13 @@ implements CDMonitorRequester,RecordProcessRequester
         if(processAccess==null)  {
             uninitialize(); return;
         }
+        
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
         int index = monitorTypeAccess.get();
         monitorType = MonitorType.getType(index);
@@ -164,7 +171,18 @@ implements CDMonitorRequester,RecordProcessRequester
                 }
             }
         }
+        this.afterStart = afterStart;
+        afterStartNode = AfterStartFactory.allocNode(this);
+        afterStart.requestCallback(afterStartNode, true, ThreadPriority.middle);
         super.connect();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
+     */
+    public void callback(AfterStartNode node) {
+        afterStart.done(afterStartNode);
+        afterStart = null;
+        afterStartNode = null;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#stop()
@@ -228,7 +246,7 @@ implements CDMonitorRequester,RecordProcessRequester
         this.cd = cd;
         if(process) {
             cdCopied = false;
-            if(recordProcess.process(this, false, null)) {
+            if(afterStart==null && recordProcess.process(this, false, null)) {
                 if(isRecordProcessRequester) {
                     lock.lock();
                     try {

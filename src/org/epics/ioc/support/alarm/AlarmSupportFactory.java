@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.alarm;
 
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.basic.GenericBase;
 import org.epics.pvData.property.AlarmSeverity;
@@ -39,11 +39,11 @@ public class AlarmSupportFactory {
     /**
      * If pvField has AlarmSupport return it.
      * @param pvField The field.
-     * @param recordSupport The recordSupport;
+     * @param locateSupport The locateSupport;
      * @return The AlarmSupport or null if not found.
      */
-    public static AlarmSupport getAlarmSupport(PVField pvField,RecordSupport recordSupport) {
-        Support support = recordSupport.getSupport(pvField);
+    public static AlarmSupport getAlarmSupport(PVField pvField,LocateSupport locateSupport) {
+        Support support = locateSupport.getSupport(pvField);
         if(support!=null && (support instanceof AlarmSupportImpl)) {
             return (AlarmSupport)support;
         }
@@ -54,10 +54,10 @@ public class AlarmSupportFactory {
      * Look first in startPVField if it is a structure.
      * If not found look up the parent tree.
      * @param startPVField The starting field.
-     * @param recordSupport The recordSupport.
+     * @param locateSupport The locateSupport.
      * @return The AlarmSupport or null if not found.
      */
-    public static AlarmSupport findAlarmSupport(PVField startPVField,RecordSupport recordSupport) {
+    public static AlarmSupport findAlarmSupport(PVField startPVField,LocateSupport locateSupport) {
         if(startPVField==null) return null;
         PVField parentPVField;
         if(startPVField instanceof PVStructure) {
@@ -74,7 +74,7 @@ public class AlarmSupportFactory {
                     Type type = field.getType();
                     if(type==Type.structure) {
                         if(field.getFieldName().equals("alarm")) {
-                            Support support = recordSupport.getSupport(pvField);
+                            Support support = locateSupport.getSupport(pvField);
                             if(support!=null && (support instanceof AlarmSupportImpl)) {
                                 return (AlarmSupport)support;
                             }
@@ -133,7 +133,7 @@ public class AlarmSupportFactory {
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
         @Override
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             // look for parent starting with parent of parent
             AlarmSupport parent = AlarmSupportFactory.findAlarmSupport(pvAlarm.getParent().getParent(),recordSupport);
             if(parent!=null) {

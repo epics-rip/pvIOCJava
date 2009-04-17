@@ -10,11 +10,16 @@ import org.epics.ioc.ca.ChannelFieldGroup;
 import org.epics.ioc.ca.ChannelMonitorNotify;
 import org.epics.ioc.ca.ChannelMonitorNotifyFactory;
 import org.epics.ioc.ca.ChannelMonitorNotifyRequester;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.AfterStartFactory;
+import org.epics.ioc.install.AfterStartNode;
+import org.epics.ioc.install.AfterStartRequester;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -26,10 +31,12 @@ import org.epics.pvData.pv.PVField;
  *
  */
 public class MonitorNotifyLinkBase extends AbstractLink
-implements RecordProcessRequester,ChannelMonitorNotifyRequester
+implements AfterStartRequester,RecordProcessRequester,ChannelMonitorNotifyRequester
 {
     private ChannelMonitorNotify channelMonitorNotify = null;
     private boolean isActive = false;
+    private AfterStart afterStart = null;
+    private AfterStartNode afterStartNode = null;
     
     /**
      * The constructor.
@@ -42,7 +49,7 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         if(!recordProcess.setRecordProcessRequester(this)) {
@@ -53,10 +60,22 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,null)) return;
+        this.afterStart = afterStart;
+        afterStartNode = AfterStartFactory.allocNode(this);
+        afterStart.requestCallback(afterStartNode, true, ThreadPriority.middle);
         super.connect();
+        super.connect();
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
+     */
+    public void callback(AfterStartNode node) {
+        afterStart.done(afterStartNode);
+        afterStart = null;
+        afterStartNode = null;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -100,6 +119,7 @@ implements RecordProcessRequester,ChannelMonitorNotifyRequester
      * @see org.epics.ioc.ca.ChannelMonitorNotifyRequester#monitorEvent()
      */
     public void monitorEvent() {
+        if(afterStart!=null) return;
         if(isActive) {
             pvRecord.lock();
             try {

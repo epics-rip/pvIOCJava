@@ -5,6 +5,10 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.AfterStartFactory;
+import org.epics.ioc.install.AfterStartNode;
+import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -18,6 +22,7 @@ import org.epics.ioc.util.ScanType;
 import org.epics.ioc.util.ScannerFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
@@ -49,7 +54,7 @@ public class ScanFactory {
         return new ScanImpl(pvStructure,scanField);
     }
     
-    private static class ScanImpl extends AbstractSupport implements PVListener
+    private static class ScanImpl extends AbstractSupport implements PVListener, AfterStartRequester
     {
         private ScanField scanField;
         private PVRecord pvRecord = null;
@@ -68,6 +73,9 @@ public class ScanFactory {
         private ThreadPriority threadPriority = null;
         private String eventName = null;
         private ScanModify scanModify = null;
+        private AfterStartNode afterStartNode = null;
+        private AfterStart afterStart = null;
+       
         
         private ScanImpl(PVStructure pvScan,ScanField scanField) {
             super("scan",pvScan);
@@ -77,7 +85,8 @@ public class ScanFactory {
             pvScanType = pvScan.getStructureField("type");
             pvScanTypeIndex = scanField.getScanTypeIndexPV();
             pvRate = scanField.getRatePV();
-            pvEventName = scanField.getEventNamePV(); 
+            pvEventName = scanField.getEventNamePV();
+            afterStartNode = AfterStartFactory.allocNode(this);
         }
         
         /* (non-Javadoc)
@@ -119,13 +128,15 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             setSupportState(SupportState.ready);
             isStarted = true;
             if(isActive) {
                 addListeners();
                 callScanModify();
             }
+            this.afterStart = afterStart;
+            afterStart.requestCallback(afterStartNode, true, ThreadPriority.lower);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#stop()
@@ -138,17 +149,7 @@ public class ScanFactory {
                 scanModify.modify();
                 scanModify = null;
             }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#allSupportStarted()
-         */
-        @Override
-        public void allSupportStarted() {
-            if(isStarted && !isActive) {
-                isActive = true;
-                addListeners();
-                callScanModify();
-            }
+            afterStart = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
@@ -157,7 +158,18 @@ public class ScanFactory {
             super.message("process is being called. Why?", MessageType.error);
             supportProcessRequester.supportProcessDone(RequestResult.failure);
         }       
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
+         */
+        public void callback(AfterStartNode node) {
+            if(isStarted && !isActive) {
+                isActive = true;
+                addListeners();
+                callScanModify();
+            }
+            afterStart.done(afterStartNode);
+        }
+
         private void addListeners() {
             pvScanType.addListener(this);
             pvRate.addListener(this);
@@ -188,8 +200,11 @@ public class ScanFactory {
         private class ScanModify implements Runnable {
             private boolean isPeriodic = false;
             private boolean isEvent = false;
+            private ExecutorNode executorNode = null;
             
-            private ScanModify() {}
+            private ScanModify() {
+                executorNode = executor.createNode(this);
+            }
             
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
@@ -200,7 +215,7 @@ public class ScanFactory {
             }
             
             public void modify() {
-                executor.execute(this);
+                executor.execute(executorNode);
             }
             
             

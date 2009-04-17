@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.alarm;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -62,7 +63,7 @@ public class BooleanAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             SupportState supportState = SupportState.readyForStart;
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure pvParent = pvStructure.getParent();
@@ -119,7 +120,7 @@ public class BooleanAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             if(noop) {
                 setSupportState(SupportState.ready);

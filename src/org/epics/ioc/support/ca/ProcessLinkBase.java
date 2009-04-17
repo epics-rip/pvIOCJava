@@ -7,11 +7,13 @@ package org.epics.ioc.support.ca;
 
 import org.epics.ioc.ca.ChannelProcess;
 import org.epics.ioc.ca.ChannelProcessRequester;
+import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.PVField;
@@ -31,9 +33,11 @@ implements Runnable,ProcessContinueRequester, ChannelProcessRequester
     public ProcessLinkBase(String supportName,PVField pvField) {
         super(supportName,pvField);
         executor = ExecutorFactory.create(pvField.getFullName(), ThreadPriority.lower);
+        executorNode = executor.createNode(this);
     }
     
     private Executor executor = null;
+    private ExecutorNode executorNode = null;
     private ChannelProcess channelProcess = null;
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult;
@@ -66,8 +70,8 @@ implements Runnable,ProcessContinueRequester, ChannelProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         super.connect();
     }
     /* (non-Javadoc)
@@ -90,7 +94,7 @@ implements Runnable,ProcessContinueRequester, ChannelProcessRequester
             return;
         }
         this.supportProcessRequester = supportProcessRequester;
-        executor.execute(this);
+        executor.execute(executorNode);
     }
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()

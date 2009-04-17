@@ -12,8 +12,9 @@ import org.epics.ioc.ca.CDPut;
 import org.epics.ioc.ca.CDPutRequester;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
@@ -93,7 +94,7 @@ public class OutputLinkBase extends AbstractIOLink implements ProcessContinueReq
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(super.getSupportState()!=SupportState.readyForStart) return;
         processAccess = pvStructure.getBooleanField("process");
@@ -105,8 +106,8 @@ public class OutputLinkBase extends AbstractIOLink implements ProcessContinueReq
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
         process = processAccess.get();
         super.connect();

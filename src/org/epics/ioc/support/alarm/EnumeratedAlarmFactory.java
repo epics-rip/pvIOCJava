@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.alarm;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -61,7 +62,7 @@ public class EnumeratedAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#initialize()
          */
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure pvStruct = pvStructure.getParent().getStructureField("value");
             if(pvStruct==null) return;
@@ -121,7 +122,7 @@ public class EnumeratedAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             if(noop) {
                 setSupportState(SupportState.ready);

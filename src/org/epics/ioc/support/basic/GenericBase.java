@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -60,7 +61,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
         processRequesterName = pvStructure.getFullName();
         SupportState supportState = SupportState.readyForStart;
@@ -122,20 +123,20 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
      */
-    public void start() {
+    public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(alarmSupport!=null) {
-            alarmSupport.start();
+            alarmSupport.start(null);
             if(alarmSupport.getSupportState()!=SupportState.ready) return;
         }
         for(int i=0; i<supports.length; i++) {
             Support support = supports[i];
-            support.start();
+            support.start(afterStart);
             if(support.getSupportState()!=SupportState.ready) {
                 for(int j=0; j<i; j++) {
                     supports[j].stop();
                 }
-                alarmSupport.stop();
+                if(alarmSupport!=null) alarmSupport.stop();
                 return;
             }
         }

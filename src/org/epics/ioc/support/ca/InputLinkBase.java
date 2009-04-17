@@ -15,8 +15,9 @@ import org.epics.ioc.ca.CDGetRequester;
 import org.epics.ioc.ca.CDStructure;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroup;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
@@ -86,7 +87,7 @@ implements CDGetRequester,ProcessContinueRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {   
+    public void initialize(LocateSupport recordSupport) {   
         super.initialize(recordSupport);
         if(super.getSupportState()!=SupportState.readyForStart) return;
         processAccess = pvStructure.getBooleanField("process");
@@ -98,8 +99,8 @@ implements CDGetRequester,ProcessContinueRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
      */
-    public void start() {
-        super.start();
+    public void start(AfterStart afterStart) {
+        super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
         process = processAccess.get();
         super.connect();

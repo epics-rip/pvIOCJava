@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.support.RecordSupport;
-import org.epics.ioc.support.SupportDatabaseFactory;
+import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.pvData.factory.BasePVByte;
@@ -119,7 +119,7 @@ public class ControlLimitFactory {
         
         private void raiseAlarm(boolean isHigh) {
             if(alarmSupport==null) {
-                RecordSupport recordSupport = SupportDatabaseFactory.get(masterPVDatabase).getRecordSupport(valuePVField.getPVRecord());
+                LocateSupport recordSupport = IOCDatabaseFactory.get(masterPVDatabase).getLocateSupport(valuePVField.getPVRecord());
                 alarmSupport = AlarmSupportFactory.findAlarmSupport(valuePVField,recordSupport);
                 if(alarmSupport==null) {
                     valuePVField.message("ControlLimit: no alarmSupport", MessageType.warning);

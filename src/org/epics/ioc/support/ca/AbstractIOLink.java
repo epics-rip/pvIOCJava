@@ -7,7 +7,8 @@ package org.epics.ioc.support.ca;
 
 import java.util.regex.Pattern;
 
-import org.epics.ioc.support.RecordSupport;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.misc.Enumerated;
@@ -86,7 +87,7 @@ abstract class AbstractIOLink extends AbstractLink  {
         super(supportName,pvField);
     }
     
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         PVStructure pvParent = super.pvStructure;
@@ -119,7 +120,7 @@ abstract class AbstractIOLink extends AbstractLink  {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
-    public void start() {
+    public void start(AfterStart afterStart) {
         if(propertyNamesPV!=null) {
             String value = propertyNamesPV.get();
             if(value!=null) {
@@ -185,7 +186,7 @@ abstract class AbstractIOLink extends AbstractLink  {
             }
             break;
         }
-        super.start();
+        super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,null)) return;
     }
     /* (non-Javadoc)

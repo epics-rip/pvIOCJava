@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -93,7 +94,7 @@ public class LinearConvertFactory {
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
         @Override
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,linearConvertInput)) return;
             PVStructure pvParent = pvStructure.getParent();
             pvRawValue = getInt(pvParent,"value");
@@ -125,7 +126,7 @@ public class LinearConvertFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             slope = pvSlope.get();
             intercept = pvIntercept.get();
             if(slope==0.0) {

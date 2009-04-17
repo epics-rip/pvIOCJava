@@ -8,10 +8,11 @@ package org.epics.ioc.support.basic;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -58,7 +59,7 @@ public class DelayFactory {
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
         @Override
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             this.recordProcess = recordSupport.getRecordProcess();
             minAccess = pvStructure.getLongField("min");
@@ -82,7 +83,7 @@ public class DelayFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             min = minAccess.get();
             max = maxAccess.get();
@@ -109,9 +110,8 @@ public class DelayFactory {
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             this.supportProcessRequester = supportProcessRequester;
-
+            TimerTask timerTask = new DelayTask(this);
             try {
-                TimerTask timerTask = new DelayTask(this);
                 timer.schedule(timerTask, delay);
             } catch (IllegalStateException e) {
                 pvStructure.message(

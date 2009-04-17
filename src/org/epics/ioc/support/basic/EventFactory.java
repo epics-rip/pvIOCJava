@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -70,7 +71,7 @@ public class EventFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             supportState = SupportState.ready;
             eventName = pvEventName.get();
             if(eventName!=null) {

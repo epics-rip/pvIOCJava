@@ -5,13 +5,13 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.install.IOCDatabase;
+import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
-import org.epics.ioc.support.SupportDatabase;
-import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
@@ -20,6 +20,7 @@ import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -50,15 +51,15 @@ public class ProcessControlFactory {
     private static final String supportName = "processControl";
     private static final String emptyString = "";
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final SupportDatabase supportDatabase = SupportDatabaseFactory.get(masterPVDatabase);
+    private static final IOCDatabase supportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     
     
     private static class ProcessControlImpl extends AbstractSupport
     implements Runnable,ProcessContinueRequester
     {
         
-        private Executor iocExecutor = ExecutorFactory.create(ProcessControlFactory.supportName, ThreadPriority.lowest);
-        
+        private Executor executor = ExecutorFactory.create(ProcessControlFactory.supportName, ThreadPriority.lowest);
+        private ExecutorNode executorNode = null;
         private RecordProcess recordProcess = null;
         
         private PVString pvMessage = null;
@@ -91,13 +92,14 @@ public class ProcessControlFactory {
         
         private ProcessControlImpl(PVStructure pvStructure) {
             super(ProcessControlFactory.supportName,pvStructure);
+            executorNode = executor.createNode(this); 
             
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
         @Override
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             PVStructure pvProcessControl = (PVStructure)super.getPVField();
             recordProcess = recordSupport.getRecordProcess();
             pvMessage = pvProcessControl.getStringField("message");
@@ -140,7 +142,7 @@ public class ProcessControlFactory {
             supportState = null;
             supportStateCommand = SupportStateCommand.getSupportStateCommand(
                     supportStateCommandPVInt.get());
-            iocExecutor.execute(this);
+            executor.execute(executorNode);
         }
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
@@ -154,7 +156,7 @@ public class ProcessControlFactory {
                     recordProcess.processContinue(this);
                     return;
                 }
-                targetRecordProcess = supportDatabase.getRecordSupport(targetPVRecord).getRecordProcess();
+                targetRecordProcess = supportDatabase.getLocateSupport(targetPVRecord).getRecordProcess();
                 if(targetRecordProcess==null) {
                     requestResult = RequestResult.failure;
                     message = "recordProcess for " + "recordName " + recordName + " not found";
@@ -204,7 +206,7 @@ public class ProcessControlFactory {
                                 return;
                             }
                         }
-                        targetRecordProcess.start(); break;
+                        targetRecordProcess.start(null); break;
                     case stop:
                         desiredState = SupportState.readyForStart;
                         if(supportState!=SupportState.ready) {

@@ -11,9 +11,10 @@ import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelFieldGroupListener;
 import org.epics.ioc.ca.ChannelListener;
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
@@ -98,7 +99,7 @@ abstract class AbstractLink extends AbstractSupport implements ChannelListener,C
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
-    public void initialize(RecordSupport recordSupport) {
+    public void initialize(LocateSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,null)) return;
        
         recordProcess = recordSupport.getRecordProcess();
@@ -121,7 +122,7 @@ abstract class AbstractLink extends AbstractSupport implements ChannelListener,C
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
-    public void start() {
+    public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         String providerName = providerPV.get();
         String pvname = pvnamePV.get();
@@ -130,7 +131,7 @@ abstract class AbstractLink extends AbstractSupport implements ChannelListener,C
             message("providerName " + providerName + " pvname " + pvname + " not found",MessageType.error);
             return;
         }
-        super.start();
+        super.start(afterStart);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#stop()
@@ -163,7 +164,7 @@ abstract class AbstractLink extends AbstractSupport implements ChannelListener,C
             pvRecord.unlock();
         }
         recordProcess.stop();
-        recordProcess.start();
+        recordProcess.start(null);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)

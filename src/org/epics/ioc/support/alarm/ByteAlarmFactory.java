@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.alarm;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.RecordSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -64,7 +65,7 @@ public class ByteAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
-        public void initialize(RecordSupport recordSupport) {
+        public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
             pvValue = pvStructure.getParent().getByteField("value");
@@ -90,7 +91,7 @@ public class ByteAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */
-        public void start() {
+        public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             SupportState supportState = SupportState.ready;
             PVField[] pvFields = pvAlarmIntervalArray.getPVFields();
@@ -160,7 +161,7 @@ public class ByteAlarmFactory {
                 }
             }
             int outOfRange = pvOutOfRange.get();
-            // intervalValue is pvAlarmIntervalValue[len-1].get();
+            // intervalValue is pvAlarmIntervalValue[length-1].get();
             raiseAlarm(intervalValue,val,outOfRange,"out of range");
         }
         
