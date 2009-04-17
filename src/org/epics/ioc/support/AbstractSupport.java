@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -20,7 +22,7 @@ public abstract class AbstractSupport implements Support {
     protected String supportName;
     private PVField pvField;
     private SupportState supportState = SupportState.readyForInitialize;
-    protected RecordSupport recordSupport = null;
+    protected LocateSupport locateSupport = null;
     
     /**
      * Constructor.
@@ -66,14 +68,14 @@ public abstract class AbstractSupport implements Support {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordProcess)
      */
-    public void initialize(RecordSupport recordSupport) {
-        this.recordSupport = recordSupport;
+    public void initialize(LocateSupport locateSupport) {
+        this.locateSupport = locateSupport;
         setSupportState(SupportState.readyForStart);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#start()
      */
-    public void start() {
+    public void start(AfterStart afterStart) {
         setSupportState(SupportState.ready);
     }
     /* (non-Javadoc)
@@ -88,12 +90,6 @@ public abstract class AbstractSupport implements Support {
     public void uninitialize() {
         if(supportState==SupportState.ready) stop();
         setSupportState(SupportState.readyForInitialize);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.Support#allSupportStarted()
-     */
-    public void allSupportStarted() {
-        // nothing to do
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#process(org.epics.ioc.process.SupportProcessRequester)
