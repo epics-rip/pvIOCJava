@@ -46,6 +46,7 @@ public class IOCConsoleFactory {
             this.display = display;
         }
 
+        private boolean isDisposed = false;
         private static String windowName = "iocConsole";
         private static String newLine = String.format("%n");
         private Display display;
@@ -57,6 +58,7 @@ public class IOCConsoleFactory {
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
+            isDisposed = true;
             masterPVDatabase.removeRequester(this);
         }
         /* (non-Javadoc)
@@ -69,6 +71,7 @@ public class IOCConsoleFactory {
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
+            if(isDisposed) return;
             consoleMessage = messageType.toString() + " " + message;
             display.syncExec(this);
         }         
@@ -76,6 +79,7 @@ public class IOCConsoleFactory {
          * @see java.lang.Runnable#run()
          */
         public void run() {
+            if(isDisposed) return;
             consoleText.append(consoleMessage);
             consoleText.append(newLine);
         }
