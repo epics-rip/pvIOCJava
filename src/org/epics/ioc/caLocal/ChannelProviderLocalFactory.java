@@ -26,10 +26,10 @@ import org.epics.ioc.ca.ChannelPut;
 import org.epics.ioc.ca.ChannelPutGet;
 import org.epics.ioc.ca.ChannelPutGetRequester;
 import org.epics.ioc.ca.ChannelPutRequester;
+import org.epics.ioc.install.IOCDatabase;
+import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.ioc.support.SupportDatabase;
-import org.epics.ioc.support.SupportDatabaseFactory;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.property.PVProperty;
@@ -60,8 +60,6 @@ public class ChannelProviderLocalFactory  {
     }
     
     private static boolean isRegistered = false; 
-    private static final PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
-    private static final SupportDatabase supportDatabase = SupportDatabaseFactory.get(pvDatabase);
     private static final String providerName = "local";
     private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty();
 
@@ -93,8 +91,15 @@ public class ChannelProviderLocalFactory  {
                     options = names[0];
                 }
             }
+            PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
             PVRecord pvRecord = pvDatabase.findRecord(recordName);
-            if(pvRecord==null) return null;
+            if(pvRecord==null) {
+                pvDatabase = PVDatabaseFactory.getBeingInstalled();
+                if(pvDatabase!=null) pvRecord = pvDatabase.findRecord(recordName);
+            }
+            if(pvRecord==null) {
+                return null;
+            }
             if(fieldName!=null) {
                 PVField pvField = pvRecord.getPVRecord().getSubField(fieldName);
                 if(pvField==null) return null;
@@ -115,8 +120,13 @@ public class ChannelProviderLocalFactory  {
             int index = channelName.indexOf('.');
             String recordName = channelName;
             if(index>=0) recordName = channelName.substring(0,index);
-            if(pvDatabase.findRecord(recordName)==null) return false;
-            return true;
+            PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+            PVRecord pvRecord = pvDatabase.findRecord(recordName);
+            if(pvRecord==null) {
+                pvDatabase = PVDatabaseFactory.getBeingInstalled();
+                if(pvDatabase!=null) pvRecord = pvDatabase.findRecord(recordName);
+            }
+            return((pvRecord==null) ? false : true);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#destroy()
@@ -295,7 +305,20 @@ public class ChannelProviderLocalFactory  {
             }
             
             private boolean init() {
-                recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                IOCDatabase supportDatabase = null;
+                PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+                if(pvDatabase.findRecord(pvRecord.getRecordName())!=null) {
+                    supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
+                } else {
+                    pvDatabase = PVDatabaseFactory.getBeingInstalled();
+                    supportDatabase = IOCDatabaseFactory.get(pvDatabase);
+                }
+                if(supportDatabase==null) {
+                    channelProcessRequester.message(
+                            "can not find support database", MessageType.error);
+                        return false;
+                }
+                recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 if(recordProcess==null) {
                     channelProcessRequester.message(
                             "record does not have a recordProcess", MessageType.error);
@@ -395,7 +418,17 @@ public class ChannelProviderLocalFactory  {
                 channelFieldList = fieldGroup.getList();
                 requesterName = "Get:" + channelGetRequester.getRequesterName();
                 if(process) {
-                    recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                    IOCDatabase supportDatabase = null;
+                    PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+                    if(pvDatabase.findRecord(pvRecord.getRecordName())!=null) {
+                        supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
+                    } else {
+                        pvDatabase = PVDatabaseFactory.getBeingInstalled();
+                        supportDatabase = IOCDatabaseFactory.get(pvDatabase);
+                    }
+                    if(supportDatabase!=null) {
+                        recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                    }
                     if(recordProcess==null) {
                         channelGetRequester.message(
                                 "record does not have a recordProcess", MessageType.error);
@@ -545,7 +578,17 @@ public class ChannelProviderLocalFactory  {
                 this.process = process;
                 channelFields = channelFieldGroup.getArray();
                 if(process) {
-                    recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                    IOCDatabase supportDatabase = null;
+                    PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+                    if(pvDatabase.findRecord(pvRecord.getRecordName())!=null) {
+                        supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
+                    } else {
+                        pvDatabase = PVDatabaseFactory.getBeingInstalled();
+                        supportDatabase = IOCDatabaseFactory.get(pvDatabase);
+                    }
+                    if(supportDatabase!=null) {
+                        recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                    }
                     if(recordProcess==null) {
                         channelPutRequester.message(
                                 "record does not have a recordProcess", MessageType.error);
@@ -707,7 +750,17 @@ public class ChannelProviderLocalFactory  {
                 putChannelFields = putFieldGroup.getArray();
                 requesterName = "ChannelGetPut:" + channelPutGetRequester.getRequesterName();
                 if(process) {
-                    recordProcess = supportDatabase.getRecordSupport(pvRecord).getRecordProcess();
+                    IOCDatabase supportDatabase = null;
+                    PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+                    if(pvDatabase.findRecord(pvRecord.getRecordName())!=null) {
+                        supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
+                    } else {
+                        pvDatabase = PVDatabaseFactory.getBeingInstalled();
+                        supportDatabase = IOCDatabaseFactory.get(pvDatabase);
+                    }
+                    if(supportDatabase!=null) {
+                        recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                    }
                     if(recordProcess==null) {
                         channelPutGetRequester.message(
                                 "record does not have a recordProcess", MessageType.error);
