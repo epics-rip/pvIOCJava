@@ -81,7 +81,9 @@ public class BaseFloat64Output extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
     public void queueCallback() {
-        deviceTrace.print(Trace.SUPPORT, "%s value = %e", fullName,value);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT, "pv %s value = %e", fullName,value);
+        }
         status = float64.write(user, value);
     }
     /* (non-Javadoc)
