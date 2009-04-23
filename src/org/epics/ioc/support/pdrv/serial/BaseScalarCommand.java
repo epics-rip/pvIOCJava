@@ -63,8 +63,9 @@ public class BaseScalarCommand extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#beginProcess()
      */
     public void beginProcess() {
-        deviceTrace.print(Trace.FLOW,
-            "%s:%s process",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,"pv %s beginProcess",fullName);
+        }
         String prefix = pvPrefix.get();
         builder.setLength(0);
         if(prefix!=null) builder.append(prefix + " ");
