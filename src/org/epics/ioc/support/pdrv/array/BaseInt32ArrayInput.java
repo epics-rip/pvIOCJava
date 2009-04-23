@@ -84,11 +84,15 @@ public class BaseInt32ArrayInput extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
     public void queueCallback() {
-        deviceTrace.print(Trace.SUPPORT, "%s startRead", fullName);           ;
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT, "pv %s queueCallback", fullName);
+        }         ;
         Status status = int32Array.startRead(user);
         if(status!=Status.success) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s int32Array.startRead failed", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support %s int32Array.startRead failed", fullName,supportName);
+            }
             return;
         }
         PVIntArray pvIntArray = int32Array.getPVIntArray();

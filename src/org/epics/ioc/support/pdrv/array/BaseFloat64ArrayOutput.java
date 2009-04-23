@@ -8,6 +8,7 @@ package org.epics.ioc.support.pdrv.array;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Status;
+import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64Array;
 import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.support.SupportState;
@@ -83,6 +84,9 @@ public class BaseFloat64ArrayOutput extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
     public void queueCallback() {
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT, "pv %s queueCallback", fullName);
+        }
         Status status = float64Array.startWrite(user);
         if(status==Status.success) {
             PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
