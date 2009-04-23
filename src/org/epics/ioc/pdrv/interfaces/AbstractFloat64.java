@@ -75,10 +75,10 @@ public abstract class AbstractFloat64 extends AbstractInterface implements Float
      */
     public void interruptOccurred(double data) {
         if(interruptActive) {
-            super.print(Trace.FLOW ,
-                    "new interrupt while interruptActive");
+            super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
+        super.print(Trace.FLOW ,"interruptOccured");
         interruptData = data;
         interrupt.interrupt();
     }

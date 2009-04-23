@@ -65,6 +65,7 @@ public abstract class AbstractInt32 extends AbstractInterface implements Int32 {
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
+        super.print(Trace.FLOW ,"interruptOccured");
         interruptData = data;
         interrupt.interrupt();
     }

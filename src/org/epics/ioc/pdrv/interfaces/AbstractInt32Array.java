@@ -69,12 +69,14 @@ public abstract class AbstractInt32Array extends AbstractInterface implements In
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endRead(org.epics.ioc.pdrv.User)
      */
     public Status endRead(User user){
+        super.print(Trace.FLOW ,"endRead");
         return Status.success;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#endWrite(org.epics.ioc.pdrv.User)
      */
     public Status endWrite(User user) {
+        super.print(Trace.FLOW ,"endWrite");
         interruptOccurred();
         return Status.success;
     }
@@ -82,12 +84,14 @@ public abstract class AbstractInt32Array extends AbstractInterface implements In
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#startRead(org.epics.ioc.pdrv.User)
      */
     public Status startRead(User user) {
+        super.print(Trace.FLOW ,"startRead");
         return Status.success;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32Array#startWrite(org.epics.ioc.pdrv.User)
      */
     public Status startWrite(User user) {
+        super.print(Trace.FLOW ,"startWrite");
         return Status.success;
     }
     /* (non-Javadoc)
@@ -98,6 +102,7 @@ public abstract class AbstractInt32Array extends AbstractInterface implements In
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
+        super.print(Trace.FLOW ,"interruptOccured");
         interrupt.interrupt();
     }
     /* (non-Javadoc)

@@ -68,12 +68,14 @@ public abstract class AbstractFloat64Array extends AbstractInterface implements 
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#endRead(org.epics.ioc.pdrv.User)
      */
     public Status endRead(User user) {
+        super.print(Trace.FLOW ,device.getFullName() + " endRead");
         return Status.success;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#endWrite(org.epics.ioc.pdrv.User)
      */
     public Status endWrite(User user) {
+        super.print(Trace.FLOW ,device.getFullName() + " endWrite");
         interruptOccurred();
         return Status.success;
     }
@@ -81,12 +83,14 @@ public abstract class AbstractFloat64Array extends AbstractInterface implements 
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#startRead(org.epics.ioc.pdrv.User)
      */
     public Status startRead(User user) {
+        super.print(Trace.FLOW ,device.getFullName() + " startRead");
         return Status.success;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64Array#startWrite(org.epics.ioc.pdrv.User)
      */
     public Status startWrite(User user) {
+        super.print(Trace.FLOW ,device.getFullName() + " endWrite");
         return Status.success;
     }
     /* (non-Javadoc)
@@ -98,6 +102,7 @@ public abstract class AbstractFloat64Array extends AbstractInterface implements 
                     "new interrupt while interruptActive");
             return;
         }
+        super.print(Trace.FLOW ,device.getFullName() + " interruptOccured");
         interrupt.interrupt();
     }
     /* (non-Javadoc)
