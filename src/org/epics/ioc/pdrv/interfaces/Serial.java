@@ -29,7 +29,7 @@ public interface Serial extends Interface {
     
     /**
      * Write a serial message.
-     * Interpose or driver code may add end of string terminators to the message
+     * Driver code may add end of string terminators to the message
      * but the extra characters are not included in the number of bytes written. 
      * @param user The user.
      * @param data The data.
@@ -45,7 +45,7 @@ public interface Serial extends Interface {
      * If read returns asynSuccess than eomReason
      * (some combination of EOM_CNT, EOM_EOS, and EOM_END)
      * tells why the read completed.
-     * Interpose or driver code may strip end of string terminators from the message.
+     * Driver code may strip end of string terminators from the message.
      * If it does the the eos characters will not be included in nbytesTransfered.
      * @param user The user.
      * @param data The data.
