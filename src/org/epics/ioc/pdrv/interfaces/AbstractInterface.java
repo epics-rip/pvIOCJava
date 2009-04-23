@@ -35,9 +35,8 @@ public abstract class AbstractInterface implements Interface {
      */
     protected void print(int reason,String message) {
     	if((reason&trace.getMask())==0) return;
-        trace.print(reason,
-        	"port " + device.getPort().getPortName()
-        	+ ":" + device.getDeviceName() + " "+ message);
+        trace.print(reason,"%s[%s] %s%n",
+        	device.getPort().getPortName(),device.getDeviceName(),message);
     }
     /**
      * Generate a trace message.
