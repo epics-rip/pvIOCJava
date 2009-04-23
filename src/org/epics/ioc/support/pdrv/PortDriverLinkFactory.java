@@ -224,8 +224,10 @@ public class PortDriverLinkFactory {
             for(PortDriverSupport portDriverSupport : portDriverSupports) {
                 portDriverSupport.beginProcess();
             }
-            deviceTrace.print(Trace.FLOW,
-                    "%s:%s process calling queueRequest", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                deviceTrace.print(Trace.FLOW,
+                    "pv %s support %s process calling queueRequest", fullName,supportName);
+            }
             user.setMessage(null);
             user.setTimeout(pvTimeout.get());
             this.supportProcessRequester = supportProcessRequester;
@@ -270,23 +272,26 @@ public class PortDriverLinkFactory {
          */
         public void callback(Status status, User user) {
             String fullName = super.getPVField().getFullName();
-            deviceTrace.print(Trace.FLOW,
-                "%s:%s callback status %s",
-                fullName,supportName,status.toString());
             if(status==Status.success) {
-                deviceTrace.print(Trace.FLOW,
-                        "%s:%s callback calling queueCallback", fullName,supportName);
+                if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                    deviceTrace.print(Trace.FLOW,
+                        "pv %s callback calling queueCallback", fullName);
+                }
                 for(PortDriverSupport portDriverSupport : portDriverSupports) {
                     portDriverSupport.queueCallback();
                 }
             } else {
-                deviceTrace.print(Trace.ERROR,
-                        "%s:%s callback error %s",
+                if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                    deviceTrace.print(Trace.FLOW,
+                        "pv %s support %s callback error %s",
                         fullName,supportName,user.getMessage());
+                }
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            deviceTrace.print(Trace.FLOW,
-                    "%s:%s callback calling processContinue", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                deviceTrace.print(Trace.FLOW,
+                    "pv %s callback calling processContinue", fullName);
+            }
             recordProcess.processContinue(this);
         }
         
@@ -298,10 +303,10 @@ public class PortDriverLinkFactory {
                 portDriverSupport.endProcess();
             }
             String fullName = super.getPVField().getFullName();
-            deviceTrace.print(Trace.FLOW,
-                "%s:%s processContinue calling supportProcessDone",
-                fullName,supportName);
-            deviceTrace.print(Trace.FLOW,"%s:%s process done", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                deviceTrace.print(Trace.FLOW,
+                    "pv %s processContinue calling supportProcessDone",fullName);
+            }
             String message = user.getMessage();
             if(message!=null && message!=emptyString) {
                 alarmSupport.setAlarm(message, AlarmSeverity.minor);

@@ -176,9 +176,11 @@ implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
      * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
      */
     public void callback(Status status, User user) {
-        deviceTrace.print(Trace.ERROR,
-                "%s:%s why was callback called???",
+        if((deviceTrace.getMask()&Trace.ERROR)!=0) {
+            deviceTrace.print(Trace.ERROR,
+                "record %s support %s why was callback called???%n",
                 fullName,supportName);
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()

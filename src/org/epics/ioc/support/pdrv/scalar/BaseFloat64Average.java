@@ -7,6 +7,7 @@ package org.epics.ioc.support.pdrv.scalar;
 
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64;
 import org.epics.ioc.pdrv.interfaces.Float64InterruptListener;
 import org.epics.ioc.pdrv.interfaces.Interface;
@@ -100,6 +101,9 @@ public class BaseFloat64Average extends AbstractPortDriverInterruptLink implemen
      * @see org.epics.ioc.pdrv.interfaces.Float64InterruptListener#interrupt(double)
      */
     public void interrupt(double value) {
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW, "pv %s interrupt", fullName);
+        }
         super.pvRecord.lock();
         try {
             sum += (double)value;

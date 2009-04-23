@@ -124,17 +124,23 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
     public void queueCallback() {
-        deviceTrace.print(Trace.FLOW,
-                "%s:%s queueCallback calling read ",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,
+                "pv %s queueCallback calling read ",fullName);
+        }
         Status status = float64.read(user);
         if(status!=Status.success) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s float64.read failed", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.ERROR)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support %s float64.read failed", fullName,supportName);
+            }
             alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
             return;
         }
         value = user.getDouble();
-        deviceTrace.print(Trace.SUPPORT, "%s value = %e", fullName,value);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT, "pv %s value = %e", fullName,value);
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#endProcess()

@@ -29,9 +29,9 @@ import org.epics.pvData.pv.PVStructure;
 /**
  * Abstract link support base class for PDRV links.
  * It handles all the generic things for a PDRV link.
- * It connects locates the interfaces for all the PDRV fields in the link structure.
+ * It connects and locates the interfaces for all the PDRV fields in the link structure.
  * For each of the lifetime methods it provides methods (initBase, startBase, stopBase, uninitBase)
- * than must be called by derived classes.
+ * that must be called by derived classes.
  * The process and message implementation should be sufficient for most derived support.
  * @author mrk
  *
@@ -162,7 +162,7 @@ implements PortDriverSupport
      */
     @Override
     public void process(SupportProcessRequester supportProcessRequester) {
-        throw new IllegalStateException("process shold never be called");
+        throw new IllegalStateException("process should never be called");
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#processCallback()

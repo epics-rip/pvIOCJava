@@ -132,9 +132,10 @@ implements Float64InterruptListener
             pvRecord.lock();
             try {
                 putData(value);
-                deviceTrace.print(Trace.FLOW,
-                    "%s:%s interrupt and record not processed",
-                    fullName,supportName);
+                if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                    deviceTrace.print(Trace.SUPPORT,
+                        "pv %s interrupt and record not processed value %e",fullName,value);
+                }
             } finally {
                 pvRecord.unlock();
             }
@@ -143,8 +144,10 @@ implements Float64InterruptListener
     
     private void putData(double value) {
         convert.fromDouble((PVScalar)valuePVField, value);
-        deviceTrace.print(Trace.FLOW,
-            "%s:%s putData ",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT,
+                "pv %s value = %e",fullName,value);
+        }
     }
 }
 

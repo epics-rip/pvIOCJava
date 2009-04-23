@@ -144,9 +144,11 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
             pvRecord.lock();
             try {
                 putData(value);
-                deviceTrace.print(Trace.FLOW,
-                    "%s:%s interrupt and record not processed",
-                    fullName,supportName);
+                if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                    deviceTrace.print(Trace.SUPPORT,
+                        "pv %s support %s interrupt and record not processed",
+                        fullName,supportName);
+                }
             } finally {
                 pvRecord.unlock();
             }
@@ -167,7 +169,9 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
         } else {
             pvStructure.message(" logic error", MessageType.fatalError);
         }
-        deviceTrace.print(Trace.FLOW,
-                "%s:%s putData and  calling postPut",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,
+                "pv %s support %s putData and  calling postPut",fullName,supportName);
+        }
     }
 }

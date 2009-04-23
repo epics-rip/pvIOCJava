@@ -157,15 +157,21 @@ public class BaseUInt32DigitalInput extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
     public void queueCallback() {
-        deviceTrace.print(Trace.FLOW,
-                "%s:%s queueCallback calling read ",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,
+                "pv %s support%s queueCallback calling read ",fullName,supportName);
+        }
         Status status = uint32Digital.read(user,mask);
         if(status!=Status.success) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s uint32Digital.read failed", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support%s uint32Digital.read failed", fullName,supportName);
+            }
             return;
         }
         value = user.getInt();
-        deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT, "pv %s value = %d", fullName,value);
+        }
     }
 }
