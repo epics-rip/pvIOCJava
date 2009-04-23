@@ -98,7 +98,6 @@ implements SerialInterruptListener
      * @see org.epics.ioc.pdrv.interfaces.SerialInterruptListener#interrupt(byte[], int)
      */
     public void interrupt(byte[] data, int nbytes) {
-        
         if(super.isProcess()) {
             recordProcess.setActive(this);
             putData(data,nbytes);
@@ -107,9 +106,10 @@ implements SerialInterruptListener
             pvRecord.lock();
             try {
                 putData(data,nbytes);
-                deviceTrace.print(Trace.FLOW,
-                    "%s:%s interrupt and record not processed",
-                    fullName,supportName);
+                if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                    deviceTrace.print(Trace.SUPPORT,
+                        "pv %s interrupt and record not processed",fullName);
+                }
             } finally {
                 pvRecord.unlock();
             }
@@ -124,7 +124,8 @@ implements SerialInterruptListener
             String string = String.copyValueOf(charArray, 0, nbytes);
             convert.fromString((PVScalar)valuePVField, string);
         }
-        deviceTrace.print(Trace.FLOW,
-            "%s:%s putData ",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT,"pv %s putData ",fullName);
+        }
     }
 }
