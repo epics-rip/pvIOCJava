@@ -66,6 +66,7 @@ public abstract class AbstractSerial extends AbstractInterface implements Serial
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
+        super.print(Trace.FLOW ,"interruptOccured");
         interruptData = data;
         interruptNumchars = nbytes;
         interrupt.interrupt();
