@@ -111,9 +111,11 @@ implements Float64ArrayInterruptListener
             } finally {
                 pvRecord.unlock();
             }
-            deviceTrace.print(Trace.SUPPORT,
-                    "%s:%s interrupt and record not processed",
+            if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                deviceTrace.print(Trace.SUPPORT,
+                    "pv %s support %s interrupt and record not processed",
                     fullName,supportName);
+            }
         }
     }
 }
