@@ -81,11 +81,15 @@ public class BaseInt32Output extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
     public void queueCallback() {
-        deviceTrace.print(Trace.SUPPORT, "%s value = %d", fullName,value);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT, "pv %s value = %d", fullName,value);
+        }
         status = int32.write(user, value);
         if(status!=Status.success) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s int32.write failed", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support %s int32.write failed", fullName,supportName);
+            }
             return;
         }
     }
