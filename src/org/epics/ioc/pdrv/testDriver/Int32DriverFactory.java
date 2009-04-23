@@ -7,12 +7,12 @@ package org.epics.ioc.pdrv.testDriver;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
-import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
+import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.interfaces.AbstractInt32;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.PVDouble;
@@ -92,6 +92,7 @@ public class Int32DriverFactory {
         private int low;
         private int high;
         private double delay;
+        private long milliseconds;
         private Port port;
         private Trace trace;
         
@@ -102,6 +103,7 @@ public class Int32DriverFactory {
             this.low = low;
             this.high = high;
             this.delay = delay;
+            milliseconds = (long)(delay * 1000.0);
             port = Factory.createPort(portName, this, "int32Driver",
                 canBlock, autoConnect,priority);
             trace = port.getTrace();
@@ -111,7 +113,7 @@ public class Int32DriverFactory {
          */
         public String report(int details) {
             if(details==0) return null;
-            return "low " + low + " high " + high;
+            return "delay " + delay + " low " + low + " high " + high;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
@@ -122,6 +124,13 @@ public class Int32DriverFactory {
                 user.setMessage("already connected");
                 trace.print(Trace.ERROR ,port.getPortName() + " already connected");
                 return Status.error;
+            }
+            if(delay>0.0) {
+                try {
+                    Thread.sleep(milliseconds);
+                } catch (InterruptedException ie) {
+
+                }
             }
             port.exceptionConnect();
             return Status.success;
@@ -184,6 +193,13 @@ public class Int32DriverFactory {
                     trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
+                if(delay>0.0) {
+                    try {
+                        Thread.sleep(milliseconds);
+                    } catch (InterruptedException ie) {
+
+                    }
+                }
                 device.exceptionConnect();
                 return Status.success;
             }
@@ -202,12 +218,9 @@ public class Int32DriverFactory {
             }
             
             private class Int32Interface extends  AbstractInt32{
-                private long milliseconds;
                 private Int32Interface(Device device) {
                     super(device);
-                    milliseconds = (long)(delay * 1000.0);
                 }
-
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.AbstractInt32#getBounds(org.epics.ioc.pdrv.User, int[])
                  */
@@ -238,7 +251,10 @@ public class Int32DriverFactory {
                         }
                     }
                     user.setInt(register[addr]);
-                    trace.print(Trace.DRIVER,device.getFullName() + " read value = " + register[addr]);
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        String info = device.getFullName() + " read value = " + register[addr];
+                        trace.print(Trace.DRIVER,info);
+                    }
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -267,7 +283,10 @@ public class Int32DriverFactory {
                         return Status.error;
                     }
                     register[addr] = value;
-                    trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        String info = device.getFullName() + " write value = " + register[addr];
+                        trace.print(Trace.DRIVER,info);
+                    }
                     super.interruptOccurred(value);
                     return Status.success;
                 }

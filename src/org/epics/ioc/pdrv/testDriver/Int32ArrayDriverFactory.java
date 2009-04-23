@@ -7,12 +7,12 @@ package org.epics.ioc.pdrv.testDriver;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
-import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
+import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.interfaces.AbstractInt32Array;
 import org.epics.pvData.factory.BasePVIntArray;
 import org.epics.pvData.factory.FieldFactory;
@@ -89,7 +89,8 @@ public class Int32ArrayDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#report(boolean, int)
          */
         public String report(int details) {
-            return null;
+            if(details==0) return null;
+            return "delay " + delay + " maxSegmentSize " + maxSegmentSize;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
@@ -100,6 +101,13 @@ public class Int32ArrayDriverFactory {
                 user.setMessage("already connected");
                 trace.print(Trace.ERROR ,port.getPortName() + " already connected");
                 return Status.error;
+            }
+            if(delay>0.0) {
+                try {
+                    Thread.sleep(milliseconds);
+                } catch (InterruptedException ie) {
+
+                }
             }
             port.exceptionConnect();
             return Status.success;
@@ -155,6 +163,13 @@ public class Int32ArrayDriverFactory {
                     user.setMessage("already connected");
                     trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
+                }
+                if(delay>0.0) {
+                    try {
+                        Thread.sleep(milliseconds);
+                    } catch (InterruptedException ie) {
+
+                    }
                 }
                 device.exceptionConnect();
                 return Status.success;
@@ -251,6 +266,10 @@ public class Int32ArrayDriverFactory {
 
                         }
                     }
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        String info = device.getFullName() + " get offset " + offset + " len " + len;
+                        trace.print(Trace.DRIVER,info);
+                    }
                     if(maxSegmentSize>0 && len>maxSegmentSize) len = maxSegmentSize;
                     int n = len;
                     if(offset+len > length) n = length - offset;
@@ -275,6 +294,10 @@ public class Int32ArrayDriverFactory {
                         } catch (InterruptedException ie) {
 
                         }
+                    }
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        String info = device.getFullName() + " put offset " + offset + " len " + len;
+                        trace.print(Trace.DRIVER,info);
                     }
                     if(maxSegmentSize>0 && len>maxSegmentSize) len = maxSegmentSize;
                     if(offset+len > length) {

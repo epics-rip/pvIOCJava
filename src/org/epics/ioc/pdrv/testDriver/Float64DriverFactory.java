@@ -7,12 +7,12 @@ package org.epics.ioc.pdrv.testDriver;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
-import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
+import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.interfaces.AbstractFloat64;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.PVDouble;
@@ -92,7 +92,8 @@ public class Float64DriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#report(boolean, int)
          */
         public String report(int details) {
-            return null;
+            if(details==0) return null;
+            return "delay " + delay;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
@@ -103,6 +104,13 @@ public class Float64DriverFactory {
                 user.setMessage("already connected");
                 trace.print(Trace.ERROR ,port.getPortName() + " already connected");
                 return Status.error;
+            }
+            if(delay>0.0) {
+                try {
+                    Thread.sleep(milliseconds);
+                } catch (InterruptedException ie) {
+
+                }
             }
             port.exceptionConnect();
             return Status.success;
@@ -165,6 +173,13 @@ public class Float64DriverFactory {
                     trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
+                if(delay>0.0) {
+                    try {
+                        Thread.sleep(milliseconds);
+                    } catch (InterruptedException ie) {
+
+                    }
+                }
                 device.exceptionConnect();
                 return Status.success;
             }
@@ -208,7 +223,10 @@ public class Float64DriverFactory {
                         }
                     }
                     user.setDouble(register[addr]);
-                    trace.print(Trace.DRIVER,device.getFullName() + " read value = " + register[addr]);
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        String info = device.getFullName() + " read value = " + register[addr];
+                        trace.print(Trace.DRIVER,info);
+                    }
                     return Status.success;
                 }                
                 /* (non-Javadoc)
@@ -232,7 +250,10 @@ public class Float64DriverFactory {
                         }
                     }
                     register[addr] = value;
-                    trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        String info = device.getFullName() + " write value = " + register[addr];
+                        trace.print(Trace.DRIVER,info);
+                    }
                     super.interruptOccurred(value);
                     return Status.success;
                 }

@@ -7,12 +7,12 @@ package org.epics.ioc.pdrv.testDriver;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
-import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
+import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.interfaces.AbstractUInt32Digital;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.PVDouble;
@@ -72,6 +72,7 @@ public class UInt32DigitalDriverFactory {
     static private class UInt32DigitalDriver implements PortDriver {
         private int[] register;
         private double delay;
+        private long milliseconds;
         private Port port;
         private String portName;
         private Trace trace;
@@ -81,6 +82,7 @@ public class UInt32DigitalDriverFactory {
         {
             register = new int[numberRegisters];
             this.delay = delay;
+            milliseconds = (long)(delay * 1000.0);
             port = Factory.createPort(portName, this, "uint32DigitalDriver",canBlock, autoConnect,priority);
             portName = port.getPortName();
             trace = port.getTrace();
@@ -89,7 +91,8 @@ public class UInt32DigitalDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#report(boolean, int)
          */
         public String report(int details) {
-            return null;
+            if(details==0) return null;
+            return "delay " + delay;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
@@ -100,6 +103,13 @@ public class UInt32DigitalDriverFactory {
                 user.setMessage("already connected");
                 trace.print(Trace.ERROR ,portName + " already connected");
                 return Status.error;
+            }
+            if(delay>0.0) {
+                try {
+                    Thread.sleep(milliseconds);
+                } catch (InterruptedException ie) {
+
+                }
             }
             port.exceptionConnect();
             return Status.success;
@@ -161,6 +171,13 @@ public class UInt32DigitalDriverFactory {
                     trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
+                if(delay>0.0) {
+                    try {
+                        Thread.sleep(milliseconds);
+                    } catch (InterruptedException ie) {
+
+                    }
+                }
                 device.exceptionConnect();
                 return Status.success;
             }
@@ -179,10 +196,8 @@ public class UInt32DigitalDriverFactory {
             }
             
             private class UInt32DigitalInterface extends  AbstractUInt32Digital{
-                private long milliseconds;
                 private UInt32DigitalInterface(Device device) {
                     super(device);
-                    milliseconds = (long)(delay * 1000.0);
                 }               
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.AbstractUInt32Digital#read(org.epics.ioc.pdrv.User, int)
@@ -206,7 +221,9 @@ public class UInt32DigitalDriverFactory {
                     }
                     int value = register[addr]&mask;
                     user.setInt(value);
-                    trace.print(Trace.DRIVER,device.getFullName() + " read value = " + value);
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        trace.print(Trace.DRIVER,device.getFullName() + " read value = " + value);
+                    }
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -232,7 +249,9 @@ public class UInt32DigitalDriverFactory {
                     int newValue = register[addr]&~mask;
                     newValue |= value&mask;
                     register[addr] = newValue;
-                    trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
+                    if((trace.getMask()&Trace.DRIVER)!=0) {
+                        trace.print(Trace.DRIVER,device.getFullName() + " write value = " + register[addr]);
+                    }
                     super.interruptOccurred(newValue);
                     return Status.success;
                 }

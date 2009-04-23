@@ -7,12 +7,12 @@ package org.epics.ioc.pdrv.testDriver;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
-import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
+import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.interfaces.AbstractSerial;
 import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.pvData.misc.ThreadPriority;
@@ -83,6 +83,7 @@ public class SerialDriverFactory {
 
     static private class SerialDriver implements PortDriver {
         private double delay;
+        private long milliseconds;
         private String portName;
         private Port port;
         private Trace trace;
@@ -96,6 +97,7 @@ public class SerialDriverFactory {
                 byte[] eosInput,byte[] eosOutput)
         {
             this.delay = delay;
+            milliseconds = (long)(delay * 1000.0);
             this.portName = portName;
             this.eosInput = eosInput;
             this.eosOutput = eosOutput;
@@ -121,6 +123,13 @@ public class SerialDriverFactory {
                 user.setMessage("already connected");
                 trace.print(Trace.ERROR ,portName + " already connected");
                 return Status.error;
+            }
+            if(delay>0.0) {
+                try {
+                    Thread.sleep(milliseconds);
+                } catch (InterruptedException ie) {
+
+                }
             }
             port.exceptionConnect();
             return Status.success;
@@ -179,6 +188,13 @@ public class SerialDriverFactory {
                     trace.print(Trace.ERROR ,device.getFullName() + " already connected");
                     return Status.error;
                 }
+                if(delay>0.0) {
+                    try {
+                        Thread.sleep(milliseconds);
+                    } catch (InterruptedException ie) {
+
+                    }
+                }
                 device.exceptionConnect();
                 return Status.success;
             }
@@ -198,13 +214,11 @@ public class SerialDriverFactory {
 
             private class EchoSerial extends  AbstractSerial{
                 private static final int BUFFERSIZE = 4096;
-                private long milliseconds;
                 private byte[] buffer = new byte[BUFFERSIZE];
                 private int size;
 
                 private EchoSerial(Device device) {
                     super(device);
-                    milliseconds = (long)(delay * 1000.0);
                 }
                 /* (non-Javadoc)
                  * @see org.epics.ioc.pdrv.interfaces.AbstractSerial#flush(org.epics.ioc.pdrv.User)
@@ -231,9 +245,11 @@ public class SerialDriverFactory {
                     user.setAuxStatus(eosInputLength);
                     eos[0] = eosInput[0];
                     eos[1] = eosInput[1];
-                    trace.printIO(Trace.FLOW ,
+                    if((trace.getMask()&Trace.FLOW)!=0) {
+                        trace.printIO(Trace.FLOW ,
                             eosInput,eosInputLength,
                             device.getFullName() +  " getInputEos");
+                    }
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -248,9 +264,11 @@ public class SerialDriverFactory {
                     user.setAuxStatus(eosOutputLength);
                     eos[0] = eosOutput[0];
                     eos[1] = eosOutput[1];
-                    trace.printIO(Trace.FLOW ,
+                    if((trace.getMask()&Trace.FLOW)!=0) {
+                        trace.printIO(Trace.FLOW ,
                             eosOutput,eosOutputLength,
                             device.getFullName() + " getOutputEos");
+                    }
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -300,7 +318,9 @@ public class SerialDriverFactory {
                     }
                     user.setAuxStatus(auxStatus);
                     user.setInt(nForUser);
-                    trace.printIO(Trace.DRIVER ,data,nRead,device.getFullName() +  " read");
+                    if(((trace.getMask()&Trace.DRIVER)!=0) && trace.getIOMask()!=0) {
+                        trace.printIO(Trace.DRIVER ,data,nRead,device.getFullName() +  " read");
+                    }
                     size = 0;
                     return status;
                 }
@@ -319,7 +339,9 @@ public class SerialDriverFactory {
                     }
                     eosInputLength = eosLen;
                     for(int i=0; i<eosLen; i++) eosInput[i] = eos[i];
-                    trace.printIO(Trace.FLOW ,eosInput,eosInputLength,device.getFullName() + " setInputEos");
+                    if(((trace.getMask()&Trace.DRIVER)!=0) && trace.getIOMask()!=0) {
+                        trace.printIO(Trace.DRIVER ,eosInput,eosInputLength,device.getFullName() + " setInputEos");
+                    }
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -337,7 +359,9 @@ public class SerialDriverFactory {
                     }
                     eosOutputLength = eosLen;
                     for(int i=0; i<eosLen; i++) eosOutput[i] = eos[i];
-                    trace.printIO(Trace.FLOW ,eosOutput,eosOutputLength,device.getFullName() + " setOutputEos");
+                    if(((trace.getMask()&Trace.DRIVER)!=0) && trace.getIOMask()!=0) {
+                        trace.printIO(Trace.DRIVER ,eosOutput,eosOutputLength,device.getFullName() + " setOutputEos");
+                    }
                     return Status.success;
                 }
                 /* (non-Javadoc)
@@ -385,7 +409,9 @@ public class SerialDriverFactory {
                         buffer[i] = data[i];
                     }
                     user.setInt(nbytes);
-                    trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " write");
+                    if(((trace.getMask()&Trace.DRIVER)!=0) && trace.getIOMask()!=0) {
+                        trace.printIO(Trace.DRIVER ,data,n,device.getFullName() + " write");
+                    }
                     super.interruptOccurred(buffer, nbytes);
                     return status;
                 }
