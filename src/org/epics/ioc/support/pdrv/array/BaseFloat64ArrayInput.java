@@ -84,11 +84,15 @@ public class BaseFloat64ArrayInput extends AbstractPortDriverSupport
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
     public void queueCallback() {
-        deviceTrace.print(Trace.SUPPORT, "%s queueCallback", fullName);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT, "pv %s queueCallback", fullName);
+        }
         Status status = float64Array.startRead(user);
         if(status!=Status.success) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s float64Array.startRead failed", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support %s int32Array.startRead failed", fullName,supportName);
+            }
             return;
         }
         PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
