@@ -121,9 +121,6 @@ public class BaseSerialOutput extends AbstractPortDriverSupport
      */
     public void beginProcess() {
         super.beginProcess();
-        deviceTrace.print(Trace.FLOW,
-            "%s:%s process",fullName,supportName);
-        
         if(valueIsArray) {
             nbytes = valuePVArray.getLength();
             if(size<nbytes) {
@@ -163,20 +160,26 @@ public class BaseSerialOutput extends AbstractPortDriverSupport
      */
     public void queueCallback() {
         super.queueCallback();
-        deviceTrace.print(Trace.FLOW,
-                "%s:%s calling write",
-                fullName,supportName);
-        deviceTrace.printIO(Trace.SUPPORT, byteArray, nbytes, "%s", fullName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,"pv %s calling write",fullName);
+        }
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.printIO(Trace.SUPPORT, byteArray, nbytes, "%s", fullName);
+        }
         status = serial.write(user, byteArray, nbytes);
         if(status!=Status.success) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s serial.write failed", fullName,supportName);
+            if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support %s serial.write failed", fullName,supportName);
+            }
             return;
         }
         if(user.getInt()!=nbytes) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s write requested %d bytes set %d bytes",
+            if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support %s write requested %d bytes set %d bytes",
                     fullName,supportName,nbytes,user.getInt());
+            }
         }
     }
 }
