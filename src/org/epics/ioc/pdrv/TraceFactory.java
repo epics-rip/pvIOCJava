@@ -181,8 +181,7 @@ public class TraceFactory {
             if((reason&mask)==0) return;
             traceLock.lock();
             try {
-                file.write(getTime() + String.format(format, args));
-                file.write(String.format("%n"));
+                file.write(getTime() + String.format(format, args) +  String.format("%n"));
                 file.flush();
             }catch (IOException e) {
                 System.err.println(e.getMessage());
