@@ -7,6 +7,7 @@ package org.epics.ioc.support.pdrv.scalar;
 
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Int32;
 import org.epics.ioc.pdrv.interfaces.Int32InterruptListener;
 import org.epics.ioc.pdrv.interfaces.Interface;
@@ -98,6 +99,11 @@ implements Int32InterruptListener
      * @see org.epics.ioc.pdrv.interfaces.Int32InterruptListener#interrupt(int)
      */
     public void interrupt(int value) {
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,
+                "pv %s support %s interrupt",
+                fullName,supportName);
+        }
         super.pvRecord.lock();
         try {
             sum += (long)value;

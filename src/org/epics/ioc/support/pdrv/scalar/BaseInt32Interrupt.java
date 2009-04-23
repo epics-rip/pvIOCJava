@@ -87,9 +87,10 @@ implements Int32InterruptListener
             pvRecord.lock();
             try {
                 putData(value);
-                deviceTrace.print(Trace.FLOW,
-                    "%s:%s interrupt and record not processed",
-                    fullName,supportName);
+                if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+                    deviceTrace.print(Trace.SUPPORT,
+                        "pv %s interrupt and record not processed value %d",fullName,value);
+                }
             } finally {
                 pvRecord.unlock();
             }
@@ -98,7 +99,8 @@ implements Int32InterruptListener
     
     private void putData(int value) {
         convert.fromInt(pvValue, value);
-        deviceTrace.print(Trace.FLOW,
-            "%s:%s putData value " + value,fullName,supportName);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.print(Trace.SUPPORT,"pv %s putData value %d",fullName,value);
+        }
     }
 }
