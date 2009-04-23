@@ -66,7 +66,7 @@ public class ClientFactory  {
         
         private void start() {
             afterStartNode = AfterStartFactory.allocNode(this);
-            AfterStartFactory.NewAfterStartRegister(this);
+            AfterStartFactory.newAfterStartRegister(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.install.NewAfterStartRequester#callback(org.epics.ioc.install.AfterStart)

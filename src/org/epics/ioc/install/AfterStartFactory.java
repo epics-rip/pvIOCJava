@@ -39,14 +39,14 @@ public class AfterStartFactory {
     public static AfterStartNode allocNode(AfterStartRequester requester) {
         return new ASRNode(requester);
     }
-    public static void NewAfterStartRegister(NewAfterStartRequester requester) {
+    public static void newAfterStartRegister(NewAfterStartRequester requester) {
         NASRNode node = new NASRNode(requester);
         synchronized(newAfterStartRequesterList) {
             newAfterStartRequesterList.addTail(node.listNode);
         }
     }
     
-    public static void NewAfterStartUnregister(NewAfterStartRequester requester) {
+    public static void newAfterStartUnregister(NewAfterStartRequester requester) {
         synchronized(newAfterStartRequesterList) {
             LinkedListNode<NASRNode> node = newAfterStartRequesterList.getHead();
             while(node!=null) {

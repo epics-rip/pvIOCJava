@@ -5,14 +5,21 @@
  */
 package org.epics.ioc.pdrv;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.io.Writer;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.AfterStartFactory;
+import org.epics.ioc.install.AfterStartNode;
+import org.epics.ioc.install.AfterStartRequester;
+import org.epics.ioc.install.NewAfterStartRequester;
 import org.epics.ioc.pdrv.interfaces.Interface;
+import org.epics.pvData.misc.LinkedList;
+import org.epics.pvData.misc.LinkedListCreate;
+import org.epics.pvData.misc.LinkedListNode;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
@@ -21,14 +28,14 @@ import org.epics.pvData.misc.ThreadReady;
 
 
 /**
- * Factory for creating PDRV (Port Driver) objects.
+ * Factory for portDriver.
  * @author mrk
  *
  */
 public class Factory {
     /**
      * Create a User, which is the "handle" for communicating with port and device drivers.
-     * @param queueRequestCallback The user callback for port.queueRequest and device.queueRequest.
+     * @param queueRequestCallback The user callback for user.queueRequest.
      * @return The interface to a User object.
      */
     public static User createUser(QueueRequestCallback queueRequestCallback) {
@@ -51,35 +58,34 @@ public class Factory {
     { 
         PortImpl port = new PortImpl(
                 portName,portDriver,driverName,canBlock,autoConnect,priority);
-        globalLock.lock();
-        try {
-            if(portList.contains(port)){
-                throw new IllegalStateException("port already exists"); 
+        synchronized(portList) {
+            LinkedListNode<PortImpl> node = portList.getHead();
+            while(node!=null) {
+                if(node.getObject().portName.equals(portName)) {
+                    throw new IllegalStateException("port already exists");
+                }
+                node = portList.getNext(node);
             }
-            portList.add(port);
-            return port;
-        } finally {
-            globalLock.unlock();
+            portList.addTail(port.portListNode);
         }
-        
+        if(autoConnect) port.startAutoConnect(100);
+        return port;
     }
     /**
      * Get an array of the portNames.
      * @return The array.
      */
     public static String[] getPortNames() {
-        globalLock.lock();
-        try {
-            String[] portNames = new String[portList.size()];
-            ListIterator<PortImpl> iter = portList.listIterator();
+        synchronized(portList) {
+            String[] portNames = new String[portList.getLength()];
+            LinkedListNode<PortImpl> node = portList.getHead();
             int index = 0;
-            while(iter.hasNext()) {
-                Port port = iter.next();
+            while(node!=null) {
+                Port port = node.getObject();
                 portNames[index++] = port.getPortName();
+                node = portList.getNext(node);
             }
             return portNames;
-        } finally {
-            globalLock.unlock();
         }
     }
     /**
@@ -88,19 +94,24 @@ public class Factory {
      * @return The interface or null if the port does not exits.
      */
     public static Port getPort(String portName) {
-        globalLock.lock();
-        try {
-            for(Port port : portList) {
+        synchronized(portList) {
+            LinkedListNode<PortImpl> node = portList.getHead();
+            while(node!=null) {
+                PortImpl port = node.getObject();
                 if(port.getPortName().equals(portName)) return port;
+                node = portList.getNext(node);
             }
             return null;
-        } finally {
-            globalLock.unlock();
         }
     }
     
-    private static ReentrantLock globalLock = new ReentrantLock();
-    private static List<PortImpl> portList = new LinkedList<PortImpl>();
+    private static LinkedListCreate<PortImpl> portListCreate = new LinkedListCreate<PortImpl>();
+    private static LinkedList<PortImpl> portList = portListCreate.create();
+    private static LinkedListCreate<DeviceImpl> deviceListCreate = new LinkedListCreate<DeviceImpl>();
+    private static LinkedListCreate<Interface> interfaceListCreate = new LinkedListCreate<Interface>();
+    private static LinkedListCreate<UserImpl> userListCreate = new LinkedListCreate<UserImpl>();
+    private static Timer timer = new Timer("portDriverAutoconnectTimer");
+    private static final long autoConnectPeriod = 10000; // 10 seconds
     
     private static class UserImpl implements User {
         
@@ -110,9 +121,12 @@ public class Factory {
         
         
         private QueueRequestCallback queueRequestCallback = null;
+        // listNode and isQueued are for PortThread
+        private LinkedListNode<UserImpl> listNode = userListCreate.createNode(this);
+        private boolean isQueued = false;
+        
         private PortImpl port = null;
         private DeviceImpl device = null;
-        private boolean isQueued = false;
         
         private Object userPvt = null;
         private Object portDriverPvt = null;
@@ -148,24 +162,22 @@ public class Factory {
         public Port connectPort(String portName) {
         	clearErrorParms();
             if(port!=null) {
-                setMessage("already connected");
+                setMessage("already connected to port");
                 return null;
             }
-            globalLock.lock();
-            try {               
-                ListIterator<PortImpl> iter = portList.listIterator();
-                while(iter.hasNext()) {
-                    PortImpl port =iter.next();
+            synchronized(portList) {
+                LinkedListNode<PortImpl> node = portList.getHead();
+                while(node!=null) {
+                    PortImpl port = node.getObject();
                     if(port.getPortName().equals(portName)) {
                         this.port = port;
                         return port;
                     }
+                    node = portList.getNext(node);
                 }
-                if(port==null) setMessage("portName " + portName + " not registered");
-            } finally {
-                globalLock.unlock();
+                setMessage("portName " + portName + " not registered");
+                return null;
             }
-            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#disconnectPort()
@@ -225,9 +237,30 @@ public class Factory {
         	clearErrorParms();
             Trace trace = port.getTrace();
             String portName = port.getPortName();
-            trace.print(Trace.FLOW, "%s queueRequest",portName);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s User.queueRequest",portName);
+            }
             if(queueRequestCallback==null) {
                 throw new IllegalStateException("queueRequestCallback is null");
+            }
+            boolean notConnected = true;
+            if(port==null) {
+                setMessage("not connected to a port");
+            } else  if(!port.isConnected()) {
+                setMessage("port is not connected");
+            } else if(device==null) {
+                setMessage("not connected to a device");
+            } else if(!device.isConnected()) {
+                setMessage("device is not connected");
+            } else {
+                notConnected = false;
+            }
+            if(notConnected) {
+                if((trace.getMask()&Trace.FLOW)!=0) {
+                    trace.print(Trace.FLOW, "%s User.queueRequest calling callback with not connected message",portName);
+                }
+                queueRequestCallback.callback(Status.error,this);
+                return;
             }
             PortThread portThread = port.portThread;
             if(portThread!=null) {
@@ -238,8 +271,10 @@ public class Factory {
                     queueRequestCallback.callback(status, this);
                     return;
                 }
-                try {  
-                    trace.print(Trace.FLOW, "%s queueRequest calling queueRequestCallback", portName);
+                try {
+                    if((trace.getMask()&Trace.FLOW)!=0) {
+                        trace.print(Trace.FLOW, "%s User.queueRequest calling queueRequestCallback", portName);
+                    }
                     queueRequestCallback.callback(Status.success,this);
                 } finally {
                     unlockPort();
@@ -253,7 +288,9 @@ public class Factory {
             if(port==null) return;
             Trace trace = port.getTrace();
             String portName = port.portName;
-            trace.print(Trace.FLOW, "%s cancelRequest", portName);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s User.cancelRequest", portName);
+            }
             PortThread portThread = port.portThread;
             if(portThread!=null) portThread.cancelRequest(this);
         }
@@ -261,10 +298,14 @@ public class Factory {
          * @see org.epics.ioc.pdrv.User#lockPort(org.epics.ioc.pdrv.User)
          */
         public Status lockPort() {
-        	clearErrorParms();
+            clearErrorParms();
             if(port==null) {
                 setMessage("not connected to a port");
                 return Status.error;
+            }
+            Trace trace = port.getTrace();
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s User.lockPort", port.getPortName());
             }
             Status status = Status.success;
             if(device!=null) {
@@ -274,28 +315,14 @@ public class Factory {
             }
             if(status!=Status.success) return status;
             if(!port.isConnected()) {
-                if(port.isAutoConnect()) {
-                    status = port.connect(this);
-                } else {
-                    status = Status.error;
-                }
-                if(status!=Status.success) {
-                    setMessage("port is not connected");
-                    port.unlockPort(this);
-                    return status;
-                }
+                setMessage("port is not connected");
+                port.unlockPort(this);
+                return Status.error;
             }
             if(device!=null && !device.isConnected()) {
-                if(device.isAutoConnect()) {
-                    status = device.connect(this);
-                } else {
-                    status = Status.error;
-                }
-                if(status!=Status.success) {
-                    setMessage("device is not connected");
-                    port.unlockPort(this);
-                    return status;
-                }
+                setMessage("device is not connected");
+                port.unlockPort(this);
+                return Status.error;
             }
             return status;
         }
@@ -308,10 +335,19 @@ public class Factory {
                 setMessage("not connected to a port");
                 return Status.error;
             }
+            Trace trace = port.getTrace();
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s User.lockPortForConnect", port.getPortName());
+            }
             Status status = port.lockPort(this);
             if(status==Status.success) {
                 if(port.connected) {
                     setMessage("port already connected");
+                    status = Status.error;
+                    port.unlockPort(this);
+                }
+                if(port.autoConnect) {
+                    setMessage("port is autoConnect");
                     status = Status.error;
                     port.unlockPort(this);
                 }
@@ -327,10 +363,19 @@ public class Factory {
                 setMessage("not connected to a device");
                 return Status.error;
             }
+            Trace trace = port.getTrace();
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s User.lockDeviceForConnect", port.getPortName());
+            }
             Status status = device.lockPort(this);
             if(status==Status.success) {
                 if(device.connected) {
                     setMessage("device already connected");
+                    status = Status.error;
+                    port.unlockPort(this);
+                }
+                if(device.autoConnect) {
+                    setMessage("device is autoConnect");
                     status = Status.error;
                     port.unlockPort(this);
                 }
@@ -380,7 +425,6 @@ public class Factory {
         public String getMessage() {
             return message;
         }
-        
 		/* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getReason()
          */
@@ -484,7 +528,7 @@ public class Factory {
         }
     }
     
-    private static class PortImpl implements Port {
+    private static class PortImpl implements Port,TraceOptionChangeListener, QueueRequestCallback {
         
         private PortImpl(String portName,PortDriver portDriver,String driverName,
             boolean canBlock,boolean autoConnect,ThreadPriority priority)
@@ -496,19 +540,24 @@ public class Factory {
             if(canBlock) {
                 portThread = new PortThread(this,priority);
             }
+            trace.optionChangeListenerAdd(portImplUser, this);
+            new InitialConnectTask(this);
         }
-        private ReentrantLock portLock = new ReentrantLock();
+        
+        private LinkedListNode<PortImpl> portListNode = portListCreate.createNode(this);
         private Trace trace = TraceFactory.create();
+        
         private String portName;
         private PortDriver portDriver;
         private String driverName;
-        private boolean autoConnect;        
+        private boolean autoConnect; 
+        private UserImpl portImplUser = (UserImpl)Factory.createUser(this);
         private PortThread portThread = null;        
         
         private boolean connected = false;
         private boolean enabled = true;
         
-        private List<DeviceImpl> deviceList = new LinkedList<DeviceImpl>();
+        private LinkedList<DeviceImpl> deviceList = deviceListCreate.create();
         private ConnectExceptionList exceptionList = new ConnectExceptionList();
         private boolean exceptionActive = false;
         
@@ -527,9 +576,11 @@ public class Factory {
                     "port %s driver %s isLocked %b%n",
                     portName,driverName,(lockPortUser==null ? false : true)
             ));
-            if(details>0) {
-                builder.append(String.format(
-                        "    autoConnect %b connected %b enabled %b%n",autoConnect,connected,enabled));
+            builder.append(String.format(
+                    "    autoConnect %b connected %b enabled %b%n",autoConnect,connected,enabled));
+            String driverReport = portDriver.report(details);
+            if(driverReport!=null) {
+                builder.append(String.format("    %s%n",driverReport));
             }
             if(reportDevices) {
                 Device[] devices = getDevices();
@@ -543,18 +594,17 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Port#getDevices()
          */
         public Device[] getDevices() {
-            Device[] devices = null;
-            portLock.lock();
-            try {
-                int size = deviceList.size();
-                devices = new Device[size];
-                for(int i=0; i<size; i++) {
-                    devices[i] = deviceList.get(i);
+            synchronized(deviceList) {
+                Device[] devices = new Device[deviceList.getLength()];
+                LinkedListNode<DeviceImpl> node = deviceList.getHead();
+                int index = 0;
+                while(node!=null) {
+                    Device device = node.getObject();
+                    devices[index++] = device;
+                    node = deviceList.getNext(node);
                 }
-            } finally {
-                portLock.unlock();
+                return devices;
             }
-            return devices;
         }
         
         /* (non-Javadoc)
@@ -587,17 +637,15 @@ public class Factory {
          */
         public void enable(boolean trueFalse) {
             boolean changed = false;
-            portLock.lock();
-            try {
+            synchronized(this){
                 if(enabled!=trueFalse) {
                     enabled = trueFalse;
                     changed = true;
                 }
-
-            } finally {
-                portLock.unlock();
             }
-            trace.print(Trace.FLOW, "%s enable %b wasChanged %b", portName,trueFalse,changed);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.enable %b wasChanged %b", portName,trueFalse,changed);
+            }
             if(changed) {
                 raiseException(ConnectException.enable);
                 if(trueFalse) scanQueues();
@@ -608,58 +656,57 @@ public class Factory {
          */
         public void autoConnect(boolean trueFalse) {
             boolean changed = false;
-            trace.print(Trace.FLOW, "%s autoConnect %b", portName,trueFalse);
-            portLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.autoConnect %b", portName,trueFalse);
+            }
+            synchronized(this){
                 if(autoConnect!=trueFalse) {
                     autoConnect = trueFalse;
                     changed = true;
                 }
-            } finally {
-                portLock.unlock();
             }
-            trace.print(Trace.FLOW, "%s autoConnect %b was changed %b", portName,trueFalse,changed);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.autoConnect %b was changed %b", portName,trueFalse,changed);
+            }
             if(changed) {
                 raiseException(ConnectException.autoConnect);
-                if(trueFalse) scanQueues();
+                if(trueFalse) startAutoConnect(0);
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getDevice(org.epics.ioc.pdrv.User, java.lang.String)
          */
         public Device getDevice(User user, String deviceName) {
-            portLock.lock();
-            try {
-                int size = deviceList.size();
-                for(int i=0; i<size; i++) {
-                    Device device = deviceList.get(i);
+            synchronized(deviceList) {
+                LinkedListNode<DeviceImpl> node = deviceList.getHead();
+                while(node!=null) {
+                    Device device = node.getObject();
                     if(device.getDeviceName().equals(deviceName)) return device;
+                    node = deviceList.getNext(node);
                 }
-            } finally {
-                portLock.unlock();
             }
-            lockPort((UserImpl)user);
-            try {
-                return portDriver.createDevice(user, deviceName);
-            } finally {
-                unlockPort((UserImpl)user);
-            }
+            return portDriver.createDevice(user, deviceName);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#connect(org.epics.ioc.pdrv.User)
          */
-        public Status connect(User user) {         
+        public Status connect(User user) { 
             if(lockPortUser!=user) {
                 user.setMessage("Illegal to call connect without owning the port");
                 return Status.error;
             }
             if(connected) {
-                user.setMessage("already connected");
+                user.setMessage("port is already connected");
                 return Status.error;
             }
-            trace.print(Trace.FLOW, "%s connect", portName);
+            if(autoConnect) {
+                user.setMessage("port is autoConnect");
+                return Status.error;
+            }
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.connect", portName);
+            }
             Status status = portDriver.connect(user);
-            if(status==Status.success && portThread!=null) portThread.scanQueues();
             return status;
         }
         /* (non-Javadoc)
@@ -671,10 +718,16 @@ public class Factory {
                 return Status.error;
             }
             if(!connected) {
-                user.setMessage("not connected");
+                user.setMessage("port is alreadt disconnected");
                 return Status.error;
             }
-            trace.print(Trace.FLOW, "%s disconnect", portName);
+            if(autoConnect) {
+                user.setMessage("port is autoConnect");
+                return Status.error;
+            }
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.disconnect", portName);
+            }
             Status status = portDriver.disconnect(user);
             if(portThread!=null) portThread.scanQueues();
             return status;
@@ -702,126 +755,131 @@ public class Factory {
          */
         public Status exceptionListenerAdd(User user,ConnectExceptionListener listener)
         {
-            trace.print(Trace.FLOW, "%s exceptionListenerAdd", portName);
-            portLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.exceptionListenerAdd", portName);
+            }
+            synchronized(this){
                 if(!exceptionActive) {
                     return exceptionList.add(user, listener);
-
                 } else {
                     return exceptionList.addNew(user, listener);
                 }          
-            } finally {
-                portLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#exceptionListenerRemove(org.epics.ioc.pdrv.User)
          */
         public void exceptionListenerRemove(User user) {
-            trace.print(Trace.FLOW, "%s exceptionListenerRemove", portName);
-            portLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.exceptionListenerRemove", portName);
+            }
+            synchronized(this){
                 exceptionList.remove(user);
-            } finally {
-                portLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortUser#scanQueue()
          */
         public void scanQueues() {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.scanQueues", portName);
+            }
             if(portThread!=null) portThread.scanQueues();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#registerLockPortNotify(org.epics.ioc.pdrv.LockPortNotify)
          */
         public void registerLockPortNotify(LockPortNotify lockPortNotify) {
-            trace.print(Trace.FLOW, "%s registerLockPortNotify", portName);
-            portLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.registerLockPortNotify", portName);
+            }
+            synchronized(this){
                 if(this.lockPortNotify!=null) {
                     throw new IllegalStateException("lockPortNotify already registered");
                 }
                 this.lockPortNotify = lockPortNotify;
-            } finally {
-                portLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#unregisterLockPortNotify()
          */
         public void unregisterLockPortNotify() {
-            trace.print(Trace.FLOW, "%s unregisterLockPortNotify", portName);
-            portLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.unregisterLockPortNotify", portName);
+            }
+            synchronized(this){
                 if(this.lockPortNotify==null) {
                     throw new IllegalStateException("not registered");
                 }
                 lockPortNotify = null;
-            } finally {
-                portLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#createDevice(org.epics.ioc.pdrv.DeviceDriver, java.lang.String)
          */
         public Device createDevice(DeviceDriver deviceDriver, String deviceName) {
-            trace.print(Trace.FLOW, "%s createDevice %s", portName,deviceName);
-            DeviceImpl deviceNew = new DeviceImpl(this,deviceDriver,deviceName);
-            portLock.lock();
-            try {
-                ListIterator<DeviceImpl> iter = deviceList.listIterator();
-                while(iter.hasNext()) {
-                    Device device = iter.next();
-                    if(deviceName.equals(device.getDeviceName())) {
-                        throw new IllegalStateException(
-                                deviceName + " already registered");
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.createDevice %s", portName,deviceName);
+            }
+            DeviceImpl device = new DeviceImpl(this,deviceDriver,deviceName);
+            synchronized(deviceList) {
+                LinkedListNode<DeviceImpl> node = deviceList.getHead();
+                while(node!=null) {
+                    if(node.getObject().deviceName.equals(deviceName)) {
+                        throw new IllegalStateException("port already exists");
                     }
                 }
-                deviceList.add(deviceNew);
-            } finally {
-                portLock.unlock();
+                deviceList.addTail(device.deviceListNode);
             }
-            return deviceNew;
+            if(connected) device.startAutoConnect(10);
+            return device;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortDriver#exceptionConnect()
          */
         public void exceptionConnect() {
-            trace.print(Trace.FLOW, "%s exceptionConnect", portName);
-            portLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.exceptionConnect", portName);
+            }
+            synchronized(this){
                 if(connected) {
                     throw new IllegalStateException("already connected");
                 }
                 connected = true;
-            } finally {
-                portLock.unlock();
+            }
+            synchronized(deviceList) {
+                LinkedListNode<DeviceImpl> node = deviceList.getHead();
+                while(node!=null) {
+                    DeviceImpl device = node.getObject();
+                    if(!device.connected)device.startAutoConnect(0);
+                    node = deviceList.getNext(node);
+                }
             }
             raiseException(ConnectException.connect);
-            scanQueues();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortDriver#exceptionDisconnect()
          */
         public void exceptionDisconnect() {
-            trace.print(Trace.FLOW, "%s exceptionDisconnect", portName);
-            portLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.exceptionDisconnect", portName);
+            }
+            synchronized(this){
                 if(!connected) {
                     throw new IllegalStateException("already disconnected");
                 }
                 connected = false;
-            } finally {
-                portLock.unlock();
             }
+            scanQueues();
+            if(autoConnect) startAutoConnect(1000);
             raiseException(ConnectException.connect);
         }
         
         
         private Status lockPort(UserImpl user) {
-            trace.print(Trace.FLOW, "%s lockPort", portName);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.lockPort", portName);
+            }
             lockPortLock.lock();
             try {
                 while(true) {
@@ -829,16 +887,19 @@ public class Factory {
                         user.message = "port disabled";
                         return Status.error;
                     }
-                    if(lockPortUser==null) break;
                     if(lockPortUser==user) {
-                        user.message = "already locked. Illegal request";
+                        user.message = "already locked by user. Illegal request";
                         return Status.error;
+                    }
+                    if(lockPortUser==null)  {
+                        lockPortUser = user;
+                        break;
                     }
                     try {
                         portUnlock.await();
                     } catch (InterruptedException e){}
                 }
-                lockPortUser = user;
+                
             } finally {
                 lockPortLock.unlock();
             }
@@ -848,11 +909,14 @@ public class Factory {
         }
         
         private void unlockPort(UserImpl user) {
-            trace.print(Trace.FLOW, "%s unlockPort", portName);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.unlockPort", portName);
+            }
             lockPortLock.lock();
             try {
                 if(lockPortUser!=user) {
                     trace.print(Trace.ERROR, "%s unlockPort but not the lockPortUser", portName);
+                    return;
                 }
                 lockPortUser = null;;
                 portUnlock.signal();
@@ -865,46 +929,119 @@ public class Factory {
         }   
         
         private void raiseException(ConnectException connectException) {
-            portLock.lock();
-            try {
+            synchronized(this){
                 exceptionActive = true;
-            } finally {
-                portLock.unlock();
             }
             exceptionList.raiseException(connectException);
-            portLock.lock();
-            try {
+            synchronized(this){
                 exceptionList.merge();
                 exceptionActive = false; 
-            } finally {
-                portLock.unlock();
+            }
+        } 
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.TraceOptionChangeListener#optionChange()
+         */
+        @Override
+        public void optionChange() {
+            int mask = trace.getMask();
+            int iomask = trace.getIOMask();
+            Writer writer = trace.getFile();
+            int size = trace.getIOTruncateSize();
+            synchronized(deviceList) {
+                LinkedListNode<DeviceImpl> node = deviceList.getHead();
+                while(node!=null) {
+                    Device device = node.getObject();
+                    Trace trace = device.getTrace();
+                    trace.setFile(writer);
+                    trace.setMask(mask);
+                    trace.setIOMask(iomask);
+                    trace.setIOTruncateSize(size);
+                    node = deviceList.getNext(node);
+                }
+            }
+        }
+        private void startAutoConnect(long initialDelay) {
+            if(portImplUser.getPort()==null && portImplUser.connectPort(portName)==null) {
+                throw new IllegalStateException("Logic error");
+            }
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.startAutoConnect", portName);
+            }
+            if(connected || !autoConnect) return;
+            if(delayTask!=null) return;
+            delayTask = new DelayTask(this);
+            timer.scheduleAtFixedRate(delayTask, initialDelay, autoConnectPeriod);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
+         */
+        @Override
+        public void callback(Status status, User user) {
+            portDriver.connect(portImplUser);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Port.callback connect result %b", portName,connected);
+            }
+            if(connected) {
+                delayTask.cancel();
+                delayTask = null;
+            }
+        }
+        
+        private DelayTask delayTask = null;
+        
+        private static class DelayTask extends TimerTask {
+            
+            private DelayTask(PortImpl port) {
+                this.port = port;
+            }
+            private PortImpl port;
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+                if(port.portThread!=null) {
+                    if(!port.portImplUser.isQueued) {
+                        port.portThread.queueRequest(port.portImplUser,QueuePriority.medium);
+                    }
+                } else {
+                    Status status = port.lockPort(port.portImplUser);
+                    if(status==Status.success) {
+                        port.portDriver.connect(port.portImplUser);
+                        if(port.connected) {
+                            super.cancel();
+                            port.delayTask = null;
+                        }
+                        port.unlockPort(port.portImplUser);
+                    }
+                }
             }
         }
     }
     
-    private static class DeviceImpl implements Device {
+    private static class DeviceImpl implements Device, QueueRequestCallback {
 
         private DeviceImpl(PortImpl port,DeviceDriver deviceDriver,String deviceName) {
             this.port = port;
             this.deviceDriver = deviceDriver;
             this.deviceName = deviceName;
-            portName = port.getPortName();
-            fullName = portName + "[" + deviceName + "]";
+            fullName = port.getPortName() + "[" + deviceName + "]";
             autoConnect = port.autoConnect;
+            deviceImplUser = (UserImpl)Factory.createUser(this);
         }
         
-        private ReentrantLock deviceLock = new ReentrantLock();
+        private LinkedListNode<DeviceImpl> deviceListNode = deviceListCreate.createNode(this);
         private PortImpl port;
-        private String portName;
         private DeviceDriver deviceDriver;
         private String deviceName;
         private String fullName;
         private Trace trace = TraceFactory.create();
-        private List<Interface> interfaceList = new LinkedList<Interface>();
+        private LinkedList<Interface> interfaceList = interfaceListCreate.create();
         private ConnectExceptionList exceptionList = new ConnectExceptionList();
         private boolean exceptionActive = false;
         private User blockingUser = null;
         private boolean autoConnect = false;
+        private UserImpl deviceImplUser = null;
         private boolean connected = false;
         private boolean enabled = true;
         
@@ -917,6 +1054,10 @@ public class Factory {
                     "    %s isBlocked %b autoConnect %b connected %b enabled %b%n",
                     fullName,isBlockedByOtherUser(null),autoConnect,connected,enabled
             ));
+            String deviceReport = deviceDriver.report(details);
+            if(deviceReport!=null) {
+                builder.append(String.format("    %s%n",deviceReport));
+            }
             if(details>0) {
                 Interface[] interfaces = getInterfaces();
                 int length = interfaces.length;
@@ -935,12 +1076,16 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Device#getInterfaces()
          */
         public Interface[] getInterfaces() {
-            deviceLock.lock();
-            try {
-                return (Interface[])interfaceList.toArray();
-               
-            } finally {
-                deviceLock.unlock();
+            synchronized(interfaceList) {
+                Interface[] interfaces = new Interface[interfaceList.getLength()];
+                LinkedListNode<Interface> node = interfaceList.getHead();
+                int index = 0;
+                while(node!=null) {
+                    Interface iface = node.getObject();
+                    interfaces[index++] = iface;
+                    node = interfaceList.getNext(node);
+                }
+                return interfaces;
             }
         }
         /* (non-Javadoc)
@@ -972,16 +1117,15 @@ public class Factory {
          */
         public void enable(boolean trueFalse) {
             boolean changed = false;
-            deviceLock.lock();
-            try {
+            synchronized(this) {
                 if(enabled!=trueFalse) {
                     enabled = trueFalse;
                     changed = true;
                 }
-            } finally {
-                deviceLock.unlock();
             }
-            trace.print(Trace.FLOW, "%s enable %b was changed %b", fullName,trueFalse,changed);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.enable %b was changed %b", fullName,trueFalse,changed);
+            }
             if(changed) {
                 raiseException(ConnectException.enable);
                 if(trueFalse) port.scanQueues();
@@ -992,26 +1136,24 @@ public class Factory {
          */
         public void autoConnect(boolean trueFalse) {
             boolean changed = false;
-            deviceLock.lock();
-            try {
+            synchronized(this) {
                 if(autoConnect!=trueFalse) {
                     autoConnect = trueFalse;
                     changed = true;
                 }
-            } finally {
-                deviceLock.unlock();
             }
-            trace.print(Trace.FLOW, "%s autoConnect %b was changed %b", fullName,trueFalse,changed);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.autoConnect %b was changed %b", fullName,trueFalse,changed);
+            }
             if(changed) {
                 raiseException(ConnectException.autoConnect);
-                if(trueFalse) port.scanQueues();
+                if(trueFalse) startAutoConnect(0);
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#connect(org.epics.ioc.pdrv.User)
          */
         public Status connect(User user) {
-            trace.print(Trace.FLOW, "%s connect", fullName);
             PortImpl port = (PortImpl)user.getPort();
             if(port.lockPortUser!=user) {
                 user.setMessage("Illegal to call connect without owning the port");
@@ -1021,13 +1163,19 @@ public class Factory {
                 user.setMessage("already connected");
                 return Status.error;
             }
+            if(autoConnect) {
+                user.setMessage("device is autoConnect");
+                return Status.error;
+            }
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.connect", fullName);
+            }
             return deviceDriver.connect(user);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#disconnect(org.epics.ioc.pdrv.User)
          */
         public Status disconnect(User user) {
-            trace.print(Trace.FLOW, "%s disconnect", fullName);
             PortImpl port = (PortImpl)user.getPort();
             if(port.lockPortUser!=user) {
                 user.setMessage("Illegal to call disconnect without owning the port");
@@ -1037,7 +1185,16 @@ public class Factory {
                 user.setMessage("not connected");
                 return Status.error;
             }
-            return deviceDriver.disconnect(user);
+            if(autoConnect) {
+                user.setMessage("port is autoConnect");
+                return Status.error;
+            }
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.disconnect", fullName);
+            }
+            Status status =  deviceDriver.disconnect(user);
+            if(port.portThread!=null) port.portThread.scanQueues();
+            return status;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#isAutoConnect()
@@ -1062,55 +1219,49 @@ public class Factory {
          */
         public Status exceptionListenerAdd(User user,ConnectExceptionListener listener)
         {
-            trace.print(Trace.FLOW, "%s exceptionListenerAdd", portName);
-            deviceLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.exceptionListenerAdd", fullName);
+            }
+            synchronized(this) {
                 if(!exceptionActive) {
                     return exceptionList.add(user, listener);
                 } else {
                     return exceptionList.addNew(user, listener);
                 }          
-            } finally {
-                deviceLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#exceptionListenerRemove(org.epics.ioc.pdrv.User)
          */
         public void exceptionListenerRemove(User user) {
-            trace.print(Trace.FLOW, "%s exceptionListenerRemove", portName);
-            deviceLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.exceptionListenerRemove", fullName);
+            }
+            synchronized(this) {
                 exceptionList.remove(user);
-            } finally {
-                deviceLock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#findInterface(org.epics.ioc.pdrv.User, java.lang.String)
          */
         public Interface findInterface(User user, String interfaceName) {
-            deviceLock.lock();
-            try {
-                
-                ListIterator<Interface> iter = interfaceList.listIterator();
-                while(iter.hasNext()) {
-                    Interface asynInterface = iter.next();
-                    if(interfaceName.equals(asynInterface.getInterfaceName())) {
-                        return asynInterface;
-                    }
+            synchronized(interfaceList) {
+                LinkedListNode<Interface> node = interfaceList.getHead();
+                while(node!=null) {
+                    Interface iface = node.getObject();
+                    if(iface.getInterfaceName().equals(interfaceName)) return iface;
+                    node = interfaceList.getNext(node);
                 }
-                user.setMessage("interface " + interfaceName + " not found");
-                return null;
-            } finally {
-                deviceLock.unlock();
             }
+            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#blockOtherUsers(org.epics.ioc.pdrv.User)
          */
         public Status blockOtherUsers(User user) {
-            trace.print(Trace.FLOW, "%s blockOtherUsers", fullName);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.blockOtherUsers", fullName);
+            }
             if(blockingUser!=null) {
                 user.setMessage("already blocked");
                 return Status.error;
@@ -1129,76 +1280,81 @@ public class Factory {
          * @see org.epics.ioc.pdrv.Device#unblockOtherUsers(org.epics.ioc.pdrv.User)
          */
         public void unblockOtherUsers(User user) {
-            trace.print(Trace.FLOW, "%s unblockOtherUsers", fullName);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.unblockOtherUsers", fullName);
+            }
             if(user!=blockingUser) {
                 throw new IllegalStateException("not the blocking asynUser");
             }
             blockingUser = null;
             PortThread portThread = ((PortImpl)port).portThread;
-            if(portThread!=null) portThread.isUnblocked();
+            if(portThread!=null) portThread.unblock();
             port.scanQueues();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceDriver#registerInterface(org.epics.ioc.asyn.Interface)
          */
-        public void registerInterface(Interface ifaceNew) {
-            String interfaceName = ifaceNew.getInterfaceName();
-            trace.print(Trace.FLOW, "%s registerInterface %s", fullName,interfaceName);
-            ListIterator<Interface> iter = interfaceList.listIterator();
-            while(iter.hasNext()) {
-                Interface iface = iter.next();
-                if(iface==ifaceNew) {
-                    throw new IllegalStateException("interface already registered");
-                }
-                int compare = interfaceName.compareTo(iface.getInterfaceName());
-                if(compare==0) {
-                    throw new IllegalStateException(
-                            "interface " + interfaceName + " already registered");
-                }
-                if(compare<0) {
-                    iter.add(ifaceNew);
-                    return;
-                }
+        public void registerInterface(Interface newIface) {
+            String name = newIface.getInterfaceName();
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.registerInterface %s", fullName,name);
             }
-            interfaceList.add(ifaceNew);
-
+            synchronized(interfaceList) {
+                LinkedListNode<Interface> newNode = interfaceListCreate.createNode(newIface);
+                LinkedListNode<Interface> node = interfaceList.getHead();
+                while(node!=null) {
+                    Interface iface = node.getObject();
+                    int compare = name.compareTo(iface.getInterfaceName());
+                    if(compare==0) {
+                        throw new IllegalStateException(
+                                "interface " + name + " already registered");
+                    }
+                    if(compare<0) {
+                        interfaceList.insertAfter(interfaceList.getPrev(node),newNode);
+                        return;
+                    }
+                    node = interfaceList.getNext(node);
+                }
+                interfaceList.addTail(newNode);
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceDriver#exceptionConnect()
          */
         public void exceptionConnect() {
-            trace.print(Trace.FLOW, "%s exceptionConnect", fullName);
-            deviceLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.exceptionConnect", fullName);
+            }
+            synchronized(this){
                 if(connected) {
                     throw new IllegalStateException("already connected");
                 }
                 connected = true;
-            } finally {
-                deviceLock.unlock();
             }
             raiseException(ConnectException.connect);
-            port.scanQueues();
+            
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceDriver#exceptionDisconnect()
          */
         public void exceptionDisconnect() {
-            trace.print(Trace.FLOW, "%s exceptionDisconnect", fullName);
-            deviceLock.lock();
-            try {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.exceptionDisconnect", fullName);
+            }
+            synchronized(this){
                 if(!connected) {
                     throw new IllegalStateException("not connected");
                 }
                 connected = false;
-            } finally {
-                deviceLock.unlock();
             }
+            port.scanQueues();
             raiseException(ConnectException.connect);
         }
         
         private Status lockPort(UserImpl user) {
-            trace.print(Trace.FLOW, "%s device.lockPort", fullName);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.lockPort", fullName);
+            }
             Status status = port.lockPort((UserImpl)user);
             if(status!=Status.success) return status;
             if(!enabled) {
@@ -1215,98 +1371,160 @@ public class Factory {
         }
         
         private void raiseException(ConnectException connectException) {
-            deviceLock.lock();
-            try {
+            synchronized(this){
                 exceptionActive = true;
-            } finally {
-                deviceLock.unlock();
             }
             exceptionList.raiseException(connectException);
-            deviceLock.lock();
-            try {
+            synchronized(this){
                 exceptionList.merge();
                 exceptionActive = false; 
-            } finally {
-                deviceLock.unlock();
+            }
+        }
+        
+        private void startAutoConnect(long initialDelay) {
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Device.startAutoConnect", fullName);
+            }
+            if(deviceImplUser.getPort()==null && deviceImplUser.connectPort(port.portName)==null) {
+                throw new IllegalStateException("Logic error");
+            }
+            if(deviceImplUser.getDevice()==null && deviceImplUser.connectDevice(deviceName)==null) {
+                throw new IllegalStateException("Logic error");
+            }
+            if(connected || !autoConnect) return;
+            if(delayTask!=null) return;
+            delayTask = new DelayTask(this);
+            timer.scheduleAtFixedRate(delayTask, initialDelay, autoConnectPeriod);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
+         */
+        @Override
+        public void callback(Status status, User user) {
+            deviceDriver.connect(deviceImplUser);
+            if((trace.getMask()&Trace.FLOW)!=0) {
+                trace.print(Trace.FLOW, "%s Deviice.callback connect %b", fullName,connected);
+            }
+            if(connected) {
+                delayTask.cancel();
+                delayTask = null;
+            }
+        }
+        
+        private DelayTask delayTask = null;
+        
+        private static class DelayTask extends TimerTask {
+            
+            private DelayTask(DeviceImpl device) {
+                this.device = device;
+            }
+            private DeviceImpl device;
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+                PortImpl port = device.port;
+                if(port.portThread!=null) {
+                    if(!device.deviceImplUser.isQueued) {
+                        device.port.portThread.queueRequest(device.deviceImplUser,QueuePriority.medium);
+                    }
+                } else {
+                    device.deviceDriver.connect(device.deviceImplUser);
+                    if(device.connected) {
+                        super.cancel();
+                        device.delayTask = null;
+                    }
+                }
             }
         }
     }
     
     private static class ConnectExceptionList {
-        Status add(User user, ConnectExceptionListener listener) {
-            for(ConnectExceptionNode node : list) {
-                if(node.user==user) {
-                    user.setMessage("already a ConnectExceptionListener");
-                    return Status.error;
-                }
-            }
-            ConnectExceptionNode node = new ConnectExceptionNode(user,listener);
-            list.add(node);
-            return Status.success;
-        }
-        Status addNew(User user, ConnectExceptionListener listener) {
-            for(ConnectExceptionNode node : list) {
-                if(node.user==user) {
-                    user.setMessage("already a ConnectExceptionListener");
-                    return Status.error;
-                }
-            }
-            if(listNew==null) {
-                listNew = new LinkedList<ConnectExceptionNode>();
-            } else {
-                for(ConnectExceptionNode node : listNew) {
-                    if(node.user==user) {
-                        user.setMessage("already a ConnectExceptionListener");
-                        return Status.error;
-                    }
-                }
-            }
-            ConnectExceptionNode node = new ConnectExceptionNode(user,listener);
-            listNew.add(node);
-            return Status.success;
-        }
-        void raiseException(ConnectException connectException) {
-            ListIterator<ConnectExceptionNode> iter =  list.listIterator();
-            while(iter.hasNext()) {
-                ConnectExceptionNode node = iter.next();
-                node.listener.exception(connectException);
-            }
-        }
-        void merge() {
-            if(listNew!=null) {
-                list.addAll(listNew);
-                listNew = null;
-            }
-        }
-        void remove(User user) {
-            ListIterator<ConnectExceptionNode> iter =  list.listIterator();
-            while(iter.hasNext()) {
-                ConnectExceptionNode node = iter.next();
-                if(node.user==user) {
-                    iter.remove();
-                    return;
-                }
-            }
-            if(listNew==null) return;
-            iter =  listNew.listIterator();
-            while(iter.hasNext()) {
-                ConnectExceptionNode node = iter.next();
-                if(node.user==user) {
-                    iter.remove();
-                    return;
-                }
-            }
-        }
+      
+        private static LinkedListCreate<ConnectExceptionNode> connectExceptionListCreate = new LinkedListCreate<ConnectExceptionNode>();
         private static class ConnectExceptionNode {
-            User user;
-            ConnectExceptionListener listener;
-            ConnectExceptionNode(User user,ConnectExceptionListener listener) {
+            private User user;
+            private ConnectExceptionListener listener;
+            private LinkedListNode<ConnectExceptionNode> linkedListNode = null;
+            private ConnectExceptionNode(User user,ConnectExceptionListener listener) {
                 this.user = user;
                 this.listener = listener;
+                linkedListNode = connectExceptionListCreate.createNode(this);
             }
         }
-        private List<ConnectExceptionNode> list = new LinkedList<ConnectExceptionNode>();
-        private List<ConnectExceptionNode> listNew = null;
+        private LinkedList<ConnectExceptionNode> list = connectExceptionListCreate.create();
+        private LinkedList<ConnectExceptionNode> listNew = connectExceptionListCreate.create();
+        
+        private Status add(User user, ConnectExceptionListener listener) {
+            Status status = checkNotAlreadyListener(user,listener);
+            if(status!=Status.success) return status;
+            ConnectExceptionNode node = new ConnectExceptionNode(user,listener);
+            list.addTail(node.linkedListNode);
+            return Status.success;
+        }
+        private Status addNew(User user, ConnectExceptionListener listener) {
+            Status status = checkNotAlreadyListener(user,listener);
+            if(status!=Status.success) return status;
+            ConnectExceptionNode node = new ConnectExceptionNode(user,listener);
+            listNew.addTail(node.linkedListNode);
+            return Status.success;
+        }
+        private Status checkNotAlreadyListener(User user, ConnectExceptionListener listener) {
+            LinkedListNode<ConnectExceptionNode> linkedListNode = list.getHead();
+            while(linkedListNode!=null) {
+                ConnectExceptionNode node = linkedListNode.getObject();
+                if(node.user==user) {
+                    user.setMessage("already a ConnectExceptionListener");
+                    return Status.error;
+                }
+                linkedListNode = list.getNext(linkedListNode);
+            }
+            linkedListNode = listNew.getHead();
+            while(linkedListNode!=null) {
+                ConnectExceptionNode node = linkedListNode.getObject();
+                if(node.user==user) {
+                    user.setMessage("already a ConnectExceptionListener");
+                    return Status.error;
+                }
+                linkedListNode = listNew.getNext(linkedListNode);
+            }
+            return Status.success;
+        }
+        private void raiseException(ConnectException connectException) {
+            LinkedListNode<ConnectExceptionNode> linkedListNode = list.getHead();
+            while(linkedListNode!=null) {
+                ConnectExceptionNode node = linkedListNode.getObject();
+                node.listener.exception(connectException);
+                linkedListNode = list.getNext(linkedListNode);
+            }
+        }
+        private void merge() {
+            LinkedListNode<ConnectExceptionNode> node = listNew.removeHead();
+            while(node!=null) {
+                list.addTail(node);
+                node = listNew.removeHead();
+            }
+        }
+        private void remove(User user) {
+            LinkedListNode<ConnectExceptionNode> linkedListNode = list.getHead();
+            while(linkedListNode!=null) {
+                ConnectExceptionNode node = linkedListNode.getObject();
+                if(node.user==user) {
+                    list.remove(linkedListNode);
+                    return;
+                }
+                linkedListNode = list.getNext(linkedListNode);
+            }
+            linkedListNode = listNew.getHead();
+            while(linkedListNode!=null) {
+                ConnectExceptionNode node = linkedListNode.getObject();
+                if(node.user==user) {
+                    listNew.remove(linkedListNode);
+                    return;
+                }
+                linkedListNode = listNew.getNext(linkedListNode);
+            }
+        }
     }
     
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
@@ -1316,34 +1534,30 @@ public class Factory {
     private static final int queuePriorityMedium = QueuePriority.medium.ordinal();
     
     private static class PortThread implements RunnableReady  {
-        private ReentrantLock queueLock = new ReentrantLock();
-        private ReentrantLock lock = new ReentrantLock();
-        private Condition moreWork = lock.newCondition();
-        private PortImpl port;
-        
-        private List<UserImpl>[] queueListArray = new ArrayList[numQueuePriorities];  
-        private List<UserImpl> waitUnblockList = new ArrayList<UserImpl>();   
         
         private PortThread(PortImpl port,ThreadPriority threadPriority) {
             this.port = port;
             for(int i=0; i<queueListArray.length; i++) {
-                queueListArray[i] = new ArrayList<UserImpl>();
+                queueListArray[i] = userListCreate.create();
             }
             threadCreate.create(port.getPortName(), threadPriority.getJavaPriority(), this);
         }
         
+        private ReentrantLock lock = new ReentrantLock();
+        private Condition moreWork = lock.newCondition();
+        private PortImpl port;
+        private LinkedList<UserImpl>[] queueListArray = new LinkedList[numQueuePriorities];  
+        private LinkedList<UserImpl> waitUnblockList =  userListCreate.create();
+        
         private void queueRequest(UserImpl user,QueuePriority asynQueuePriority)
         {
-            queueLock.lock();
-            try {
+            synchronized(this){
                 if(user.isQueued) {
                     throw new IllegalStateException("prevous queueRequest not complete");
                 }
                 user.isQueued = true;
-                List<UserImpl> list = queueListArray[asynQueuePriority.ordinal()];
-                list.add(user);
-            } finally {
-                queueLock.unlock();
+                LinkedList<UserImpl> list = queueListArray[asynQueuePriority.ordinal()];
+                list.addTail(user.listNode);
             }
             scanQueues();
         }
@@ -1351,47 +1565,41 @@ public class Factory {
         private void cancelRequest(UserImpl asynUserPvtCancel)
         {
             UserImpl user = null;
-            queueLock.lock();
-            try {
-                List<UserImpl> list = null;
-                ListIterator<UserImpl> iter = null;
+            synchronized(this){
+                LinkedList<UserImpl> list = null;
                 for(int i=queuePriorityHigh; i>=queuePriorityLow; i--) {
                     list = queueListArray[i];
-                    iter = list.listIterator();
-                    while(iter.hasNext()) {
-                        user = iter.next();
+                    LinkedListNode<UserImpl> listNode = list.getHead();
+                    while(listNode!=null) {
+                        user = listNode.getObject();
                         if(user==asynUserPvtCancel) {
-                            iter.remove();
+                            list.remove(listNode);
                             user.isQueued = false;
                             return;
                         }
+                        listNode = list.getNext(listNode);
                     }
                 }
-                iter = waitUnblockList.listIterator();
-                while(iter.hasNext()) {
-                    user = iter.next();
+                LinkedListNode<UserImpl> listNode = waitUnblockList.getHead();
+                while(listNode!=null) {
+                    user = listNode.getObject();
                     if(user==asynUserPvtCancel) {
-                        iter.remove();
+                        list.remove(listNode);
                         user.isQueued = false;
                         return;
                     }
+                    listNode = waitUnblockList.getNext(listNode);
                 }
-            } finally {
-                queueLock.unlock();
             }
         }
         
-        private void isUnblocked() {
-            queueLock.lock();
-            try {
-                ListIterator<UserImpl> iter = waitUnblockList.listIterator();
-                while(iter.hasNext()) {
-                    UserImpl user = iter.next();
-                    iter.remove();
-                    queueListArray[queuePriorityMedium].add(user);
+        private void unblock() {
+            synchronized(this){
+                LinkedListNode<UserImpl> listNode = waitUnblockList.getHead();
+                while(listNode!=null) {
+                    waitUnblockList.remove(listNode);
+                    queueListArray[queuePriorityMedium].addTail(listNode);
                 }
-            } finally {
-                queueLock.unlock();
             }
             scanQueues();
         }
@@ -1432,18 +1640,16 @@ public class Factory {
             UserImpl user = null;
             DeviceImpl device = null;
             while(true) {                                
-                queueLock.lock();
-                try {
+                synchronized(this){
                     for(int queue=queuePriorityHigh; queue>=queuePriorityLow; queue--) {
-                        List<UserImpl> list = queueListArray[queue];
-                        int size = list.size();
-                        if(size<=0) continue;
-                        user = list.get(0);
-                        list.remove(0);
+                        LinkedList<UserImpl> list = queueListArray[queue];
+                        LinkedListNode<UserImpl> listNode = list.removeHead();
+                        if(listNode==null) continue;
+                        user = listNode.getObject();
                         device = (DeviceImpl)user.getDevice();
                         if(device!=null) {
                             if(device.isBlockedByOtherUser(user)) {
-                                waitUnblockList.add(user);
+                                waitUnblockList.addTail(user.listNode);
                                 continue;
                             }
                         }
@@ -1451,8 +1657,6 @@ public class Factory {
                         break;
                     }
                     if(user==null) return;
-                } finally {
-                    queueLock.unlock();
                 }
                 QueueRequestCallback queueRequestCallback = user.getQueueRequestCallback();
                 Status status = null;
@@ -1460,25 +1664,26 @@ public class Factory {
                     status = device.lockPort(user);
                 } else {
                     status = port.lockPort(user);
-
                 }
                 if(status==Status.success) {
-                    if(!port.isConnected()) {
-                        if(port.isAutoConnect()) {
-                            status = port.connect(user);
-                        } else {
+                    boolean checkConnect = true;
+                    if((device!=null && user==device.deviceImplUser) || (user==port.portImplUser)) {
+                        checkConnect = false;
+                    }
+                    if(checkConnect) {
+                        if(!port.isConnected()) {
                             user.setMessage("port is not connected");
                             status = Status.error;
                         }
-                    }
-                    if(status==Status.success && device!=null && !device.isConnected()) {
-                        if(device.isAutoConnect()) {
-                            status = device.connect(user);
-                        } else {
+                        if(status==Status.success && device!=null && !device.isConnected()) {
                             user.setMessage("device is not connected");
                             status = Status.error;
                         }
                     }
+                }
+                Trace trace = port.getTrace();
+                if((trace.getMask()&Trace.FLOW)!=0) {
+                    trace.print(Trace.FLOW, "%s portThread calling queueRequestCallback status %s", port.getPortName(),status.toString());
                 }
                 try {
                     queueRequestCallback.callback(status,user);
@@ -1489,5 +1694,41 @@ public class Factory {
             }
         }
         
+    }
+    
+    private static class InitialConnectTask extends TimerTask implements NewAfterStartRequester,AfterStartRequester {
+        private AfterStartNode afterStartNode = AfterStartFactory.allocNode(this);
+        private AfterStart afterStart = null;
+        private int numTimes = 0;
+        private InitialConnectTask(PortImpl port) {
+            this.port = port;
+            AfterStartFactory.newAfterStartRegister(this);
+        }
+        private PortImpl port;
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
+            if(port.connected || numTimes>50) {
+                super.cancel();
+                afterStart.done(afterStartNode);
+            }
+            numTimes++;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.install.NewAfterStartRequester#callback(org.epics.ioc.install.AfterStart)
+         */
+        @Override
+        public void callback(AfterStart afterStart) {
+            this.afterStart = afterStart;
+            afterStart.requestCallback(afterStartNode, false, ThreadPriority.high);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
+         */
+        @Override
+        public void callback(AfterStartNode node) {
+            timer.schedule(this, 0, 100);
+        }
     }
 }
