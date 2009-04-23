@@ -76,6 +76,7 @@ public abstract class AbstractUInt32Digital extends AbstractInterface  implement
             super.print(Trace.FLOW ,"new interrupt while interruptActive");
             return;
         }
+        super.print(Trace.FLOW ,"interruptOccured");
         interrupt.interrupt(prevValue,value);
     }
     /* (non-Javadoc)
