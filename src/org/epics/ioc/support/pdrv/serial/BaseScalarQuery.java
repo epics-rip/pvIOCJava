@@ -65,14 +65,17 @@ public class BaseScalarQuery extends AbstractPortDriverSupport
      */
     public void endProcess() {
         super.endProcess();
-        deviceTrace.print(Trace.FLOW,
-                "%s:%s endProcess",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,"pv %s endProcess",fullName);
+        }
         String prefix = pvPrefix.get();
         String value = pvResponseString.get();
         if(prefix!=null && prefix.length()>0) {
             if(!value.startsWith(prefix)) {
-                deviceTrace.print(Trace.ERROR,
-                        "%s:%s prefix does not exist",fullName,supportName);
+                if((deviceTrace.getMask()&Trace.ERROR)!=0) {
+                    deviceTrace.print(Trace.ERROR,
+                        "pv %s support %s prefix does not exist",fullName,supportName);
+                }
                 return;
             }
             value = value.substring(prefix.length());
@@ -80,8 +83,10 @@ public class BaseScalarQuery extends AbstractPortDriverSupport
         try {
             convert.fromString(pvValueScalar, value);
         } catch (NumberFormatException e) {
-            deviceTrace.print(Trace.ERROR,
-                    "%s:%s conversion error %s",fullName,supportName,e.getMessage());
+            if((deviceTrace.getMask()&Trace.ERROR)!=0) {
+                deviceTrace.print(Trace.ERROR,
+                    "pv %s support %s conversion error %s",fullName,supportName,e.getMessage());
+            }
             return;
         }     
     }

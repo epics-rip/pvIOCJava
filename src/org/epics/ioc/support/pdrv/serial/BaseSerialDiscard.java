@@ -82,8 +82,9 @@ public class BaseSerialDiscard extends AbstractPortDriverSupport
      */
     public void endProcess() {
         super.endProcess();
-        deviceTrace.print(Trace.FLOW,
-            "%s:%s processContinue ",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,"pv %s endProcess ",fullName);
+        }
         if(status!=Status.success) {
             alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
         }
@@ -93,14 +94,17 @@ public class BaseSerialDiscard extends AbstractPortDriverSupport
      */
     public void queueCallback() {
         super.queueCallback();
-        deviceTrace.print(Trace.FLOW,
-            "%s:%s queueCallback calling read ",fullName,supportName);
+        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+            deviceTrace.print(Trace.FLOW,"pv %s queueCallback calling read ",fullName);
+        }
         status = serial.read(user, byteArray, size);
         if(status!=Status.success) {
             deviceTrace.print(Trace.ERROR,
                     "%s:%s serial.read failed", fullName,supportName);
             return;
         }
-        deviceTrace.printIO(Trace.SUPPORT, byteArray, user.getInt(), "%s", fullName);
+        if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+            deviceTrace.printIO(Trace.SUPPORT, byteArray, user.getInt(), "%s", fullName);
+        }
     }
 }
