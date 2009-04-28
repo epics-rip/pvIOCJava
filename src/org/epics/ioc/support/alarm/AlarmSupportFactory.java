@@ -25,7 +25,7 @@ import org.epics.pvData.pv.Type;
  */
 public class AlarmSupportFactory {
    
-    private static final String alarmSupportName = "alarm";
+    private static final String alarmSupportName = "org.epics.ioc.alarm";
     /**
      * Create support for an alarm field.
      * @param pvStructure The interface to the alarm field.
