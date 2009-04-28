@@ -34,7 +34,7 @@ public class NoopFactory {
     }    
     
     private static class Noop extends AbstractSupport {
-        private static String supportName = "noop";
+        private static final String supportName = "org.epics.ioc.noop";
         
         private Noop(PVField dbField) {
             super(supportName,dbField);
