@@ -19,7 +19,7 @@ import org.epics.pvData.pv.PVField;
  *
  */
 public abstract class AbstractSupport implements Support {
-    protected String supportName;
+    private String supportName;
     private PVField pvField;
     private SupportState supportState = SupportState.readyForInitialize;
     protected LocateSupport locateSupport = null;
