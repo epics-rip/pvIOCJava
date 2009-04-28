@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <database>
 <include addPath = "${JAVAIOC}/test/analog" />
-
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
 <include href = "ai.xml" />
 <include href = "ao.xml" />
 <include href = "aoIncremental.xml" />
