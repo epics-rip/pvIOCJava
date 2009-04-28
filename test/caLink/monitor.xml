@@ -1,43 +1,43 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "monitorCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "monitorCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=20.0 ? value+1 : 0.0</scalar>
       </structure>
     </structure>
-    <structure name = "valueAlarm" type = "doubleAlarm">
+    <structure name = "valueAlarm" extends = "doubleAlarm">
           <scalar name = "active">true</scalar>
           <structure name = "interval">
-              <structure name = "0" type = "doubleAlarmInterval">
+              <structure name = "0" extends = "doubleAlarmInterval">
                   <scalar name = "value">2</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">LOWLOW</scalar>
               </structure>
-              <structure name = "1" type = "doubleAlarmInterval">
+              <structure name = "1" extends = "doubleAlarmInterval">
                   <scalar name = "value">4</scalar>
                   <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">LOW</scalar>
               </structure>
-              <structure name = "2" type = "doubleAlarmInterval">
+              <structure name = "2" extends = "doubleAlarmInterval">
                   <scalar name = "value">6</scalar>
                   <structure name = "severity"><scalar name = "choice">none</scalar></structure>
                   <scalar name = "message">none</scalar>
               </structure>
-              <structure name = "3" type = "doubleAlarmInterval">
+              <structure name = "3" extends = "doubleAlarmInterval">
                   <scalar name = "value">8</scalar>
                   <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">HIGH</scalar>
               </structure>
-              <structure name = "4" type = "doubleAlarmInterval">
+              <structure name = "4" extends = "doubleAlarmInterval">
                   <scalar name = "value">18</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">HIGHHIGH</scalar>
@@ -48,36 +48,36 @@
     </structure> 
 </record>
 
-<record name = "monitorPut">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "monitorPut">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">put</scalar></structure>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
-    <structure name = "link" type = "caOutputLink">
+    <structure name = "link" extends = "caOutputLink">
         <scalar name = "pvname">cachePut</scalar>
         <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "cachePut">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "cachePut">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <scalar name = "processSelf">true</scalar>
     </structure>
 </record>
 
-<record name = "monitorChange">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "monitorChange">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">change</scalar></structure>
         <scalar name = "process">true</scalar>
@@ -85,11 +85,11 @@
     </structure>
 </record>
 
-<record name = "monitorAbsoluteChange">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "monitorAbsoluteChange">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">absoluteChange</scalar></structure>
         <scalar name = "deadband">1.001</scalar>
@@ -98,11 +98,11 @@
     </structure>
 </record>
 
-<record name = "monitorPercentageChange">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "monitorPercentageChange">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <structure name = "type"><scalar name = "choice">percentageChange</scalar></structure>
         <scalar name = "deadband">20.0</scalar>
@@ -111,14 +111,14 @@
     </structure>
 </record>
 
-<record name = "notifyPut">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "notify" type = "caMonitorNotifyLink">
+<record recordName = "notifyPut">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "notify" extends = "caMonitorNotifyLink">
         <scalar name = "pvname">monitorCounter</scalar>
     </structure>
-    <structure name = "input" type = "caInputLink">
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -126,13 +126,15 @@
 </record>
 
 <!-- really simple monitor -->
-<record name = "caMonitor" type = "caMonitorLink">
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <scalar name = "pvname">monitorCounter</scalar>
-    <scalar name = "process">true</scalar>
-    <scalar name = "propertyNames">alarm</scalar>
+<record recordName = "caMonitor">
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "input" extends = "caMonitorLink">
+        <scalar name = "pvname">monitorCounter</scalar>
+        <scalar name = "process">true</scalar>
+        <scalar name = "propertyNames">alarm</scalar>
+    </structure>
 </record>
 
 </database>
