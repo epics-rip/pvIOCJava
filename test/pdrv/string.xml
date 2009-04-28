@@ -1,17 +1,17 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "syncStringPort" type = "portCreate">
+<record recordName = "syncStringPort" extends = "portCreate">
     <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.SerialDriverFactory</scalar>
     <scalar name = "portName">syncStringPort</scalar>
-    <structure name = "driverParameters" type = "serialDriver" >
+    <structure name = "driverParameters" extends = "serialDriver" >
         <scalar name = "delay">0.0</scalar>
         <scalar name = "eosInput">CRLF</scalar>
         <scalar name = "eosOutput">CRLF</scalar>
     </structure>
 </record>
 
-<record name = "syncStringDeviceControl" type = "portDeviceControl" >
+<record recordName = "syncStringDeviceControl" extends = "portDeviceControl" >
     <scalar name = "portName">syncStringPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
@@ -20,72 +20,72 @@
 -->
 </record>
 
-<record name = "syncStringCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "syncStringCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "caOutputLink">
+    <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">syncStringOut</scalar>
          <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "syncStringOut">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "outlink" type = "portDriverLink">
+<record recordName = "syncStringOut">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "output" type = "pdrvSerialOutput"/>
+        <structure name = "output" extends = "pdrvSerialOutput"/>
     </structure>
-    <structure name = "link" type = "caProcessLink">
+    <structure name = "link" extends = "caProcessLink">
          <scalar name = "pvname">syncStringIn</scalar>
     </structure>
 </record>
 
-<record name = "syncStringIn">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "syncStringIn">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvSerialInput"/>
+        <structure name = "input" extends = "pdrvSerialInput"/>
     </structure>
 </record>
 
-<record name = "syncStringInInterrupt">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "pdrvSerialInterrupt">
+<record recordName = "syncStringInInterrupt">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "pdrvSerialInterrupt">
         <scalar name = "portName">syncStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "asynStringPort" type = "portCreate">
+<record recordName = "asynStringPort" extends = "portCreate">
     <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.SerialDriverFactory</scalar>
     <scalar name = "portName">asynStringPort</scalar>
-    <structure name = "driverParameters" type = "serialDriver" >
+    <structure name = "driverParameters" extends = "serialDriver" >
         <scalar name = "delay">0.1</scalar>
     </structure>
 </record>
 
-<record name = "asynStringDeviceControl" type = "portDeviceControl" >
+<record recordName = "asynStringDeviceControl" extends = "portDeviceControl" >
     <scalar name = "portName">asynStringPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
@@ -94,57 +94,57 @@
 -->
 </record>
 
-<record name = "asynStringCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "asynStringCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "caOutputLink">
+    <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">asynStringOut</scalar>
          <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "asynStringOut">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "outlink" type = "portDriverLink">
+<record recordName = "asynStringOut">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "output" type = "pdrvSerialOutput"/>
+        <structure name = "output" extends = "pdrvSerialOutput"/>
     </structure>
-    <structure name = "link" type = "caProcessLink">
+    <structure name = "link" extends = "caProcessLink">
          <scalar name = "pvname">asynStringIn</scalar>
     </structure>
 </record>
 
-<record name = "asynStringIn">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "asynStringIn">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvSerialInput"/>
+        <structure name = "input" extends = "pdrvSerialInput"/>
     </structure>
 </record>
 
-<record name = "asynStringInInterrupt">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "pdrvSerialInterrupt">
+<record recordName = "asynStringInInterrupt">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "pdrvSerialInterrupt">
         <scalar name = "portName">asynStringPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "process">true</scalar>
