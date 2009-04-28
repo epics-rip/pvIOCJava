@@ -1,61 +1,61 @@
 <?xml version="1.0" ?>
 <database>
-<record name = "getPutCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "getPutCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=10.0 ? value+1 : 0.0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "generic">
-        <structure name = "output" type = "dbOutputLink">
+    <structure name = "link" extends = "generic">
+        <structure name = "output" extends = "dbOutputLink">
             <scalar name = "pvname">putFromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "process0" type = "dbProcessLink">
+        <structure name = "process0" extends = "dbProcessLink">
              <scalar name = "pvname">getFromCounter</scalar>
         </structure>
-        <structure name = "process1" type = "dbProcessLink">
-             <scalar name = "wait" type = "boolean">false</scalar>
+        <structure name = "process1" extends = "dbProcessLink">
+             <scalar name = "wait" scalarType = "boolean">false</scalar>
              <scalar name = "pvname">dbInput</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "putFromCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "valueAlarm" type = "doubleAlarm">
+<record recordName = "putFromCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "valueAlarm" extends = "doubleAlarm">
           <scalar name = "active">true</scalar>
           <structure name = "interval">
-              <structure name = "0" type = "doubleAlarmInterval">
+              <structure name = "0" extends = "doubleAlarmInterval">
                   <scalar name = "value">2</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">LOWLOW</scalar>
               </structure>
-              <structure name = "1" type = "doubleAlarmInterval">
+              <structure name = "1" extends = "doubleAlarmInterval">
                   <scalar name = "value">4</scalar>
                   <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">LOW</scalar>
               </structure>
-              <structure name = "2" type = "doubleAlarmInterval">
+              <structure name = "2" extends = "doubleAlarmInterval">
                   <scalar name = "value">6</scalar>
                   <structure name = "severity"><scalar name = "choice">none</scalar></structure>
                   <scalar name = "message">none</scalar>
               </structure>
-              <structure name = "3" type = "doubleAlarmInterval">
+              <structure name = "3" extends = "doubleAlarmInterval">
                   <scalar name = "value">8</scalar>
                   <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                   <scalar name = "message">HIGH</scalar>
               </structure>
-              <structure name = "4" type = "doubleAlarmInterval">
+              <structure name = "4" extends = "doubleAlarmInterval">
                   <scalar name = "value">10</scalar>
                   <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                   <scalar name = "message">HIGHHIGH</scalar>
@@ -66,11 +66,11 @@
     </structure> 
 </record>
 
-<record name = "getFromCounter">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "dbInputLink">
+<record recordName = "getFromCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "dbInputLink">
         <scalar name = "pvname">putFromCounter</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "inheritSeverity">true</scalar>
@@ -78,10 +78,10 @@
 </record>
 
 <!-- really simple dbLink -->
-<record name = "dbInput" type = "dbInputLink">
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
+<record recordName = "dbInput" extends = "dbInputLink" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
     <scalar name = "pvname">putFromCounter</scalar>
     <scalar name = "process">false</scalar>
     <scalar name = "inheritSeverity">true</scalar>
