@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "float64Driver">
-    <scalar name = "delay" type = "double" />
-    <scalar name = "numberRegisters" type = "int" default = "1" />
+<structure structureName = "float64Driver">
+    <scalar name = "delay" scalarType = "double" />
+    <scalar name = "numberRegisters" scalarType = "int" default = "1" />
 </structure>
 
 </database>
