@@ -2,49 +2,49 @@
 <database>
 
 
-<record name = "aoCounter" >
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "aoCounter" >
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">value+.1&lt;=10?value+.1:0.0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "generic">
-        <structure name = "output" type = "caOutputLink">
+    <structure name = "link" extends = "generic">
+        <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">ao</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "ao">
-    <scalar name = "value" type = "double" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "output" type = "linearConvertOutput">
+<record recordName = "ao">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "output" extends = "linearConvertOutput">
         <structure name = "linearConvert">
             <scalar name = "deviceHigh">2047</scalar>
             <scalar name = "deviceLow">-2048</scalar>
             <scalar name = "engUnitsLow">0.0</scalar>
             <scalar name = "engUnitsHigh">10.0</scalar>
         </structure>
-        <structure name = "output" type = "caOutputLink">
+        <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">aoRaw</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "aoRaw">
-    <scalar name = "value" type = "int"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
+<record recordName = "aoRaw">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
 </record>
 
 
