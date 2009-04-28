@@ -1,71 +1,71 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "enumeratedCounter">
-    <scalar name = "value" type = "byte"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "enumeratedCounter">
+    <scalar name = "value" scalarType = "byte"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=4 ? value+1 : 0</scalar>
       </structure>
     </structure>
-    <structure name = "scan" type = "scan" >
+    <structure name = "scan" extends = "scan" >
         <structure name = "type">
             <scalar name = "choice">periodic</scalar>
         </structure> 
         <scalar name = "rate">1.0</scalar>
         <scalar name = "processAfterStart">true</scalar>
     </structure>
-    <structure name = "link" type = "generic">
-        <structure name = "output" type = "caOutputLink">
+    <structure name = "link" extends = "generic">
+        <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">enumerated.value.index</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "process0" type = "caProcessLink">
+        <structure name = "process0" extends = "caProcessLink">
             <scalar name = "pvname">enumeratedInput</scalar>
         </structure>
-        <structure name = "process1" type = "caProcessLink">
+        <structure name = "process1" extends = "caProcessLink">
             <scalar name = "pvname">enumeratedInputIndex</scalar>
         </structure>
-        <structure name = "process2" type = "caProcessLink">
+        <structure name = "process2" extends = "caProcessLink">
             <scalar name = "pvname">enumeratedInputChoice</scalar>
         </structure>
     </structure>
 </record>
 
 
-<record name = "enumerated">
-    <structure name = "value" type = "enumerated"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "digital">
-        <structure name = "alarm" type = "alarm" />
+<record recordName = "enumerated">
+    <structure name = "value" extends = "enumerated"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "digital">
+        <structure name = "alarm" extends = "alarm" />
         <structure name = "states" >
-             <auxInfo name = "supportFactory" type = "string">digitalInputFactory</auxInfo>
-             <structure name = "0" type = "digitalState">
+             <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.digitalInputFactory</auxInfo>
+             <structure name = "0" extends = "digitalState">
                  <scalar name = "name">zero</scalar>
                  <scalar name = "value">0</scalar>
                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
                  <scalar name = "message">ZERO ALARM</scalar>
              </structure>
-             <structure name = "1" type = "digitalState">
+             <structure name = "1" extends = "digitalState">
                  <scalar name = "name">one</scalar>
                  <scalar name = "value">1</scalar>
                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
              </structure>
-             <structure name = "2" type = "digitalState">
+             <structure name = "2" extends = "digitalState">
                  <scalar name = "name">two</scalar>
                  <scalar name = "value">2</scalar>
                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
              </structure>
-             <structure name = "3" type = "digitalState">
+             <structure name = "3" extends = "digitalState">
                  <scalar name = "name">three</scalar>
                  <scalar name = "value">3</scalar>
                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                  <scalar name = "message">THREE ALARM</scalar>
              </structure>
-             <structure name = "4" type = "digitalState">
+             <structure name = "4" extends = "digitalState">
                  <scalar name = "name">four</scalar>
                  <scalar name = "value">4</scalar>
                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
@@ -73,7 +73,7 @@
              </structure>
         </structure>
     </structure>
-    <structure name = "valueAlarm" type = "enumeratedAlarm">
+    <structure name = "valueAlarm" extends = "enumeratedAlarm">
             <scalar name = "active">true</scalar>
             <structure name = "changeStateAlarm">
                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
@@ -83,11 +83,11 @@
 </record>
 
 
-<record name = "enumeratedInput" >
-    <structure name = "value" type = "enumerated"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "enumeratedInput" >
+    <structure name = "value" extends = "enumerated"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">enumerated.value</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -95,55 +95,55 @@
 </record>
 
 
-<record name = "enumeratedMonitor" >
-    <structure name = "value" type = "enumerated"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "enumeratedMonitor" >
+    <structure name = "value" extends = "enumerated"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">enumerated.value</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
 
-<record name = "enumeratedInputIndex">
-    <scalar name = "value" type = "int"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "enumeratedInputIndex">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">enumerated.value.index</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
 
-<record name = "enumeratedMonitorIndex">
-    <scalar name = "value" type = "int"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "enumeratedMonitorIndex">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">enumerated.value.index</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
 
-<record name = "enumeratedInputChoice">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "enumeratedInputChoice">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">enumerated.value.choice</scalar>
         <scalar name = "process">false</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
 
-<record name = "enumeratedMonitorChoice">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "enumeratedMonitorChoice">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">enumerated.value.choice</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
