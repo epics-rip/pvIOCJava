@@ -47,8 +47,8 @@ public class LinkFactory {
         pvField.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
-    private static final String dbProcessLinkName = "dbProcessLink";
-    private static final String dbInputLinkName = "dbInputLink";
-    private static final String dbOutputLinkName = "dbOutputLink";
+    private static final String dbProcessLinkName = "org.epics.ioc.dbProcessLink";
+    private static final String dbInputLinkName = "org.epics.ioc.dbInputLink";
+    private static final String dbOutputLinkName = "org.epics.ioc.dbOutputLink";
     
 }
