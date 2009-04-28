@@ -105,13 +105,13 @@ public class CDMonitorFactory {
         public void lookForChange(ChannelField channelField, boolean causeMonitor) {
             Field field = channelField.getField();
             Type type = field.getType();
-            if(type!=Type.scalar && type!=Type.scalarArray) {
-                message("field is not primitive", MessageType.error);
+            if(type!=Type.scalar) {
+                message("field is not type scalar", MessageType.error);
                 lookForPut(channelField,causeMonitor);
                 return;
             }
             Scalar scalar = (Scalar)field;
-            MonitorField monitorField = new MonitorField(type,scalar.getScalarType(),causeMonitor);
+            MonitorField   monitorField = new MonitorField(type,scalar.getScalarType(),causeMonitor);
             monitorField.initField(channelField.getPVField());
             monitorFieldList.add(monitorField);
             channelFieldList.add(channelField);
@@ -342,7 +342,7 @@ public class CDMonitorFactory {
         }
         
         private static class MonitorField {
-            private MonitorType monitorType;
+            private MonitorType monitorType = MonitorType.onPut;
             private ScalarType scalarType = null;
             private boolean causeMonitor = false;
             

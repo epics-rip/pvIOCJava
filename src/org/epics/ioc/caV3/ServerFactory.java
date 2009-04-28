@@ -838,7 +838,7 @@ public class ServerFactory {
             }
             
             private void lookForChange() {
-                if(scalarType!=null && scalarType.isNumeric()) {
+                if(type!=null && type == Type.scalar && scalarType!=null && scalarType.isNumeric()) {
                     cdMonitor.lookForChange(valueChannelField, true);
                 } else {
                     cdMonitor.lookForPut(valueChannelField, true);

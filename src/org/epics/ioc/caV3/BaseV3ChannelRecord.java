@@ -184,7 +184,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         Type elementType = null;
         Field valueField = null;
         if(type==Type.structure) {
-            PVStructure pvEnumerated = masterPVDatabase.findStructure("enumerated");
+            PVStructure pvEnumerated = masterPVDatabase.findStructure("org.epics.pvData.enumerated");
             Field[] valueFields = pvEnumerated.getStructure().getFields();
             valueField = fieldCreate.createStructure(valueFieldName, valueFields);
             if(dbrProperty==DBRProperty.control || dbrProperty==DBRProperty.graphic) {
@@ -212,6 +212,8 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 }
             }
             PVStructure pvStructure = masterPVDatabase.findStructure(propertyName);
+            if(pvStructure==null) pvStructure = masterPVDatabase.findStructure("org.epics.ioc." + propertyName);
+            if(pvStructure==null) pvStructure = masterPVDatabase.findStructure("org.epics.pvData." + propertyName);
             if(pvStructure==null) {
                 notUsed++;
                 continue;
@@ -234,7 +236,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             PVStructure pvStructure = (PVStructure)pvRecord.getPVFields()[0];
             PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
             PVString pvString = (PVString)pvAuxInfo.createInfo("pvReplaceFactory", ScalarType.pvString);
-            pvString.put("enumeratedFactory");
+            pvString.put("org.epics.pvData.enumeratedFactory");
             PVReplaceFactory.replace(masterPVDatabase, pvStructure);
         }
         for(PVField pvField : pvRecord.getPVFields()) {
@@ -246,7 +248,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     pvAlarmIndex = pvStruct.getIntField("index");
                     pvAlarmChoice = pvStruct.getStringField("choice");
                     pvAlarmChoices = (PVStringArray)pvStruct.getArrayField("choices", ScalarType.pvString);
-                    PVStructure alarmSevr = masterPVDatabase.findStructure("alarmSeverity");
+                    PVStructure alarmSevr = masterPVDatabase.findStructure("org.epics.pvData.alarmSeverity");
                     PVStringArray pvStringArray = (PVStringArray)alarmSevr.getArrayField("choices", ScalarType.pvString);
                     StringArrayData stringArrayData = new StringArrayData();
                     pvStringArray.get(0, pvStringArray.getLength(), stringArrayData);
