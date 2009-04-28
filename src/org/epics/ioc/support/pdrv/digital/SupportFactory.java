@@ -47,7 +47,7 @@ public class SupportFactory {
         return null;
     }
     
-    private static final String pdrvUInt32DigitalInputSupportName = "pdrvUInt32DigitalInputFactory";
-    private static final String pdrvUInt32DigitalInterruptSupportName = "pdrvUInt32DigitalInterruptFactory";
-    private static final String pdrvUInt32DigitalOutputSupportName = "pdrvUInt32DigitalOutputFactory";
+    private static final String pdrvUInt32DigitalInputSupportName = "org.epics.ioc.pdrvUInt32DigitalInputFactory";
+    private static final String pdrvUInt32DigitalInterruptSupportName = "org.epics.ioc.pdrvUInt32DigitalInterruptFactory";
+    private static final String pdrvUInt32DigitalOutputSupportName = "org.epics.ioc.pdrvUInt32DigitalOutputFactory";
 }
