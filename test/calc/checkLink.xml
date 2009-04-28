@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <database>
-    <structure name = "output" type = "generic">
-        <scalar name = "wait" type = "boolean" >true</scalar>
-        <structure name = "link" type = "caOutputLink">
+    <structure name = "output" extends = "generic">
+        <scalar name = "wait" scalarType = "boolean" >true</scalar>
+        <structure name = "link" extends = "caOutputLink">
             <scalar name = "pvname">${checkRecord}Check.input.calcArgs.a.value</scalar>
             <scalar name = "process">true</scalar>
         </structure>
