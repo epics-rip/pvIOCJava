@@ -54,11 +54,11 @@ public class SupportFactory {
         return null;
     }
     
-    private static final String pdrvInt32ArrayInputSupportName = "pdrvInt32ArrayInputFactory";
-    private static final String pdrvInt32ArrayInterruptSupportName = "pdrvInt32ArrayInterruptFactory";
-    private static final String pdrvInt32ArrayOutputSupportName = "pdrvInt32ArrayOutputFactory";
+    private static final String pdrvInt32ArrayInputSupportName = "org.epics.ioc.pdrvInt32ArrayInputFactory";
+    private static final String pdrvInt32ArrayInterruptSupportName = "org.epics.ioc.pdrvInt32ArrayInterruptFactory";
+    private static final String pdrvInt32ArrayOutputSupportName = "org.epics.ioc.pdrvInt32ArrayOutputFactory";
    
-    private static final String pdrvFloat64ArrayInputSupportName = "pdrvFloat64ArrayInputFactory";
-    private static final String pdrvFloat64ArrayInterruptSupportName = "pdrvFloat64ArrayInterruptFactory";
-    private static final String pdrvFloat64ArrayOutputSupportName = "pdrvFloat64ArrayOutputFactory";
+    private static final String pdrvFloat64ArrayInputSupportName = "org.epics.ioc.pdrvFloat64ArrayInputFactory";
+    private static final String pdrvFloat64ArrayInterruptSupportName = "org.epics.ioc.pdrvFloat64ArrayInterruptFactory";
+    private static final String pdrvFloat64ArrayOutputSupportName = "org.epics.ioc.pdrvFloat64ArrayOutputFactory";
 }

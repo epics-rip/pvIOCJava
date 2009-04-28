@@ -54,11 +54,11 @@ public class SupportFactory {
         pvStructure.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
-    private static final String pdrvSerialInputName = "pdrvSerialInputFactory";
-    private static final String pdrvSerialInterruptName = "pdrvSerialInterruptFactory";
-    private static final String pdrvSerialOutputName = "pdrvSerialOutputFactory"; 
-    private static final String pdrvSerialDiscardName = "pdrvSerialDiscardFactory"; 
-    private static final String pdrvScalarCommandName = "pdrvScalarCommandFactory"; 
-    private static final String pdrvScalarQueryName = "pdrvScalarQueryFactory"; 
-    private static final String pdrvStringNoopName = "pdrvStringNoopFactory"; 
+    private static final String pdrvSerialInputName = "org.epics.ioc.pdrvSerialInputFactory";
+    private static final String pdrvSerialInterruptName = "org.epics.ioc.pdrvSerialInterruptFactory";
+    private static final String pdrvSerialOutputName = "org.epics.ioc.pdrvSerialOutputFactory"; 
+    private static final String pdrvSerialDiscardName = "org.epics.ioc.pdrvSerialDiscardFactory"; 
+    private static final String pdrvScalarCommandName = "org.epics.ioc.pdrvScalarCommandFactory"; 
+    private static final String pdrvScalarQueryName = "org.epics.ioc.pdrvScalarQueryFactory"; 
+    private static final String pdrvStringNoopName = "org.epics.ioc.pdrvStringNoopFactory"; 
 }
