@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "syncBooleanPort" type = "portCreate">
+<record recordName = "syncBooleanPort" extends = "portCreate">
     <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</scalar>
     <scalar name = "portName">syncBooleanPort</scalar>
-    <structure name = "driverParameters" type = "uint32DigitalDriver" >
+    <structure name = "driverParameters" extends = "uint32DigitalDriver" >
         <scalar name = "delay">0.0</scalar>
         <scalar name = "numberRegisters">2</scalar>
     </structure>
 </record>
 
-<record name = "syncBooleanDeviceControl" type = "portDeviceControl" >
+<record recordName = "syncBooleanDeviceControl" extends = "portDeviceControl" >
     <scalar name = "portName">syncBooleanPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
@@ -19,65 +19,65 @@
 -->
 </record>
 
-<record name = "syncBooleanCounter">
-    <scalar name = "value" type = "int"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "syncBooleanCounter">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "caOutputLink">
+    <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">syncBooleanOut</scalar>
          <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "syncBooleanOut">
-    <scalar name = "value" type = "int"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "outlink" type = "portDriverLink">
+<record recordName = "syncBooleanOut">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "output" type = "pdrvUInt32DigitalOutput">
+        <structure name = "output" extends = "pdrvUInt32DigitalOutput">
             <scalar name = "mask">32767</scalar>
         </structure>    
     </structure>
-    <structure name = "link" type = "generic">
-        <structure name = "1" type = "caProcessLink">
+    <structure name = "link" extends = "generic">
+        <structure name = "1" extends = "caProcessLink">
              <scalar name = "pvname">syncBooleanIn1</scalar>
-             <scalar name = "wait" type = "boolean">false</scalar>
+             <scalar name = "wait" scalarType = "boolean">false</scalar>
         </structure>
-        <structure name = "2" type = "caProcessLink">
+        <structure name = "2" extends = "caProcessLink">
              <scalar name = "pvname">syncBooleanIn2</scalar>
-             <scalar name = "wait" type = "boolean">false</scalar>
+             <scalar name = "wait" scalarType = "boolean">false</scalar>
         </structure>
-        <structure name = "3" type = "caProcessLink">
+        <structure name = "3" extends = "caProcessLink">
              <scalar name = "pvname">syncBooleanIn3</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "syncBooleanIn1">
-    <scalar name = "value" type = "boolean"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "syncBooleanIn1">
+    <scalar name = "value" scalarType = "boolean"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvUInt32DigitalInput">
+        <structure name = "input" extends = "pdrvUInt32DigitalInput">
             <scalar name = "mask">0x1</scalar>
         </structure>
     </structure>
-    <structure name = "valueAlarm" type = "booleanAlarm">
+    <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
@@ -86,19 +86,19 @@
     </structure>
 </record>
 
-<record name = "syncBooleanIn2">
-    <scalar name = "value" type = "boolean"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "syncBooleanIn2">
+    <scalar name = "value" scalarType = "boolean"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvUInt32DigitalInput">
+        <structure name = "input" extends = "pdrvUInt32DigitalInput">
             <scalar name = "mask">0x2</scalar>
         </structure>
     </structure>
-    <structure name = "valueAlarm" type = "booleanAlarm">
+    <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
@@ -107,19 +107,19 @@
     </structure>
 </record>
 
-<record name = "syncBooleanIn3">
-    <scalar name = "value" type = "boolean"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "syncBooleanIn3">
+    <scalar name = "value" scalarType = "boolean"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">syncBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvUInt32DigitalInput">
+        <structure name = "input" extends = "pdrvUInt32DigitalInput">
             <scalar name = "mask">0x4</scalar>
         </structure>
     </structure>
-    <structure name = "valueAlarm" type = "booleanAlarm">
+    <structure name = "valueAlarm" extends = "booleanAlarm">
         <scalar name = "active">true</scalar>
         <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
         <scalar name = "falseMessage">false alarm</scalar>
@@ -128,16 +128,16 @@
     </structure>
 </record>
 
-<record name = "asynBooleanPort" type = "portCreate">
+<record recordName = "asynBooleanPort" extends = "portCreate">
     <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</scalar>
     <scalar name = "portName">asynBooleanPort</scalar>
-    <structure name = "driverParameters" type = "uint32DigitalDriver" >
+    <structure name = "driverParameters" extends = "uint32DigitalDriver" >
         <scalar name = "delay">0.1</scalar>
         <scalar name = "numberRegisters">2</scalar>
     </structure>
 </record>
 
-<record name = "asynBooleanDeviceControl" type = "portDeviceControl" >
+<record recordName = "asynBooleanDeviceControl" extends = "portDeviceControl" >
     <scalar name = "portName">asyncBooleanPort</scalar>
     <scalar name = "deviceName">0</scalar>
 <!--
@@ -146,63 +146,63 @@
 -->
 </record>
 
-<record name = "asynBooleanCounter">
-    <scalar name = "value" type = "int"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+<record recordName = "asynBooleanCounter">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=7 ? value+1 : 0</scalar>
       </structure>
     </structure>
-    <structure name = "link" type = "caOutputLink">
+    <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">asynBooleanOut</scalar>
          <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "asynBooleanOut">
-    <scalar name = "value" type = "int"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "outlink" type = "portDriverLink">
+<record recordName = "asynBooleanOut">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "output" type = "pdrvUInt32DigitalOutput">
+        <structure name = "output" extends = "pdrvUInt32DigitalOutput">
             <scalar name = "mask">32767</scalar>
         </structure>    
     </structure>
-    <structure name = "link" type = "generic">
-        <structure name = "link1" type = "caProcessLink">
+    <structure name = "link" extends = "generic">
+        <structure name = "link1" extends = "caProcessLink">
              <scalar name = "pvname">asynBooleanIn1</scalar>
         </structure>
-        <structure name = "link2" type = "caProcessLink">
+        <structure name = "link2" extends = "caProcessLink">
              <scalar name = "pvname">asynBooleanIn2</scalar>
         </structure>
-        <structure name = "link3" type = "caProcessLink">
+        <structure name = "link3" extends = "caProcessLink">
              <scalar name = "pvname">asynBooleanIn3</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "asynBooleanIn1">
-    <scalar name = "value" type = "boolean"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "asynBooleanIn1">
+    <scalar name = "value" scalarType = "boolean"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvUInt32DigitalInput">
+        <structure name = "input" extends = "pdrvUInt32DigitalInput">
             <scalar name = "mask">0x1</scalar>
         </structure>
     </structure>
-    <structure name = "valueAlarm" type = "booleanAlarm">
+    <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
@@ -211,19 +211,19 @@
     </structure>
 </record>
 
-<record name = "asynBooleanIn2">
-    <scalar name = "value" type = "boolean"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "asynBooleanIn2">
+    <scalar name = "value" scalarType = "boolean"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvUInt32DigitalInput">
+        <structure name = "input" extends = "pdrvUInt32DigitalInput">
             <scalar name = "mask">0x2</scalar>
         </structure>
     </structure>
-    <structure name = "valueAlarm" type = "booleanAlarm">
+    <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
@@ -231,19 +231,19 @@
       <scalar name = "trueMessage">true alarm</scalar>
     </structure>
 </record>
-<record name = "asynBooleanIn3">
-    <scalar name = "value" type = "boolean"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "asynBooleanIn3">
+    <scalar name = "value" scalarType = "boolean"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">asynBooleanPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvUInt32DigitalInput">
+        <structure name = "input" extends = "pdrvUInt32DigitalInput">
             <scalar name = "mask">0x4</scalar>
         </structure>
     </structure>
-    <structure name = "valueAlarm" type = "booleanAlarm">
+    <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
       <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
       <scalar name = "falseMessage">false alarm</scalar>
