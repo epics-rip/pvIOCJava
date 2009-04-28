@@ -1,20 +1,20 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "boolean" >
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <scalar name = "value" type = "boolean" />
+<record recordName = "boolean" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <scalar name = "value" scalarType = "boolean" />
 </record>
 
-<record name = "byte" >
-    <scalar name = "value" type = "byte">
-        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+<record recordName = "byte" >
+    <scalar name = "value" scalarType = "byte">
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
         1
     </scalar>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "display" type = "display" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -22,7 +22,7 @@
             <scalar name = "high">10</scalar>
         </structure>
     </structure>
-    <structure name = "control" type = "control" >
+    <structure name = "control" extends = "control" >
         <structure name = "limit">
             <scalar name = "low">1</scalar>
             <scalar name = "high">9</scalar>
@@ -30,14 +30,14 @@
     </structure>
 </record>
 
-<record name = "short" >
-    <scalar name = "value" type = "short">
-        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+<record recordName = "short" >
+    <scalar name = "value" scalarType = "short">
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
         1
     </scalar>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "display" type = "display" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -45,7 +45,7 @@
             <scalar name = "high">10</scalar>
         </structure>
     </structure>
-    <structure name = "control" type = "control" >
+    <structure name = "control" extends = "control" >
         <structure name = "limit">
             <scalar name = "low">1</scalar>
             <scalar name = "high">9</scalar>
@@ -53,14 +53,14 @@
     </structure>
 </record>
 
-<record name = "int" >
-    <scalar name = "value" type = "int">
-        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+<record recordName = "int" >
+    <scalar name = "value" scalarType = "int">
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
         1
     </scalar>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "display" type = "display" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -68,7 +68,7 @@
             <scalar name = "high">10</scalar>
         </structure>
     </structure>
-    <structure name = "control" type = "control" >
+    <structure name = "control" extends = "control" >
         <structure name = "limit">
             <scalar name = "low">1</scalar>
             <scalar name = "high">9</scalar>
@@ -76,14 +76,14 @@
     </structure>
 </record>
 
-<record name = "long" >
-    <scalar name = "value" type = "long">
-        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+<record recordName = "long" >
+    <scalar name = "value" scalarType = "long">
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
         1
     </scalar>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "display" type = "display" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -91,7 +91,7 @@
             <scalar name = "high">10</scalar>
         </structure>
     </structure>
-    <structure name = "control" type = "control" >
+    <structure name = "control" extends = "control" >
         <structure name = "limit">
             <scalar name = "low">1</scalar>
             <scalar name = "high">9</scalar>
@@ -99,14 +99,14 @@
     </structure>
 </record>
 
-<record name = "float" >
-    <scalar name = "value" type = "float">
-        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+<record recordName = "float" >
+    <scalar name = "value" scalarType = "float">
+    <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
         1
     </scalar>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "display" type = "display" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -114,7 +114,7 @@
             <scalar name = "high">10</scalar>
         </structure>
     </structure>
-    <structure name = "control" type = "control" >
+    <structure name = "control" extends = "control" >
         <structure name = "limit">
             <scalar name = "low">1</scalar>
             <scalar name = "high">9</scalar>
@@ -122,14 +122,14 @@
     </structure>
 </record>
 
-<record name = "double" >
-    <scalar name = "value" type = "double">
-        <auxInfo name = "pvReplaceFactory" type = "string">controlLimitFactory</auxInfo>
+<record recordName = "double" >
+    <scalar name = "value" scalarType = "double">
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
         1
     </scalar>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "display" type = "display" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -137,7 +137,7 @@
             <scalar name = "high">10</scalar>
         </structure>
     </structure>
-    <structure name = "control" type = "control" >
+    <structure name = "control" extends = "control" >
         <structure name = "limit">
             <scalar name = "low">1</scalar>
             <scalar name = "high">9</scalar>
@@ -145,25 +145,25 @@
     </structure>
 </record>
 
-<record name = "string" >
-    <scalar name = "value" type = "string">a string</scalar>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
+<record recordName = "string" >
+    <scalar name = "value" scalarType = "string">a string</scalar>
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
 </record>
 
-<record name = "booleanArray">
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "boolean">
+<record recordName = "booleanArray">
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "boolean">
         false false false
     </array>
 </record>
 
-<record name = "byteArray">
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "byte">0 0 0</array>
-    <structure name = "display" type = "display" >
+<record recordName = "byteArray">
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "byte">0 0 0</array>
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -173,11 +173,11 @@
     </structure>
 </record>
 
-<record name = "intArray" >
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "int">0 0 0</array>
-    <structure name = "display" type = "display" >
+<record recordName = "intArray" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "int">0 0 0</array>
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -187,11 +187,11 @@
     </structure>
 </record>
 
-<record name = "shortArray" >
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "short">0 0 0</array>
-    <structure name = "display" type = "display" >
+<record recordName = "shortArray" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "short">0 0 0</array>
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -201,11 +201,11 @@
     </structure>
 </record>
 
-<record name = "longArray" >
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "long">0 0 0</array>
-    <structure name = "display" type = "display" >
+<record recordName = "longArray" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "long">0 0 0</array>
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -215,11 +215,11 @@
     </structure>
 </record>
 
-<record name = "floatArray" >
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "float">0 0 0</array>
-    <structure name = "display" type = "display" >
+<record recordName = "floatArray" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "float">0 0 0</array>
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -229,11 +229,11 @@
     </structure>
 </record>
 
-<record name = "doubleArray" >
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "double">0 0 0</array>
-    <structure name = "display" type = "display" >
+<record recordName = "doubleArray" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "double">0 0 0</array>
+    <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
         <structure name = "limit">
@@ -243,10 +243,10 @@
     </structure>
 </record>
 
-<record name = "stringArray" >
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "string">
+<record recordName = "stringArray" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "string">
         one," two with blanks ",three
     </array>
 </record>

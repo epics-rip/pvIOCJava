@@ -1,52 +1,52 @@
 <?xml version="1.0" ?>
 <database>
-<record name = "booleanArrayToggle">
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <array name = "value" type = "boolean">
+<record recordName = "booleanArrayToggle">
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "boolean">
         false true false
     </array>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
-      <structure name = "calculator" type = "generic">
-          <auxInfo name = "supportFactory" type = "string">booleanArrayToggleCalculatorFactory</auxInfo>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator" extends = "generic">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.booleanArrayToggleCalculatorFactory</auxInfo>
       </structure>
     </structure>
-    <structure name = "link" type = "generic" >
-        <structure name = "1" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+    <structure name = "link" extends = "generic" >
+        <structure name = "1" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">booleanArray1FromToggle</scalar>
         </structure>
-        <structure name = "2" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "2" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">booleanArray2FromToggle</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "booleanArray1FromToggle">
-    <array name = "value" type = "boolean" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "booleanArray1FromToggle">
+    <array name = "value" scalarType = "boolean" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">booleanArrayToggle</scalar>
     </structure>
 </record>
 
-<record name = "booleanArray2FromToggle" >
-    <array name = "value" type = "boolean" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
+<record recordName = "booleanArray2FromToggle" >
+    <array name = "value" scalarType = "boolean" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
 </record>
-<record name = "booleanArray3FromToggle">
-    <array name = "value" type = "boolean" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "booleanArray3FromToggle">
+    <array name = "value" scalarType = "boolean" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">booleanArrayToggle</scalar>
         <scalar name = "process">true</scalar>
     </structure>
