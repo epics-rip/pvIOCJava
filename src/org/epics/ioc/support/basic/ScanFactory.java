@@ -56,6 +56,7 @@ public class ScanFactory {
     
     private static class ScanImpl extends AbstractSupport implements PVListener, AfterStartRequester
     {
+        private static final String supportName = "org.epics.ioc.scan";
         private ScanField scanField;
         private PVRecord pvRecord = null;
         
@@ -78,7 +79,7 @@ public class ScanFactory {
        
         
         private ScanImpl(PVStructure pvScan,ScanField scanField) {
-            super("scan",pvScan);
+            super(supportName,pvScan);
             this.scanField = scanField;
             pvRecord = pvScan.getPVRecord();
             pvRecord.registerListener(this);

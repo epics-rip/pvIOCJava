@@ -36,6 +36,7 @@ public class CalcArgsFactory {
     private static class CalcArgsImpl extends AbstractSupport
     implements CalcArgs,SupportProcessRequester
     {
+        private static final String supportName = "org.epics.ioc.calcArgArray";
         private String processRequesterName = null;
         private PVStructure pvStructure;
         private PVField[] valuePVFields;
@@ -48,7 +49,7 @@ public class CalcArgsFactory {
         private RequestResult finalResult;
        
         private CalcArgsImpl(PVStructure pvStructure) {
-            super("calcArgArray",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
             processRequesterName = pvStructure.getFullName();
         }

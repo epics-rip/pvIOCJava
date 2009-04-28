@@ -63,10 +63,11 @@ public abstract class ExpressionCalculatorFactory  {
     private static class ExpressionCalculator extends AbstractSupport {
         
         private ExpressionCalculator(PVStructure pvStructure) {
-            super("expressionCalculator",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         
+        private static final String supportName = "org.epics.ioc.expressionCalculator";
         
         private PVStructure pvStructure = null;
         private AlarmSupport alarmSupport = null;
