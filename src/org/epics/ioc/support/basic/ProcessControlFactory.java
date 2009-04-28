@@ -48,7 +48,7 @@ public class ProcessControlFactory {
         return new ProcessControlImpl(pvStructure);
     }
     
-    private static final String supportName = "processControl";
+    private static final String supportName = "org.epics.ioc.processControl";
     private static final String emptyString = "";
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final IOCDatabase supportDatabase = IOCDatabaseFactory.get(masterPVDatabase);

@@ -36,7 +36,8 @@ public class DelayFactory {
     private static Timer timer = new Timer("delaySupportTimer");
     
     private static class DelayImpl extends AbstractSupport implements ProcessContinueRequester
-    {       
+    {
+        private static final String supportName = "org.epics.ioc.delay";
         private PVStructure pvStructure = null;
         private RecordProcess recordProcess = null;
         private PVLong minAccess = null;
@@ -48,7 +49,7 @@ public class DelayFactory {
         private SupportProcessRequester supportProcessRequester = null;
 
         private DelayImpl(PVStructure pvStructure) {
-            super("delay",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)

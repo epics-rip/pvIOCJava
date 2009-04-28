@@ -62,7 +62,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
      * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordSupport)
      */
     public void initialize(LocateSupport recordSupport) {
-        if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+        if(!super.checkSupportState(SupportState.readyForInitialize,super.getSupportName())) return;
         processRequesterName = pvStructure.getFullName();
         SupportState supportState = SupportState.readyForStart;
         PVField[] pvFields = pvStructure.getPVFields();
@@ -124,7 +124,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
      * @see org.epics.ioc.process.Support#start()
      */
     public void start(AfterStart afterStart) {
-        if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
+        if(!super.checkSupportState(SupportState.readyForStart,super.getSupportName())) return;
         if(alarmSupport!=null) {
             alarmSupport.start(null);
             if(alarmSupport.getSupportState()!=SupportState.ready) return;
@@ -167,7 +167,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
         if(supportProcessRequester==null) {
             throw new IllegalStateException("no processRequestListener");
         }
-        if(!super.checkSupportState(SupportState.ready,supportName + ".process")) {
+        if(!super.checkSupportState(SupportState.ready,super.getSupportName() + ".process")) {
             supportProcessRequester.supportProcessDone(RequestResult.failure);
             return;
         }
@@ -201,7 +201,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     }
     
     private void callSupport() {
-        if(!super.checkSupportState(SupportState.ready,supportName + ".processContinue")) {
+        if(!super.checkSupportState(SupportState.ready,super.getSupportName() + ".processContinue")) {
             throw new IllegalStateException("processContinue but not ready");
         }
         while(nextLink<supports.length) {    

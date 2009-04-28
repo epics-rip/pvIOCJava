@@ -54,7 +54,7 @@ public class EventFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordSupport#processRecord(org.epics.ioc.process.RecordProcessRequester)
          */
-        private static final String supportName = "event";
+        private static final String supportName = "org.epics.ioc.event";
         private static final EventScanner eventScanner = ScannerFactory.getEventScanner();
         private SupportState supportState = SupportState.readyForInitialize;
         private PVString pvEventName = null;

@@ -65,8 +65,8 @@ public class DigitalFactory {
         return support;
     }
     
-    private static final String digitalInputName = "digitalInputFactory";
-    private static final String digitalOutputName = "digitalOutputFcatory";
+    private static final String digitalInputName = "org.epics.ioc.digitalInputFactory";
+    private static final String digitalOutputName = "org.epics.ioc.digitalOutputFcatory";
     private static PVDatabase pvDatabaseMaster = PVDatabaseFactory.getMaster();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static Convert convert = ConvertFactory.getConvert();
@@ -162,7 +162,12 @@ public class DigitalFactory {
             if(nstates<1) return false;
             String[] names = new String[nstates];
             values = new int[nstates];
-            PVStructure pvEnumeratedAlarmState = pvDatabaseMaster.findStructure("enumeratedAlarmState");
+            String enumeratedAlarmState = "org.epics.ioc.enumeratedAlarmState";
+            PVStructure pvEnumeratedAlarmState = pvDatabaseMaster.findStructure(enumeratedAlarmState);
+            if(pvEnumeratedAlarmState==null) {
+                pvStates.message("did not find " + enumeratedAlarmState, MessageType.error);
+                return false;
+            }
             for(int indState=0; indState<nstates; indState++) {
                 PVField pvField = pvStatesFields[indState];
                 if(pvField.getField().getType()!=Type.structure) {
