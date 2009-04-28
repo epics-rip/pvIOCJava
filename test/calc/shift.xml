@@ -2,23 +2,23 @@
 <database>
 
 <substitute fromTo = "checkRecord=shiftTest,checkType=int,checkValue=0x81" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-     <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "int" >0x80000000</scalar>
+            <scalar name = "value" scalarType = "int" >0x80000000</scalar>
           </structure>
           <structure name = "b">
-            <scalar name = "value" type = "int" >31</scalar>
+            <scalar name = "value" scalarType = "int" >31</scalar>
           </structure>
           <structure name = "c">
-            <scalar name = "value" type = "int" >7</scalar>
+            <scalar name = "value" scalarType = "int" >7</scalar>
           </structure>
           <structure name = "d">
-            <scalar name = "value" type = "int" >0x1</scalar>
+            <scalar name = "value" scalarType = "int" >0x1</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -27,7 +27,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -35,14 +35,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=leftShiftByte,checkType=byte,checkValue=0x28" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "byte" >5</scalar>
+            <scalar name = "value" scalarType = "byte" >5</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -51,7 +51,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -59,14 +59,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=leftShiftShort,checkType=short,checkValue=0x28" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "short" >5</scalar>
+            <scalar name = "value" scalarType = "short" >5</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -75,7 +75,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -83,14 +83,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=leftShiftInt,checkType=int,checkValue=0x28" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "int" >5</scalar>
+            <scalar name = "value" scalarType = "int" >5</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -99,7 +99,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -107,14 +107,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=leftShiftLong,checkType=long,checkValue=0x28" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "long" >5</scalar>
+            <scalar name = "value" scalarType = "long" >5</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -123,7 +123,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -131,14 +131,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftByteSignExtended,checkType=byte,checkValue=0xf8" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "byte" >0x80</scalar>
+            <scalar name = "value" scalarType = "byte" >0x80</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -147,7 +147,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -155,14 +155,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftByteZeroExtended,checkType=byte,checkValue=0x8" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "byte" >0x80</scalar>
+            <scalar name = "value" scalarType = "byte" >0x80</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -171,7 +171,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -179,14 +179,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftShortSignExtended,checkType=short,checkValue=0xff80" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "short" >0x8000</scalar>
+            <scalar name = "value" scalarType = "short" >0x8000</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -195,7 +195,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -203,14 +203,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftShortZeroExtended,checkType=short,checkValue=0x80" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "short" >0x8000</scalar>
+            <scalar name = "value" scalarType = "short" >0x8000</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -219,7 +219,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -227,14 +227,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftIntSignExtended,checkType=int,checkValue=0xffffff80" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "int" >0x80000000</scalar>
+            <scalar name = "value" scalarType = "int" >0x80000000</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -243,7 +243,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -251,14 +251,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftIntZeroExtended,checkType=int,checkValue=0x80" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "int" >0x80000000</scalar>
+            <scalar name = "value" scalarType = "int" >0x80000000</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -267,7 +267,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -275,14 +275,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftLongSignExtended,checkType=long,checkValue=-1" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "long" >-1</scalar>
+            <scalar name = "value" scalarType = "long" >-1</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -291,7 +291,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
@@ -299,14 +299,14 @@
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=rightShiftLongZeroExtended,checkType=long,checkValue=0xff" />
-<record name = "${checkRecord}"  >
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-     <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}"  >
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "long" >-1</scalar>
+            <scalar name = "value" scalarType = "long" >-1</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
@@ -315,7 +315,7 @@
          </scalar>
        </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
     <include href = "checkLink.xml" />
