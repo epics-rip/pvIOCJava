@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "serialPort" type = "portCreate">
+<record recordName = "serialPort" extends = "portCreate">
     <scalar name = "factoryName">org.epics.ioc.pdrv.vxi11.DriverFactory</scalar>
     <scalar name = "portName">serialPort</scalar>
 
-    <structure name = "driverParameters" type = "vxi11Driver" >
+    <structure name = "driverParameters" extends = "vxi11Driver" >
         <scalar name = "hostName">192.168.1.10</scalar>
         <scalar name = "vxiName">hpib</scalar>
 <!--
@@ -15,7 +15,7 @@
     </structure>
 </record>
 
-<record name = "serialDeviceControl" type = "portDeviceControl" >
+<record recordName = "serialDeviceControl" extends = "portDeviceControl" >
     <scalar name = "portName">serialPort</scalar>
     <scalar name = "deviceName">3</scalar>
 <!--
@@ -26,68 +26,68 @@
 </record>
 
 
-<record name = "intToSerial">
-    <scalar name = "value" type = "int">1000</scalar>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "intToSerial">
+    <scalar name = "value" scalarType = "int">1000</scalar>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">serialPort</scalar>
         <scalar name = "deviceName">3</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "command" type = "pdrvScalarCommand">
+        <structure name = "command" extends = "pdrvScalarCommand">
             <scalar name = "prefix">:VOLT:DC:RANG:UPP</scalar>
-            <structure name = "output" type = "pdrvSerialOutput"/>
+            <structure name = "output" extends = "pdrvSerialOutput"/>
         </structure>
-        <structure name = "discardResponse" type = "pdrvStringNoop">
-            <structure name = "query" type = "pdrvScalarQuery">
+        <structure name = "discardResponse" extends = "pdrvStringNoop">
+            <structure name = "query" extends = "pdrvScalarQuery">
                 <scalar name = "request">:VOLT:DC:RANG:UPP?</scalar>
-                <structure name = "output" type = "pdrvSerialOutput"/> 
-                <structure name = "input" type = "pdrvSerialInput"/>
+                <structure name = "output" extends = "pdrvSerialOutput"/> 
+                <structure name = "input" extends = "pdrvSerialInput"/>
             </structure>
         </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
 </record>
 
 
-<record name = "serialToDouble">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "serialToDouble">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">serialPort</scalar>
         <scalar name = "deviceName">3</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "query" type = "pdrvScalarQuery">
+        <structure name = "query" extends = "pdrvScalarQuery">
             <scalar name = "request">:FETC?</scalar>
-            <structure name = "output" type = "pdrvSerialOutput"/>
-            <structure name = "input" type = "pdrvSerialInput"/>
+            <structure name = "output" extends = "pdrvSerialOutput"/>
+            <structure name = "input" extends = "pdrvSerialInput"/>
         </structure>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
 </record>
 
-<record name = "getIDN">
-    <scalar name = "value" type = "string"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "getIDN">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">serialPort</scalar>
         <scalar name = "deviceName">3</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "query" type = "pdrvScalarQuery">
+        <structure name = "query" extends = "pdrvScalarQuery">
             <scalar name = "request">*IDN?</scalar>
-            <structure name = "output" type = "pdrvSerialOutput"/>
+            <structure name = "output" extends = "pdrvSerialOutput"/>
         </structure>
-        <structure name = "input" type = "pdrvSerialInput"/>
+        <structure name = "input" extends = "pdrvSerialInput"/>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
