@@ -50,9 +50,9 @@ public class LinkFactory {
         pvField.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
-    private static final String caProcessLinkName = "caProcessLink";
-    private static final String caInputLinkName = "caInputLink";
-    private static final String caOutputLinkName = "caOutputLink";
-    private static final String caMonitorLinkName = "caMonitorLink";
-    private static final String caMonitorNotifyLinkName = "caMonitorNotifyLink";    
+    private static final String caProcessLinkName = "org.epics.ioc.caProcessLink";
+    private static final String caInputLinkName = "org.epics.ioc.caInputLink";
+    private static final String caOutputLinkName = "org.epics.ioc.caOutputLink";
+    private static final String caMonitorLinkName = "org.epics.ioc.caMonitorLink";
+    private static final String caMonitorNotifyLinkName = "org.epics.ioc.caMonitorNotifyLink";    
 }

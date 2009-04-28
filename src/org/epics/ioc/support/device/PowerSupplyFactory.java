@@ -91,7 +91,7 @@ public class PowerSupplyFactory {
     }
     
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final String powerSupplyFactory = "powerSupplyFactory";
+    private static final String powerSupplyFactory = "org.epics.ioc.powerSupplyFactory";
     
     
     static private class PowerSupplyCurrentImpl extends AbstractSupport
