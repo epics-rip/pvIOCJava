@@ -1,15 +1,19 @@
 <?xml version="1.0" ?>
 <database>
-<record name = "processControl" type = "processControl" />
-<record name = "portDeviceControl" type = "portDeviceControl" />
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<record recordName = "processControl" extends = "processControl" />
+<record recordName = "portDeviceControl" extends = "portDeviceControl" />
 <include addPath = "test/pdrv" />
 
 <include href = "boolean.xml" />
 <include href = "digital.xml" />
+
 <include href = "int32.xml" />
 <include href = "float64.xml" />
 <include href = "int32Array.xml" />
 <include href = "float64Array.xml" />
+
 <!--
 <include href = "string.xml" />
 -->
