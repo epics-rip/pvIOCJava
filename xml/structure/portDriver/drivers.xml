@@ -1,38 +1,38 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "portCreateFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "portCreateFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.PortCreateFactory</scalar>
 </structure>
 
-<structure name = "portDeviceControlFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "portDeviceControlFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.PortDeviceControlFactory</scalar>
 </structure>
 
-<structure name = "portCreate">
-  <auxInfo name = "supportFactory" type = "string">portCreateFactory</auxInfo>
-  <scalar name = "factoryName" type = "string" />
-  <scalar name = "portName" type = "string" />
-  <scalar name = "autoConnect" type = "boolean">true</scalar>
-  <structure name = "priority" type = "scanPriority" />
+<structure structureName = "portCreate">
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.portCreateFactory</auxInfo>
+  <scalar name = "factoryName" scalarType = "string" />
+  <scalar name = "portName" scalarType = "string" />
+  <scalar name = "autoConnect" scalarType = "boolean">true</scalar>
+  <structure name = "priority" extends = "scanPriority" />
 </structure>
 
-<structure name = "portDeviceControl">
-  <auxInfo name = "supportFactory" type = "string">portDeviceControlFactory</auxInfo>
-  <scalar name = "message" type = "string" />
-  <scalar name = "portName" type = "string" />
-  <scalar name = "deviceName" type = "string" />
-  <scalar name = "processAtStart" type = "boolean">false</scalar>
-  <scalar name = "connect" type = "boolean">false</scalar>
-  <scalar name = "enable" type = "boolean">true</scalar>
-  <scalar name = "autoConnect" type = "boolean">truer</scalar>
-  <scalar name = "traceMask" type = "int">1</scalar>
-  <scalar name = "traceIOMask" type = "int">0</scalar>
-  <scalar name = "traceIOTruncateSize" type = "int">80</scalar>
-  <scalar name = "report" type = "boolean">false</scalar>
-  <scalar name = "reportDetails" type = "int">3</scalar>
+<structure structureName = "portDeviceControl">
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.portDeviceControlFactory</auxInfo>
+  <scalar name = "message" scalarType = "string" />
+  <scalar name = "portName" scalarType = "string" />
+  <scalar name = "deviceName" scalarType = "string" />
+  <scalar name = "processAtStart" scalarType = "boolean">false</scalar>
+  <scalar name = "connect" scalarType = "boolean">false</scalar>
+  <scalar name = "enable" scalarType = "boolean">true</scalar>
+  <scalar name = "autoConnect" scalarType = "boolean">truer</scalar>
+  <scalar name = "traceMask" scalarType = "int">1</scalar>
+  <scalar name = "traceIOMask" scalarType = "int">0</scalar>
+  <scalar name = "traceIOTruncateSize" scalarType = "int">80</scalar>
+  <scalar name = "report" scalarType = "boolean">false</scalar>
+  <scalar name = "reportDetails" scalarType = "int">3</scalar>
 </structure>
 
 <include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />

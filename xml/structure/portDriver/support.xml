@@ -1,23 +1,23 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "portDriverLinkFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "portDriverLinkFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.PortDriverLinkFactory</scalar>
 </structure>
 
-<structure name = "portDriverLink">
-  <auxInfo name = "supportFactory" type = "string">portDriverLinkFactory</auxInfo>
-  <scalar name = "portName" type = "string" />
-  <scalar name = "deviceName" type = "string" />
+<structure structureName = "portDriverLink">
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.portDriverLinkFactory</auxInfo>
+  <scalar name = "portName" scalarType = "string" />
+  <scalar name = "deviceName" scalarType = "string" />
   <!-- timeout only used for asynchronous ports -->
-  <scalar name = "timeout" type = "double">1.0</scalar>
-  <structure name = "alarm" type = "alarm" />
+  <scalar name = "timeout" scalarType = "double">1.0</scalar>
+  <structure name = "alarm" extends = "alarm" />
 </structure>
 
-<structure name = "portDriverInterruptLink">
-  <scalar name = "portName" type = "string" />
-  <scalar name = "deviceName" type = "string" />
+<structure structureName = "portDriverInterruptLink">
+  <scalar name = "portName" scalarType = "string" />
+  <scalar name = "deviceName" scalarType = "string" />
 </structure>
 
 </database>

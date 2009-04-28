@@ -1,32 +1,32 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "pdrvUInt32DigitalInputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvUInt32DigitalInputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.digital.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvUInt32DigitalInput">
-   <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInputFactory</auxInfo>
-   <scalar name = "mask" type = "int" />
+<structure structureName = "pdrvUInt32DigitalInput">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvUInt32DigitalInputFactory</auxInfo>
+   <scalar name = "mask" scalarType = "int" />
 </structure>
 
-<structure name = "pdrvUInt32DigitalInterruptInputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvUInt32DigitalInterruptInputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.digital.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvUInt32DigitalInterrupt" type = "portDriverInterruptLink">
-   <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalInterruptFactory</auxInfo>
-   <scalar name = "mask" type = "int" />
-   <scalar name = "process" type = "boolean">false</scalar>
+<structure structureName = "pdrvUInt32DigitalInterrupt" scalarType = "portDriverInterruptLink">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvUInt32DigitalInterruptFactory</auxInfo>
+   <scalar name = "mask" scalarType = "int" />
+   <scalar name = "process" scalarType = "boolean">false</scalar>
 </structure>
 
-<structure name = "pdrvUInt32DigitalOutputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvUInt32DigitalOutputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.digital.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvUInt32DigitalOutput">
-   <auxInfo name = "supportFactory" type = "string">pdrvUInt32DigitalOutputFactory</auxInfo>
-   <scalar name = "mask" type = "int" />
+<structure structureName = "pdrvUInt32DigitalOutput">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvUInt32DigitalOutputFactory</auxInfo>
+   <scalar name = "mask" scalarType = "int" />
 </structure>
 
 </database>

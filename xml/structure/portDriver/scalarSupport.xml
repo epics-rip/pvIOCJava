@@ -1,71 +1,71 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "pdrvInt32InputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvInt32InputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvInt32Input">
-   <auxInfo name = "supportFactory" type = "string">pdrvInt32InputFactory</auxInfo>
+<structure structureName = "pdrvInt32Input">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvInt32InputFactory</auxInfo>
 </structure>
 
-<structure name = "pdrvInt32InterruptFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvInt32InterruptFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvInt32Interrupt" type = "portDriverInterruptLink">
-   <auxInfo name = "supportFactory" type = "string">pdrvInt32InterruptFactory</auxInfo>
-   <scalar name = "process" type = "boolean">false</scalar>
+<structure structureName = "pdrvInt32Interrupt" extends = "portDriverInterruptLink">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvInt32InterruptFactory</auxInfo>
+   <scalar name = "process" scalarType = "boolean">false</scalar>
 </structure>
 
-<structure name = "pdrvInt32AverageFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvInt32AverageFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvInt32Average"  type = "portDriverInterruptLink">
-   <auxInfo name = "supportFactory" type = "string">pdrvInt32AverageFactory</auxInfo>
+<structure structureName = "pdrvInt32Average"  extends = "portDriverInterruptLink">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvInt32AverageFactory</auxInfo>
 </structure>
 
-<structure name = "pdrvInt32OutputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvInt32OutputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvInt32Output">
-   <auxInfo name = "supportFactory" type = "string">pdrvInt32OutputFactory</auxInfo>
+<structure structureName = "pdrvInt32Output">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvInt32OutputFactory</auxInfo>
 </structure>
 
 
-<structure name = "pdrvFloat64InputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvFloat64InputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvFloat64Input">
-   <auxInfo name = "supportFactory" type = "string">pdrvFloat64InputFactory</auxInfo>
+<structure structureName = "pdrvFloat64Input">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvFloat64InputFactory</auxInfo>
 </structure>
 
-<structure name = "pdrvFloat64InterruptFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvFloat64InterruptFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvFloat64Interrupt" type = "portDriverInterruptLink">
-   <auxInfo name = "supportFactory" type = "string">pdrvFloat64InterruptFactory</auxInfo>
-   <scalar name = "process" type = "boolean">false</scalar>
+<structure structureName = "pdrvFloat64Interrupt" extends = "portDriverInterruptLink">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvFloat64InterruptFactory</auxInfo>
+   <scalar name = "process" scalarType = "boolean">false</scalar>
 </structure>
 
-<structure name = "pdrvFloat64AverageFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvFloat64AverageFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvFloat64Average" type = "portDriverInterruptLink">
-   <auxInfo name = "supportFactory" type = "string">pdrvFloat64AverageFactory</auxInfo>
+<structure structureName = "pdrvFloat64Average" extends = "portDriverInterruptLink">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvFloat64AverageFactory</auxInfo>
 </structure>
 
-<structure name = "pdrvFloat64OutputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvFloat64OutputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.scalar.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvFloat64Output">
-   <auxInfo name = "supportFactory" type = "string">pdrvFloat64OutputFactory</auxInfo>
+<structure structureName = "pdrvFloat64Output">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvFloat64OutputFactory</auxInfo>
 </structure>
 
 </database>

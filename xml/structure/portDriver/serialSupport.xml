@@ -1,72 +1,72 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "pdrvSerialInputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvSerialInputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.serial.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvSerialInput" >
-   <auxInfo name = "supportFactory" type = "string">pdrvSerialInputFactory</auxInfo>
-   <scalar name = "size" type = "int">80</scalar>
+<structure structureName = "pdrvSerialInput" >
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvSerialInputFactory</auxInfo>
+   <scalar name = "size" scalarType = "int">80</scalar>
 </structure>
 
-<structure name = "pdrvSerialInterruptFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvSerialInterruptFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.serial.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvSerialInterrupt" type = "portDriverInterruptLink" >
-   <auxInfo name = "supportFactory" type = "string">pdrvSerialInterruptFactory</auxInfo>
-   <scalar name = "size" type = "int">80</scalar>
-   <scalar name = "process" type = "boolean">false</scalar>
+<structure structureName = "pdrvSerialInterrupt" extends = "portDriverInterruptLink" >
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvSerialInterruptFactory</auxInfo>
+   <scalar name = "size" scalarType = "int">80</scalar>
+   <scalar name = "process" scalarType = "boolean">false</scalar>
 </structure>
 
-<structure name = "pdrvSerialOutputFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvSerialOutputFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.serial.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvSerialOutput" >
-   <auxInfo name = "supportFactory" type = "string">pdrvSerialOutputFactory</auxInfo>
-   <scalar name = "size" type = "int">80</scalar>
+<structure structureName = "pdrvSerialOutput" >
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvSerialOutputFactory</auxInfo>
+   <scalar name = "size" scalarType = "int">80</scalar>
 </structure>
 
-<structure name = "pdrvStringNoopFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvStringNoopFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.serial.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvStringNoop" >
-   <auxInfo name = "supportFactory" type = "string">pdrvStringNoopFactory</auxInfo>
-   <scalar name = "value" type = "string"/>
+<structure structureName = "pdrvStringNoop" >
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvStringNoopFactory</auxInfo>
+   <scalar name = "value" scalarType = "string"/>
 </structure>
 
-<structure name = "pdrvScalarCommandFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvScalarCommandFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.serial.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvScalarCommand" >
-   <auxInfo name = "supportFactory" type = "string">pdrvScalarCommandFactory</auxInfo>
-   <scalar name = "prefix" type = "string"/>
-   <scalar name = "command" type = "string"/>
+<structure structureName = "pdrvScalarCommand" >
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvScalarCommandFactory</auxInfo>
+   <scalar name = "prefix" scalarType = "string"/>
+   <scalar name = "command" scalarType = "string"/>
 </structure>
 
-<structure name = "pdrvScalarQueryFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvScalarQueryFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.serial.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvScalarQuery" >
-   <auxInfo name = "supportFactory" type = "string">pdrvScalarQueryFactory</auxInfo>
-   <scalar name = "request" type = "string"/>
-   <scalar name = "prefix" type = "string"/>
-   <scalar name = "response" type = "string" />
+<structure structureName = "pdrvScalarQuery" >
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvScalarQueryFactory</auxInfo>
+   <scalar name = "request" scalarType = "string"/>
+   <scalar name = "prefix" scalarType = "string"/>
+   <scalar name = "response" scalarType = "string" />
 </structure>
 
 
-<structure name = "pdrvSerialDiscardFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "pdrvSerialDiscardFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.pdrv.serial.SupportFactory</scalar>
 </structure>
-<structure name = "pdrvSerialDiscard" >
-   <auxInfo name = "supportFactory" type = "string">pdrvSerialDiscardFactory</auxInfo>
-   <scalar name = "size" type = "int">80</scalar>
+<structure structureName = "pdrvSerialDiscard" >
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.pdrvSerialDiscardFactory</auxInfo>
+   <scalar name = "size" scalarType = "int">80</scalar>
 </structure>
 
 </database>
