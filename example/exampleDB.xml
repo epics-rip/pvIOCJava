@@ -1,5 +1,7 @@
 <?xml version="1.0" ?>
 <database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
 <include addPath = "${PVDATA}/test/example" />
 <include removePath = "${PVDATA}/test/example" />
 <include addPath = "${JAVAIOC}/example" />
