@@ -1,26 +1,26 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "adcVoltageSupported">
-    <scalar name = "value" type = "int" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
+<record recordName = "adcVoltageSupported">
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
     <scalar name = "value">1000</scalar>
 </record>
 
-<record name = "voltage">
-    <scalar name = "value" type = "double" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "linearConvertInput">
-        <structure name = "alarm" type = "alarm" />
+<record recordName = "voltage">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "linearConvertInput">
+        <structure name = "alarm" extends = "alarm" />
         <structure name = "linearConvert">
             <scalar name = "deviceHigh">4095</scalar>
             <scalar name = "deviceLow">0</scalar>
             <scalar name = "engUnitsLow">0.0</scalar>
             <scalar name = "engUnitsHigh">10.0</scalar>
         </structure>
-        <structure name = "input" type = "caInputLink">
+        <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">adcVoltageSupported</scalar>
             <scalar name = "process">false</scalar>
         </structure>
@@ -29,52 +29,52 @@
 
 
 
-<record name = "psLinked" >
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "voltage" type = "generic">
-        <scalar name = "value" type = "double" />
-        <structure name = "input" type = "caInputLink">
+<record recordName = "psLinked" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "voltage" extends = "generic">
+        <scalar name = "value" scalarType = "double" />
+        <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">adcVoltageSupported</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
-    <structure name = "current" type = "generic">
-        <scalar name = "value" type = "double" >
-           <auxInfo name = "supportFactory" type = "string">powerSupplyFactory</auxInfo>
+    <structure name = "current" extends = "generic">
+        <scalar name = "value" scalarType = "double" >
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.powerSupplyFactory</auxInfo>
         </scalar>
-        <structure name = "output" type = "caOutputLink">
+        <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">current</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
     <structure name = "power">
-        <scalar name = "value" type = "double" />
+        <scalar name = "value" scalarType = "double" />
     </structure>
 </record>
 
-<record name = "current" >
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <scalar name = "value" type = "double" />
-    <structure name = "output" type = "linearConvertOutput">
+<record recordName = "current" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "output" extends = "linearConvertOutput">
         <structure name = "linearConvert">
             <scalar name = "deviceHigh">4095</scalar>
             <scalar name = "deviceLow">0</scalar>
             <scalar name = "engUnitsLow">0.0</scalar>
             <scalar name = "engUnitsHigh">10.0</scalar>
         </structure>
-        <structure name = "output" type = "caOutputLink">
+        <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">dacCurrentSupported</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "dacCurrentSupported" >
-    <scalar name = "value" type = "int" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
+<record recordName = "dacCurrentSupported" >
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
 </record>
 
 </database>
