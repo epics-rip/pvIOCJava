@@ -159,7 +159,7 @@ public class SupportCreationFactory {
             if(pvField!=pvField.getPVRecord()) return true;
             pvAuxField = pvAuxInfo.createInfo(supportFactory, ScalarType.pvString);
             PVString pvString = (PVString)pvAuxField;
-            pvString.put("genericFactory");
+            pvString.put("org.epics.ioc.genericFactory");
         }
         if(pvAuxField.getScalar().getScalarType()!=ScalarType.pvString) {
             printError(requester,pvField,"pvAuxInfo for support is not a string");
@@ -251,6 +251,10 @@ public class SupportCreationFactory {
                     + " invoke InvocationTargetException "
                     + e.getLocalizedMessage());
             return false;
+        }
+        if(support==null) {
+            printError(requester,pvField,"support "
+                    + supportName + " was not created");
         }
         recordSupport.setSupport(pvField, support);
         return true;
