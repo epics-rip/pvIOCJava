@@ -40,6 +40,7 @@ public class EnumeratedAlarmFactory {
     
     private static class EnumeratedAlarmImpl extends AbstractSupport
     {
+        private static final String supportName = "org.epics.ioc.enumeratedAlarm";
         private PVStructure pvStructure;
         private boolean noop;
         private AlarmSupport alarmSupport;
@@ -56,7 +57,7 @@ public class EnumeratedAlarmFactory {
         private int prevValue = 0;
        
         private EnumeratedAlarmImpl(PVStructure pvStructure) {
-            super("enumeratedAlarm",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)

@@ -41,6 +41,7 @@ public class ByteAlarmFactory {
     
     private static class ByteAlarmImpl extends AbstractSupport
     {
+        private static final String supportName = "org.epics.ioc.byteAlarm";
         private PVStructure pvStructure;
         
         private AlarmSupport alarmSupport;
@@ -59,7 +60,7 @@ public class ByteAlarmFactory {
         private int lastAlarmSeverityIndex;
        
         private ByteAlarmImpl(PVStructure pvStructure) {
-            super("byteAlarm",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)

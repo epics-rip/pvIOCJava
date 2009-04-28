@@ -39,8 +39,11 @@ public class BooleanAlarmFactory {
         return new BooleanAlarmImpl(pvStructure);
     }
     
+    
+    
     private static class BooleanAlarmImpl extends AbstractSupport
     {
+        private static final String supportName = "org.epics.ioc.booleanAlarm";
         private PVStructure pvStructure;
         private boolean noop;
         private AlarmSupport alarmSupport;
@@ -57,7 +60,7 @@ public class BooleanAlarmFactory {
         boolean prevValue;
        
         private BooleanAlarmImpl(PVStructure pvStructure) {
-            super("booleanAlarm",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)

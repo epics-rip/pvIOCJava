@@ -39,6 +39,7 @@ public class LongAlarmFactory {
     
     private static class LongAlarmImpl extends AbstractSupport
     {
+        private static final String supportName = "org.epics.ioc.longAlarm";
         private PVStructure pvStructure;
         
         private AlarmSupport alarmSupport;
@@ -57,7 +58,7 @@ public class LongAlarmFactory {
         private int lastAlarmSeverityIndex;
        
         private LongAlarmImpl(PVStructure pvStructure) {
-            super("longAlarm",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)

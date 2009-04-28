@@ -41,6 +41,7 @@ public class DoubleAlarmFactory {
     
     private static class DoubleAlarmImpl extends AbstractSupport
     {
+        private static final String supportName = "org.epics.ioc.doubleAlarm";
         private PVStructure pvStructure;
         
         private AlarmSupport alarmSupport;
@@ -59,7 +60,7 @@ public class DoubleAlarmFactory {
         private int lastAlarmSeverityIndex;
        
         private DoubleAlarmImpl(PVStructure pvStructure) {
-            super("doubleAlarm",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)

@@ -38,6 +38,7 @@ public class IntAlarmFactory {
     
     private static class IntAlarmImpl extends AbstractSupport
     {
+        private static final String supportName = "org.epics.ioc.intAlarm";
         private PVStructure pvStructure;
         
         private AlarmSupport alarmSupport;
@@ -56,7 +57,7 @@ public class IntAlarmFactory {
         private int lastAlarmSeverityIndex;
        
         private IntAlarmImpl(PVStructure pvStructure) {
-            super("intAlarm",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)

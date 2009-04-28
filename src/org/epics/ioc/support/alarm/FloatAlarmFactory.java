@@ -40,6 +40,7 @@ public class FloatAlarmFactory {
     
     private static class FloatAlarmImpl extends AbstractSupport
     {
+        private static final String supportName = "org.epics.ioc.floatAlarm";
         private PVStructure pvStructure;
         
         private AlarmSupport alarmSupport;
@@ -58,7 +59,7 @@ public class FloatAlarmFactory {
         private int lastAlarmSeverityIndex;
        
         private FloatAlarmImpl(PVStructure pvStructure) {
-            super("floatAlarm",pvStructure);
+            super(supportName,pvStructure);
             this.pvStructure = pvStructure;
         }
         /* (non-Javadoc)
