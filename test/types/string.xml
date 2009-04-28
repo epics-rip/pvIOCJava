@@ -1,60 +1,60 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "syncStringDriver" type = "portCreate">
+<record recordName = "syncStringDriver" extends = "portCreate">
     <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.SerialDriverFactory</scalar>
     <scalar name = "portName">syncSerialPort</scalar>
-    <structure name = "driverParameters" type = "serialDriver" >
+    <structure name = "driverParameters" extends = "serialDriver" >
         <scalar name = "delay">0.0</scalar>
     </structure>
 </record>
 
-<record name = "stringCounter">
-    <scalar name = "value" type = "byte"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "stringCounter">
+    <scalar name = "value" scalarType = "byte"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1&lt;=10)?(value+1):0</scalar>
       </structure>
     </structure>
-     <structure name = "scan" type = "scan">
+     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
-    <structure name = "link" type = "generic" >
-        <structure name = "1" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >true</scalar>
+    <structure name = "link" extends = "generic" >
+        <structure name = "1" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >true</scalar>
             <scalar name = "pvname">stringOut</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "2" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "2" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">stringIn</scalar>
         </structure>
     </structure>
 </record>
 
 
-<record name = "stringOut">
-    <scalar name = "value" type = "string"/>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "outlink" type = "portDriverLink">
+<record recordName = "stringOut">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
         <scalar name = "portName">syncSerialPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "output" type = "pdrvSerialOutput"/>
+        <structure name = "output" extends = "pdrvSerialOutput"/>
     </structure>
 </record>
 
-<record name = "stringIn">
-    <scalar name = "value" type = "string"/>
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "link" type = "portDriverLink">
+<record recordName = "stringIn">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
         <scalar name = "portName">syncSerialPort</scalar>
         <scalar name = "deviceName">0</scalar>
         <scalar name = "timeout">.2</scalar>
-        <structure name = "input" type = "pdrvSerialInput"/>
+        <structure name = "input" extends = "pdrvSerialInput"/>
     </structure>
 </record>
 

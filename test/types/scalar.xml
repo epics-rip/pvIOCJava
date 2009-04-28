@@ -1,209 +1,209 @@
 <?xml version="1.0" ?>
 <database>
-<record name = "scalarCounter">
-    <scalar name = "value" type = "byte"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "scalarCounter">
+    <scalar name = "value" scalarType = "byte"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
       </structure>
     </structure>
-   <structure name = "scan" type = "scan">
+   <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
-    <structure name = "link" type = "generic" >
-        <structure name = "1" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+    <structure name = "link" extends = "generic" >
+        <structure name = "1" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarByte1FromCounter</scalar>
         </structure>
-        <structure name = "2" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "2" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarByte2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "3" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "3" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarShort1FromCounter</scalar>
         </structure>
-        <structure name = "4" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "4" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarShort2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "5" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "5" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarInt1FromCounter</scalar>
         </structure>
-        <structure name = "6" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "6" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarInt2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "7" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "7" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarLong1FromCounter</scalar>
         </structure>
-        <structure name = "8" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "8" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarLong2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "9" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "9" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarFloat1FromCounter</scalar>
         </structure>
-        <structure name = "10" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "10" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarFloat2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
-        <structure name = "11" type = "caProcessLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "11" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarDouble1FromCounter</scalar>
         </structure>
-        <structure name = "12" type = "caOutputLink">
-            <scalar name = "wait" type = "boolean" >false</scalar>
+        <structure name = "12" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">scalarDouble2FromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
 </record>
 
-<record name = "scalarByte1FromCounter">
-    <scalar name = "value" type = "byte" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "scalarByte1FromCounter">
+    <scalar name = "value" scalarType = "byte" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">scalarCounter</scalar>
     </structure>
 </record>
-<record name = "scalarByte2FromCounter" >
-    <scalar name = "value" type = "byte" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
+<record recordName = "scalarByte2FromCounter" >
+    <scalar name = "value" scalarType = "byte" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
 </record>
-<record name = "scalarByte3FromCounter">
-    <scalar name = "value" type = "byte" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caMonitorLink">
-        <scalar name = "pvname">scalarCounter</scalar>
-        <scalar name = "process">true</scalar>
-    </structure>
-</record>
-
-<record name = "scalarShort1FromCounter">
-    <scalar name = "value" type = "short" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caInputLink">
-        <scalar name = "pvname">scalarCounter</scalar>
-    </structure>
-</record>
-<record name = "scalarShort2FromCounter" >
-    <scalar name = "value" type = "short" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-</record>
-<record name = "scalarShort3FromCounter">
-    <scalar name = "value" type = "short" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "scalarByte3FromCounter">
+    <scalar name = "value" scalarType = "byte" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">scalarCounter</scalar>
         <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "scalarInt1FromCounter">
-    <scalar name = "value" type = "int" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "scalarShort1FromCounter">
+    <scalar name = "value" scalarType = "short" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">scalarCounter</scalar>
     </structure>
 </record>
-<record name = "scalarInt2FromCounter" >
-    <scalar name = "value" type = "int" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
+<record recordName = "scalarShort2FromCounter" >
+    <scalar name = "value" scalarType = "short" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
 </record>
-<record name = "scalarInt3FromCounter">
-    <scalar name = "value" type = "int" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caMonitorLink">
-        <scalar name = "pvname">scalarCounter</scalar>
-        <scalar name = "process">true</scalar>
-    </structure>
-</record>
-
-<record name = "scalarLong1FromCounter">
-    <scalar name = "value" type = "long" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caInputLink">
-        <scalar name = "pvname">scalarCounter</scalar>
-    </structure>
-</record>
-<record name = "scalarLong2FromCounter" >
-    <scalar name = "value" type = "long" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-</record>
-<record name = "scalarLong3FromCounter">
-    <scalar name = "value" type = "long" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "scalarShort3FromCounter">
+    <scalar name = "value" scalarType = "short" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">scalarCounter</scalar>
         <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "scalarFloat1FromCounter">
-    <scalar name = "value" type = "float" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "scalarInt1FromCounter">
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">scalarCounter</scalar>
     </structure>
 </record>
-<record name = "scalarFloat2FromCounter" >
-    <scalar name = "value" type = "float" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
+<record recordName = "scalarInt2FromCounter" >
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
 </record>
-<record name = "scalarFloat3FromCounter">
-    <scalar name = "value" type = "float" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "scalarInt3FromCounter">
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">scalarCounter</scalar>
         <scalar name = "process">true</scalar>
     </structure>
 </record>
 
-<record name = "scalarDouble1FromCounter">
-    <scalar name = "value" type = "double" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "scalarLong1FromCounter">
+    <scalar name = "value" scalarType = "long" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">scalarCounter</scalar>
     </structure>
 </record>
-<record name = "scalarDouble2FromCounter" >
-    <scalar name = "value" type = "double" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
+<record recordName = "scalarLong2FromCounter" >
+    <scalar name = "value" scalarType = "long" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
 </record>
-<record name = "scalarDouble3FromCounter">
-    <scalar name = "value" type = "double" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "input" type = "caMonitorLink">
+<record recordName = "scalarLong3FromCounter">
+    <scalar name = "value" scalarType = "long" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
+        <scalar name = "pvname">scalarCounter</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+</record>
+
+<record recordName = "scalarFloat1FromCounter">
+    <scalar name = "value" scalarType = "float" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">scalarCounter</scalar>
+    </structure>
+</record>
+<record recordName = "scalarFloat2FromCounter" >
+    <scalar name = "value" scalarType = "float" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+</record>
+<record recordName = "scalarFloat3FromCounter">
+    <scalar name = "value" scalarType = "float" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
+        <scalar name = "pvname">scalarCounter</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+</record>
+
+<record recordName = "scalarDouble1FromCounter">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">scalarCounter</scalar>
+    </structure>
+</record>
+<record recordName = "scalarDouble2FromCounter" >
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+</record>
+<record recordName = "scalarDouble3FromCounter">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">scalarCounter</scalar>
         <scalar name = "process">true</scalar>
     </structure>
