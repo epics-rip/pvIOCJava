@@ -1,28 +1,25 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure name = "processControlFactory">
-  <scalar name = "supportFactory" type = "string">
+<structure structureName = "processControlFactory">
+  <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.basic.ProcessControlFactory</scalar>
 </structure>
 
 
-<structure name = "supportStateCommand">
-  <auxInfo name = "pvReplaceFactory" type = "string">enumeratedFactory</auxInfo>
-  <scalar name = "index" type = "int" />
-  <scalar name = "choice" type = "string" />
-  <array name = "choices" type = "string">
+<structure structureName = "supportStateCommand" extends = "enumerated" >
+  <array name = "choices">
     idle ,initialize,start,stop,uninitialize</array>
 </structure>
 
-<structure name = "processControl" >
-  <auxInfo name = "supportFactory" type = "string">processControlFactory</auxInfo>
-  <scalar name = "message" type = "string" />
-  <scalar name = "recordName" type = "string" />
-  <scalar name = "trace" type = "boolean" />
-  <scalar name = "enable" type = "boolean" />
-  <structure name = "supportState" type = "supportState" />
-  <structure name = "supportStateCommand" type = "supportStateCommand" />
+<structure structureName = "processControl" >
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.processControlFactory</auxInfo>
+  <scalar name = "message" scalarType = "string" />
+  <scalar name = "recordName" scalarType = "string" />
+  <scalar name = "trace" scalarType = "boolean" />
+  <scalar name = "enable" scalarType = "boolean" />
+  <structure name = "supportState" extends = "supportState" />
+  <structure name = "supportStateCommand" extends = "supportStateCommand" />
 </structure>
 
 </database>
