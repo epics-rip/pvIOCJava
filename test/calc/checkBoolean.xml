@@ -1,23 +1,23 @@
 <?xml version="1.0" ?>
 <database>
-<record name = "${checkRecord}Check">
-    <scalar name = "value" type = "boolean" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "calculation" >
+<record recordName = "${checkRecord}Check">
+    <scalar name = "value" scalarType = "boolean" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "${checkType}" />
+            <scalar name = "value" scalarType = "${checkType}" />
           </structure>
           <structure name = "b">
-            <scalar name = "value" type = "${checkType}" >${checkValue}</scalar>
+            <scalar name = "value" scalarType = "${checkType}" >${checkValue}</scalar>
           </structure>
        </structure>
        <structure name = "calculator">
          <scalar name = "expression">(a==b) ? true : false</scalar>
        </structure>
     </structure>
-    <structure name = "valueAlarm" type = "booleanAlarm" >
+    <structure name = "valueAlarm" extends = "booleanAlarm" >
        <scalar name = "active">true</scalar>
        <scalar name = "falseMessage">checkExpression Failure</scalar>
        <structure name ="falseAlarm"><scalar name = "choice">major</scalar></structure>
