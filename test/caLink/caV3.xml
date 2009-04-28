@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "aiExample">
-    <scalar name = "value" type = "double"/>
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "input" type = "caInputLink">
+<record recordName = "aiExample">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">mrkHost:aiExample<</scalar>
         <scalar name = "process">false</scalar>
