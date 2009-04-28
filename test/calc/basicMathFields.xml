@@ -1,27 +1,27 @@
 <?xml version="1.0" ?>
 <database>
-    <scalar name = "value" type = "${checkType}" />
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
-    <structure name = "scan" type = "scan">
+    <scalar name = "value" scalarType = "${checkType}" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
-    <structure name = "input" type = "calculation" >
+    <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
           <structure name = "a">
-            <scalar name = "value" type = "${checkType}" >4</scalar>
+            <scalar name = "value" scalarType = "${checkType}" >4</scalar>
           </structure>
           <structure name = "b">
-            <scalar name = "value" type = "${checkType}" >2</scalar>
+            <scalar name = "value" scalarType = "${checkType}" >2</scalar>
           </structure>
           <structure name = "c">
-            <scalar name = "value" type = "${checkType}" >6</scalar>
+            <scalar name = "value" scalarType = "${checkType}" >6</scalar>
           </structure>
           <structure name = "d">
-            <scalar name = "value" type = "${checkType}" >4</scalar>
+            <scalar name = "value" scalarType = "${checkType}" >4</scalar>
           </structure>
           <structure name = "e">
-            <scalar name = "value" type = "${checkType}" >3</scalar>
+            <scalar name = "value" scalarType = "${checkType}" >3</scalar>
           </structure>
        </structure>
        <structure name = "calculator">

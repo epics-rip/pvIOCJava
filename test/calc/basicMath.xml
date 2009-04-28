@@ -2,42 +2,42 @@
 <database>
 
 <substitute fromTo = "checkRecord=basicMathByte,checkType=byte,checkValue=10" />
-<record name = "${checkRecord}">
+<record recordName = "${checkRecord}">
     <include href = "basicMathFields.xml" />
     <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=basicMathShort,checkType=short,checkValue=10" />
-<record name = "${checkRecord}">
+<record recordName = "${checkRecord}">
     <include href = "basicMathFields.xml" />
     <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=basicMathInt,checkType=int,checkValue=10" />
-<record name = "${checkRecord}">
+<record recordName = "${checkRecord}">
     <include href = "basicMathFields.xml" />
     <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=basicMathLong,checkType=long,checkValue=10" />
-<record name = "${checkRecord}">
+<record recordName = "${checkRecord}">
     <include href = "basicMathFields.xml" />
     <include href = "checkLink.xml" />
 </record>
 <include href = "checkInteger.xml" />
 
 <substitute fromTo = "checkRecord=basicMathFloat,checkType=float,checkValue=10" />
-<record name = "${checkRecord}">
+<record recordName = "${checkRecord}">
     <include href = "basicMathFields.xml" />
     <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
 
 <substitute fromTo = "checkRecord=basicMathDouble,checkType=double,checkValue=10" />
-<record name = "${checkRecord}">
+<record recordName = "${checkRecord}">
     <include href = "basicMathFields.xml" />
     <include href = "checkLink.xml" />
 </record>
