@@ -1,22 +1,22 @@
 <?xml version="1.0" ?>
 <database>
 
-<record name = "psSimple" >
-    <structure name = "alarm" type = "alarm" />
-    <structure name = "timeStamp" type = "timeStamp" />
+<record recordName = "psSimple" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "voltage">
-       <scalar name = "value" type = "double">10.0</scalar>
+       <scalar name = "value" scalarType = "double">10.0</scalar>
     </structure>
     <structure name = "current">
-       <auxInfo name = "supportFactory" type = "string">genericFactory</auxInfo>
-       <scalar name = "value" type = "double">
-         <auxInfo name = "supportFactory" type = "string">powerSupplyFactory</auxInfo>
+       <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.genericFactory</auxInfo>
+       <scalar name = "value" scalarType = "double">
+         <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.powerSupplyFactory</auxInfo>
        </scalar>
     </structure>
      <structure name = "power">
-      <scalar name = "value" type = "double">10.0</scalar>
+      <scalar name = "value" scalarType = "double">10.0</scalar>
     </structure>
-    <structure name = "scan" type = "scan">
+    <structure name = "scan" extends = "scan">
         <scalar name = "processAfterStart">true</scalar>
     </structure>
 </record>
