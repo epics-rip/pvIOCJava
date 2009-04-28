@@ -58,7 +58,7 @@ public class IncrementalFactory {
     
     static private class IncrementalImpl extends AbstractSupport
     {
-        private static String supportName = "incremental";
+        private static String supportName = "org.epics.ioc.incremental";
         private PVBoolean pvIncremental = null;
         private PVScalar pvValue = null;
         private PVScalar pvDesiredValue = null;

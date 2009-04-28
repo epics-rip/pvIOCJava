@@ -27,5 +27,5 @@ public class GenericFactory {
         return new GenericBase(supportName,pvStructure);
     }
     
-    private static String supportName = "generic";
+    private static final String supportName = "org.epics.ioc.generic";
 }
