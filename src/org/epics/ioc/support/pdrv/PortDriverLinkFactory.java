@@ -43,7 +43,7 @@ public class PortDriverLinkFactory {
         return new PortDriverLinkImpl(PortDriverLink,pvStructure);
     }
     
-    private static final String PortDriverLink = "portDriverLink";
+    private static final String PortDriverLink = "org.epics.ioc.portDriverLink";
     
     private static class PortDriverLinkImpl extends AbstractSupport
     implements PortDriverLink,QueueRequestCallback,ProcessContinueRequester
@@ -78,7 +78,7 @@ public class PortDriverLinkFactory {
         private SupportProcessRequester supportProcessRequester = null;
         
         public void initialize(LocateSupport recordSupport) {
-            if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
+            if(!super.checkSupportState(SupportState.readyForInitialize,super.getSupportName())) return;
             recordProcess = recordSupport.getRecordProcess();
             PVStructure pvStructure = (PVStructure)super.getPVField();
             alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
@@ -160,7 +160,7 @@ public class PortDriverLinkFactory {
         }
         
         public void start(AfterStart afterStart) {
-            if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
+            if(!super.checkSupportState(SupportState.readyForStart,super.getSupportName())) return;
             PVStructure pvStructure = (PVStructure)super.getPVField();
             
             user = Factory.createUser(this);
@@ -226,7 +226,7 @@ public class PortDriverLinkFactory {
             }
             if((deviceTrace.getMask()&Trace.FLOW)!=0) {
                 deviceTrace.print(Trace.FLOW,
-                    "pv %s support %s process calling queueRequest", fullName,supportName);
+                    "pv %s support %s process calling queueRequest", fullName,super.getSupportName());
             }
             user.setMessage(null);
             user.setTimeout(pvTimeout.get());
@@ -284,7 +284,7 @@ public class PortDriverLinkFactory {
                 if((deviceTrace.getMask()&Trace.FLOW)!=0) {
                     deviceTrace.print(Trace.FLOW,
                         "pv %s support %s callback error %s",
-                        fullName,supportName,user.getMessage());
+                        fullName,super.getSupportName(),user.getMessage());
                 }
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }

@@ -43,7 +43,7 @@ public class PortDeviceControlFactory {
         return new PortDeviceControl(supportName,pvStructure);
     }
     
-    private static final String supportName = "portDeviceControl";
+    private static final String supportName = "org.epics.ioc.portDeviceControl";
      
     private static class PortDeviceControl extends AbstractSupport
     implements ProcessCallbackRequester,ProcessContinueRequester

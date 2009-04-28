@@ -36,7 +36,7 @@ public class PortCreateFactory {
         return portCreate(portCreate,pvStructure);
     }
     
-    private static final String portCreate = "portCreate";
+    private static final String portCreate = "org.epics.ioc.portCreate";
     
     private static Support portCreate(String supportName,PVStructure pvStructure) {
         PVString pvString = pvStructure.getStringField("factoryName");
