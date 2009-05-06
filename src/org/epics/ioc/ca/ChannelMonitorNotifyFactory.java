@@ -44,7 +44,6 @@ public class ChannelMonitorNotifyFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitor#setFieldGroup(org.epics.ioc.ca.ChannelFieldGroup)
          */
-        @Override
         public void setFieldGroup(ChannelFieldGroup channelFieldGroup) {
             this.channelFieldGroup = channelFieldGroup;
             
@@ -52,7 +51,6 @@ public class ChannelMonitorNotifyFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitor#start()
          */
-        @Override
         public void start() {
             channelFields = channelFieldGroup.getArray();
             PVRecord pvRecord = channel.getPVRecord();

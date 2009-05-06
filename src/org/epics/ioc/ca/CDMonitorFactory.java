@@ -201,7 +201,6 @@ public class CDMonitorFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelMonitorRequester#initialDataAvailable()
          */
-        @Override
         public void initialDataAvailable() {
             for(int i=0; i<channelFields.length; i++) {
                 ChannelField channelField = channelFields[i];

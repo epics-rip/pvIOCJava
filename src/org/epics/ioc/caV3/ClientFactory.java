@@ -71,7 +71,6 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.NewAfterStartRequester#callback(org.epics.ioc.install.AfterStart)
          */
-        @Override
         public void callback(AfterStart afterStart) {
             this.afterStart = afterStart;
             afterStart.requestCallback(afterStartNode, false, ThreadPriority.middle);
@@ -79,7 +78,6 @@ public class ClientFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
-        @Override
         public void callback(AfterStartNode node) {
             timer.schedule(this, 2000);
         }

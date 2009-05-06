@@ -57,7 +57,6 @@ public class IOCDatabaseFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.SupportDatabase#getPVDatabase()
          */
-        @Override
         public PVDatabase getPVDatabase() {
             return pvDatabase;
         }
@@ -65,7 +64,6 @@ public class IOCDatabaseFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.SupportDatabase#getRecordSupport(org.epics.pvData.pv.PVRecord)
          */
-        @Override
         public synchronized LocateSupport getLocateSupport(PVRecord pvRecord) {
             LocateSupport recordSupport = recordSupportMap.get(pvRecord.getRecordName());
             if(recordSupport==null) {
@@ -110,7 +108,6 @@ public class IOCDatabaseFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordSupport#getRecordProcess()
          */
-        @Override
         public synchronized RecordProcess getRecordProcess() {
             return recordProcess;
         }
@@ -118,7 +115,6 @@ public class IOCDatabaseFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordSupport#getSupport(org.epics.pvData.pv.PVField)
          */
-        @Override
         public synchronized Support getSupport(PVField pvField) {
             if(pvField==null || pvField==pvRecord) return supportForRecord;
             return supportMap.get(pvField.getFullFieldName());
@@ -127,7 +123,6 @@ public class IOCDatabaseFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordSupport#setRecordProcess(org.epics.ioc.support.RecordProcess)
          */
-        @Override
         public synchronized void setRecordProcess(RecordProcess recordProcess) {
             this.recordProcess = recordProcess;
         }
@@ -135,7 +130,6 @@ public class IOCDatabaseFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordSupport#setSupport(org.epics.pvData.pv.PVField, org.epics.ioc.support.Support)
          */
-        @Override
         public synchronized void setSupport(PVField pvField, Support support) {
             if(pvField==null || pvField==pvRecord) {
                 supportForRecord = support;

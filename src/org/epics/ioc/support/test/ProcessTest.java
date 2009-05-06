@@ -116,7 +116,6 @@ public class ProcessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.NewAfterStartRequester#callback(org.epics.ioc.install.AfterStart)
          */
-        @Override
         public void callback(AfterStart afterStart) {
             this.afterStart = afterStart;
             afterStart.requestCallback(afterStartNode,true, ThreadPriority.middle);
@@ -124,7 +123,6 @@ public class ProcessTest extends TestCase {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
-        @Override
         public void callback(AfterStartNode node) {
             System.out.println("NewAfterStartRequester called");
             afterStart.done(node);
