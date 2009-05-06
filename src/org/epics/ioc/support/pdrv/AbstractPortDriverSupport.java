@@ -137,7 +137,6 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#setPortDriverLink(org.epics.ioc.support.pdrv.PortDriverLink)
      */
-    @Override
     public void setPortDriverLink(PortDriverLink portDriverLink) {
         this.portDriverLink = portDriverLink;
         user = portDriverLink.getUser();
@@ -167,7 +166,6 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#processCallback()
      */
-    @Override
     public void beginProcess() {
         for(PortDriverSupport portDriverSupport : portDriverSupports) {
             portDriverSupport.beginProcess();
@@ -176,7 +174,6 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#endProcess()
      */
-    @Override
     public void endProcess() {
         for(PortDriverSupport portDriverSupport : portDriverSupports) {
             portDriverSupport.endProcess();
@@ -185,7 +182,6 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#queueCallback()
      */
-    @Override
     public void queueCallback() {
         for(PortDriverSupport portDriverSupport : portDriverSupports) {
             portDriverSupport.queueCallback();
