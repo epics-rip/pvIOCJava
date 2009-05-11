@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.swtshell.SwtshellFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
@@ -53,6 +54,7 @@ public class JavaIOC {
     }
 
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static final Install install = InstallFactory.get();
     /**
      * read and dump a database instance file.
      * @param  args is a sequence of flags and filenames.
@@ -193,7 +195,7 @@ public class JavaIOC {
     static void parseStructures(String fileName,Requester iocRequester) {
         System.out.printf("\nparsing PV file %s\n",fileName);
         try {
-            InstallFactory.installStructures(fileName,iocRequester);
+            install.installStructures(fileName,iocRequester);
         }  catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
@@ -202,7 +204,7 @@ public class JavaIOC {
     static void parseRecords(String fileName,Requester iocRequester) {
         System.out.printf("\nparsing PV file %s\n",fileName);
         try {
-            InstallFactory.installRecords(fileName,iocRequester);
+            install.installRecords(fileName,iocRequester);
         }  catch (IllegalStateException e) {
             System.out.println("IllegalStateException: " + e);
         }
