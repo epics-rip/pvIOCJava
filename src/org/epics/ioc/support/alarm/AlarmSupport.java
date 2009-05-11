@@ -32,7 +32,7 @@ public interface AlarmSupport extends Support{
      * the current priority. 
      * @param message The message.
      * @param severity The severity for the message.
-     * @return (false,true) if the request (was not, was) successfull.
+     * @return (false,true) if the request (was not, was) successful.
      */
     boolean setAlarm(String message, AlarmSeverity severity);
 }
