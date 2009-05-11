@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Install<br />
 package: org.epics.ioc.install<br />
-2009.04.17</h1>
+2009.05.07</h1>
 CONTENTS 
 
 <div class="toc">
@@ -21,6 +21,8 @@ CONTENTS
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#installStr">installStructures</a></li>
       <li><a href="#installRec">installRecords</a></li>
+      <li><a href="#Initialize">Initialize, and Start Record
+      Instances</a></li>
     </ul>
   </li>
   <li><a href="#IOCDatabas">IOCDatabase</a>
@@ -82,8 +84,10 @@ at a time is allowed.</p>
 
 <p>This overview describes the following:</p>
 <dl>
+  <dt>Install</dt>
+    <dd>The interface for installing structures and records.</dd>
   <dt>InstallFactory</dt>
-    <dd>The factory for installing structures or records.</dd>
+    <dd>The factory which implements a single instance of Install.</dd>
   <dt>IOCDatabase</dt>
     <dd>The database that provides access to support code.</dd>
   <dt>SupportCreation</dt>
@@ -98,31 +102,71 @@ at a time is allowed.</p>
 <h2 style="text-align: center" id="Install">Install Factory</h2>
 <hr />
 
-<p>InstallFactory is used to install structure or records into a javaIOC.
-Only one set of definitions at a time can be installed.</p>
+<p>InstallFactory is used to install structure or records into master
+database of a javaIOC. Only one set of definitions at a time can be
+installed.</p>
 
 <h3 id="Definition">Definitions</h3>
-<pre>public class InstallFactory {
-    public static boolean installStructures(String file,Requester requester);
-    public static boolean installRecords(String file,Requester requester);
+<pre>interface Install {
+    boolean installStructures(String xmlFile,Requester requester);
+    boolean installStructures(PVDatabase pvDatabase,Requester requester);
+    boolean installStructure(PVStructure pvStructure,Requester requester);
+    boolean installRecords(String xmlFile,Requester requester);
+    boolean installRecords(PVDatabase pvDatabase,Requester requester);
+
+    boolean installRecord(PVRecord pvRecord,Requester requester);
+}
+
+class InstallFactory {
+    public static Install get();
 }</pre>
 
 <h3 id="installStr">installStructures</h3>
 
-<p>Install structure definitions from file. The file must contain xml
-structure definitions as described in project pvData. If the file is read
-successfully and contains only structure definitions the new definitions are
-merged into master. The return value is (false,true) if the new structures
-(were not, were) installed.</p>
+<p>Three methods are provided. The first install structure definitions from
+file. The second installs structure definitions from a PVDatabase. The last
+installs a single PVStructure.</p>
+
+<p>The xml file must contain xml structure definitions as described in
+project pvData. The file is read into a PVDatabase named beingInstalled. If
+the file is read successfully the second installStructures method is
+called.</p>
+
+<p>The next method attempts to install structures from a PVDatabase. The
+pvDatabase must not have any records and must not have any structure that is
+already in master. If these checks succeed the new definitions are merged
+into master. The return value is (false,true) if the new structures (were
+not, were) installed.</p>
+
+<p>The last method installs a PVStructure if the structure does not already
+exist in the master.</p>
 
 <h3 id="installRec">installRecords</h3>
 
-<p>Install record definitions from file. The file must contain xml record
-definitions as described in project pvData. If the file fails or the file has
-any structure definitions install fails and nothing more is done.</p>
+<p>Three methods are provided. The first Install record definitions from
+file. The second installs records from a PVDatabase. The last installs a
+single PVRecord.</p>
+<ol>
+  <li>The xml file must contain xml record definitions as described in
+    project pvData. The file is read into a PVDatabase named beingInstalled.
+    If the file is read successfully method 2 is called</li>
+  <li>This method attempts to install records from a PVDatabase. The
+    pvDatabase must not have any structuress and must not have any record
+    that is already in master. If these checks succeed an attempt is made to
+    initialize and start the records instances as described below.</li>
+  <li>The last method creates a PVDatabase named beingInstalled, adds the
+    PVRecord to it, and calls method 2.</li>
+</ol>
 
-<p>Next a beingInstalled PVDatabase and a SupportCreation is created and the
-following steps performed.</p>
+<h3 id="Initialize">Initialize, and Start Record Instances</h3>
+
+<p>PVReplaceFactory.replace is called for the PCDatabase holding the new
+records.</p>
+
+<p>An IOCDatabase is created for the PVDatabase holding the new records. </p>
+
+<p>A SupportCreation named beingInstalled is created and the following steps
+performed</p>
 <dl>
   <dt>createSupport</dt>
     <dd>supportCreation.createSupport is called. If it fails installation
@@ -132,7 +176,7 @@ following steps performed.</p>
       fails.</dd>
   <dt>start</dt>
     <dd>An AfterStart is created and then supportCreation.start(afterStart)
-      is called. If it fails nothing more is done.</dd>
+      is called. If it fails installation fails. </dd>
   <dt>before merge</dt>
     <dd>afterStart.callRequesters(false) is called.</dd>
   <dt>merge</dt>

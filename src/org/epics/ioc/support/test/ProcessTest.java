@@ -17,6 +17,7 @@ import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.IOCDatabase;
 import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.install.NewAfterStartRequester;
 import org.epics.ioc.support.RecordProcess;
@@ -39,18 +40,19 @@ import org.epics.pvData.xml.XMLToPVDatabaseFactory;
  *
  */
 public class ProcessTest extends TestCase {
-    private static PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
+    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
+    private static final Install install = InstallFactory.get();
     private static MessageType maxMessageType = MessageType.info;
     /**
      * test PVAccess.
      */
     public static void testProcess() {
         Requester iocRequester = new RequesterForTesting("accessTest");
-        XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester);
+        XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
         new NewAfterStartRequesterImpl(0);
-        boolean ok = InstallFactory.installRecords("src/org/epics/ioc/support/test/processTestPV.xml", iocRequester);
+        boolean ok = install.installRecords("src/org/epics/ioc/support/test/processTestPV.xml", iocRequester);
         PVRecord[] pvRecords;
         if(!ok) {
             System.out.printf("\nrecords\n");
@@ -84,7 +86,7 @@ public class ProcessTest extends TestCase {
         
 
         
-        ok = InstallFactory.installRecords("src/org/epics/ioc/support/test/loopPV.xml", iocRequester);
+        ok = install.installRecords("src/org/epics/ioc/support/test/loopPV.xml", iocRequester);
         if(!ok) return;
         
 //        System.out.printf("\nrecords\n");
