@@ -10,10 +10,8 @@ import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVAuxInfo;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVScalar;
@@ -90,7 +88,6 @@ public class PowerSupplyFactory {
         return (PVDouble)pvField;
     }
     
-    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final String powerSupplyFactory = "org.epics.ioc.powerSupplyFactory";
     
     
