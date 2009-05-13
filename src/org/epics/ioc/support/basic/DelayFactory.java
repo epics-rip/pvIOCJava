@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.support.basic;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
@@ -17,8 +15,11 @@ import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.misc.Timer;
+import org.epics.pvData.misc.TimerFactory;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVLong;
+import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVStructure;
 
 
@@ -33,19 +34,19 @@ public class DelayFactory {
         return new DelayImpl(pvStructure);
     }
     
-    private static Timer timer = new Timer("delaySupportTimer");
+    private static Timer timer = TimerFactory.create("delaySupportTimer",ThreadPriority.middle);
     
-    private static class DelayImpl extends AbstractSupport implements ProcessContinueRequester
+    private static class DelayImpl extends AbstractSupport implements ProcessContinueRequester,Timer.TimerCallback
     {
         private static final String supportName = "org.epics.ioc.delay";
+        private Timer.TimerNode timerNode = TimerFactory.createNode(this);
         private PVStructure pvStructure = null;
         private RecordProcess recordProcess = null;
-        private PVLong minAccess = null;
-        private PVLong maxAccess = null;
-        private PVLong incAccess = null;
-        private long min,max,inc;
-        
-        private long delay = 0;
+        private PVDouble minAccess = null;
+        private PVDouble maxAccess = null;
+        private PVDouble incAccess = null;
+        private double min,max,inc;
+        private double delay = 0;
         private SupportProcessRequester supportProcessRequester = null;
 
         private DelayImpl(PVStructure pvStructure) {
@@ -63,11 +64,11 @@ public class DelayFactory {
         public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             this.recordProcess = recordSupport.getRecordProcess();
-            minAccess = pvStructure.getLongField("min");
+            minAccess = pvStructure.getDoubleField("min");
             if(minAccess==null) return;
-            maxAccess = pvStructure.getLongField("max");
+            maxAccess = pvStructure.getDoubleField("max");
             if(maxAccess==null) return;
-            incAccess = pvStructure.getLongField("inc");
+            incAccess = pvStructure.getDoubleField("inc");
             if(incAccess==null) return;
             setSupportState(SupportState.readyForStart);
         }
@@ -104,6 +105,7 @@ public class DelayFactory {
          */
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
+            timerNode.cancel();
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
@@ -111,13 +113,7 @@ public class DelayFactory {
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             this.supportProcessRequester = supportProcessRequester;
-            TimerTask timerTask = new DelayTask(this);
-            try {
-                timer.schedule(timerTask, delay);
-            } catch (IllegalStateException e) {
-                pvStructure.message(
-                        " timer.schedule failed " + e.getMessage(), MessageType.error);
-            }
+            timer.scheduleAfterDelay(timerNode, delay);
             delay += inc;
             if(delay>max) delay = min;
         }
@@ -127,25 +123,18 @@ public class DelayFactory {
         public void processContinue() {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
-        
-        private void delayDone() {
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#callback()
+         */
+        public void callback() {
             recordProcess.processContinue(this);
         }
-        
-    }
-    
-    private static class DelayTask extends TimerTask {
-        DelayImpl delayImpl;
-        
-        private DelayTask(DelayImpl delayImpl) {
-            this.delayImpl = delayImpl;
-        }
-
         /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
+         * @see org.epics.pvData.misc.Timer.TimerCallback#timerStopped()
          */
-        public void run() {
-            delayImpl.delayDone();
+        public void timerStopped() {
+            pvStructure.message("Why was timerStopped called", MessageType.error);
         }
+        
     }
 }
