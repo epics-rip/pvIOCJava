@@ -161,9 +161,9 @@
         <scalar name = "propertyNames">alarm,display</scalar>
     </structure>
     <structure name = "delay" extends = "delay"> 
-         <scalar name = "min">100</scalar>
-         <scalar name = "max">100</scalar>
-         <scalar name = "inc">100</scalar>
+         <scalar name = "min">.1</scalar>
+         <scalar name = "max">.1</scalar>
+         <scalar name = "inc">.1</scalar>
    </structure>
 </record>
 
