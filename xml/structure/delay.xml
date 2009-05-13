@@ -8,10 +8,10 @@
 
 <structure structureName = "delay">
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.delayFactory</auxInfo>
-  <!-- min, max, inc are delay in milliseconds -->
-  <scalar name = "min" scalarType = "long" />
-  <scalar name = "max" scalarType = "long" />
-  <scalar name = "inc" scalarType = "long" />
+  <!-- min, max, inc are delay in seconds -->
+  <scalar name = "min" scalarType = "double" />
+  <scalar name = "max" scalarType = "double" />
+  <scalar name = "inc" scalarType = "double" />
 </structure>
 
 
