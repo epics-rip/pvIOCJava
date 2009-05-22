@@ -15,6 +15,7 @@
 package org.epics.ioc.caV4;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 
 import org.epics.ca.CAException;
 import org.epics.ca.CAStatus;
@@ -31,6 +32,8 @@ import org.epics.ca.server.ProcessVariableReadCallback;
 import org.epics.ca.server.ProcessVariableValueCallback;
 import org.epics.ca.server.ProcessVariableWriteCallback;
 import org.epics.ca.server.Server;
+import org.epics.ca.server.plugins.IntrospectionSearchProvider;
+import org.epics.ca.util.WildcharMatcher;
 import org.epics.ioc.ca.Channel;
 import org.epics.ioc.ca.ChannelAccess;
 import org.epics.ioc.ca.ChannelAccessFactory;
@@ -39,12 +42,14 @@ import org.epics.ioc.ca.ChannelListener;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.property.PVProperty;
 import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
@@ -54,8 +59,11 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVListener;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Scalar;
+import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
 public class ServerFactory {
@@ -71,6 +79,48 @@ public class ServerFactory {
     private static final Convert convert = ConvertFactory.getConvert();
     private static final ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
+    
+    private static class JavaIOCIntrospectionSearchProvider implements IntrospectionSearchProvider
+    {
+    	/**
+    	 * Server context to query.
+    	 */
+    	protected ServerContextImpl context;
+    	
+    	/**
+    	 * Constructor.
+    	 * @param context server context to be monitored.
+    	 */
+    	public JavaIOCIntrospectionSearchProvider(ServerContextImpl context) {
+    		this.context = context;
+    	}
+
+		/* (non-Javadoc)
+		 * @see org.epics.ca.server.plugins.IntrospectionSearchProvider#introspectionSearch(org.epics.ca.server.ProcessVariableReadCallback, org.epics.pvData.pv.PVField)
+		 */
+		public void introspectionSearch(ProcessVariableReadCallback callback, PVField searchData) throws CAException
+		{
+			// data check
+			if (!(searchData instanceof PVString))
+				throw new CAStatusException(CAStatus.BADTYPE);
+			
+			final String name = ((PVString)searchData).get();
+			
+			// TODO values (tags) are nor supported
+			ArrayList<String> result = new ArrayList<String>();
+			String[] recordNames = PVDatabaseFactory.getMaster().getRecordNames();
+			for (String recordName : recordNames)
+				if (WildcharMatcher.match(name, recordName))
+					result.add(recordName);
+			
+			Array field = FieldFactory.getFieldCreate().createArray("value", ScalarType.pvString);
+			PVStringArray pvStringArray = (PVStringArray)PVDataFactory.getPVDataCreate().createPVArray(null, field);
+			pvStringArray.put(0, result.size(), result.toArray(new String[result.size()]), 0);
+			
+			callback.processVariableReadCompleted(pvStringArray, CAStatus.NORMAL);
+		}
+    	
+    }
     
     private static class ThreadInstance implements RunnableReady {
 
@@ -95,6 +145,8 @@ public class ServerFactory {
     		// Create a context with default configuration values.
     		context = new ServerContextImpl();
     		context.setBeaconServerStatusProvider(new DefaultBeaconServerDataProvider(context));
+    		context.setIntrospectionSearachProvider(new JavaIOCIntrospectionSearchProvider(context));
+    		
     		context.initialize(server);
 
     		// Display basic information about the context.
@@ -315,7 +367,7 @@ public class ServerFactory {
                 try
                 {
 	                // no convert...
-	    			PVDataUtils.copyValue(value, targetField, offset, -1);
+	    			PVDataUtils.copyValue(value, targetField, 0, offset, -1);
                 } finally {
         			if (groupPut) record.endGroupPut();
                 }
@@ -347,7 +399,7 @@ public class ServerFactory {
 				this.monitoredField = monitoredField;
 				lastValue = pvDataFactory.createPVField(monitoredField.getParent(), monitoredField.getField());
 				try {
-					PVDataUtils.copyValue(monitoredField, lastValue, 0, -1);
+					PVDataUtils.copyValue(monitoredField, lastValue, 0, 0, -1);
 				} catch (CAException e) {
 					throw new RuntimeException("unexpected exception occured", e);
 				}
@@ -358,7 +410,8 @@ public class ServerFactory {
 					return false;
 
 				try {
-					PVDataUtils.copyValue(field, lastValue, 0, -1);
+					// TODO structure change?!!
+					PVDataUtils.copyValue(field, lastValue, 0, 0, -1);
 				} catch (CAException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -461,7 +514,6 @@ public class ServerFactory {
 			 * @see org.epics.pvData.pv.PVListener#beginGroupPut(org.epics.pvData.pv.PVRecord)
 			 */
 			public void beginGroupPut(PVRecord pvRecord) {
-System.out.println("beingGroupPut: " + pvRecord.getFullName());
 				group = true;
 			}
 
@@ -469,7 +521,6 @@ System.out.println("beingGroupPut: " + pvRecord.getFullName());
 			 * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
 			 */
 			public void endGroupPut(PVRecord pvRecord) {
-System.out.println("endGroupPut: " + pvRecord.getFullName());
 				postData();
 				group = false;
 			}
@@ -478,12 +529,11 @@ System.out.println("endGroupPut: " + pvRecord.getFullName());
 			 * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVField)
 			 */
 			public void dataPut(PVField pvField) {
-System.out.println("dataPut for " + pvField.getFullName() + ":" + pvField);
 				if (copyData) {
 					// we create copy here... where it is all nicely locked :)
 					final PVField pvFieldCopy = pvDataFactory.createPVField(pvField.getParent(), pvField.getField());
 					try {
-						PVDataUtils.copyValue(pvField, pvFieldCopy, offset, count);
+						PVDataUtils.copyValue(pvField, pvFieldCopy, offset, 0, count);
 						newData.appendPVField(pvFieldCopy);
 					} catch (CAException e) {
 						// TODO
@@ -511,7 +561,7 @@ System.out.println("dataPut for " + pvField.getFullName() + ":" + pvField);
 			 * @see org.epics.pvData.pv.PVListener#unlisten(org.epics.pvData.pv.PVRecord)
 			 */
 			public void unlisten(PVRecord pvRecord) {
-System.out.println("unlisten:" + pvRecord.getFullName());
+System.err.println("unlisten:" + pvRecord.getFullName());
 // TODO check
 //callback.canceled();
 			}

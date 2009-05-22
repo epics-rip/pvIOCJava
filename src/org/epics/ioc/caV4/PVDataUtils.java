@@ -61,7 +61,7 @@ public class PVDataUtils {
 	 * @param offset
 	 * @throws CAException
 	 */
-	public static final void copyValue(PVField from, PVField to, int offset, int count) throws CAException
+	public static final void copyValue(PVField from, PVField to, int fromOffset, int toOffset, int count) throws CAException
 	{
 		final Field field = to.getField();
 		if (!field.equals(from.getField()))
@@ -108,8 +108,8 @@ public class PVDataUtils {
 						BooleanArrayData data = new BooleanArrayData();
 						PVBooleanArray fromArray = (PVBooleanArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVBooleanArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVBooleanArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				case pvByte:
@@ -117,8 +117,8 @@ public class PVDataUtils {
 						ByteArrayData data = new ByteArrayData();
 						PVByteArray fromArray = (PVByteArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVByteArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVByteArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				case pvDouble:
@@ -126,8 +126,8 @@ public class PVDataUtils {
 						DoubleArrayData data = new DoubleArrayData();
 						PVDoubleArray fromArray = (PVDoubleArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVDoubleArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVDoubleArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				case pvFloat:
@@ -135,8 +135,8 @@ public class PVDataUtils {
 						FloatArrayData data = new FloatArrayData();
 						PVFloatArray fromArray = (PVFloatArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVFloatArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVFloatArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				case pvInt:
@@ -144,8 +144,8 @@ public class PVDataUtils {
 						IntArrayData data = new IntArrayData();
 						PVIntArray fromArray = (PVIntArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVIntArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVIntArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				case pvLong:
@@ -153,8 +153,8 @@ public class PVDataUtils {
 						LongArrayData data = new LongArrayData();
 						PVLongArray fromArray = (PVLongArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVLongArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVLongArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				case pvShort:
@@ -162,8 +162,8 @@ public class PVDataUtils {
 						ShortArrayData data = new ShortArrayData();
 						PVShortArray fromArray = (PVShortArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVShortArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVShortArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				case pvString:
@@ -171,8 +171,8 @@ public class PVDataUtils {
 						StringArrayData data = new StringArrayData();
 						PVStringArray fromArray = (PVStringArray)from;
 						int len = (count < 0) ? fromArray.getLength() : count;
-						len = fromArray.get(0, len, data);
-						((PVStringArray)to).put(offset, len, data.data, 0);
+						len = fromArray.get(fromOffset, len, data);
+						((PVStringArray)to).put(toOffset, len, data.data, data.offset);
 						return;
 					}
 				default:
@@ -186,7 +186,7 @@ public class PVDataUtils {
 				{
 					PVField toField = toStructure.getSubField(fromField.getField().getFieldName());
 					if (toField != null)
-						copyValue(fromField, toField, offset, count);
+						copyValue(fromField, toField, 0, 0, -1);
 					// TODO really? else do not complain here..
 				}
 				break;

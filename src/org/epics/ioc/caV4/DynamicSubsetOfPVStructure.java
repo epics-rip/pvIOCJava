@@ -200,6 +200,14 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
 	}
 
 	/* (non-Javadoc)
+	 * @see org.epics.pvData.pv.PVStructure#removePVField(java.lang.String)
+	 */
+	public void removePVField(String fieldName) {
+		pvFieldsMap.remove(fieldName);
+		changed();
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.epics.pvData.pv.PVStructure#appendPVField(org.epics.pvData.pv.PVField)
 	 */
 	public void appendPVField(PVField pvField) {
@@ -484,6 +492,27 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
     }
     
     /* (non-Javadoc)
+	 * @see org.epics.pvData.pv.PVStructure#getExtendsStructureName()
+	 */
+	public String getExtendsStructureName() {
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.epics.pvData.pv.PVStructure#putExtendsStructureName(java.lang.String)
+	 */
+	public boolean putExtendsStructureName(String extendsStructureName) {
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.epics.pvData.pv.Serializable#serialize(java.nio.ByteBuffer, int, int)
+	 */
+	public void serialize(ByteBuffer buffer, int offset, int count) {
+		serialize(buffer);
+	}
+
+	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -520,5 +549,5 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
 			return false;
 		return true;
 	}
-	
+
 }
