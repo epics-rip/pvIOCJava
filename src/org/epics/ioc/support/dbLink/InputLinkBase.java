@@ -103,7 +103,6 @@ implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfReques
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessCallbackRequester#processCallback()
      */
-    @Override
     public void processCallback() {
         if(isRecordProcessRequester) {
             becomeProcessor(linkRecordProcess);
@@ -114,7 +113,6 @@ implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfReques
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessContinueRequester#processContinue()
      */
-    @Override
     public void processContinue() {
         getData();
         if(alarmMessage!=null) {
@@ -126,21 +124,18 @@ implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfReques
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
      */
-    @Override
     public void recordProcessComplete() {
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
      */
-    @Override
     public void recordProcessResult(RequestResult requestResult) {
         this.requestResult = requestResult;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
      */
-    @Override
     public void becomeProcessor(RecordProcess recordProcess) {
         if(!recordProcess.process(this, true, super.timeStamp)) {
             alarmMessage = "could not process record";

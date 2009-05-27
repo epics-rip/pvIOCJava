@@ -186,7 +186,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
      */
-    @Override
     public void callback(AfterStartNode node) {
         afterStart.done(afterStartNode);
         afterStart = null;
@@ -234,7 +233,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDMonitorRequester#dataOverrun(int)
      */
-    @Override
     public void dataOverrun(int number) {
         if(!reportOverrun) return;
         if(process) {
@@ -254,7 +252,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDMonitorRequester#monitorCD(org.epics.ioc.ca.CD)
      */
-    @Override
     public void monitorCD(CD cd) {
         this.cd = cd;
         if(process && afterStart==null) {
@@ -287,7 +284,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
      */
-    @Override
     public void recordProcessComplete() {
         lock.lock();
         try {
@@ -301,7 +297,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
      */
-    @Override
     public void recordProcessResult(RequestResult requestResult) {
         // nothing to do
     }
@@ -309,7 +304,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
      */
-    @Override
     public void becomeProcessor(RecordProcess recordProcess) {
         boolean canProcess = recordProcess.process(this, false, null);
         if(!canProcess) {

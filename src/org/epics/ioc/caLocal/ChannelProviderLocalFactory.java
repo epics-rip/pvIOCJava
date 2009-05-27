@@ -77,7 +77,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#createChannel(java.lang.String, org.epics.ioc.ca.ChannelListener)
          */
-        @Override
         public Channel createChannel(String pvName,String[] propertys,ChannelListener listener) {
             String recordName = null;
             String fieldName = null;
@@ -112,14 +111,12 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#getProviderName()
          */
-        @Override
         public String getProviderName() {
             return providerName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#isProvider(java.lang.String)
          */
-        @Override
         public boolean isProvider(String channelName) {            
             int index = channelName.indexOf('.');
             String recordName = channelName;
@@ -135,7 +132,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelProvider#destroy()
          */
-        @Override
         public void destroy() {
             // nothing to do
         }
@@ -168,7 +164,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelField(java.lang.String)
          */
-        @Override
         public ChannelField createChannelField(String name) {
             if(!super.isConnected()) {
                 message("createChannelField but not connected",MessageType.warning);
@@ -184,7 +179,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelProcess(org.epics.ioc.ca.ChannelProcessRequester)
          */
-        @Override
         public ChannelProcess createChannelProcess(ChannelProcessRequester channelProcessRequester)
         {
             if(!super.isConnected()) {
@@ -202,7 +196,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelGetRequester, boolean)
          */
-        @Override
         public ChannelGet createChannelGet(ChannelFieldGroup channelFieldGroup,
                 ChannelGetRequester channelGetRequester, boolean process)
         {
@@ -219,7 +212,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelPut(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutRequester, boolean)
          */
-        @Override
         public ChannelPut createChannelPut(ChannelFieldGroup channelFieldGroup,
                 ChannelPutRequester channelPutRequester, boolean process)
         {
@@ -236,7 +228,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelPutGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelPutGetRequester, boolean)
          */
-        @Override
         public ChannelPutGet createChannelPutGet(ChannelFieldGroup putFieldGroup,
             ChannelFieldGroup getFieldGroup, ChannelPutGetRequester channelPutGetRequester,
             boolean process)
@@ -255,7 +246,6 @@ public class ChannelProviderLocalFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.Channel#createChannelMonitor(org.epics.ioc.ca.ChannelMonitorRequester)
          */
-        @Override
         public ChannelMonitor createChannelMonitor(ChannelMonitorRequester channelMonitorRequester)
         {
             if(!super.isConnected()) {
@@ -354,7 +344,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelProcess#destroy()
              */
-            @Override
             public void destroy() {
                 isDestroyed = true;
                 if(isRecordProcessRequester)recordProcess.releaseRecordProcessRequester(this);
@@ -363,7 +352,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelProcess#process()
              */
-            @Override
             public void process() {
                 if(isDestroyed || !isConnected()) {
                     channelProcessRequester.message(
@@ -380,28 +368,24 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
-            @Override
             public String getRequesterName() {
                 return requesterName;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
-            @Override
             public void message(String message, MessageType messageType) {
                 channelProcessRequester.message(message, messageType);
             }    
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
              */
-            @Override
             public void recordProcessResult(RequestResult requestResult) {
                 this.requestResult = requestResult;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
              */
-            @Override
             public void recordProcessComplete() {
                 channelProcessRequester.processDone(requestResult);
                 if(processSelf!=null) processSelf.endRequest(this);
@@ -409,7 +393,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
              */
-            @Override
             public void becomeProcessor(RecordProcess recordProcess) {
                 if(recordProcess.process(this, false, null)) return;
                 channelProcessRequester.message(
@@ -477,7 +460,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGet#destroy()
              */
-            @Override
             public void destroy() {
                 isDestroyed = true;
                 if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
@@ -486,7 +468,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGet#get(org.epics.ioc.ca.ChannelFieldGroup)
              */
-            @Override
             public void get() {
                 if(isDestroyed || !isConnected()) {
                     channelGetRequester.message(
@@ -508,7 +489,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelGet#getDelayed(org.epics.ioc.pv.PVField)
              */
-            @Override
             public void getDelayed(PVField pvField) {
                 if(pvField!=this.pvField) {
                     throw new IllegalStateException("pvField is not correct"); 
@@ -518,21 +498,18 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
-            @Override
             public String getRequesterName() {
                 return requesterName;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
-            @Override
             public void message(String message, MessageType messageType) {
                 channelGetRequester.message(message, messageType);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
              */
-            @Override
             public void recordProcessComplete() {
                 startGetData();
                 recordProcess.setInactive(this);
@@ -542,7 +519,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
              */
-            @Override
             public void recordProcessResult(RequestResult requestResult) {
                 this.requestResult = requestResult;
             }
@@ -550,7 +526,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
              */
-            @Override
             public void becomeProcessor(RecordProcess recordProcess) {
                 if(recordProcess.process(this, true, null)) return;
                 channelGetRequester.message("process failed", MessageType.warning);
@@ -708,7 +683,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
              */
-            @Override
             public void becomeProcessor(RecordProcess recordProcess) {
                 canProcess = recordProcess.setActive(this);
                 if(!canProcess) {
@@ -833,7 +807,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#destroy()
              */
-            @Override
             public void destroy() {
                 isDestroyed = true;
                 if(isRecordProcessRequester)recordProcess.releaseRecordProcessRequester(this);
@@ -842,7 +815,6 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#putGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup)
              */
-            @Override
             public void putGet()
             {
                 if(isDestroyed || !isConnected()) {
@@ -867,21 +839,18 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#getDelayed(org.epics.ioc.pv.PVField)
              */
-            @Override
             public void getDelayed(PVField pvField) {
                 getData();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#putDelayed(org.epics.ioc.pv.PVField)
              */
-            @Override
             public void putDelayed(PVField pvField) {
                 putData();
             }    
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
              */
-            @Override
             public void recordProcessComplete() {
                 startGetData();                
                 if(canProcess) recordProcess.setInactive(this);
@@ -891,14 +860,12 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
              */
-            @Override
             public void recordProcessResult(RequestResult requestResult) {
                 this.requestResult = requestResult;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
              */
-            @Override
             public void becomeProcessor(RecordProcess recordProcess) {
                 canProcess = recordProcess.setActive(this);
                 if(!canProcess) {
@@ -911,14 +878,12 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
-            @Override
             public String getRequesterName() {
                 return requesterName;
             }     
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
              */
-            @Override
             public void message(String message, MessageType messageType) {
                 channelPutGetRequester.message(message, messageType);
             }

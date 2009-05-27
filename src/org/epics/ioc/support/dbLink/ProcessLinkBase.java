@@ -79,7 +79,6 @@ public class ProcessLinkBase extends AbstractLink implements ProcessCallbackRequ
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessCallbackRequester#processCallback()
      */
-    @Override
     public void processCallback() {
         if(isRecordProcessRequester) {
             becomeProcessor(linkRecordProcess);
@@ -90,7 +89,6 @@ public class ProcessLinkBase extends AbstractLink implements ProcessCallbackRequ
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessContinueRequester#processContinue()
      */
-    @Override
     public void processContinue() {
         if(alarmMessage!=null) {
             alarmSupport.setAlarm(alarmMessage, AlarmSeverity.minor);
@@ -101,21 +99,18 @@ public class ProcessLinkBase extends AbstractLink implements ProcessCallbackRequ
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
      */
-    @Override
     public void recordProcessComplete() {
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
      */
-    @Override
     public void recordProcessResult(RequestResult requestResult) {
         this.requestResult = requestResult;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
      */
-    @Override
     public void becomeProcessor(RecordProcess recordProcess) {
         if(!recordProcess.process(this, false, super.timeStamp)) {
             alarmMessage = "could not process record";

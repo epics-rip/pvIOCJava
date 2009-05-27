@@ -88,14 +88,12 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#isEnabled()
          */
-        @Override
         public boolean isEnabled() {
             return enabled;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#setEnabled(boolean)
          */
-        @Override
         public boolean setEnabled(boolean value) {
             pvRecord.lock();
             try {
@@ -109,28 +107,24 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#isActive()
          */
-        @Override
         public boolean isActive() {
             return active;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordProcess#getRecord()
          */
-        @Override
         public PVRecord getRecord() {
             return pvRecord;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#isTrace()
          */
-        @Override
         public boolean isTrace() {
             return trace;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#setTrace(boolean)
          */
-        @Override
         public boolean setTrace(boolean value) {
             pvRecord.lock();
             try {
@@ -145,7 +139,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#getSupportState()
          */
-        @Override
         public SupportState getSupportState() {
             pvRecord.lock();
             try {
@@ -157,7 +150,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#initialize()
          */
-        @Override
         public void initialize() {
             pvRecord.lock();
             try {
@@ -197,7 +189,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#start()
          */
-        @Override
         public void start(AfterStart afterStart) {
             pvRecord.lock();
             try {
@@ -212,7 +203,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#stop()
          */
-        @Override
         public void stop() {
             pvRecord.lock();
             try {
@@ -232,7 +222,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#uninitialize()
          */
-        @Override
         public void uninitialize() {
             pvRecord.lock();
             try {
@@ -252,14 +241,12 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        @Override
         public void message(String message, MessageType messageType) {
             pvRecord.message(message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#setRecordProcessRequester(org.epics.ioc.process.RecordProcessRequester)
          */
-        @Override
         public boolean setRecordProcessRequester(RecordProcessRequester recordProcessRequester) {
             if(recordProcessRequester==null) {
                 throw new IllegalArgumentException("must implement recordProcessRequester");
@@ -283,7 +270,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#getRecordProcessRequesterName()
          */
-        @Override
         public String getRecordProcessRequesterName() {
             pvRecord.lock();
             try {
@@ -296,7 +282,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#releaseRecordProcessRequester(org.epics.ioc.process.RecordProcessRequester)
          */
-        @Override
         public boolean releaseRecordProcessRequester(RecordProcessRequester recordProcessRequester) {
             pvRecord.lock();
             try {
@@ -316,7 +301,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#releaseRecordProcessRequester()
          */
-        @Override
         public void releaseRecordProcessRequester() {
             pvRecord.lock();
             try {
@@ -333,7 +317,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#setActive(org.epics.ioc.process.RecordProcessRequester)
          */
-        @Override
         public boolean setActive(RecordProcessRequester recordProcessRequester) {
             boolean isStarted;
             pvRecord.lock();
@@ -355,14 +338,12 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordProcess#canProcessSelf()
          */
-        @Override
         public ProcessSelf canProcessSelf() {
             return processSelf;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#process(org.epics.ioc.process.RecordProcessRequester, boolean, org.epics.ioc.util.TimeStamp)
          */
-        @Override
         public boolean process(RecordProcessRequester recordProcessRequester, boolean leaveActive, TimeStamp timeStamp)
         {
             boolean isStarted = true;
@@ -433,7 +414,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#setInactive(org.epics.ioc.process.RecordProcessRequester)
          */
-        @Override
         public void setInactive(RecordProcessRequester recordProcessRequester) {
             pvRecord.lock();
             try {
@@ -461,7 +441,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#processContinue()
          */
-        @Override
         public void processContinue(ProcessContinueRequester processContinueRequester) {
             ProcessCallbackRequester processCallbackRequester = null;
             pvRecord.lock();
@@ -510,7 +489,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#requestProcessCallback(org.epics.ioc.process.ProcessCallbackRequester)
          */
-        @Override
         public void requestProcessCallback(ProcessCallbackRequester processCallbackRequester) {
             if(!active) {
                 throw new IllegalStateException("requestProcessCallback called but record is not active");
@@ -541,7 +519,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#setTimeStamp(org.epics.ioc.util.TimeStamp)
          */
-        @Override
         public void setTimeStamp(TimeStamp timeStamp) {
             checkForIllegalRequest();
             if(trace) traceMessage("setTimeStamp");
@@ -550,7 +527,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#getTimeStamp(org.epics.ioc.util.TimeStamp)
          */
-        @Override
         public void getTimeStamp(TimeStamp timeStamp) {
             checkForIllegalRequest();
             if(this.timeStamp==null) return;
@@ -559,7 +535,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#getSupportProcessRequesterName()
          */
-        @Override
         public String getRequesterName() {
             return recordProcessSupportName;
         }
@@ -567,7 +542,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
-        @Override
         public void supportProcessDone(RequestResult requestResult) {
             if(!processIsRunning && !processContinueIsRunning) {
                 throw new IllegalStateException("must be called from process or processContinue");
@@ -580,7 +554,6 @@ public class RecordProcessFactory {
          * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
         // following are for processAfterStart
-        @Override
         public void callback(AfterStartNode node) {
             if(pvProcessAfterStart!=null) {
                 boolean process = pvProcessAfterStart.get();
@@ -603,7 +576,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
          */
-        @Override
         public void recordProcessComplete() {
             releaseRecordProcessRequester(this);
             afterStart.done(afterStartNode);
@@ -613,7 +585,6 @@ public class RecordProcessFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
          */
-        @Override
         public void recordProcessResult(RequestResult requestResult) {
             // nothing to do
         }
@@ -716,7 +687,6 @@ public class RecordProcessFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelf#cancelRequest(org.epics.ioc.support.ProcessSelfRequester)
              */
-            @Override
             public void cancelRequest(ProcessSelfRequester requester) {
                 synchronized(this) {
                     if(!requesterList.contains(requester)) return;
@@ -727,7 +697,6 @@ public class RecordProcessFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelf#endRequest(org.epics.ioc.support.ProcessSelfRequester)
              */
-            @Override
             public void endRequest(ProcessSelfRequester requester) {
                 synchronized(this) {
                     if(requester!=this.requester) {
@@ -748,7 +717,6 @@ public class RecordProcessFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelf#request(org.epics.ioc.support.ProcessSelfRequester)
              */
-            @Override
             public void request(ProcessSelfRequester requester) {
                 synchronized(this) {
                     if(this.requester==null) {
