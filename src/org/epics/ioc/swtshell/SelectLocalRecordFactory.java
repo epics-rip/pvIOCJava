@@ -39,8 +39,7 @@ public class SelectLocalRecordFactory {
     
     private static class SelectRecordFactory extends Dialog
     implements SelectLocalRecord, SelectionListener
-    {
-        private Requester requester;     
+    {     
         private Shell shell;
         private List list;
         private int ntimes = 0;
@@ -53,7 +52,6 @@ public class SelectLocalRecordFactory {
          */
         private SelectRecordFactory(Shell parent,Requester requester){
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-            this.requester = requester;
         }
 
         /**
