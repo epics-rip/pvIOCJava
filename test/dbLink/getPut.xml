@@ -14,11 +14,18 @@
       </structure>
     </structure>
     <structure name = "link" extends = "generic">
-        <structure name = "output" extends = "dbOutputLink">
+        <structure name = "output0" extends = "dbOutputLink">
+            <scalar name = "pvname">putFromCounter</scalar>
+            <scalar name = "process">true</scalar>
+        </structure>
+        <!-- check that queue for ProcessSelf works -->
+        <structure name = "output1" extends = "dbOutputLink">
+            <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname">putFromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
         <structure name = "process0" extends = "dbProcessLink">
+             <scalar name = "wait" scalarType = "boolean">false</scalar>
              <scalar name = "pvname">getFromCounter</scalar>
         </structure>
         <structure name = "process1" extends = "dbProcessLink">
@@ -32,6 +39,9 @@
     <scalar name = "value" scalarType = "double"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <scalar name = "processSelf">true</scalar>
+    </structure>
     <structure name = "valueAlarm" extends = "doubleAlarm">
           <scalar name = "active">true</scalar>
           <structure name = "interval">
