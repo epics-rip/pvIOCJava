@@ -8,7 +8,7 @@ package org.epics.ioc.ca;
 import java.util.List;
 
 /**
- * Interface for getting data from a group of fields.
+ * Interface for getting data from a group of nodes.
  * @author mrk
  *
  */
@@ -24,7 +24,7 @@ public interface ChannelFieldGroup {
      */
     void removeChannelField(ChannelField channelField);
     /**
-     * Get the list of channel fields.
+     * Get the list of channel nodes.
      * @return The list.
      */
     List<ChannelField> getList();
