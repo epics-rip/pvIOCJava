@@ -280,7 +280,7 @@ public class ServerFactory {
 		private static PVDataCreate pvDataFactory = PVDataFactory.getPVDataCreate();
 		static FieldCreate fieldFactory = FieldFactory.getFieldCreate();
 	    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
-
+	    
 	    /* (non-Javadoc)
 		 * @see org.epics.ca.server.ProcessVariable#read(org.epics.ca.server.ProcessVariableReadCallback, org.epics.ca.PropertyListType, java.lang.String[])
 		 */
@@ -380,6 +380,16 @@ public class ServerFactory {
 		}
 		
 		
+		/* (non-Javadoc)
+		 * @see org.epics.ca.server.ProcessVariable#process(org.epics.ca.server.ProcessVariableWriteCallback)
+		 */
+		@Override
+		public CAStatus process(ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
+			// TODO 
+			return CAStatus.NOSUPPORT;
+		}
+
+
 		interface MonitorCondition {
 			boolean conditionCheck(PVField field);
 		}
@@ -726,28 +736,5 @@ System.err.println("unlisten:" + pvRecord.getFullName());
             // TODO
         }
         
-        /*
-        private String getOption(String option) {
-            String options = channel.getOptions();
-            if(options==null) return null;
-            int start = options.indexOf(option);
-            if(start<0) return null;
-            String rest = options.substring(start + option.length());
-            if(rest==null || rest.length()<1 || rest.charAt(0)!='=') {
-                message("getOption bad option " + rest,MessageType.error);
-                return null;
-            }
-            rest = rest.substring(1);
-            return rest;
-        }
-
-        String processValue = getOption("getProcess");
-        boolean process = false;
-        if(processValue!=null && processValue.equals("true")) process = true;
-
-        String processValue = getOption("putProcess");
-        boolean process = false;
-        if(processValue!=null && processValue.equals("true")) process = true;
-         */
     }
 }

@@ -211,7 +211,7 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
 	 * @see org.epics.pvData.pv.PVStructure#appendPVField(org.epics.pvData.pv.PVField)
 	 */
 	public void appendPVField(PVField pvField) {
-		pvFieldsMap.put(pvField.getField().getFieldName(), pvField);
+		pvFieldsMap.put(pvField.getFullFieldName(), pvField);
 		changed();
 	}
 
