@@ -125,11 +125,13 @@ public class JavaIOC {
     }
     
     static void startServer(String fileName) {
+        System.out.println("starting servers fileName " + fileName);
         try {
             BufferedReader in = new BufferedReader(new FileReader(fileName));
 
             String factoryName = null;
             while((factoryName = in.readLine()) !=null) {
+                System.out.println("starting server factoryName " + factoryName);
                 Class startClass;
                 Method method = null;
                 try {
@@ -138,7 +140,7 @@ public class JavaIOC {
                     printError("server factory "
                             + e.getLocalizedMessage()
                             + " class not found");
-                    return;
+                    continue;
                 }
                 try {
                     method = startClass.getDeclaredMethod("start", (Class[])null);
@@ -146,28 +148,28 @@ public class JavaIOC {
                     printError("server factory "
                             + e.getLocalizedMessage()
                             + " method start not found");
-                    return;
+                    continue;
                 }
                 if(!Modifier.isStatic(method.getModifiers())) {
                     printError("server factory "
                             + factoryName
                             + " start is not a static method ");
-                    return;
+                    continue;
                 }
                 try {
                     method.invoke(null, new Object[0]);
                 } catch(IllegalAccessException e) {
-                    printError("server factory "
+                    printError("server start IllegalAccessException "
                             + e.getLocalizedMessage());
-                    return;
+                    continue;
                 } catch(IllegalArgumentException e) {
-                    printError("server factory "
+                    printError("server start IllegalArgumentException "
                             + e.getLocalizedMessage());
-                    return;
+                    continue;
                 } catch(InvocationTargetException e) {
-                    printError("server factory "
+                    printError("server start InvocationTargetException "
                             + e.getLocalizedMessage());
-                    return;
+                    continue;
                 }
             }
         } catch (IOException e) {
