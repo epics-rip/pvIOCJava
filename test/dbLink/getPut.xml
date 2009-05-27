@@ -15,6 +15,7 @@
     </structure>
     <structure name = "link" extends = "generic">
         <structure name = "output0" extends = "dbOutputLink">
+            <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname">putFromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
@@ -74,6 +75,11 @@
           <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
           <scalar name = "hystersis">0.3</scalar>
     </structure> 
+    <structure name = "delay" extends = "delay"> 
+         <scalar name = "min">.1</scalar>
+         <scalar name = "max">.1</scalar>
+         <scalar name = "inc">.1</scalar>
+   </structure>
 </record>
 
 <record recordName = "getFromCounter">
