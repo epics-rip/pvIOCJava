@@ -249,7 +249,7 @@ public class IntrospectDatabaseFactory {
             }
             if(object==showStateButton) {
                 RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                boolean processSelf = recordProcess.canProcessSelf();
+                boolean processSelf = ((recordProcess.canProcessSelf()==null) ? false : true);
                 String processRequesterName = recordProcess.getRecordProcessRequesterName();
                 SupportState supportState = recordProcess.getSupportState();
                 boolean isActive = recordProcess.isActive();

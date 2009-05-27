@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS JavaIOC: support</title>
@@ -10,18 +10,18 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2009.04.17</h1>
+2009.05.27</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a> 
+  <li><a href="#Overview">Overview</a>
     <ul>
       <li><a href="#RecordProc">RecordProcess</a></li>
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Record">Record Processing Theory of Operation</a> 
+  <li><a href="#Record">Record Processing Theory of Operation</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requester">Requester Examples</a></li>
@@ -32,7 +32,7 @@ CONTENTS
       <li><a href="#Support1">Support Overview</a></li>
     </ul>
   </li>
-  <li><a href="#Record1">Record Process</a> 
+  <li><a href="#Record1">Record Process</a>
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#RecordProc2">RecordProcess - General Purpose
@@ -46,17 +46,19 @@ CONTENTS
       <li><a href="#RecordProc6">RecordProcessRequester</a></li>
       <li><a href="#ProcessCal">ProcessCallbackRequester</a></li>
       <li><a href="#ProcessCon">ProcessContinueRequester</a></li>
+      <li><a href="#ProcessSel">ProcessSelf</a></li>
+      <li><a href="#ProcessSel1">ProcessSelfRequester</a></li>
       <li><a href="#RecordProc7">RecordProcessFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Support2">Support</a> 
+  <li><a href="#Support2">Support</a>
     <ul>
       <li><a href="#Support3">Support State</a></li>
       <li><a href="#Support4">Support</a></li>
       <li><a href="#Record2">Record Support</a></li>
     </ul>
   </li>
-  <li><a href="#AbstractSu">AbstractSupport</a> 
+  <li><a href="#AbstractSu">AbstractSupport</a>
     <ul>
       <li><a href="#AbstractSu1">AbstractSupport</a></li>
       <li><a href="#Definition2">Definitions</a></li>
@@ -65,6 +67,8 @@ CONTENTS
   </li>
 </ul>
 </div>
+
+<p></p>
 <hr />
 
 <h2 style="text-align: center" id="Overview">Overview</h2>
@@ -199,6 +203,11 @@ can call other support.</p>
       processing. Thus a registration request fails if a requester is already
       attached to a record. If code that is not the requester attempts to
       process a record an exception is thrown.</dd>
+  <dt>self processed record</dt>
+    <dd>A self processed record is a record that allows multiple process
+      requsters. An interface is provided that allows multiple requesters to
+      ask to become the process requester. If a requester is already active]
+      the new request is queued.</dd>
   <dt>active</dt>
     <dd>A record instance is active while a process request is active. A
       request to set a record active will fail if it is already active..</dd>
@@ -592,6 +601,8 @@ structure definitions that come with the javaIOC for examples.</p>
         void recordProcessComplete();
     }
 
+    
+
     public interface RecordProcess {
         // general purpose methods
         boolean isEnabled();
@@ -617,13 +628,6 @@ structure definitions that come with the javaIOC for examples.</p>
         boolean process(RecordProcessRequester recordProcessRequester,
             boolean leaveActive, TimeStamp timeStamp);
         void setInactive(RecordProcessRequester recordProcessRequester);
-        // self processing methods
-        boolean canProcessSelf();
-        boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
-        boolean processSelfSetActive(RecordProcessRequester recordProcessRequester);
-        boolean processSelfProcess(RecordProcessRequester recordProcessRequester,
-            boolean leaveActive);
-        void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
         // support processing methods
         void processContinue(
             ProcessContinueRequester processContinueRequester);
@@ -631,6 +635,8 @@ structure definitions that come with the javaIOC for examples.</p>
             ProcessCallbackRequester processCallbackRequester);
         void setTimeStamp(TimeStamp timeStamp);
         void getTimeStamp(TimeStamp timeStamp);
+        // self processing method
+        ProcessSelf canProcessSelf();
     }
 
     public interface RecordProcessRequester extends Requester{
@@ -646,9 +652,18 @@ structure definitions that come with the javaIOC for examples.</p>
         void processContinue();
     }
     
-    // SupportProcessRequester is defined in org.epics.ioc.support
     public interface SupportProcessRequester {
         void supportProcessDone(RequestResult requestResult);
+    }
+
+    interface ProcessSelfRequester extends RecordProcessRequester {
+        void becomeProcessor(RecordProcess recordProcess);
+    }
+
+    interface ProcessSelf {
+        void request(ProcessSelfRequester requester);
+        void endRequest(ProcessSelfRequester requester);
+        void cancelRequest(ProcessSelfRequester requester);
     }</pre>
 
 <p>An instance of RecordProcess is created for each IOCrecord. Each method
@@ -721,11 +736,6 @@ The record support code must ignore these fields.</p>
 
 <p>These are methods called by code that wants a record processed.</p>
 <dl>
-  <dt style="font-family: courier;">canProcessSelf</dt>
-    <dd>Can the record process itself? This is true if scan.processSelf is
-      true. In this case scanSupport, itself, is the recordProcessRequester
-      and processes the record when method (processSelfRequest) is
-    called.</dd>
   <dt style="font-family: courier;">setRecordProcessRequester</dt>
     <dd>Request to be the record processor. Each record instance can have
       only one record process requester. If a requester is already registered
@@ -764,17 +774,11 @@ The record support code must ignore these fields.</p>
       style="font-family: courier;">leaveActive</span> true and then calling
       setInactive allows the requester to communicated with other code after
       the record is unlocked but before it becomes inactive.</dd>
-  <dt style="font-family: courier;">processSelfRequest</dt>
-    <dd>Ask that the record process itself. This request will succeed only if
-      scan.processSelf is true and the record is not active. The caller must
-      be prepared for a false return, which means the following methods can
-      not be called.</dd>
-  <dt style="font-family: courier;">processSelfSetActive</dt>
-    <dd>Set the record active.</dd>
-  <dt style="font-family: courier;">processSelfProcess</dt>
-    <dd>Process the record.</dd>
-  <dt style="font-family: courier;">processSelfSetInactive</dt>
-    <dd>Set the record inactive.</dd>
+  <dt style="font-family: courier;">canProcessSelf</dt>
+    <dd>Called to see if a record is self processed. If code wants to process
+      a record and serRecordProcessRequester fails, this can be called to see
+      if the record is self processed, If so a ProcessSelf interface is
+      called. This is described below.</dd>
 </dl>
 
 <h3 id="RecordProc5">RecordProcess - Support Processing methods.</h3>
@@ -840,6 +844,34 @@ style="font-family: courier;">processContinue</span> is running.</p>
   <dt style="font-family: courier;">processContinue</dt>
     <dd>A request to call support with the record locked. This is the only
       way asynchronous support should continue processing.</dd>
+</dl>
+
+<h3 id="ProcessSel">ProcessSelf</h3>
+<dl>
+  <dt style="font-family: courier;">request</dt>
+    <dd>Request to become the record process requester. If another request is
+      already active the request is queued.</dd>
+  <dt style="font-family: courier;">endRequest</dt>
+    <dd>After a requester becomes the record process requester, it processes
+      the record just like a normal requester. A requester must call
+      endRequest after it finishes processing the record. It is not
+      permissible to keep control of the record after it finishes
+    processing.</dd>
+  <dt style="font-family: courier;">cancelRequest</dt>
+    <dd>If a request is queued the request can be canceled. Note that a race
+      condition does exist in that the requester could become the record
+      processor between when cancelRequest is called and the request removed
+      from the queue. Thus it must still be prepared to become the record
+      process requester. In this case it can just immediately call
+    endRequest.</dd>
+</dl>
+
+<h3 id="ProcessSel1">ProcessSelfRequester</h3>
+<dl>
+  <dt style="font-family: courier;">becomeProcessor</dt>
+    <dd>Called when the request has become the record process requester. At
+      this point it acts just like a regular record process requester. When
+      it is done it must call processSelf.endRequest.</dd>
 </dl>
 
 <h3 id="RecordProc7">RecordProcessFactory</h3>

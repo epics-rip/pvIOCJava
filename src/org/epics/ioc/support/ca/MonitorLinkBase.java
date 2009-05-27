@@ -23,7 +23,9 @@ import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.LocateSupport;
-import org.epics.ioc.support.RecordProcessRequester;
+import org.epics.ioc.support.ProcessSelf;
+import org.epics.ioc.support.ProcessSelfRequester;
+import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
@@ -56,7 +58,7 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class MonitorLinkBase extends AbstractIOLink
-implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
+implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
 {
     /**
      * The constructor.
@@ -98,6 +100,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     private int queueSize = 0;
     private boolean reportOverrun = false;
     private boolean isRecordProcessRequester = false;
+    private ProcessSelf processSelf = null;
     private boolean process = false;
    
     private StringArrayData stringArrayData = null;
@@ -119,6 +122,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
+    @Override
     public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(super.getSupportState()!=SupportState.readyForStart) return;
@@ -149,6 +153,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
@@ -165,9 +170,11 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
         if(process) {
             isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
             if(!isRecordProcessRequester) {
-                if(!recordProcess.canProcessSelf()) {
+                processSelf = recordProcess.canProcessSelf();
+                if(processSelf==null) {
                     pvStructure.message("process may fail",
                             MessageType.warning);
+                    this.process = false;
                 }
             }
         }
@@ -179,6 +186,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
      */
+    @Override
     public void callback(AfterStartNode node) {
         afterStart.done(afterStartNode);
         afterStart = null;
@@ -187,6 +195,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#stop()
      */
+    @Override
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
         if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
@@ -197,6 +206,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.SupportListener)
      */
+    @Override
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!channel.isConnected()) {
             alarmSupport.setAlarm("Support not connected",AlarmSeverity.invalid);
@@ -209,6 +219,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#connectionChange(boolean)
      */
+    @Override
     public void connectionChange(boolean isConnected) {
         super.connectionChange(isConnected);
         if(isConnected) {
@@ -223,6 +234,7 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDMonitorRequester#dataOverrun(int)
      */
+    @Override
     public void dataOverrun(int number) {
         if(!reportOverrun) return;
         if(process) {
@@ -242,38 +254,27 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.CDMonitorRequester#monitorCD(org.epics.ioc.ca.CD)
      */
+    @Override
     public void monitorCD(CD cd) {
         this.cd = cd;
-        if(process) {
+        if(process && afterStart==null) {
             cdCopied = false;
-            if(afterStart==null && recordProcess.process(this, false, null)) {
-                if(isRecordProcessRequester) {
-                    lock.lock();
-                    try {
-                        if(!cdCopied) waitForCopied.await(10, TimeUnit.SECONDS);
-                    } catch(InterruptedException e) {
-                        System.err.println(
-                                e.getMessage()
-                                + " thread did not call ready");
-                    } finally {
-                        lock.unlock();
-                    }
-                    return;
-                } else if(recordProcess.processSelfRequest(this)) {
-                    recordProcess.processSelfProcess(this, false);
-                    lock.lock();
-                    try {
-                        if(!cdCopied) waitForCopied.await(10, TimeUnit.SECONDS);
-                    } catch(InterruptedException e) {
-                        System.err.println(
-                                e.getMessage()
-                                + " thread did not call ready");
-                    } finally {
-                        lock.unlock();
-                    }
-                    return;
-                }
+            if(isRecordProcessRequester) {
+                becomeProcessor(recordProcess);
+            } else {
+                processSelf.request(this);
             }
+            lock.lock();
+            try {
+                if(!cdCopied) waitForCopied.await(10, TimeUnit.SECONDS);
+            } catch(InterruptedException e) {
+                System.err.println(
+                        e.getMessage()
+                        + " thread did not call ready");
+            } finally {
+                lock.unlock();
+            }
+            return;
         }
         pvRecord.lock();
         try {
@@ -283,16 +284,16 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
             pvRecord.unlock();
         }
     }
-    
-
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
      */
+    @Override
     public void recordProcessComplete() {
         lock.lock();
         try {
             cdCopied = true;
             waitForCopied.signal();
+            if(processSelf!=null) processSelf.endRequest(this);
         } finally {
             lock.unlock();
         }
@@ -300,10 +301,22 @@ implements AfterStartRequester,CDMonitorRequester,RecordProcessRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
      */
+    @Override
     public void recordProcessResult(RequestResult requestResult) {
         // nothing to do
     }
     
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
+     */
+    @Override
+    public void becomeProcessor(RecordProcess recordProcess) {
+        boolean canProcess = recordProcess.process(this, false, null);
+        if(!canProcess) {
+            recordProcessComplete();
+            return;
+        }
+    }
     private void channelStart() {
         channelFieldGroup = channel.createFieldGroup(this);
         if(valueIsEnumerated) {

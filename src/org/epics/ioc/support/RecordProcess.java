@@ -57,20 +57,20 @@ public interface RecordProcess {
     /**
      * Initialize.
      * This must be called rather than directly calling record support.
-     * This handles global fields like scan and then calls record support.
+     * This handles global nodes like scan and then calls record support.
      */
     void initialize();
     /**
      * JavaIOC.
      * This must be called rather than directly calling record support.
-     * This handles global fields like scan and then calls record support.
+     * This handles global nodes like scan and then calls record support.
      * @param afterStart interface for being called after all support has started.
      */
     void start(AfterStart afterStart);
     /**
      * Stop.
      * This must be called rather than directly calling record support.
-     * This handles global fields like scan and then calls record support.
+     * This handles global nodes like scan and then calls record support.
      * If the record is active when stop is called then the record will not be stopped
      * until the record completes the current process request.
      */
@@ -78,7 +78,7 @@ public interface RecordProcess {
     /**
      * Uninitialize.
      * This must be called rather than directly calling record support.
-     * This handles global fields like scan and then calls record support.
+     * This handles global nodes like scan and then calls record support.
      * If the record is active when uninitialize is called then the record will not be uninitialized
      * until the record completes the current process request.
      */
@@ -108,7 +108,7 @@ public interface RecordProcess {
     String getRecordProcessRequesterName();
     /**
      * Prepare for processing a record but do not call record support.
-     * A typical use of this method is when the processor wants to modify fields
+     * A typical use of this method is when the processor wants to modify nodes
      * of the record before it is processed.
      * If successful the record is active but unlocked.
      * @param recordProcessRequester The recordProcessRequester.
@@ -143,41 +143,11 @@ public interface RecordProcess {
      */
     void setInactive(RecordProcessRequester recordProcessRequester);
     /**
-     * Can the record process itself?
-     * @return (false,true) if the record (can not, can) process itself.
+     * Is the record self processed.
+     * A self processed record allows multiple Record Process Requesters.
+     * @return Return the ProcessSelf interface or null if the record is not self processed.
      */
-    boolean canProcessSelf();
-    /**
-     * Request that record process itself.
-     * If successful the caller is the temporary holder of the right to call processSelfSetActive,
-     * processSelfProcess, and processSelfSetInactive. When record completes processing the caller will no longer have this right.
-     * @param recordProcessRequester The requester to call if the request is successful.
-     * @return (false,true) if the record started processing.
-     */
-    boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
-    /**
-     * Set the record active.
-     * Similar to setActive since the actual recordProcessor calls setActive.
-     * @param recordProcessRequester The recordProcessRequester.
-     * @return (false,true) if the request was successful.
-     */
-    boolean processSelfSetActive(RecordProcessRequester recordProcessRequester);
-    /**
-     * JavaIOC processing.
-     * Similar to process since the actual recordProcessor calls process.
-     * @param recordProcessRequester The recordProcessRequester.
-     * @param leaveActive Leave the record active when process is done.
-     * The requester must call setInactive.
-     * @return (false,true) if the request was successful.
-     */
-    boolean processSelfProcess(RecordProcessRequester recordProcessRequester, boolean leaveActive);
-    /**
-     * Called if processSelfProcess was called with leaveActive true.
-     * Similar to setInactive since the actual recordProcessor calls setInactive.
-     * @param recordProcessRequester The recordProcessRequester.
-     */
-    void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
-    
+    ProcessSelf canProcessSelf();    
     /**
      * Ask recordProcess to continue processing.
      * This must be called with the record unlocked.

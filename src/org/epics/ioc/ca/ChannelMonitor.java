@@ -11,7 +11,7 @@ package org.epics.ioc.ca;
  */
 public interface ChannelMonitor {
     /**
-     * Specify the group of fields to monitor.
+     * Specify the group of nodes to monitor.
      * @param channelFieldGroup The field group to monitor.
      */
     void setFieldGroup(ChannelFieldGroup channelFieldGroup);
