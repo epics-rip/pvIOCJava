@@ -288,6 +288,27 @@ public class ServerFactory {
 		public void read(ProcessVariableReadCallback asyncReadCallback,
 						 PropertyListType propertyListType, String[] propertyList) throws CAException {
 			
+			final PVField data = prepareData(propertyListType, propertyList);
+			
+            // TODO temp (no processing is done)
+            final PVRecord record = channel.getPVRecord();
+            record.lock();
+            try
+            {
+            	// this method never blocks...
+            	asyncReadCallback.processVariableReadCompleted(data, CAStatus.NORMAL);
+            } finally {
+            	record.unlock();
+            }
+		}
+
+		/**
+		 * @param propertyListType
+		 * @param propertyList
+		 * @return
+		 */
+		private final PVField prepareData(PropertyListType propertyListType, String[] propertyList)
+		{
 			final PVField thisPVField = channelField.getPVField();
 			final PVRecord thisRecord = channel.getPVRecord();
 			
@@ -323,17 +344,7 @@ public class ServerFactory {
 				}
 				data = dynamicStructure;
 			}
-			
-            // TODO temp (no processing is done)
-            final PVRecord record = channel.getPVRecord();
-            record.lock();
-            try
-            {
-            	// this method never blocks...
-            	asyncReadCallback.processVariableReadCompleted(data, CAStatus.NORMAL);
-            } finally {
-            	record.unlock();
-            }
+			return data;
 		}
 
 		/* (non-Javadoc)
@@ -380,6 +391,62 @@ public class ServerFactory {
 		}
 		
 		
+		/* (non-Javadoc)
+		 * @see org.epics.ca.server.ProcessVariable#writeRead(org.epics.pvData.pv.PVField, int, org.epics.ca.server.ProcessVariableReadCallback, org.epics.ca.PropertyListType, java.lang.String[])
+		 */
+		@Override
+		public void writeRead(PVField value, int offset, ProcessVariableReadCallback asyncReadCallback, PropertyListType propertyListType, String[] propertyList) throws CAException {
+			PVField targetField = channelField.getPVField();
+			final String valueFieldName = value.getField().getFieldName(); 
+			if (valueFieldName != null &&
+				value.getField().getType() != Type.structure &&
+				targetField.getField().getType() == Type.structure)
+			{
+				// special case: only field is being sent and target is structure, find target field
+				targetField = ((PVStructure)targetField).getSubField(valueFieldName);
+				if (targetField == null)
+					// TODO find better status
+					asyncReadCallback.processVariableReadCompleted(null, CAStatus.BADTYPE);
+					return;
+			}
+			
+			final PVField getData = prepareData(propertyListType, propertyList);
+
+			// TODO is this always necessary?!!!
+			final boolean groupPut = (value.getField().getType() == Type.structure);
+			
+            final PVRecord record = channel.getPVRecord();
+            record.lock();
+            try
+            {
+            	//
+            	// put
+                //
+            	if (groupPut) record.beginGroupPut();
+                try
+                {
+	                // no convert...
+	    			PVDataUtils.copyValue(value, targetField, 0, offset, -1);
+                } finally {
+        			if (groupPut) record.endGroupPut();
+                }
+                
+                // TODO process here... if requested
+                
+                //
+                // get
+                //
+            	// this method never blocks...
+            	asyncReadCallback.processVariableReadCompleted(getData, CAStatus.NORMAL);
+
+            } finally {
+            	record.unlock();
+            }
+            
+            // error...
+			asyncReadCallback.processVariableReadCompleted(null, CAStatus.DEFUNCT);
+		}
+
 		/* (non-Javadoc)
 		 * @see org.epics.ca.server.ProcessVariable#process(org.epics.ca.server.ProcessVariableWriteCallback)
 		 */
