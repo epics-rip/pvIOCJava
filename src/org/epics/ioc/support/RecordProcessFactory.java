@@ -735,14 +735,14 @@ public class RecordProcessFactory {
                     }
                     recordProcess.releaseRecordProcessRequester(requester);
                     if(requesterList.size()>0) {
-                        this.requester = requesterList.get(0);
+                        this.requester = requesterList.remove(0);
                     } else {
                         this.requester = null;
                         return;
                     }
                 }
-                recordProcess.processSelfSetRecordProcessRequester(requester);
-                requester.becomeProcessor(recordProcess);
+                recordProcess.processSelfSetRecordProcessRequester(this.requester);
+                this.requester.becomeProcessor(recordProcess);
             }
 
             /* (non-Javadoc)
