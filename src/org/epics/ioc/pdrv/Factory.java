@@ -6,8 +6,6 @@
 package org.epics.ioc.pdrv;
 
 import java.io.Writer;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,6 +23,8 @@ import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
+import org.epics.pvData.misc.Timer;
+import org.epics.pvData.misc.TimerFactory;
 
 
 /**
@@ -68,7 +68,7 @@ public class Factory {
             }
             portList.addTail(port.portListNode);
         }
-        if(autoConnect) port.startAutoConnect(100);
+        if(autoConnect) port.startAutoConnect(.01);
         return port;
     }
     /**
@@ -110,8 +110,8 @@ public class Factory {
     private static LinkedListCreate<DeviceImpl> deviceListCreate = new LinkedListCreate<DeviceImpl>();
     private static LinkedListCreate<Interface> interfaceListCreate = new LinkedListCreate<Interface>();
     private static LinkedListCreate<UserImpl> userListCreate = new LinkedListCreate<UserImpl>();
-    private static Timer timer = new Timer("portDriverAutoconnectTimer");
-    private static final long autoConnectPeriod = 10000; // 10 seconds
+    private static Timer timer = TimerFactory.create("portDriverAutoconnectTimer",ThreadPriority.lower);
+    private static final double autoConnectPeriod = 10.0; // 10 seconds
     
     private static class UserImpl implements User {
         
@@ -148,6 +148,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#duplicateUser(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.QueueRequestCallback)
          */
+        @Override
         public User duplicateUser(QueueRequestCallback queueRequestCallback) {
             UserImpl newUser = new UserImpl(queueRequestCallback);
             newUser.port = port;
@@ -159,6 +160,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#connectPort(java.lang.String)
          */
+        @Override
         public Port connectPort(String portName) {
         	clearErrorParms();
             if(port!=null) {
@@ -182,6 +184,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#disconnectPort()
          */
+        @Override
         public void disconnectPort() {
             disconnectDevice();
             if(port==null) return;
@@ -193,12 +196,14 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getPort()
          */
+        @Override
         public Port getPort() {
             return port;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#connectDevice(java.lang.String)
          */
+        @Override
         public Device connectDevice(String deviceName) {
         	clearErrorParms();
             if(device!=null) {
@@ -215,6 +220,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#disconnectDevice()
          */
+        @Override
         public void disconnectDevice() {
         	clearErrorParms();
             if(device==null) return;
@@ -227,12 +233,14 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getDevice()
          */
+        @Override
         public Device getDevice() {
             return device;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#queueRequest(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.QueuePriority)
          */
+        @Override
         public void queueRequest(QueuePriority queuePriority) { 
         	clearErrorParms();
             Trace trace = port.getTrace();
@@ -284,6 +292,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#cancelRequest(org.epics.ioc.pdrv.User)
          */
+        @Override
         public void cancelRequest() {
             if(port==null) return;
             Trace trace = port.getTrace();
@@ -297,6 +306,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#lockPort(org.epics.ioc.pdrv.User)
          */
+        @Override
         public Status lockPort() {
             clearErrorParms();
             if(port==null) {
@@ -329,6 +339,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#lockPortForConnect()
          */
+        @Override
         public Status lockPortForConnect() {
             clearErrorParms();
             if(port==null) {
@@ -357,6 +368,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#lockDeviceForConnect()
          */
+        @Override
         public Status lockDeviceForConnect() {
             clearErrorParms();
             if(device==null) {
@@ -385,6 +397,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#unlockPort(org.epics.ioc.pdrv.User)
          */
+        @Override
         public void unlockPort() {
             if(port==null) return;
             port.unlockPort(this);
@@ -392,132 +405,154 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getAuxStatus()
          */
+        @Override
         public int getAuxStatus() {
             return auxStatus;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getBoolean()
          */
+        @Override
         public boolean getBoolean() {
             return booleanvalue;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setBoolean(boolean)
          */
+        @Override
         public void setBoolean(boolean value) {
             booleanvalue = value;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getDouble()
          */
+        @Override
         public double getDouble() {
             return doubleValue;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getInt()
          */
+        @Override
         public int getInt() {
             return intValue;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getMessage()
          */
+        @Override
         public String getMessage() {
             return message;
         }
 		/* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getReason()
          */
+        @Override
         public int getReason() {
             return reason;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getString()
          */
+        @Override
         public String getString() {
             return stringValue;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getTimeout()
          */
+        @Override
         public double getTimeout() {
             return timeout;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getUserPvt()
          */
+        @Override
         public Object getUserPvt() {
             return userPvt;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getDeviceDriverPvt()
          */
+        @Override
         public Object getDeviceDriverPvt() {
             return deviceDriverPvt;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#getPortDriverPvt()
          */
+        @Override
         public Object getPortDriverPvt() {
             return portDriverPvt;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setAuxStatus(int)
          */
+        @Override
         public void setAuxStatus(int auxStatus) {
             this.auxStatus = auxStatus;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setDouble(double)
          */
+        @Override
         public void setDouble(double value) {
             doubleValue = value;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setInt(int)
          */
+        @Override
         public void setInt(int value) {
             this.intValue = value;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setMessage(java.lang.String)
          */
+        @Override
         public void setMessage(String message) {
             this.message = message;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setReason(int)
          */
+        @Override
         public void setReason(int reason) {
             this.reason = reason;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setString(java.lang.String)
          */
+        @Override
         public void setString(String value) {
             this.stringValue = value;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setTimeout(double)
          */
+        @Override
         public void setTimeout(double timeout) {
             this.timeout = timeout;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setUserPvt(java.lang.Object)
          */
+        @Override
         public void setUserPvt(Object userPvt) {
             this.userPvt = userPvt;
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setDeviceDriverPvt(java.lang.Object)
          */
+        @Override
         public void setDeviceDriverPvt(Object deviceDriverPvt) {
             this.deviceDriverPvt = deviceDriverPvt;
         }        
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.User#setPortDriverPvt(java.lang.Object)
          */
+        @Override
         public void setPortDriverPvt(Object portDriverPvt) {
             this.portDriverPvt = portDriverPvt;
         }
@@ -528,7 +563,7 @@ public class Factory {
         }
     }
     
-    private static class PortImpl implements Port,TraceOptionChangeListener, QueueRequestCallback {
+    private static class PortImpl implements Port,TraceOptionChangeListener, QueueRequestCallback,Timer.TimerCallback {
         
         private PortImpl(String portName,PortDriver portDriver,String driverName,
             boolean canBlock,boolean autoConnect,ThreadPriority priority)
@@ -545,6 +580,7 @@ public class Factory {
         }
         
         private LinkedListNode<PortImpl> portListNode = portListCreate.createNode(this);
+        private Timer.TimerNode timerNode = TimerFactory.createNode(this);
         private Trace trace = TraceFactory.create();
         
         private String portName;
@@ -570,6 +606,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#report(boolean, int)
          */
+        @Override
         public String report(boolean reportDevices,int details) {
             StringBuilder builder = new StringBuilder();
             builder.append(String.format(
@@ -593,6 +630,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getDevices()
          */
+        @Override
         public Device[] getDevices() {
             synchronized(deviceList) {
                 Device[] devices = new Device[deviceList.getLength()];
@@ -610,18 +648,21 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getDriverName()
          */
+        @Override
         public String getDriverName() {
             return driverName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getPortName()
          */
+        @Override
         public String getPortName() {
             return portName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getTrace()
          */
+        @Override
         public Trace getTrace() {
             return trace;
         }
@@ -629,12 +670,14 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#canBlock()
          */
+        @Override
         public boolean canBlock() {
             return ((portThread==null) ? true : false);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#enable(boolean)
          */
+        @Override
         public void enable(boolean trueFalse) {
             boolean changed = false;
             synchronized(this){
@@ -654,6 +697,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#autoConnect(boolean)
          */
+        @Override
         public void autoConnect(boolean trueFalse) {
             boolean changed = false;
             if((trace.getMask()&Trace.FLOW)!=0) {
@@ -670,12 +714,17 @@ public class Factory {
             }
             if(changed) {
                 raiseException(ConnectException.autoConnect);
-                if(trueFalse) startAutoConnect(0);
+                if(trueFalse) {
+                    startAutoConnect(0.0);
+                } else {
+                    timerNode.cancel();
+                }
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#getDevice(org.epics.ioc.pdrv.User, java.lang.String)
          */
+        @Override
         public Device getDevice(User user, String deviceName) {
             synchronized(deviceList) {
                 LinkedListNode<DeviceImpl> node = deviceList.getHead();
@@ -690,6 +739,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#connect(org.epics.ioc.pdrv.User)
          */
+        @Override
         public Status connect(User user) { 
             if(lockPortUser!=user) {
                 user.setMessage("Illegal to call connect without owning the port");
@@ -712,6 +762,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#disconnect(org.epics.ioc.pdrv.User)
          */
+        @Override
         public Status disconnect(User user) {
             if(lockPortUser!=user) {
                 user.setMessage("Illegal to call disconnect without owning the port");
@@ -735,24 +786,28 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#isConnected()
          */
+        @Override
         public boolean isConnected() {
             return connected;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#isEnabled()
          */
+        @Override
         public boolean isEnabled() {
             return enabled;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#isAutoConnect()
          */
+        @Override
         public boolean isAutoConnect() {
             return autoConnect;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#exceptionListenerAdd(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.ConnectExceptionListener)
          */
+        @Override
         public Status exceptionListenerAdd(User user,ConnectExceptionListener listener)
         {
             if((trace.getMask()&Trace.FLOW)!=0) {
@@ -769,6 +824,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#exceptionListenerRemove(org.epics.ioc.pdrv.User)
          */
+        @Override
         public void exceptionListenerRemove(User user) {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.exceptionListenerRemove", portName);
@@ -780,6 +836,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortUser#scanQueue()
          */
+        @Override
         public void scanQueues() {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.scanQueues", portName);
@@ -789,6 +846,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#registerLockPortNotify(org.epics.ioc.pdrv.LockPortNotify)
          */
+        @Override
         public void registerLockPortNotify(LockPortNotify lockPortNotify) {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.registerLockPortNotify", portName);
@@ -803,6 +861,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#unregisterLockPortNotify()
          */
+        @Override
         public void unregisterLockPortNotify() {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.unregisterLockPortNotify", portName);
@@ -817,6 +876,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#createDevice(org.epics.ioc.pdrv.DeviceDriver, java.lang.String)
          */
+        @Override
         public Device createDevice(DeviceDriver deviceDriver, String deviceName) {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.createDevice %s", portName,deviceName);
@@ -831,12 +891,13 @@ public class Factory {
                 }
                 deviceList.addTail(device.deviceListNode);
             }
-            if(connected) device.startAutoConnect(10);
+            if(connected) device.startAutoConnect(.01);
             return device;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortDriver#exceptionConnect()
          */
+        @Override
         public void exceptionConnect() {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.exceptionConnect", portName);
@@ -851,7 +912,7 @@ public class Factory {
                 LinkedListNode<DeviceImpl> node = deviceList.getHead();
                 while(node!=null) {
                     DeviceImpl device = node.getObject();
-                    if(!device.connected)device.startAutoConnect(0);
+                    if(!device.connected)device.startAutoConnect(0.0);
                     node = deviceList.getNext(node);
                 }
             }
@@ -860,6 +921,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortDriver#exceptionDisconnect()
          */
+        @Override
         public void exceptionDisconnect() {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.exceptionDisconnect", portName);
@@ -871,7 +933,7 @@ public class Factory {
                 connected = false;
             }
             scanQueues();
-            if(autoConnect) startAutoConnect(1000);
+            if(autoConnect) startAutoConnect(1.0);
             raiseException(ConnectException.connect);
         }
         
@@ -942,6 +1004,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.TraceOptionChangeListener#optionChange()
          */
+        @Override
         public void optionChange() {
             int mask = trace.getMask();
             int iomask = trace.getIOMask();
@@ -960,7 +1023,7 @@ public class Factory {
                 }
             }
         }
-        private void startAutoConnect(long initialDelay) {
+        private void startAutoConnect(double initialDelay) {
             if(portImplUser.getPort()==null && portImplUser.connectPort(portName)==null) {
                 throw new IllegalStateException("Logic error");
             }
@@ -968,56 +1031,51 @@ public class Factory {
                 trace.print(Trace.FLOW, "%s Port.startAutoConnect", portName);
             }
             if(connected || !autoConnect) return;
-            if(delayTask!=null) return;
-            delayTask = new DelayTask(this);
-            timer.scheduleAtFixedRate(delayTask, initialDelay, autoConnectPeriod);
+            timerNode.cancel();
+            timer.schedulePeriodic(timerNode, initialDelay, autoConnectPeriod);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
          */
+        @Override
         public void callback(Status status, User user) {
             portDriver.connect(portImplUser);
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.callback connect result %b", portName,connected);
             }
             if(connected) {
-                delayTask.cancel();
-                delayTask = null;
+                timerNode.cancel();
             }
         }
         
-        private DelayTask delayTask = null;
-        
-        private static class DelayTask extends TimerTask {
-            
-            private DelayTask(PortImpl port) {
-                this.port = port;
-            }
-            private PortImpl port;
-            /* (non-Javadoc)
-             * @see java.lang.Runnable#run()
-             */
-            public void run() {
-                if(port.portThread!=null) {
-                    if(!port.portImplUser.isQueued) {
-                        port.portThread.queueRequest(port.portImplUser,QueuePriority.medium);
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#callback()
+         */
+        @Override
+        public void callback() {
+            if(portThread!=null) {
+                if(portImplUser.isQueued) {
+                    portThread.queueRequest(portImplUser,QueuePriority.medium);
+                }
+            } else {
+                Status status = lockPort(portImplUser);
+                if(status==Status.success) {
+                    portDriver.connect(portImplUser);
+                    if(connected) {
+                        timerNode.cancel();
                     }
-                } else {
-                    Status status = port.lockPort(port.portImplUser);
-                    if(status==Status.success) {
-                        port.portDriver.connect(port.portImplUser);
-                        if(port.connected) {
-                            super.cancel();
-                            port.delayTask = null;
-                        }
-                        port.unlockPort(port.portImplUser);
-                    }
+                    unlockPort(portImplUser);
                 }
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#timerStopped()
+         */
+        @Override
+        public void timerStopped() {}
     }
     
-    private static class DeviceImpl implements Device, QueueRequestCallback {
+    private static class DeviceImpl implements Device, QueueRequestCallback,Timer.TimerCallback {
 
         private DeviceImpl(PortImpl port,DeviceDriver deviceDriver,String deviceName) {
             this.port = port;
@@ -1029,6 +1087,7 @@ public class Factory {
         }
         
         private LinkedListNode<DeviceImpl> deviceListNode = deviceListCreate.createNode(this);
+        private Timer.TimerNode timerNode = TimerFactory.createNode(this);
         private PortImpl port;
         private DeviceDriver deviceDriver;
         private String deviceName;
@@ -1046,6 +1105,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#report(int)
          */
+        @Override
         public String report(int details) {
             StringBuilder builder = new StringBuilder();
             builder.append(String.format(
@@ -1073,6 +1133,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#getInterfaces()
          */
+        @Override
         public Interface[] getInterfaces() {
             synchronized(interfaceList) {
                 Interface[] interfaces = new Interface[interfaceList.getLength()];
@@ -1089,30 +1150,35 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#getDeviceName()
          */
+        @Override
         public String getDeviceName() {
             return deviceName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#getFullName()
          */
+        @Override
         public String getFullName() {
             return fullName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#getPort()
          */
+        @Override
         public Port getPort() {
             return port;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#getTrace()
          */
+        @Override
         public Trace getTrace() {
             return trace;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#enable(boolean)
          */
+        @Override
         public void enable(boolean trueFalse) {
             boolean changed = false;
             synchronized(this) {
@@ -1132,6 +1198,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#autoConnect(boolean)
          */
+        @Override
         public void autoConnect(boolean trueFalse) {
             boolean changed = false;
             synchronized(this) {
@@ -1145,12 +1212,13 @@ public class Factory {
             }
             if(changed) {
                 raiseException(ConnectException.autoConnect);
-                if(trueFalse) startAutoConnect(0);
+                if(trueFalse) startAutoConnect(0.0);
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#connect(org.epics.ioc.pdrv.User)
          */
+        @Override
         public Status connect(User user) {
             PortImpl port = (PortImpl)user.getPort();
             if(port.lockPortUser!=user) {
@@ -1173,6 +1241,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#disconnect(org.epics.ioc.pdrv.User)
          */
+        @Override
         public Status disconnect(User user) {
             PortImpl port = (PortImpl)user.getPort();
             if(port.lockPortUser!=user) {
@@ -1197,24 +1266,28 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#isAutoConnect()
          */
+        @Override
         public boolean isAutoConnect() {
             return autoConnect;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#isConnected()
          */
+        @Override
         public boolean isConnected() {
             return connected;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceUser#isEnabled()
          */
+        @Override
         public boolean isEnabled() {
             return enabled;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#exceptionListenerAdd(org.epics.ioc.pdrv.User, org.epics.ioc.pdrv.ConnectExceptionListener)
          */
+        @Override
         public Status exceptionListenerAdd(User user,ConnectExceptionListener listener)
         {
             if((trace.getMask()&Trace.FLOW)!=0) {
@@ -1231,6 +1304,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#exceptionListenerRemove(org.epics.ioc.pdrv.User)
          */
+        @Override
         public void exceptionListenerRemove(User user) {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Device.exceptionListenerRemove", fullName);
@@ -1242,6 +1316,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#findInterface(org.epics.ioc.pdrv.User, java.lang.String)
          */
+        @Override
         public Interface findInterface(User user, String interfaceName) {
             synchronized(interfaceList) {
                 LinkedListNode<Interface> node = interfaceList.getHead();
@@ -1256,6 +1331,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#blockOtherUsers(org.epics.ioc.pdrv.User)
          */
+        @Override
         public Status blockOtherUsers(User user) {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Device.blockOtherUsers", fullName);
@@ -1270,6 +1346,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#isBlockedByUser(org.epics.ioc.pdrv.User)
          */
+        @Override
         public boolean isBlockedByOtherUser(User user) {
             if(blockingUser==null) return false;
             return ((blockingUser==user) ? false : true);
@@ -1277,6 +1354,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Device#unblockOtherUsers(org.epics.ioc.pdrv.User)
          */
+        @Override
         public void unblockOtherUsers(User user) {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Device.unblockOtherUsers", fullName);
@@ -1292,6 +1370,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceDriver#registerInterface(org.epics.ioc.asyn.Interface)
          */
+        @Override
         public void registerInterface(Interface newIface) {
             String name = newIface.getInterfaceName();
             if((trace.getMask()&Trace.FLOW)!=0) {
@@ -1319,6 +1398,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceDriver#exceptionConnect()
          */
+        @Override
         public void exceptionConnect() {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Device.exceptionConnect", fullName);
@@ -1335,6 +1415,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.DeviceDriver#exceptionDisconnect()
          */
+        @Override
         public void exceptionDisconnect() {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Device.exceptionDisconnect", fullName);
@@ -1379,7 +1460,7 @@ public class Factory {
             }
         }
         
-        private void startAutoConnect(long initialDelay) {
+        private void startAutoConnect(double initialDelay) {
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Device.startAutoConnect", fullName);
             }
@@ -1390,50 +1471,44 @@ public class Factory {
                 throw new IllegalStateException("Logic error");
             }
             if(connected || !autoConnect) return;
-            if(delayTask!=null) return;
-            delayTask = new DelayTask(this);
-            timer.scheduleAtFixedRate(delayTask, initialDelay, autoConnectPeriod);
+            timerNode.cancel();
+            timer.schedulePeriodic(timerNode, initialDelay, autoConnectPeriod);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
          */
+        @Override
         public void callback(Status status, User user) {
             deviceDriver.connect(deviceImplUser);
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Deviice.callback connect %b", fullName,connected);
             }
             if(connected) {
-                delayTask.cancel();
-                delayTask = null;
+                timerNode.cancel();
             }
         }
         
-        private DelayTask delayTask = null;
-        
-        private static class DelayTask extends TimerTask {
-            
-            private DelayTask(DeviceImpl device) {
-                this.device = device;
-            }
-            private DeviceImpl device;
-            /* (non-Javadoc)
-             * @see java.lang.Runnable#run()
-             */
-            public void run() {
-                PortImpl port = device.port;
-                if(port.portThread!=null) {
-                    if(!device.deviceImplUser.isQueued) {
-                        device.port.portThread.queueRequest(device.deviceImplUser,QueuePriority.medium);
-                    }
-                } else {
-                    device.deviceDriver.connect(device.deviceImplUser);
-                    if(device.connected) {
-                        super.cancel();
-                        device.delayTask = null;
-                    }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#callback()
+         */
+        @Override
+        public void callback() {
+            if(port.portThread!=null) {
+                if(deviceImplUser.isQueued) {
+                    port.portThread.queueRequest(deviceImplUser,QueuePriority.medium);
+                }
+            } else {
+                deviceDriver.connect(deviceImplUser);
+                if(connected) {
+                    timerNode.cancel();
                 }
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#timerStopped()
+         */
+        @Override
+        public void timerStopped() {}
     }
     
     private static class ConnectExceptionList {
@@ -1612,6 +1687,7 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
+        @Override
         public void run(ThreadReady threadReady) {
             boolean firstTime = true;
             try {
@@ -1693,8 +1769,9 @@ public class Factory {
         
     }
     
-    private static class InitialConnectTask extends TimerTask implements NewAfterStartRequester,AfterStartRequester {
+    private static class InitialConnectTask implements NewAfterStartRequester,AfterStartRequester,Timer.TimerCallback  {
         private AfterStartNode afterStartNode = AfterStartFactory.allocNode(this);
+        private Timer.TimerNode timerNode = TimerFactory.createNode(this);
         private AfterStart afterStart = null;
         private int numTimes = 0;
         private InitialConnectTask(PortImpl port) {
@@ -1703,18 +1780,9 @@ public class Factory {
         }
         private PortImpl port;
         /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            if(port.connected || numTimes>50) {
-                super.cancel();
-                afterStart.done(afterStartNode);
-            }
-            numTimes++;
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.install.NewAfterStartRequester#callback(org.epics.ioc.install.AfterStart)
          */
+        @Override
         public void callback(AfterStart afterStart) {
             this.afterStart = afterStart;
             afterStart.requestCallback(afterStartNode, false, ThreadPriority.high);
@@ -1722,8 +1790,25 @@ public class Factory {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
+        @Override
         public void callback(AfterStartNode node) {
-            timer.schedule(this, 0, 100);
+            timer.schedulePeriodic(timerNode, 0.0,.1);
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#callback()
+         */
+        @Override
+        public void callback() {
+            if(port.connected || numTimes>50) {
+                timerNode.cancel();
+                afterStart.done(afterStartNode);
+            }
+            numTimes++;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#timerStopped()
+         */
+        @Override
+        public void timerStopped() {}
     }
 }
