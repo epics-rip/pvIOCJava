@@ -155,14 +155,14 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
     <array name = "value" scalarType = "boolean">
-        false false false
+        false,false,false
     </array>
 </record>
 
 <record recordName = "byteArray">
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
-    <array name = "value" scalarType = "byte">0 0 0</array>
+    <array name = "value" scalarType = "byte">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
@@ -176,7 +176,7 @@
 <record recordName = "intArray" >
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
-    <array name = "value" scalarType = "int">0 0 0</array>
+    <array name = "value" scalarType = "int">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
@@ -190,7 +190,7 @@
 <record recordName = "shortArray" >
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
-    <array name = "value" scalarType = "short">0 0 0</array>
+    <array name = "value" scalarType = "short">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
@@ -204,7 +204,7 @@
 <record recordName = "longArray" >
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
-    <array name = "value" scalarType = "long">0 0 0</array>
+    <array name = "value" scalarType = "long">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
@@ -218,7 +218,7 @@
 <record recordName = "floatArray" >
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
-    <array name = "value" scalarType = "float">0 0 0</array>
+    <array name = "value" scalarType = "float">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
@@ -232,7 +232,7 @@
 <record recordName = "doubleArray" >
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
-    <array name = "value" scalarType = "double">0 0 0</array>
+    <array name = "value" scalarType = "double">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "resolution">0</scalar>
