@@ -48,7 +48,7 @@ public class CDGetFactory {
     
     private static class GetCDValue extends Dialog implements CDGet, SelectionListener {
         private static Convert convert = ConvertFactory.getConvert();
-        private static Pattern separatorPattern = Pattern.compile("[, ]");
+        private static Pattern separatorPattern = Pattern.compile("[,]");
         private Shell parent;
         private Shell shell;
         private Button doneButton;
@@ -66,10 +66,10 @@ public class CDGetFactory {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
             this.parent = parent;
         }
-        /**
-         * Get values from the operator and put them in CDRecord.
-         * @param cdRecord The CDRecord that holds the data.
+        /* (non-Javadoc)
+         * @see org.epics.ioc.swtshell.CDGet#getValue(org.epics.ioc.ca.CDRecord)
          */
+        @Override
         public void getValue(CDRecord cdRecord) {
             cdRecord.getCDStructure().clearNumPuts();
             CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
@@ -128,12 +128,14 @@ public class CDGetFactory {
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
          */
+        @Override
         public void widgetDefaultSelected(SelectionEvent arg0) {
             widgetSelected(arg0);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
+        @Override
         public void widgetSelected(SelectionEvent arg0) {
             Object object = arg0.getSource();
             if(object==doneButton) {
@@ -194,11 +196,22 @@ public class CDGetFactory {
                         }
                     } else { // type is array; elementType.isScalar
                         PVArray pvArray = (PVArray)pvField;
-                        String[] values = separatorPattern.split(text.getText());
-                        if(values.length<=0) {
+                        String textValue = text.getText();
+                        if(textValue==null || textValue.length()<=0) {
                             pvArray.setLength(0);
                             return;
                         }
+                        if((textValue.charAt(0)=='[') && textValue.endsWith("]")) {
+                            int offset = textValue.lastIndexOf(']');
+                            textValue = textValue.substring(1, offset);
+                        }
+                        String[] values = separatorPattern.split(textValue);
+                        int length = values.length;
+                        if(length<=0) {
+                            pvArray.setLength(0);
+                            return;
+                        }
+                        
                         try {
                             convert.fromStringArray(pvArray, 0, values.length, values, 0);
                         }catch (NumberFormatException e) {
@@ -271,13 +284,14 @@ public class CDGetFactory {
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
              */
+            @Override
             public void widgetDefaultSelected(SelectionEvent e) {
                 widgetSelected(e);
             }
-
             /* (non-Javadoc)
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
+            @Override
             public void widgetSelected(SelectionEvent e) {
                 Object object = e.getSource();
                 if(object==text) {               
