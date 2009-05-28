@@ -27,7 +27,7 @@
         <scalar name = "rate">1.0</scalar>
     </structure>
     <array name = "value" scalarType = "double">
-        0.0 1.0 2.0 3.0 4.0 5.0 6.0
+        0.0,1.0,2.0,3.0,4.0,5.0,6.0
     </array>
     <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
@@ -102,7 +102,7 @@
         <scalar name = "rate">1.0</scalar>
     </structure>
     <array name = "value" scalarType = "double">
-        0.0 1.0 2.0 3.0 4.0 5.0 6.0
+        0.0,1.0,2.0,3.0,4.0,5.0,6.0
     </array>
     <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
