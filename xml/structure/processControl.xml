@@ -9,7 +9,8 @@
 
 <structure structureName = "supportStateCommand" extends = "enumerated" >
   <array name = "choices">
-    idle ,initialize,start,stop,uninitialize</array>
+    idle,initialize,start,stop,uninitialize
+    </array>
 </structure>
 
 <structure structureName = "processControl" >
