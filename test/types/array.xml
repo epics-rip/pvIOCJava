@@ -4,7 +4,7 @@
 <record recordName = "arrayIncrementer">
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
-    <array name = "value" scalarType = "double">0.0 1.0 2.0</array>
+    <array name = "value" scalarType = "double">0.0,1.0,2.0</array>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>

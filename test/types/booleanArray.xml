@@ -4,7 +4,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
     <array name = "value" scalarType = "boolean">
-        false true false
+        false,true,false
     </array>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
