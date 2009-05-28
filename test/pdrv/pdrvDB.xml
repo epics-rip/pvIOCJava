@@ -4,7 +4,7 @@
 <import name = "org.epics.pvData.*" />
 <record recordName = "processControl" extends = "processControl" />
 <record recordName = "portDeviceControl" extends = "portDeviceControl" />
-<include addPath = "test/pdrv" />
+<include addPath = "${JAVAIOC}/test/pdrv" />
 
 <include href = "boolean.xml" />
 <include href = "digital.xml" />
@@ -18,6 +18,6 @@
 <include href = "string.xml" />
 -->
 
-<include removePath = "test/pdrv" />
+<include removePath = "${JAVAIOC}/test/pdrv" />
 </database>
 
