@@ -318,7 +318,7 @@ public class ServerFactory {
         		return CAStatus.PROCESSFAIL;
         	
         	try {
-				if (!processLock.tryLock(5, TimeUnit.SECONDS))
+				if (!processLock.tryLock(LOCK_TIMEOUT_SEC, TimeUnit.SECONDS))
 					return CAStatus.TIMEOUT;
 			} catch (InterruptedException e) {
 				return CAStatus.DEFUNCT;	// TODO different status
@@ -332,6 +332,8 @@ public class ServerFactory {
 
         private PVField data;
         private ProcessVariableReadCallback asyncReadCallback;
+        // TODO configurable
+        private static final int LOCK_TIMEOUT_SEC = 10;
         
         public CAStatus processGet(boolean process, PVField data, ProcessVariableReadCallback asyncReadCallback)
         {
@@ -341,7 +343,7 @@ public class ServerFactory {
         	if (process && canProcess)
         	{
             	try {
-					if (!processLock.tryLock(5, TimeUnit.SECONDS))
+					if (!processLock.tryLock(LOCK_TIMEOUT_SEC, TimeUnit.SECONDS))
 						return CAStatus.TIMEOUT;
 				} catch (InterruptedException e) {
 					return CAStatus.DEFUNCT;	// TODO different status
@@ -372,24 +374,101 @@ public class ServerFactory {
             }
         }
 
-        /*
-        public boolean processPut()
+        private PVField targetData;
+        private int offset;
+        private CAStatus putStatus;
+        
+        public CAStatus processPut(boolean process, PVField targetField, PVField data, int offset, ProcessVariableWriteCallback asyncWriteCallback)
         {
+        	if (destroyed)
+        		return CAStatus.CHANDESTROY;
+        	
         	if (process && canProcess)
-        		return internalProcess(Action.PUT_PROCESS);
+        	{
+            	try {
+					if (!processLock.tryLock(LOCK_TIMEOUT_SEC, TimeUnit.SECONDS))
+						return CAStatus.TIMEOUT;
+				} catch (InterruptedException e) {
+					return CAStatus.DEFUNCT;	// TODO different status
+				}
+            	
+            	this.data = data;
+            	this.asyncCompletionCallback = asyncWriteCallback;
+            	this.targetData = targetField;
+            	this.offset = offset;
+
+            	internalProcess(Action.PUT_PROCESS);
+            	return null;	// async
+        	}
         	else
-        		putData();
+        	{
+        		return putData(targetField, data, offset);
+        	}
         }
 
-        public boolean processPutGet()
+        private CAStatus putData(PVField targetField, PVField value, int offset)
         {
-        	if (process && canProcess)
-        		return internalProcess(Action.PUT_PROCESS_GET); // async
-        	else
-        		startPutGetData();
+			// TODO is this always necessary?!!!
+			final boolean groupPut = (value.getField().getType() == Type.structure);
+			
+            pvRecord.lock();
+            try
+            {
+                if (groupPut) pvRecord.beginGroupPut();
+                try
+                {
+	                // no convert...
+	    			PVDataUtils.copyValue(value, targetField, 0, offset, -1);
+	    			return CAStatus.NORMAL;
+                } catch (CAStatusException cse) {
+                	return cse.getStatus();
+                } catch (Throwable th) {
+                	// TODO log
+                	return CAStatus.DEFUNCT;
+                } finally {
+        			if (groupPut) pvRecord.endGroupPut();
+                }
+
+            } finally {
+            	pvRecord.unlock();
+            }
         }
-         */
+
+        private PVField putData;
         
+        public CAStatus processPutGet(boolean process, PVField targetField, PVField value, int offset, PVField getData, ProcessVariableReadCallback asyncReadCallback)
+        {
+        	if (destroyed)
+        		return CAStatus.CHANDESTROY;
+        	
+        	if (process && canProcess)
+        	{
+            	try {
+					if (!processLock.tryLock(LOCK_TIMEOUT_SEC, TimeUnit.SECONDS))
+						return CAStatus.TIMEOUT;
+				} catch (InterruptedException e) {
+					return CAStatus.DEFUNCT;	// TODO different status
+				}
+            	
+            	this.data = getData;
+            	this.asyncReadCallback = asyncReadCallback;
+            	this.targetData = targetField;
+            	this.offset = offset;
+            	this.putData = value;
+
+            	internalProcess(Action.PUT_PROCESS_GET);
+            	return null;	// async
+        	}
+        	else
+        	{
+        		CAStatus status = putData(targetField, data, offset);
+        		if (status != CAStatus.NORMAL)
+        			return status;
+        		getData(getData, asyncReadCallback);
+        		return null;
+        	}
+        }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
          */
@@ -415,6 +494,7 @@ public class ServerFactory {
 				}
 				
 				case PROCESS_GET:
+				case PUT_PROCESS_GET:
 				{
 		            getData(data, asyncReadCallback);
 		            asyncReadCallback = null;
@@ -424,18 +504,19 @@ public class ServerFactory {
 		            if (processSelf != null) processSelf.endRequest(this);
 					break;
 				}
-					/*
 				case PUT_PROCESS:
 		            if (processSelf != null) processSelf.endRequest(this);
-		            channelPutRequester.putDone(requestResult);
+
+		            // if put was OK and process failed, report it
+		            if (putStatus == CAStatus.NORMAL && requestResult == RequestResult.failure)
+		            	putStatus = CAStatus.PROCESSFAIL;
+		            
+		            asyncCompletionCallback.processVariableWriteCompleted(putStatus);
+		            asyncCompletionCallback = null;
+		            data = null;
+		            targetData = null;
+		            
 					break;
-				case PUT_PROCESS_GET:
-	                startGetData();                
-	                if (canProcess) recordProcess.setInactive(this);
-		            if (processSelf != null) processSelf.endRequest(this);
-	                channelPutGetRequester.getDone(requestResult);
-					break;
-					*/
 			}
             
             processLock.unlock();
@@ -472,24 +553,58 @@ public class ServerFactory {
 		            if (processSelf != null) processSelf.endRequest(this);
 					break;
 				}
-				/*	
 				case PUT_PROCESS:
-		            canProcess = recordProcess.setActive(this);
-		            if(!canProcess) {
-		                requestResult = RequestResult.failure;
-		                message("setActive failed",MessageType.error);
-		            }
-		            startPutData();
-					break;
 				case PUT_PROCESS_GET:
-	                canProcess = recordProcess.setActive(this);
-	                if(!canProcess) {
-	                    requestResult = RequestResult.failure;
-	                    message("setActive failed",MessageType.error);
-	                }
-	                startPutData();
-					break;
-				*/
+				{
+		            boolean activated = recordProcess.setActive(this);
+		            if (!activated) {
+		                requestResult = RequestResult.failure;
+		                // TODO !!!
+		                message("setActive failed", MessageType.error);
+		            }
+
+		            putStatus = putData(targetData, putData, offset);
+		            putData = null;
+		            
+		            // unlock and notify... or not yet (wait until processed)
+					if (activated)
+					{
+						if (putStatus == CAStatus.NORMAL)
+						{	
+							if (recordProcess.process(this, false, null))
+								return;
+	                            
+							// failed to process, simulate failure
+							message("process failed", MessageType.error);
+							requestResult = RequestResult.failure;
+						}
+							
+						recordProcessComplete();
+						return;						
+					}
+					else
+					{
+						if (action == Action.PUT_PROCESS_GET)
+						{
+							if (putStatus == CAStatus.NORMAL)
+								getData(data, asyncReadCallback);
+							else
+								asyncReadCallback.processVariableReadCompleted(data, putStatus);
+				            asyncReadCallback = null;
+				            data = null;
+				            targetData = null;
+							break;
+						}
+						else
+						{
+				            asyncCompletionCallback.processVariableWriteCompleted(putStatus);
+				            asyncCompletionCallback = null;
+				            data = null;
+				            targetData = null;
+							break;
+						}
+					}
+				}
         	}
 
         	// process failed, unlock...
@@ -579,16 +694,15 @@ public class ServerFactory {
 	    private static PVProperty pvProperty = PVPropertyFactory.getPVProperty();
 	    
 	    /* (non-Javadoc)
-		 * @see org.epics.ca.server.ProcessVariable#read(org.epics.ca.server.ProcessVariableReadCallback, org.epics.ca.PropertyListType, java.lang.String[])
+		 * @see org.epics.ca.server.ProcessVariable#read(boolean, org.epics.ca.server.ProcessVariableReadCallback, org.epics.ca.PropertyListType, java.lang.String[])
 		 */
 		@Override
-		public void read(ProcessVariableReadCallback asyncReadCallback,
+		public void read(boolean process, ProcessVariableReadCallback asyncReadCallback,
 						 PropertyListType propertyListType, String[] propertyList) throws CAException {
 			
 			final PVField data = prepareData(propertyListType, propertyList);
 			
-			// TODO process flag!!!
-			final CAStatus status = channelDataAccess.processGet(false, data, asyncReadCallback);
+			final CAStatus status = channelDataAccess.processGet(process, data, asyncReadCallback);
 			if (status != null)
 				asyncReadCallback.processVariableReadCompleted(data, status);
 		}
@@ -639,10 +753,10 @@ public class ServerFactory {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.epics.ca.server.ProcessVariable#write(org.epics.pvData.pv.PVField, int, org.epics.ca.server.ProcessVariableWriteCallback)
+		 * @see org.epics.ca.server.ProcessVariable#write(boolean, org.epics.pvData.pv.PVField, int, org.epics.ca.server.ProcessVariableWriteCallback)
 		 */
 		@Override
-		public CAStatus write(PVField value, int offset, ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
+		public CAStatus write(boolean process, PVField value, int offset, ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
 			
 			PVField targetField = channelField.getPVField();
 			final String valueFieldName = value.getField().getFieldName(); 
@@ -657,36 +771,16 @@ public class ServerFactory {
 					return CAStatus.BADTYPE;
 			}
 			
-			// TODO is this always necessary?!!!
-			final boolean groupPut = (value.getField().getType() == Type.structure);
-			
-            // TODO temp (no processing is done)
-            final PVRecord record = channel.getPVRecord();
-            record.lock();
-            try
-            {
-                if (groupPut) record.beginGroupPut();
-                try
-                {
-	                // no convert...
-	    			PVDataUtils.copyValue(value, targetField, 0, offset, -1);
-                } finally {
-        			if (groupPut) record.endGroupPut();
-                }
-
-            } finally {
-            	record.unlock();
-            }
-            
-            return CAStatus.NORMAL;
+            return channelDataAccess.processPut(process, targetField, value, offset, asyncWriteCallback);
 		}
 		
 		
 		/* (non-Javadoc)
-		 * @see org.epics.ca.server.ProcessVariable#writeRead(org.epics.pvData.pv.PVField, int, org.epics.ca.server.ProcessVariableReadCallback, org.epics.ca.PropertyListType, java.lang.String[])
+		 * @see org.epics.ca.server.ProcessVariable#writeRead(boolean, org.epics.pvData.pv.PVField, int, org.epics.ca.server.ProcessVariableReadCallback, org.epics.ca.PropertyListType, java.lang.String[])
 		 */
 		@Override
-		public void writeRead(PVField value, int offset, ProcessVariableReadCallback asyncReadCallback, PropertyListType propertyListType, String[] propertyList) throws CAException {
+		public void writeRead(boolean process, PVField value, int offset, ProcessVariableReadCallback asyncReadCallback, PropertyListType propertyListType, String[] propertyList) throws CAException {
+
 			PVField targetField = channelField.getPVField();
 			final String valueFieldName = value.getField().getFieldName(); 
 			if (valueFieldName != null &&
@@ -703,39 +797,9 @@ public class ServerFactory {
 			
 			final PVField getData = prepareData(propertyListType, propertyList);
 
-			// TODO is this always necessary?!!!
-			final boolean groupPut = (value.getField().getType() == Type.structure);
-			
-            final PVRecord record = channel.getPVRecord();
-            record.lock();
-            try
-            {
-            	//
-            	// put
-                //
-            	if (groupPut) record.beginGroupPut();
-                try
-                {
-	                // no convert...
-	    			PVDataUtils.copyValue(value, targetField, 0, offset, -1);
-                } finally {
-        			if (groupPut) record.endGroupPut();
-                }
-                
-                // TODO process here... if requested
-                
-                //
-                // get
-                //
-            	// this method never blocks...
-            	asyncReadCallback.processVariableReadCompleted(getData, CAStatus.NORMAL);
-
-            } finally {
-            	record.unlock();
-            }
-            
-            // error...
-			asyncReadCallback.processVariableReadCompleted(null, CAStatus.DEFUNCT);
+			final CAStatus status = channelDataAccess.processPutGet(process, targetField, value, offset, getData, asyncReadCallback);
+			if (status != null)
+				asyncReadCallback.processVariableReadCompleted(getData, status);
 		}
 
 		/* (non-Javadoc)
