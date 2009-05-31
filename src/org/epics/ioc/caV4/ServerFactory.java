@@ -16,6 +16,9 @@ package org.epics.ioc.caV4;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ca.CAException;
 import org.epics.ca.CAStatus;
@@ -39,6 +42,12 @@ import org.epics.ioc.ca.ChannelAccess;
 import org.epics.ioc.ca.ChannelAccessFactory;
 import org.epics.ioc.ca.ChannelField;
 import org.epics.ioc.ca.ChannelListener;
+import org.epics.ioc.install.IOCDatabase;
+import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.support.ProcessSelf;
+import org.epics.ioc.support.ProcessSelfRequester;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
@@ -55,6 +64,7 @@ import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVListener;
 import org.epics.pvData.pv.PVRecord;
@@ -106,7 +116,7 @@ public class ServerFactory {
 			
 			final String name = ((PVString)searchData).get();
 			
-			// TODO values (tags) are nor supported
+			// simple name wildchar test (no tags)
 			ArrayList<String> result = new ArrayList<String>();
 			String[] recordNames = PVDatabaseFactory.getMaster().getRecordNames();
 			for (String recordName : recordNames)
@@ -214,6 +224,289 @@ public class ServerFactory {
             return exists ? ProcessVariableExistanceCompletion.EXISTS_HERE : ProcessVariableExistanceCompletion.DOES_NOT_EXIST_HERE;
         }
     }
+
+
+
+    private static class ChannelDataAccess implements ProcessSelfRequester
+    {
+        private enum Action { PROCESS, PROCESS_GET, PUT_PROCESS, PUT_PROCESS_GET };
+
+        private final PVRecord pvRecord;
+        private volatile boolean destroyed = false;
+
+        private RecordProcess recordProcess = null;
+        private boolean isRecordProcessRequester = false;
+        private ProcessSelf processSelf = null;
+        private boolean canProcess = true;
+
+        private volatile RequestResult requestResult = RequestResult.success;
+        
+        private final Lock processLock = new ReentrantLock(true);
+        
+             
+        public ChannelDataAccess(PVRecord pvRecord)
+        {
+        	this.pvRecord = pvRecord;
+        	initProcess();
+        }
+        
+        private void initProcess()
+        {
+            IOCDatabase supportDatabase;
+            PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+            if (pvDatabase.findRecord(pvRecord.getRecordName()) != null) {
+                supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
+            } else {
+                pvDatabase = PVDatabaseFactory.getBeingInstalled();
+                supportDatabase = IOCDatabaseFactory.get(pvDatabase);
+            }
+            
+            if (supportDatabase != null)
+                recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+           
+            if (recordProcess == null) {
+            	// TODO log
+            	System.err.println("record " + pvRecord.getFullName() + " does not have a recordProcess");
+                canProcess = false;
+            } 
+            else
+            {
+                isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
+                if (!isRecordProcessRequester)
+                {
+                    processSelf = recordProcess.canProcessSelf();
+                	// TODO log
+                    if (processSelf==null) {
+                    	System.err.println(pvRecord.getFullName() + " already has process requester other than self");
+                        canProcess = false;
+                    }
+                }
+            }
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelProcess#destroy()
+         */
+        public void destroy()
+        {
+            destroyed = true;
+            
+            if (isRecordProcessRequester)
+            	recordProcess.releaseRecordProcessRequester(this);
+        }
+        
+        private Action action; 
+
+        // lock must be already held
+        private final void internalProcess(Action action)
+        {
+        	this.action = Action.PROCESS;
+
+        	if (isRecordProcessRequester)
+            	becomeProcessor(recordProcess);
+            else
+            	processSelf.request(this);
+        }
+        
+        private ProcessVariableWriteCallback asyncCompletionCallback;
+
+        public CAStatus process(ProcessVariableWriteCallback asyncCompletionCallback)
+        {
+        	if (destroyed)
+        		return CAStatus.CHANDESTROY;
+        	else if (!canProcess)
+        		return CAStatus.PROCESSFAIL;
+        	
+        	try {
+				if (!processLock.tryLock(5, TimeUnit.SECONDS))
+					return CAStatus.TIMEOUT;
+			} catch (InterruptedException e) {
+				return CAStatus.DEFUNCT;	// TODO different status
+			}
+        	
+        	this.asyncCompletionCallback = asyncCompletionCallback;
+        	
+        	internalProcess(Action.PROCESS);
+        	return null;	// async
+        }   
+
+        private PVField data;
+        private ProcessVariableReadCallback asyncReadCallback;
+        
+        public CAStatus processGet(boolean process, PVField data, ProcessVariableReadCallback asyncReadCallback)
+        {
+        	if (destroyed)
+        		return CAStatus.CHANDESTROY;
+        	
+        	if (process && canProcess)
+        	{
+            	try {
+					if (!processLock.tryLock(5, TimeUnit.SECONDS))
+						return CAStatus.TIMEOUT;
+				} catch (InterruptedException e) {
+					return CAStatus.DEFUNCT;	// TODO different status
+				}
+            	
+            	this.data = data;
+            	this.asyncReadCallback = asyncReadCallback;
+
+            	internalProcess(Action.PROCESS_GET);
+            	return null;	// async
+        	}
+        	else
+        	{
+        		getData(data, asyncReadCallback);
+            	return null;	// async
+        	}
+        }
+        
+        private void getData(PVField data, ProcessVariableReadCallback asyncReadCallback)
+        {
+            pvRecord.lock();
+            try
+            {
+            	// this method never blocks...
+            	asyncReadCallback.processVariableReadCompleted(data, CAStatus.NORMAL);
+            } finally {
+            	pvRecord.unlock();
+            }
+        }
+
+        /*
+        public boolean processPut()
+        {
+        	if (process && canProcess)
+        		return internalProcess(Action.PUT_PROCESS);
+        	else
+        		putData();
+        }
+
+        public boolean processPutGet()
+        {
+        	if (process && canProcess)
+        		return internalProcess(Action.PUT_PROCESS_GET); // async
+        	else
+        		startPutGetData();
+        }
+         */
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
+         */
+        public void recordProcessResult(RequestResult requestResult)
+        {
+            this.requestResult = requestResult;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
+         */
+        public void recordProcessComplete()
+        {
+        	switch (action)
+        	{
+				case PROCESS: 
+				{
+		            if (processSelf != null) processSelf.endRequest(this);
+		            final CAStatus status = (requestResult == RequestResult.success) ? CAStatus.NORMAL : CAStatus.PROCESSFAIL;
+		            asyncCompletionCallback.processVariableWriteCompleted(status);
+		            asyncCompletionCallback = null;
+					break;
+				}
+				
+				case PROCESS_GET:
+				{
+		            getData(data, asyncReadCallback);
+		            asyncReadCallback = null;
+		            data = null;
+
+		            recordProcess.setInactive(this);
+		            if (processSelf != null) processSelf.endRequest(this);
+					break;
+				}
+					/*
+				case PUT_PROCESS:
+		            if (processSelf != null) processSelf.endRequest(this);
+		            channelPutRequester.putDone(requestResult);
+					break;
+				case PUT_PROCESS_GET:
+	                startGetData();                
+	                if (canProcess) recordProcess.setInactive(this);
+		            if (processSelf != null) processSelf.endRequest(this);
+	                channelPutGetRequester.getDone(requestResult);
+					break;
+					*/
+			}
+            
+            processLock.unlock();
+        }
+        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
+         */
+        public void becomeProcessor(RecordProcess recordProcess)
+        {
+        	switch (action)
+        	{
+				case PROCESS:
+				{
+		        	if (recordProcess.process(this, false, null))
+		            	return;
+	
+		        	asyncCompletionCallback.processVariableWriteCompleted(CAStatus.PROCESSFAIL);
+		            asyncCompletionCallback = null;
+					break;
+				}
+				
+				case PROCESS_GET:
+				{
+		            if (recordProcess.process(this, true, null))
+		            	return;
+		            
+		            // TODO proces failed, how do indicate this?!!!
+		            
+		            getData(data, asyncReadCallback);
+		            asyncReadCallback = null;
+		            data = null;
+
+		            if (processSelf != null) processSelf.endRequest(this);
+					break;
+				}
+				/*	
+				case PUT_PROCESS:
+		            canProcess = recordProcess.setActive(this);
+		            if(!canProcess) {
+		                requestResult = RequestResult.failure;
+		                message("setActive failed",MessageType.error);
+		            }
+		            startPutData();
+					break;
+				case PUT_PROCESS_GET:
+	                canProcess = recordProcess.setActive(this);
+	                if(!canProcess) {
+	                    requestResult = RequestResult.failure;
+	                    message("setActive failed",MessageType.error);
+	                }
+	                startPutData();
+					break;
+				*/
+        	}
+
+        	// process failed, unlock...
+        	processLock.unlock();
+        }
+
+		public String getRequesterName() {
+			return pvRecord.getFullName() + " processor";
+		}
+
+		public void message(String message, MessageType messageType) {
+			// TODO log
+			System.err.println(messageType + ": " + message);
+		}
+    
+    }
+    
     
     /**
      * Channel process variable implementation. 
@@ -226,6 +519,7 @@ public class ServerFactory {
 
         private final Channel channel;
         private ChannelField channelField;
+        private ChannelDataAccess channelDataAccess;
         
         /**
          * Channel PV constructor.
@@ -257,6 +551,8 @@ public class ServerFactory {
         	channelField = channel.createChannelField(fieldName); 
         	if (channelField == null)
 	        	 throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + fieldName);
+        	
+        	channelDataAccess = new ChannelDataAccess(channel.getPVRecord());
         }
         
         /* (non-Javadoc)
@@ -274,6 +570,7 @@ public class ServerFactory {
         @Override
         public void destroy() {
             super.destroy();
+            channelDataAccess.destroy();
             channel.destroy();
         }
 
@@ -290,16 +587,10 @@ public class ServerFactory {
 			
 			final PVField data = prepareData(propertyListType, propertyList);
 			
-            // TODO temp (no processing is done)
-            final PVRecord record = channel.getPVRecord();
-            record.lock();
-            try
-            {
-            	// this method never blocks...
-            	asyncReadCallback.processVariableReadCompleted(data, CAStatus.NORMAL);
-            } finally {
-            	record.unlock();
-            }
+			// TODO process flag!!!
+			final CAStatus status = channelDataAccess.processGet(false, data, asyncReadCallback);
+			if (status != null)
+				asyncReadCallback.processVariableReadCompleted(data, status);
 		}
 
 		/**
@@ -452,8 +743,7 @@ public class ServerFactory {
 		 */
 		@Override
 		public CAStatus process(ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
-			// TODO 
-			return CAStatus.NOSUPPORT;
+			return channelDataAccess.process(asyncWriteCallback);
 		}
 
 
