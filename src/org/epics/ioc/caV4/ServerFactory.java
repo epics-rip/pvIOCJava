@@ -300,7 +300,7 @@ public class ServerFactory {
         // lock must be already held
         private final void internalProcess(Action action)
         {
-        	this.action = Action.PROCESS;
+        	this.action = action;
 
         	if (isRecordProcessRequester)
             	becomeProcessor(recordProcess);
@@ -392,7 +392,7 @@ public class ServerFactory {
 					return CAStatus.DEFUNCT;	// TODO different status
 				}
             	
-            	this.data = data;
+            	this.putData = data;
             	this.asyncCompletionCallback = asyncWriteCallback;
             	this.targetData = targetField;
             	this.offset = offset;
@@ -513,7 +513,7 @@ public class ServerFactory {
 		            
 		            asyncCompletionCallback.processVariableWriteCompleted(putStatus);
 		            asyncCompletionCallback = null;
-		            data = null;
+		            putData = null;
 		            targetData = null;
 		            
 					break;
