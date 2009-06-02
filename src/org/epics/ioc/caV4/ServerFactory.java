@@ -461,7 +461,7 @@ public class ServerFactory {
         	}
         	else
         	{
-        		CAStatus status = putData(targetField, data, offset);
+        		CAStatus status = putData(targetField, value, offset);
         		if (status != CAStatus.NORMAL)
         			return status;
         		getData(getData, asyncReadCallback);
