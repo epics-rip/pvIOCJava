@@ -226,7 +226,7 @@ public class ServerFactory {
     }
 
 
-
+    // TODO thread safe variables (data, putData, etc..)
     private static class ChannelDataAccess implements ProcessSelfRequester
     {
         private enum Action { PROCESS, PROCESS_GET, PUT_PROCESS, PUT_PROCESS_GET };
@@ -242,8 +242,21 @@ public class ServerFactory {
         private volatile RequestResult requestResult = RequestResult.success;
         
         private final Lock processLock = new ReentrantLock(true);
+
+        // not very nice (volatile-s), but does the trick
+        private volatile Action action; 
+        private volatile ProcessVariableWriteCallback asyncCompletionCallback;
+        private volatile PVField data;
+        private volatile ProcessVariableReadCallback asyncReadCallback;
+        // TODO configurable
+        private static final int LOCK_TIMEOUT_SEC = 10;
+
+        private volatile PVField targetData;
+        private volatile int offset;
+        private volatile CAStatus putStatus;
+        private volatile PVField putData;
+
         
-             
         public ChannelDataAccess(PVRecord pvRecord)
         {
         	this.pvRecord = pvRecord;
@@ -295,8 +308,6 @@ public class ServerFactory {
             	recordProcess.releaseRecordProcessRequester(this);
         }
         
-        private Action action; 
-
         // lock must be already held
         private final void internalProcess(Action action)
         {
@@ -308,8 +319,6 @@ public class ServerFactory {
             	processSelf.request(this);
         }
         
-        private ProcessVariableWriteCallback asyncCompletionCallback;
-
         public CAStatus process(ProcessVariableWriteCallback asyncCompletionCallback)
         {
         	if (destroyed)
@@ -330,11 +339,6 @@ public class ServerFactory {
         	return null;	// async
         }   
 
-        private PVField data;
-        private ProcessVariableReadCallback asyncReadCallback;
-        // TODO configurable
-        private static final int LOCK_TIMEOUT_SEC = 10;
-        
         public CAStatus processGet(boolean process, PVField data, ProcessVariableReadCallback asyncReadCallback)
         {
         	if (destroyed)
@@ -373,10 +377,6 @@ public class ServerFactory {
             	pvRecord.unlock();
             }
         }
-
-        private PVField targetData;
-        private int offset;
-        private CAStatus putStatus;
         
         public CAStatus processPut(boolean process, PVField targetField, PVField data, int offset, ProcessVariableWriteCallback asyncWriteCallback)
         {
@@ -434,8 +434,6 @@ public class ServerFactory {
             }
         }
 
-        private PVField putData;
-        
         public CAStatus processPutGet(boolean process, PVField targetField, PVField value, int offset, PVField getData, ProcessVariableReadCallback asyncReadCallback)
         {
         	if (destroyed)
@@ -505,6 +503,7 @@ public class ServerFactory {
 					break;
 				}
 				case PUT_PROCESS:
+		            recordProcess.setInactive(this);
 		            if (processSelf != null) processSelf.endRequest(this);
 
 		            // if put was OK and process failed, report it
@@ -571,7 +570,7 @@ public class ServerFactory {
 					{
 						if (putStatus == CAStatus.NORMAL)
 						{	
-							if (recordProcess.process(this, false, null))
+							if (recordProcess.process(this, true, null))
 								return;
 	                            
 							// failed to process, simulate failure
