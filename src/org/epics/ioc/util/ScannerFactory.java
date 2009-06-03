@@ -61,11 +61,11 @@ public class ScannerFactory {
         private String name;
         private RecordProcess recordProcess;
         private PVRecord pvRecord;
-        private boolean isActive = false;
+        private volatile boolean isActive = false;
         private int numberConsecutiveActive = 0;
         private PVInt pvMaxConsecutiveActive = null;
         private int maxConsecutiveActive = 1;
-        private boolean release = false;
+        private volatile boolean release = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForNotActive = lock.newCondition();
 
@@ -157,8 +157,8 @@ public class ScannerFactory {
         
         private TimeStamp timeStamp = TimeStampFactory.create(0, 0);
         
-        private boolean isActive = false;
-        private boolean listModify = false;
+        private volatile boolean isActive = false;
+        private volatile boolean listModify = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForNotActive = lock.newCondition();
         private Condition waitForModify = lock.newCondition();
@@ -615,8 +615,8 @@ public class ScannerFactory {
         
         private ProcessEvent[] processEvents = new ProcessEvent[0];
         
-        private boolean isActive = false;
-        private boolean listModify = false;
+        private volatile boolean isActive = false;
+        private volatile boolean listModify = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForWork = lock.newCondition();
         private Condition waitForModify = lock.newCondition();
