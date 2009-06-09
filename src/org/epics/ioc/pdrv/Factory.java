@@ -1053,19 +1053,14 @@ public class Factory {
          */
         @Override
         public void callback() {
-            if(portThread!=null) {
-                if(portImplUser.isQueued) {
-                    portThread.queueRequest(portImplUser,QueuePriority.medium);
+            // It is our timer so even if port is asynchronous just wait.
+            Status status = lockPort(portImplUser);
+            if(status==Status.success) {
+                portDriver.connect(portImplUser);
+                if(connected) {
+                    timerNode.cancel();
                 }
-            } else {
-                Status status = lockPort(portImplUser);
-                if(status==Status.success) {
-                    portDriver.connect(portImplUser);
-                    if(connected) {
-                        timerNode.cancel();
-                    }
-                    unlockPort(portImplUser);
-                }
+                unlockPort(portImplUser);
             }
         }
         /* (non-Javadoc)
@@ -1493,15 +1488,9 @@ public class Factory {
          */
         @Override
         public void callback() {
-            if(port.portThread!=null) {
-                if(deviceImplUser.isQueued) {
-                    port.portThread.queueRequest(deviceImplUser,QueuePriority.medium);
-                }
-            } else {
-                deviceDriver.connect(deviceImplUser);
-                if(connected) {
-                    timerNode.cancel();
-                }
+            deviceDriver.connect(deviceImplUser);
+            if(connected) {
+                timerNode.cancel();
             }
         }
         /* (non-Javadoc)
