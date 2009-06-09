@@ -7,14 +7,14 @@ package org.epics.ioc.support.ca;
 
 import java.util.regex.Pattern;
 
-import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.SupportState;
+import org.epics.ioc.support.alarm.AlarmSupport;
+import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.property.Alarm;
-import org.epics.pvData.property.AlarmFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -109,23 +109,18 @@ abstract class AbstractIOLink extends AbstractLink  {
             stringArrayData = new StringArrayData();
         }
         recordProcess = recordSupport.getRecordProcess();
-        if(pvStructure.getSubField("propertyNames")!=null) {
-            propertyNamesPV = pvStructure.getStringField("propertyNames");
-            if(propertyNamesPV==null) {
-                super.uninitialize();
-                return;
-            }
+        if(pvStructure.getSubField("propertyNames")==null) {
+            return; // if no properties then done
         }
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#start()
-     */
-    public void start(AfterStart afterStart) {
-        if(propertyNamesPV!=null) {
-            String value = propertyNamesPV.get();
-            if(value!=null) {
-                propertyNames = whiteSpacePattern.split(value);
-            }
+        propertyNamesPV = pvStructure.getStringField("propertyNames");
+        if(propertyNamesPV==null) {
+            super.uninitialize();
+            return;
+        }
+        
+        String value = propertyNamesPV.get();
+        if(value!=null) {
+            propertyNames = whiteSpacePattern.split(value);
         }
         if(propertyNames==null) propertyNames = new String[0];
         while(true) {
@@ -142,7 +137,13 @@ abstract class AbstractIOLink extends AbstractLink  {
                         pvStructure.message("does not have field alarm", MessageType.warning);
                         continue;
                     }
-                    Alarm alarm = AlarmFactory.getAlarm(pvField);
+                    AlarmSupport alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+                    if(alarmSupport==null || alarmSupport.getPVField()!=pvField) {
+                        super.message("illegal alarm field", MessageType.error);
+                        super.uninitialize();
+                        return;
+                    }
+                    Alarm alarm = alarmSupport.getAlarm();
                     if(alarm==null) {
                         pvStructure.message("alarm is not valid structure", MessageType.warning);
                         continue;
@@ -186,13 +187,11 @@ abstract class AbstractIOLink extends AbstractLink  {
             }
             break;
         }
-        super.start(afterStart);
-        if(!super.checkSupportState(SupportState.ready,null)) return;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#stop()
+     * @see org.epics.ioc.support.AbstractSupport#uninitialize()
      */
-    public void stop() {
+    public void uninitialize() {
         alarmIsProperty = false;
         alarmMessagePV = null;
         alarmSeverityIndexPV = null;
@@ -222,7 +221,6 @@ abstract class AbstractIOLink extends AbstractLink  {
                         int len = fromPVArray.getLength();
                         fromPVArray.get(0, len, stringArrayData);
                         valueChoicesPV.put(0, len, stringArrayData.data, 0);
-                        valueChoicesPV.postPut();
                     }
                 }
                 if(gotAdditionalPropertys) {
