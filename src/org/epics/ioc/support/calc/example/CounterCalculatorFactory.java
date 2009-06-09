@@ -63,7 +63,6 @@ public class CounterCalculatorFactory {
             inc = incPV.get();
             compute();
             valuePV.put(value);
-            valuePV.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
 
