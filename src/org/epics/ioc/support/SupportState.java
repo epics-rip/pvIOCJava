@@ -81,7 +81,7 @@ public enum SupportState {
                 return null;
             }
         }
-        pvChoices.setMutable(false);
+        pvChoices.setImmutable();
         return enumerated;
     }
 }
