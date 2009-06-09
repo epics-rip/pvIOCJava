@@ -70,6 +70,10 @@ abstract class AbstractLink extends AbstractSupport {
      * The record process for linkPVRecord.
      */
     protected RecordProcess linkRecordProcess = null;
+    /**
+     * The locateSupport for the linjkPVRecord.
+     */
+    protected LocateSupport linkRecordLocateSupport = null;
     
     /**
      * Constructor.
@@ -128,7 +132,8 @@ abstract class AbstractLink extends AbstractSupport {
             super.message("pvname not found", MessageType.error);
             return;
         }
-        linkRecordProcess = supportDatabase.getLocateSupport(linkPVRecord).getRecordProcess();
+        linkRecordLocateSupport = supportDatabase.getLocateSupport(linkPVRecord);
+        linkRecordProcess = linkRecordLocateSupport.getRecordProcess();
         super.start(afterStart);
     }
 }
