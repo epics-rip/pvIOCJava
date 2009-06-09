@@ -6,6 +6,7 @@
 package org.epics.ioc.support.alarm;
 
 import org.epics.ioc.support.Support;
+import org.epics.pvData.property.Alarm;
 import org.epics.pvData.property.AlarmSeverity;
 
 
@@ -35,4 +36,9 @@ public interface AlarmSupport extends Support{
      * @return (false,true) if the request (was not, was) successful.
      */
     boolean setAlarm(String message, AlarmSeverity severity);
+    /**
+     * Get the Alarm interface, which is defined in org.epics.pvData.property.
+     * @return The interface.
+     */
+    Alarm getAlarm();
 }
