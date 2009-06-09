@@ -105,7 +105,6 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
             if(choices!=null) {
                 PVStringArray pvStringArray = enumerated.getChoices();
                 pvStringArray.put(0, choices.length, choices, 0);
-                pvStringArray.postPut();
             }
         }
         if(valueScalarType!=null) {
@@ -162,16 +161,14 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
         }
         if(valuePVBoolean!=null) {
             valuePVBoolean.put((value==0) ? false : true);
-            valuePVBoolean.postPut();
         } else if(pvIndex!=null)  {
             pvIndex.put(value);
-            pvIndex.postPut();
         } else {
             pvStructure.message(" logic error", MessageType.fatalError);
         }
         if((deviceTrace.getMask()&Trace.FLOW)!=0) {
             deviceTrace.print(Trace.FLOW,
-                "pv %s support %s putData and  calling postPut",fullName,supportName);
+                "pv %s support %s putData",fullName,supportName);
         }
     }
 }
