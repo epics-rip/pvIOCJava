@@ -216,8 +216,8 @@ public class Int32ArrayDriverFactory {
                         trace.print(Trace.ERROR,device.getFullName() + " startWrite but not connected");
                         return Status.error;
                     }
-                    if(!super.getPVIntArray().isMutable()) {
-                        trace.print(Trace.ERROR,device.getFullName() + " put but notMutable");
+                    if(super.getPVIntArray().isImmutable()) {
+                        trace.print(Trace.ERROR,device.getFullName() + " put is immutable");
                         user.setMessage("not mutable");
                         return Status.error;
                     }
@@ -281,7 +281,7 @@ public class Int32ArrayDriverFactory {
                  * @see org.epics.pvData.factory.BasePVIntArray#put(int, int, int[], int)
                  */
                 public int put(int offset, int len, int[] from, int fromOffset) {
-                    if(!super.isMutable()) {
+                    if(super.isImmutable()) {
                         return 0;
                     }
                     if(!device.isConnected()) {

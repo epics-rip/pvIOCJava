@@ -214,8 +214,8 @@ public class Float64ArrayDriverFactory {
                         trace.print(Trace.ERROR,device.getFullName() + " startWrite but not connected");
                         return Status.error;
                     }
-                    if(!super.getPVDoubleArray().isMutable()) {
-                        trace.print(Trace.ERROR,device.getFullName() + " put but notMutable");
+                    if(super.getPVDoubleArray().isImmutable()) {
+                        trace.print(Trace.ERROR,device.getFullName() + " put but is immutable");
                         user.setMessage("not mutable");
                         return Status.error;
                     }
@@ -283,8 +283,8 @@ public class Float64ArrayDriverFactory {
                         trace.print(Trace.ERROR,device.getFullName() + " put but not connected");
                         return 0;
                     }
-                    if(!super.isMutable()) {
-                        trace.print(Trace.ERROR,device.getFullName() + " put but notMutable");
+                    if(super.isImmutable()) {
+                        trace.print(Trace.ERROR,device.getFullName() + " put but is immutable");
                         return 0;
                     }
                     if(delay>0.0) {
