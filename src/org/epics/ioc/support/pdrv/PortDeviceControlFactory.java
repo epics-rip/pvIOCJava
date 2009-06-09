@@ -176,32 +176,25 @@ public class PortDeviceControlFactory {
         public void processContinue() {
             if(message!=emptyMessage) {
                 pvMessage.put(message);
-                pvMessage.postPut();
                 message = emptyMessage;
             }
             if(connect!=pvConnect.get()) {
                 pvConnect.put(connect);
-                pvConnect.postPut();
             }
             if(enable!=pvEnable.get()) {
                 pvEnable.put(enable);
-                pvEnable.postPut();
             }
             if(autoConnect!=pvAutoConnect.get()) {
                 pvAutoConnect.put(autoConnect);
-                pvAutoConnect.postPut();
             }
             if(traceMask!=pvTraceMask.get()) {
                 pvTraceMask.put(traceMask);
-                pvTraceMask.postPut();
             }
             if(traceIOMask!=pvTraceIOMask.get()) {
                 pvTraceIOMask.put(traceIOMask);
-                pvTraceIOMask.postPut();
             }
             if(traceIOTruncateSize!=pvTraceIOTruncateSize.get()) {
                 pvTraceIOTruncateSize.put(traceIOTruncateSize);
-                pvTraceIOTruncateSize.postPut();
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }

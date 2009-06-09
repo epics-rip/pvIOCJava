@@ -123,7 +123,6 @@ public class PowerSupplyFactory {
                 current = power/voltage;
             }
             currentPVField.put(current);
-            currentPVField.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
     }

@@ -106,7 +106,6 @@ public class BaseUInt32DigitalInput extends AbstractPortDriverSupport
             if(choices!=null) {
                 PVStringArray pvStringArray = enumerated.getChoices();
                 pvStringArray.put(0, choices.length, choices, 0);
-                pvStringArray.postPut();
             }
         }
         if(valueScalarType!=null) {
@@ -144,11 +143,9 @@ public class BaseUInt32DigitalInput extends AbstractPortDriverSupport
             boolean newValue = ((value==0) ? false : true);
             if(oldValue!=newValue) {
                 valuePVBoolean.put(newValue);
-                valuePVBoolean.postPut();
             }
         } else if(pvIndex!=null)  {
             pvIndex.put(value);
-            pvIndex.postPut();
         } else {
             pvStructure.message(" logic error", MessageType.fatalError);
         }
