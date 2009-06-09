@@ -1172,7 +1172,7 @@ public abstract class ExpressionCalculatorFactory  {
                     Boolean scalar = Boolean.valueOf(token.value);
                     PVBoolean pv = (PVBoolean)pvDataCreate.createPVScalar(pvStructure,"result", ScalarType.pvBoolean);
                     pv.put(scalar);
-                    pv.setMutable(false);
+                    pv.setImmutable();
                     exp.pvResult = pv;
                     expStack.push(exp);
                     return true;
@@ -1205,7 +1205,7 @@ public abstract class ExpressionCalculatorFactory  {
                         PVInt pv = (PVInt)pvScalar;
                         pv.put((int)(long)scalar);
                     }
-                    pvScalar.setMutable(false);
+                    pvScalar.setImmutable();
                     exp.pvResult = pvScalar;
                     expStack.push(exp);
                     return true;
@@ -1226,7 +1226,7 @@ public abstract class ExpressionCalculatorFactory  {
                         PVDouble pv = (PVDouble)pvScalar;
                         pv.put(scalar);
                     }
-                    pvScalar.setMutable(false);
+                    pvScalar.setImmutable();
                     exp.pvResult = pvScalar;
                     expStack.push(exp);
                     return true;
@@ -1235,7 +1235,7 @@ public abstract class ExpressionCalculatorFactory  {
                     String scalar = token.value;
                     PVString pv = (PVString)pvDataCreate.createPVScalar(pvStructure,"result", ScalarType.pvString);
                     pv.put(scalar);
-                    pv.setMutable(false);
+                    pv.setImmutable();
                     exp.pvResult = pv;
                     expStack.push(exp);
                     return true;
@@ -1245,7 +1245,7 @@ public abstract class ExpressionCalculatorFactory  {
                     PVDouble pv = (PVDouble)pvDataCreate.createPVScalar(pvStructure,"result", ScalarType.pvDouble);
                     double value = (functionName.equals("E")) ? Math.E : Math.PI;
                     pv.put(value);
-                    pv.setMutable(false);
+                    pv.setImmutable();
                     exp.pvResult = pv;
                     expStack.push(exp);
                     return true;
@@ -1472,7 +1472,7 @@ public abstract class ExpressionCalculatorFactory  {
                     numArgs = expressionArguments.length;
                     for(Expression argExp: expressionArguments) {
                         pruneExpStack(argExp);
-                        if(argExp.pvResult.isMutable()) continue;
+                        if(!argExp.pvResult.isImmutable()) continue;
                         if(!(argExp instanceof MathFunctionExpression)) {
                             numConstantArgs++;
                             continue;
@@ -1489,7 +1489,7 @@ public abstract class ExpressionCalculatorFactory  {
                     }
                     if(okToPrune) {
                         operator.compute();
-                        expression.pvResult.setMutable(false);
+                        expression.pvResult.setImmutable();
                         expression.operator = null;
                         expression.expressionArguments = new Expression[0];
                     }
