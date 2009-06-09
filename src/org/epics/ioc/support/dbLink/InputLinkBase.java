@@ -13,9 +13,10 @@ import org.epics.ioc.support.ProcessSelfRequester;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
+import org.epics.ioc.support.alarm.AlarmSupport;
+import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.Alarm;
-import org.epics.pvData.property.AlarmFactory;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -67,12 +68,20 @@ implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfReques
         pvInheritSeverity = pvDatabaseLink.getBooleanField("inheritSeverity");
         if(pvInheritSeverity==null) {
             super.message(
-                    "inheritSeverity no found", MessageType.error);
+                    "inheritSeverity not found", MessageType.error);
             super.stop();
         }
         PVField pvField = linkPVRecord.getSubField("alarm");
         if(pvField!=null) {
-            linkAlarm = AlarmFactory.getAlarm(pvField);
+            
+            AlarmSupport alarmSupport = AlarmSupportFactory.findAlarmSupport(
+                    pvField,linkRecordLocateSupport);
+            if(alarmSupport==null || alarmSupport.getPVField()!=pvField) {
+                super.message("illegal alarm field", MessageType.error);
+                super.uninitialize();
+                return;
+            }
+            linkAlarm = alarmSupport.getAlarm();
         }
     }
     /* (non-Javadoc)
