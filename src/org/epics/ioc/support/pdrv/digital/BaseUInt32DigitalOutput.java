@@ -105,7 +105,6 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
             if(choices!=null) {
                 PVStringArray pvStringArray = enumerated.getChoices();
                 pvStringArray.put(0, choices.length, choices, 0);
-                pvStringArray.postPut();
             }
         }
         if(valueScalarType!=null) {
