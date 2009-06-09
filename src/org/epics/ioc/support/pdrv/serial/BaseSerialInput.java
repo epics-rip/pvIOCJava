@@ -126,7 +126,6 @@ public class BaseSerialInput extends AbstractPortDriverSupport
             }
             if(pvResponse!=null) {
                 pvResponse.put(stringValue);
-                pvResponse.postPut();
             } else if(valueIsArray) {
                 convert.fromByteArray((PVArray)valuePVField, 0, nbytes, byteArray, 0);
             } else {
