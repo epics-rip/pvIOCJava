@@ -408,7 +408,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
                 PVInt pvInt = (PVInt)targetPVField;
                 int newValueIndex = pvInt.get();
                 valueIndexPV.put(newValueIndex);
-                valueIndexPV.postPut();
             } else if(channelField==valueChoicesChannelField){
                 PVStringArray pvStringArray = (PVStringArray)targetPVField;
                 if(stringArrayData==null) stringArrayData = new StringArrayData();
@@ -416,7 +415,6 @@ implements AfterStartRequester,CDMonitorRequester,ProcessSelfRequester
                 pvStringArray.get(0, len, stringArrayData);
                 String[] newValueChoices = stringArrayData.data;
                 valueChoicesPV.put(0, newValueChoices.length, newValueChoices, 0);
-                valueChoicesPV.postPut();
             } else if(gotAdditionalPropertys){
                 boolean foundIt = false;
                 for(int j=0; j<propertyChannelFields.length; j++) {
