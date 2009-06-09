@@ -9,6 +9,8 @@ import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.basic.GenericBase;
+import org.epics.pvData.property.Alarm;
+import org.epics.pvData.property.AlarmFactory;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
@@ -101,6 +103,7 @@ public class AlarmSupportFactory {
         private int currentIndex = 0;
         private String beginMessage = null;
         private String currentMessage = null;
+        private Alarm alarm = null;
         
         private AlarmSupportImpl parentAlarmSupport = null;
         
@@ -126,6 +129,7 @@ public class AlarmSupportFactory {
                 pvStructure.message("field index does not exist", MessageType.error);
                 return false;
             }
+            alarm = AlarmFactory.getAlarm(pvAlarm);
             return true;
         }
        
@@ -179,9 +183,7 @@ public class AlarmSupportFactory {
             }
             if(currentIndex!=beginIndex || messageChange) {
                 pvSeverity.put(currentIndex);
-                pvSeverity.postPut();
                 pvMessage.put(currentMessage);
-                pvMessage.postPut();
             }
         }
         
@@ -195,12 +197,8 @@ public class AlarmSupportFactory {
                     beginProcess();
                 } else { // record is not being processed
                     if(newIndex>0) { // raise alarm
-                        pvSeverity.getPVRecord().beginGroupPut();
                         pvSeverity.put(newIndex);
-                        pvSeverity.postPut();
                         pvMessage.put(message);
-                        pvMessage.postPut();
-                        pvSeverity.getPVRecord().endGroupPut();
                         return true;
                     } else { // no alarm just return false
                         return false;
@@ -217,6 +215,14 @@ public class AlarmSupportFactory {
                 return true;
             }
             return false;
+        }
+
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.alarm.AlarmSupport#getAlarm()
+         */
+        @Override
+        public Alarm getAlarm() {
+            return alarm;
         }
     }
 }
