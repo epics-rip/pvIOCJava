@@ -14,7 +14,7 @@
         <scalar name = "units">volts</scalar>
     </structure>
     <array name = "value" scalarType = "double" capacity = "5">
-        0.0 1.0 2.0 3.0 4.0
+        [0.0,1.0,2.0,3.0,4.0]
     </array>
     <structure name = "input" extends = "calculation" >
         <structure name = "calculator" extends = "null">
