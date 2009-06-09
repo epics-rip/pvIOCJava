@@ -351,13 +351,11 @@ implements CDGetRequester,ProcessContinueRequester
         }
         if(valueIndexChanged) {
             valueIndexPV.put(newValueIndex);
-            valueIndexPV.postPut();
             valueIndexChanged = false;
             newValueIndex = 0;
         }
         if(valueChoicesChanged) {
             valueChoicesPV.put(0, newValueChoices.length, newValueChoices, 0);
-            valueChoicesPV.postPut();
             valueChoicesChanged = false;
             newValueChoices = null;
         }
