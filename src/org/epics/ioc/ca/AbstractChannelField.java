@@ -59,10 +59,10 @@ public abstract class AbstractChannelField implements ChannelField{
      */
     public AccessRights getAccessRights() {
         // OK until access security is implemented
-        if (pvField.isMutable()) {
-            return AccessRights.readWrite;
-        } else {
+        if (pvField.isImmutable()) {
             return AccessRights.read;
+        } else {
+            return AccessRights.readWrite;
         }
     }
     /* (non-Javadoc)
