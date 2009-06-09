@@ -10,12 +10,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.epics.ioc.install.AfterStart;
+import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanField;
 import org.epics.ioc.util.ScanFieldFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -54,7 +56,7 @@ public class RecordProcessFactory {
         private ScanField  scanField = null;
         private ProcessSelf processSelf = null;
         private PVBoolean pvProcessAfterStart = null;
-        private AfterStartNode afterStartNode;
+        private AfterStartNode afterStartNode = null;
         private AfterStart afterStart = null;
         private Support scanSupport = null;
         
@@ -177,7 +179,7 @@ public class RecordProcessFactory {
                         if(pvProcessSelf.get()) {
                             processSelf = new ProcessSelfImpl(this);
                         }
-                        pvProcessSelf.setMutable(false);
+                        pvProcessSelf.setImmutable();
                         pvProcessAfterStart = scanField.getProcessAfterStartPV();
                     }
                 }
@@ -195,6 +197,13 @@ public class RecordProcessFactory {
                 if(trace) traceMessage(" start");
                 fieldSupport.start(afterStart);
                 if(scanSupport!=null) scanSupport.start(afterStart);
+                if(pvProcessAfterStart!=null) {
+                    if(pvProcessAfterStart.get()) {
+                        afterStartNode = AfterStartFactory.allocNode(this);
+                        this.afterStart = afterStart;
+                        afterStart.requestCallback(afterStartNode, true, ThreadPriority.high);
+                    }
+                }
             } finally {
                 pvRecord.unlock();
             }
@@ -555,24 +564,18 @@ public class RecordProcessFactory {
          */
         // following are for processAfterStart
         public void callback(AfterStartNode node) {
-            if(pvProcessAfterStart!=null) {
-                boolean process = pvProcessAfterStart.get();
-                if(process) {
-                    if(recordProcessRequester==null) {
-                        // always become process requester
-                        processSelfSetRecordProcessRequester(this);
-                        process(this,false,null);
-                        return;
-                    } else {
-                        pvRecord.message(" processAfterStart failed", MessageType.warning);
-                    }
-                }
+            if(recordProcessRequester==null) {
+                // always become process requester
+                processSelfSetRecordProcessRequester(this);
+                process(this,false,null);
+                return;
+            } else {
+                pvRecord.message(" processAfterStart failed", MessageType.warning);
+                afterStart.done(afterStartNode);
+                afterStartNode = null;
+                afterStart = null;
             }
-            afterStart.done(afterStartNode);
-            afterStartNode = null;
-            afterStart = null;
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
          */
