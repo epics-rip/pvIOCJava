@@ -1,1 +1,2 @@
 org.epics.ioc.caV3.ServerFactory
+org.epics.ioc.caV4.ServerFactory
