@@ -21,7 +21,7 @@
         </structure>
         <!-- check that queue for ProcessSelf works -->
         <structure name = "output1" extends = "dbOutputLink">
-            <scalar name = "wait" scalarType = "boolean">false</scalar>
+            <scalar name = "wait" scalarType = "boolean">true</scalar>
             <scalar name = "pvname">putFromCounter</scalar>
             <scalar name = "process">true</scalar>
         </structure>
