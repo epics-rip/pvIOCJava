@@ -57,7 +57,6 @@ public class ProcessControlFactory {
     private static class ProcessControlImpl extends AbstractSupport
     implements Runnable,ProcessContinueRequester
     {
-        
         private Executor executor = ExecutorFactory.create(ProcessControlFactory.supportName, ThreadPriority.lowest);
         private ExecutorNode executorNode = null;
         private RecordProcess recordProcess = null;
@@ -131,7 +130,6 @@ public class ProcessControlFactory {
             recordName = pvRecordName.get();
             if(recordName==null || recordName.equals("")) {
                 pvMessage.put("recordName is null");
-                pvMessage.postPut();
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
@@ -236,26 +234,21 @@ public class ProcessControlFactory {
          */
         public void processContinue() {
             pvMessage.put(message);
-            pvMessage.postPut();
             if(trace!=pvTrace.get()) {
                 pvTrace.put(trace);
-                pvTrace.postPut();
             }
             if(enable!=pvEnable.get()) {
                 pvEnable.put(enable);
-                pvEnable.postPut();
             }
             
             if(supportState!=null) {
                 int index = supportState.ordinal();
                 if(index!=supportStatePVInt.get()) {
                     supportStatePVInt.put(index);
-                    supportStatePVInt.postPut();
                 }
             }
             if(supportStateCommandPVInt.get()!=0) {
                 supportStateCommandPVInt.put(0);
-                supportStateCommandPVInt.postPut();
             }
             supportProcessRequester.supportProcessDone(requestResult);
         }
@@ -318,7 +311,7 @@ public class ProcessControlFactory {
                         return null;
                     }
                 }
-                pvChoices.setMutable(false);
+                pvChoices.setImmutable();
                 return enumerated;
             }
         }

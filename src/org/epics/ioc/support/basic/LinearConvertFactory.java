@@ -146,9 +146,7 @@ public class LinearConvertFactory {
                 intercept = (deviceHigh*engUnitsLow - deviceLow*engUnitsHigh)
                     /(deviceHigh - deviceLow);
                 pvSlope.put(slope);
-                pvSlope.postPut();
                 pvIntercept.put(intercept);
-                pvIntercept.postPut();
             }
             super.setSupportState(SupportState.ready);
         }
@@ -207,7 +205,6 @@ public class LinearConvertFactory {
             double rawValue = (double)pvRawValue.get();
             double value = rawValue*slope + intercept;
             pvValue.put(value);
-            pvValue.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         
@@ -225,7 +222,6 @@ public class LinearConvertFactory {
             double value = pvValue.get();
             double rawValue = (value -intercept)/slope;
             pvRawValue.put((int)rawValue);
-            pvRawValue.postPut();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         

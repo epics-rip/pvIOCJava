@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.pvData.factory.BasePVByte;
@@ -169,6 +169,7 @@ public class ControlLimitFactory {
                     }
                 }
                 this.value = value;
+                super.postPut();
             }
         }
         
@@ -203,6 +204,7 @@ public class ControlLimitFactory {
                     }
                 }
                 this.value = value;
+                super.postPut();
             }
         }
         private class IntValue extends BasePVInt implements PVInt {
@@ -236,6 +238,7 @@ public class ControlLimitFactory {
                     }
                 }
                 this.value = value;
+                super.postPut();
             }
         }
         private class LongValue extends BasePVLong implements PVLong {
@@ -269,6 +272,7 @@ public class ControlLimitFactory {
                     }
                 }
                 this.value = value;
+                super.postPut();
             }
         }
         private class FloatValue extends BasePVFloat implements PVFloat {
@@ -302,6 +306,7 @@ public class ControlLimitFactory {
                     }
                 }
                 this.value = value;
+                super.postPut();
             }
         }
         private class DoubleValue extends BasePVDouble implements PVDouble {
@@ -335,6 +340,7 @@ public class ControlLimitFactory {
                     }
                 }
                 this.value = value;
+                super.postPut();
             }
         }
     }

@@ -234,7 +234,6 @@ public class DigitalFactory {
                 for(int i=0; i< values.length; i++) {
                     if(values[i]==newValue) {
                         pvValueIndex.put(i);
-                        pvValueIndex.postPut();
                         break;
                     }
                 }
