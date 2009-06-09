@@ -97,16 +97,13 @@ implements Float64InterruptListener
         if(pvUnits!=null && (pvUnits.get()==null || pvUnits.get().length()==0)) {
             String units = float64.getUnits(user);
             pvUnits.put(units);
-            pvUnits.postPut();
         }
         if(pvLowLimit!=null && pvHighLimit!=null) {
             if(pvLowLimit.get()==pvHighLimit.get()) {
                 double[] limits = float64.getDisplayLimits(user);
                 if(limits!=null) {
                     pvLowLimit.put(limits[0]);
-                    pvLowLimit.postPut();
                     pvHighLimit.put(limits[1]);
-                    pvHighLimit.postPut();   
                 }
             }
         }
