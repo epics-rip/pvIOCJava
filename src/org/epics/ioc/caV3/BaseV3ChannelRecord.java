@@ -401,11 +401,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             String oldMessage = pvAlarmMessage.get();
             if(oldMessage!=message || (message!=null &&(!message.equals(oldMessage)))) {
                 pvAlarmMessage.put(message);
-                pvAlarmMessage.postPut();
             }
             if(pvAlarmIndex.get()!=index) {
                 pvAlarmIndex.put(index);
-                pvAlarmIndex.postPut();
             }
         } else {
             System.err.println(
@@ -442,7 +440,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 DBR_CTRL_Enum dbr = (DBR_CTRL_Enum)fromDBR;
                 String[] labels = dbr.getLabels();
                 pvChoices.put(0, labels.length, labels, 0);
-                pvChoices.postPut();
                 index = dbr.getEnumValue()[0];
             } else if(requestDBRType==DBRType.INT) {
                 DBR_Int dbr = (DBR_Int)fromDBR;
@@ -576,7 +573,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }
             if(index!=pvIndex.get()) {
                 pvIndex.put(index);
-                pvIndex.postPut();
             }
         } else {
             if(requestDBRType==DBRType.DOUBLE) {
@@ -910,8 +906,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             seconds += 7305*86400;
             pvSeconds.put(seconds);
             pvNanoSeconds.put((int)timeStamp.nsec());
-            pvSeconds.postPut();
-            pvNanoSeconds.postPut();
         }
         if(severity!=null && pvAlarm!=null) {
             int index = severity.getValue();
@@ -926,14 +920,12 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     PVString pvUnits = pvStructure.getStringField("units");
                     if(pvUnits!=null) {
                         pvUnits.put(units.toString());
-                        pvUnits.postPut();
                     }
                 }
                 if(precision>=0) {
                     PVInt pvResolution = pvStructure.getIntField("resolution");
                     if(pvResolution!=null) {
                         pvResolution.put(precision);
-                        pvResolution.postPut();
                     }
                 }
                 PVStructure pvLimits = pvStructure.getStructureField("limit");
@@ -942,9 +934,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     PVDouble pvHigh = pvLimits.getDoubleField("high");
                     if(pvLow!=null && pvHigh!=null) {
                         pvLow.put(displayLow);
-                        pvLow.postPut();
                         pvHigh.put(displayHigh);
-                        pvHigh.postPut();
                     }
                 }
             }
@@ -958,9 +948,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     PVDouble pvHigh = pvStructure.getDoubleField("high");
                     if(pvLow!=null && pvHigh!=null) {
                         pvLow.put(controlLow);
-                        pvLow.postPut();
                         pvHigh.put(controlHigh);
-                        pvHigh.postPut();
                     }
                 }
             }
