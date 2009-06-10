@@ -1039,7 +1039,7 @@ public class Factory {
          */
         @Override
         public void callback(Status status, User user) {
-            portDriver.connect(portImplUser);
+            if(!connected) portDriver.connect(portImplUser);
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Port.callback connect result %b", portName,connected);
             }
@@ -1053,14 +1053,19 @@ public class Factory {
          */
         @Override
         public void callback() {
-            // It is our timer so even if port is asynchronous just wait.
-            Status status = lockPort(portImplUser);
-            if(status==Status.success) {
-                portDriver.connect(portImplUser);
+            if(portThread!=null) {
+                if(!portImplUser.isQueued) {
+                    portThread.queueRequest(portImplUser,QueuePriority.medium);
+                } 
+            } else {
+                Status status = lockPort(portImplUser);
+                if(status==Status.success) {
+                    if(!connected) portDriver.connect(portImplUser);  
+                    unlockPort(portImplUser);
+                }
                 if(connected) {
                     timerNode.cancel();
                 }
-                unlockPort(portImplUser);
             }
         }
         /* (non-Javadoc)
@@ -1474,7 +1479,7 @@ public class Factory {
          */
         @Override
         public void callback(Status status, User user) {
-            deviceDriver.connect(deviceImplUser);
+            if(!connected) deviceDriver.connect(deviceImplUser);
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s Deviice.callback connect %b", fullName,connected);
             }
@@ -1488,9 +1493,15 @@ public class Factory {
          */
         @Override
         public void callback() {
-            deviceDriver.connect(deviceImplUser);
-            if(connected) {
-                timerNode.cancel();
+            if(port.portThread!=null) {
+                if(!deviceImplUser.isQueued) {
+                    port.portThread.queueRequest(deviceImplUser,QueuePriority.medium);
+                }
+            }else {
+                if(!connected) deviceDriver.connect(deviceImplUser);
+                if(connected) {
+                    timerNode.cancel();
+                }
             }
         }
         /* (non-Javadoc)
