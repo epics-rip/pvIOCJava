@@ -77,7 +77,7 @@ abstract class AbstractIOLink extends AbstractLink  {
     
     private PVString propertyNamesPV = null;
     private StringArrayData stringArrayData = null;
-    private static final Pattern whiteSpacePattern = Pattern.compile("[, ]");
+    private static final Pattern commaPattern = Pattern.compile("[,]");
     /**
      * Constructor.
      * @param supportName The support name.
@@ -120,7 +120,7 @@ abstract class AbstractIOLink extends AbstractLink  {
         
         String value = propertyNamesPV.get();
         if(value!=null) {
-            propertyNames = whiteSpacePattern.split(value);
+            propertyNames = commaPattern.split(value);
         }
         if(propertyNames==null) propertyNames = new String[0];
         while(true) {
