@@ -8,7 +8,6 @@ package org.epics.ioc.caV4;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.epics.pvData.factory.AbstractPVField;
@@ -166,13 +165,11 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
      * @see org.epics.pvData.pv.PVStructure#postPut(org.epics.pvData.pv.PVField)
      */
     public void postPut(PVField subField) {
-        Iterator<PVListener> iter;
-        iter = super.pvListenerList.iterator();
-        while(iter.hasNext()) {
-            PVListener pvListener = iter.next();
-            pvListener.dataPut(this,subField);
+        for(int index=0; index<pvListenerList.size(); index++) {
+            final PVListener pvListener = pvListenerList.get(index);
+            /*if(pvListener!=null)*/ pvListener.dataPut(this,subField);
         }
-        PVStructure pvParent = super.getParent();
+        final PVStructure pvParent = super.getParent();
         if(pvParent!=null) pvParent.postPut(subField);
     }
     
@@ -238,7 +235,12 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
 		return findSubField(fieldName,this);
 	}
 
-    private PVField findSubField(String fieldName,PVStructure pvStructure) {
+    @Override
+	public PVField getSubField(int fieldOffset) {
+		throw new UnsupportedOperationException("dynamic type");
+	}
+
+	private PVField findSubField(String fieldName,PVStructure pvStructure) {
         if(fieldName==null || fieldName.length()<1) return null;
         int index = fieldName.indexOf('.');
         String name = fieldName;
@@ -249,9 +251,7 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
                 restOfName = fieldName.substring(index+1);
             }
         }
-        // TODO
-        //PVField pvField = pvFieldsMap.get(name);
-
+  
         PVField[] pvFields = pvStructure.getPVFields();
         PVField pvField = null;
         for(PVField pvf : pvFields) {
@@ -465,7 +465,7 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
     }       
     /**
      * Called by BasePVRecord.
-     * @param prefix A prefix for the generated stting.
+     * @param prefix A prefix for the generated string.
      * @param indentLevel The indentation level.
      * @return String showing the PVStructure.
      */
