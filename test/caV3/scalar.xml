@@ -36,10 +36,6 @@
        <scalar name = "wait" scalarType = "boolean">false</scalar>
        <scalar name = "pvname">enumInIndex${num}</scalar>
     </structure>
-    <structure name = "process2" extends = "caProcessLink">
-       <scalar name = "wait" scalarType = "boolean">false</scalar>
-       <scalar name = "pvname">enumInChoice${num}</scalar>
-    </structure>
 </record>
 
 <record recordName = "enumIn${num}">
@@ -83,29 +79,6 @@
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}.value.index</scalar>
-        <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
-    </structure>
-</record>
-
-<record recordName = "enumInChoice${num}">
-    <scalar name = "value" scalarType = "string"/>
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV3</scalar>
-        <scalar name = "pvname">enum${num}.value.choice</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
-    </structure>
-</record>
-
-<record recordName = "enumMonitorChoice${num}">
-    <scalar name = "value" scalarType = "string"/>
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV3</scalar>
-        <scalar name = "pvname">enum${num}.value.choice</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>

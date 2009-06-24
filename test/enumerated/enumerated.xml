@@ -28,9 +28,6 @@
         <structure name = "process1" extends = "caProcessLink">
             <scalar name = "pvname">enumeratedInputIndex</scalar>
         </structure>
-        <structure name = "process2" extends = "caProcessLink">
-            <scalar name = "pvname">enumeratedInputChoice</scalar>
-        </structure>
     </structure>
 </record>
 
@@ -128,27 +125,6 @@
     </structure>
 </record>
 
-<record recordName = "enumeratedInputChoice">
-    <scalar name = "value" scalarType = "string"/>
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "caInputLink">
-        <scalar name = "pvname">enumerated.value.choice</scalar>
-        <scalar name = "process">false</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
-    </structure>
-</record>
-
-<record recordName = "enumeratedMonitorChoice">
-    <scalar name = "value" scalarType = "string"/>
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "pvname">enumerated.value.choice</scalar>
-        <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
-    </structure>
-</record>
 
 
 <!--
