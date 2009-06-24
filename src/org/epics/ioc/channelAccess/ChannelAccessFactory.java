@@ -5,8 +5,7 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.pvData.channelAccess.*;
-import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.channelAccess.ChannelAccess;
 
 /**
  * @author mrk

@@ -4,22 +4,42 @@
  */
 package org.epics.ioc.channelAccess;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
 import java.util.BitSet;
+import java.util.LinkedList;
 
-
-import org.epics.ioc.install.*;
-import org.epics.ioc.support.*;
+import org.epics.ioc.ca.ChannelFieldGroup;
+import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.support.ProcessSelf;
+import org.epics.ioc.support.ProcessSelfRequester;
+import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.channelAccess.AccessRights;
+import org.epics.pvData.channelAccess.Channel;
+import org.epics.pvData.channelAccess.ChannelAccess;
+import org.epics.pvData.channelAccess.ChannelGet;
+import org.epics.pvData.channelAccess.ChannelGetRequester;
+import org.epics.pvData.channelAccess.ChannelMonitor;
+import org.epics.pvData.channelAccess.ChannelMonitorRequester;
+import org.epics.pvData.channelAccess.ChannelProcess;
+import org.epics.pvData.channelAccess.ChannelProcessRequester;
+import org.epics.pvData.channelAccess.ChannelPut;
+import org.epics.pvData.channelAccess.ChannelPutGet;
+import org.epics.pvData.channelAccess.ChannelPutGetRequester;
+import org.epics.pvData.channelAccess.ChannelPutRequester;
+import org.epics.pvData.channelAccess.ChannelRequester;
+import org.epics.pvData.channelAccess.CreatePVStructureRequester;
+import org.epics.pvData.channelAccess.GetFieldRequester;
 import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.property.PVProperty;
-import org.epics.pvData.property.PVPropertyFactory;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.channelAccess.*;
-import org.epics.pvData.pvCopy.*;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDatabase;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVListener;
+import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pvCopy.PVCopy;
+import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /**
  * Factory and implementation of local channel access, i.e. channel access that
@@ -277,7 +297,7 @@ public class ChannelProviderLocalFactory  {
         @Override
         public void createChannelMonitor(
                 ChannelMonitorRequester channelMonitorRequester,
-                PVStructure pvStructure) {
+                PVStructure pvStructure, boolean shareData, byte queueSize) {
             // TODO Auto-generated method stub
             
         }
@@ -367,7 +387,7 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelProcess#process()
              */
             @Override
-            public void process() {
+            public void process(boolean lastRequest) {
                 if(isDestroyed || channelImpl.isDestroyed()) {
                     channelProcessRequester.message(
                             "channel is not connected",MessageType.info);
@@ -473,7 +493,7 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.pvData.channelAccess.ChannelGet#get()
              */
             @Override
-            public void get() {
+            public void get(boolean lastRequest) {
                 if(isDestroyed || channelImpl.isDestroyed()) {
                     channelGetRequester.message(
                         "channel is destroyed",MessageType.info);
@@ -606,7 +626,7 @@ public class ChannelProviderLocalFactory  {
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPut#put(org.epics.ioc.ca.ChannelFieldGroup)
              */
-            public void put() {
+            public void put(boolean lastRequest) {
                 if(isDestroyed || channelImpl.isDestroyed()) {
                     message("channel is destroyed",MessageType.info);
                     channelPutRequester.putDone(false);
@@ -747,7 +767,7 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelPutGet#putGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup)
              */
             @Override
-            public void putGet()
+            public void putGet(boolean lastRequest)
             {
                 if(isDestroyed || channelImpl.isDestroyed()) {
                     channelPutGetRequester.message(

@@ -50,6 +50,8 @@ import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.factory.PVReplaceFactory;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.property.AlarmSeverity;
@@ -94,7 +96,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     private PVStructure pvAlarm = null;
     private PVString pvAlarmMessage = null;
     private PVInt pvAlarmIndex = null;
-    private PVString pvAlarmChoice = null;
     private PVStringArray pvAlarmChoices = null;
     private String[] alarmChoices = null;
     private PVStructure pvTimeStamp = null;
@@ -104,9 +105,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     private PVScalar pvScalarValue = null;
     private PVArray pvArrayValue = null;
     // Following not null if nativeDBRType.isENUM(
-    private PVInt pvIndex = null;
-    private PVString pvChoice = null;
-    private PVStringArray pvChoices = null;
+    private Enumerated pvEnumerated = null;
     
     private V3ChannelRecordRequester v3ChannelRecordRequester = null;
     private RequestResult requestResult = null;
@@ -238,6 +237,8 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             PVString pvString = (PVString)pvAuxInfo.createInfo("pvReplaceFactory", ScalarType.pvString);
             pvString.put("org.epics.pvData.enumeratedFactory");
             PVReplaceFactory.replace(masterPVDatabase, pvStructure);
+            pvStructure = (PVStructure)pvRecord.getPVFields()[0];
+            pvEnumerated = EnumeratedFactory.getEnumerated(pvStructure);
         }
         for(PVField pvField : pvRecord.getPVFields()) {
             if(pvField.getField().getFieldName().equals("alarm")) {
@@ -246,7 +247,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 PVStructure pvStruct = pvAlarm.getStructureField("severity");
                 if(pvStruct!=null) {
                     pvAlarmIndex = pvStruct.getIntField("index");
-                    pvAlarmChoice = pvStruct.getStringField("choice");
                     pvAlarmChoices = (PVStringArray)pvStruct.getArrayField("choices", ScalarType.pvString);
                     PVStructure alarmSevr = masterPVDatabase.findStructure("org.epics.pvData.alarmSeverity");
                     PVStringArray pvStringArray = (PVStringArray)alarmSevr.getArrayField("choices", ScalarType.pvString);
@@ -255,7 +255,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                     alarmChoices = stringArrayData.data;
                     pvAlarmChoices.put(0, pvStringArray.getLength(), alarmChoices,0);
                 }
-                if(pvAlarmMessage==null || pvAlarmIndex==null || pvAlarmChoice==null ) {
+                if(pvAlarmMessage==null || pvAlarmIndex==null ) {
                     throw new RuntimeException("bad alarm structure");    
                 }
             }
@@ -270,10 +270,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         }
         PVField pvValue = pvRecord.getPVFields()[0];
         if(nativeDBRType.isENUM()) {
-            PVStructure pvStructure = (PVStructure)pvRecord.getPVFields()[0];
-            pvIndex = pvStructure.getIntField("index");
-            pvChoice = pvStructure.getStringField("choice");
-            pvChoices =(PVStringArray)pvStructure.getArrayField("choices", ScalarType.pvString);
             String message = null;
             try {
                 jcaChannel.get(DBRType.CTRL_ENUM,1,this);
@@ -435,11 +431,11 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         int precision = -1;
         DBRType requestDBRType = fromDBR.getType();
         if(nativeDBRType.isENUM()) {
-            int index = pvIndex.get();
+            int index = pvEnumerated.getIndex().get();
             if(requestDBRType==DBRType.CTRL_ENUM) {
                 DBR_CTRL_Enum dbr = (DBR_CTRL_Enum)fromDBR;
                 String[] labels = dbr.getLabels();
-                pvChoices.put(0, labels.length, labels, 0);
+                pvEnumerated.getChoices().put(0, labels.length, labels, 0);
                 index = dbr.getEnumValue()[0];
             } else if(requestDBRType==DBRType.INT) {
                 DBR_Int dbr = (DBR_Int)fromDBR;
@@ -478,9 +474,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }  else if(requestDBRType==DBRType.STRING) {
                 DBR_String dbr = (DBR_String)fromDBR;
                 String choice = dbr.getStringValue()[0];
-                if(!choice.equals(pvChoice.get())) {
+                if(!choice.equals(pvEnumerated.getChoice())) {
                     index = -1;
-                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
+                    int numChoices = pvEnumerated.getChoices().get(0, pvEnumerated.getChoices().getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
@@ -496,9 +492,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
-                if(!choice.equals(pvChoice.get())) {
+                if(!choice.equals(pvEnumerated.getChoice())) {
                     index = -1;
-                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
+                    int numChoices = pvEnumerated.getChoices().get(0, pvEnumerated.getChoices().getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
@@ -515,9 +511,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
-                if(!choice.equals(pvChoice.get())) {
+                if(!choice.equals(pvEnumerated.getChoice())) {
                     index = -1;
-                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
+                    int numChoices = pvEnumerated.getChoices().get(0, pvEnumerated.getChoices().getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
@@ -534,9 +530,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
-                if(!choice.equals(pvChoice.get())) {
+                if(!choice.equals(pvEnumerated.getChoice())) {
                     index = -1;
-                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
+                    int numChoices = pvEnumerated.getChoices().get(0, pvEnumerated.getChoices().getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
@@ -553,9 +549,9 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 timeStamp = dbr.getTimeStamp();
                 severity = dbr.getSeverity();
                 String choice = dbr.getStringValue()[0];
-                if(!choice.equals(pvChoice.get())) {
+                if(!choice.equals(pvEnumerated.getChoice())) {
                     index = -1;
-                    int numChoices = pvChoices.get(0, pvChoices.getLength(), valueChoicesData);
+                    int numChoices = pvEnumerated.getChoices().get(0, pvEnumerated.getChoices().getLength(), valueChoicesData);
                     for(int i=0; i<numChoices; i++) {
                         if(choice.equals(valueChoicesData.data[i])) {
                             index = i;
@@ -571,8 +567,8 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                         " unsupported DBRType " + requestDBRType.getName());
                 return;
             }
-            if(index!=pvIndex.get()) {
-                pvIndex.put(index);
+            if(index!=pvEnumerated.getIndex().get()) {
+                pvEnumerated.getIndex().put(index);
             }
         } else {
             if(requestDBRType==DBRType.DOUBLE) {
