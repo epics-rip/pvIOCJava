@@ -3,6 +3,7 @@ org.epics.ioc.ca
 org.epics.ioc.caLocal
 org.epics.ioc.caV3
 org.epics.ioc.caV4
+org.epics.ioc.channelAccess
 org.epics.ioc.install
 org.epics.ioc.pdrv
 org.epics.ioc.pdrv.interfaces
