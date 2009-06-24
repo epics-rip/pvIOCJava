@@ -25,7 +25,6 @@
 <structure structureName = "monitorType">
   <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvData.enumeratedFactory</auxInfo>
   <scalar name = "index" scalarType = "int" />
-  <scalar name = "choice" scalarType = "string" />
   <array name = "choices" scalarType = "string" immutable = "true" >
      put,change,absoluteChange,percentageChange</array>
 </structure>
