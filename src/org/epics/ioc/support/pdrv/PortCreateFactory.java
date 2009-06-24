@@ -11,6 +11,8 @@ import java.lang.reflect.Modifier;
 
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
+import org.epics.pvData.misc.Enumerated;
+import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -18,7 +20,6 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Structure;
-import org.epics.pvData.pv.Type;
 
 
 /**
@@ -48,9 +49,9 @@ public class PortCreateFactory {
         PVBoolean pvBoolean = pvStructure.getBooleanField("autoConnect");
         if(pvBoolean==null) return null;
         boolean autoConnect = pvBoolean.get();
-        PVString pvPriority = getChoiceField(pvStructure,"priority");
-        if(pvPriority==null) return null;
-        ThreadPriority scanPriority = ThreadPriority.valueOf(pvPriority.get());
+        String priority = getChoiceField(pvStructure,"priority");
+        if(priority==null) return null;
+        ThreadPriority scanPriority = ThreadPriority.valueOf(priority);
         PVStructure driverParameters = pvStructure.getStructureField("driverParameters");
         if(driverParameters==null) return null;
         Object[] parameters = new Object[4];
@@ -107,7 +108,7 @@ public class PortCreateFactory {
         // nothing to do
     }
     
-    private static PVString getChoiceField(PVStructure pvStructure,String fieldName) {
+    private static String getChoiceField(PVStructure pvStructure,String fieldName) {
         Structure structure = pvStructure.getStructure();
         PVField[] pvFields = pvStructure.getPVFields();
         int index = structure.getFieldIndex(fieldName);
@@ -116,11 +117,11 @@ public class PortCreateFactory {
             return null;
         }
         PVField pvField = pvFields[index];
-        if(pvField.getField().getType()!=Type.structure) {
-            pvField.message("field is not a structure", MessageType.error);
+        Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
+        if(enumerated==null) {
+            pvField.message(fieldName + " is not an enumerated structure", MessageType.error);
             return null;
         }
-        pvStructure = (PVStructure)pvField;
-        return pvStructure.getStringField("choice");
+        return enumerated.getChoice();
     }
 }
