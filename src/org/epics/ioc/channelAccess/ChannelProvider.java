@@ -5,13 +5,13 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.pvData.channelAccess.ChannelAccess;
+import org.epics.pvData.channelAccess.ChannelRequester;
 
 /**
  * @author mrk
  *
  */
 public interface ChannelProvider {
-    void findChannel(String channelName,double timeOut,ChannelProviderRequester channelProviderRequester);
-    ChannelAccess getChannelAccess();
+    String getProviderName();
+    void findChannel(String channelName,ChannelRequester channelRequester,double timeOut);
 }
