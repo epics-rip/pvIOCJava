@@ -17,10 +17,21 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
 
 /**
+ * IOCDatabaseFactory.
+ * This is a factory that creates an IOCDatabase.
+ * It allows only two IOCDatabases: master and beingInstalled.
+ * Once the beingInstalled database is merged into master then it no longer exists.
  * @author mrk
  *
  */
 public class IOCDatabaseFactory {
+    /**
+     * Create an IOCDatabase.
+     * The pvDatabase must be either master or beingInstalled.
+     * The master is permanent. beingInstalled only exists until it is merged into master.
+     * @param pvDatabase The PVDatabase that IOCDatabase refernces.
+     * @return The IOCDatabase.
+     */
     public static synchronized IOCDatabase create(PVDatabase pvDatabase) {
         if(pvDatabase==PVDatabaseFactory.getMaster()) {
             return masterIOCDatabase;
@@ -35,13 +46,32 @@ public class IOCDatabaseFactory {
         }
        throw new IllegalStateException("database must be master or beingInstalled");
     }
-    
+    /**
+     * Get the IOCDatabase for the pvDatabase.
+     * @param pvDatabase The PVDatabase.
+     * This must be either master or beingInstalled.
+     * @return The IOCDatabase or null if no IOCDatabase exists for the pvDatabase.
+     */
     public static synchronized IOCDatabase get(PVDatabase pvDatabase) {
         if(pvDatabase==PVDatabaseFactory.getMaster()) {
             return masterIOCDatabase;
         }
         if(beingInstalledIOCDatabase!=null) return beingInstalledIOCDatabase;
         throw new IllegalStateException("database must be master or beingInstalled");
+    }
+    /**
+     * Get the LocateSupport for the specified record.
+     * The record must be in either master or beingInstalled.
+     * @param pvRecord The record for which to find LocateSupport.
+     * @return The LocateSupport or null if an IOCDatabase does not exist for the pvRecord.
+     */
+    public static synchronized LocateSupport getLocateSupport(PVRecord pvRecord) {
+        IOCDatabase iocDatabase = masterIOCDatabase;
+        LocateSupport locateSupport = iocDatabase.getLocateSupport(pvRecord);
+        if(locateSupport!=null) return locateSupport;
+        if(beingInstalledIOCDatabase==null) return null;
+        iocDatabase = beingInstalledIOCDatabase;
+        return iocDatabase.getLocateSupport(pvRecord);
     }
 
     private static IOCDatabaseImpl masterIOCDatabase = new IOCDatabaseImpl(PVDatabaseFactory.getMaster());
