@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2009.06.24</h1>
+2009.06.29</h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -39,26 +39,26 @@ configured via xml definitions. A structure defining support provides the
 name of a Java factory that creates support for a field.</p>
 
 <p>The pvData overview gives a simple example of a record instance:</p>
-<pre>&lt;record name = "simple"&gt;
-  &lt;scalar name = "value" type = "double" /&gt;
+<pre>&lt;record recordName = "simple"&gt;
+  &lt;scalar name = "value" scalarType = "double" /&gt;
 &lt;/record&gt;</pre>
 
 <p>For the JavaIOC, this is actually the same as if the following was
 defined.</p>
-<pre>&lt;record name = "simple" &gt;
-  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
-  &lt;scalar name = "value" type = "double"/&gt;
+<pre>&lt;record recordName = "simple" &gt;
+  &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;genericFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "value" scalarType = "double"/&gt;
 &lt;/record&gt;</pre>
 
 <p>When the ioc adds a new record to the database it looks for support
 attached to the record. If it does not find any, it assigns generic support.
 The definition for generic is:</p>
-<pre>&lt;structure name = "genericFactory"&gt;
-  &lt;scalar name = "supportFactory" type = "string"&gt;
+<pre>&lt;structure structureName = "genericFactory"&gt;
+  &lt;scalar name = "supportFactory" scalarType = "string"&gt;
      org.epics.ioc.support.basic.GenericFactory&lt;/scalar&gt;
 &lt;/structure&gt;
-&lt;structure name = "generic"&gt;
-  &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
+&lt;structure structureName = "generic"&gt;
+  &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;genericFactory&lt;/auxInfo&gt;
 &lt;/structure&gt;</pre>
 
 <p>Thus generic is a structure that has no fields and support named generic.
@@ -78,15 +78,15 @@ The definition for generic is:</p>
 <div class="toc">
 <ul>
   <li><a href="#Preface">Preface</a></li>
-  <li><a href="#Part">Part I: JavaIOC - Brief Description</a>
+  <li><a href="#Part">Part I: JavaIOC - Brief Description</a> 
     <ul>
-      <li><a href="#Overview">Overview Of Part I</a>
+      <li><a href="#Overview">Overview Of Part I</a> 
         <ul>
           <li><a href="#Getting">Getting Started</a></li>
           <li><a href="#Status">Status and Remaining Tasks</a></li>
         </ul>
       </li>
-      <li><a href="#Package">Package Summary</a>
+      <li><a href="#Package">Package Summary</a> 
         <ul>
           <li><a href="#default">default - JavaIOC/src</a></li>
           <li><a href="#org.epics.">org.epics.ioc </a></li>
@@ -114,9 +114,9 @@ The definition for generic is:</p>
       <li><a href="#Database">Database Syntax For JavaIOC</a></li>
       <li><a href="#Channel">Channel Access</a></li>
       <li><a href="#Record">Record Processing</a></li>
-      <li><a href="#Database1">Database Examples</a>
+      <li><a href="#Database1">Database Examples</a> 
         <ul>
-          <li><a href="#Record1">Record Instance Examples</a>
+          <li><a href="#Record1">Record Instance Examples</a> 
             <ul>
               <li><a href="#doubleInpu">doubleInput</a></li>
               <li><a href="#doubleOutp">doubleOutput</a></li>
@@ -131,10 +131,10 @@ The definition for generic is:</p>
       </li>
     </ul>
   </li>
-  <li><a href="#Part1">Part II: JavaIOC Data Model</a>
+  <li><a href="#Part1">Part II: JavaIOC Data Model</a> 
     <ul>
       <li><a href="#Summary">Summary</a></li>
-      <li><a href="#JavaIOC3">JavaIOC Data Model</a>
+      <li><a href="#JavaIOC3">JavaIOC Data Model</a> 
         <ul>
           <li><a href="#Basic">Basic Concept</a></li>
         </ul>
@@ -142,22 +142,22 @@ The definition for generic is:</p>
       <li><a href="#Definition">Definitions for Standard Properties</a></li>
     </ul>
   </li>
-  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a>
+  <li><a href="#Part2">Part III: JavaIOC - Database Definition</a> 
     <ul>
       <li><a href="#Overview1">Overview Of Part III</a></li>
-      <li><a href="#JavaIOC4">JavaIOC/xml/structures.xml</a>
+      <li><a href="#JavaIOC4">JavaIOC/xml/structures.xml</a> 
         <ul>
           <li><a href="#structures">structures.xml</a></li>
         </ul>
       </li>
-      <li><a href="#structure">xml/structure/alarm.xml</a>
+      <li><a href="#structure">xml/structure/alarm.xml</a> 
         <ul>
           <li><a href="#numeric">numeric alarms</a></li>
           <li><a href="#boolean">boolean alarms</a></li>
           <li><a href="#enumerated">enumerated alarms</a></li>
         </ul>
       </li>
-      <li><a href="#structure1">xml/structure/analog.xml</a>
+      <li><a href="#structure1">xml/structure/analog.xml</a> 
         <ul>
           <li><a href="#linearConv">linearConvert</a></li>
           <li><a href="#linearConv1">linearConvertInput</a></li>
@@ -166,7 +166,7 @@ The definition for generic is:</p>
         </ul>
       </li>
       <li><a href="#structure2">xml/structure/calc.xml</a></li>
-      <li><a href="#structure3">xml/structure/caLink.xml</a>
+      <li><a href="#structure3">xml/structure/caLink.xml</a> 
         <ul>
           <li><a href="#caProcessL">caProcessLink</a></li>
           <li><a href="#caMonitorL">caMonitorLink</a></li>
@@ -175,7 +175,7 @@ The definition for generic is:</p>
           <li><a href="#caOutputLi">caOutputLink</a></li>
         </ul>
       </li>
-      <li><a href="#structure4">xml/structure/dbLink.xml</a>
+      <li><a href="#structure4">xml/structure/dbLink.xml</a> 
         <ul>
           <li><a href="#dbProcessL">dbProcessLink</a></li>
           <li><a href="#caInputLin1">caInputLink</a></li>
@@ -185,7 +185,7 @@ The definition for generic is:</p>
       <li><a href="#structures1">xml/structures/commonFields.xml</a></li>
       <li><a href="#structures2">xml/structures/control.xml</a></li>
       <li><a href="#structure5">xml/structure/delay.xml</a></li>
-      <li><a href="#structure6">xml/structure/digital.xml</a>
+      <li><a href="#structure6">xml/structure/digital.xml</a> 
         <ul>
           <li><a href="#digitalSta">digitalState</a></li>
           <li><a href="#digital">digital</a></li>
@@ -193,7 +193,7 @@ The definition for generic is:</p>
       </li>
       <li><a href="#structure7">xml/structure/event.xml</a></li>
       <li><a href="#structure8">xml/structure/generic.xml</a></li>
-      <li><a href="#structure9">xml/structure/portDriver</a>
+      <li><a href="#structure9">xml/structure/portDriver</a> 
         <ul>
           <li><a href="#portDriver">portDriver.xml</a></li>
           <li><a href="#portDriver1">portDriver/arraySupport.xml</a></li>
@@ -414,7 +414,7 @@ are:</p>
 <h4 id="org.epics."><a
 href="org/epics/ioc/package-summary.html">org.epics.ioc</a> </h4>
 
-<p>This package has the Start class.</p>
+<p>This package has the JavaIOC class.</p>
 
 <h4 id="org.epics.1"><a
 href="org/epics/ioc/swtshell/package-summary.html">org.epics.ioc.swtshell</a>
@@ -564,13 +564,13 @@ application.</p>
 <p>Support is defined via a structure definition. Support is assigned to a
 field via an auxInfo attached to the field. For example the definition for
 alarm support is:</p>
-<pre>&lt;structure name = "alarmSupportFactory"&gt;
-  &lt;scalar name = "supportFactory" type = "string"&gt;
+<pre>&lt;structure structureName = "alarmSupportFactory"&gt;
+  &lt;scalar name = "supportFactory" scalarType = "string"&gt;
      org.epics.ioc.support.alarm.AlarmSupportFactory&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;structure name = "alarm" supportName = "alarm" &gt;
-  &lt;auxInfo name = "supportFactory" type = "string"&gt;alarmSupportFactory&lt;/auxInfo&gt;
+&lt;structure structureName = "alarm" extends = "org.epics.pvData.alarm" &gt;
+  &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;alarmSupportFactory&lt;/auxInfo&gt;
 &lt;/structure&gt;</pre>
 <hr />
 
@@ -760,12 +760,13 @@ the following support</p>
 
 <p>The following creates a record instance of type double. It is an input
 record because input is initialized to a Channel Access inputLink.</p>
-<pre>&lt;record name = "doubleInput"&gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
-    &lt;scalar name = "value" type = "double" /&gt;
-    &lt;structure name = "display" type = "display" /&gt;
-    &lt;structure name = "input" type = "caInputLink"&gt;
+<pre>&lt;record recordName = "doubleInput"&gt;
+    &lt;structure name = "alarm" extends" /&gt;
+    &lt;structure name = = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;scalar name = "value" scalarType = "double" /&gt;
+    &lt;structure name = "display" extends = "display" /&gt;
+    &lt;structure name = "input" extends = "caInputLink"&gt;
         &lt;scalar name = "pvname"&gt;counter&lt;/scalar&gt;
         &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
         &lt;scalar name = "propertyNames"&gt;alarm&lt;/scalar&gt;
@@ -776,12 +777,13 @@ record because input is initialized to a Channel Access inputLink.</p>
 
 <p>The following creates a record instance of type double. It is an output
 record because output is initialized to a Channel Access outputLink.</p>
-<pre>&lt;record name = "doubleOutput"&gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
-    &lt;scalar name = "value" type = "double" /&gt;
-    &lt;structure name = "display" type = "display" /&gt;
-    &lt;structure name = "output" type = "caOutputLink"&gt;
+<pre>&lt;record recordName = "doubleOutput"&gt;
+    &lt;structure name = "alarm" extends" /&gt;
+    &lt;structure name  = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;scalar name = "value" scalarType = "double" /&gt;
+    &lt;structure name = "display" extends = "display" /&gt;
+    &lt;structure name = "output" extends = "caOutputLink"&gt;
         &lt;scalar name = "pvname"&gt;someOutput&lt;/scalar&gt;
         &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
     &lt;/structure&gt;   
@@ -792,18 +794,19 @@ record because output is initialized to a Channel Access outputLink.</p>
 <p>The following creates an instance of an aiRecord. The raw ADC value is
 read via channelAccess support and converted via linearConvertInput
 support.</p>
-<pre>&lt;record name = "ai"&gt;
-    &lt;scalar name = "value" type = "double" /&gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
-    &lt;structure name = "input" type = "linearConvertInput"&gt;
+<pre>&lt;record recordName = "ai"&gt;
+    &lt;scalar name = "value" scalarTe" /&gt;
+    &lt;structure name = "alarm" tyype = "double" /&gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;structure name = "input" extends = "linearConvertInput"&gt;
         &lt;structure name = "linearConvert"&gt;
             &lt;scalar name = "deviceHigh"&gt;2047&lt;/scalar&gt;
             &lt;scalar name = "deviceLow"&gt;-2048&lt;/scalar&gt;
             &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
             &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
         &lt;/structure&gt;
-        &lt;structure name = "input" type = "caInputLink"&gt;
+        &lt;structure name = "input" extends = "caInputLink"&gt;
             &lt;scalar name = "pvname"&gt;aiRaw&lt;/scalar&gt;
             &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
             &lt;scalar name = "propertyNames"&gt;alarm,display&lt;/scalar&gt;
@@ -816,18 +819,19 @@ support.</p>
 <p>The following creates an instance of an aoRecord. The value is converted
 via linearConvertOutput support to a rawValue which is written via portDriver
 support.</p>
-<pre>&lt;record name = "ao"&gt;
-    &lt;scalar name = "value" type = "double" /&gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
-    &lt;structure name = "output" type = "linearConvertOutput"&gt;
+<pre>&lt;record recordName = "ao"&gt;
+    &lt;scalar name = "value" scalarTe" /&gt;
+    &lt;structure name = "alarm" tyype = "double" /&gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;structure name = "output" extends = "linearConvertOutput"&gt;
         &lt;structure name = "linearConvert"&gt;
             &lt;scalar name = "deviceHigh"&gt;2047&lt;/scalar&gt;
             &lt;scalar name = "deviceLow"&gt;-2048&lt;/scalar&gt;
             &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
             &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
         &lt;/structure&gt;
-        &lt;structure name = "output" type = "caOutPutLink"&gt;
+        &lt;structure name = "output" extends = "caOutPutLink"&gt;
             &lt;scalar name = "pvname"&gt;aoRaw&lt;/scalar&gt;
             &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
         &lt;/structure&gt;
@@ -838,22 +842,22 @@ support.</p>
 
 <p>The following creates a powerSupply instance that does no input or output.
 The power.value must be set via channel access.</p>
-<pre>&lt;record name = "psSimple" &gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+<pre>&lt;record recordName = "psSimple" &gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
     &lt;structure name = "voltage"&gt;
-       &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
+       &lt;scalar name = "value" scalarType = "double"&gt;10.0&lt;/scalar&gt;
     &lt;/structure&gt;
     &lt;structure name = "current"&gt;
-       &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
-       &lt;scalar name = "value" type = "double"&gt;
-         &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+       &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.genericFactory&lt;/auxInfo&gt;
+       &lt;scalar name = "value" scalarType = "double"&gt;
+         &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.powerSupplyFactory&lt;/auxInfo&gt;
        &lt;/scalar&gt;
     &lt;/structure&gt;
      &lt;structure name = "power"&gt;
-      &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
+      &lt;scalar name = "value" scalarType = "double"&gt;10.0&lt;/scalar&gt;
     &lt;/structure&gt;
-    &lt;structure name = "scan" type = "scan"&gt;
+    &lt;structure name = "scan" extends = "scan"&gt;
         &lt;scalar name = "processAfterStart"&gt;true&lt;/scalar&gt;
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
@@ -862,27 +866,27 @@ The power.value must be set via channel access.</p>
 
 <p>The following creates a powerSupply record that gets its voltage and
 writes its current via channel access.</p>
-<pre>&lt;record name = "psLinked" &gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
-    &lt;structure name = "voltage" type = "generic"&gt;
-        &lt;scalar name = "value" type = "double" /&gt;
-        &lt;structure name = "input" type = "caInputLink"&gt;
+<pre>&lt;record recordName = "psLinked" &gt;
+   &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;structure name = "voltage" extends = "generic"&gt;
+        &lt;scalar name = "value" scalarType = "double" /&gt;
+        &lt;structure name = "input" extends = "caInputLink"&gt;
             &lt;scalar name = "pvname"&gt;adcVoltageSupported&lt;/scalar&gt;
             &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
         &lt;/structure&gt;
     &lt;/structure&gt;
-    &lt;structure name = "current" type = "generic"&gt;
-        &lt;scalar name = "value" type = "double" &gt;
-           &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+    &lt;structure name = "current" extends = "generic"&gt;
+        &lt;scalar name = "value" scalarType = "double" &gt;
+           &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.powerSupplyFactory&lt;/auxInfo&gt;
         &lt;/scalar&gt;
-        &lt;structure name = "output" type = "caOutputLink"&gt;
+        &lt;structure name = "output" extends = "caOutputLink"&gt;
             &lt;scalar name = "pvname"&gt;current&lt;/scalar&gt;
             &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
         &lt;/structure&gt;
     &lt;/structure&gt;
     &lt;structure name = "power"&gt;
-        &lt;scalar name = "value" type = "double" /&gt;
+        &lt;scalar name = "value" scalarType = "double" /&gt;
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
@@ -890,45 +894,45 @@ writes its current via channel access.</p>
 
 <p>The following creates a powerSupply record that gets its voltage and
 writes its current via embeded support.</p>
-<pre>&lt;record name = "psEmbeded"&gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
-    &lt;structure name = "voltage" type = "generic"&gt;
-        &lt;scalar name = "value" type = "double" /&gt;
-        &lt;structure name = "alarm" type = "alarm" /&gt;
-        &lt;structure name = "input" type = "linearConvertInput"&gt;
+<pre>&lt;record recordName = "psEmbeded"&gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;structure name = "voltage" extends = "generic"&gt;
+        &lt;scalar name = "value" scalarType = "double" /&gt;
+        &lt;structure name = "alarm" extends = "alarm" /&gt;
+        &lt;structure name = "input" extends = "linearConvertInput"&gt;
             &lt;structure name = "linearConvert"&gt;
                 &lt;scalar name = "deviceHigh"&gt;4095&lt;/scalar&gt;
                 &lt;scalar name = "deviceLow"&gt;0&lt;/scalar&gt;
                 &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
                 &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
             &lt;/structure&gt;
-            &lt;structure name = "input" type = "caInputLink"&gt;
+            &lt;structure name = "input" extends = "caInputLink"&gt;
                 &lt;scalar name = "pvname"&gt;adcVoltageEmbeded&lt;/scalar&gt;
                 &lt;scalar name = "process"&gt;false&lt;/scalar&gt;
             &lt;/structure&gt;
-        &lt;/structure&gt;  
+        &lt;/structure&gt;
     &lt;/structure&gt;
-    &lt;structure name = "current" type = "generic"&gt;
-        &lt;scalar name = "value" type = "double"&gt;
-            &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+    &lt;structure name = "current" extends = "generic"&gt;
+        &lt;scalar name = "value" scalarType = "double"&gt;
+            &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.powerSupplyFactory&lt;/auxInfo&gt;
         &lt;/scalar&gt;
-        &lt;structure name = "output" type = "linearConvertOutput"&gt;
+        &lt;structure name = "alarm" extends = "alarm" /&gt;
+        &lt;structure name = "output" extends = "linearConvertOutput"&gt;
             &lt;structure name = "linearConvert"&gt;
                 &lt;scalar name = "deviceHigh"&gt;4095&lt;/scalar&gt;
                 &lt;scalar name = "deviceLow"&gt;0&lt;/scalar&gt;
                 &lt;scalar name = "engUnitsLow"&gt;0.0&lt;/scalar&gt;
                 &lt;scalar name = "engUnitsHigh"&gt;10.0&lt;/scalar&gt;
-            &lt;/structure&gt; 
-            &lt;structure name = "output" type = "caOutputLink"&gt;
+            &lt;/structure&gt;
+            &lt;structure name = "output" extends = "caOutputLink"&gt;
                 &lt;scalar name = "pvname"&gt;dacCurrentEmbeded&lt;/scalar&gt;
                 &lt;scalar name = "process"&gt;true&lt;/scalar&gt;
             &lt;/structure&gt;
         &lt;/structure&gt;
     &lt;/structure&gt;
     &lt;structure name = "power"&gt;
-        &lt;scalar name = "value" type = "double" /&gt;
-    &lt;/structure&gt;
+        &lt;scalar name = "value" scalarType = "double" /&gt;
 &lt;/record&gt;</pre>
 <hr />
 <hr />
@@ -958,11 +962,11 @@ hieraracy above the value field it is considered a property</p>
 
 <p>For example the following record has a single value field. The value field
 has propertys alarm, timeStamp, and display.</p>
-<pre>&lt;record name = "someRecord" &gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
-    &lt;scalar name = "value" type = "double" /&gt;
-    &lt;structure name = "display" type = "display" &gt;
+<pre>&lt;record recordName = "someRecord" &gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;scalar name = "value" scalarType = "double" /&gt;
+    &lt;structure name = "display" extends = "display" &gt;
         &lt;scalar name = "description"&gt;Sample Description&lt;/scalar&gt;
         &lt;scalar name = "format"&gt;%f&lt;/scalar&gt;
         &lt;scalar name = "resolution"&gt;1&lt;/scalar&gt;
@@ -976,26 +980,23 @@ has propertys alarm, timeStamp, and display.</p>
 
 <p>The following example has three value fields each with propertys alarm and
 timeStamp.</p>
-<pre>&lt;record name = "psSimple"&gt;
-    &lt;structure name = "alarm" type = "alarm" /&gt;
-    &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+<pre>&lt;record recordName = "psSimple"&gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
     &lt;structure name = "voltage"&gt;
-       &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
-       &lt;structure name = "alarm" type = "alarm" /&gt;
-       &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+       &lt;scalar name = "value" scalarType = "double"&gt;10.0&lt;/scalar&gt;
     &lt;/structure&gt;
     &lt;structure name = "current"&gt;
-       &lt;auxInfo name = "supportFactory" type = "string"&gt;genericFactory&lt;/auxInfo&gt;
-       &lt;scalar name = "value" type = "double"&gt;
-         &lt;auxInfo name = "supportFactory" type = "string"&gt;powerSupplyFactory&lt;/auxInfo&gt;
+       &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.genericFactory&lt;/auxInfo&gt;
+       &lt;scalar name = "value" scalarType = "double"&gt;
+         &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.powerSupplyFactory&lt;/auxInfo&gt;
        &lt;/scalar&gt;
-       &lt;structure name = "alarm" type = "alarm" /&gt;
-       &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
     &lt;/structure&gt;
      &lt;structure name = "power"&gt;
-       &lt;scalar name = "value" type = "double"&gt;10.0&lt;/scalar&gt;
-       &lt;structure name = "alarm" type = "alarm" /&gt;
-       &lt;structure name = "timeStamp" type = "timeStamp" /&gt;
+      &lt;scalar name = "value" scalarType = "double"&gt;10.0&lt;/scalar&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "scan" extends = "scan"&gt;
+        &lt;scalar name = "processAfterStart"&gt;true&lt;/scalar&gt;
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
@@ -2124,8 +2125,7 @@ org.epics.ioc.portDriver for details.</p>
 &lt;include href = "digitalSupport.xml" /&gt;
 &lt;include href = "serialSupport.xml" /&gt;
 &lt;include removePath = "${JAVAIOC}/xml/structure/portDriver" /&gt;
-&lt;/database&gt;
-</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="portDriver1">portDriver/arraySupport.xml</h4>
 <pre>&lt;database&gt;
@@ -2182,8 +2182,7 @@ org.epics.ioc.portDriver for details.</p>
 &lt;/structure&gt;
 
 
-&lt;/database&gt;
-</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="portDriver2">portDriver/digitalSupport.xml</h4>
 <pre>&lt;database&gt; 
@@ -2214,9 +2213,7 @@ org.epics.ioc.portDriver for details.</p>
 &lt;structure structureName = "pdrvUInt32DigitalOutput"&gt;
    &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.pdrvUInt32DigitalOutputFactory&lt;/auxInfo&gt;
    &lt;scalar name = "mask" scalarType = "int" /&gt; 
-&lt;/structure&gt;
-
-</pre>
+&lt;/structure&gt;</pre>
 
 <h4 id="portDriver3">portDriver/scalarSupport.xml</h4>
 <pre>&lt;database&gt; 
@@ -2288,8 +2285,7 @@ org.epics.ioc.portDriver for details.</p>
    &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.pdrvFloat64OutputFactory&lt;/auxInfo&gt;
 &lt;/structure&gt;
 
-&lt;/database&gt;
-</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="portDriver4">portDriver/serialSupport.xml</h4>
 <pre>&lt;database&gt;
@@ -2361,8 +2357,7 @@ org.epics.ioc.portDriver for details.</p>
    &lt;scalar name = "size" scalarType = "int"&gt;80&lt;/scalar&gt;
 &lt;/structure&gt;
 
-&lt;/database&gt;
-</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="portDriver5">portDriver/support.xml</h4>
 <pre>&lt;database&gt;
@@ -2386,8 +2381,7 @@ org.epics.ioc.portDriver for details.</p>
   &lt;scalar name = "deviceName" scalarType = "string" /&gt;
 &lt;/structure&gt;
 
-&lt;/database&gt;
-</pre>
+&lt;/database&gt;</pre>
 
 <h4 id="portDriver6">portDriver/drivers.xml</h4>
 <pre>&lt;database&gt;
@@ -2443,8 +2437,7 @@ org.epics.ioc.portDriver for details.</p>
 &lt;include href = "vxi11Driver.xml" /&gt;
 &lt;include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" /&gt;
 
-&lt;/database&gt;
-</pre>
+&lt;/database&gt;</pre>
 <hr />
 
 <h3 style="text-align: center"
