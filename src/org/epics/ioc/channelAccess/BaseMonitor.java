@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.channelAccess;
 
+import java.util.BitSet;
+
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.factory.ConvertFactory;
@@ -13,6 +15,8 @@ import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pvCopy.BitSetUtil;
+import org.epics.pvData.pvCopy.BitSetUtilFactory;
 import org.epics.pvData.pvCopy.PVCopy;
 import org.epics.pvData.pvCopy.PVCopyMonitor;
 import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
@@ -21,6 +25,7 @@ import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
  *
  */
 abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequester{
+    
     protected BaseMonitor(
             ChannelMonitorRequester channelMonitorRequester,
             PVCopy pvCopy,
@@ -36,7 +41,8 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
         monitorQueue = MonitorQueueFactory.create(pvCopy, queueSize);
     }
     
-    private static Convert convert = ConvertFactory.getConvert();
+    private static final Convert convert = ConvertFactory.getConvert();
+    private static final BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
     private ChannelMonitorRequester channelMonitorRequester;
     private PVCopy pvCopy;
     private Executor executor;
@@ -96,15 +102,20 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
      */
     @Override
     public void dataChanged() {
+        PVStructure pvStructure = monitorQueueElement.getPVStructure();
+        BitSet bitSet = monitorQueueElement.getChangedBitSet();
+        bitSetUtil.compress(bitSet, pvStructure);
+        bitSet = monitorQueueElement.getOverrunBitSet();
+        bitSetUtil.compress(bitSet, pvStructure);
         if(!generateMonitor(monitorQueueElement)) return;
         MonitorQueue.MonitorQueueElement newElement = monitorQueue.getFree();
         if(newElement==null) {
             if(monitorQueue.capacity()<2) {
                 callRequester.call();
-                return;
             }
+            return;
         }
-        PVStructure pvStructure = monitorQueueElement.getPVStructure();
+        pvStructure = monitorQueueElement.getPVStructure();
         PVStructure pvNext = newElement.getPVStructure();
         convert.copy(pvStructure, pvNext);
         monitorQueueElement = newElement;

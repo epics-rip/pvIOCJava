@@ -5,10 +5,13 @@
  */
 package org.epics.ioc.channelAccess;
 
+import java.util.BitSet;
+
 import org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.misc.Executor;
+import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pvCopy.PVCopy;
 
@@ -33,7 +36,7 @@ public class MonitorOnPutFactory{
                 byte queueSize,
                 Executor executor)
         {
-            return new MonitorPut(channelMonitorRequester,pvCopy,queueSize,executor);
+            return new Monitor(channelMonitorRequester,pvCopy,queueSize,executor);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorCreate#getName()
@@ -44,20 +47,29 @@ public class MonitorOnPutFactory{
         }
     }
 
-    private static class MonitorPut extends BaseMonitor {
-        private MonitorPut(
+    private static class Monitor extends BaseMonitor {
+        private Monitor(
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
                 byte queueSize,
                 Executor executor)
         {
             super(channelMonitorRequester,pvCopy,queueSize,executor);
+            PVStructure pvStructure = pvCopy.createPVStructure();
+            PVField pvField = pvStructure.getSubField("timeStamp");
+            timeStampOffset = pvField.getFieldOffset();
         }
+        
+        private int timeStampOffset = 0;
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
          */
         @Override
         protected boolean generateMonitor(MonitorQueueElement monitorQueueElement) {
+            BitSet bitSet = monitorQueueElement.getChangedBitSet();
+            int first = bitSet.nextSetBit(0);
+            int next = bitSet.nextSetBit(first+1);
+            if(first==timeStampOffset && next==-1) return false;
             return true;
         }
 

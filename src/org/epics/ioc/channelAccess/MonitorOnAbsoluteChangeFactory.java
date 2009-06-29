@@ -65,7 +65,7 @@ public class MonitorOnAbsoluteChangeFactory {
                 return null;
             }
             pvField = pvCopy.getRecordPVField(pvField.getFieldOffset());
-            return new MonitorPut(channelMonitorRequester,pvCopy,queueSize,executor,pvDeadband.get(),(PVScalar)pvField);
+            return new Monitor(channelMonitorRequester,pvCopy,queueSize,executor,pvDeadband.get(),(PVScalar)pvField);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorCreate#getName()
@@ -77,8 +77,8 @@ public class MonitorOnAbsoluteChangeFactory {
     }
     
     private static Convert convert = ConvertFactory.getConvert();
-    private static class MonitorPut extends BaseMonitor {
-        private MonitorPut(
+    private static class Monitor extends BaseMonitor {
+        private Monitor(
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
                 byte queueSize,

@@ -9,14 +9,13 @@ import org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Scalar;
-import org.epics.pvData.pv.Type;
 import org.epics.pvData.pvCopy.PVCopy;
 
 /**
@@ -26,6 +25,8 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnChangeFactory {
     private static final String name = "onChange";
     private static final MonitorOnChange monitorOnChange = new MonitorOnChange();
+    private static final PVDataCreate pvDataCreate= PVDataFactory.getPVDataCreate();
+    private static final Convert convert = ConvertFactory.getConvert();
 
     public static void start() {
         ChannelProviderLocalFactory.registerMonitor(monitorOnChange);
@@ -48,17 +49,8 @@ public class MonitorOnChangeFactory {
                 channelMonitorRequester.message("value field not defined", MessageType.error);
                 return null;
             }
-            if(pvField.getField().getType()!=Type.scalar) {
-                channelMonitorRequester.message("value is not a scalar", MessageType.error);
-                return null;
-            }
-            Scalar scalar = (Scalar)pvField.getField();
-            if(!scalar.getScalarType().isNumeric()) {
-                channelMonitorRequester.message("value is not a numeric scalar", MessageType.error);
-                return null;
-            }
             pvField = pvCopy.getRecordPVField(pvField.getFieldOffset());
-            return new MonitorPut(channelMonitorRequester,pvCopy,queueSize,executor,(PVScalar)pvField);
+            return new Monitor(channelMonitorRequester,pvCopy,queueSize,executor,pvField);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorCreate#getName()
@@ -69,30 +61,29 @@ public class MonitorOnChangeFactory {
         }
     }
     
-    private static Convert convert = ConvertFactory.getConvert();
-    private static class MonitorPut extends BaseMonitor {
-        private MonitorPut(
+    
+    private static class Monitor extends BaseMonitor {
+        private Monitor(
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
                 byte queueSize,
                 Executor executor,
-                PVScalar valuePVField)
+                PVField valuePVField)
         {
             super(channelMonitorRequester,pvCopy,queueSize,executor);
             this.valuePVField = valuePVField;
-            prevValue = convert.toDouble(valuePVField);
+            pvPrev = pvDataCreate.createPVField(null, null, valuePVField);
         }
         
-        private PVScalar valuePVField;
-        private double prevValue = 0.0;
+        private PVField valuePVField;
+        private PVField pvPrev;
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
          */
         @Override
         protected boolean generateMonitor(MonitorQueueElement monitorQueueElement) {
-            double value = convert.toDouble(valuePVField);
-            if(value==prevValue) return false;
-            prevValue = value;
+            if(valuePVField.equals(pvPrev)) return false;
+            convert.copy(valuePVField, pvPrev);   
             return true;
         }
         
