@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: Install<br />
 package: org.epics.ioc.install<br />
-2009.05.07</h1>
+2009.06.26</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Install">Install Factory</a>
+  <li><a href="#Install">Install Factory</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#installStr">installStructures</a></li>
@@ -25,7 +25,7 @@ CONTENTS
       Instances</a></li>
     </ul>
   </li>
-  <li><a href="#IOCDatabas">IOCDatabase</a>
+  <li><a href="#IOCDatabas">IOCDatabase</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#IOCDatabas1">IOCDatabaseFactory</a></li>
@@ -33,14 +33,14 @@ CONTENTS
       <li><a href="#LocateSupp">LocateSupport</a></li>
     </ul>
   </li>
-  <li><a href="#Support">Support Creation</a>
+  <li><a href="#Support">Support Creation</a> 
     <ul>
       <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#Factory">Factory</a></li>
       <li><a href="#SupportCre">SupportCreation</a></li>
     </ul>
   </li>
-  <li><a href="#After">After Start</a>
+  <li><a href="#After">After Start</a> 
     <ul>
       <li><a href="#Definition3">Definitions</a></li>
       <li><a href="#AfterStart">AfterStartNode</a></li>
@@ -201,6 +201,7 @@ fields of a record.</p>
 <pre>public class IOCDatabaseFactory {
     public static synchronized IOCDatabase create(PVDatabase pvDatabase);
     public static synchronized IOCDatabase get(PVDatabase pvDatabase);
+    public static LocateSupport getLocateSupport(PVRecord pvRecord);
 }
 
 public interface IOCDatabase {
@@ -221,10 +222,14 @@ public interface LocateSupport {
 <p>Given a PVDatabase this is used to create and located an IOCDatabase.</p>
 <dl>
   <dt>create</dt>
-    <dd>Create a new IOCDatabase for the pbDatabase.</dd>
+    <dd>Create a new IOCDatabase for the pbDatabase. The pvDatabase must be
+      either master or beingInstalled or null is returned.</dd>
   <dt>get</dt>
     <dd>Get the IOCDatabase for the PVDatabase. It returns null if it does
       not exist.</dd>
+  <dt>getLocateSupport</dt>
+    <dd>Get the LocateSupport for the specified record. The pvRecord must be
+      in either master or beingInstalled or else null is returned.</dd>
 </dl>
 
 <h3 id="IOCDatabas2">IOCDatabase</h3>
