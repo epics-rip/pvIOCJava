@@ -58,7 +58,7 @@ public interface MonitorQueue {
     MonitorQueueElement getFree();
     /**
      * Get the oldest used element.
-     * @return
+     * @return The next used element or null if no used elements.
      */
     MonitorQueueElement getUsed();
     /**
