@@ -21,11 +21,18 @@ import org.epics.pvData.pvCopy.PVCopy;
 import org.epics.pvData.pvCopy.PVCopyMonitor;
 import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
 /**
+ * A Base class for implementing a ChannelMonitor.
  * @author mrk
  *
  */
 abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequester{
     
+    /**
+     * @param channelMonitorRequester
+     * @param pvCopy
+     * @param queueSize
+     * @param executor
+     */
     protected BaseMonitor(
             ChannelMonitorRequester channelMonitorRequester,
             PVCopy pvCopy,
@@ -53,6 +60,13 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
     private MonitorQueue.MonitorQueueElement monitorQueueElement = null;
     private boolean isMonitoring = false;
     
+    /**
+     * A method that must be implemented by a derived class.
+     * When this class gets notified that data has changed it calls this method to see
+     * if it should notify the ChannelMonitorRequester that a monitor has occurred.
+     * @param monitorQueueElement The current monitorQueueElement.
+     * @return (false,true) if the ChannelMonitorRequester should be notified of a new monitor.
+     */
     abstract protected boolean generateMonitor(MonitorQueue.MonitorQueueElement monitorQueueElement);
     /* (non-Javadoc)
      * @see org.epics.pvData.channelAccess.ChannelMonitor#destroy()

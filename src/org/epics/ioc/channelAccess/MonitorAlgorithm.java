@@ -6,10 +6,15 @@
 package org.epics.ioc.channelAccess;
 
 /**
+ * The algorithm for monitoring.
  * @author mrk
  *
  */
 public interface MonitorAlgorithm {
+    /**
+     * Get the name of the algorithm.
+     * @return The name.
+     */
     String getAlgorithmName();
     
 }

@@ -12,11 +12,25 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pvCopy.PVCopy;
 
 /**
+ * An interface implemented by code that implements a monitor algorithm.
  * @author mrk
  *
  */
 public interface MonitorCreate {
+    /**
+     * Get the name of the algorithm.
+     * @return The name.
+     */
     String getName();
+    /**
+     * Create a ChannelMonitor.
+     * @param channelMonitorRequester The requester.
+     * @param pvOption Options for the algorithm.
+     * @param pvCopy The PVCopy that maps to a subset of the fields in a PVBRecord.
+     * @param queueSize The queuesize.
+     * @param executor An Executor for calling the requester.
+     * @return The ChannelMonitor interface.
+     */
     ChannelMonitor create(
             ChannelMonitorRequester channelMonitorRequester,
             PVStructure pvOption,

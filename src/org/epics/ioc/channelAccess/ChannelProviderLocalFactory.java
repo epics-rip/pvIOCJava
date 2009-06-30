@@ -248,17 +248,11 @@ public class ChannelProviderLocalFactory  {
         @Override
         public void createChannelProcess(ChannelProcessRequester channelProcessRequester) {
             ChannelProcessImpl channelProcessImpl = new ChannelProcessImpl(this,channelProcessRequester);
-            boolean result =channelProcessImpl.init();
-            if(result) {
-                synchronized(channelProcessList) {
-                    channelProcessList.add(channelProcessImpl);
-                }
-                channelProcessRequester.channelProcessConnect(channelProcessImpl);
-            } else {
-                channelProcessRequester.channelProcessConnect(null);
+            synchronized(channelProcessList) {
+                channelProcessList.add(channelProcessImpl);
             }
+            channelProcessRequester.channelProcessConnect(channelProcessImpl);
         }
-
         /* (non-Javadoc)
          * @see org.epics.pvData.channelAccess.Channel#createChannelGet(org.epics.pvData.channelAccess.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
          */
@@ -395,9 +389,6 @@ public class ChannelProviderLocalFactory  {
             {
                 this.channelImpl = channelImpl;
                 this.channelProcessRequester = channelProcessRequester;
-            }
-            
-            boolean init() {
                 recordProcess = channelImpl.getRecordProcess();
                 isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
                 if(!isRecordProcessRequester) {
@@ -405,11 +396,10 @@ public class ChannelProviderLocalFactory  {
                     if(processSelf==null) {
                         channelProcessRequester.message(
                                 "already has process requester other than self", MessageType.error);
-                        return false;
+                        return;
                     }
                 }
                 requesterName = "Process:" + channelProcessRequester.getRequesterName();
-                return true;
             }
             
             private ChannelImpl channelImpl;
