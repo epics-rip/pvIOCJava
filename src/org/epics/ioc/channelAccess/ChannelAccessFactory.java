@@ -17,6 +17,7 @@ import org.epics.pvData.channelAccess.ChannelRequester;
  *
  */
 public class ChannelAccessFactory {
+    private static final Map<String,ChannelProvider> channelProviderMap = new TreeMap<String,ChannelProvider>();
     private static ChannelAccess channelAccess = new ChannelAccessImpl();
     static {
         ChannelProviderLocalFactory.register();
@@ -36,7 +37,7 @@ public class ChannelAccessFactory {
         }
     }
     
-    private static final Map<String,ChannelProvider> channelProviderMap = new TreeMap<String,ChannelProvider>();
+    
     
     private static class ChannelAccessImpl implements ChannelAccess{
         ChannelProvider[] channelProviders = null;

@@ -38,8 +38,10 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pvCopy.PVCopy;
+import org.epics.pvData.pvCopy.*;
 import org.epics.pvData.pvCopy.PVCopyFactory;
+import org.epics.pvData.pvCopy.PVCopyMonitor;
+import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
 
 /**
  * Factory and implementation of local channel access, i.e. channel access that
@@ -103,7 +105,7 @@ public class ChannelProviderLocalFactory  {
     }
     
     private static class ChannelImpl implements Channel {
-        private boolean isDestroyed = true;
+        private boolean isDestroyed = false;
         private PVRecord pvRecord;
         private RecordProcess recordProcess;
         private ChannelRequester channelRequester;
@@ -146,7 +148,9 @@ public class ChannelProviderLocalFactory  {
          * @see org.epics.pvData.channelAccess.Channel#connect()
          */
         @Override
-        public void connect() {}
+        public void connect() {
+            channelRequester.channelStateChange(this, true);
+        }
 
         /* (non-Javadoc)
          * @see org.epics.pvData.channelAccess.Channel#isConnected()
@@ -160,6 +164,7 @@ public class ChannelProviderLocalFactory  {
          */
         @Override
         public void destroy() {
+            if(isDestroyed) return;
             isDestroyed = true;
             while(true) {
                 ChannelProcess channelProcess = null;
@@ -350,8 +355,7 @@ public class ChannelProviderLocalFactory  {
          */
         @Override
         public void disconnect() {
-            // TODO Auto-generated method stub
-            
+            destroy();
         }
         /* (non-Javadoc)
          * @see org.epics.pvData.channelAccess.Channel#getAccessRights(org.epics.pvData.pv.PVField)
@@ -415,9 +419,13 @@ public class ChannelProviderLocalFactory  {
              */
             @Override
             public void destroy() {
+                if(isDestroyed) return;
                 isDestroyed = true;
                 if(isRecordProcessRequester) {
                     recordProcess.releaseRecordProcessRequester(this);
+                }
+                synchronized(channelImpl.channelProcessList) {
+                    channelImpl.channelProcessList.remove(this);
                 }
             }
            
@@ -482,7 +490,7 @@ public class ChannelProviderLocalFactory  {
             }
         }
         
-        private class ChannelGetImpl implements ChannelGet,ProcessSelfRequester
+        private class ChannelGetImpl implements ChannelGet,ProcessSelfRequester,PVCopyMonitorRequester
         {
             private ChannelGetImpl(ChannelImpl channelImpl,ChannelGetRequester channelGetRequester,PVStructure pvStructure,PVCopy pvCopy,boolean process)
             {
@@ -505,27 +513,45 @@ public class ChannelProviderLocalFactory  {
                         }
                     }
                 }
+                if(pvCopy.isShared()) {
+                    pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
+                    monitorBitSet = new BitSet(pvStructure.getNumberFields());
+                    overrunBitSet = new BitSet(pvStructure.getNumberFields());
+                    pvCopyMonitor.startMonitoring(monitorBitSet, overrunBitSet);
+                }
             }
             
+            private boolean firstTime = true;
             private ChannelImpl channelImpl;
             private ChannelGetRequester channelGetRequester;
             private PVStructure pvStructure;
             private PVCopy pvCopy;
             private boolean process;
             private BitSet bitSet = null;
+            // following for share
+            private BitSet monitorBitSet = null;
+            private BitSet overrunBitSet = null;
             private boolean isDestroyed = false;
             private String requesterName;
             private RecordProcess recordProcess = null;
             private boolean isRecordProcessRequester = false;
             private ProcessSelf processSelf = null;
             private RequestResult requestResult = RequestResult.success;
+            private PVCopyMonitor pvCopyMonitor = null;
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelGet#destroy()
              */
             @Override
             public void destroy() {
+                if(isDestroyed) return;
+                if(pvCopyMonitor!=null) {
+                    pvCopyMonitor.stopMonitoring();
+                }
                 isDestroyed = true;
                 if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
+                synchronized(channelImpl.channelGetList) {
+                    channelImpl.channelGetList.remove(this);
+                }
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelGet#getBitSet()
@@ -595,6 +621,18 @@ public class ChannelProviderLocalFactory  {
                 channelGetRequester.getDone(true);
             }
             /* (non-Javadoc)
+             * @see org.epics.pvData.pvCopy.PVCopyMonitorRequester#dataChanged()
+             */
+            @Override
+            public void dataChanged() {}
+            /* (non-Javadoc)
+             * @see org.epics.pvData.pvCopy.PVCopyMonitorRequester#unlisten()
+             */
+            @Override
+            public void unlisten() {
+                
+            }
+            /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
             @Override
@@ -610,7 +648,24 @@ public class ChannelProviderLocalFactory  {
             }
             
             private void getData() {
-                pvCopy.updateCopySetBitSet(pvStructure, bitSet, false);
+                if(pvCopyMonitor==null) {
+                    pvCopy.updateCopySetBitSet(pvStructure, bitSet, false);
+                } else {
+                    overrunBitSet.clear();
+                    bitSet.clear();
+                    int index = 0;
+                    index = monitorBitSet.nextSetBit(0);
+                    while(index>=0) {
+                        bitSet.set(index);
+                        monitorBitSet.clear(index);
+                        index = monitorBitSet.nextSetBit(index);
+                    }
+                }
+                if(firstTime) {
+                    bitSet.clear();
+                    bitSet.set(0);
+                    firstTime = false;
+                } 
             }
         }
         
@@ -661,7 +716,14 @@ public class ChannelProviderLocalFactory  {
              * @see org.epics.ioc.ca.ChannelPut#destroy()
              */
             public void destroy() {
+                if(isDestroyed) return;
                 isDestroyed = true;
+                if(isRecordProcessRequester) {
+                    recordProcess.releaseRecordProcessRequester(this);
+                }
+                synchronized(channelImpl.channelPutList) {
+                    channelImpl.channelPutList.remove(this);
+                }
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelPut#getBitSet()
@@ -808,6 +870,12 @@ public class ChannelProviderLocalFactory  {
             public void destroy() {
                 isDestroyed = true;
                 if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
+                if(isRecordProcessRequester) {
+                    recordProcess.releaseRecordProcessRequester(this);
+                }
+                synchronized(channelImpl.channelPutGetList) {
+                    channelImpl.channelPutGetList.remove(this);
+                }
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelPutGet#getGetBitSet()
