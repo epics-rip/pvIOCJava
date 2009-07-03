@@ -12,9 +12,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
 
 
@@ -32,8 +35,17 @@ public class SwtshellFactory {
     public static void swtshell() {
         new ThreadInstance();
     }
+    
+    /**
+     * Get an Executor that can be shared by swtshell objects.
+     * @return
+     */
+    public static Executor getExecutor() {
+        return executor;
+    }
    
     static private ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
+    static private Executor executor = ExecutorFactory.create("swtshell",ThreadPriority.low);
 
     static private class ThreadInstance implements RunnableReady {
         
@@ -44,6 +56,7 @@ public class SwtshellFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
+        @Override
         public void run(ThreadReady threadReady) {
             threadReady.ready();
             final Display display = new Display();
