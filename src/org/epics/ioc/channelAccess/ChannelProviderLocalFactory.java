@@ -759,6 +759,25 @@ public class ChannelProviderLocalFactory  {
                 return;
             }        
             /* (non-Javadoc)
+             * @see org.epics.pvData.channelAccess.ChannelPut#get()
+             */
+            @Override
+            public void get() {
+                if(isDestroyed || channelImpl.isDestroyed()) {
+                    message("channel is destroyed",MessageType.info);
+                    channelPutRequester.getDone(false);
+                    return;
+                }
+                pvRecord.lock();
+                try {
+                    getData();
+                } finally {
+                    pvRecord.unlock();
+                }
+                channelPutRequester.getDone(true);
+                return;
+            }
+            /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
              */
             @Override
@@ -808,8 +827,15 @@ public class ChannelProviderLocalFactory  {
             }
             
             private void putData() {
+channelPutRequester.message("putData " + bitSet.toString(), MessageType.info);
                pvCopy.updateRecord(pvStructure, bitSet, false);
             }
+            
+            private void getData() {
+                bitSet.clear();
+                bitSet.set(0);
+                pvCopy.updateCopyFromBitSet(pvStructure, bitSet, false);
+             }
         }
         
         private class ChannelPutGetImpl implements ChannelPutGet,ProcessSelfRequester
