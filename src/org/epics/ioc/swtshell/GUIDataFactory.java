@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.swtshell;
 
+import java.util.BitSet;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
@@ -20,66 +21,72 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.epics.ioc.ca.CDField;
-import org.epics.ioc.ca.CDRecord;
-import org.epics.ioc.ca.CDStructure;
+
+import org.epics.ioc.channelAccess.*;
+
 import org.epics.pvData.factory.ConvertFactory;
-import org.epics.pvData.pv.Convert;
-import org.epics.pvData.pv.Field;
-import org.epics.pvData.pv.PVArray;
-import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVScalar;
-import org.epics.pvData.pv.Type;
+import org.epics.pvData.channelAccess.*;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.pvCopy.*;
 
 /**
  * Factory which implements CDGet.
  * @author mrk
  *
  */
-public class CDGetFactory {
+public class GUIDataFactory {
     /**
      * Create a CDGet and return the interface.
      * @param parent The parent shell.
      * @return The CDGet interface.
      */
-    public static CDGet create(Shell parent) {
-        return new GetCDValue(parent);
+    public static GUIData create(Shell parent) {
+        return new GUIDataImpl(parent);
     }
     
-    private static class GetCDValue extends Dialog implements CDGet, SelectionListener {
-        private static Convert convert = ConvertFactory.getConvert();
-        private static Pattern separatorPattern = Pattern.compile("[,]");
+    private static final Convert convert = ConvertFactory.getConvert();
+    private static final Pattern separatorPattern = Pattern.compile("[,]");
+    
+    private static class GUIDataImpl extends Dialog implements GUIData, SelectionListener {
+        
         private Shell parent;
         private Shell shell;
         private Button doneButton;
         private Button editButton;
         private Text text;
         private Tree tree;
-        private CDField cdField = null;
-        private Type cdType = null;
+        
+        private BitSet bitSet;
+        
+        private PVField pvField = null;
+        private Type type = null;
+        
         
         /**
          * Constructor.
          * @param parent The parent shell.
          */
-        public GetCDValue(Shell parent) {
+        public GUIDataImpl(Shell parent) {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
             this.parent = parent;
         }
+        
         /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.CDGet#getValue(org.epics.ioc.ca.CDRecord)
+         * @see org.epics.ioc.swtshell.GUIData#get(org.epics.pvData.pv.PVStructure, java.util.BitSet)
          */
         @Override
-        public void getValue(CDRecord cdRecord) {
-            cdRecord.getCDStructure().clearNumPuts();
-            CDField[] cdFields = cdRecord.getCDStructure().getCDFields();
-            if(cdFields.length==1) {
-                CDField cdField = cdFields[0];
-                Field field = cdField.getPVField().getField();
+        public void get(PVStructure pvStructure, BitSet bitSet) {
+            this.bitSet = bitSet;
+            bitSet.clear();
+            PVField[] pvFields = pvStructure.getPVFields();
+            if(pvFields.length==1) {
+                PVField pvField = pvFields[0];
+                Field field = pvField.getField();
                 Type type = field.getType();
                 if(type==Type.scalar) {
-                    GetCDSimple getCDSimple = new GetCDSimple(parent,cdField);
-                    getCDSimple.get();
+                    GetSimple getSimple = new GetSimple(parent,pvField);
+                    boolean isModified = getSimple.get();
+                    if(isModified) bitSet.set(pvField.getFieldOffset());
                     return;
                 }
             }
@@ -114,8 +121,8 @@ public class CDGetFactory {
             gridData = new GridData(GridData.FILL_BOTH);
             tree.setLayoutData(gridData);
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-            treeItem.setText(cdRecord.getPVRecord().getRecordName());
-            createStructureTreeItem(treeItem,cdRecord.getCDStructure());
+            treeItem.setText(pvStructure.getFullFieldName());
+            createStructureTreeItem(treeItem,pvStructure);
             shell.open();
             Display display = shell.getDisplay();
             while(!shell.isDisposed()) {
@@ -143,25 +150,23 @@ public class CDGetFactory {
                 return;
             }
             if(object==editButton) {
-                
                 TreeItem[] treeItems = tree.getSelection();
                 int length = treeItems.length;
                 if(length!=0) {
                     assert(length==1);
                     TreeItem treeItem = treeItems[0];
                     object = treeItem.getData();
-                    if(object instanceof CDField) {
-                        cdField = (CDField)object;
-                        PVField pvField = cdField.getPVField();
+                    if(object instanceof PVField) {
+                        pvField = (PVField)object;
                         Field field = pvField.getField();
-                        cdType = field.getType();
+                        type = field.getType();
                         boolean ok = false;
-                        if(cdType==Type.scalar) {
+                        if(type==Type.scalar) {
                             ok = true;
-                            textMessage(cdField.getPVField().toString());
-                        } else if(cdType==Type.scalarArray) {
+                            textMessage(pvField.toString());
+                        } else if(type==Type.scalarArray) {
                             ok = true;
-                            String values = cdField.getPVField().toString();
+                            String values = pvField.toString();
                             int beginIndex = values.indexOf("{");
                             int endIndex = values.indexOf("}");
                             if(beginIndex>=0 && endIndex>=0) {
@@ -171,23 +176,22 @@ public class CDGetFactory {
                         }
                         if(!ok) {
                             textMessage("cant handle type");
-                            cdField = null;
-                            cdType = null;
+                            pvField = null;
+                            type = null;
                         }
                     } else {
-                        cdField = null;
-                        cdType = null;
+                        pvField = null;
+                        type = null;
                         text.setText("illegal field was selected");
                     }
                 }
                 return;
             }
             if(object==text) {
-                if(cdField==null) {
+                if(pvField==null) {
                     textMessage("no field was selected");
                 } else {
-                    PVField pvField = cdField.getPVField();
-                    if(cdType==Type.scalar) {
+                    if(type==Type.scalar) {
                         try {
                             convert.fromString((PVScalar)pvField, text.getText());
                         }catch (NumberFormatException e) {
@@ -219,7 +223,7 @@ public class CDGetFactory {
                             return;
                         }
                     }
-                    cdField.incrementNumPuts();
+                    bitSet.set(pvField.getFieldOffset());
                 }
                 return;
             }
@@ -232,34 +236,33 @@ public class CDGetFactory {
             text.setText(message);
         }
         
-        private void createStructureTreeItem(TreeItem tree,CDStructure cdStructure) {
-            CDField[] cdFields = cdStructure.getCDFields();
-            for(CDField cdField : cdFields) {
-                Field field = cdField.getPVField().getField();
+        private void createStructureTreeItem(TreeItem tree,PVStructure pvStructure) {
+            PVField[] pvFields = pvStructure.getPVFields();
+            for(PVField pvField : pvFields) {
+                Field field = pvField.getField();
                 TreeItem treeItem = new TreeItem(tree,SWT.NONE);
                 treeItem.setText(field.getFieldName());
                 Type type = field.getType();
                 if(type==Type.structure) {
-                    createStructureTreeItem(treeItem,(CDStructure)cdField);
+                    createStructureTreeItem(treeItem,(PVStructure)pvField);
                 } else {
-                    treeItem.setData(cdField);
+                    treeItem.setData(pvField);
                 }
             }
         }
         
-        
-        
-        private static class GetCDSimple extends Dialog implements SelectionListener{
-            private CDField cdField;
+        private static class GetSimple extends Dialog implements SelectionListener{
+            private PVField pvField;
             private Shell shell;
             private Text text;
+            private boolean modified = false;
             
-            private GetCDSimple(Shell parent,CDField cdField) {
+            private GetSimple(Shell parent,PVField pvField) {
                 super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-                this.cdField = cdField;
+                this.pvField = pvField;
             }
             
-            private void get() {
+            private boolean get() {
                 shell = new Shell(super.getParent());
                 shell.setText("value");
                 GridLayout gridLayout = new GridLayout();
@@ -279,6 +282,7 @@ public class CDGetFactory {
                     }
                 }
                 shell.dispose();
+                return  modified;
             }
 
             /* (non-Javadoc)
@@ -295,11 +299,11 @@ public class CDGetFactory {
             public void widgetSelected(SelectionEvent e) {
                 Object object = e.getSource();
                 if(object==text) {               
-                    PVField pvField = cdField.getPVField();
                     Type type = pvField.getField().getType();
                     try {
                         if(type==Type.scalar) {
                             convert.fromString((PVScalar)pvField, text.getText());
+                            modified = true;
                         } else {
                             textMessage("CDField type is not scalar");
                         }
@@ -307,7 +311,6 @@ public class CDGetFactory {
                         textMessage("exception " + ex.getMessage());
                         return;
                     }
-                    cdField.incrementNumPuts();
                     shell.close();
                     return;
                 }

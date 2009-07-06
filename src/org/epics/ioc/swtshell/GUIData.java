@@ -4,18 +4,15 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.swtshell;
+import java.util.BitSet;
 
-import org.epics.ioc.ca.CDRecord;
+import org.epics.pvData.pv.PVStructure;
+
 
 /**
- * Get values from a user and put them in a CD (ChannelData)
  * @author mrk
  *
  */
-public interface CDGet {
-    /**
-     * get values from a user and put them in cdRecord.
-     * @param cdRecord
-     */
-    void getValue(CDRecord cdRecord);
+public interface GUIData {
+    void get(PVStructure pvStructure,BitSet bitSet);
 }

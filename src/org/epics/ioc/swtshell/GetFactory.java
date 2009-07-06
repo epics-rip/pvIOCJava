@@ -268,7 +268,7 @@ public class GetFactory {
             private boolean isShared;
             private boolean process;
 
-            private void connect(boolean isShared,boolean process) {
+            void connect(boolean isShared,boolean process) {
                 if(isConnected) {
                     requester.message("already connected", MessageType.warning);
                     return;
@@ -279,7 +279,7 @@ public class GetFactory {
                 executor.execute(executorNode);
             }
             
-            private void disconnect() {
+            void disconnect() {
                 if(!isConnected) {
                     requester.message("not connected", MessageType.warning);
                     return;
@@ -288,7 +288,7 @@ public class GetFactory {
                 executor.execute(executorNode);
             }
             
-            private void get() {
+            void get() {
                 runRequest = GetRunRequest.get;
                 executor.execute(executorNode);
             }
