@@ -2,6 +2,7 @@
 <database>
 <record recordName = "valueOnly">
     <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
 </record>
 
 <record recordName = "simpleCounter" >
