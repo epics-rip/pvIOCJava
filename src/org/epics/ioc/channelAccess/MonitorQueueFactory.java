@@ -71,8 +71,8 @@ public class MonitorQueueFactory {
         }
     }
     private static class MonitorQueueImpl implements MonitorQueue {
-        private MonitorQueueElement[] monitorQueueElements;
-        private int number = 0;
+        private final MonitorQueueElement[] monitorQueueElements;
+        private final int number;
         private int numberFree = 0;
         private int numberUsed = 0;
         private int nextGetFree = 0;
@@ -92,12 +92,14 @@ public class MonitorQueueFactory {
          */
         @Override
         public void clear() {
-            numberFree = number;
-            numberUsed = 0;
-            nextGetFree = 0;
-            nextSetUsed = 0;
-            nextGetUsed = 0;
-            nextReleaseUsed = 0;
+            synchronized(this) {
+	            numberFree = number;
+	            numberUsed = 0;
+	            nextGetFree = 0;
+	            nextSetUsed = 0;
+	            nextGetUsed = 0;
+	            nextReleaseUsed = 0;
+            }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#capacity()
