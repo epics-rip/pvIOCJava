@@ -38,7 +38,7 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pvCopy.*;
+import org.epics.pvData.pvCopy.PVCopy;
 import org.epics.pvData.pvCopy.PVCopyFactory;
 import org.epics.pvData.pvCopy.PVCopyMonitor;
 import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
@@ -59,20 +59,21 @@ public class ChannelProviderLocalFactory  {
      */
     static public void register() {
         ChannelAccessFactory.registerChannelProvider(channelProvider);
+        // start standard algorithms
+        MonitorOnPutFactory.start();
+        MonitorOnChangeFactory.start();
+        MonitorOnAbsoluteChangeFactory.start();
+        MonitorOnPercentChangeFactory.start();
     }
     
-    static public void registerMonitor(MonitorCreate monitorCreate) {
-        synchronized(monitorCreateList) {
-            monitorCreateList.add(monitorCreate);
-        }
+    static public ChannelProvider getChannelProvider() {
+        return channelProvider;
     }
     
     private static final String providerName = "local";
-    
     private static final ArrayList<MonitorCreate> monitorCreateList = new ArrayList<MonitorCreate>();
-
+    
     private static class ChannelProviderLocal implements ChannelProvider{
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#getProviderName()
          */
@@ -101,6 +102,25 @@ public class ChannelProviderLocalFactory  {
             RecordProcess recordProcess = locateSupport.getRecordProcess();
             Channel channel = new ChannelImpl(pvRecord,recordProcess,channelRequester);
             channelRequester.channelCreated(channel);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#registerMonitor(org.epics.ioc.channelAccess.MonitorCreate)
+         */
+        @Override
+        public void registerMonitor(MonitorCreate monitorCreate) {
+            synchronized(monitorCreateList) {
+                monitorCreateList.add(monitorCreate);
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#destroyMonitor(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelMonitor)
+         */
+        @Override
+        public void destroyMonitor(Channel channel,ChannelMonitor channelMonitor) {
+            ChannelImpl channelImpl = (ChannelImpl)channel;
+            synchronized(channelImpl.channelMonitorList) {
+                channelImpl.channelMonitorList.remove(channelMonitor);
+            }
         }
     }
     
@@ -226,8 +246,8 @@ public class ChannelProviderLocalFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createPVStructure(org.epics.pvData.channelAccess.CreatePVStructureRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean)
          */
         @Override
-        public void createPVStructure(CreatePVStructureRequester requester,
-                PVStructure pvRequest, String structureName, boolean shareData)
+        public void createPVStructure(Channel channel,
+                CreatePVStructureRequester requester, PVStructure pvRequest, String structureName, boolean shareData)
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             requester.createDone(pvCopy.createPVStructure());
@@ -251,7 +271,7 @@ public class ChannelProviderLocalFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createChannelProcess(org.epics.pvData.channelAccess.ChannelProcessRequester)
          */
         @Override
-        public void createChannelProcess(ChannelProcessRequester channelProcessRequester) {
+        public void createChannelProcess(Channel channel, ChannelProcessRequester channelProcessRequester) {
             ChannelProcessImpl channelProcessImpl = new ChannelProcessImpl(this,channelProcessRequester);
             synchronized(channelProcessList) {
                 channelProcessList.add(channelProcessImpl);
@@ -262,9 +282,9 @@ public class ChannelProviderLocalFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createChannelGet(org.epics.pvData.channelAccess.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
          */
         @Override
-        public void createChannelGet(ChannelGetRequester channelGetRequester,
-                PVStructure pvRequest, String structureName, boolean shareData,
-                boolean process)
+        public void createChannelGet(Channel channel,
+                ChannelGetRequester channelGetRequester, PVStructure pvRequest, String structureName,
+                boolean shareData, boolean process)
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             PVStructure pvStructure = pvCopy.createPVStructure();
@@ -278,9 +298,9 @@ public class ChannelProviderLocalFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createChannelPut(org.epics.pvData.channelAccess.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
          */
         @Override
-        public void createChannelPut(ChannelPutRequester channelPutRequester,
-                PVStructure pvRequest, String structureName, boolean shareData,
-                boolean process)
+        public void createChannelPut(Channel channel,
+                ChannelPutRequester channelPutRequester, PVStructure pvRequest, String structureName,
+                boolean shareData, boolean process)
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             PVStructure pvStructure = pvCopy.createPVStructure();
@@ -296,10 +316,10 @@ public class ChannelProviderLocalFactory  {
          */
         @Override
         public void createChannelPutGet(
-                ChannelPutGetRequester channelPutGetRequester,
-                PVStructure pvPutRequest, String putStructureName,
-                boolean sharePutData, PVStructure pvGetRequest,
-                String getStructureName, boolean shareGetData, boolean process)
+                Channel channel,
+                ChannelPutGetRequester channelPutGetRequester, PVStructure pvPutRequest,
+                String putStructureName, boolean sharePutData,
+                PVStructure pvGetRequest, String getStructureName, boolean shareGetData, boolean process)
         {
             PVCopy pvPutCopy = PVCopyFactory.create(pvRecord, pvPutRequest, putStructureName, sharePutData);
             PVStructure pvPutStructure = pvPutCopy.createPVStructure();
@@ -319,10 +339,10 @@ public class ChannelProviderLocalFactory  {
          */
         @Override
         public void createChannelMonitor(
-                ChannelMonitorRequester channelMonitorRequester,
-                PVStructure pvRequest, String structureName,
-                PVStructure pvOption,
-                Executor executor)
+                Channel channel,
+                ChannelMonitorRequester channelMonitorRequester, PVStructure pvRequest,
+                String structureName,
+                PVStructure pvOption, Executor executor)
         {
             PVString pvAlgorithm = pvOption.getStringField("algorithm");
             if(pvAlgorithm==null) {
@@ -344,10 +364,11 @@ public class ChannelProviderLocalFactory  {
                 return;
             }
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, ((queueSize==0) ? true : false));
-            ChannelMonitor channelMonitor = monitorCreate.create(channelMonitorRequester, pvOption, pvCopy, queueSize, executor);
+            ChannelMonitor channelMonitor = monitorCreate.create(this,channelMonitorRequester, pvOption, pvCopy, queueSize, executor);
             synchronized(channelMonitorList) {
                 channelMonitorList.add(channelMonitor);
             }
+            channelMonitorRequester.channelMonitorConnect(channelMonitor);
         }
 
         /* (non-Javadoc)
@@ -449,7 +470,7 @@ public class ChannelProviderLocalFactory  {
             @Override
             public void process(boolean lastRequest) {
                 if(isDestroyed || channelImpl.isDestroyed()) {
-                    message("channel is not connected",MessageType.info);
+                    message("channel is destroyed",MessageType.info);
                     channelProcessRequester.processDone(false);
                     return;
                 }
@@ -827,7 +848,6 @@ public class ChannelProviderLocalFactory  {
             }
             
             private void putData() {
-channelPutRequester.message("putData " + bitSet.toString(), MessageType.info);
                pvCopy.updateRecord(pvStructure, bitSet, false);
             }
             
@@ -926,7 +946,7 @@ channelPutRequester.message("putData " + bitSet.toString(), MessageType.info);
             {
                 if(isDestroyed || channelImpl.isDestroyed()) {
                     channelPutGetRequester.message(
-                        "channel is not connected",MessageType.info);
+                        "channel is destroyed",MessageType.info);
                     channelPutGetRequester.putGetDone(false);
                     return;
                 }
@@ -947,6 +967,43 @@ channelPutRequester.message("putData " + bitSet.toString(), MessageType.info);
                 } finally {
                     pvRecord.unlock();
                 }
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.channelAccess.ChannelPutGet#getGet()
+             */
+            @Override
+            public void getGet() {
+                if(isDestroyed || channelImpl.isDestroyed()) {
+                    message("channel is destroyed",MessageType.info);
+                    channelPutGetRequester.getGetDone(false);
+                    return;
+                }
+                pvRecord.lock();
+                try {
+                    getData();
+                } finally {
+                    pvRecord.unlock();
+                }
+                channelPutGetRequester.getGetDone(true);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.channelAccess.ChannelPutGet#getPut()
+             */
+            @Override
+            public void getPut() {
+                if(isDestroyed || channelImpl.isDestroyed()) {
+                    message("channel is destroyed",MessageType.info);
+                    channelPutGetRequester.getPutDone(false);
+                    return;
+                }
+                pvRecord.lock();
+                try {
+                    getPutData();
+                } finally {
+                    pvRecord.unlock();
+                }
+                channelPutGetRequester.getPutDone(true);
+                
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
@@ -1005,7 +1062,11 @@ channelPutRequester.message("putData " + bitSet.toString(), MessageType.info);
             
             private void getData() {
                 pvGetCopy.updateCopySetBitSet(pvGetStructure, getBitSet, false);
-            }   
+            }
+            
+            private void getPutData() {
+                pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet, false);
+            }
         }
     }
 }

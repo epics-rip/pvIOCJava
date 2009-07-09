@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.pvData.channelAccess.Channel;
+import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelRequester;
 
 /**
@@ -14,4 +16,6 @@ import org.epics.pvData.channelAccess.ChannelRequester;
 public interface ChannelProvider {
     String getProviderName();
     void findChannel(String channelName,ChannelRequester channelRequester,double timeOut);
+    void registerMonitor(MonitorCreate monitorCreate);
+    void destroyMonitor(Channel channel,ChannelMonitor channelMonitor);
 }

@@ -7,7 +7,7 @@ package org.epics.ioc.channelAccess;
 
 import java.util.BitSet;
 
-import org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement;
+import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.misc.Executor;
@@ -22,21 +22,23 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnPutFactory{
     private static final String name = "onPut";
     private static final MonitorOnPut monitorOnPut = new MonitorOnPut();
+    private static final ChannelProvider channelProvider = ChannelProviderLocalFactory.getChannelProvider();
 
     public static void start() {
-        ChannelProviderLocalFactory.registerMonitor(monitorOnPut);
+        channelProvider.registerMonitor(monitorOnPut);
     }
 
     private static class MonitorOnPut implements MonitorCreate {
 
         public ChannelMonitor create(
+                Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVStructure pvOption,
                 PVCopy pvCopy,
                 byte queueSize,
                 Executor executor)
         {
-            return new Monitor(channelMonitorRequester,pvCopy,queueSize,executor);
+            return new Monitor(channel,channelMonitorRequester,pvCopy,queueSize,executor);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorCreate#getName()
@@ -49,27 +51,31 @@ public class MonitorOnPutFactory{
 
     private static class Monitor extends BaseMonitor {
         private Monitor(
+                Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
                 byte queueSize,
                 Executor executor)
         {
-            super(channelMonitorRequester,pvCopy,queueSize,executor);
+            super(channel,channelMonitorRequester,pvCopy,queueSize,executor);
             PVStructure pvStructure = pvCopy.createPVStructure();
             PVField pvField = pvStructure.getSubField("timeStamp");
-            timeStampOffset = pvField.getFieldOffset();
+            if(pvField!=null) {
+                timeStampOffset = pvField.getFieldOffset();
+                afterTimeStampOffset = pvField.getNextFieldOffset();
+            }
         }
         
-        private int timeStampOffset = 0;
+        private int timeStampOffset = -1;
+        private int afterTimeStampOffset = -1;
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
+         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(java.util.BitSet)
          */
         @Override
-        protected boolean generateMonitor(MonitorQueueElement monitorQueueElement) {
-            BitSet bitSet = monitorQueueElement.getChangedBitSet();
+        protected boolean generateMonitor(BitSet bitSet) {
             int first = bitSet.nextSetBit(0);
-            int next = bitSet.nextSetBit(first+1);
-            if(first==timeStampOffset && next==-1) return false;
+            int next = bitSet.nextSetBit(afterTimeStampOffset);
+            if(first>=timeStampOffset && next==-1) return false;
             return true;
         }
 

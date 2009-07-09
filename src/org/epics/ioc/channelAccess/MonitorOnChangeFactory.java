@@ -5,13 +5,13 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement;
+import java.util.BitSet;
+
+import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
-import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.Executor;
-import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
@@ -25,11 +25,11 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnChangeFactory {
     private static final String name = "onChange";
     private static final MonitorOnChange monitorOnChange = new MonitorOnChange();
+    private static final ChannelProvider channelProvider = ChannelProviderLocalFactory.getChannelProvider();
     private static final PVDataCreate pvDataCreate= PVDataFactory.getPVDataCreate();
-    private static final Convert convert = ConvertFactory.getConvert();
 
     public static void start() {
-        ChannelProviderLocalFactory.registerMonitor(monitorOnChange);
+        channelProvider.registerMonitor(monitorOnChange);
     }
 
     private static class MonitorOnChange implements MonitorCreate {
@@ -37,6 +37,7 @@ public class MonitorOnChangeFactory {
          * @see org.epics.ioc.channelAccess.MonitorCreate#create(org.epics.pvData.channelAccess.ChannelMonitorRequester, org.epics.pvData.pv.PVStructure, org.epics.pvData.pvCopy.PVCopy, byte, org.epics.pvData.misc.Executor)
          */
         public ChannelMonitor create(
+                Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVStructure pvOption,
                 PVCopy pvCopy,
@@ -50,7 +51,7 @@ public class MonitorOnChangeFactory {
                 return null;
             }
             pvField = pvCopy.getRecordPVField(pvField.getFieldOffset());
-            return new Monitor(channelMonitorRequester,pvCopy,queueSize,executor,pvField);
+            return new Monitor(channel,channelMonitorRequester,pvCopy,queueSize,executor,pvField);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorCreate#getName()
@@ -64,13 +65,14 @@ public class MonitorOnChangeFactory {
     
     private static class Monitor extends BaseMonitor {
         private Monitor(
+                Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
                 byte queueSize,
                 Executor executor,
                 PVField valuePVField)
         {
-            super(channelMonitorRequester,pvCopy,queueSize,executor);
+            super(channel,channelMonitorRequester,pvCopy,queueSize,executor);
             this.valuePVField = valuePVField;
             pvPrev = pvDataCreate.createPVField(null, null, valuePVField);
         }
@@ -78,10 +80,10 @@ public class MonitorOnChangeFactory {
         private PVField valuePVField;
         private PVField pvPrev;
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
+         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(java.util.BitSet)
          */
         @Override
-        protected boolean generateMonitor(MonitorQueueElement monitorQueueElement) {
+        protected boolean generateMonitor(BitSet changeBitSet) {
             if(valuePVField.equals(pvPrev)) return false;
             convert.copy(valuePVField, pvPrev);   
             return true;

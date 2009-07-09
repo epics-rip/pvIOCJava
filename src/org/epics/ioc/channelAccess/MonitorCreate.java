@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.channelAccess;
 
+import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.misc.Executor;
@@ -24,6 +25,7 @@ public interface MonitorCreate {
     String getName();
     /**
      * Create a ChannelMonitor.
+     * @param channel The channel;
      * @param channelMonitorRequester The requester.
      * @param pvOption Options for the algorithm.
      * @param pvCopy The PVCopy that maps to a subset of the fields in a PVBRecord.
@@ -32,6 +34,7 @@ public interface MonitorCreate {
      * @return The ChannelMonitor interface.
      */
     ChannelMonitor create(
+            Channel channel,
             ChannelMonitorRequester channelMonitorRequester,
             PVStructure pvOption,
             PVCopy pvCopy,

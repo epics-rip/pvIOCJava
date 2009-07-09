@@ -57,12 +57,24 @@ public interface MonitorQueue {
      */
     MonitorQueueElement getFree();
     /**
+     * Set the getFree element to used;
+     * @param monitorQueueElement The monitorQueueElement, which must be the
+     * element returned by the oldest call to getFree that was not setUsed.
+     * @throws IllegalStateException if monitorQueueElement is not the element
+     * returned by the oldest call to getFree that was not setUsed.
+     */
+    void setUsed(MonitorQueueElement monitorQueueElement);
+    /**
      * Get the oldest used element.
      * @return The next used element or null if no used elements.
      */
     MonitorQueueElement getUsed();
     /**
      * Release the getUsed structure.
+     * @param monitorQueueElement The monitorQueueElement, which must be the
+     * element returned by the most recent call to getUsed.
+     * @throws IllegalStateException if monitorQueueElement is not the element
+     * returned by the most recent call to getUsed.
      */
-    void release();
+    void releaseUsed(MonitorQueueElement monitorQueueElement);
 }

@@ -11,11 +11,22 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pvCopy.PVCopy;
 
 /**
+ * Factory that creates a MonitorQueue.
  * @author mrk
  *
  */
 public class MonitorQueueFactory {
+    /**
+     * Create a MonitorQueue.
+     * @param pvCopy The PVCopy to create the data in each queue element.
+     * @param queueSize The queue size which must be at least 2.
+     * @throws IllegalStateException if the queue size is not at least 2.
+     * @return The MonitorQueue interface.
+     */
     public static MonitorQueue create(PVCopy pvCopy, byte queueSize) {
+        if(queueSize<2) {
+            throw new IllegalStateException("queueSize must be at least 2");
+        }
         MonitorQueue.MonitorQueueElement[] monitorQueueElements = new MonitorQueue.MonitorQueueElement[queueSize];
         for(int i=0; i<monitorQueueElements.length; i++) {
             PVStructure pvStructure = pvCopy.createPVStructure();
@@ -36,6 +47,7 @@ public class MonitorQueueFactory {
         private PVStructure pvStructure;
         private BitSet changedBitSet;
         private BitSet overrunBitSet;
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement#getChangedBitSet()
          */
@@ -59,24 +71,33 @@ public class MonitorQueueFactory {
         }
     }
     private static class MonitorQueueImpl implements MonitorQueue {
-        MonitorQueueElement[] monitorQueueElements;
-        int number = 0;
-        int numberUsed = 0;
-        int nextFree = 0;
-        int nextUsed = 0;
+        private MonitorQueueElement[] monitorQueueElements;
+        private int number = 0;
+        private int numberFree = 0;
+        private int numberUsed = 0;
+        private int nextGetFree = 0;
+        private int nextSetUsed = 0;
+        private int nextGetUsed = 0;
+        private int nextReleaseUsed = 0;
+        
+       
         
         MonitorQueueImpl(MonitorQueueElement[] monitorQueueElements) {
             this.monitorQueueElements = monitorQueueElements;
             number = monitorQueueElements.length;
+            numberFree = number;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#clear()
          */
         @Override
         public void clear() {
+            numberFree = number;
             numberUsed = 0;
-            nextFree = 0;
-            nextUsed = 0;
+            nextGetFree = 0;
+            nextSetUsed = 0;
+            nextGetUsed = 0;
+            nextReleaseUsed = 0;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#capacity()
@@ -91,7 +112,7 @@ public class MonitorQueueFactory {
         @Override
         public int getNumberFree() {
             synchronized(this) {
-                return number - numberUsed;
+                return numberFree;
             }
         }
         /* (non-Javadoc)
@@ -100,11 +121,24 @@ public class MonitorQueueFactory {
         @Override
         public MonitorQueueElement getFree() {
             synchronized(this) {
-                if(numberUsed>=number) return null;
-                MonitorQueueElement monitorQueueElement = monitorQueueElements[nextFree++];
-                if(nextFree>=number) nextFree = 0;
-                numberUsed++;
+                if(numberFree==0) return null;
+                numberFree--;
+                MonitorQueueElement monitorQueueElement = monitorQueueElements[nextGetFree++];
+                if(nextGetFree>=number) nextGetFree = 0;
                 return monitorQueueElement;
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.MonitorQueue#setUsed(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
+         */
+        @Override
+        public void setUsed(MonitorQueueElement monitorQueueElement) {
+            synchronized(this) {
+                if(monitorQueueElement!=monitorQueueElements[nextSetUsed++]) {
+                    throw new IllegalStateException("not correct monitorQueueElement");
+                }
+                numberUsed++;
+                if(nextSetUsed>=number) nextSetUsed = 0;
             }
         }
         /* (non-Javadoc)
@@ -114,18 +148,23 @@ public class MonitorQueueFactory {
         public MonitorQueueElement getUsed() {
             synchronized(this) {
                 if(numberUsed==0) return null;
-                return monitorQueueElements[nextUsed];
+                MonitorQueueElement monitorQueueElement = monitorQueueElements[nextGetUsed++];
+                if(nextGetUsed>=number) nextGetUsed = 0;
+                return monitorQueueElement;
             }
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.MonitorQueue#release()
+         * @see org.epics.ioc.channelAccess.MonitorQueue#releaseUsed(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
          */
         @Override
-        public void release() {
+        public void releaseUsed(MonitorQueueElement monitorQueueElement) {
             synchronized(this) {
-                nextUsed++;
+                if(monitorQueueElement!=monitorQueueElements[nextReleaseUsed++]) {
+                    throw new IllegalStateException("not monitorQueueElement returned by last call to getUsed");
+                }
+                if(nextReleaseUsed>=number) nextReleaseUsed = 0;
                 numberUsed--;
+                numberFree++;
             }
         }
     }

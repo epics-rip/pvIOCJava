@@ -5,12 +5,12 @@
  */
 package org.epics.ioc.channelAccess;
 
-import org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement;
+import java.util.BitSet;
+
+import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
-import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.misc.Executor;
-import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
@@ -27,9 +27,10 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnAbsoluteChangeFactory {
     private static final String name = "onAbsoluteChange";
     private static final MonitorOnAbsoluteChange monitorOnAbsoluteChange = new MonitorOnAbsoluteChange();
+    private static final ChannelProvider channelProvider = ChannelProviderLocalFactory.getChannelProvider();
 
     public static void start() {
-        ChannelProviderLocalFactory.registerMonitor(monitorOnAbsoluteChange);
+        channelProvider.registerMonitor(monitorOnAbsoluteChange);
     }
 
     private static class MonitorOnAbsoluteChange implements MonitorCreate {
@@ -38,6 +39,7 @@ public class MonitorOnAbsoluteChangeFactory {
          * @see org.epics.ioc.channelAccess.MonitorCreate#create(org.epics.pvData.channelAccess.ChannelMonitorRequester, org.epics.pvData.pv.PVStructure, org.epics.pvData.pvCopy.PVCopy, byte, org.epics.pvData.misc.Executor)
          */
         public ChannelMonitor create(
+                Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVStructure pvOption,
                 PVCopy pvCopy,
@@ -45,9 +47,9 @@ public class MonitorOnAbsoluteChangeFactory {
                 Executor executor)
         {
             PVStructure pvStructure = pvCopy.createPVStructure();
-            PVDouble pvDeadband = pvStructure.getDoubleField("deadband");
+            PVDouble pvDeadband = pvOption.getDoubleField("deadband");
             if(pvDeadband==null) {
-                channelMonitorRequester.message("dead field not defined", MessageType.error);
+                channelMonitorRequester.message("deadband field not defined", MessageType.error);
                 return null;
             }
             PVField pvField = pvStructure.getSubField("value");
@@ -65,7 +67,7 @@ public class MonitorOnAbsoluteChangeFactory {
                 return null;
             }
             pvField = pvCopy.getRecordPVField(pvField.getFieldOffset());
-            return new Monitor(channelMonitorRequester,pvCopy,queueSize,executor,pvDeadband.get(),(PVScalar)pvField);
+            return new Monitor(channel,channelMonitorRequester,pvCopy,queueSize,executor,pvDeadband.get(),(PVScalar)pvField);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorCreate#getName()
@@ -76,9 +78,9 @@ public class MonitorOnAbsoluteChangeFactory {
         }
     }
     
-    private static Convert convert = ConvertFactory.getConvert();
     private static class Monitor extends BaseMonitor {
         private Monitor(
+                Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
                 byte queueSize,
@@ -86,20 +88,20 @@ public class MonitorOnAbsoluteChangeFactory {
                 double deadband,
                 PVScalar valuePVField)
         {
-            super(channelMonitorRequester,pvCopy,queueSize,executor);
+            super(channel,channelMonitorRequester,pvCopy,queueSize,executor);
             this.deadband = deadband;
             this.valuePVField = valuePVField;
             prevValue = convert.toDouble(valuePVField);
         }
         
         private double deadband = 0.0;
-        private PVScalar valuePVField;
-        private double prevValue = 0.0;
+        private PVScalar valuePVField = null;
+        private double prevValue;
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
+         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(java.util.BitSet)
          */
         @Override
-        protected boolean generateMonitor(MonitorQueueElement monitorQueueElement) {
+        protected boolean generateMonitor(BitSet changeBitSet) {
             double value = convert.toDouble(valuePVField);
             double diff = value - prevValue;
             if(Math.abs(diff) < deadband) return false;
