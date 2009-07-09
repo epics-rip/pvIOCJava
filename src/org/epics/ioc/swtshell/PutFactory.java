@@ -6,9 +6,6 @@
 package org.epics.ioc.swtshell;
 
 import java.util.BitSet;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -23,16 +20,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.channelAccess.*;
-
-
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.channelAccess.Channel;
+import org.epics.pvData.channelAccess.ChannelPut;
+import org.epics.pvData.channelAccess.ChannelPutRequester;
 import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
-import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.channelAccess.*;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Requester;
 
 /*
  * A shell for channelGet.
@@ -60,6 +55,7 @@ public class PutFactory {
 
         private boolean isDisposed = false;
         private static String windowName = "put";
+        private ExecutorNode executorNode = executor.createNode(this);
         private Display display;
         private Shell shell = null;
         private Requester requester = null;
@@ -137,6 +133,7 @@ public class PutFactory {
          */
         public void widgetDisposed(DisposeEvent e) {
             isDisposed = true;
+            executor.execute(executorNode);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -248,7 +245,7 @@ public class PutFactory {
         }
         
         private enum PutRunRequest {
-            connect,
+            create,
             disconnect,
             put
         }
@@ -257,7 +254,7 @@ public class PutFactory {
         Runnable,
         ChannelPutRequester
         {
-            boolean isConnected = false;
+            boolean isCreated = false;
             private ExecutorNode executorNode = executor.createNode(this);
             private ChannelPut channelPut = null;
             private PVStructure pvStructure = null;
@@ -267,19 +264,19 @@ public class PutFactory {
             private boolean process;
 
             void connect(boolean isShared,boolean process) {
-                if(isConnected) {
-                    requester.message("already connected", MessageType.warning);
+                if(isCreated) {
+                    requester.message("already created", MessageType.warning);
                     return;
                 }
                 this.isShared = isShared;
                 this.process = process;
-                runRequest = PutRunRequest.connect;
+                runRequest = PutRunRequest.create;
                 executor.execute(executorNode);
             }
             
             void disconnect() {
-                if(!isConnected) {
-                    requester.message("not connected", MessageType.warning);
+                if(!isCreated) {
+                    requester.message("not created", MessageType.warning);
                     return;
                 }
                 runRequest = PutRunRequest.disconnect;
@@ -304,13 +301,13 @@ public class PutFactory {
             @Override
             public void run() {
                 switch(runRequest) {
-                case connect:
-                    channel.createChannelPut(this, pvRequest, pvRequest.getField().getFieldName(),isShared,process);
+                case create:
+                    channel.createChannelPut(channel, this, pvRequest,pvRequest.getField().getFieldName(),isShared, process);
                     break;
                 case disconnect:
                     channelPut.destroy();
                     channel.destroy();
-                    isConnected = false;
+                    isCreated = false;
                     break;
                 case put:
                     channelPut.put(false);
@@ -326,7 +323,7 @@ public class PutFactory {
                 this.channelPut = channelPut;
                 this.pvStructure = pvStructure;
                 changeBitSet = channelPut.getBitSet();
-                isConnected = true;
+                isCreated = true;
                 channelPut.get();
             }
             /* (non-Javadoc)

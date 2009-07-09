@@ -134,7 +134,10 @@ public class ProcessFactory {
          */
         @Override
         public void widgetSelected(SelectionEvent arg0) {
-            if(isDisposed) return;
+            if(isDisposed) {
+                if(channel!=null) channel.destroy();
+                return;
+            }
             Object object = arg0.getSource();
             if(object==connectButton) {
                 ConnectChannel connectChannel = ConnectChannelFactory.create(shell, this);
@@ -232,7 +235,7 @@ public class ProcessFactory {
                 this.channel = channel;
                 this.requester = requester;
                 executorNode = executor.createNode(this);
-                channel.createChannelProcess(this);
+                channel.createChannelProcess(channel, this);
             }
             
             private void process() {

@@ -56,6 +56,7 @@ public class GetFactory {
         
         private boolean isDisposed = false;
         private static String windowName = "get";
+        private ExecutorNode executorNode = executor.createNode(this);
         private Display display;
         private Shell shell = null;
         private Requester requester = null;
@@ -135,6 +136,7 @@ public class GetFactory {
         @Override
         public void widgetDisposed(DisposeEvent e) {
             isDisposed = true;
+            executor.execute(executorNode);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -212,7 +214,7 @@ public class GetFactory {
         @Override
         public void request(PVStructure pvRequest, boolean isShared) {
             this.pvRequest = pvRequest;
-            get.connect(isShared, isProcess);
+            get.create(isShared, isProcess);
             getButton.setEnabled(true);
             createRequestButton.setEnabled(false);
             processButton.setEnabled(false);
@@ -250,7 +252,7 @@ public class GetFactory {
         }
         
         private enum GetRunRequest {
-            connect,
+            create,
             disconnect,
             get
         }
@@ -259,29 +261,29 @@ public class GetFactory {
         Runnable,
         ChannelGetRequester
         {
-            boolean isConnected = false;
+            boolean isCreated = false;
             private ExecutorNode executorNode = executor.createNode(this);
             private ChannelGet channelGet = null;
-            private PVStructure pvStructure = null;
             private BitSet changeBitSet = null;
             private GetRunRequest runRequest;
             private boolean isShared;
             private boolean process;
+            private PrintModified printModified = null;
 
-            void connect(boolean isShared,boolean process) {
-                if(isConnected) {
-                    requester.message("already connected", MessageType.warning);
+            void create(boolean isShared,boolean process) {
+                if(isCreated) {
+                    requester.message("already created", MessageType.warning);
                     return;
                 }
                 this.isShared = isShared;
                 this.process = process;
-                runRequest = GetRunRequest.connect;
+                runRequest = GetRunRequest.create;
                 executor.execute(executorNode);
             }
             
             void disconnect() {
-                if(!isConnected) {
-                    requester.message("not connected", MessageType.warning);
+                if(!isCreated) {
+                    requester.message("not created", MessageType.warning);
                     return;
                 }
                 runRequest = GetRunRequest.disconnect;
@@ -298,13 +300,13 @@ public class GetFactory {
             @Override
             public void run() {
                 switch(runRequest) {
-                case connect:
-                    channel.createChannelGet(this, pvRequest, pvRequest.getField().getFieldName(),isShared,process);
+                case create:
+                    channel.createChannelGet(channel, this, pvRequest,pvRequest.getField().getFieldName(),isShared, process);
                     break;
                 case disconnect:
                     channelGet.destroy();
                     channel.destroy();
-                    isConnected = false;
+                    isCreated = false;
                     break;
                 case get:
                     channelGet.get(false);
@@ -318,9 +320,9 @@ public class GetFactory {
             @Override
             public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure) {
                 this.channelGet = channelGet;
-                this.pvStructure = pvStructure;
                 changeBitSet = channelGet.getBitSet();
-                isConnected = true;
+                isCreated = true;
+                printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, null, consoleText);
             }
 
             /* (non-Javadoc)
@@ -330,7 +332,6 @@ public class GetFactory {
             public void getDone(boolean success) {
                 display.asyncExec( new Runnable() {
                     public void run() {
-                        PrintModified printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, null, consoleText);
                         printModified.print();
                     }
 

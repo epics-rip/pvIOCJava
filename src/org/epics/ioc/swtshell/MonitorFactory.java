@@ -5,10 +5,7 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.List;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.BitSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -17,30 +14,29 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.ca.CD;
-import org.epics.ioc.ca.CDMonitor;
-import org.epics.ioc.ca.CDMonitorFactory;
-import org.epics.ioc.ca.CDMonitorRequester;
-import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelField;
-import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.ca.ChannelFieldGroupListener;
-import org.epics.ioc.ca.ChannelListener;
+import org.epics.pvData.channelAccess.Channel;
+import org.epics.pvData.channelAccess.ChannelMonitor;
+import org.epics.pvData.channelAccess.ChannelMonitorRequester;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
-import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVByte;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.pv.Scalar;
 import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.pv.Type;
+
 /**
  * A shell for monitoring a channel.
  * @author mrk
@@ -56,130 +52,99 @@ public class MonitorFactory {
         MonitorImpl monitorImpl = new MonitorImpl(display);
         monitorImpl.start();
     }
-
+    
     private static class MonitorImpl
-    implements DisposeListener,Requester,ChannelListener,
-    ChannelFieldGroupListener,SelectionListener,CDMonitorRequester  {
+    implements DisposeListener,CreateRequestRequester,SelectionListener,Runnable  {
 
         private MonitorImpl(Display display) {
             this.display = display;
         }
 
-        private static Executor executor
-            = ExecutorFactory.create("swtshellMonitor", ThreadPriority.low);
-        private static String windowName = "monitor";
+        private static final Executor executor = SwtshellFactory.getExecutor();
+        private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+        private static final String windowName = "monitor";
+        private ExecutorNode executorNode = executor.createNode(this);
         private Display display;
         private boolean isDisposed = false;
         private Shell shell = null;
         private Requester requester = null;
         private Channel channel = null;
-        private ChannelField channelField = null;
-        private ChannelConnect channelConnect = null;
-        private static enum MonitorType{ put, change, absolute, percentage }
-        private int queueSize = 10;
-        private MonitorType monitorType = MonitorType.put;
-        private double deadband = 0.0;       
-        private Button propertyButton;          
+        private Button connectButton;
+        private Button createRequestButton = null;
+        private Button disconnectButton;
+        
+        private Text consoleText = null;
+        private PVStructure pvRequest = null;
+        private PVStructure pvOption = null;
+        private PVString pvAlgorithm = null;
+        private PVByte pvQueueSize = null;
+        private Text queueSizeText = null;
+        private PVDouble pvDeadband = null;
+        private Text deadbandText;
+        private Monitor monitor = new Monitor();
+        
+        private byte queueSize = 3;
+        private double deadband = 0.0;               
         private Button putButton;
         private Button changeButton;
         private Button absoluteButton;
         private Button percentageButton;
         private Button startStopButton;
-        private Text deadbandText;
-        private Text consoleText = null;
-
-        private String[] propertyNames = null;
-        private CDMonitor cdMonitor = null;
-        private boolean isMonitoring = false;
-
-        private Lock lock = new ReentrantLock();
-        private Condition waitDone = lock.newCondition();
-        private boolean allDone = false;
         
-        /* (non-Javadoc)
-         * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
-         */
-        public void widgetDisposed(DisposeEvent e) {
-            isDisposed = true;
-            if(channel!=null) channel.destroy();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        public String getRequesterName() {
-            return requester.getRequesterName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            requester.message(message, messageType);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelListener#channelStateChange(org.epics.ioc.ca.Channel, boolean)
-         */
-        public void channelStateChange(Channel c, boolean isConnected) {
-            if(isDisposed) return;
-            if(isConnected) {
-                channel = channelConnect.getChannel();
-                String fieldName = channel.getFieldName();
-                channelField = channel.createChannelField(fieldName);
-                cdMonitor = null;
-                startStopButton.setText("startMonitor");
-                enableOptions();
-                return;
-            } else { 
-                isMonitoring = false;
-                if(cdMonitor!=null) cdMonitor.stop();
-                cdMonitor = null;
-                startStopButton.setText("startMonitor");
-                disableOptions();                   
-                return;
-            }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelListener#disconnect(org.epics.ioc.ca.Channel)
-         */
-        public void destroy(Channel c) {
-            channelStateChange(c,false);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelFieldGroupListener#accessRightsChange(org.epics.ioc.ca.Channel, org.epics.ioc.ca.ChannelField)
-         */
-        public void accessRightsChange(Channel channel, ChannelField channelField) {
-            // Nothing to do
-        }
+        
+        private boolean isMonitoring = false;
         
         private void start() {
+            initPVOption();
             shell = new Shell(display);
             shell.setText(windowName);
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
-            channelConnect = ChannelConnectFactory.create(this,this);
-            channelConnect.createWidgets(shell,true,true);
-            Composite rowComposite = new Composite(shell,SWT.BORDER);
+            Composite composite = new Composite(shell,SWT.BORDER);
+            RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
+            composite.setLayout(rowLayout);
+            connectButton = new Button(composite,SWT.PUSH);
+            connectButton.setText("connect");
+            connectButton.addSelectionListener(this);               
+            connectButton.setEnabled(true);
+            createRequestButton = new Button(composite,SWT.PUSH);
+            createRequestButton.setText("createRequest");
+            createRequestButton.addSelectionListener(this);               
+            createRequestButton.setEnabled(false);
+            disconnectButton = new Button(composite,SWT.PUSH);
+            disconnectButton.setText("disconnect");
+            disconnectButton.addSelectionListener(this);               
+            disconnectButton.setEnabled(false);
+            composite  = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
-            rowComposite.setLayout(gridLayout);
-            propertyButton = new Button(rowComposite,SWT.PUSH);
-            propertyButton.setText("property");
-            propertyButton.addSelectionListener(this);
-            Composite deadbandComposite = new Composite(rowComposite,SWT.BORDER);
+            composite.setLayout(gridLayout);
+            Composite queueComposite = new Composite(composite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            queueComposite.setLayout(gridLayout);
+            new Label(queueComposite,SWT.NONE).setText("queueSize");
+            queueSizeText = new Text(queueComposite,SWT.BORDER);
+            GridData gridData = new GridData(); 
+            gridData.widthHint = 25;
+            queueSizeText.setLayoutData(gridData);
+            queueSizeText.addSelectionListener(this);
+            Composite deadbandComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             deadbandComposite.setLayout(gridLayout);
             new Label(deadbandComposite,SWT.NONE).setText("deadband");
             deadbandText = new Text(deadbandComposite,SWT.BORDER);
-            GridData gridData = new GridData(); 
+            gridData = new GridData(); 
             gridData.widthHint = 75;
             deadbandText.setLayoutData(gridData);
             deadbandText.addSelectionListener(this);
-            rowComposite = new Composite(shell,SWT.BORDER);
+            composite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
-            rowComposite.setLayout(gridLayout);
-            Composite monitorTypeComposite = new Composite(rowComposite,SWT.BORDER);
+            composite.setLayout(gridLayout);
+            Composite monitorTypeComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 4;
             monitorTypeComposite.setLayout(gridLayout);
@@ -203,7 +168,7 @@ public class MonitorFactory {
             startStopButton = new Button(startStopComposite,SWT.PUSH);
             startStopButton.setText("startMonitor");
             startStopButton.addSelectionListener(this);
-            disableOptions();
+            startStopButton.setEnabled(false);
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -228,9 +193,30 @@ public class MonitorFactory {
             gridData.widthHint = 200;
             consoleText.setLayoutData(gridData);
             requester = SWTMessageFactory.create(windowName,display,consoleText);
+            enableOptions();
             shell.pack();
             shell.open();
             shell.addDisposeListener(this);
+        }
+        
+        private void initPVOption() {
+            pvOption = pvDataCreate.createPVStructure(null, "pvOption", new Field[0]);
+            pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvOption, "algorithm", ScalarType.pvString);
+            pvAlgorithm.put("onPut");
+            pvOption.appendPVField(pvAlgorithm);
+            pvQueueSize = (PVByte)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvByte);
+            pvQueueSize.put(queueSize);
+            pvOption.appendPVField(pvQueueSize);
+            pvDeadband = (PVDouble)pvDataCreate.createPVScalar(pvOption, "deadband", ScalarType.pvDouble);
+            pvDeadband.put(deadband);
+            pvOption.appendPVField(pvDeadband);
+        }
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+         */
+        public void widgetDisposed(DisposeEvent e) {
+            isDisposed = true;
+            executor.execute(executorNode);
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -244,100 +230,246 @@ public class MonitorFactory {
         public void widgetSelected(SelectionEvent arg0) {
             if(isDisposed) return;
             Object object = arg0.getSource();
-            if(object==propertyButton) {
-                PropertyGet propertyGet = PropertyGetFactory.create(shell);
-                propertyNames = propertyGet.getPropertyNames(channelField);
+            if(object==connectButton) {
+                ConnectChannel connectChannel = ConnectChannelFactory.create(shell, this);
+                connectChannel.connect();
+                return;
+            }
+            if(object==createRequestButton) {
+                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
+                createRequest.create();
+                return;
+            }
+            if(object==disconnectButton) {
+                monitor.stop();
+                connectButton.setEnabled(true);
+                disconnectButton.setEnabled(false);
+                channel.destroy();
+                channel = null;
+                return;
             }
             if(object==putButton) {
                 if(!putButton.getSelection()) return;
-                monitorType = MonitorType.put;
+                pvAlgorithm.put("onPut");
                 return;
             }
             if(object==changeButton) {
                 if(!changeButton.getSelection()) return;
-                monitorType = MonitorType.change;
+                pvAlgorithm.put("onChange");
                 return;
             }
             if(object==absoluteButton) {
                 if(!absoluteButton.getSelection()) return;
-                monitorType = MonitorType.absolute;
+                pvAlgorithm.put("onAbsoluteChange");
                 return;
             }
             if(object==percentageButton) {
                 if(!percentageButton.getSelection()) return;
-                monitorType = MonitorType.percentage;
+                pvAlgorithm.put("onPercentChange");
+                return;
+            }
+            if(object==queueSizeText) {
+                String value = queueSizeText.getText();
+                try {
+                    queueSize = (byte)(int)Integer.decode(value);
+                    pvQueueSize.put(queueSize);
+                } catch (NumberFormatException e) {
+                    message("Illegal value", MessageType.error);
+                }
                 return;
             }
             if(object==deadbandText) {
                 String value = deadbandText.getText();
                 try {
                     deadband = Double.parseDouble(value);
+                    pvDeadband.put(deadband);
                 } catch (NumberFormatException e) {
                     message("Illegal value", MessageType.error);
                 }
+                return;
             }
             if(object==startStopButton) {
                 if(isMonitoring) {
                     isMonitoring = false;
-                    cdMonitor.stop();
-                    cdMonitor = null;
+                    monitor.stop();
                     startStopButton.setText("startMonitor");
                     enableOptions();
-                    return;
-                }
-                if(cdMonitor==null) createMonitor();
-                if(cdMonitor==null) {
-                    message("no cdMonitor", MessageType.error);
                     return;
                 }
                 isMonitoring = true;
                 startStopButton.setText("stopMonitor");
                 disableOptions();
                 startStopButton.setEnabled(true);
-                cdMonitor.start(queueSize,executor);
+                monitor.start();
                 return;
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequester#dataOverrun(int)
+         * @see org.epics.ioc.util.Requester#getRequesterName()
          */
-        public void dataOverrun(int number) {
-            message(String.format("dataOverrun number = %d", number), MessageType.info);
+        public String getRequesterName() {
+            return requester.getRequesterName();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelMonitorRequester#monitorData(org.epics.ioc.ca.CD)
+         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
-        public void monitorCD(final CD cD) {
-            if(isDisposed) return;
-            allDone = false;
-            display.asyncExec( new Runnable() {
-                public void run() {
-                    CDPrint cdPrint = CDPrintFactory.create(cD.getCDRecord(),consoleText);
-                    cdPrint.print();
-                    lock.lock();
-                    try {
-                        allDone = true;
-                        waitDone.signal();
-                    } finally {
-                        lock.unlock();
-                    }
-                }
-
-            });
-            lock.lock();
-            try {
-                while(!allDone) {                       
-                    waitDone.await();
-                }
-            } catch (InterruptedException ie) {
+        public void message(String message, MessageType messageType) {
+            requester.message(message, messageType);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelRequester#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+         */
+        @Override
+        public void channelStateChange(Channel c, boolean isConnected) {
+            display.asyncExec(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+         */
+        @Override
+        public void channelCreated(Channel channel) {
+            this.channel = channel;
+            message("channel created",MessageType.info);
+            display.asyncExec(this);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+         */
+        @Override
+        public void channelNotCreated() {
+            message("channelNotCreated",MessageType.error);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
+         */
+        @Override
+        public void request(PVStructure pvRequest, boolean isShared) {
+            this.pvRequest = pvRequest;
+            
+            createRequestButton.setEnabled(false);
+            startStopButton.setEnabled(true);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
+         */
+        @Override
+        public void destroy(Channel c) {
+            display.asyncExec(this);
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            if(isDisposed) {
+                if(channel!=null) channel.destroy();
                 return;
-            } finally {
-                lock.unlock();
+            }
+            if(channel==null) return;
+            boolean isConnected = channel.isConnected();
+            if(isConnected) {
+                connectButton.setEnabled(false);
+                disconnectButton.setEnabled(true);
+                createRequestButton.setEnabled(true);
+                startStopButton.setText("startMonitor");
+            } else {
+                connectButton.setEnabled(true);
+                createRequestButton.setEnabled(false);
+                disconnectButton.setEnabled(false);
+                startStopButton.setText("startMonitor");
             }
         }
         
+        private enum MonitorRunRequest {
+            start,
+            stop
+        }
+        
+        
+        private class Monitor implements
+        Runnable,
+        ChannelMonitorRequester
+        {
+            private ExecutorNode executorNode = executor.createNode(this);
+            private MonitorRunRequest runRequest;
+            private ChannelMonitor channelMonitor = null;
+            private PrintModified printModified = null;
+            
+            void start() {
+                runRequest = MonitorRunRequest.start;
+                executor.execute(executorNode);
+            }
+            
+            void stop() {
+                runRequest = MonitorRunRequest.stop;
+                executor.execute(executorNode);
+            }
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            @Override
+            public void run() {
+                switch(runRequest) {
+                case start:
+                    channel.createChannelMonitor(channel, this, pvRequest, pvRequest.getField().getFieldName(), pvOption, executor);
+                    channelMonitor.start();
+                    break;
+                case stop:
+                    channelMonitor.stop();
+                    channelMonitor.destroy();
+                    break;
+                }
+                
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#channelMonitorConnect(org.epics.pvData.channelAccess.ChannelMonitor)
+             */
+            @Override
+            public void channelMonitorConnect(ChannelMonitor channelMonitor) {
+                this.channelMonitor = channelMonitor;
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, java.util.BitSet, java.util.BitSet)
+             */
+            @Override
+            public void monitorEvent(PVStructure pvStructure,
+                    BitSet changeBitSet, BitSet overrunBitSet)
+            {
+                printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, null, consoleText);
+                display.asyncExec( new Runnable() {
+                    public void run() {
+                        printModified.print();
+                    }
+                });
+            }
+
+            /* (non-Javadoc)
+             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#unlisten()
+             */
+            @Override
+            public void unlisten() {
+                // TODO Auto-generated method stub
+                
+            } 
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requester#getRequesterName()
+             */
+            @Override
+            public String getRequesterName() {
+                return requester.getRequesterName();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+             */
+            @Override
+            public void message(final String message, final MessageType messageType) {
+                requester.message(message, MessageType.info);
+            }           
+            
+        }
+
         private void disableOptions() {
-            propertyButton.setEnabled(false);
             putButton.setEnabled(false);
             changeButton.setEnabled(false);
             absoluteButton.setEnabled(false);
@@ -345,66 +477,14 @@ public class MonitorFactory {
             deadbandText.setEnabled(false);
             startStopButton.setEnabled(false);
         }
-        
+
         private void enableOptions() {
-            Field field = channelField.getField();
-            Type type = field.getType();
-            if(type==Type.scalar) {
-                Scalar scalar = (Scalar)field;
-                ScalarType scalarType = scalar.getScalarType();
-                if(!scalarType.isNumeric()) {
-                    monitorType = MonitorType.put;
-                    putButton.setSelection(true);
-                }
-            }
-            propertyButton.setEnabled(true);
             putButton.setEnabled(true);
             changeButton.setEnabled(true);
             absoluteButton.setEnabled(true);
             percentageButton.setEnabled(true);
             deadbandText.setEnabled(true);
             startStopButton.setEnabled(true);
-        }
-
-        private void createMonitor() {
-            ChannelFieldGroup channelFieldGroup = channel.createFieldGroup(this);
-            channelFieldGroup.addChannelField(channelField);
-            if(propertyNames!=null && propertyNames.length>0) {
-                for(String propertyName: propertyNames) {
-                    ChannelField propChannelField = channelField.findProperty(propertyName);
-                    if(propChannelField==null) {
-                        requester.message(String.format(
-                                "property %s not found%n", propertyName),MessageType.error);
-                        continue;
-                    }
-                    channelFieldGroup.addChannelField(propChannelField);
-                }
-            }
-            
-            cdMonitor = CDMonitorFactory.create(channel, this);
-            List<ChannelField> channelFieldList = channelFieldGroup.getList();
-            ChannelField channelField = channelFieldList.get(0);
-            switch(monitorType) {
-            case put:
-                cdMonitor.lookForPut(channelField, true);
-                break;
-            case change:
-                cdMonitor.lookForChange(channelField, true);
-                break;
-            case absolute:
-                cdMonitor.lookForAbsoluteChange(channelField, deadband);
-                break;
-            case percentage:
-                cdMonitor.lookForPercentageChange(channelField, deadband);
-                break;
-            }
-            for(int i = 1; i<channelFieldList.size(); i++) {
-                channelField = channelFieldList.get(i);
-                String fieldName = channelField.getField().getFieldName();
-                boolean causeMonitor = true;
-                if(fieldName.equals("timeStamp")) causeMonitor = false;
-                cdMonitor.lookForPut(channelField, causeMonitor);
-            }
         }
     }
 }

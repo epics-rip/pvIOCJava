@@ -21,13 +21,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-
-import org.epics.ioc.channelAccess.*;
-
 import org.epics.pvData.factory.ConvertFactory;
-import org.epics.pvData.channelAccess.*;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.pvCopy.*;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Type;
 
 /**
  * Factory which implements CDGet.
