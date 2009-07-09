@@ -246,6 +246,7 @@ public class MonitorFactory {
                 disconnectButton.setEnabled(false);
                 channel.destroy();
                 channel = null;
+                startStopButton.setEnabled(false);
                 return;
             }
             if(object==putButton) {
@@ -345,7 +346,6 @@ public class MonitorFactory {
         @Override
         public void request(PVStructure pvRequest, boolean isShared) {
             this.pvRequest = pvRequest;
-            
             createRequestButton.setEnabled(false);
             startStopButton.setEnabled(true);
         }
@@ -475,7 +475,6 @@ public class MonitorFactory {
             absoluteButton.setEnabled(false);
             percentageButton.setEnabled(false);
             deadbandText.setEnabled(false);
-            startStopButton.setEnabled(false);
         }
 
         private void enableOptions() {
@@ -484,7 +483,6 @@ public class MonitorFactory {
             absoluteButton.setEnabled(true);
             percentageButton.setEnabled(true);
             deadbandText.setEnabled(true);
-            startStopButton.setEnabled(true);
         }
     }
 }
