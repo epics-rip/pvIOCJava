@@ -20,7 +20,7 @@ public class ChannelAccessFactory {
     private static final Map<String,ChannelProvider> channelProviderMap = new TreeMap<String,ChannelProvider>();
     private static ChannelAccess channelAccess = new ChannelAccessImpl();
     static {
-        ChannelProviderLocalFactory.register();
+        ChannelProviderFactory.register();
     }
     
     /**
@@ -36,7 +36,6 @@ public class ChannelAccessFactory {
             channelProviderMap.put(channelProvider.getProviderName(), channelProvider);
         }
     }
-    
     
     
     private static class ChannelAccessImpl implements ChannelAccess{

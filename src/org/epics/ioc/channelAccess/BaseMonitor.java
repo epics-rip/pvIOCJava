@@ -62,7 +62,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
             monitorQueue = MonitorQueueFactory.create(pvCopy, queueSize);
         }
     }
-    private static final ChannelProvider channelProvider = ChannelProviderLocalFactory.getChannelProvider();
+    private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
     protected static final Convert convert = ConvertFactory.getConvert();
     protected static final BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
     protected Channel channel;

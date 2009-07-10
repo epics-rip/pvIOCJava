@@ -8,12 +8,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
 
-import org.epics.ioc.install.IOCDatabaseFactory;
-import org.epics.ioc.install.LocateSupport;
-import org.epics.ioc.support.ProcessSelf;
-import org.epics.ioc.support.ProcessSelfRequester;
-import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.util.RequestResult;
+
 import org.epics.pvData.channelAccess.AccessRights;
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelGet;
@@ -52,10 +47,10 @@ import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
  * @author mrk
  *
  */
-public class ChannelProviderLocalFactory  {
+public class ChannelProviderFactory  {
     private static ChannelProviderLocal channelProvider = new ChannelProviderLocal();
     /**
-     * Register. This is called by ChannelFactory.
+     * Register. This is called by ChannelAccessFactory.
      */
     static public void register() {
         ChannelAccessFactory.registerChannelProvider(channelProvider);
@@ -72,6 +67,8 @@ public class ChannelProviderLocalFactory  {
     
     private static final String providerName = "local";
     private static final ArrayList<MonitorCreate> monitorCreateList = new ArrayList<MonitorCreate>();
+    private static final PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
+    private static ChannelProcessorProvider channelProcessorProvider = null;
     
     private static class ChannelProviderLocal implements ChannelProvider{
         /* (non-Javadoc)
@@ -88,19 +85,16 @@ public class ChannelProviderLocalFactory  {
         public void findChannel(String channelName,
                 ChannelRequester channelRequester, double timeOut)
         {
-            PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
             PVRecord pvRecord = pvDatabase.findRecord(channelName);
             if(pvRecord==null) {
-                pvDatabase = PVDatabaseFactory.getBeingInstalled();
-                if(pvDatabase!=null) pvRecord = pvDatabase.findRecord(channelName);
+                PVDatabase beingInstalled = PVDatabaseFactory.getBeingInstalled();
+                if(beingInstalled!=null) pvRecord = beingInstalled.findRecord(channelName);
             }
             if(pvRecord==null) {
                 channelRequester.channelNotCreated();
                 return;
             }
-            LocateSupport locateSupport = IOCDatabaseFactory.get(pvDatabase).getLocateSupport(pvRecord);
-            RecordProcess recordProcess = locateSupport.getRecordProcess();
-            Channel channel = new ChannelImpl(pvRecord,recordProcess,channelRequester);
+            Channel channel = new ChannelImpl(pvRecord,channelRequester);
             channelRequester.channelCreated(channel);
         }
         /* (non-Javadoc)
@@ -122,12 +116,20 @@ public class ChannelProviderLocalFactory  {
                 channelImpl.channelMonitorList.remove(channelMonitor);
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#registerChannelProcessProvider(org.epics.ioc.channelAccess.ChannelProcessorProvider)
+         */
+        @Override
+        public boolean registerChannelProcessProvider(ChannelProcessorProvider channelProcessorProvider) {
+            if(ChannelProviderFactory.channelProcessorProvider!=null) return false;
+            ChannelProviderFactory.channelProcessorProvider = channelProcessorProvider;
+            return true;
+        }
     }
     
     private static class ChannelImpl implements Channel {
         private boolean isDestroyed = false;
         private PVRecord pvRecord;
-        private RecordProcess recordProcess;
         private ChannelRequester channelRequester;
         private LinkedList<ChannelProcess> channelProcessList = new LinkedList<ChannelProcess>();
         private LinkedList<ChannelGet> channelGetList = new LinkedList<ChannelGet>();
@@ -136,10 +138,9 @@ public class ChannelProviderLocalFactory  {
         private LinkedList<ChannelMonitor> channelMonitorList = new LinkedList<ChannelMonitor>();
         
         
-        private ChannelImpl(PVRecord pvRecord,RecordProcess recordProcess,ChannelRequester channelRequester)
+        private ChannelImpl(PVRecord pvRecord,ChannelRequester channelRequester)
         {
             this.pvRecord = pvRecord;
-            this.recordProcess = recordProcess;
             this.channelRequester = channelRequester;
         }       
         
@@ -147,11 +148,14 @@ public class ChannelProviderLocalFactory  {
             return isDestroyed;
         }
         
-        private RecordProcess getRecordProcess() {
-            return recordProcess;
+        private ChannelProcessor requestChannelProcessor(PVRecord pvRecord,ChannelProcessorRequester channelProcessorRequester)  {
+            ChannelProcessorProvider channelProcessorProvider = ChannelProviderFactory.channelProcessorProvider;
+            if(channelProcessorProvider==null) return null;
+            return channelProcessorProvider.requestChannelProcessor(pvRecord, channelProcessorRequester);
         }
-        
-        /* (non-Javadoc)         * @see org.epics.pvData.pv.Requester#getRequesterName()
+    
+        /* (non-Javadoc)
+         * @see org.epics.pvData.pv.Requester#getRequesterName()
          */
         @Override
         public String getRequesterName() {
@@ -272,11 +276,7 @@ public class ChannelProviderLocalFactory  {
          */
         @Override
         public void createChannelProcess(Channel channel, ChannelProcessRequester channelProcessRequester) {
-            ChannelProcessImpl channelProcessImpl = new ChannelProcessImpl(this,channelProcessRequester);
-            synchronized(channelProcessList) {
-                channelProcessList.add(channelProcessImpl);
-            }
-            channelProcessRequester.channelProcessConnect(channelProcessImpl);
+            new ChannelProcessImpl(this,channelProcessRequester);
         }
         /* (non-Javadoc)
          * @see org.epics.pvData.channelAccess.Channel#createChannelGet(org.epics.pvData.channelAccess.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
@@ -288,11 +288,7 @@ public class ChannelProviderLocalFactory  {
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             PVStructure pvStructure = pvCopy.createPVStructure();
-            ChannelGetImpl channelGetImpl = new ChannelGetImpl(this,channelGetRequester,pvStructure,pvCopy,process);
-            synchronized(channelGetList) {
-                channelGetList.add(channelGetImpl);
-            }
-            channelGetRequester.channelGetConnect(channelGetImpl, pvStructure);
+            new ChannelGetImpl(this,channelGetRequester,pvStructure,pvCopy,process);
         }
         /* (non-Javadoc)
          * @see org.epics.pvData.channelAccess.Channel#createChannelPut(org.epics.pvData.channelAccess.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
@@ -304,11 +300,7 @@ public class ChannelProviderLocalFactory  {
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             PVStructure pvStructure = pvCopy.createPVStructure();
-            ChannelPutImpl channelPutImpl = new ChannelPutImpl(this,channelPutRequester,pvStructure,pvCopy,process);
-            synchronized(channelPutList) {
-                channelPutList.add(channelPutImpl);
-            }
-            channelPutRequester.channelPutConnect(channelPutImpl, pvStructure);
+            new ChannelPutImpl(this,channelPutRequester,pvStructure,pvCopy,process);
         }
 
         /* (non-Javadoc)
@@ -325,14 +317,7 @@ public class ChannelProviderLocalFactory  {
             PVStructure pvPutStructure = pvPutCopy.createPVStructure();
             PVCopy pvGetCopy = PVCopyFactory.create(pvRecord, pvGetRequest, getStructureName, shareGetData);
             PVStructure pvGetStructure = pvGetCopy.createPVStructure();
-            ChannelPutGetImpl channelPutGetImpl = new ChannelPutGetImpl(
-                    this,channelPutGetRequester,pvPutStructure,pvPutCopy,
-                    pvGetStructure,pvGetCopy,
-                    process);
-            synchronized(channelPutGetList) {
-                channelPutGetList.add(channelPutGetImpl);
-            }
-            channelPutGetRequester.channelPutGetConnect(channelPutGetImpl, pvPutStructure,pvGetStructure);
+            new ChannelPutGetImpl(this,channelPutGetRequester,pvPutStructure,pvPutCopy,pvGetStructure,pvGetCopy,process);
         }
         /* (non-Javadoc)
          * @see org.epics.pvData.channelAccess.Channel#createChannelMonitor(org.epics.pvData.channelAccess.ChannelMonitorRequester, org.epics.pvData.pv.PVStructure, java.lang.String, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.Executor)
@@ -408,33 +393,29 @@ public class ChannelProviderLocalFactory  {
             return channelRequester.getRequesterName();
         }
         
-        private static class ChannelProcessImpl implements ChannelProcess,ProcessSelfRequester
+        private static class ChannelProcessImpl implements ChannelProcess,ChannelProcessorRequester
         {
             ChannelProcessImpl(ChannelImpl channelImpl,ChannelProcessRequester channelProcessRequester)
             {
                 this.channelImpl = channelImpl;
                 this.channelProcessRequester = channelProcessRequester;
-                recordProcess = channelImpl.getRecordProcess();
-                isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-                if(!isRecordProcessRequester) {
-                    processSelf = recordProcess.canProcessSelf();
-                    if(processSelf==null) {
-                        channelProcessRequester.message(
-                                "already has process requester other than self", MessageType.error);
-                        return;
+                PVRecord pvRecord = channelImpl.pvRecord;
+                channelProcessor = channelImpl.requestChannelProcessor(pvRecord, this);
+                if(channelProcessor!=null) {
+                    synchronized(channelImpl.channelProcessList) {
+                        channelImpl.channelProcessList.add(this);
+                        channelProcessRequester.channelProcessConnect(this);
                     }
+                } else {
+                    channelProcessRequester.channelProcessConnect(null);
                 }
-                requesterName = "Process:" + channelProcessRequester.getRequesterName();
             }
-            
+
             private ChannelImpl channelImpl;
-            private ChannelProcessRequester channelProcessRequester = null;
-            private String requesterName;
+            private ChannelProcessRequester channelProcessRequester;
+            private ChannelProcessor channelProcessor = null;
             private boolean isDestroyed = false;
-            private RecordProcess recordProcess = null;
-            private boolean isRecordProcessRequester = false;
-            private ProcessSelf processSelf = null;
-            private RequestResult requestResult = null;
+            private boolean success = false;
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelProcess#destroy()
              */
@@ -442,30 +423,14 @@ public class ChannelProviderLocalFactory  {
             public void destroy() {
                 if(isDestroyed) return;
                 isDestroyed = true;
-                if(isRecordProcessRequester) {
-                    recordProcess.releaseRecordProcessRequester(this);
-                }
+                channelProcessor.detach();
                 synchronized(channelImpl.channelProcessList) {
                     channelImpl.channelProcessList.remove(this);
                 }
             }
-           
+            
             /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requester#getRequesterName()
-             */
-            @Override
-            public String getRequesterName() {
-                return requesterName;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-             */
-            @Override
-            public void message(String message, MessageType messageType) {
-                channelProcessRequester.message(message, messageType);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelProcess#process()
+             * @see org.epics.pvData.channelAccess.ChannelProcess#process(boolean)
              */
             @Override
             public void process(boolean lastRequest) {
@@ -474,44 +439,40 @@ public class ChannelProviderLocalFactory  {
                     channelProcessRequester.processDone(false);
                     return;
                 }
-                requestResult = RequestResult.success;
-                if(isRecordProcessRequester) {
-                    becomeProcessor(recordProcess);
-                } else {
-                    processSelf.request(this);
-                }
-            }    
-            /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
-             */
-            @Override
-            public void recordProcessResult(RequestResult requestResult) {
-                this.requestResult = requestResult;
+                channelProcessor.process(false, null);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()
              */
             @Override
             public void recordProcessComplete() {
-                if(processSelf!=null) processSelf.endRequest(this);
-                if(requestResult!=RequestResult.success) {
-                    channelProcessRequester.message("requestResult " + requestResult.toString(),MessageType.info);
-                }
-                channelProcessRequester.processDone(true);
+                channelProcessRequester.processDone(success);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessResult(boolean)
              */
             @Override
-            public void becomeProcessor(RecordProcess recordProcess) {
-                if(recordProcess.process(this, false, null)) return;
-                channelProcessRequester.message(
-                        "could not process record",MessageType.error);
-                channelProcessRequester.processDone(false);
+            public void recordProcessResult(boolean success) {
+                this.success = success;
             }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requester#getRequesterName()
+             */
+            @Override
+            public String getRequesterName() {
+                return channelProcessRequester.getRequesterName();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+             */
+            @Override
+            public void message(String message, MessageType messageType) {
+                channelProcessRequester.message(message, messageType);
+            }
+            
         }
         
-        private class ChannelGetImpl implements ChannelGet,ProcessSelfRequester,PVCopyMonitorRequester
+        private class ChannelGetImpl implements ChannelGet,ChannelProcessorRequester,PVCopyMonitorRequester
         {
             private ChannelGetImpl(ChannelImpl channelImpl,ChannelGetRequester channelGetRequester,PVStructure pvStructure,PVCopy pvCopy,boolean process)
             {
@@ -521,17 +482,14 @@ public class ChannelProviderLocalFactory  {
                 this.pvCopy = pvCopy;
                 this.process = process;
                 bitSet = new BitSet(pvStructure.getNumberFields());
-                requesterName = "Get:" + channelGetRequester.getRequesterName();
                 if(process) {
-                    recordProcess = channelImpl.getRecordProcess();
-                    isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-                    if(!isRecordProcessRequester) {
-                        processSelf = recordProcess.canProcessSelf();
-                        if(processSelf==null) {
-                            channelGetRequester.message(
-                                    "already has process requester other than self", MessageType.error);
-                            this.process = false;
-                        }
+                    this.process = true;
+                    PVRecord pvRecord = channelImpl.pvRecord;
+                    channelProcessor = channelImpl.requestChannelProcessor(pvRecord, this);
+                    if(channelProcessor==null) {
+                        channelGetRequester.message(
+                                "can not process", MessageType.error);
+                        this.process = false;
                     }
                 }
                 if(pvCopy.isShared()) {
@@ -540,6 +498,10 @@ public class ChannelProviderLocalFactory  {
                     overrunBitSet = new BitSet(pvStructure.getNumberFields());
                     pvCopyMonitor.startMonitoring(monitorBitSet, overrunBitSet);
                 }
+                synchronized(channelImpl.channelGetList) {
+                    channelImpl.channelGetList.add(this);
+                }
+                channelGetRequester.channelGetConnect(this, pvStructure);
             }
             
             private boolean firstTime = true;
@@ -548,16 +510,13 @@ public class ChannelProviderLocalFactory  {
             private PVStructure pvStructure;
             private PVCopy pvCopy;
             private boolean process;
+            private boolean success = false;
+            private ChannelProcessor channelProcessor = null;
             private BitSet bitSet = null;
             // following for share
             private BitSet monitorBitSet = null;
             private BitSet overrunBitSet = null;
             private boolean isDestroyed = false;
-            private String requesterName;
-            private RecordProcess recordProcess = null;
-            private boolean isRecordProcessRequester = false;
-            private ProcessSelf processSelf = null;
-            private RequestResult requestResult = RequestResult.success;
             private PVCopyMonitor pvCopyMonitor = null;
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelGet#destroy()
@@ -569,7 +528,7 @@ public class ChannelProviderLocalFactory  {
                     pvCopyMonitor.stopMonitoring();
                 }
                 isDestroyed = true;
-                if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
+                if(process) channelProcessor.detach();
                 synchronized(channelImpl.channelGetList) {
                     channelImpl.channelGetList.remove(this);
                 }
@@ -592,14 +551,8 @@ public class ChannelProviderLocalFactory  {
                     channelGetRequester.getDone(false);
                 }
                 bitSet.clear();
-                requestResult = RequestResult.success;
                 if(process) {
-                    if(isRecordProcessRequester) {
-                        becomeProcessor(recordProcess);
-                    } else {
-                        processSelf.request(this);
-                    }
-                    return;
+                    if(channelProcessor.process(true, null)) return;
                 }
                 pvRecord.lock();
                 try {
@@ -608,38 +561,22 @@ public class ChannelProviderLocalFactory  {
                     pvRecord.unlock();
                 }
                 channelGetRequester.getDone(true);
-            }                
-            /* (non-Javadoc)
-             * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
-             */
-            @Override
-            public void becomeProcessor(RecordProcess recordProcess) {
-                if(recordProcess.process(this, true, null)) return;
-                channelGetRequester.message("process failed", MessageType.warning);
-                requestResult = RequestResult.failure;
-                getData();
-                if(processSelf!=null) processSelf.endRequest(this);
-                channelGetRequester.getDone(true);
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
-             */
-            @Override
-            public void recordProcessResult(RequestResult requestResult) {
-                this.requestResult = requestResult;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()
              */
             @Override
             public void recordProcessComplete() {
                 getData();
-                recordProcess.setInactive(this);
-                if(processSelf!=null) processSelf.endRequest(this);
-                if(requestResult!=RequestResult.success) {
-                    channelGetRequester.message("requestResult " + requestResult.toString(),MessageType.info);
-                }
-                channelGetRequester.getDone(true);
+                channelProcessor.setInactive();
+                channelGetRequester.getDone(success);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessResult(boolean)
+             */
+            @Override
+            public void recordProcessResult(boolean success) {
+                this.success = success;
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.pvCopy.PVCopyMonitorRequester#dataChanged()
@@ -658,7 +595,7 @@ public class ChannelProviderLocalFactory  {
              */
             @Override
             public String getRequesterName() {
-                return requesterName;
+                return channelGetRequester.getRequesterName();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
@@ -690,7 +627,7 @@ public class ChannelProviderLocalFactory  {
             }
         }
         
-        private class ChannelPutImpl implements ChannelPut,ProcessSelfRequester
+        private class ChannelPutImpl implements ChannelPut,ChannelProcessorRequester
         {
             private ChannelPutImpl(
                     ChannelImpl channelImpl,
@@ -705,19 +642,20 @@ public class ChannelProviderLocalFactory  {
                 this.pvCopy = pvCopy;
                 this.process = process;
                 bitSet = new BitSet(pvStructure.getNumberFields());
-                requesterName = "Put:" + channelPutRequester.getRequesterName();
                 if(process) {
-                    recordProcess = channelImpl.getRecordProcess();
-                    isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-                    if(!isRecordProcessRequester) {
-                        processSelf = recordProcess.canProcessSelf();
-                        if(processSelf==null) {
-                            channelPutRequester.message(
-                                    "already has process requester other than self", MessageType.error);
-                            this.process = false;
-                        }
+                    this.process = true;
+                    PVRecord pvRecord = channelImpl.pvRecord;
+                    channelProcessor = channelImpl.requestChannelProcessor(pvRecord, this);
+                    if(channelProcessor==null) {
+                        channelPutRequester.message(
+                                "can not process", MessageType.error);
+                        this.process = false;
                     }
                 }
+                synchronized(channelImpl.channelPutList) {
+                    channelImpl.channelPutList.add(this);
+                }
+                channelPutRequester.channelPutConnect(this, pvStructure);
             }
             
             private ChannelImpl channelImpl;
@@ -725,23 +663,18 @@ public class ChannelProviderLocalFactory  {
             private PVStructure pvStructure;
             private PVCopy pvCopy;
             private boolean process;
+            private boolean success = false;
+            private ChannelProcessor channelProcessor = null;
             private BitSet bitSet = null;
             private boolean isDestroyed = false;
-            private String requesterName;
-            private RecordProcess recordProcess = null;
-            private boolean isRecordProcessRequester = false;
-            private ProcessSelf processSelf = null;
-            private boolean canProcess = false;
-            private RequestResult requestResult = null;
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPut#destroy()
              */
             public void destroy() {
                 if(isDestroyed) return;
                 isDestroyed = true;
-                if(isRecordProcessRequester) {
-                    recordProcess.releaseRecordProcessRequester(this);
-                }
+                if(process) channelProcessor.detach();
                 synchronized(channelImpl.channelPutList) {
                     channelImpl.channelPutList.remove(this);
                 }
@@ -762,14 +695,16 @@ public class ChannelProviderLocalFactory  {
                     channelPutRequester.putDone(false);
                     return;
                 }
-                requestResult = RequestResult.success;
+                success = true;
                 if(process) {
-                    if(isRecordProcessRequester) {
-                        becomeProcessor(recordProcess);
+                    boolean isActive = channelProcessor.setActive();
+                    if(isActive) {
+                        putData();
+                        channelProcessor.process(false, null);
+                        return;
                     } else {
-                        processSelf.request(this);
+                        success = false;
                     }
-                    return;
                 }
                 pvRecord.lock();
                 try {
@@ -777,8 +712,23 @@ public class ChannelProviderLocalFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
+                channelPutRequester.putDone(success);
                 return;
-            }        
+            } 
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()
+             */
+            @Override
+            public void recordProcessComplete() {
+                channelPutRequester.putDone(success);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessResult(boolean)
+             */
+            @Override
+            public void recordProcessResult(boolean success) {
+                this.success = success;
+            }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelPut#get()
              */
@@ -799,45 +749,11 @@ public class ChannelProviderLocalFactory  {
                 return;
             }
             /* (non-Javadoc)
-             * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
-             */
-            @Override
-            public void becomeProcessor(RecordProcess recordProcess) {
-                canProcess = recordProcess.setActive(this);
-                if(!canProcess) {
-                    requestResult = RequestResult.failure;
-                    message("setActive failed",MessageType.error);
-                    putData();
-                    channelPutRequester.putDone(false);
-                    return;
-                }
-                putData();
-                recordProcess.process(this, false, null);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
-             */
-            @Override
-            public void recordProcessResult(RequestResult requestResult) {
-                this.requestResult = requestResult;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
-             */
-            @Override
-            public void recordProcessComplete() {
-                if(processSelf!=null) processSelf.endRequest(this);
-                if(requestResult!=RequestResult.success) {
-                    channelPutRequester.message("requestResult " + requestResult.toString(),MessageType.info);
-                }
-                channelPutRequester.putDone(true);
-            }
-            /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
             @Override
             public String getRequesterName() {
-                return requesterName;
+                return channelPutRequester.getRequesterName();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
@@ -858,7 +774,7 @@ public class ChannelProviderLocalFactory  {
              }
         }
         
-        private class ChannelPutGetImpl implements ChannelPutGet,ProcessSelfRequester
+        private class ChannelPutGetImpl implements ChannelPutGet,ChannelProcessorRequester
         {
             private ChannelPutGetImpl(
                     ChannelImpl channelImpl,
@@ -880,17 +796,19 @@ public class ChannelProviderLocalFactory  {
                 getBitSet = new BitSet(pvGetStructure.getNumberFields());
                 requesterName = "PutGet:" + channelPutGetRequester.getRequesterName();
                 if(process) {
-                    recordProcess = channelImpl.getRecordProcess();
-                    isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-                    if(!isRecordProcessRequester) {
-                        processSelf = recordProcess.canProcessSelf();
-                        if(processSelf==null) {
-                            channelPutGetRequester.message(
-                                    "already has process requester other than self", MessageType.error);
-                            this.process = false;
-                        }
+                    this.process = true;
+                    PVRecord pvRecord = channelImpl.pvRecord;
+                    channelProcessor = channelImpl.requestChannelProcessor(pvRecord, this);
+                    if(channelProcessor==null) {
+                        channelPutGetRequester.message(
+                                "can not process", MessageType.error);
+                        this.process = false;
                     }
                 }
+                synchronized(channelImpl.channelPutGetList) {
+                    channelImpl.channelPutGetList.add(this);
+                }
+                channelPutGetRequester.channelPutGetConnect(this, pvPutStructure, pvGetStructure);
             }
             
             private ChannelImpl channelImpl;
@@ -900,25 +818,20 @@ public class ChannelProviderLocalFactory  {
             private PVStructure pvGetStructure;
             private PVCopy pvGetCopy;
             private boolean process;
+            private boolean success = false;
+            private ChannelProcessor channelProcessor = null;
             private BitSet putBitSet = null;
             private BitSet getBitSet = null;
             private boolean isDestroyed = false;
             private String requesterName;
-            private RecordProcess recordProcess = null;
-            private boolean isRecordProcessRequester = false;
-            private ProcessSelf processSelf = null;
-            private boolean canProcess = false;
-            private RequestResult requestResult = null;
+           
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#destroy()
              */
             @Override
             public void destroy() {
                 isDestroyed = true;
-                if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
-                if(isRecordProcessRequester) {
-                    recordProcess.releaseRecordProcessRequester(this);
-                }
+                if(process) channelProcessor.detach();
                 synchronized(channelImpl.channelPutGetList) {
                     channelImpl.channelPutGetList.remove(this);
                 }
@@ -950,15 +863,16 @@ public class ChannelProviderLocalFactory  {
                     channelPutGetRequester.putGetDone(false);
                     return;
                 }
-                requestResult = RequestResult.success;
-                canProcess = false;
+               
                 if(process) {
-                    if(isRecordProcessRequester) {
-                        becomeProcessor(recordProcess);
+                    boolean isActive = channelProcessor.setActive();
+                    if(isActive) {
+                        putData();
+                        channelProcessor.process(true, null);
+                        return;
                     } else {
-                        processSelf.request(this);
+                        success = false;
                     }
-                    return;
                 }
                 pvRecord.lock();
                 try {
@@ -967,6 +881,23 @@ public class ChannelProviderLocalFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
+                channelPutGetRequester.putGetDone(success);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()
+             */
+            @Override
+            public void recordProcessComplete() {
+                getData();
+                channelProcessor.setInactive();
+                channelPutGetRequester.putGetDone(success);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessResult(boolean)
+             */
+            @Override
+            public void recordProcessResult(boolean success) {
+                this.success = success;
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelPutGet#getGet()
@@ -1004,42 +935,6 @@ public class ChannelProviderLocalFactory  {
                 }
                 channelPutGetRequester.getPutDone(true);
                 
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
-             */
-            @Override
-            public void becomeProcessor(RecordProcess recordProcess) {
-                canProcess = recordProcess.setActive(this);
-                if(!canProcess) {
-                    requestResult = RequestResult.failure;
-                    message("setActive failed",MessageType.error);
-                    putData();
-                    channelPutGetRequester.putGetDone(false);
-                    return;
-                }
-                putData();
-                recordProcess.process(this, true, null);
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
-             */
-            @Override
-            public void recordProcessResult(RequestResult requestResult) {
-                this.requestResult = requestResult;
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete()
-             */
-            @Override
-            public void recordProcessComplete() {
-                getData();                
-                if(canProcess) recordProcess.setInactive(this);
-                if(processSelf!=null) processSelf.endRequest(this);
-                if(requestResult!=RequestResult.success) {
-                    channelPutGetRequester.message("requestResult " + requestResult.toString(),MessageType.info);
-                }
-                channelPutGetRequester.putGetDone(true);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()

@@ -25,7 +25,7 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnChangeFactory {
     private static final String name = "onChange";
     private static final MonitorOnChange monitorOnChange = new MonitorOnChange();
-    private static final ChannelProvider channelProvider = ChannelProviderLocalFactory.getChannelProvider();
+    private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
     private static final PVDataCreate pvDataCreate= PVDataFactory.getPVDataCreate();
 
     public static void start() {

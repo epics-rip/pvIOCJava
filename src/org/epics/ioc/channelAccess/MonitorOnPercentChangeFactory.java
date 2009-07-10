@@ -27,7 +27,7 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnPercentChangeFactory {
     private static final String name = "onPercentChange";
     private static final MonitorOnPercent monitorOnPercent = new MonitorOnPercent();
-    private static final ChannelProvider channelProvider = ChannelProviderLocalFactory.getChannelProvider();
+    private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
 
     public static void start() {
         channelProvider.registerMonitor(monitorOnPercent);

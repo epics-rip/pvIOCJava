@@ -27,7 +27,7 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnAbsoluteChangeFactory {
     private static final String name = "onAbsoluteChange";
     private static final MonitorOnAbsoluteChange monitorOnAbsoluteChange = new MonitorOnAbsoluteChange();
-    private static final ChannelProvider channelProvider = ChannelProviderLocalFactory.getChannelProvider();
+    private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
 
     public static void start() {
         channelProvider.registerMonitor(monitorOnAbsoluteChange);
