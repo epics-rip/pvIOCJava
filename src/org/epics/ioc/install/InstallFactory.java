@@ -7,6 +7,7 @@ package org.epics.ioc.install;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.epics.ioc.support.ChannelProcessorProviderFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.factory.PVReplaceFactory;
 import org.epics.pvData.pv.MessageType;
@@ -28,6 +29,9 @@ public class InstallFactory {
      */
     public static Install get() {
         return install;
+    }
+    static {
+        ChannelProcessorProviderFactory.register();
     }
     private static final InstallImpl install = new InstallImpl();
 
