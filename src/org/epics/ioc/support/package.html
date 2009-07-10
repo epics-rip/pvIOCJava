@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
   <title>EPICS JavaIOC: support</title>
@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2009.05.27</h1>
+2009.07.10</h1>
 CONTENTS 
 
 <div class="toc">
@@ -65,10 +65,9 @@ CONTENTS
       <li><a href="#Factory">Factory</a></li>
     </ul>
   </li>
+  <li><a href="#ChannelPro">ChannelProcessorProviderFactory</a></li>
 </ul>
 </div>
-
-<p></p>
 <hr />
 
 <h2 style="text-align: center" id="Overview">Overview</h2>
@@ -1073,5 +1072,18 @@ methods it needs.</p>
   <dt>createSupport</dt>
     <dd>Create the support for the field.</dd>
 </dl>
+<hr />
+
+<h2 style="text-align: center"
+id="ChannelPro">ChannelProcessorProviderFactory</h2>
+<hr />
+
+<p>This implements ChannelProcessorProvider. It is the only support required
+from the javaIOC for channel access V4.</p>
+<pre>class ChannelProcessorProviderFactory {
+     public void register();
+}</pre>
+
+<p>register is called by ioc.install.Install.</p>
 </body>
 </html>
