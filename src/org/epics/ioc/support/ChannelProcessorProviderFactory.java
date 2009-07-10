@@ -5,11 +5,6 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.property.TimeStamp;
-import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.ioc.channelAccess.ChannelProcessor;
 import org.epics.ioc.channelAccess.ChannelProcessorProvider;
 import org.epics.ioc.channelAccess.ChannelProcessorRequester;
@@ -17,8 +12,12 @@ import org.epics.ioc.channelAccess.ChannelProvider;
 import org.epics.ioc.channelAccess.ChannelProviderFactory;
 import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.LocateSupport;
-import org.epics.ioc.support.*;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.property.TimeStamp;
+import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDatabase;
+import org.epics.pvData.pv.PVRecord;
 
 /**
  * @author mrk
