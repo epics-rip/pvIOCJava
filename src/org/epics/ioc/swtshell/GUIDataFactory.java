@@ -6,7 +6,6 @@
 package org.epics.ioc.swtshell;
 
 import java.util.BitSet;
-import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -46,7 +45,6 @@ public class GUIDataFactory {
     }
     
     private static final Convert convert = ConvertFactory.getConvert();
-    private static final Pattern separatorPattern = Pattern.compile("[,]");
     
     private static class GUIDataImpl extends Dialog implements GUIData, SelectionListener {
         
@@ -168,11 +166,6 @@ public class GUIDataFactory {
                         } else if(type==Type.scalarArray) {
                             ok = true;
                             String values = pvField.toString();
-                            int beginIndex = values.indexOf("{");
-                            int endIndex = values.indexOf("}");
-                            if(beginIndex>=0 && endIndex>=0) {
-                                values = values.substring(beginIndex+1, endIndex-1);
-                            }
                             textMessage(values);
                         }
                         if(!ok) {
@@ -200,25 +193,9 @@ public class GUIDataFactory {
                             return;
                         }
                     } else { // type is array; elementType.isScalar
-                        PVArray pvArray = (PVArray)pvField;
-                        String textValue = text.getText();
-                        if(textValue==null || textValue.length()<=0) {
-                            pvArray.setLength(0);
-                            return;
-                        }
-                        if((textValue.charAt(0)=='[') && textValue.endsWith("]")) {
-                            int offset = textValue.lastIndexOf(']');
-                            textValue = textValue.substring(1, offset);
-                        }
-                        String[] values = separatorPattern.split(textValue);
-                        int length = values.length;
-                        if(length<=0) {
-                            pvArray.setLength(0);
-                            return;
-                        }
-                        
+                        PVArray pvArray = (PVArray)pvField; 
                         try {
-                            convert.fromStringArray(pvArray, 0, values.length, values, 0);
+                            convert.fromString(pvArray,text.getText());
                         }catch (NumberFormatException e) {
                             textMessage("exception " + e.getMessage());
                             return;

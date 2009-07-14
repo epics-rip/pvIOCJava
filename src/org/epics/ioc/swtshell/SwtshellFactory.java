@@ -95,6 +95,13 @@ public class SwtshellFactory {
                     MonitorFactory.init(display);
                 }
             });
+            Button arrayDB = new Button(shell,SWT.PUSH);
+            arrayDB.setText("array");
+            arrayDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    ArrayFactory.init(display);
+                }
+            });
             Button iocConsoleDB = new Button(shell,SWT.PUSH);
             iocConsoleDB.setText("iocConsole");
             iocConsoleDB.addSelectionListener( new SelectionAdapter() {
