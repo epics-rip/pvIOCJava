@@ -10,24 +10,27 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2009.03.03</h1>
-CONTENTS 
+2009.07.15</h1>
+
+<p>CONTENTS </p>
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Access</a> 
+  <li><a href="#Channel">Channel Access</a>
     <ul>
+      <li><a href="#Connecting">Connecting to a Channel</a></li>
+      <li><a href="#Creating">Creating a Request</a></li>
       <li><a href="#get">get</a></li>
       <li><a href="#put">put</a></li>
       <li><a href="#process">process</a></li>
       <li><a href="#monitor">monitor</a></li>
     </ul>
   </li>
-  <li><a href="#Local">Local JavaIOC</a> 
+  <li><a href="#Local">Local JavaIOC</a>
     <ul>
       <li><a href="#loadDataba">loadDatabase</a></li>
-      <li><a href="#introspect">introspectDatabase</a> 
+      <li><a href="#introspect">introspectDatabase</a>
         <ul>
           <li><a href="#Database">Database Definitions</a></li>
           <li><a href="#Local1">Local Record Instance</a></li>
@@ -59,7 +62,7 @@ when the javaIOC is started.</p>
 
 <p>The window has the following buttons:</p>
 <ul>
-  <li>get, put, process, and monitor:<br />
+  <li>get, put, process, monitor, and array:<br />
     Each of these brings up another window which provides the ability to
     access data via channel access. The next section describes these
   windows:</li>
@@ -83,29 +86,68 @@ text input window, the enter key must be pressed.</p>
 
 <h2 style="text-align: center" id="Channel">Channel Access</h2>
 <hr />
-The get, put, process, and monitor buttons each start a new window. Each
-window provides the ability to connect to a PV (Process Variable). 
+
+<p>The get, put, process, monitor, and array buttons each start a new window.
+Each window provides the ability to connect to a PV (Process Variable). </p>
 
 <p>This window gets data from a local or remote IOC. The data is accessed via
-javaIOC Channel Access. Two types are implemented:</p>
+Channel Access, which can be either V3 or V4 channelAccess</p>
+
+<p>ForEPICS V3 Channel Access only the following data can be accessed:</p>
 <ul>
-  <li>javaIOC 
-    <p>For now only local Channel Access is implemented for a javIOC. Thus it
-    is only possible to pass structured data within a single javaIOC.</p>
-  </li>
-  <li>EPICS V3 Channel Access 
-    <p>This can be either a V3 EPICS IOC (or a server implemented via the
-    portable Channel Access Server) or a javaIOC running the caV3 server.
-    This means that only the following data can be accessed:</p>
-    <ul>
-      <li>primitive data </li>
-      <li>array of primitive data</li>
-      <li>Channel Access V3 properties.</li>
-    </ul>
-  </li>
+  <li>primitive data </li>
+  <li>array of primitive data</li>
+  <li>Channel Access V3 properties.</li>
 </ul>
 
 <p>See package org.epics.ioc.caV3 for details about caV3.</p>
+
+<h3 id="Connecting">Connecting to a Channel</h3>
+
+<p>The get, put, process, monotor, and array windows all have a connect
+button. When this button is pressed the following window appears:</p>
+
+<center>
+<p><img src="./connectChannel.gif" alt="connectChannel" /></p>
+</center>
+
+<p>If selectLocalRecord is clicked then a list of all the records in the
+local javaIOC is presented. When a record is selected a request is made to
+create a channel connected to the record and control returned to the window
+that has the connect button.</p>
+
+<p>A pvname can be entered. When return is given a request is made to create
+a channel to the selected record and control returned to the window that has
+the connect button.</p>
+
+<h3 id="Creating">Creating a Request</h3>
+
+<p>The get, put, and monotor windows all have a createRequest button, which
+is activated after connecting to a channel. createRequest allows you to
+select an arbitarary set of fields from the PVRecord to which the channel is
+connected. When the createRequest button is pressed the following window
+appears:</p>
+
+<center>
+<p><img src="./createRequest.gif" alt="createRequest" /></p>
+</center>
+
+<p>If shareData is selected then when a request is made it is a request for
+shared data. This means that the server will share the scalar and array data
+with the record itself instead of keeping a copy. If showRequest is selected
+then when createRequest is done the created request structure is shown.</p>
+
+<p>When the createRequest button is clicked the following window appears:</p>
+
+<center>
+<p><img src="./getSubSet.gif" alt="getSubSet" /></p>
+</center>
+
+<p>This window allows the user to select an arbitrary set of fields from the
+PVRecord to which the channel is attached. When the arrow for a structure
+field is clicked the fields for that structure appear. A field is selected by
+clicking the bod next to the field name. If a structure field is selected the
+entire structure is selected.</p>
 
 <h3 id="get">get</h3>
 
@@ -115,72 +157,18 @@ javaIOC Channel Access. Two types are implemented:</p>
 <p><img src="./get.gif" alt="get" /></p>
 </center>
 
-<p><span style="font-weight:bold;">Note</span>: in order to make a connection
-to an EPICS IOC the following is done:</p>
-<ul>
-  <li>The caV3 provider is selected.</li>
-  <li>The pvname is entered into the pvname box.</li>
-  <li>Properties are selected on the third row.</li>
-  <li>The connect button on the first row is clicked.</li>
-  <li>If connected then the controls on the fourth row are active.</li>
-</ul>
-
 <p>The first row has the following widgets:</p>
 <dl>
-  <dt>conection status</dt>
-    <dd>This is a message box that shows if get is connected. </dd>
-  <dt>connect button</dt>
-    <dd>This is a toggle button that can issue either a connect or disconnect
-      request. If it shows "connect" then when it is clicked, get changes the
-      button to "disconnect" and attempts to connect. The connection status
-      message box shows if the request is successful. When the button shows
-      "disconnect" and the button is clicked, get changes the button to
-      "connect" and disconnects.</dd>
-  <dt>selectLocalRecord</dt>
-    <dd>This brings up a list of all records in the local javaIOC and allows
-      the user to select a record. When it is selected the pvname on the
-      second row will change.</dd>
-  <dt>selectLocalField</dt>
-    <dd>If a local record has been selected then the user can click this
-      button. It brings up a window that has a tree showing all the fields in
-      the record. Any field can be selected. When a field is selected the
-      field name is appended to the record name and appears in the pvname on
-      the second row.</dd>
-</dl>
-
-<p>The second row allows the user to select a provider and to specify a
-pvname. Currently only two providers are available: local and caV3. The local
-provider is just the javaIOC to which swtshell is connected. caV3 is the V3
-EPICS Channel Access client (JCA/CAJ) which can commuinicate with V3 EPICS
-Channel Access servers. If the local provider is chosen than the user can
-select a pvname via the controls on the first row or can enter the pvname
-directly. If caV3 is specified then the pvname must be entered direrctly.</p>
-
-<p>A pvname is entered directly by entering the value into the pvname box and
-pressing return. The pvname is of the form "record.field". </p>
-
-<p>For javaIOC records field is of the form "name.name..." where where each
-name is a field name or a property name. If just the record name is given
-then the entire record is selected.</p>
-
-<p>For caV3 records field is a single name. If not specified VAL is assumed.
-Both VAL and value mean VAL.</p>
-
-<p>The third row is for caV3. It is used to select caV3 properties that will
-be requested via caV3. </p>
-
-<p>After get has connected to a pv, the fourth row is used to request a get.
-It has the following controls:</p>
-<dl>
-  <dt>get</dt>
-    <dd>Each time get is clicked data is read and shown on the message
-      window. </dd>
+  <dt>conect</dt>
+    <dd>This was described above.</dd>
   <dt>process</dt>
-    <dd>If process is selected, then the record will be processed before the
-      data is read. </dd>
-  <dt>property</dt>
-    <dd>The property button is used to select the set of propertys to get
-      along with the value. </dd>
+    <dd>This says if a get is a get or a getProcess.</dd>
+  <dt>createRequest</dt>
+    <dd>This was described above.</dd>
+  <dt>disconnect</dt>
+    <dd>Disconnect from the channel.</dd>
+  <dt>get</dt>
+    <dd>Issue a get request. The result is shown in the text window.</dd>
 </dl>
 
 <h3 id="put">put</h3>
@@ -191,31 +179,34 @@ It has the following controls:</p>
 <p><img src="./put.gif" alt="put" /></p>
 </center>
 
-<p>The controls are similar to the controls for get except that no property
-buttons are present because put request do not have associated properties.
-For a javaIOC record any field, including the entire record can be
-selected.</p>
+<p>Except for put the top row is just like get.</p>
 
-<p>If a primitive or array of primitives is selected then when put is clicked
-the following happens: </p>
+<p>When the put button is clicked then what happens depends of how many
+fields where selected from the PVRecord. If only a single scalar or array
+field was selected, then a text entry box apppears. When a value is entered
+and the return key is pressed then this value is sent via channel access.</p>
+
+<p>If more than a single scalar or array field waas selected then when put is
+clicked a window appears that allows the user to provide values to each
+scalar or array field of the selected fields. This window is:</p>
+
+<center>
+<p><img src="./getValue.gif" alt="getValue" /></p>
+</center>
+
+<p>This display allows the user to give values to any of the scalar or array
+fields.</p>
+
+<p>If a primitive or array of primitives is selected then when edit is
+clicked the following happens: </p>
 <ul>
-  <li>A text entry window appears</li>
-  <li>After text is entered and the enter key presssed the data is put to the
-    PV. </li>
+  <li>The text entry window shows the current value.</li>
+  <li>After text is entered and the enter key presssed the data is put in the
+    PVStructure created as a result of createRequest.</li>
 </ul>
 
-<p>If a structured field is chosen and put is clicked the following
-happens:</p>
-<ul>
-  <li>A window appears that provides a tree structured view of the structure.
-    Any field of the structure can be selected.</li>
-  <li>After clicking the edit button text can be entered in the test window
-    that appears after the edit button. When the enter key is pressed the
-    data value is saved.</li>
-  <li>When all desired data has been entered the done button is clicked. When
-    this happens the window disappears and the newly entered data is sent to
-    the PV.</li>
-</ul>
+<p>When done is clicked the modified fields are sent to the channel access
+server and written to the PVRecord.</p>
 
 <h3 id="process">process</h3>
 
@@ -225,9 +216,9 @@ happens:</p>
 <p><img src="./process.gif" alt="process" /></p>
 </center>
 
-<p>The controls are similar to the controls for get exxept that no controls
-are available for properties or fields because they are not meaningful for a
-process request.</p>
+<p>The connect an disconnect buttons are for connecting and disconnecting
+to/from a channel. The process button sends a process request to the channel
+access server.</p>
 
 <h3 id="monitor">monitor</h3>
 
@@ -237,16 +228,22 @@ process request.</p>
 <p><img src="./monitor.gif" alt="monitor" /></p>
 </center>
 
-<p>The controls in the first three rows are identical to the controls for
-get. The forth and fifth rows provide options for monitor:</p>
+<p>The controls in the first row are like for get and put.</p>
+
+<p>The second row and third allows you to set the:</p>
 <dl>
-  <dt>property</dt>
-    <dd>Selects a set of properties to accompany the data</dd>
+  <dt>queueSize</dt>
+    <dd>The queue size. A value of 3 or more means that a queue will be kept
+      on the server. A value of 2 is automatically set to 3. A value &lt;2
+      means that no queue will be created on the server. Also if shareData
+      was specified on createRequest than no queue is created. </dd>
   <dt>deadband</dt>
     <dd>A deadband to use if onAbsolute or onPercentage are seleccted.</dd>
   <dt>onPut, ...,onPercentage</dt>
     <dd>A set of radio buttons that determines the type of change which will
       cause a monitor to occur.</dd>
+  <dt>When startMonitor is clicked monitoring is started. It changes to
+  stopMonitor button while monitoring is active.</dt>
 </dl>
 <hr />
 
@@ -357,5 +354,7 @@ are for setting trace options and for connect and enable commands.</p>
 master IOCDB. Whenever any code sends a message to the iocdb, the message is
 displayed on the iocConsole window. Note that iocdb puts the messages on a
 queue and has a separate thead that send the messages to the requesters.</p>
+
+<p></p>
 </body>
 </html>
