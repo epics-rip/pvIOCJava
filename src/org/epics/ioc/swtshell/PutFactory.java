@@ -316,13 +316,13 @@ public class PutFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutRequester#channelPutConnect(org.epics.pvData.channelAccess.ChannelPut, org.epics.pvData.pv.PVStructure)
+             * @see org.epics.pvData.channelAccess.ChannelPutRequester#channelPutConnect(org.epics.pvData.channelAccess.ChannelPut, org.epics.pvData.pv.PVStructure, java.util.BitSet)
              */
             @Override
-            public void channelPutConnect(ChannelPut channelPut,PVStructure pvStructure) {
+            public void channelPutConnect(ChannelPut channelPut,PVStructure pvStructure,BitSet bitSet) {
                 this.channelPut = channelPut;
                 this.pvStructure = pvStructure;
-                changeBitSet = channelPut.getBitSet();
+                changeBitSet = bitSet;
                 isCreated = true;
                 channelPut.get();
             }

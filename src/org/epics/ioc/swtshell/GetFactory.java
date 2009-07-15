@@ -315,12 +315,12 @@ public class GetFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelGetRequester#channelGetConnect(org.epics.pvData.channelAccess.ChannelGet, org.epics.pvData.pv.PVStructure)
+             * @see org.epics.pvData.channelAccess.ChannelGetRequester#channelGetConnect(org.epics.pvData.channelAccess.ChannelGet, org.epics.pvData.pv.PVStructure, java.util.BitSet)
              */
             @Override
-            public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure) {
+            public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure,BitSet bitSet) {
                 this.channelGet = channelGet;
-                changeBitSet = channelGet.getBitSet();
+                changeBitSet = bitSet;
                 isCreated = true;
                 printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, null, consoleText);
             }

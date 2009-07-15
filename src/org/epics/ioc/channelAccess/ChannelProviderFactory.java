@@ -535,7 +535,7 @@ public class ChannelProviderFactory  {
                 synchronized(channelImpl.channelGetList) {
                     channelImpl.channelGetList.add(this);
                 }
-                channelGetRequester.channelGetConnect(this, pvStructure);
+                channelGetRequester.channelGetConnect(this, pvStructure,bitSet);
             }
             
             private boolean firstTime = true;
@@ -567,13 +567,6 @@ public class ChannelProviderFactory  {
                 synchronized(channelImpl.channelGetList) {
                     channelImpl.channelGetList.remove(this);
                 }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelGet#getBitSet()
-             */
-            @Override
-            public BitSet getBitSet() {
-                return bitSet;
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelGet#get()
@@ -692,7 +685,7 @@ public class ChannelProviderFactory  {
                 synchronized(channelImpl.channelPutList) {
                     channelImpl.channelPutList.add(this);
                 }
-                channelPutRequester.channelPutConnect(this, pvStructure);
+                channelPutRequester.channelPutConnect(this, pvStructure,bitSet);
             }
             
             private ChannelImpl channelImpl;
@@ -716,13 +709,6 @@ public class ChannelProviderFactory  {
                 synchronized(channelImpl.channelPutList) {
                     channelImpl.channelPutList.remove(this);
                 }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPut#getBitSet()
-             */
-            @Override
-            public BitSet getBitSet() {
-                return bitSet;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPut#put(org.epics.ioc.ca.ChannelFieldGroup)
@@ -848,7 +834,7 @@ public class ChannelProviderFactory  {
                 synchronized(channelImpl.channelPutGetList) {
                     channelImpl.channelPutGetList.add(this);
                 }
-                channelPutGetRequester.channelPutGetConnect(this, pvPutStructure, pvGetStructure);
+                channelPutGetRequester.channelPutGetConnect(this, pvPutStructure,putBitSet, pvGetStructure,getBitSet);
             }
             
             private ChannelImpl channelImpl;
@@ -876,21 +862,6 @@ public class ChannelProviderFactory  {
                 synchronized(channelImpl.channelPutGetList) {
                     channelImpl.channelPutGetList.remove(this);
                 }
-            }
-            /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutGet#getGetBitSet()
-             */
-            @Override
-            public BitSet getGetBitSet() {
-                return getBitSet;
-            }
-
-            /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutGet#getPutBitSet()
-             */
-            @Override
-            public BitSet getPutBitSet() {
-                return putBitSet;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#putGet(org.epics.ioc.ca.ChannelFieldGroup, org.epics.ioc.ca.ChannelFieldGroup)
