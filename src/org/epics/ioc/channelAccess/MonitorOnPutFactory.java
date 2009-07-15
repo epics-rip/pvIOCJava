@@ -73,6 +73,7 @@ public class MonitorOnPutFactory{
          */
         @Override
         protected boolean generateMonitor(BitSet bitSet) {
+            if(timeStampOffset<0) return true;
             int first = bitSet.nextSetBit(0);
             int next = bitSet.nextSetBit(afterTimeStampOffset);
             if(first>=timeStampOffset && next==-1) return false;

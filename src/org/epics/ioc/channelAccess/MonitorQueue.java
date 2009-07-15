@@ -10,6 +10,7 @@ import org.epics.pvData.pv.PVStructure;
 
 /**
  * A queue for monitors.
+ * None of the methods are synchronized. The caller must perform synchronization.
  * @author mrk
  *
  */

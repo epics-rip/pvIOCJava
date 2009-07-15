@@ -79,9 +79,9 @@ public class MonitorQueueFactory {
         private int nextSetUsed = 0;
         private int nextGetUsed = 0;
         private int nextReleaseUsed = 0;
-        
-       
-        
+
+
+
         MonitorQueueImpl(MonitorQueueElement[] monitorQueueElements) {
             this.monitorQueueElements = monitorQueueElements;
             number = monitorQueueElements.length;
@@ -92,14 +92,12 @@ public class MonitorQueueFactory {
          */
         @Override
         public void clear() {
-            synchronized(this) {
-	            numberFree = number;
-	            numberUsed = 0;
-	            nextGetFree = 0;
-	            nextSetUsed = 0;
-	            nextGetUsed = 0;
-	            nextReleaseUsed = 0;
-            }
+            numberFree = number;
+            numberUsed = 0;
+            nextGetFree = 0;
+            nextSetUsed = 0;
+            nextGetUsed = 0;
+            nextReleaseUsed = 0;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#capacity()
@@ -113,61 +111,51 @@ public class MonitorQueueFactory {
          */
         @Override
         public int getNumberFree() {
-            synchronized(this) {
-                return numberFree;
-            }
+            return numberFree;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#getFree()
          */
         @Override
         public MonitorQueueElement getFree() {
-            synchronized(this) {
-                if(numberFree==0) return null;
-                numberFree--;
-                MonitorQueueElement monitorQueueElement = monitorQueueElements[nextGetFree++];
-                if(nextGetFree>=number) nextGetFree = 0;
-                return monitorQueueElement;
-            }
+            if(numberFree==0) return null;
+            numberFree--;
+            MonitorQueueElement monitorQueueElement = monitorQueueElements[nextGetFree++];
+            if(nextGetFree>=number) nextGetFree = 0;
+            return monitorQueueElement;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#setUsed(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
          */
         @Override
         public void setUsed(MonitorQueueElement monitorQueueElement) {
-            synchronized(this) {
-                if(monitorQueueElement!=monitorQueueElements[nextSetUsed++]) {
-                    throw new IllegalStateException("not correct monitorQueueElement");
-                }
-                numberUsed++;
-                if(nextSetUsed>=number) nextSetUsed = 0;
+            if(monitorQueueElement!=monitorQueueElements[nextSetUsed++]) {
+                throw new IllegalStateException("not correct monitorQueueElement");
             }
+            numberUsed++;
+            if(nextSetUsed>=number) nextSetUsed = 0;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#getUsed()
          */
         @Override
         public MonitorQueueElement getUsed() {
-            synchronized(this) {
-                if(numberUsed==0) return null;
-                MonitorQueueElement monitorQueueElement = monitorQueueElements[nextGetUsed++];
-                if(nextGetUsed>=number) nextGetUsed = 0;
-                return monitorQueueElement;
-            }
+            if(numberUsed==0) return null;
+            MonitorQueueElement monitorQueueElement = monitorQueueElements[nextGetUsed++];
+            if(nextGetUsed>=number) nextGetUsed = 0;
+            return monitorQueueElement;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#releaseUsed(org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement)
          */
         @Override
         public void releaseUsed(MonitorQueueElement monitorQueueElement) {
-            synchronized(this) {
-                if(monitorQueueElement!=monitorQueueElements[nextReleaseUsed++]) {
-                    throw new IllegalStateException("not monitorQueueElement returned by last call to getUsed");
-                }
-                if(nextReleaseUsed>=number) nextReleaseUsed = 0;
-                numberUsed--;
-                numberFree++;
+            if(monitorQueueElement!=monitorQueueElements[nextReleaseUsed++]) {
+                throw new IllegalStateException("not monitorQueueElement returned by last call to getUsed");
             }
+            if(nextReleaseUsed>=number) nextReleaseUsed = 0;
+            numberUsed--;
+            numberFree++;
         }
     }
 }
