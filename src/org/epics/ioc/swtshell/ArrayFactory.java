@@ -12,7 +12,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -79,6 +78,9 @@ public class ArrayFactory {
     
         private Array array = null;
         private String subField = "value";
+        
+        private boolean getFinished = false;
+        private String getValue = null;
 
         private void start() {
             shell = new Shell(display);
@@ -87,8 +89,9 @@ public class ArrayFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             Composite composite = new Composite(shell,SWT.BORDER);
-            RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
-            composite.setLayout(rowLayout);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
+            composite.setLayout(gridLayout);
             connectButton = new Button(composite,SWT.PUSH);
             connectButton.setText("connect");
             connectButton.addSelectionListener(this);               
@@ -237,7 +240,6 @@ public class ArrayFactory {
                 putButton.setEnabled(false);
             } else if(object==subFieldText) {
                 subField = subFieldText.getText();
-
             } else if(object==getButton) {
                 int offset = Integer.parseInt(getOffsetText.getText());
                 int count = Integer.parseInt(countText.getText());
@@ -302,6 +304,11 @@ public class ArrayFactory {
                 return;
             }
             if(channel==null) return;
+            if(getFinished) {
+                valueText.setText(getValue);
+                getFinished = false;
+                getValue = null;
+            }
             boolean isConnected = channel.isConnected();
             if(isConnected) {
                 connectButton.setEnabled(false);
@@ -316,9 +323,16 @@ public class ArrayFactory {
                 putButton.setEnabled(false);
             }
         }
-        private enum RunCommand{get,put,disconnect};
         
-        private static class Array implements Runnable,ChannelArrayRequester
+        private void getDone(String value) {
+            getFinished = true;
+            getValue = value;
+            display.asyncExec(this);
+        }
+        
+        private enum ArrayRunCommand{get,put,disconnect};
+        
+        private class Array implements Runnable,ChannelArrayRequester
         {   
             private Channel channel;
             private Requester requester;
@@ -329,7 +343,7 @@ public class ArrayFactory {
             private int count;
             private String value;
             
-            private RunCommand runCommand = null;
+            private ArrayRunCommand runCommand = null;
 
             private Array(Channel channel,Requester requester,String subField) {
                 this.channel = channel;
@@ -341,19 +355,19 @@ public class ArrayFactory {
             private void get(int offset,int count) {
                 this.offset = offset;
                 this.count = count;
-                runCommand = RunCommand.get;
+                runCommand = ArrayRunCommand.get;
                 executor.execute(executorNode);
             }
             
             private void put(int offset,String value) {
                 this.offset = offset;
                 this.value = value;
-                runCommand = RunCommand.put;
+                runCommand = ArrayRunCommand.put;
                 executor.execute(executorNode);
             }
             
             private void disconnect() {
-                runCommand = RunCommand.disconnect;
+                runCommand = ArrayRunCommand.disconnect;
                 executor.execute(executorNode);
             }
             /* (non-Javadoc)
@@ -370,7 +384,7 @@ public class ArrayFactory {
             @Override
             public void getArrayDone(boolean success) {
                 message("getArrayDone success " + success,MessageType.info);
-                message(pvArray.toString(),MessageType.info);
+                getDone(pvArray.toString());
             }
 
             /* (non-Javadoc)
@@ -392,7 +406,8 @@ public class ArrayFactory {
                     break;
                 case put:
                     try {
-                        convert.fromString(pvArray,value);
+                        int len = convert.fromString(pvArray,value);
+                        pvArray.setLength(len);
                     } catch (Exception e) {
                         message("exception " + e.getMessage(),MessageType.error);
                         return;

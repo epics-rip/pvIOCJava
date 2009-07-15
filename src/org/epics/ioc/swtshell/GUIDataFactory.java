@@ -70,6 +70,12 @@ public class GUIDataFactory {
             this.parent = parent;
         }
         
+        private static void textMessage(Text text,String message) {
+            text.selectAll();
+            text.clearSelection();
+            text.setText(message);
+        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.GUIData#get(org.epics.pvData.pv.PVStructure, java.util.BitSet)
          */
@@ -82,7 +88,7 @@ public class GUIDataFactory {
                 PVField pvField = pvFields[0];
                 Field field = pvField.getField();
                 Type type = field.getType();
-                if(type==Type.scalar) {
+                if(type!=Type.structure) {
                     GetSimple getSimple = new GetSimple(parent,pvField);
                     boolean isModified = getSimple.get();
                     if(isModified) bitSet.set(pvField.getFieldOffset());
@@ -162,14 +168,14 @@ public class GUIDataFactory {
                         boolean ok = false;
                         if(type==Type.scalar) {
                             ok = true;
-                            textMessage(pvField.toString());
+                            textMessage(text,pvField.toString());
                         } else if(type==Type.scalarArray) {
                             ok = true;
                             String values = pvField.toString();
-                            textMessage(values);
+                            textMessage(text,values);
                         }
                         if(!ok) {
-                            textMessage("cant handle type");
+                            textMessage(text,"cant handle type");
                             pvField = null;
                             type = null;
                         }
@@ -183,13 +189,13 @@ public class GUIDataFactory {
             }
             if(object==text) {
                 if(pvField==null) {
-                    textMessage("no field was selected");
+                    textMessage(text,"no field was selected");
                 } else {
                     if(type==Type.scalar) {
                         try {
                             convert.fromString((PVScalar)pvField, text.getText());
                         }catch (NumberFormatException e) {
-                            textMessage("exception " + e.getMessage());
+                            textMessage(text,"exception " + e.getMessage());
                             return;
                         }
                     } else { // type is array; elementType.isScalar
@@ -197,7 +203,7 @@ public class GUIDataFactory {
                         try {
                             convert.fromString(pvArray,text.getText());
                         }catch (NumberFormatException e) {
-                            textMessage("exception " + e.getMessage());
+                            textMessage(text,"exception " + e.getMessage());
                             return;
                         }
                     }
@@ -206,13 +212,6 @@ public class GUIDataFactory {
                 return;
             }
         }  
-        
-        
-        private void textMessage(String message) {
-            text.selectAll();
-            text.clearSelection();
-            text.setText(message);
-        }
         
         private void createStructureTreeItem(TreeItem tree,PVStructure pvStructure) {
             PVField[] pvFields = pvStructure.getPVFields();
@@ -251,6 +250,7 @@ public class GUIDataFactory {
                 gridData.minimumWidth = 100;
                 text.setLayoutData(gridData);
                 text.addSelectionListener(this);
+                textMessage(text,pvField.toString());
                 shell.pack();
                 shell.open();
                 Display display = shell.getDisplay();
@@ -276,17 +276,21 @@ public class GUIDataFactory {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 Object object = e.getSource();
-                if(object==text) {               
+                if(object==text) {  
+                    
                     Type type = pvField.getField().getType();
                     try {
                         if(type==Type.scalar) {
                             convert.fromString((PVScalar)pvField, text.getText());
                             modified = true;
+                        } else if(type==Type.scalarArray) {
+                            convert.fromString((PVArray)pvField, text.getText());
+                            modified = true;
                         } else {
-                            textMessage("CDField type is not scalar");
+                            textMessage(text,"Field type is a structure");
                         }
                     }catch (NumberFormatException ex) {
-                        textMessage("exception " + ex.getMessage());
+                        textMessage(text,"exception " + ex.getMessage());
                         return;
                     }
                     shell.close();
@@ -294,11 +298,6 @@ public class GUIDataFactory {
                 }
             }
             
-            private void textMessage(String message) {
-                text.selectAll();
-                text.clearSelection();
-                text.setText(message);
-            }
         }
     }
 }
