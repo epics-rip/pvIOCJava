@@ -64,5 +64,13 @@ public class ChannelAccessFactory {
             }
             
         }
+
+		@Override
+		public boolean findChannel(String channelName) {
+			// TODO Auto-generated method stub
+			return true;
+		}
+        
+        
     }
 }

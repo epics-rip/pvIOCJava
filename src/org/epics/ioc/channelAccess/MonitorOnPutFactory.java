@@ -5,11 +5,10 @@
  */
 package org.epics.ioc.channelAccess;
 
-import java.util.BitSet;
-
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
@@ -69,7 +68,7 @@ public class MonitorOnPutFactory{
         private int timeStampOffset = -1;
         private int afterTimeStampOffset = -1;
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(java.util.BitSet)
+         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(org.epics.pvData.misc.BitSet)
          */
         @Override
         protected boolean generateMonitor(BitSet bitSet) {

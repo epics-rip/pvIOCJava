@@ -5,11 +5,10 @@
  */
 package org.epics.ioc.channelAccess;
 
-import java.util.BitSet;
-
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
@@ -97,7 +96,7 @@ public class MonitorOnPercentChangeFactory {
         private PVScalar valuePVField;
         private double prevValue = 0.0;
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(java.util.BitSet)
+         * @see org.epics.ioc.channelAccess.BaseMonitor#generateMonitor(org.epics.pvData.misc.BitSet)
          */
         @Override
         protected boolean generateMonitor(BitSet changeBitSet) {

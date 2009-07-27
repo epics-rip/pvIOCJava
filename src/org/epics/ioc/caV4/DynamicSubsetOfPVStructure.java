@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import org.epics.pvData.factory.AbstractPVField;
 import org.epics.pvData.factory.BaseField;
 import org.epics.pvData.factory.FieldFactory;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
@@ -450,7 +451,19 @@ class DynamicSubsetOfPVStructure extends AbstractPVField implements PVStructure
         	pvField.deserialize(buffer);
 	}
 
-    /* (non-Javadoc)
+    @Override
+	public void deserialize(ByteBuffer buffer, BitSet bitSet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void serialize(ByteBuffer buffer, BitSet bitSet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     public String toString() {

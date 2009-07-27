@@ -5,8 +5,7 @@
  */
 package org.epics.ioc.channelAccess;
 
-import java.util.BitSet;
-
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pvCopy.PVCopy;
 
@@ -44,9 +43,9 @@ public class MonitorQueueFactory {
             overrunBitSet = new BitSet(pvStructure.getNumberFields());
         }
         
-        private PVStructure pvStructure;
-        private BitSet changedBitSet;
-        private BitSet overrunBitSet;
+        private final PVStructure pvStructure;
+        private final BitSet changedBitSet;
+        private final BitSet overrunBitSet;
         
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue.MonitorQueueElement#getChangedBitSet()

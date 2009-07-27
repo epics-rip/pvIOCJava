@@ -5,12 +5,11 @@
  */
 package org.epics.ioc.channelAccess;
 
-import java.util.BitSet;
-
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.Convert;
