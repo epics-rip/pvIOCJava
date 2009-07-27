@@ -28,7 +28,7 @@ import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVByte;
+import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVString;
@@ -76,13 +76,13 @@ public class MonitorFactory {
         private PVStructure pvRequest = null;
         private PVStructure pvOption = null;
         private PVString pvAlgorithm = null;
-        private PVByte pvQueueSize = null;
+        private PVInt pvQueueSize = null;
         private Text queueSizeText = null;
         private PVDouble pvDeadband = null;
         private Text deadbandText;
         private Monitor monitor = new Monitor();
         
-        private byte queueSize = 3;
+        private int queueSize = 3;
         private double deadband = 0.0;               
         private Button putButton;
         private Button changeButton;
@@ -203,7 +203,7 @@ public class MonitorFactory {
             pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvOption, "algorithm", ScalarType.pvString);
             pvAlgorithm.put("onPut");
             pvOption.appendPVField(pvAlgorithm);
-            pvQueueSize = (PVByte)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvByte);
+            pvQueueSize = (PVInt)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvInt);
             pvQueueSize.put(queueSize);
             pvOption.appendPVField(pvQueueSize);
             pvDeadband = (PVDouble)pvDataCreate.createPVScalar(pvOption, "deadband", ScalarType.pvDouble);
@@ -271,7 +271,7 @@ public class MonitorFactory {
             if(object==queueSizeText) {
                 String value = queueSizeText.getText();
                 try {
-                    queueSize = (byte)(int)Integer.decode(value);
+                    queueSize = Integer.decode(value);
                     pvQueueSize.put(queueSize);
                 } catch (NumberFormatException e) {
                     message("Illegal value", MessageType.error);
