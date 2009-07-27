@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.BitSet;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -23,6 +21,7 @@ import org.eclipse.swt.widgets.Text;
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelGet;
 import org.epics.pvData.channelAccess.ChannelGetRequester;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
@@ -315,7 +314,7 @@ public class GetFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelGetRequester#channelGetConnect(org.epics.pvData.channelAccess.ChannelGet, org.epics.pvData.pv.PVStructure, java.util.BitSet)
+             * @see org.epics.pvData.channelAccess.ChannelGetRequester#channelGetConnect(org.epics.pvData.channelAccess.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
             public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure,BitSet bitSet) {

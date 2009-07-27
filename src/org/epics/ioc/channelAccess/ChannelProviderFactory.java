@@ -5,7 +5,6 @@
 package org.epics.ioc.channelAccess;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.LinkedList;
 
 import org.epics.pvData.channelAccess.AccessRights;
@@ -28,6 +27,7 @@ import org.epics.pvData.channelAccess.GetFieldRequester;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;

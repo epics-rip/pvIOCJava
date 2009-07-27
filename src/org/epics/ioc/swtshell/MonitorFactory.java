@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.BitSet;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -25,6 +23,7 @@ import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.Field;
@@ -430,7 +429,7 @@ public class MonitorFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, java.util.BitSet, java.util.BitSet)
+             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
              */
             @Override
             public void monitorEvent(PVStructure pvStructure,

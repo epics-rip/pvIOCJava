@@ -5,10 +5,10 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.BitSet;
 import java.util.Date;
 
 import org.eclipse.swt.widgets.Text;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.PVField;

@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.BitSet;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -21,6 +19,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.PVArray;
@@ -77,7 +76,7 @@ public class GUIDataFactory {
         }
         
         /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.GUIData#get(org.epics.pvData.pv.PVStructure, java.util.BitSet)
+         * @see org.epics.ioc.swtshell.GUIData#get(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
          */
         @Override
         public void get(PVStructure pvStructure, BitSet bitSet) {

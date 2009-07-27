@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.BitSet;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -23,6 +21,7 @@ import org.eclipse.swt.widgets.Text;
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelPut;
 import org.epics.pvData.channelAccess.ChannelPutRequester;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
@@ -316,7 +315,7 @@ public class PutFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutRequester#channelPutConnect(org.epics.pvData.channelAccess.ChannelPut, org.epics.pvData.pv.PVStructure, java.util.BitSet)
+             * @see org.epics.pvData.channelAccess.ChannelPutRequester#channelPutConnect(org.epics.pvData.channelAccess.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
             public void channelPutConnect(ChannelPut channelPut,PVStructure pvStructure,BitSet bitSet) {

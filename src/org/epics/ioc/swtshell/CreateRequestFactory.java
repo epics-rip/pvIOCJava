@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.BitSet;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -22,6 +20,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.CreatePVStructureRequester;
 import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.Field;
