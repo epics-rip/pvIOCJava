@@ -29,7 +29,7 @@ public class ChannelProcessorProviderFactory {
     private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
     private static final PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
     /**
-     * Register. This is called by ChannelAccessFactory.
+     * Register. This is called by InstallFactory.
      */
     static public void register() {
         channelProvider.registerChannelProcessProvider(channelProcessProvider);
