@@ -57,8 +57,10 @@ public class ConnectChannelFactory {
         private Shell shell = null;
         private ExecutorNode executorNode = null;
         private Button selectLocalRecordButton = null;
+        private Text timeOutText = null;
         private Text pvNameText = null;
         private String pvName = null;
+        private double timeOut = 2.0;
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.ConnectChannel#connect()
          */
@@ -68,16 +70,30 @@ public class ConnectChannelFactory {
             shell = new Shell(parent);  
             shell.setText("connectChannel");
             GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
+            gridLayout.numColumns = 3;
             shell.setLayout(gridLayout);
             selectLocalRecordButton = new Button(shell,SWT.PUSH);
             selectLocalRecordButton.setText("selectLocalRecord");
             selectLocalRecordButton.addSelectionListener(this);
+            Composite timeout = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            timeout.setLayout(gridLayout);
+            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            timeout.setLayoutData(gridData);   
+            new Label(timeout,SWT.RIGHT).setText("timeout");
+            timeOutText = new Text(timeout,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.minimumWidth = 100;
+            timeOutText.setLayoutData(gridData);
+            timeOutText.setText(Double.toString(timeOut));
+            timeOutText.addSelectionListener(this);
+            
             Composite pvname = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             pvname.setLayout(gridLayout);
-            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
             pvname.setLayoutData(gridData);   
             new Label(pvname,SWT.RIGHT).setText("pvname");
             pvNameText = new Text(pvname,SWT.BORDER);
@@ -122,6 +138,9 @@ public class ConnectChannelFactory {
                 pvName = pvNameText.getText();
                 executor.execute(executorNode);
                 shell.close();
+            } else if(object==timeOutText) {
+                String text = timeOutText.getText();
+                timeOut = Double.parseDouble(text);
             }
             
         }
@@ -130,7 +149,7 @@ public class ConnectChannelFactory {
          */
         @Override
         public void run() {
-            channelAccess.createChannel(pvName, channelRequester,2.0);
+            channelAccess.createChannel(pvName, channelRequester,timeOut);
         }
     }
 }

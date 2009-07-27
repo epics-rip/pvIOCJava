@@ -7,6 +7,7 @@ package org.epics.ioc.swtshell;
 
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.misc.BitSet;
 
 
 /**
