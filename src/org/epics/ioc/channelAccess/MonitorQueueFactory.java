@@ -22,7 +22,7 @@ public class MonitorQueueFactory {
      * @throws IllegalStateException if the queue size is not at least 2.
      * @return The MonitorQueue interface.
      */
-    public static MonitorQueue create(PVCopy pvCopy, byte queueSize) {
+    public static MonitorQueue create(PVCopy pvCopy, int queueSize) {
         if(queueSize<2) {
             throw new IllegalStateException("queueSize must be at least 2");
         }

@@ -38,7 +38,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
             Channel channel,
             ChannelMonitorRequester channelMonitorRequester,
             PVCopy pvCopy,
-            byte queueSize,
+            int queueSize,
             Executor executor)
     {
         this.channel = channel;
@@ -74,7 +74,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
     private CallRequester callRequester;
     private PVCopyMonitor pvCopyMonitor;
     private boolean isMonitoring = false;
-    private byte queueSize;
+    private int queueSize;
     // following only used if queueSize <=1
     private PVStructure pvStructure = null;
     private int indexBitSet = 0;

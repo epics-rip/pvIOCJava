@@ -41,7 +41,7 @@ public class MonitorOnPercentChangeFactory {
                 ChannelMonitorRequester channelMonitorRequester,
                 PVStructure pvOption,
                 PVCopy pvCopy,
-                byte queueSize,
+                int queueSize,
                 Executor executor)
         {
             PVStructure pvStructure = pvCopy.createPVStructure();
@@ -81,7 +81,7 @@ public class MonitorOnPercentChangeFactory {
                 Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
-                byte queueSize,
+                int queueSize,
                 Executor executor,
                 double deadband,
                 PVScalar valuePVField)

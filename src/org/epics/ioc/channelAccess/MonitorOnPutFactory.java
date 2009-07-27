@@ -26,15 +26,17 @@ public class MonitorOnPutFactory{
     public static void start() {
         channelProvider.registerMonitor(monitorOnPut);
     }
-
+    
     private static class MonitorOnPut implements MonitorCreate {
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.MonitorCreate#create(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelMonitorRequester, org.epics.pvData.pv.PVStructure, org.epics.pvData.pvCopy.PVCopy, int, org.epics.pvData.misc.Executor)
+         */
         public ChannelMonitor create(
                 Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVStructure pvOption,
                 PVCopy pvCopy,
-                byte queueSize,
+                int queueSize,
                 Executor executor)
         {
             return new Monitor(channel,channelMonitorRequester,pvCopy,queueSize,executor);
@@ -53,7 +55,7 @@ public class MonitorOnPutFactory{
                 Channel channel,
                 ChannelMonitorRequester channelMonitorRequester,
                 PVCopy pvCopy,
-                byte queueSize,
+                int queueSize,
                 Executor executor)
         {
             super(channel,channelMonitorRequester,pvCopy,queueSize,executor);

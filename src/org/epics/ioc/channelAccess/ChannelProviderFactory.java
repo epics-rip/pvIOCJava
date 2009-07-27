@@ -32,7 +32,7 @@ import org.epics.pvData.misc.Executor;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
-import org.epics.pvData.pv.PVByte;
+import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
@@ -78,8 +78,42 @@ public class ChannelProviderFactory  {
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final Convert convert = ConvertFactory.getConvert();
     private static ChannelProcessorProvider channelProcessorProvider = null;
+   
+    private static class ChannelFindImpl implements ChannelFind {
+        
+        private ChannelFindImpl(PVRecord pvRecord) {
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelFind#cancelChannelFind()
+         */
+        @Override
+        public void cancelChannelFind() {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelFind#geChannelProvider()
+         */
+        @Override
+        public ChannelProvider getChannelProvider() {
+            return channelProvider;
+        }
+        
+    }
     
     private static class ChannelProviderLocal implements ChannelProvider{
+        private LinkedList<Channel> channelList = new LinkedList<Channel>();
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#destroy()
+         */
+        @Override
+        public void destroy() {
+            Channel channel = null;
+            while(true) {
+                synchronized(channelList) {
+                    if(channelList.size()<1) return;
+                    channel = channelList.pop();
+                }
+                channel.destroy();
+            }
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#getProviderName()
          */
@@ -88,23 +122,26 @@ public class ChannelProviderFactory  {
             return providerName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProvider#findChannel(java.lang.String, org.epics.pvData.channelAccess.ChannelRequester, double)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#channelFind(java.lang.String, org.epics.ioc.channelAccess.ChannelFindRequester, org.epics.pvData.channelAccess.ChannelRequester)
          */
         @Override
-        public void findChannel(String channelName,
-                ChannelRequester channelRequester, double timeOut)
-        {
+        public ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester,ChannelRequester channelRequester) {
             PVRecord pvRecord = pvDatabase.findRecord(channelName);
             if(pvRecord==null) {
                 PVDatabase beingInstalled = PVDatabaseFactory.getBeingInstalled();
                 if(beingInstalled!=null) pvRecord = beingInstalled.findRecord(channelName);
             }
-            if(pvRecord==null) {
-                channelRequester.channelNotCreated();
-                return;
+            ChannelFindImpl channelFind = new ChannelFindImpl(pvRecord);
+            boolean wasFound = ((pvRecord==null) ? false : true);
+            channelFindRequester.channelFindResult(channelFind, wasFound);
+            if(wasFound) {
+                ChannelImpl channel = new ChannelImpl(pvRecord,channelRequester);
+                channelRequester.channelCreated(channel);
+                synchronized(channelList) {
+                    channelList.add(channel);
+                }
             }
-            Channel channel = new ChannelImpl(pvRecord,channelRequester);
-            channelRequester.channelCreated(channel);
+            return channelFind;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#registerMonitor(org.epics.ioc.channelAccess.MonitorCreate)
@@ -346,8 +383,8 @@ public class ChannelProviderFactory  {
                 return;
             }
             String algorithm = pvAlgorithm.get();
-            PVByte pvQueueSize = pvOption.getByteField("queueSize");
-            byte queueSize = pvQueueSize.get();
+            PVInt pvQueueSize = pvOption.getIntField("queueSize");
+            int queueSize = pvQueueSize.get();
             MonitorCreate monitorCreate = null;
             for(int i=0; i<monitorCreateList.size(); i++) {
                 monitorCreate = monitorCreateList.get(i);

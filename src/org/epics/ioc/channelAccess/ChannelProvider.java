@@ -17,17 +17,15 @@ import org.epics.pvData.channelAccess.ChannelRequester;
  */
 public interface ChannelProvider {
     /**
+     * Terminate.
+     */
+    void destroy();
+    /**
      * Get the provider name.
      * @return The name.
      */
     String getProviderName();
-    /**
-     * Find a channel.
-     * @param channelName The name of the channel.
-     * @param channelRequester The requester.
-     * @param timeOut A timeout value for finding the channel.
-     */
-    void findChannel(String channelName,ChannelRequester channelRequester,double timeOut);
+    ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester,ChannelRequester channelRequester);
     /**
      * Register an interface for creating monitors.
      * @param monitorCreate The interface.

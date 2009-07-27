@@ -38,6 +38,6 @@ public interface MonitorCreate {
             ChannelMonitorRequester channelMonitorRequester,
             PVStructure pvOption,
             PVCopy pvCopy,
-            byte queueSize,
+            int queueSize,
             Executor executor);
 }
