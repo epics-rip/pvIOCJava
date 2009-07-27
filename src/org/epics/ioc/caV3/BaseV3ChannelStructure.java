@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.caV3;
 
+
 import gov.aps.jca.CAException;
 import gov.aps.jca.CAStatus;
 import gov.aps.jca.dbr.DBR;
@@ -43,13 +44,14 @@ import gov.aps.jca.dbr.DBR_TIME_String;
 import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
 
-import org.epics.ioc.ca.ChannelListener;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.factory.PVReplaceFactory;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
@@ -67,7 +69,6 @@ import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVLong;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
@@ -80,8 +81,8 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable {
-    protected static final Convert convert = ConvertFactory.getConvert();
+public class BaseV3ChannelStructure implements V3ChannelStructure,GetListener,Runnable {
+    private static final Convert convert = ConvertFactory.getConvert();
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
@@ -92,11 +93,11 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     private ExecutorNode executorNode = null;
     
     private DBRType nativeDBRType = null;
-    private PVRecord pvRecord = null;
+    private PVStructure pvStructure = null;
+    private BitSet bitSet = null;
     private PVStructure pvAlarm = null;
     private PVString pvAlarmMessage = null;
     private PVInt pvAlarmIndex = null;
-    private PVStringArray pvAlarmChoices = null;
     private String[] alarmChoices = null;
     private PVStructure pvTimeStamp = null;
     private PVLong pvSeconds = null;
@@ -107,26 +108,28 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
     // Following not null if nativeDBRType.isENUM(
     private Enumerated pvEnumerated = null;
     
-    private V3ChannelRecordRequester v3ChannelRecordRequester = null;
+    private V3ChannelStructureRequester v3ChannelRecordRequester = null;
     private RequestResult requestResult = null;
+    private boolean firstGetPVStructure = true;
     
     /**
      * The Constructor
      * @param v3Channel The v3Channel.
      */
-    public BaseV3ChannelRecord(V3Channel v3Channel) {
+    public BaseV3ChannelStructure(V3Channel v3Channel) {
         this.v3Channel = v3Channel;
         executor = v3Channel.getExecutor();
         executorNode = executor.createNode(this);
     }
-    /**
-     * Create a PVRecord for the Channel.
-     * @param recordName
+    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.caV3.V3ChannelStructure#createPVStructure(org.epics.ioc.caV3.V3ChannelStructureRequester, java.lang.String)
      */
-    public boolean createPVRecord(
-        V3ChannelRecordRequester v3ChannelRecordRequester,String recordName)
+    @Override
+    public boolean createPVStructure(
+        V3ChannelStructureRequester v3ChannelStructureRequester,String fieldName)
     {
-        this.v3ChannelRecordRequester = v3ChannelRecordRequester;
+        this.v3ChannelRecordRequester = v3ChannelStructureRequester;
         requestResult = RequestResult.success;
         gov.aps.jca.Channel jcaChannel = v3Channel.getJCAChannel();
         int elementCount = jcaChannel.getElementCount();
@@ -230,34 +233,38 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }
             fields = newFields;
         }
-        pvRecord = pvDataCreate.createPVRecord(recordName,fields);
+        pvStructure = pvDataCreate.createPVStructure(null, fieldName, fields);
         if(nativeDBRType.isENUM()) {
-            PVStructure pvStructure = (PVStructure)pvRecord.getPVFields()[0];
-            PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
+            PVStructure pvStruct = (PVStructure)pvStructure.getPVFields()[0];
+            PVAuxInfo pvAuxInfo = pvStruct.getPVAuxInfo();
             PVString pvString = (PVString)pvAuxInfo.createInfo("pvReplaceFactory", ScalarType.pvString);
             pvString.put("org.epics.pvData.enumeratedFactory");
-            PVReplaceFactory.replace(masterPVDatabase, pvStructure);
-            pvStructure = (PVStructure)pvRecord.getPVFields()[0];
-            pvEnumerated = EnumeratedFactory.getEnumerated(pvStructure);
+            PVReplaceFactory.replace(masterPVDatabase, pvStruct);
+            pvStruct = (PVStructure)pvStructure.getPVFields()[0];
+            pvEnumerated = EnumeratedFactory.getEnumerated(pvStruct);
         }
-        for(PVField pvField : pvRecord.getPVFields()) {
+        for(PVField pvField : pvStructure.getPVFields()) {
             if(pvField.getField().getFieldName().equals("alarm")) {
-                pvAlarm = (PVStructure)pvField;
+                PVStructure pvTemp = masterPVDatabase.findStructure("org.epics.pvData.alarm");
+                PVStructure pvReplace = pvDataCreate.createPVStructure(pvField.getParent(), pvField.getField().getFieldName(),pvTemp);
+                pvField.replacePVField(pvReplace);
+                pvAlarm = pvReplace;
+                PVField[] pvAlarmFields = pvAlarm.getPVFields();
+                for(PVField alarmField : pvAlarmFields) {
+                    String name = alarmField.getField().getFieldName();
+                    if(name.equals("severity" ) || name.equals("message")) continue;
+                    pvAlarm.removePVField(name);
+                }
+                PVField pvFromChoices = pvTemp.getSubField("severity.choices");
+                PVField pvToChoices = pvAlarm.getSubField("severity.choices");
+                convert.copy(pvFromChoices, pvToChoices);
                 pvAlarmMessage = pvAlarm.getStringField("message");
-                PVStructure pvStruct = pvAlarm.getStructureField("severity");
-                if(pvStruct!=null) {
-                    pvAlarmIndex = pvStruct.getIntField("index");
-                    pvAlarmChoices = (PVStringArray)pvStruct.getArrayField("choices", ScalarType.pvString);
-                    PVStructure alarmSevr = masterPVDatabase.findStructure("org.epics.pvData.alarmSeverity");
-                    PVStringArray pvStringArray = (PVStringArray)alarmSevr.getArrayField("choices", ScalarType.pvString);
-                    StringArrayData stringArrayData = new StringArrayData();
-                    pvStringArray.get(0, pvStringArray.getLength(), stringArrayData);
-                    alarmChoices = stringArrayData.data;
-                    pvAlarmChoices.put(0, pvStringArray.getLength(), alarmChoices,0);
-                }
-                if(pvAlarmMessage==null || pvAlarmIndex==null ) {
-                    throw new RuntimeException("bad alarm structure");    
-                }
+                PVStructure pvSeverity = pvAlarm.getStructureField("severity");
+                pvAlarmIndex = pvSeverity.getIntField("index");
+                PVStringArray pvAlarmChoices = (PVStringArray)pvSeverity.getArrayField("choices", ScalarType.pvString);
+                StringArrayData stringArrayData = new StringArrayData();
+                pvAlarmChoices.get(0, pvAlarmChoices.getLength(), stringArrayData);
+                alarmChoices = stringArrayData.data;
             }
             if(pvField.getField().getFieldName().equals("timeStamp")) {
                 pvTimeStamp = (PVStructure)pvField;
@@ -268,7 +275,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 }
             }
         }
-        PVField pvValue = pvRecord.getPVFields()[0];
+        PVField pvValue = pvStructure.getPVFields()[0];
         if(nativeDBRType.isENUM()) {
             String message = null;
             try {
@@ -375,15 +382,24 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 return false;
             }
         }
-        
+        bitSet = new BitSet(pvStructure.getNumberFields());
         return true;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3ChannelRecord#getPVRecord()
+     * @see org.epics.ioc.caV3.V3ChannelStructure#getPVStructure()
      */
-    public PVRecord getPVRecord() {
-        return pvRecord;
+    @Override
+    public PVStructure getPVStructure() {
+        return pvStructure;
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.caV3.V3ChannelStructure#getBitSet()
+     */
+    @Override
+    public BitSet getBitSet() {
+        return bitSet;
+    }
+
     /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3ChannelRecord#getValueDBRType()
      */
@@ -403,20 +419,31 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }
         } else {
             System.err.println(
-                    pvRecord.getRecordName()
+                    pvStructure.getField().getFieldName()
                     + " v3Ca error " + message
                     + " severity " + alarmSeverity.toString());
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3ChannelRecord#toRecord(gov.aps.jca.dbr.DBR)
+     * @see org.epics.ioc.caV3.V3ChannelStructure#toStructure(gov.aps.jca.dbr.DBR)
      */
-    public void toRecord(DBR fromDBR) {
+    @Override
+    public void toStructure(DBR fromDBR) {
+        if(firstGetPVStructure) {
+            bitSet.set(0);
+            firstGetPVStructure = false;
+        } else {
+            bitSet.clear();
+            if(pvAlarmMessage!=null) bitSet.set(pvAlarmMessage.getFieldOffset());
+            if(pvAlarmIndex!=null) bitSet.set(pvAlarmIndex.getFieldOffset());
+            if(pvTimeStamp!=null) bitSet.set(pvTimeStamp.getFieldOffset());
+            if(pvScalarValue!=null) bitSet.set(pvScalarValue.getFieldOffset());
+            if(pvArrayValue!=null) bitSet.set(pvArrayValue.getFieldOffset());
+        }
         if(fromDBR==null) {
             setAlarm(AlarmSeverity.invalid,"fromDBR is null");
             return;
         }
-        pvRecord.beginGroupPut();
         gov.aps.jca.dbr.Status status = null;
         gov.aps.jca.dbr.TimeStamp timeStamp = null;
         gov.aps.jca.dbr.Severity severity = null;
@@ -568,7 +595,8 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 return;
             }
             if(index!=pvEnumerated.getIndex().get()) {
-                pvEnumerated.getIndex().put(index);
+                PVInt pvInt = pvEnumerated.getIndex();
+                pvInt.put(index);
             }
         } else {
             if(requestDBRType==DBRType.DOUBLE) {
@@ -910,7 +938,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             setAlarm(alarmSeverity,message);
         }
         if(displayLow<displayHigh) {
-            pvStructure = pvRecord.getStructureField("display");
+            pvStructure = this.pvStructure.getStructureField("display");
             if(pvStructure!=null) {
                 if(units!=null) {
                     PVString pvUnits = pvStructure.getStringField("units");
@@ -936,7 +964,7 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
             }
         }
         if(controlLow<controlHigh) {
-            pvStructure = pvRecord.getStructureField("control");
+            pvStructure = this.pvStructure.getStructureField("control");
             if(pvStructure!=null) {
                 pvStructure = pvStructure.getStructureField("limit");
                 if(pvStructure!=null) {
@@ -949,7 +977,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
                 }
             }
         }
-        pvRecord.endGroupPut();
     }
     /* (non-Javadoc)
      * @see gov.aps.jca.event.GetListener#getCompleted(gov.aps.jca.event.GetEvent)
@@ -958,15 +985,16 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
         DBR fromDBR = getEvent.getDBR();
         if(fromDBR==null) {
             CAStatus caStatus = getEvent.getStatus();
-            ChannelListener channelListener = v3Channel.getChannelListener();
+            ChannelRequester channelRequester = v3Channel.getChannelRequester();
             if(caStatus==null) {
-                channelListener.message(getEvent.toString(),MessageType.error);
+                channelRequester.message(getEvent.toString(),MessageType.error);
             } else {
-                channelListener.message(caStatus.getMessage(),MessageType.error);
+                channelRequester.message(caStatus.getMessage(),MessageType.error);
             }
             requestResult = RequestResult.failure;
         } else {
-            toRecord(fromDBR);
+            toStructure(fromDBR);
+            firstGetPVStructure = true;
             requestResult = RequestResult.success;
         }
         executor.execute(executorNode);
@@ -975,6 +1003,6 @@ public class BaseV3ChannelRecord implements V3ChannelRecord,GetListener,Runnable
      * @see java.lang.Runnable#run()
      */
     public void run() {
-        v3ChannelRecordRequester.createPVRecordDone(requestResult);
+        v3ChannelRecordRequester.createPVStructureDone(requestResult);
     }
 }

@@ -6,20 +6,19 @@
 package org.epics.ioc.caV3;
 
 import gov.aps.jca.CAException;
+import gov.aps.jca.CAStatus;
 import gov.aps.jca.Channel;
+import gov.aps.jca.dbr.DBR;
 import gov.aps.jca.dbr.DBRType;
 import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.ConnectionListener;
+import gov.aps.jca.event.GetEvent;
+import gov.aps.jca.event.GetListener;
 import gov.aps.jca.event.PutEvent;
 import gov.aps.jca.event.PutListener;
 
-import org.epics.ioc.ca.ChannelField;
-import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.ca.ChannelProcess;
-import org.epics.ioc.ca.ChannelProcessRequester;
-import org.epics.ioc.ca.ChannelPut;
-import org.epics.ioc.ca.ChannelPutRequester;
-import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.channelAccess.ChannelPut;
+import org.epics.pvData.channelAccess.ChannelPutRequester;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.pv.ByteArrayData;
@@ -40,6 +39,7 @@ import org.epics.pvData.pv.PVShort;
 import org.epics.pvData.pv.PVShortArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
+import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ShortArrayData;
 import org.epics.pvData.pv.StringArrayData;
 
@@ -49,21 +49,17 @@ import org.epics.pvData.pv.StringArrayData;
  *
  */
 public class BaseV3ChannelPut
-implements ChannelPut,PutListener,ChannelProcessRequester,ConnectionListener
+implements ChannelPut,GetListener,PutListener,ConnectionListener
 {
-    private ChannelFieldGroup channelFieldGroup = null;
     private ChannelPutRequester channelPutRequester = null;
-    private boolean process = false;
-    
+    private DBRType requestDBRType = null;
     private V3Channel v3Channel = null;
     private gov.aps.jca.Channel jcaChannel = null;
     private int elementCount = 0;
    
     private boolean isDestroyed = false;
-    private ChannelField channelField = null;
     private PVField pvField = null;
     private PVInt pvIndex = null; // only if nativeDBRType.isENUM()
-    private ChannelProcess channelProcess = null; // only if process is true
     private ByteArrayData byteArrayData = new ByteArrayData();
     private ShortArrayData shortArrayData = new ShortArrayData();
     private IntArrayData intArrayData = new IntArrayData();
@@ -79,22 +75,26 @@ implements ChannelPut,PutListener,ChannelProcessRequester,ConnectionListener
      * @param channelPutRequester The channelPutRequester.
      * @param process Should the record be processed after the put.
      */
-    public BaseV3ChannelPut(ChannelFieldGroup channelFieldGroup,
-            ChannelPutRequester channelPutRequester, boolean process)
+    public BaseV3ChannelPut(ChannelPutRequester channelPutRequester, boolean process)
     {
-        this.channelFieldGroup = channelFieldGroup;
         this.channelPutRequester = channelPutRequester;
-        this.process = process;
+        if(process) {
+            channelPutRequester.message("process not supported for caV3", MessageType.warning);
+        }
     }
     /**
      * Initialize the channelPut.
      * @param v3Channel The V3Channel
-     * @return (false,true) if the channelPut (did not, did) properly initialize.
      */
-    public boolean init(V3Channel v3Channel)
+    public void init(V3Channel v3Channel)
     {
         this.v3Channel = v3Channel;
-        DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
+        DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
+        if(nativeDBRType.isENUM()) {
+            requestDBRType = DBRType.INT;
+        } else {
+            requestDBRType = nativeDBRType;
+        }
         jcaChannel = v3Channel.getJCAChannel();
         try {
             jcaChannel.addConnectionListener(this);
@@ -102,68 +102,103 @@ implements ChannelPut,PutListener,ChannelProcessRequester,ConnectionListener
             message(
                     "addConnectionListener failed " + e.getMessage(),
                     MessageType.error);
+            channelPutRequester.channelPutConnect(null, null, null);
             jcaChannel = null;
-            return false;
+            return;
         };
+        String valueFieldName = v3Channel.getValueFieldName();
+        V3ChannelStructure v3ChannelStructure = v3Channel.getV3ChannelStructure();
+        PVStructure pvStructure = v3ChannelStructure.getPVStructure();
+        pvField = pvStructure.getSubField(valueFieldName);
         elementCount = jcaChannel.getElementCount();
-        ChannelField[] channelFields = channelFieldGroup.getArray();
-        if(channelFields.length!=1) {
-            message("only one channelField supported", MessageType.error);
-            return false;
-        }
-        channelField = channelFields[0];
-        pvField = channelField.getPVField();
-        if(pvField==null) {
-            message("value pvField not found",MessageType.error);
-            return false;
-        }
         if(nativeDBRType.isENUM()) {
-            if(process) {
-                message("process not supported for enumerated", MessageType.error);
-                return false;
-            }
             if(elementCount!=1) {
                 message("array of ENUM not supported",MessageType.error);
-                return false;
+                return;
             }
             Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
             pvIndex = enumerated.getIndex();
         }
-        if(process) {
-            channelProcess = v3Channel.createChannelProcess(this);
-            if(channelProcess==null) return false;
-        }
-        return true;
+       
+        channelPutRequester.channelPutConnect(this, pvStructure,v3ChannelStructure.getBitSet());
     } 
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelPut#destroy()
      */
     public void destroy() {
         isDestroyed = true;
-        if(channelProcess!=null) channelProcess.destroy();
         v3Channel.remove(this);
     }
+    
     /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelPut#put()
+     * @see org.epics.pvData.channelAccess.ChannelPut#get()
      */
-    public void put() {
+    @Override
+    public void get() {
         if(isDestroyed) {
             message("isDestroyed",MessageType.error);
-            putDone(RequestResult.failure);
+            getDone(false);
             return;
         }
         if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
-            putDone(RequestResult.failure);
+            getDone(false);
             return;
         }
-        DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
+        String message = null;
+        
+            try {
+                jcaChannel.get(requestDBRType, elementCount, this);
+            } catch (CAException e) {
+                message = e.getMessage();
+            } catch (IllegalStateException e) {
+                message = e.getMessage();
+            }
+        if(message!=null) {
+            message(message,MessageType.error);
+            getDone(false);
+        }
+    }
+    /* (non-Javadoc)
+     * @see gov.aps.jca.event.GetListener#getCompleted(gov.aps.jca.event.GetEvent)
+     */
+    @Override
+    public void getCompleted(GetEvent getEvent) {
+        DBR fromDBR = getEvent.getDBR();
+        if(fromDBR==null) {
+            CAStatus caStatus = getEvent.getStatus();
+            if(caStatus==null) {
+                message(getEvent.toString(),MessageType.error);
+            } else {
+                message(caStatus.getMessage(),MessageType.error);
+                getDone(false);
+            }
+            return;
+        }
+        v3Channel.getV3ChannelStructure().toStructure(fromDBR);
+        getDone(true);
+    }
+    private void getDone(boolean success) {
+        channelPutRequester.getDone(success);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.pvData.channelAccess.ChannelPut#put(boolean)
+     */
+    @Override
+    public void put(boolean lastRequest) {
+        if(isDestroyed) {
+            message("isDestroyed",MessageType.error);
+            putDone(false);
+            return;
+        }
+        if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
+            putDone(false);
+            return;
+        }
+        DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
         String message = null;
         isActive = true;
         try {
-            boolean more = channelPutRequester.nextPutField(channelField,pvField);
-            if(more) {
-                message = "cant handle nextPutField returning more";
-            } else if(pvIndex!=null) {
+            if(pvIndex!=null) {
                 short index = (short)pvIndex.get();
                 jcaChannel.put(index, this);
             } else if(nativeDBRType==DBRType.BYTE) {
@@ -254,31 +289,22 @@ implements ChannelPut,PutListener,ChannelProcessRequester,ConnectionListener
         }
         if(message!=null) {
             message(message,MessageType.error);
-            putDone(RequestResult.failure);
+            putDone(false);
         } else {
             isActive = true;
         }
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelPut#putDelayed(org.epics.ioc.pv.PVField)
-     */
-    public void putDelayed(PVField pvField) {
-        // nothing to do
-    }
+    
     /* (non-Javadoc)
      * @see gov.aps.jca.event.PutListener#putCompleted(gov.aps.jca.event.PutEvent)
      */
     public void putCompleted(PutEvent arg0) {
         if(!arg0.getStatus().isSuccessful()) {
             message(arg0.getStatus().getMessage(),MessageType.error);
-            putDone(RequestResult.failure);
+            putDone(false);
             return;
         }
-        if(process) {
-            channelProcess.process();
-            return;
-        }
-        putDone(RequestResult.success);
+        putDone(true);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -287,17 +313,12 @@ implements ChannelPut,PutListener,ChannelProcessRequester,ConnectionListener
         return channelPutRequester.getRequesterName();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
+     * @see org.epics.pvData.pv.Requester#message(java.lang.String, org.epics.pvData.pv.MessageType)
      */
     public void message(String message, MessageType messageType) {
         channelPutRequester.message(message, messageType);
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelProcessRequester#processDone(org.epics.ioc.util.RequestResult)
-     */
-    public void processDone(RequestResult requestResult) {
-        putDone(requestResult);
-    }
+   
     /* (non-Javadoc)
      * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
      */
@@ -305,13 +326,13 @@ implements ChannelPut,PutListener,ChannelProcessRequester,ConnectionListener
         if(!arg0.isConnected()) {
             if(isActive) {
                 message("disconnected while active",MessageType.error);
-                putDone(RequestResult.failure);
+                putDone(false);
             }
         }
     }
     
-    private void putDone(RequestResult requestResult) {
+    private void putDone(boolean success) {
         isActive = false;
-        channelPutRequester.putDone(requestResult);
+        channelPutRequester.putDone(success);
     }
 }

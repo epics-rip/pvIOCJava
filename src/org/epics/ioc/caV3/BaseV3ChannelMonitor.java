@@ -5,19 +5,22 @@
  */
 package org.epics.ioc.caV3;
 
+
 import gov.aps.jca.CAException;
 import gov.aps.jca.CAStatus;
 import gov.aps.jca.Monitor;
 import gov.aps.jca.dbr.DBR;
 import gov.aps.jca.dbr.DBRType;
+import gov.aps.jca.event.ConnectionEvent;
+import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 
-import org.epics.ioc.ca.ChannelField;
-import org.epics.ioc.ca.ChannelFieldGroup;
-import org.epics.ioc.ca.ChannelMonitor;
-import org.epics.ioc.ca.ChannelMonitorRequester;
+import org.epics.pvData.channelAccess.ChannelMonitor;
+import org.epics.pvData.channelAccess.ChannelMonitorRequester;
+import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVStructure;
 
 
 /**
@@ -25,7 +28,7 @@ import org.epics.pvData.pv.MessageType;
  * @author mrk
  *
  */
-public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
+public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,ConnectionListener
 {
     private static enum DBRProperty {none,status,time};
 
@@ -35,12 +38,16 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
     private gov.aps.jca.Channel jcaChannel = null;
     private int elementCount = 0;
     
-    private ChannelField[] channelFields = null;
+    private String[] propertyNames = null;
     private DBRProperty dbrProperty = DBRProperty.none;
     private DBRType requestDBRType = null;
 
     private Monitor monitor = null;
     private boolean isDestroyed = false;
+    
+    private  PVStructure pvStructure = null;
+    private BitSet changeBitSet = null;
+    private BitSet overrunBitSet = null;
     /**
      * Constructor.
      * @param channelMonitorRequester The channelMonitorRequester.
@@ -53,35 +60,37 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
      * @param v3Channel The V3Channel
      * @return (false,true) if the channelMonitor (did not, did) properly initialize.
      */
-    public boolean init(V3Channel v3Channel)
+    /**
+     * @param v3Channel
+     * @return
+     */
+    public void init(V3Channel v3Channel)
     {
         this.v3Channel = v3Channel;
+        propertyNames = v3Channel.getPropertyNames();
         jcaChannel = v3Channel.getJCAChannel();
+        try {
+            jcaChannel.addConnectionListener(this);
+        } catch (CAException e) {
+            
+            channelMonitorRequester.message(
+                    "addConnectionListener failed " + e.getMessage(),
+                    MessageType.error);
+            channelMonitorRequester.channelMonitorConnect(null);
+            
+            jcaChannel = null;
+            return;
+        };
+        DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
+        requestDBRType = null;
         elementCount = jcaChannel.getElementCount();
-        return true;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelMonitor#destroy()
-     */
-    public void destroy() {
-        isDestroyed = true;
-        if(monitor!=null) stop();
-        v3Channel.remove(this);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.ChannelMonitor#setFieldGroup(org.epics.ioc.ca.ChannelFieldGroup)
-     */
-    public void setFieldGroup(ChannelFieldGroup channelFieldGroup) {
-        channelFields = channelFieldGroup.getArray();
-        DBRType nativeDBRType = v3Channel.getV3ChannelRecord().getNativeDBRType();
         dbrProperty = DBRProperty.none;
-        for(ChannelField channelField : channelFields) {
-            String fieldName = channelField.getPVField().getField().getFieldName();
-            if(fieldName.equals("alarm")&& (dbrProperty.compareTo(DBRProperty.status)<0)) {
+        for(String property : propertyNames) {
+            if(property.equals("alarm")&& (dbrProperty.compareTo(DBRProperty.status)<0)) {
                 dbrProperty = DBRProperty.status;
                 continue;
             }
-            if(fieldName.equals("timeStamp")&& (dbrProperty.compareTo(DBRProperty.time)<0)) {
+            if(property.equals("timeStamp")&& (dbrProperty.compareTo(DBRProperty.time)<0)) {
                 dbrProperty = DBRProperty.time;
                 continue;
             }
@@ -129,6 +138,19 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
             }
             break;
         }
+        V3ChannelStructure v3ChannelStructure = v3Channel.getV3ChannelStructure();
+        pvStructure = v3ChannelStructure.getPVStructure();
+        changeBitSet = v3ChannelStructure.getBitSet();
+        overrunBitSet = new BitSet(pvStructure.getNumberFields());
+        channelMonitorRequester.channelMonitorConnect(this);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.ca.ChannelMonitor#destroy()
+     */
+    public void destroy() {
+        isDestroyed = true;
+        if(monitor!=null) stop();
+        v3Channel.remove(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#start()
@@ -167,7 +189,16 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener
         if(fromDBR==null) {
             channelMonitorRequester.message("fromDBR is null", MessageType.error);
         } else {
-            v3Channel.getV3ChannelRecord().toRecord(fromDBR);
+            v3Channel.getV3ChannelStructure().toStructure(fromDBR);
+            channelMonitorRequester.monitorEvent(pvStructure, changeBitSet, overrunBitSet);
+        }
+    }
+    /* (non-Javadoc)
+     * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
+     */
+    public void connectionChanged(ConnectionEvent arg0) {
+        if(!arg0.isConnected()) {
+            if(monitor!=null) stop();
         }
     }
 }

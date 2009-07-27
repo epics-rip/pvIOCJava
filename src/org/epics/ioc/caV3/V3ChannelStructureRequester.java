@@ -8,14 +8,14 @@ package org.epics.ioc.caV3;
 import org.epics.ioc.util.RequestResult;
 
 /**
- * Implemented by BaseV3Channel; Called by BaseV3ChannelRecord.
+ * Implemented by BaseV3Channel; Called by BaseV3ChannelStructure.
  * @author mrk
  *
  */
-public interface V3ChannelRecordRequester {
+public interface V3ChannelStructureRequester {
      /**
       * V3ChannelRecord has finished createPVRecord.
      * @param requestResult The result.
      */
-    void createPVRecordDone(RequestResult requestResult);
+    void createPVStructureDone(RequestResult requestResult);
 }

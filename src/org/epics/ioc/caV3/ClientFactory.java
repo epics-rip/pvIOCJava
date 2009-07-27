@@ -18,15 +18,20 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
 
-import org.epics.ioc.ca.Channel;
-import org.epics.ioc.ca.ChannelAccessFactory;
-import org.epics.ioc.ca.ChannelListener;
-import org.epics.ioc.ca.ChannelProvider;
+import org.epics.ioc.channelAccess.ChannelAccessFactory;
+import org.epics.ioc.channelAccess.ChannelFind;
+import org.epics.ioc.channelAccess.ChannelFindRequester;
+import org.epics.ioc.channelAccess.ChannelProcessorProvider;
+import org.epics.ioc.channelAccess.ChannelProvider;
+import org.epics.ioc.channelAccess.MonitorCreate;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
+import org.epics.pvData.channelAccess.Channel;
+import org.epics.pvData.channelAccess.ChannelMonitor;
+import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
@@ -43,7 +48,7 @@ import org.epics.pvData.pv.ScalarType;
  *
  */
 public class ClientFactory  {
-    private static ChannelProviderImpl channelProvider = new ChannelProviderImpl();
+    static ChannelProviderImpl channelProvider = new ChannelProviderImpl();
     private static JCALibrary jca = null;
     private static Context context = null;
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
@@ -98,6 +103,7 @@ public class ClientFactory  {
         static private final Pattern periodPattern = Pattern.compile("[.]");
         static private final Pattern leftBracePattern = Pattern.compile("[{]");
         static private final Pattern rightBracePattern = Pattern.compile("[}]");
+        static private final Pattern commaPattern = Pattern.compile("[,]");
         private boolean isRegistered = false; 
         private CAThread caThread = null;
         
@@ -114,16 +120,37 @@ public class ClientFactory  {
                 System.err.println(e.getMessage());
                 return;
             }     
-            ChannelAccessFactory.getChannelAccess().registerChannelProvider(this);
+            ChannelAccessFactory.registerChannelProvider(this);
         }       
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelProvider#createChannel(java.lang.String, org.epics.ioc.ca.ChannelListener)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#destroy()
          */
-        public Channel createChannel(String pvName,String[] propertys,ChannelListener listener) {
+        @Override
+        public void destroy() {
+            caThread.stop();
+            try {
+                context.destroy();
+            } catch (CAException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#destroyMonitor(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelMonitor)
+         */
+        @Override
+        public void destroyMonitor(Channel channel,ChannelMonitor channelMonitor) {
+            // TODO Auto-generated method stub
+            
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#channelFind(java.lang.String, org.epics.ioc.channelAccess.ChannelFindRequester, org.epics.pvData.channelAccess.ChannelRequester)
+         */
+        @Override
+        public ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester,ChannelRequester channelRequester) {
             String recordName = null;
             String fieldName = null;
-            String options = null;
-            String[] names = periodPattern.split(pvName,2);
+            String[] propertys = new String[0];
+            String[] names = periodPattern.split(channelName,2);
             recordName = names[0];
             if(names.length==2) {
                 names = leftBracePattern.split(names[1], 2);
@@ -131,7 +158,7 @@ public class ClientFactory  {
                 if(fieldName.length()==0) fieldName = null;
                 if(names.length==2) {
                     names = rightBracePattern.split(names[1], 2);
-                    options = names[0];
+                    propertys = commaPattern.split(names[0]);
                 }
             }
             String remoteFieldName = null;
@@ -157,34 +184,29 @@ public class ClientFactory  {
                 fieldName = "value";
                 remoteFieldName = "VAL";
             }
-            pvName =  recordName + "." + remoteFieldName;
-            
-            BaseV3Channel v3Channel = new BaseV3Channel(listener,options,enumRequestType);
-            v3Channel.init(context,pvName,recordName,fieldName,propertys);
+            channelName =  recordName + "." + remoteFieldName;
+            BaseV3Channel v3Channel = new BaseV3Channel(
+                    channelFindRequester,channelRequester,context,channelName,recordName,fieldName,enumRequestType,propertys);
+            v3Channel.connectCaV3();
             return v3Channel;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelProvider#getProviderName()
+         * @see org.epics.ioc.channelAccess.ChannelProvider#registerChannelProcessProvider(org.epics.ioc.channelAccess.ChannelProcessorProvider)
+         */
+        @Override
+        public boolean registerChannelProcessProvider(ChannelProcessorProvider channelProcessProvider) {
+            return false;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#registerMonitor(org.epics.ioc.channelAccess.MonitorCreate)
+         */
+        @Override
+        public void registerMonitor(MonitorCreate monitorCreate) {}
+        /* (non-Javadoc)
+         * @see org.epics.ioc.channelAccess.ChannelProvider#getProviderName()
          */
         public String getProviderName() {
             return providerName;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelProvider#isProvider(java.lang.String)
-         */
-        public boolean isProvider(String channelName) {            
-            return true;
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelProvider#destroy()
-         */
-        public void destroy() {
-            caThread.stop();
-            try {
-                context.destroy();
-            } catch (CAException e) {
-                System.err.println(e.getMessage());
-            }
         }
         /* (non-Javadoc)
          * @see gov.aps.jca.event.ContextExceptionListener#contextException(gov.aps.jca.event.ContextExceptionEvent)
