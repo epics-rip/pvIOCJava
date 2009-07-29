@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: caV3<br />
 Channel Access Version 3<br />
 package: org.epics.ioc.caV3<br />
-2008.02.25</h1>
+2009.07.23</h1>
 CONTENTS 
 
 <div class="toc">
@@ -118,7 +118,8 @@ the powerSupplyArray record.</p>
 
 <p>The currently supported options are:</p>
 <pre>    getProcess=true
-    putProcess=true</pre>
+    putProcess=true
+    shareData=true</pre>
 
 <p>getProcess processes the record and then retrives data. putProcess first
 puts data into the record and then processes the record. In order for either
@@ -127,11 +128,7 @@ it.</p>
 
 <h3 id="monitor">monitor options</h3>
 
-<p>Currently no monitor options are supported but in the future something
-like the following will be supported.</p>
-<pre>    onChange=true
-    absoluteChange=value
-    percentChange=value</pre>
+<p>Currently no options are supported. </p>
 <hr />
 
 <h2 style="text-align: center" id="Client">Client</h2>
@@ -146,7 +143,7 @@ provider name is "caV3". </p>
 <h3 id="Naming">Naming conventions.</h3>
 
 <p>A PV Name (Process Variable Name) must be of the form:</p>
-<pre>    recordName.fieldName</pre>
+<pre>    recordName.fieldName{propertyList}</pre>
 
 <p>where</p>
 <dl>
@@ -196,7 +193,8 @@ provider name is "caV3". </p>
     </dd>
 </dl>
 
-<p>The following propertyNames are supported.</p>
+<p>The propertyList is a comma separated list of property namesThe following
+property names are supported.</p>
 <dl>
   <dt><span
   style="font-family: Courier New,Courier,monospace;">alarm</span></dt>
