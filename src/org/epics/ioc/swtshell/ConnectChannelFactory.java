@@ -10,7 +10,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.channelAccess.ChannelAccessFactory;
-import org.epics.pvData.channelAccess.ChannelAccess;
+import org.epics.pvData.channelAccess.*;
 import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -57,10 +57,10 @@ public class ConnectChannelFactory {
         private Shell shell = null;
         private ExecutorNode executorNode = null;
         private Button selectLocalRecordButton = null;
-        private Text timeOutText = null;
+        private List providerList = null;
         private Text pvNameText = null;
+        private String providerName = null;
         private String pvName = null;
-        private double timeOut = 2.0;
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.ConnectChannel#connect()
          */
@@ -75,25 +75,22 @@ public class ConnectChannelFactory {
             selectLocalRecordButton = new Button(shell,SWT.PUSH);
             selectLocalRecordButton.setText("selectLocalRecord");
             selectLocalRecordButton.addSelectionListener(this);
-            Composite timeout = new Composite(shell,SWT.BORDER);
+            Composite provider = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
-            timeout.setLayout(gridLayout);
-            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-            timeout.setLayoutData(gridData);   
-            new Label(timeout,SWT.RIGHT).setText("timeout");
-            timeOutText = new Text(timeout,SWT.BORDER);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
-            gridData.minimumWidth = 100;
-            timeOutText.setLayoutData(gridData);
-            timeOutText.setText(Double.toString(timeOut));
-            timeOutText.addSelectionListener(this);
-            
+            provider.setLayout(gridLayout);
+            new Label(provider,SWT.RIGHT).setText("provider");
+            providerList = new List(provider,SWT.SINGLE|SWT.BORDER);
+            String[] names = channelAccess.getProviderNames();
+            providerName = names[0];
+            for(String name :names) {
+                providerList.add(name);
+            }
             Composite pvname = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             pvname.setLayout(gridLayout);
-            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
             pvname.setLayoutData(gridData);   
             new Label(pvname,SWT.RIGHT).setText("pvname");
             pvNameText = new Text(pvname,SWT.BORDER);
@@ -138,18 +135,15 @@ public class ConnectChannelFactory {
                 pvName = pvNameText.getText();
                 executor.execute(executorNode);
                 shell.close();
-            } else if(object==timeOutText) {
-                String text = timeOutText.getText();
-                timeOut = Double.parseDouble(text);
             }
-            
         }
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         @Override
         public void run() {
-            channelAccess.createChannel(pvName, channelRequester,timeOut);
+            ChannelProvider channelProvider = channelAccess.getProvider(providerName);
+            channelProvider.createChannel(pvName, channelRequester);
         }
     }
 }
