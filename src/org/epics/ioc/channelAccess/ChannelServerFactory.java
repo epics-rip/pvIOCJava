@@ -11,12 +11,15 @@ import org.epics.pvData.channelAccess.AccessRights;
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelArray;
 import org.epics.pvData.channelAccess.ChannelArrayRequester;
+import org.epics.pvData.channelAccess.ChannelFind;
+import org.epics.pvData.channelAccess.ChannelFindRequester;
 import org.epics.pvData.channelAccess.ChannelGet;
 import org.epics.pvData.channelAccess.ChannelGetRequester;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.channelAccess.ChannelProcess;
 import org.epics.pvData.channelAccess.ChannelProcessRequester;
+import org.epics.pvData.channelAccess.ChannelProvider;
 import org.epics.pvData.channelAccess.ChannelPut;
 import org.epics.pvData.channelAccess.ChannelPutGet;
 import org.epics.pvData.channelAccess.ChannelPutGetRequester;
@@ -54,13 +57,13 @@ import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
  * @author mrk
  *
  */
-public class ChannelProviderFactory  {
-    private static ChannelProviderLocal channelProvider = new ChannelProviderLocal();
+public class ChannelServerFactory  {
+    private static ChannelServerLocal channelServer = new ChannelServerLocal();
     /**
      * Register. This is called by ChannelAccessFactory.
      */
     static public void register() {
-        ChannelAccessFactory.registerChannelProvider(channelProvider);
+        ChannelAccessFactory.registerChannelProvider(channelServer);
         // start standard algorithms
         MonitorOnPutFactory.start();
         MonitorOnChangeFactory.start();
@@ -68,8 +71,8 @@ public class ChannelProviderFactory  {
         MonitorOnPercentChangeFactory.start();
     }
     
-    static public ChannelProvider getChannelProvider() {
-        return channelProvider;
+    static public ChannelServer getChannelServer() {
+        return channelServer;
     }
     
     private static final String providerName = "local";
@@ -93,12 +96,12 @@ public class ChannelProviderFactory  {
          */
         @Override
         public ChannelProvider getChannelProvider() {
-            return channelProvider;
+            return channelServer;
         }
         
     }
     
-    private static class ChannelProviderLocal implements ChannelProvider{
+    private static class ChannelServerLocal implements ChannelServer{
         private LinkedList<Channel> channelList = new LinkedList<Channel>();
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#destroy()
@@ -122,10 +125,10 @@ public class ChannelProviderFactory  {
             return providerName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProvider#channelFind(java.lang.String, org.epics.ioc.channelAccess.ChannelFindRequester, org.epics.pvData.channelAccess.ChannelRequester)
+         * @see org.epics.pvData.channelAccess.ChannelProvider#channelFind(java.lang.String, org.epics.pvData.channelAccess.ChannelFindRequester)
          */
         @Override
-        public ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester,ChannelRequester channelRequester) {
+        public ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester) {
             PVRecord pvRecord = pvDatabase.findRecord(channelName);
             if(pvRecord==null) {
                 PVDatabase beingInstalled = PVDatabaseFactory.getBeingInstalled();
@@ -134,14 +137,28 @@ public class ChannelProviderFactory  {
             ChannelFindImpl channelFind = new ChannelFindImpl(pvRecord);
             boolean wasFound = ((pvRecord==null) ? false : true);
             channelFindRequester.channelFindResult(channelFind, wasFound);
+            return channelFind;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.channelAccess.ChannelProvider#createChannel(java.lang.String, org.epics.pvData.channelAccess.ChannelRequester)
+         */
+        @Override
+        public void createChannel(String channelName,ChannelRequester channelRequester) {
+            PVRecord pvRecord = pvDatabase.findRecord(channelName);
+            if(pvRecord==null) {
+                PVDatabase beingInstalled = PVDatabaseFactory.getBeingInstalled();
+                if(beingInstalled!=null) pvRecord = beingInstalled.findRecord(channelName);
+            }
+            boolean wasFound = ((pvRecord==null) ? false : true);
             if(wasFound) {
                 ChannelImpl channel = new ChannelImpl(pvRecord,channelRequester);
                 channelRequester.channelCreated(channel);
                 synchronized(channelList) {
                     channelList.add(channel);
                 }
+            } else {
+                channelRequester.message("channel " + channelName + " nor found", MessageType.fatalError);
             }
-            return channelFind;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#registerMonitor(org.epics.ioc.channelAccess.MonitorCreate)
@@ -167,8 +184,8 @@ public class ChannelProviderFactory  {
          */
         @Override
         public boolean registerChannelProcessProvider(ChannelProcessorProvider channelProcessorProvider) {
-            if(ChannelProviderFactory.channelProcessorProvider!=null) return false;
-            ChannelProviderFactory.channelProcessorProvider = channelProcessorProvider;
+            if(ChannelServerFactory.channelProcessorProvider!=null) return false;
+            ChannelServerFactory.channelProcessorProvider = channelProcessorProvider;
             return true;
         }
     }
@@ -196,7 +213,7 @@ public class ChannelProviderFactory  {
         }
         
         private ChannelProcessor requestChannelProcessor(PVRecord pvRecord,ChannelProcessorRequester channelProcessorRequester)  {
-            ChannelProcessorProvider channelProcessorProvider = ChannelProviderFactory.channelProcessorProvider;
+            ChannelProcessorProvider channelProcessorProvider = ChannelServerFactory.channelProcessorProvider;
             if(channelProcessorProvider==null) return null;
             return channelProcessorProvider.requestChannelProcessor(pvRecord, channelProcessorRequester);
         }
@@ -387,8 +404,11 @@ public class ChannelProviderFactory  {
             int queueSize = pvQueueSize.get();
             MonitorCreate monitorCreate = null;
             for(int i=0; i<monitorCreateList.size(); i++) {
-                monitorCreate = monitorCreateList.get(i);
-                if(monitorCreate.getName().equals(algorithm))  break;
+                MonitorCreate create = monitorCreateList.get(i);
+                if(create.getName().equals(algorithm))  {
+                    monitorCreate = create;
+                    break;
+                }
             }
             if(monitorCreate==null) {
                 channelMonitorRequester.message("no support for algorithm", MessageType.error);

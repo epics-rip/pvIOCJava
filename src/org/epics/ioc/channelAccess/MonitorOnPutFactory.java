@@ -21,10 +21,10 @@ import org.epics.pvData.pvCopy.PVCopy;
 public class MonitorOnPutFactory{
     private static final String name = "onPut";
     private static final MonitorOnPut monitorOnPut = new MonitorOnPut();
-    private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
+    private static final ChannelServer channelServer = ChannelServerFactory.getChannelServer();
 
     public static void start() {
-        channelProvider.registerMonitor(monitorOnPut);
+        channelServer.registerMonitor(monitorOnPut);
     }
     
     private static class MonitorOnPut implements MonitorCreate {

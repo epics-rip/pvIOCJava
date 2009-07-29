@@ -63,7 +63,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
             monitorQueue = MonitorQueueFactory.create(pvCopy, queueSize);
         }
     }
-    private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
+    private static final ChannelServer channelServer = ChannelServerFactory.getChannelServer();
     protected static final Convert convert = ConvertFactory.getConvert();
     protected static final BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
     protected Channel channel;
@@ -102,7 +102,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
             pvCopyMonitor.stopMonitoring();
             isMonitoring = false;
         }
-        channelProvider.destroyMonitor(channel, this);
+        channelServer.destroyMonitor(channel, this);
     }
     /* (non-Javadoc)
      * @see org.epics.pvData.channelAccess.ChannelMonitor#start()

@@ -7,7 +7,7 @@ package org.epics.ioc.channelAccess;
 
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelMonitor;
-import org.epics.pvData.channelAccess.ChannelRequester;
+import org.epics.pvData.channelAccess.ChannelProvider;
 
 /**
  * Interface implemented by code that can provide access to the record
@@ -15,17 +15,7 @@ import org.epics.pvData.channelAccess.ChannelRequester;
  * @author mrk
  *
  */
-public interface ChannelProvider {
-    /**
-     * Terminate.
-     */
-    void destroy();
-    /**
-     * Get the provider name.
-     * @return The name.
-     */
-    String getProviderName();
-    ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester,ChannelRequester channelRequester);
+public interface ChannelServer extends ChannelProvider{
     /**
      * Register an interface for creating monitors.
      * @param monitorCreate The interface.
