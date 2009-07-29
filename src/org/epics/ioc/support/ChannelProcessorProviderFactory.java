@@ -8,8 +8,8 @@ package org.epics.ioc.support;
 import org.epics.ioc.channelAccess.ChannelProcessor;
 import org.epics.ioc.channelAccess.ChannelProcessorProvider;
 import org.epics.ioc.channelAccess.ChannelProcessorRequester;
-import org.epics.ioc.channelAccess.ChannelProvider;
-import org.epics.ioc.channelAccess.ChannelProviderFactory;
+import org.epics.ioc.channelAccess.ChannelServer;
+import org.epics.ioc.channelAccess.ChannelServerFactory;
 import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;
@@ -26,13 +26,13 @@ import org.epics.pvData.pv.PVRecord;
 public class ChannelProcessorProviderFactory {
     
     private static final ChannelProcessorProvider channelProcessProvider = new Provider();
-    private static final ChannelProvider channelProvider = ChannelProviderFactory.getChannelProvider();
+    private static final ChannelServer channelServer = ChannelServerFactory.getChannelServer();
     private static final PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
     /**
      * Register. This is called by InstallFactory.
      */
     static public void register() {
-        channelProvider.registerChannelProcessProvider(channelProcessProvider);
+        channelServer.registerChannelProcessProvider(channelProcessProvider);
     }
     
 
