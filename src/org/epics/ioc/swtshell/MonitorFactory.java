@@ -4,7 +4,6 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.swtshell;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -80,10 +79,12 @@ public class MonitorFactory {
         private Text queueSizeText = null;
         private PVDouble pvDeadband = null;
         private Text deadbandText;
+        private Text simulateDelayText;
         private Monitor monitor = new Monitor();
         
         private int queueSize = 3;
-        private double deadband = 0.0;               
+        private double deadband = 0.0;
+        private double simulateDelay = 0.0;
         private Button putButton;
         private Button changeButton;
         private Button absoluteButton;
@@ -117,7 +118,7 @@ public class MonitorFactory {
             disconnectButton.setEnabled(false);
             composite  = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
+            gridLayout.numColumns = 3;
             composite.setLayout(gridLayout);
             Composite queueComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -128,6 +129,7 @@ public class MonitorFactory {
             GridData gridData = new GridData(); 
             gridData.widthHint = 25;
             queueSizeText.setLayoutData(gridData);
+            queueSizeText.setText(Integer.toString(queueSize));
             queueSizeText.addSelectionListener(this);
             Composite deadbandComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -138,7 +140,21 @@ public class MonitorFactory {
             gridData = new GridData(); 
             gridData.widthHint = 75;
             deadbandText.setLayoutData(gridData);
+            deadbandText.setText(Double.toString(deadband));
             deadbandText.addSelectionListener(this);
+            
+            Composite simulateDelayComposite = new Composite(composite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            simulateDelayComposite.setLayout(gridLayout);
+            new Label(simulateDelayComposite,SWT.NONE).setText("simulateDelay");
+            simulateDelayText = new Text(simulateDelayComposite,SWT.BORDER);
+            gridData = new GridData(); 
+            gridData.widthHint = 75;
+            simulateDelayText.setLayoutData(gridData);
+            simulateDelayText.setText(Double.toString(simulateDelay));
+            simulateDelayText.addSelectionListener(this);
+            
             composite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -240,12 +256,17 @@ public class MonitorFactory {
                 return;
             }
             if(object==disconnectButton) {
-                monitor.stop();
+                if(isMonitoring) {
+                    isMonitoring = false;
+                    monitor.stop();
+                    startStopButton.setEnabled(false);
+                    startStopButton.setText("startMonitor");
+                    enableOptions();
+                }
                 connectButton.setEnabled(true);
                 disconnectButton.setEnabled(false);
                 channel.destroy();
                 channel = null;
-                startStopButton.setEnabled(false);
                 return;
             }
             if(object==putButton) {
@@ -283,6 +304,16 @@ public class MonitorFactory {
                 try {
                     deadband = Double.parseDouble(value);
                     pvDeadband.put(deadband);
+                } catch (NumberFormatException e) {
+                    message("Illegal value", MessageType.error);
+                }
+                return;
+            }
+            if(object==simulateDelayText) {
+                String value = simulateDelayText.getText();
+                try {
+                    simulateDelay = Double.parseDouble(value);
+System.out.println("simulateDelay " + simulateDelay);
                 } catch (NumberFormatException e) {
                     message("Illegal value", MessageType.error);
                 }
@@ -411,11 +442,12 @@ public class MonitorFactory {
                 switch(runRequest) {
                 case start:
                     channel.createChannelMonitor(channel, this, pvRequest, pvRequest.getField().getFieldName(), pvOption, executor);
-                    channelMonitor.start();
                     break;
                 case stop:
-                    channelMonitor.stop();
-                    channelMonitor.destroy();
+                    if(channelMonitor!=null) {
+                        channelMonitor.destroy();
+                        channelMonitor = null;
+                    }
                     break;
                 }
                 
@@ -426,8 +458,18 @@ public class MonitorFactory {
             @Override
             public void channelMonitorConnect(ChannelMonitor channelMonitor) {
                 this.channelMonitor = channelMonitor;
-            }
+                if(channelMonitor==null) {
+                    display.asyncExec( new Runnable() {
+                        public void run() {
+                            startStopButton.setText("startMonitor");
+                            enableOptions();
+                        }
 
+                    });
+                } else {
+                    channelMonitor.start();
+                }
+            }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
              */
@@ -435,12 +477,20 @@ public class MonitorFactory {
             public void monitorEvent(PVStructure pvStructure,
                     BitSet changeBitSet, BitSet overrunBitSet)
             {
-                printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, null, consoleText);
+                printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, overrunBitSet, consoleText);
                 display.asyncExec( new Runnable() {
                     public void run() {
                         printModified.print();
                     }
                 });
+                if(simulateDelay>0.0) {
+                    long millis = (long)(simulateDelay*1000.0);
+                    try{
+                        Thread.sleep(millis, 0);
+                    } catch (InterruptedException e) {
+
+                    }
+                }
             }
 
             /* (non-Javadoc)
@@ -474,6 +524,7 @@ public class MonitorFactory {
             absoluteButton.setEnabled(false);
             percentageButton.setEnabled(false);
             deadbandText.setEnabled(false);
+            queueSizeText.setEnabled(false);
         }
 
         private void enableOptions() {
@@ -482,6 +533,7 @@ public class MonitorFactory {
             absoluteButton.setEnabled(true);
             percentageButton.setEnabled(true);
             deadbandText.setEnabled(true);
+            queueSizeText.setEnabled(true);
         }
     }
 }

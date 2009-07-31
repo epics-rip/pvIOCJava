@@ -61,11 +61,21 @@ public class PrintModifiedFactory {
             }
             // following code allows timeStamp to be displayed properly.
             if(offset==0) {
+                boolean setOverrun = false;
+                if(overrunBitSet!=null) {
+                    setOverrun = (overrunBitSet.nextSetBit(0)>=0);
+                }
+                if(setOverrun) {
+                    overrunBitSet.clear();
+                }
                 PVField[] pvFields = pvStructure.getPVFields();
                 changeBitSet.clear();
                 for(int i=0; i<pvFields.length; i++) {
-                    PVField pvField = pvFields[i];
-                    changeBitSet.set(pvField.getFieldOffset());
+                    offset = pvFields[i].getFieldOffset();
+                    changeBitSet.set(offset);
+                    if(setOverrun) {
+                        overrunBitSet.set(offset);
+                    }
                 }
             }
             printStructure(pvStructure,0);
@@ -98,11 +108,11 @@ public class PrintModifiedFactory {
                 if(next>=offset+numberFields) continue;
                 fieldName = pvField.getField().getFieldName();
                 newLine(indentLevel+1);
-                text.append(fieldName);
                 if(overrunBitSet!=null) {
                     boolean isSet = overrunBitSet.get(offset);
-                    if(isSet) text.append("(overrun)");
+                    if(isSet) text.append("(overrun) ");
                 }
+                text.append(fieldName);
                 if(numberFields==1) {
                     text.append(" = " + pvField.toString(indentLevel+1));
                 } else {
