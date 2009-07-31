@@ -141,7 +141,6 @@ public class ControlLimitFactory {
         private class ByteValue extends BasePVByte implements PVByte {
             private PVScalar lowPVField;
             private PVScalar highPVField;
-            private byte value;
             private ByteValue(PVStructure parent,Scalar field,PVScalar lowPVField,PVScalar highPVField) {
                 super(parent,field);
                 this.lowPVField = lowPVField;
@@ -176,7 +175,6 @@ public class ControlLimitFactory {
         private class ShortValue extends BasePVShort implements PVShort {
             private PVScalar lowPVField;
             private PVScalar highPVField;
-            private short value;
             private ShortValue(PVStructure parent,Scalar field,PVScalar lowPVField,PVScalar highPVField) {
                 super(parent,field);
                 this.lowPVField = lowPVField;
@@ -210,7 +208,6 @@ public class ControlLimitFactory {
         private class IntValue extends BasePVInt implements PVInt {
             private PVScalar lowPVField;
             private PVScalar highPVField;
-            private int value;
             private IntValue(PVStructure parent,Scalar field,PVScalar lowPVField,PVScalar highPVField) {
                 super(parent,field);
                 this.lowPVField = lowPVField;
@@ -244,7 +241,6 @@ public class ControlLimitFactory {
         private class LongValue extends BasePVLong implements PVLong {
             private PVScalar lowPVField;
             private PVScalar highPVField;
-            private long value;
             private LongValue(PVStructure parent,Scalar field,PVScalar lowPVField,PVScalar highPVField) {
                 super(parent,field);
                 this.lowPVField = lowPVField;
@@ -278,7 +274,6 @@ public class ControlLimitFactory {
         private class FloatValue extends BasePVFloat implements PVFloat {
             private PVScalar lowPVField;
             private PVScalar highPVField;
-            private float value;
             private FloatValue(PVStructure parent,Scalar field,PVScalar lowPVField,PVScalar highPVField) {
                 super(parent,field);
                 this.lowPVField = lowPVField;
@@ -312,7 +307,6 @@ public class ControlLimitFactory {
         private class DoubleValue extends BasePVDouble implements PVDouble {
             private PVScalar lowPVField;
             private PVScalar highPVField;
-            private double value;
             private DoubleValue(PVStructure parent,Scalar field,PVScalar lowPVField,PVScalar highPVField) {
                 super(parent,field);
                 this.lowPVField = lowPVField;
