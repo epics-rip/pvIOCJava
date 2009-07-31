@@ -158,6 +158,7 @@ public class ChannelServerFactory  {
                 }
             } else {
                 channelRequester.message("channel " + channelName + " nor found", MessageType.fatalError);
+                channelRequester.channelNotCreated();
             }
         }
         /* (non-Javadoc)
@@ -417,6 +418,10 @@ public class ChannelServerFactory  {
             }
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, ((queueSize==0) ? true : false));
             ChannelMonitor channelMonitor = monitorCreate.create(this,channelMonitorRequester, pvOption, pvCopy, queueSize, executor);
+            if(channelMonitor==null) {
+                channelMonitorRequester.channelMonitorConnect(null);
+                return;
+            }
             synchronized(channelMonitorList) {
                 channelMonitorList.add(channelMonitor);
             }

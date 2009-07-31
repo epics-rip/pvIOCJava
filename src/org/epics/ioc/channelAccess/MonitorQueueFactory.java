@@ -80,12 +80,12 @@ public class MonitorQueueFactory {
         private int nextReleaseUsed = 0;
 
 
-
         MonitorQueueImpl(MonitorQueueElement[] monitorQueueElements) {
             this.monitorQueueElements = monitorQueueElements;
             number = monitorQueueElements.length;
             numberFree = number;
         }
+       
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.MonitorQueue#clear()
          */
@@ -155,6 +155,15 @@ public class MonitorQueueFactory {
             if(nextReleaseUsed>=number) nextReleaseUsed = 0;
             numberUsed--;
             numberFree++;
+        }
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return "number " + number + " numberFree " + numberFree + " numberUsed " + numberUsed
+                 + " nextGetFree " + nextGetFree + " nextSetUsed " + nextSetUsed
+                 + " nextGetUsed " + nextGetUsed + " nextReleaseUsed " + nextReleaseUsed;
         }
     }
 }

@@ -74,6 +74,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
     private CallRequester callRequester;
     private PVCopyMonitor pvCopyMonitor;
     private boolean isMonitoring = false;
+    private boolean firstMonitor = false;
     private int queueSize;
     // following only used if queueSize <=1
     private PVStructure pvStructure = null;
@@ -83,6 +84,8 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
     // following only used if queueSize>=2
     private MonitorQueue monitorQueue = null;
     private MonitorQueue.MonitorQueueElement monitorQueueElement = null;
+    private BitSet saveChangeBitSet = null;
+    private boolean overrunInProgress = false;
     
     
     /**
@@ -127,6 +130,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
         } finally {
             pvRecord.unlock();
         }
+        firstMonitor = true;
         pvCopyMonitor.startMonitoring(changeBitSet,overrunBitSet);
         isMonitoring = true;
     }
@@ -144,40 +148,41 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
     @Override
     public void dataChanged() {
         if(queueSize<2) {
-            if(!generateMonitor(changeBitSets[indexBitSet])) return;
+            if(!firstMonitor && !generateMonitor(changeBitSets[indexBitSet])) return;
         } else {
             PVStructure pvStructure = monitorQueueElement.getPVStructure();
             BitSet changedBitSet = monitorQueueElement.getChangedBitSet();
             BitSet overrunBitSet = monitorQueueElement.getOverrunBitSet();
-            BitSet bitSet = null;
             pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet, false);
-            if(!generateMonitor(monitorQueueElement.getChangedBitSet())) return;
+            if(!firstMonitor &&!generateMonitor(monitorQueueElement.getChangedBitSet())) return;
             MonitorQueue.MonitorQueueElement newElement = null;
             synchronized(monitorQueue) {
-                newElement = monitorQueue.getFree();
-                if(newElement==null) {
-                    // get the oldest element in the queue
-                    MonitorQueue.MonitorQueueElement usedElement = monitorQueue.getUsed();
-                    monitorQueue.releaseUsed(usedElement);
                     newElement = monitorQueue.getFree();
-                    // so that data is not lost set bits in monitorQueueElement that were set in newElement
-                    bitSet = newElement.getChangedBitSet();
-                    int nextModified = bitSet.nextSetBit(0);
-                    while(nextModified>=0) {
-                        changedBitSet.set(nextModified);
-                        nextModified = bitSet.nextSetBit(nextModified+1);
-                    }
-                    bitSet = newElement.getOverrunBitSet();
-                    nextModified = bitSet.nextSetBit(0);
-                    while(nextModified>=0) {
-                        overrunBitSet.set(nextModified);
-                        nextModified = bitSet.nextSetBit(nextModified+1);
+            }
+            if(newElement==null) {
+                if(saveChangeBitSet==null) {
+                    saveChangeBitSet = new BitSet(changedBitSet.length());
+                } else if(!overrunInProgress) {
+                    saveChangeBitSet.clear();
+                }
+                overrunInProgress = true;
+            }
+            if(overrunInProgress) {
+                int offset = 0;
+                while(true) {
+                    int nextSet = changedBitSet.nextSetBit(offset++);
+                    if(nextSet<0) break;
+                    if(saveChangeBitSet.get(nextSet)) {
+                        overrunBitSet.set(nextSet);
+                    } else {
+                        saveChangeBitSet.set(nextSet);
                     }
                 }
+                if(newElement==null) return;
+                overrunInProgress = false;
             }
             bitSetUtil.compress(changedBitSet, pvStructure);
-            changedBitSet = monitorQueueElement.getOverrunBitSet();
-            bitSetUtil.compress(changedBitSet, pvStructure);
+            bitSetUtil.compress(overrunBitSet, pvStructure);
             pvStructure = monitorQueueElement.getPVStructure();
             PVStructure pvNext = newElement.getPVStructure();
             convert.copy(pvStructure, pvNext);
@@ -191,6 +196,7 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
             }
             monitorQueueElement = newElement;
         }
+        firstMonitor = false;
         callRequester.call();
     }
     /* (non-Javadoc)
@@ -233,8 +239,6 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
                 channelMonitorRequester.monitorEvent(pvStructure,changeBitSet,overrunBitSet);
             } else { // using queue
                 while(true) {
-                    BitSet changeBitSet = null;
-                    BitSet overrunBitSet = null;
                     PVStructure pvStructure = null;
                     MonitorQueue.MonitorQueueElement monitorQueueElement = null;
                     synchronized(monitorQueue) {
@@ -244,8 +248,8 @@ abstract public class BaseMonitor implements ChannelMonitor,PVCopyMonitorRequest
                         }
                     }
                     pvStructure = monitorQueueElement.getPVStructure();
-                    changeBitSet = monitorQueueElement.getChangedBitSet();
-                    overrunBitSet = monitorQueueElement.getOverrunBitSet();
+                    BitSet changeBitSet = monitorQueueElement.getChangedBitSet();
+                    BitSet overrunBitSet = monitorQueueElement.getOverrunBitSet();
                     channelMonitorRequester.monitorEvent(pvStructure,changeBitSet,overrunBitSet);
                     synchronized(monitorQueue) {
                         monitorQueue.releaseUsed(monitorQueueElement);
