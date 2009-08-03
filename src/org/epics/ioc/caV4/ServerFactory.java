@@ -53,14 +53,14 @@ public class ServerFactory {
     	/**
     	 * Server context to query.
     	 */
-    	protected ServerContextImpl context;
+    	//protected ServerContextImpl context;
     	
     	/**
     	 * Constructor.
     	 * @param context server context to be monitored.
     	 */
     	public JavaIOCIntrospectionSearchProvider(ServerContextImpl context) {
-    		this.context = context;
+    		//this.context = context;
     	}
 
 		/* (non-Javadoc)
