@@ -3,31 +3,25 @@
 
 <structure structureName = "caProcessLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.ca.LinkFactory</scalar>
+    org.epics.ioc.support.caLink.LinkFactory</scalar>
 </structure>
 <structure structureName = "caMonitorLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.ca.LinkFactory</scalar>
+    org.epics.ioc.support.caLink.LinkFactory</scalar>
 </structure>
 <structure structureName = "caMonitorNotifyLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.ca.LinkFactory</scalar>
+    org.epics.ioc.support.caLink.LinkFactory</scalar>
 </structure>
 <structure structureName = "caInputLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.ca.LinkFactory</scalar>
+    org.epics.ioc.support.caLink.LinkFactory</scalar>
 </structure>
 <structure structureName = "caOutputLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.ca.LinkFactory</scalar>
+    org.epics.ioc.support.caLink.LinkFactory</scalar>
 </structure>
 
-<structure structureName = "monitorType">
-  <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvData.enumeratedFactory</auxInfo>
-  <scalar name = "index" scalarType = "int" />
-  <array name = "choices" scalarType = "string" immutable = "true" >
-     put,change,absoluteChange,percentageChange</array>
-</structure>
 
 <structure structureName = "caProcessLink" extends = "generic" >
    <scalar name = "pvname" scalarType = "string">
@@ -43,7 +37,7 @@
   </scalar>
   <structure name = "alarm" extends = "alarm" />
   <scalar name = "providerName" scalarType = "string">local</scalar>
-  <structure name = "type" extends = "monitorType"/>
+  <scalar name = "type" scalarType = "string">onPut</scalar>
   <scalar name = "deadband" scalarType = "double" />
   <scalar name = "queueSize" scalarType = "int"  >3</scalar>
   <scalar name = "reportOverrun" scalarType = "boolean" />
