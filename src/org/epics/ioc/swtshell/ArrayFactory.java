@@ -5,6 +5,10 @@
  */
 package org.epics.ioc.swtshell;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -109,8 +113,8 @@ public class ArrayFactory {
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
             gridData.minimumWidth = 500;
             subFieldText.setLayoutData(gridData);
-            subFieldText.addSelectionListener(this);
             subFieldText.setText(subField);
+            subFieldText.addSelectionListener(this);
             
             Composite getComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -140,7 +144,6 @@ public class ArrayFactory {
             gridData.widthHint = 100;
             countText.setLayoutData(gridData);
             countText.setText("-1");
-            
             Composite putComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 3;
@@ -172,8 +175,6 @@ public class ArrayFactory {
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             valueText.setLayoutData(gridData);
             valueText.setText("[]");
-            
-            
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -232,7 +233,7 @@ public class ArrayFactory {
                 ConnectChannel connectChannel = ConnectChannelFactory.create(shell, this);
                 connectChannel.connect();
             } else if(object==disconnectButton) {
-                array.disconnect();
+                if(channel!=null) channel.destroy();
                 connectButton.setEnabled(true);
                 disconnectButton.setEnabled(false);
                 channel = null;
@@ -313,7 +314,7 @@ public class ArrayFactory {
             if(isConnected) {
                 connectButton.setEnabled(false);
                 disconnectButton.setEnabled(true);
-                array = new Array(channel,this,subField);
+                array = new Array(channel,this);
                 getButton.setEnabled(true);
                 putButton.setEnabled(true);
             } else {
@@ -330,10 +331,14 @@ public class ArrayFactory {
             display.asyncExec(this);
         }
         
-        private enum ArrayRunCommand{get,put,disconnect};
+        private enum ArrayRunCommand{get,put};
         
         private class Array implements Runnable,ChannelArrayRequester
         {   
+            private ReentrantLock lock = new ReentrantLock();
+            private Condition wait = lock.newCondition();
+            private volatile boolean waiting = true;
+
             private Channel channel;
             private Requester requester;
             private ChannelArray channelArray = null;
@@ -345,11 +350,11 @@ public class ArrayFactory {
             
             private ArrayRunCommand runCommand = null;
 
-            private Array(Channel channel,Requester requester,String subField) {
+            private Array(Channel channel,Requester requester) {
                 this.channel = channel;
                 this.requester = requester;
                 executorNode = executor.createNode(this);
-                channel.createChannelArray(channel, this,subField);
+                
             }
             
             private void get(int offset,int count) {
@@ -366,10 +371,6 @@ public class ArrayFactory {
                 executor.execute(executorNode);
             }
             
-            private void disconnect() {
-                runCommand = ArrayRunCommand.disconnect;
-                executor.execute(executorNode);
-            }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelArrayRequester#channelArrayConnect(org.epics.pvData.channelAccess.ChannelArray, org.epics.pvData.pv.PVArray)
              */
@@ -377,6 +378,13 @@ public class ArrayFactory {
             public void channelArrayConnect(ChannelArray channelArray,PVArray pvArray) {
                 this.channelArray = channelArray;
                 this.pvArray = pvArray;
+                lock.lock();
+                try {
+                    waiting = false;
+                    wait.signal();
+                } finally {
+                    lock.unlock();
+                }
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelArrayRequester#getArrayDone(boolean)
@@ -385,6 +393,13 @@ public class ArrayFactory {
             public void getArrayDone(boolean success) {
                 message("getArrayDone success " + success,MessageType.info);
                 getDone(pvArray.toString());
+                lock.lock();
+                try {
+                    waiting = false;
+                    wait.signal();
+                } finally {
+                    lock.unlock();
+                }
             }
 
             /* (non-Javadoc)
@@ -393,6 +408,13 @@ public class ArrayFactory {
             @Override
             public void putArrayDone(boolean success) {
                 message("putArrayDone success " + success,MessageType.info);
+                lock.lock();
+                try {
+                    waiting = false;
+                    wait.signal();
+                } finally {
+                    lock.unlock();
+                }
             }
             
             /* (non-Javadoc)
@@ -402,9 +424,54 @@ public class ArrayFactory {
             public void run() {
                 switch(runCommand) {
                 case get:
+                    waiting = true;
+                    channel.createChannelArray(channel, this,subField);
+                    lock.lock();
+                    try {
+                        while(waiting) {
+                            try {
+                            wait.await();
+                            } catch(InterruptedException e) {}
+                        }
+                    } finally {
+                        lock.unlock();
+                    }
+                    if(channelArray==null) {
+                        message("get failed ",MessageType.error);
+                        break;
+                    }
+                    waiting = true;
                     channelArray.getArray(false, offset, count);
+                    lock.lock();
+                    try {
+                        while(waiting) {
+                            try {
+                            wait.await();
+                            } catch(InterruptedException e) {}
+                        }
+                    } finally {
+                        lock.unlock();
+                    }
+                    channelArray.destroy();
                     break;
                 case put:
+                    waiting = true;
+                    channel.createChannelArray(channel, this,subField);
+                    lock.lock();
+                    try {
+                        while(waiting) {
+                            try {
+                            wait.await();
+                            } catch(InterruptedException e) {}
+                        }
+                    } finally {
+                        lock.unlock();
+                    }
+                    if(channelArray==null) {
+                        message("put failed ",MessageType.error);
+                        break;
+                    }
+                    waiting = true;
                     try {
                         int len = convert.fromString(pvArray,value);
                         pvArray.setLength(len);
@@ -412,12 +479,22 @@ public class ArrayFactory {
                         message("exception " + e.getMessage(),MessageType.error);
                         return;
                     }
-                    channelArray.putArray(false, offset, pvArray.getLength());
-                    break;
-                case disconnect:
+                    try {
+                        channelArray.putArray(false, offset, pvArray.getLength());
+                    } catch (IllegalArgumentException e) {
+                        message("IllegalArgumentException " + e.getMessage(),MessageType.error);
+                    }
+                    lock.lock();
+                    try {
+                        while(waiting) {
+                            try {
+                            wait.await();
+                            } catch(InterruptedException e) {}
+                        }
+                    } finally {
+                        lock.unlock();
+                    }
                     channelArray.destroy();
-                    channel.destroy();
-                    break;
                 }
             }
             /* (non-Javadoc)
