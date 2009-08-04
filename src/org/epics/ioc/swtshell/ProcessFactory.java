@@ -266,12 +266,19 @@ public class ProcessFactory {
              */
             @Override
             public void run() {
+
                 switch(runCommand) {
                 case process:
-                    channelProcess.process(false);
+                    if(channelProcess!=null) {
+                        channelProcess.process(false);
+                    } else {
+                        message("not channelProcessor ",MessageType.info);
+                    }
                     break;
                 case disconnect:
-                    channelProcess.destroy();
+                    if(channelProcess!=null) {
+                        channelProcess.destroy();
+                    }
                     channel.destroy();
                     break;
                 }
