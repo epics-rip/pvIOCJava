@@ -534,8 +534,16 @@ public class ChannelServerFactory  {
                     return;
                 }
                 this.lastRequest = lastRequest;
+                channelProcessor.requestProcess();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#becomeProcessor()
+             */
+            @Override
+            public void becomeProcessor() {
                 channelProcessor.process(false, null);
             }
+
             /* (non-Javadoc)
              * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()
              */
@@ -643,7 +651,8 @@ public class ChannelServerFactory  {
                 this.lastRequest = lastRequest;
                 bitSet.clear();
                 if(process) {
-                    if(channelProcessor.process(true, null)) return;
+                    channelProcessor.requestProcess();
+                    return;
                 }
                 pvRecord.lock();
                 try {
@@ -652,6 +661,17 @@ public class ChannelServerFactory  {
                     pvRecord.unlock();
                 }
                 channelGetRequester.getDone(true);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#becomeProcessor()
+             */
+            @Override
+            public void becomeProcessor() {
+                if(channelProcessor.process(true, null)) return;
+                message("process request failed",MessageType.error);
+                success = false;
+                channelGetRequester.getDone(success);
+                if(lastRequest) destroy();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()
@@ -784,14 +804,8 @@ public class ChannelServerFactory  {
                 success = true;
                 this.lastRequest = lastRequest;
                 if(process) {
-                    boolean isActive = channelProcessor.setActive();
-                    if(isActive) {
-                        putData();
-                        channelProcessor.process(false, null);
-                        return;
-                    } else {
-                        success = false;
-                    }
+                    channelProcessor.requestProcess();
+                    return;
                 }
                 pvRecord.lock();
                 try {
@@ -802,6 +816,23 @@ public class ChannelServerFactory  {
                 channelPutRequester.putDone(success);
                 return;
             } 
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#becomeProcessor()
+             */
+            @Override
+            public void becomeProcessor() {
+                boolean isActive = channelProcessor.setActive();
+                if(isActive) {
+                    putData();
+                    channelProcessor.process(false, null);
+                    return;
+                } else {
+                    success = false;
+                    message("process request failed",MessageType.error);
+                    channelPutRequester.putDone(success);
+                    if(lastRequest) destroy();
+                }
+            }
             /* (non-Javadoc)
              * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()
              */
@@ -939,14 +970,8 @@ public class ChannelServerFactory  {
                 }
                 this.lastRequest = lastRequest;
                 if(process) {
-                    boolean isActive = channelProcessor.setActive();
-                    if(isActive) {
-                        putData();
-                        channelProcessor.process(true, null);
-                        return;
-                    } else {
-                        success = false;
-                    }
+                    channelProcessor.requestProcess();
+                    return;
                 }
                 pvRecord.lock();
                 try {
@@ -956,6 +981,22 @@ public class ChannelServerFactory  {
                     pvRecord.unlock();
                 }
                 channelPutGetRequester.putGetDone(success);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#becomeProcessor()
+             */
+            @Override
+            public void becomeProcessor() {
+                boolean isActive = channelProcessor.setActive();
+                if(isActive) {
+                    putData();
+                    channelProcessor.process(true, null);
+                    return;
+                } else {
+                    success = false;
+                    channelPutGetRequester.putGetDone(success);
+                    if(lastRequest) destroy();
+                }
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.channelAccess.ChannelProcessorRequester#recordProcessComplete()

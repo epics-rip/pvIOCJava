@@ -17,6 +17,10 @@ public interface ChannelProcessor {
      */
     void detach();
     /**
+     * Request to process. ChannelProcessorRequester.becomeProcessor is called when the requester can call setActive and/or process.
+     */
+    void requestProcess();
+    /**
      * Set the record active.
      * This is called if the requester wants to put to the record
      * before the record starts processing.
@@ -31,7 +35,7 @@ public interface ChannelProcessor {
      * Process the record.
      * A value of false means that the request failed.
      * If the request failed Requester .message is called.
-     * @param leaveActive Should the record be left actived after
+     * @param leaveActive Should the record be left active after
      * process is complete? This is true if the requester wants to read
      * data from the record after processing.
      * @param timeStamp The timeStamp to be assigned to the record.

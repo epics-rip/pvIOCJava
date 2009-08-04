@@ -13,6 +13,10 @@ import org.epics.pvData.pv.Requester;
  */
 public interface ChannelProcessorRequester extends Requester{
     /**
+     * Called as a result of calling ChannelProcessor.requestProcess.
+     */
+    void becomeProcessor();
+    /**
      * The result of the process request.
      * This is called with the record still active and locked.
      * The requester can read data from the record.
