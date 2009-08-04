@@ -5,18 +5,11 @@
  */
 package org.epics.ioc.support.caLink;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.channelAccess.*;
-import org.epics.pvData.channelAccess.*;
-
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.AfterStartFactory;
-import org.epics.ioc.install.AfterStartNode;
-import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessSelf;
 import org.epics.ioc.support.ProcessSelfRequester;
@@ -24,30 +17,22 @@ import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.channelAccess.ChannelMonitor;
+import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.misc.BitSet;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Scalar;
 import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.pv.StringArrayData;
-import org.epics.pvData.pv.Structure;
-import org.epics.pvData.pv.Type;
 
 /**
  * Implementation for a channel access monitor link.
@@ -294,10 +279,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     
     private void getCD() {
         boolean allSet = changeBitSet.get(0);
-        if(allSet) {
-            changeBitSet.set(monitorStructure.getFieldOffset());
-        }
-        copyChanged(monitorStructure.getSubField("value"),valuePVField);
+        copyChanged(monitorStructure.getSubField("value"),valuePVField,allSet);
         if(alarmIsProperty) {
             PVString pvMessage = monitorStructure.getStringField("alarm.message");
             PVInt pvSeverityIndex = monitorStructure.getIntField("alarm.severity.index");
@@ -307,10 +289,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         if(propertyPVFields!=null) length = propertyPVFields.length;
         if(length>=1) for(int i=0; i <length; i++) {
             PVField pvLink = monitorStructure.getSubField(propertyPVFields[i].getField().getFieldName());
-            if(allSet) {
-                changeBitSet.set(pvLink.getFieldOffset());
-            }
-            copyChanged(pvLink,propertyPVFields[i]);
+            copyChanged(pvLink,propertyPVFields[i],allSet);
         }
         if(overrunBitSet.nextSetBit(0)>=0) {
             alarmSupport.setAlarm(
@@ -319,7 +298,11 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         }
     }
     
-    private void copyChanged(PVField pvFrom,PVField pvTo) {
+    private void copyChanged(PVField pvFrom,PVField pvTo,boolean allSet) {
+        if(allSet) {
+            convert.copy(pvFrom, pvTo);
+            return;
+        }
         int startFrom = pvFrom.getFieldOffset();
         int startTo = pvTo.getFieldOffset();
         int nextSet = changeBitSet.nextSetBit(startFrom);

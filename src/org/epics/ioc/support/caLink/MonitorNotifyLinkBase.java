@@ -5,49 +5,25 @@
  */
 package org.epics.ioc.support.caLink;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.epics.ioc.channelAccess.*;
-import org.epics.pvData.channelAccess.*;
-
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.AfterStartFactory;
-import org.epics.ioc.install.AfterStartNode;
-import org.epics.ioc.install.AfterStartRequester;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessSelf;
 import org.epics.ioc.support.ProcessSelfRequester;
 import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.channelAccess.ChannelMonitor;
+import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.misc.BitSet;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
-import org.epics.pvData.pv.PVBoolean;
-import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Scalar;
 import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.pv.StringArrayData;
-import org.epics.pvData.pv.Structure;
-import org.epics.pvData.pv.Type;
 
 /**
  * Implementation for a channel access monitor link.
@@ -80,7 +56,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
-        
+
         pvOption = pvDataCreate.createPVStructure(null, "pvOption", new Field[0]);
         pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvOption, "algorithm", ScalarType.pvString);
         pvAlgorithm.put("onPut");
@@ -88,15 +64,15 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         PVInt pvQueueSize = (PVInt)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvInt);
         pvQueueSize.put(0);
         pvOption.appendPVField(pvQueueSize);
-            isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-            if(!isRecordProcessRequester) {
-                processSelf = recordProcess.canProcessSelf();
-                if(processSelf==null) {
-                    pvStructure.message("process not possible",
-                            MessageType.error);
-                   super.stop();
-                }
+        isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
+        if(!isRecordProcessRequester) {
+            processSelf = recordProcess.canProcessSelf();
+            if(processSelf==null) {
+                pvStructure.message("process not possible",
+                        MessageType.error);
+                super.stop();
             }
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#stop()
@@ -116,8 +92,6 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             channel.createChannelMonitor(channel, this, pvRequest, "monitorNotify", pvOption, executor);
-            pvRecord.lock();
-            
         } else {
             if(channelMonitor!=null) channelMonitor.destroy();
             channelMonitor = null;
