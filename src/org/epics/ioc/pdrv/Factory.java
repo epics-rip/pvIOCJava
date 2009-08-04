@@ -672,7 +672,7 @@ public class Factory {
          */
         @Override
         public boolean canBlock() {
-            return ((portThread==null) ? true : false);
+            return ((portThread==null) ? false : true);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.Port#enable(boolean)
