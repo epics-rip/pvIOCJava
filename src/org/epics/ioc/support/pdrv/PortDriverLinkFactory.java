@@ -232,7 +232,9 @@ public class PortDriverLinkFactory {
             user.setTimeout(pvTimeout.get());
             this.supportProcessRequester = supportProcessRequester;
             user.queueRequest(QueuePriority.medium);
-            
+            if(!port.canBlock()) {
+                processContinue();
+            }
         }   
         /* (non-Javadoc)
          * @see org.epics.ioc.support.pdrv.PortDriverLink#getUser()
@@ -288,11 +290,13 @@ public class PortDriverLinkFactory {
                 }
                 alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
             }
-            if((deviceTrace.getMask()&Trace.FLOW)!=0) {
-                deviceTrace.print(Trace.FLOW,
-                    "pv %s callback calling processContinue", fullName);
+            if(port.canBlock()) {
+                if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+                    deviceTrace.print(Trace.FLOW,
+                        "pv %s callback calling processContinue", fullName);
+                }
+                recordProcess.processContinue(this);
             }
-            recordProcess.processContinue(this);
         }
         
         /* (non-Javadoc)
