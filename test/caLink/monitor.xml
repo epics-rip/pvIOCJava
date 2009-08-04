@@ -54,7 +54,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
-        <structure name = "type"><scalar name = "choice">put</scalar></structure>
+        <scalar name = "type">onPut</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
@@ -79,7 +79,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
-        <structure name = "type"><scalar name = "choice">change</scalar></structure>
+        <scalar name = "type">onChange</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
@@ -91,7 +91,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
-        <structure name = "type"><scalar name = "choice">absoluteChange</scalar></structure>
+        <scalar name = "type">onAbsoluteChange</scalar>
         <scalar name = "deadband">1.001</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
@@ -104,7 +104,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
-        <structure name = "type"><scalar name = "choice">percentageChange</scalar></structure>
+        <scalar name = "type">onPercentChange</scalar>
         <scalar name = "deadband">20.0</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
