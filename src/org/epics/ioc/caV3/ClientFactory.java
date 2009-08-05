@@ -19,17 +19,13 @@ import java.util.TimerTask;
 import java.util.regex.Pattern;
 
 import org.epics.ioc.channelAccess.ChannelAccessFactory;
-import org.epics.ioc.channelAccess.ChannelProcessorProvider;
-import org.epics.ioc.channelAccess.MonitorCreate;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
-import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelFind;
 import org.epics.pvData.channelAccess.ChannelFindRequester;
-import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelProvider;
 import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.misc.RunnableReady;
