@@ -134,19 +134,8 @@ public class ClientFactory  {
                 System.err.println(e.getMessage());
             }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProvider#destroyMonitor(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelMonitor)
-         */
-        @Override
-        public void destroyMonitor(Channel channel,ChannelMonitor channelMonitor) {
-            // TODO Auto-generated method stub
-            
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProvider#channelFind(java.lang.String, org.epics.ioc.channelAccess.ChannelFindRequester, org.epics.pvData.channelAccess.ChannelRequester)
-         */
-        @Override
-        public ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester,ChannelRequester channelRequester) {
+       
+        private ChannelFind channelLocate(String channelName,ChannelFindRequester channelFindRequester,ChannelRequester channelRequester) {
             String recordName = null;
             String fieldName = null;
             String[] propertys = new String[0];
@@ -191,17 +180,19 @@ public class ClientFactory  {
             return v3Channel;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProvider#registerChannelProcessProvider(org.epics.ioc.channelAccess.ChannelProcessorProvider)
+         * @see org.epics.pvData.channelAccess.ChannelProvider#channelFind(java.lang.String, org.epics.pvData.channelAccess.ChannelFindRequester)
          */
         @Override
-        public boolean registerChannelProcessProvider(ChannelProcessorProvider channelProcessProvider) {
-            return false;
+        public ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester) {
+            return channelLocate(channelName,channelFindRequester,null);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProvider#registerMonitor(org.epics.ioc.channelAccess.MonitorCreate)
+         * @see org.epics.pvData.channelAccess.ChannelProvider#createChannel(java.lang.String, org.epics.pvData.channelAccess.ChannelRequester)
          */
         @Override
-        public void registerMonitor(MonitorCreate monitorCreate) {}
+        public void createChannel(String channelName,ChannelRequester channelRequester) {
+            channelLocate(channelName,null,channelRequester);
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#getProviderName()
          */

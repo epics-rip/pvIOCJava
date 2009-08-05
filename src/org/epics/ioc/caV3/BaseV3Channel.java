@@ -115,7 +115,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         executorNode = executor.createNode(this);
     }
     
-   
     public void connectCaV3() {
         try {
             isCreatingChannel = true;
@@ -127,7 +126,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
                 synchCreateChannel = false;
             }
         } catch (CAException e) {
-            channelFindRequester.channelFindResult(this, false);
+            if(channelFindRequester!=null) channelFindRequester.channelFindResult(this, false);
             jcaChannel = null;
         };
     }
@@ -404,8 +403,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void destroy() {
-        // TODO Auto-generated method stub
-        
+        jcaChannel.dispose();
     }
     /* (non-Javadoc)
      * @see org.epics.pvData.channelAccess.Channel#getAccessRights(org.epics.pvData.pv.PVField)
@@ -519,7 +517,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void connect() {
-        channelRequester.channelCreated(this);
+        channelRequester.channelStateChange(this, true);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.AbstractChannel#disconnect()
@@ -571,7 +569,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             if(gotFirstConnection) return;
             gotFirstConnection = true;
             if(isCreatingChannel) {
-                
                 synchCreateChannel = true;
                 return;
             }
@@ -584,13 +581,18 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      * @see java.lang.Runnable#run()
      */
     public void run() {
+        if(channelFindRequester!=null) {
+            channelFindRequester.channelFindResult(this, true);
+            disconnect();
+            return;
+        }
         v3ChannelStructure = new BaseV3ChannelStructure(this);
         if(v3ChannelStructure.createPVStructure(this,recordName)) {
-            channelFindRequester.channelFindResult(this, true);
             channelRequester.channelCreated(this);
             return;
         } else {
-            channelFindRequester.channelFindResult(this, false);
+            channelRequester.message("createPVStructure failed", MessageType.error);
+            channelRequester.channelNotCreated();
         }
         disconnect();
     }
@@ -599,9 +601,10 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     public void createPVStructureDone(RequestResult requestResult) {
         if(requestResult==RequestResult.success) {
-            channelFindRequester.channelFindResult(this, true);
+            channelRequester.channelCreated(this);
         } else {
-            channelFindRequester.channelFindResult(this, false);
+            channelRequester.message("createPVStructure failed", MessageType.error);
+            channelRequester.channelNotCreated();
             disconnect();
         }
     }

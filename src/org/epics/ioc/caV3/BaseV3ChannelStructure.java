@@ -597,6 +597,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure,GetListener,Ru
             if(index!=pvEnumerated.getIndex().get()) {
                 PVInt pvInt = pvEnumerated.getIndex();
                 pvInt.put(index);
+                bitSet.set(pvInt.getFieldOffset());
             }
         } else {
             if(requestDBRType==DBRType.DOUBLE) {

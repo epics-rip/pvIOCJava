@@ -148,8 +148,8 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
      * @see org.epics.ioc.ca.ChannelMonitor#destroy()
      */
     public void destroy() {
-        isDestroyed = true;
         if(monitor!=null) stop();
+        isDestroyed = true;
         v3Channel.remove(this);
     }
     /* (non-Javadoc)

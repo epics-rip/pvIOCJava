@@ -62,8 +62,6 @@ import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.BitSet;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
@@ -258,7 +256,9 @@ public class ServerFactory {
         private PVField valuePVField = null;
         private PVArray valuePVArray = null;
         private PVScalar valuePVScalar = null;
-        private Enumerated enumerated = null;
+        private PVInt valueIndexPV = null;
+        private PVStringArray valueChoicesPV = null;
+        private int valueIndex = -1;
 
         private PVCopy pvCopy = null;
         private PVStructure pvCopyStructure = null;
@@ -281,7 +281,7 @@ public class ServerFactory {
         private BitSet monitorChangeBitSet = null;
         private BitSet monitorOverrunBitSet = null;
 
-        private int elementCount;
+        private int elementCount = 1;
 
         private String[] enumLabels = null;
 
@@ -355,9 +355,12 @@ public class ServerFactory {
             }
             pvCopy = PVCopyFactory.create(pvRecord, pvRequest, pvRecord.getRecordName(), shareData);
             pvCopyStructure = pvCopy.createPVStructure();
+            copyBitSet = new BitSet(pvCopyStructure.getNumberFields());
+            copyBitSet.set(0);
+            pvCopy.updateCopyFromBitSet(pvCopyStructure, copyBitSet, true);
             valuePVField = pvCopyStructure.getSubField("value");
             initializeChannelDBRType();
-            copyBitSet = new BitSet(pvCopyStructure.getNumberFields());
+            
             option = getOption("getProcess");
             if(option!=null) getProcess = Boolean.valueOf(option);
             option = getOption("putProcess");
@@ -653,15 +656,20 @@ public class ServerFactory {
                 dbrType = getChannelDBRType(scalarType);
                 return;
             } else if(type==Type.structure) {
-                enumerated = EnumeratedFactory.getEnumerated(valuePVField);
-                if (enumerated!=null)
+                PVStructure pvStructure = (PVStructure)valuePVField;
+                valueIndexPV = pvStructure.getIntField("index");
+                PVArray pvArray = pvStructure.getArrayField("choices",ScalarType.pvString);
+                if(pvArray!=null) {
+                    valueChoicesPV = (PVStringArray)pvArray;
+                }
+                if (valueIndexPV!=null && valueChoicesPV!=null)
                 {
+                    valueIndex = valueIndexPV.getFieldOffset();
                     // this is done only once..
-                    PVStringArray pvChoices = enumerated.getChoices();
-                    int count = pvChoices.getLength();
+                    int count = valueChoicesPV.getLength();
                     StringArrayData data = new StringArrayData();
                     enumLabels = new String[count];
-                    int num = pvChoices.get(0, count, data);
+                    int num = valueChoicesPV.get(0, count, data);
                     System.arraycopy(data.data, 0, enumLabels, 0, num);
                     dbrType = DBRType.ENUM;
                     return;
@@ -748,8 +756,9 @@ public class ServerFactory {
                             valuePVField.message("illegal enum", MessageType.error);
                         }
                     } else {
-                        if (enumerated != null) {
-                            value[0] = (short) enumerated.getIndex().get();
+                        if (valueIndex!=-1) {
+                            PVInt pvInt = (PVInt)((PVStructure)pvField).getSubField(valueIndex);
+                            value[0] = (short) pvInt.get();
                         } else {
                             valuePVField.message("illegal enum", MessageType.error);
                         }
@@ -858,10 +867,9 @@ public class ServerFactory {
                             valuePVField.message("illegal enum", MessageType.error);
                         }
                     } else {                               
-                        if (enumerated != null)  {
-                            PVInt pvInt = enumerated.getIndex();
-                            pvInt.put(value[0]);
-                            copyBitSet.set(pvInt.getFieldOffset());
+                        if (valueIndexPV != null)  {
+                            valueIndexPV.put(value[0]);
+                            copyBitSet.set(valueIndexPV.getFieldOffset());
                         } else {
                             valuePVField.message("illegal enum",MessageType.error);
                         }
