@@ -140,6 +140,11 @@ public class ProcessFactory {
             }
             Object object = arg0.getSource();
             if(object==connectButton) {
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    channel.destroy();
+                    this.channel = null;
+                }
                 ConnectChannel connectChannel = ConnectChannelFactory.create(shell, this);
                 connectChannel.connect();
             } else if(object==disconnectButton) {

@@ -246,6 +246,11 @@ public class MonitorFactory {
             if(isDisposed) return;
             Object object = arg0.getSource();
             if(object==connectButton) {
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    channel.destroy();
+                    this.channel = null;
+                }
                 ConnectChannel connectChannel = ConnectChannelFactory.create(shell, this);
                 connectChannel.connect();
                 return;
@@ -256,17 +261,16 @@ public class MonitorFactory {
                 return;
             }
             if(object==disconnectButton) {
-                if(isMonitoring) {
-                    isMonitoring = false;
-                    monitor.stop();
-                    startStopButton.setEnabled(false);
-                    startStopButton.setText("startMonitor");
-                    enableOptions();
-                }
                 connectButton.setEnabled(true);
                 disconnectButton.setEnabled(false);
                 channel.destroy();
                 channel = null;
+                if(isMonitoring) {
+                    isMonitoring = false;
+                    startStopButton.setEnabled(false);
+                    startStopButton.setText("startMonitor");
+                    enableOptions();
+                }
                 return;
             }
             if(object==putButton) {
@@ -313,7 +317,6 @@ public class MonitorFactory {
                 String value = simulateDelayText.getText();
                 try {
                     simulateDelay = Double.parseDouble(value);
-System.out.println("simulateDelay " + simulateDelay);
                 } catch (NumberFormatException e) {
                     message("Illegal value", MessageType.error);
                 }

@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.epics.ioc.channelAccess.ChannelAccessFactory;
 import org.epics.pvData.channelAccess.ChannelAccess;
 import org.epics.pvData.channelAccess.ChannelProvider;
@@ -59,7 +59,7 @@ public class ConnectChannelFactory {
         private Shell shell = null;
         private ExecutorNode executorNode = null;
         private Button selectLocalRecordButton = null;
-        private List providerList = null;
+        private Combo providerCombo = null;
         private Text pvNameText = null;
         private String providerName = null;
         private String pvName = null;
@@ -82,12 +82,13 @@ public class ConnectChannelFactory {
             gridLayout.numColumns = 2;
             provider.setLayout(gridLayout);
             new Label(provider,SWT.RIGHT).setText("provider");
-            providerList = new List(provider,SWT.SINGLE|SWT.BORDER);
+            providerCombo = new Combo(provider,SWT.SINGLE|SWT.BORDER);
             String[] names = channelAccess.getProviderNames();
             providerName = names[0];
             for(String name :names) {
-                providerList.add(name);
+                providerCombo.add(name);
             }
+            providerCombo.select(0);
             Composite pvname = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
@@ -130,11 +131,13 @@ public class ConnectChannelFactory {
                 if(pvName==null) return;
                 pvNameText.setText(pvName);
                 pvName = pvNameText.getText();
+                providerName = "local";
                 executor.execute(executorNode);
                 shell.close();
                 return;
             } else if(object==pvNameText) {
                 pvName = pvNameText.getText();
+                providerName = providerCombo.getText();
                 executor.execute(executorNode);
                 shell.close();
             }
