@@ -204,15 +204,24 @@ abstract class AbstractIOLink extends AbstractLink {
         String providerName = providerPV.get();
         pvname = pvnamePV.get();
         if(providerName.equals("caV3")) {
-            if(propertyNames!=null && propertyNames.length>0) {
+            if(alarmIsProperty || (propertyNames!=null && propertyNames.length>0)) {
+                boolean addComma = false;
                 int indexPeriod = pvname.indexOf('.');
                 if(indexPeriod<1) pvname += ".value";
                 pvname += "{";
-                for(int i=0; i<propertyNames.length; i++) {
-                    if(i>0) pvname += ",";
-                    pvname += propertyNames[i];
+                if(alarmIsProperty) {
+                    pvname += "alarm";
+                    addComma = true;
                 }
-                pvname += "}";
+                if(propertyNames!=null && propertyNames.length>0) {
+                    for(int i=0; i<propertyNames.length; i++) {
+                        if(addComma) pvname += ",";
+                        pvname += propertyNames[i];
+                        addComma = true;
+                    }
+                    pvname += "}";
+                }
+                pvnamePV.put(pvname);
             }
         }
         super.start(afterStart);
