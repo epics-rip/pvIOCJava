@@ -7,6 +7,14 @@
     <scalar name = "value" scalarType = "boolean" />
 </record>
 
+<record recordName = "enum" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "value" extends = "enumerated">
+        <array name = "choices">zero,one,two,three,four</array>
+    </structure>
+</record>
+
 <record recordName = "byte" >
     <scalar name = "value" scalarType = "byte">
         <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
