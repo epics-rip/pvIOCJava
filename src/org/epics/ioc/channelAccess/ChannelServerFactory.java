@@ -971,6 +971,7 @@ public class ChannelServerFactory  {
                     channelPutGetRequester.putGetDone(false);
                     return;
                 }
+                success = true;
                 this.lastRequest = lastRequest;
                 if(process) {
                     channelProcessor.requestProcess();
