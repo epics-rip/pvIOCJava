@@ -438,10 +438,12 @@ public class ChannelServerFactory  {
             PVField pvField = pvRecord.getSubField(subField);
             if(pvField==null) {
                 channelArrayRequester.message("subField does not exist", MessageType.error);
+                channelArrayRequester.channelArrayConnect(null, null);
                 return;
             }
             if(pvField.getField().getType()!=Type.scalarArray) {
                 channelArrayRequester.message("subField is not an array", MessageType.error);
+                channelArrayRequester.channelArrayConnect(null, null);
                 return;
             }
             PVArray pvArray = (PVArray)pvField;
@@ -1126,7 +1128,7 @@ public class ChannelServerFactory  {
                 pvRecord.lock();
                 try {
                     int len = convert.copyArray(pvArray, offset, pvCopy, 0, count);
-                    pvCopy.setLength(len);
+                    if(!pvCopy.isImmutable()) pvCopy.setLength(len);
                 } finally  {
                     pvRecord.unlock();
                 }
