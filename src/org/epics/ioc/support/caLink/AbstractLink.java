@@ -18,8 +18,6 @@ import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.pvData.channelAccess.Channel;
 import org.epics.pvData.channelAccess.ChannelAccess;
-import org.epics.pvData.channelAccess.ChannelFind;
-import org.epics.pvData.channelAccess.ChannelFindRequester;
 import org.epics.pvData.channelAccess.ChannelProvider;
 import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.factory.PVDataFactory;
@@ -37,7 +35,7 @@ import org.epics.pvData.pv.PVStructure;
  * @author mrk
  *
  */
-abstract class AbstractLink extends AbstractSupport implements AfterStartRequester,ChannelFindRequester,ChannelRequester {
+abstract class AbstractLink extends AbstractSupport implements AfterStartRequester,ChannelRequester {
     /**
      * pvDataCreate is for creating PV data.
      */
@@ -143,22 +141,10 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
      */
     @Override
     public void callback(AfterStartNode node) {
-        channelProvider.channelFind(pvnamePV.get(), this);
+        channelProvider.createChannel(pvnamePV.get(), this);
         afterStart.done(afterStartNode);
         afterStart = null;
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.channelAccess.ChannelFindRequester#channelFindResult(org.epics.ioc.channelAccess.ChannelFind, boolean)
-     */
-    @Override
-    public void channelFindResult(ChannelFind channelFind, boolean wasFound) {
-        if(!wasFound) {
-            message("pvname " + pvnamePV.get() +  " not found",MessageType.error);
-            return;
-        }
-        channelProvider.createChannel(pvnamePV.get(), this);
-    }
-
     /* (non-Javadoc)
      * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
      */

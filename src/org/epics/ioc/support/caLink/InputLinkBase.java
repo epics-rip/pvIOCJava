@@ -83,12 +83,8 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      */
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
-            channel.createChannelGet(channel, this, pvRequest, "get", false, process);
-            pvRecord.lock();
-            try {
-                isReady = true;
-            } finally {
-                pvRecord.unlock();
+            if(channelGet==null) {
+                channel.createChannelGet(channel, this, pvRequest, "get", false, process);
             }
         } else {
             pvRecord.lock();
@@ -108,6 +104,12 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     @Override
     public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
         this.channelGet = channelGet;
+        pvRecord.lock();
+        try {
+            isReady = true;
+        } finally {
+            pvRecord.unlock();
+        }
         linkPVStructure = pvStructure;
         this.bitSet = bitSet;
         linkValuePVField = linkPVStructure.getSubField("value");

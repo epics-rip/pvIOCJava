@@ -176,12 +176,8 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     @Override
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
-            channel.createChannelMonitor(channel, this, pvRequest, "monitor", pvOption, executor);
-            pvRecord.lock();
-            try {
-                isReady = true;
-            } finally {
-                pvRecord.unlock();
+            if(channelMonitor==null) {
+                channel.createChannelMonitor(channel, this, pvRequest, "monitor", pvOption, executor);
             }
         } else {
             pvRecord.lock();
@@ -200,6 +196,12 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     @Override
     public void channelMonitorConnect(ChannelMonitor channelMonitor) {
         this.channelMonitor = channelMonitor;
+        pvRecord.lock();
+        try {
+            isReady = true;
+        } finally {
+            pvRecord.unlock();
+        }
         channelMonitor.start();
     }
     /* (non-Javadoc)
