@@ -328,6 +328,7 @@ public class ChannelServerFactory  {
         public void getField(GetFieldRequester requester,String subField) {
             if(subField==null || subField.length()<1) {
                 requester.getDone(pvRecord.getStructure());
+                return;
             }
             PVField pvField = pvRecord.getSubField(subField);
             if(pvField==null) {
