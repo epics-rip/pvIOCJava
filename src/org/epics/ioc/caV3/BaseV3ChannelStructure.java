@@ -275,6 +275,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure,GetListener,Ru
                 }
             }
         }
+        bitSet = new BitSet(pvStructure.getNumberFields());
         PVField pvValue = pvStructure.getPVFields()[0];
         if(nativeDBRType.isENUM()) {
             String message = null;
@@ -382,7 +383,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure,GetListener,Ru
                 return false;
             }
         }
-        bitSet = new BitSet(pvStructure.getNumberFields());
+        
         return true;
     }
     /* (non-Javadoc)
