@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<database>
+
+<structure structureName = "recordListFactory">
+  <scalar name = "supportFactory" scalarType = "string">
+     org.epics.ioc.support.rpc.RecordListFactory</scalar>
+</structure>
+
+<structure structureName = "recordList" >
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.recordListFactory</auxInfo>
+  <structure name = "arguments" >
+      <scalar name = "database" scalarType = "string">master</scalar>
+      <scalar name = "regularExpression" scalarType = "string" >*</scalar>
+  </structure>
+  <structure name = "result" >
+      <scalar name = "status" scalarType = "string" />
+      <array name = "names" scalarType = "string" />
+  </structure>
+</structure>
+
+</database>
