@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "arrayValueOnly">
+    <array name = "value" scalarType = "double"/>
+    <structure name = "timeStamp" extends = "timeStamp" />
+</record>
+
+</database>
