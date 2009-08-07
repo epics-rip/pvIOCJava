@@ -620,11 +620,11 @@ public class ChannelServerFactory  {
             private boolean success = false;
             private ChannelProcessor channelProcessor = null;
             private BitSet bitSet = null;
+            private boolean isDestroyed = false;
+            private boolean lastRequest = false;
             // following for share
             private BitSet monitorBitSet = null;
             private BitSet overrunBitSet = null;
-            private boolean isDestroyed = false;
-            private boolean lastRequest = false;
             private PVCopyMonitor pvCopyMonitor = null;
             /* (non-Javadoc)
              * @see org.epics.pvData.channelAccess.ChannelGet#destroy()
@@ -916,7 +916,6 @@ public class ChannelServerFactory  {
                 this.process = process;
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
                 getBitSet = new BitSet(pvGetStructure.getNumberFields());
-                requesterName = "PutGet:" + channelPutGetRequester.getRequesterName();
                 if(process) {
                     this.process = true;
                     PVRecord pvRecord = channelImpl.pvRecord;
@@ -946,7 +945,6 @@ public class ChannelServerFactory  {
             private BitSet getBitSet = null;
             private boolean isDestroyed = false;
             private boolean lastRequest = false;
-            private String requesterName;
            
             /* (non-Javadoc)
              * @see org.epics.ioc.ca.ChannelPutGet#destroy()
@@ -1061,7 +1059,7 @@ public class ChannelServerFactory  {
              */
             @Override
             public String getRequesterName() {
-                return requesterName;
+                return channelPutGetRequester.getRequesterName();
             }     
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
@@ -1072,15 +1070,21 @@ public class ChannelServerFactory  {
             }
             
             private void putData() {
+                putBitSet.clear();
+                putBitSet.set(0);
                 pvPutCopy.updateRecord(pvPutStructure, putBitSet, false);
             }
             
             private void getData() {
                 pvGetCopy.updateCopySetBitSet(pvGetStructure, getBitSet, false);
+                getBitSet.clear();
+                getBitSet.set(0);
             }
             
             private void getPutData() {
                 pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet, false);
+                putBitSet.clear();
+                putBitSet.set(0);
             }
         }
         
