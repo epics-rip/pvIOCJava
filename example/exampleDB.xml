@@ -2,6 +2,8 @@
 <database>
 <import name = "org.epics.ioc.*" />
 <import name = "org.epics.pvData.*" />
+<record recordName = "processControl" extends = "processControl" />
+<record recordName = "recordList" extends = "recordList" />
 <include addPath = "${PVDATA}/test/example" />
 <include removePath = "${PVDATA}/test/example" />
 <include addPath = "${JAVAIOC}/example" />
