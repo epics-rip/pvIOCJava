@@ -67,6 +67,13 @@ public class SwtshellFactory {
             layout.makeColumnsEqualWidth = true;
             shell.setLayout(layout);
             
+            Button processDB = new Button(shell,SWT.PUSH);
+            processDB.setText("process");
+            processDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    ProcessFactory.init(display);
+                }
+            });
             Button getDB = new Button(shell,SWT.PUSH);
             getDB.setText("get");
             getDB.addSelectionListener( new SelectionAdapter() {
@@ -81,11 +88,11 @@ public class SwtshellFactory {
                     PutFactory.init(display);
                 }
             });
-            Button processDB = new Button(shell,SWT.PUSH);
-            processDB.setText("process");
-            processDB.addSelectionListener( new SelectionAdapter() {
+            Button putGetDB = new Button(shell,SWT.PUSH);
+            putGetDB.setText("putGet");
+            putGetDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
-                    ProcessFactory.init(display);
+                    PutGetFactory.init(display);
                 }
             });
             Button monitorDB = new Button(shell,SWT.PUSH);
