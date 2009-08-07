@@ -5,33 +5,18 @@
  */
 package org.epics.ioc.support.rpc;
 
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
-import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
-import org.epics.pvData.misc.ExecutorNode;
-import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.pv.PVBoolean;
+import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.StringArrayData;
+import org.epics.pvData.pv.ScalarType;
 
 /**
  * Support for remotely get a list of records.
@@ -49,9 +34,6 @@ public class RecordListFactory {
     }
     
     private static final String supportName = "org.epics.ioc.rpc.recordList";
-    private static final String emptyString = "";
-    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final IOCDatabase supportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     
     
     private static class RecordListImpl extends AbstractSupport
@@ -100,7 +82,7 @@ public class RecordListFactory {
                 pvStatus.put("database not found");
                 pvNames.setLength(0);
             } else {
-                String[] names = pvDatabase.getRecordNames();
+                String[] names = pvDatabase.recordList(pvRegularExpression.get());
                 pvNames.setLength(names.length);
                 pvNames.put(0, names.length, names, 0);
                 pvStatus.put("success");
