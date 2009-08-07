@@ -14,14 +14,21 @@
 
 package org.epics.ioc.channelAccess.test;
 
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import junit.framework.TestCase;
 
 import org.epics.ioc.channelAccess.ChannelAccessFactory;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.pvData.channelAccess.Channel;
+import org.epics.pvData.channelAccess.ChannelArray;
+import org.epics.pvData.channelAccess.ChannelArrayRequester;
 import org.epics.pvData.channelAccess.ChannelGet;
 import org.epics.pvData.channelAccess.ChannelGetRequester;
+import org.epics.pvData.channelAccess.ChannelMonitor;
+import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.channelAccess.ChannelProcess;
 import org.epics.pvData.channelAccess.ChannelProcessRequester;
 import org.epics.pvData.channelAccess.ChannelProvider;
@@ -31,21 +38,32 @@ import org.epics.pvData.channelAccess.ChannelPutGetRequester;
 import org.epics.pvData.channelAccess.ChannelPutRequester;
 import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.channelAccess.GetFieldRequester;
+import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.DoubleArrayData;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVDoubleArray;
+import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.StringArrayData;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -549,7 +567,6 @@ public class ChannelAccessTest extends TestCase {
 		@Override
 		public void getDone(Field field) {
 			synchronized (this) {
-				System.out.println("=================> " + field);
 				this.field = field;
 				this.success = new Boolean(true);
 				this.notify();
@@ -661,6 +678,187 @@ public class ChannelAccessTest extends TestCase {
 		
 	};
 	
+	private class ChannelArrayRequesterImpl implements ChannelArrayRequester {
+
+		ChannelArray channelArray;
+		PVArray pvArray;
+		
+		private Boolean connected = null;
+		private Boolean success = null;
+
+		@Override
+		public void channelArrayConnect(ChannelArray channelArray, PVArray pvArray) {
+			synchronized (this)
+			{
+				this.channelArray = channelArray;
+				this.pvArray = pvArray;
+
+				connected = new Boolean(true);	// put here connection status
+				this.notify();
+			}
+		}
+
+		public void waitAndCheckConnect()
+		{
+			synchronized (this) {
+				if (connected == null)
+				{
+					try {
+						this.wait(TIMEOUT_MS);
+					} catch (InterruptedException e) {
+						// noop
+					}
+				}
+				
+				assertNotNull("channel array connect timeout", connected);
+				assertTrue("channel array failed to connect", connected.booleanValue());
+				assertNotNull(pvArray);
+			}
+		}
+
+		@Override
+		public void getArrayDone(boolean success) {
+			synchronized (this) {
+				this.success = new Boolean(success);
+				this.notify();
+			}
+		}
+
+		public void syncGet(boolean lastRequest, int offset, int count)
+		{
+			synchronized (this) {
+				if (connected == null)
+					assertNotNull("channel array not connected", connected);
+					
+				success = null;
+				channelArray.getArray(lastRequest, offset, count);
+				
+				try {
+					if (success == null)
+						this.wait(TIMEOUT_MS);
+				} catch (InterruptedException e) {
+					// noop
+				}
+				
+				assertNotNull("channel array get timeout", success);
+				assertTrue("channel array get failed", success.booleanValue());
+			}
+		}
+
+		@Override
+		public void putArrayDone(boolean success) {
+			synchronized (this) {
+				this.success = new Boolean(success);
+				this.notify();
+			}
+		}
+
+		public void syncPut(boolean lastRequest, int offset, int count)
+		{
+			synchronized (this) {
+				if (connected == null)
+					assertNotNull("channel array not connected", connected);
+					
+				success = null;
+				channelArray.putArray(lastRequest, offset, count);
+				
+				try {
+					if (success == null)
+						this.wait(TIMEOUT_MS);
+				} catch (InterruptedException e) {
+					// noop
+				}
+				
+				assertNotNull("channel array put timeout", success);
+				assertTrue("channel array put failed", success.booleanValue());
+			}
+		}
+
+		@Override
+		public String getRequesterName() {
+			return this.getClass().getName();
+		}
+
+		@Override
+		public void message(String message, MessageType messageType) {
+			System.err.println("[" + messageType + "] " + message);
+		}
+		
+	};
+
+	private class ChannelMonitorRequesterImpl implements ChannelMonitorRequester {
+		
+		PVStructure pvStructure;
+		BitSet changeBitSet;
+		BitSet overrunBitSet;
+		
+		AtomicInteger monitorCounter = new AtomicInteger();
+			
+		ChannelMonitor channelMonitor;
+		
+		private Boolean connected = null;
+
+		@Override
+		public void channelMonitorConnect(ChannelMonitor channelMonitor) {
+			synchronized (this)
+			{
+				this.channelMonitor = channelMonitor;
+
+				connected = new Boolean(true);	// put here connection status
+				this.notify();
+			}
+		}
+
+		public void waitAndCheckConnect()
+		{
+			synchronized (this) {
+				if (connected == null)
+				{
+					try {
+						this.wait(TIMEOUT_MS);
+					} catch (InterruptedException e) {
+						// noop
+					}
+				}
+				
+				assertNotNull("channel monitor connect timeout", connected);
+				assertTrue("channel monitor failed to connect", connected.booleanValue());
+			}
+		}
+
+		@Override
+		public void unlisten() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void monitorEvent(PVStructure pvStructure, BitSet changeBitSet, BitSet overrunBitSet) {
+			synchronized (this) {
+				this.pvStructure = pvStructure;
+				this.changeBitSet = changeBitSet;
+				this.overrunBitSet = overrunBitSet;
+				
+				assertNotNull(this.pvStructure);
+				assertNotNull(this.changeBitSet);
+				assertNotNull(this.overrunBitSet);
+			
+				monitorCounter.incrementAndGet();
+				this.notify();
+			}
+		}
+		
+		@Override
+		public String getRequesterName() {
+			return this.getClass().getName();
+		}
+
+		@Override
+		public void message(String message, MessageType messageType) {
+			System.err.println("[" + messageType + "] " + message);
+		}
+	};
+
 	private static final long TIMEOUT_MS = 3000;
 
 	public void testChannelGet() throws Throwable
@@ -693,8 +891,7 @@ public class ChannelAccessTest extends TestCase {
 		ch.createChannelGet(ch, channelGetRequester, pvRequest, "get-test", share, false);
 		channelGetRequester.waitAndCheckConnect();
 		
-		// TODO not implemented
-		//assertEquals("get-test", channelGetRequester.pvStructure.getFullName());
+		assertEquals("get-test", channelGetRequester.pvStructure.getFullName());
 		
 		channelGetRequester.syncGet(false);
 		// only first bit must be set
@@ -732,8 +929,7 @@ public class ChannelAccessTest extends TestCase {
 		ch.createChannelGet(ch, channelGetRequester, pvRequest, "get-test", share, true);
 		channelGetRequester.waitAndCheckConnect();
 		
-		// TODO not implemented
-		//assertEquals("get-test", channelGetRequester.pvStructure.getFullName());
+		assertEquals("get-test", channelGetRequester.pvStructure.getFullName());
 		PVInt value = channelGetRequester.pvStructure.getIntField("value");
 		TimeStamp timestamp = TimeStampFactory.getTimeStamp(channelGetRequester.pvStructure.getStructureField("timeStamp"));
 		
@@ -791,8 +987,7 @@ public class ChannelAccessTest extends TestCase {
 		ch.createChannelPut(ch, channelPutRequester, pvRequest, "put-test", share, false);
 		channelPutRequester.waitAndCheckConnect();
 		
-		// TODO not implemented
-		//assertEquals("put-test", channelPutRequester.pvStructure.getFullName());
+		assertEquals("put-test", channelPutRequester.pvStructure.getFullName());
 
 		// set and get test
 		PVDouble value = channelPutRequester.pvStructure.getDoubleField("value");
@@ -844,8 +1039,7 @@ public class ChannelAccessTest extends TestCase {
 		ch.createChannelPut(ch, channelPutRequester, pvRequest, "put-test", share, true);
 		channelPutRequester.waitAndCheckConnect();
 		
-		// TODO not implemented
-		//assertEquals("put-test", channelPutRequester.pvStructure.getFullName());
+		assertEquals("put-test", channelPutRequester.pvStructure.getFullName());
 
 		// set and get test
 		PVInt value = channelPutRequester.pvStructure.getIntField("value");
@@ -1002,22 +1196,6 @@ public class ChannelAccessTest extends TestCase {
 		// however it shoudn't, right!!!
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	public void testChannelPutGet() throws Throwable
 	{
 	    Channel ch = syncCreateChannel("valueOnly");
@@ -1054,9 +1232,8 @@ public class ChannelAccessTest extends TestCase {
 		ch.createChannelPutGet(ch, channelPutGetRequester, pvRequest, "put-test", share, pvGetRequest, "get-test", share, false);
 		channelPutGetRequester.waitAndCheckConnect();
 		
-		// TODO not implemented
-		//assertEquals("put-test", channelPutGetRequester.pvPutStructure.getFullName());
-		//assertEquals("get-test", channelPutGetRequester.pvGetStructure.getFullName());
+		assertEquals("put-test", channelPutGetRequester.pvPutStructure.getFullName());
+		assertEquals("get-test", channelPutGetRequester.pvGetStructure.getFullName());
 
 		// set and get test
 		PVDouble putValue = channelPutGetRequester.pvPutStructure.getDoubleField("value");
@@ -1129,9 +1306,8 @@ public class ChannelAccessTest extends TestCase {
 		ch.createChannelPutGet(ch, channelPutGetRequester, pvRequest, "put-test", share, pvGetRequest, "get-test", share, true);
 		channelPutGetRequester.waitAndCheckConnect();
 		
-		// TODO not implemented
-		//assertEquals("put-test", channelPutGetRequester.pvPutStructure.getFullName());
-		//assertEquals("get-test", channelPutGetRequester.pvGetStructure.getFullName());
+		assertEquals("put-test", channelPutGetRequester.pvPutStructure.getFullName());
+		assertEquals("get-test", channelPutGetRequester.pvGetStructure.getFullName());
 
 		// set and get test
 		PVInt putValue = channelPutGetRequester.pvPutStructure.getIntField("value");
@@ -1168,9 +1344,6 @@ public class ChannelAccessTest extends TestCase {
 			assertTrue(timestamp.getSecondsPastEpoch() > previousTimestampSec);
 		}
 
-		// destroy
-		channelPutGetRequester.syncPutGet(true);
-
 		/*
 		// TODO check when error handling is implemented
 		channelPutGetRequester.channelPutGet.destroy();
@@ -1178,5 +1351,133 @@ public class ChannelAccessTest extends TestCase {
 		*/
 	}
 	
+	public void testChannelArray() throws Throwable
+	{
+	    Channel ch = syncCreateChannel("simpleCounter");
+	    
+	    ChannelArrayRequesterImpl channelArrayRequester = new ChannelArrayRequesterImpl();
+	    ch.createChannelArray(ch, channelArrayRequester, "alarm.severity.choices");
+	    channelArrayRequester.waitAndCheckConnect();
+	    
+	    // test get
+	    PVStringArray array = (PVStringArray)channelArrayRequester.pvArray;
+	    StringArrayData data = new StringArrayData();
+	    channelArrayRequester.syncGet(true, 1, 2);
+	    int count = array.get(0, 100, data);
+	    assertEquals(2, count);
+	    assertTrue(Arrays.equals(new String[] { "minor", "major" }, data.data));
+	 
+	    ch.destroy();
+
+	    /*
+		// TODO check when error handling is implemented
+		channelArrayRequester.channelArray.destroy();
+		channelArrayRequester.syncGet(true);
+		*/
+	    
+	    ch = syncCreateChannel("arrayValueOnly");
+	    channelArrayRequester = new ChannelArrayRequesterImpl();
+	    ch.createChannelArray(ch, channelArrayRequester, "value");
+	    channelArrayRequester.waitAndCheckConnect();
+	    
+	    // test put
+	    PVDoubleArray doubleArray = (PVDoubleArray)channelArrayRequester.pvArray;
+	    final double[] ARRAY_VALUE = new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 }; 
+	    doubleArray.put(0, ARRAY_VALUE.length, ARRAY_VALUE, 0);
+	    channelArrayRequester.syncPut(false, 0, -1);
+	    channelArrayRequester.syncGet(false, 0, -1);
+	    DoubleArrayData doubleData = new DoubleArrayData();
+	    count = doubleArray.get(0, 100, doubleData);
+	    assertEquals(ARRAY_VALUE.length, count);
+	    for (int i = 0; i < count; i++)
+	    	assertEquals(ARRAY_VALUE[i], doubleData.data[i]);
+	    
+	    channelArrayRequester.syncPut(false, 4, -1);
+	    channelArrayRequester.syncGet(false, 3, 3);
+	    count = doubleArray.get(0, 3, doubleData);
+	    assertEquals(3, count);
+	    final double[] EXPECTED_VAL = new double[] { 4.4, 1.1, 2.2 };
+	    for (int i = 0; i < count; i++)
+	    	assertEquals(EXPECTED_VAL[i], doubleData.data[i]);
+	}
+	
+	private static final Executor executor = ExecutorFactory.create("MonitorHandler", ThreadPriority.lowest);
+    private static final Convert convert = ConvertFactory.getConvert();
+
+	public void testChannelMonitors() throws Throwable
+	{
+    	PVStructure pvRequest = pvDataCreate.createPVStructure(null, "", new Field[0]);
+        Field newField = fieldCreate.createScalar("timeStamp", ScalarType.pvString);
+        PVString pvString = (PVString)pvDataCreate.createPVField(pvRequest, newField);
+        pvString.put("timeStamp");
+        pvRequest.appendPVField(pvString);
+        newField = fieldCreate.createScalar("value", ScalarType.pvString);
+        pvString = (PVString)pvDataCreate.createPVField(pvRequest, newField);
+        pvString.put("value");
+        pvRequest.appendPVField(pvString);
+        // add something static
+        newField = fieldCreate.createScalar("alarm.severity.choices", ScalarType.pvString);
+        pvString = (PVString)pvDataCreate.createPVField(pvRequest, newField);
+        pvString.put("alarm.severity.choices");
+        pvRequest.appendPVField(pvString);
+
+        PVStructure pvOption = pvDataCreate.createPVStructure(null, "pvOption", new Field[0]);
+        PVString pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvOption, "algorithm", ScalarType.pvString);
+        pvAlgorithm.put("onChange");		// TODO constant!!!
+        pvOption.appendPVField(pvAlgorithm);
+        PVInt pvQueueSize = (PVInt)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvInt);
+        pvQueueSize.put(10);
+        pvOption.appendPVField(pvQueueSize);
+
+        Channel ch = syncCreateChannel("counter");
+		
+	    ChannelMonitorRequesterImpl channelMonitorRequester = new ChannelMonitorRequesterImpl();
+	    ch.createChannelMonitor(ch, channelMonitorRequester, pvRequest, "monitor-test", pvOption, executor);
+	    channelMonitorRequester.waitAndCheckConnect();
+
+	    // TODO currently we get no pvStructure until first monitor
+	    
+	    // not start, no monitors
+	    assertEquals(0, channelMonitorRequester.monitorCounter.get());
+	    
+	    synchronized (channelMonitorRequester) {
+		    channelMonitorRequester.channelMonitor.start();
+		    
+		    channelMonitorRequester.wait(TIMEOUT_MS);
+		    // first monitor, entire structure
+		    assertEquals("monitor-test", channelMonitorRequester.pvStructure.getFullName());
+		    assertEquals(1, channelMonitorRequester.monitorCounter.get());
+		    assertEquals(1, channelMonitorRequester.changeBitSet.cardinality());
+		    assertTrue(channelMonitorRequester.changeBitSet.get(0));
+
+		    PVField valueField = channelMonitorRequester.pvStructure.getSubField("value");
+		    PVField previousValue = pvDataCreate.createPVField(null, valueField.getField());
+		    convert.copy(valueField, previousValue);
+		    assertTrue(valueField.equals(previousValue));
+		    
+		    // all subsequent only timestamp and value
+		    for (int i = 2; i < 5; i++) {
+			    channelMonitorRequester.wait(TIMEOUT_MS);
+			    assertEquals("monitor-test", channelMonitorRequester.pvStructure.getFullName());
+			    assertEquals(i, channelMonitorRequester.monitorCounter.get());
+			    assertEquals(2, channelMonitorRequester.changeBitSet.cardinality());
+			    assertTrue(channelMonitorRequester.changeBitSet.get(1));
+			    assertTrue(channelMonitorRequester.changeBitSet.get(4));
+			    
+			    valueField = channelMonitorRequester.pvStructure.getSubField("value");
+			    assertFalse(valueField.equals(previousValue));
+			    convert.copy(valueField, previousValue);
+		    }
+
+		    channelMonitorRequester.channelMonitor.stop();
+		    channelMonitorRequester.wait(500);
+		    int mc = channelMonitorRequester.monitorCounter.get();
+		    Thread.sleep(2000);
+		    // no more monitors
+		    assertEquals(mc, channelMonitorRequester.monitorCounter.get());
+	    }
+	    
+	    
+	}
 	
 }
