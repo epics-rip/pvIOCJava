@@ -57,7 +57,8 @@ public class ClientFactory  {
         channelProvider.register();
     }
     
-    
+    // afterStartDelay ensures that no run method gets called until after 2 seconds after
+    // the last record has started. This allows time to connect to servers.
     private static class AfterStartDelay extends TimerTask  implements NewAfterStartRequester,AfterStartRequester {
         private static final Timer timer = new Timer("caClientDelay");
         private AfterStartNode afterStartNode = null;
