@@ -18,9 +18,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.pvData.channelAccess.Channel;
-import org.epics.pvData.channelAccess.ChannelMonitor;
-import org.epics.pvData.channelAccess.ChannelMonitorRequester;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelMonitor;
+import org.epics.ca.channelAccess.client.ChannelMonitorRequester;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
@@ -358,7 +358,7 @@ public class MonitorFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
          */
         @Override
         public void channelCreated(Channel channel) {
@@ -367,7 +367,7 @@ public class MonitorFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
          */
         @Override
         public void channelNotCreated() {
@@ -456,7 +456,7 @@ public class MonitorFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#channelMonitorConnect(org.epics.pvData.channelAccess.ChannelMonitor)
+             * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#channelMonitorConnect(org.epics.ca.channelAccess.client.ChannelMonitor)
              */
             @Override
             public void channelMonitorConnect(ChannelMonitor channelMonitor) {
@@ -474,7 +474,7 @@ public class MonitorFactory {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
              */
             @Override
             public void monitorEvent(PVStructure pvStructure,
@@ -497,7 +497,7 @@ public class MonitorFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#unlisten()
+             * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#unlisten()
              */
             @Override
             public void unlisten() {

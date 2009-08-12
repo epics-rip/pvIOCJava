@@ -5,12 +5,12 @@
  */
 package org.epics.ioc.support.caLink;
 
+import org.epics.ca.channelAccess.client.ChannelProcess;
+import org.epics.ca.channelAccess.client.ChannelProcessRequester;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.channelAccess.ChannelProcess;
-import org.epics.pvData.channelAccess.ChannelProcessRequester;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.PVField;
 /**
@@ -52,7 +52,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelProcessRequester#channelProcessConnect(org.epics.pvData.channelAccess.ChannelProcess)
+     * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(org.epics.ca.channelAccess.client.ChannelProcess)
      */
     @Override
     public void channelProcessConnect(ChannelProcess channelProcess) {
@@ -93,7 +93,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         channelProcess.process(false);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelProcessRequester#processDone(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(boolean)
      */
     @Override
     public void processDone(boolean success) {

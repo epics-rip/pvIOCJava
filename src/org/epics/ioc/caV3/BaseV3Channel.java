@@ -13,26 +13,26 @@ import gov.aps.jca.event.ConnectionListener;
 
 import java.util.LinkedList;
 
+import org.epics.ca.channelAccess.client.AccessRights;
+import org.epics.ca.channelAccess.client.ChannelArray;
+import org.epics.ca.channelAccess.client.ChannelArrayRequester;
+import org.epics.ca.channelAccess.client.ChannelFind;
+import org.epics.ca.channelAccess.client.ChannelFindRequester;
+import org.epics.ca.channelAccess.client.ChannelGet;
+import org.epics.ca.channelAccess.client.ChannelGetRequester;
+import org.epics.ca.channelAccess.client.ChannelMonitor;
+import org.epics.ca.channelAccess.client.ChannelMonitorRequester;
+import org.epics.ca.channelAccess.client.ChannelProcess;
+import org.epics.ca.channelAccess.client.ChannelProcessRequester;
+import org.epics.ca.channelAccess.client.ChannelProvider;
+import org.epics.ca.channelAccess.client.ChannelPut;
+import org.epics.ca.channelAccess.client.ChannelPutGet;
+import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
+import org.epics.ca.channelAccess.client.ChannelPutRequester;
+import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.client.CreatePVStructureRequester;
+import org.epics.ca.channelAccess.client.GetFieldRequester;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.channelAccess.AccessRights;
-import org.epics.pvData.channelAccess.ChannelArray;
-import org.epics.pvData.channelAccess.ChannelArrayRequester;
-import org.epics.pvData.channelAccess.ChannelFind;
-import org.epics.pvData.channelAccess.ChannelFindRequester;
-import org.epics.pvData.channelAccess.ChannelGet;
-import org.epics.pvData.channelAccess.ChannelGetRequester;
-import org.epics.pvData.channelAccess.ChannelMonitor;
-import org.epics.pvData.channelAccess.ChannelMonitorRequester;
-import org.epics.pvData.channelAccess.ChannelProcess;
-import org.epics.pvData.channelAccess.ChannelProcessRequester;
-import org.epics.pvData.channelAccess.ChannelProvider;
-import org.epics.pvData.channelAccess.ChannelPut;
-import org.epics.pvData.channelAccess.ChannelPutGet;
-import org.epics.pvData.channelAccess.ChannelPutGetRequester;
-import org.epics.pvData.channelAccess.ChannelPutRequester;
-import org.epics.pvData.channelAccess.ChannelRequester;
-import org.epics.pvData.channelAccess.CreatePVStructureRequester;
-import org.epics.pvData.channelAccess.GetFieldRequester;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
@@ -50,7 +50,7 @@ import org.epics.pvData.pv.ScalarType;
  *
  */
 public class BaseV3Channel implements
-ChannelFind,org.epics.pvData.channelAccess.Channel,
+ChannelFind,org.epics.ca.channelAccess.client.Channel,
 V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
 {
     private static Executor executor = ExecutorFactory.create("caV3Connect", ThreadPriority.low);
@@ -150,7 +150,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.pvData.channelAccess.ChannelProcess)
+     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelProcess)
      */
     @Override
     public boolean add(ChannelProcess channelProcess)
@@ -162,7 +162,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.pvData.channelAccess.ChannelGet)
+     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelGet)
      */
     @Override
     public boolean add(ChannelGet channelGet)
@@ -174,7 +174,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.pvData.channelAccess.ChannelPut)
+     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelPut)
      */
     @Override
     public boolean add(ChannelPut channelPut)
@@ -186,7 +186,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.pvData.channelAccess.ChannelPutGet)
+     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelPutGet)
      */
     @Override
     public boolean add(ChannelPutGet channelPutGet)
@@ -198,7 +198,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.pvData.channelAccess.ChannelMonitor)
+     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelMonitor)
      */
     @Override
     public boolean add(ChannelMonitor channelMonitor)
@@ -214,7 +214,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             return channelPutGet;
         }
         return null;
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.pvData.channelAccess.ChannelArray)
+     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelArray)
      */
     @Override
     public boolean add(ChannelArray channelArray)
@@ -226,7 +226,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.pvData.channelAccess.ChannelProcess)
+     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelProcess)
      */
     @Override
     public boolean remove(ChannelProcess channelProcess) {
@@ -237,7 +237,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.pvData.channelAccess.ChannelGet)
+     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelGet)
      */
     @Override
     public boolean remove(ChannelGet channelGet) {
@@ -248,7 +248,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.pvData.channelAccess.ChannelPut)
+     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelPut)
      */
     @Override
     public boolean remove(ChannelPut channelPut) {
@@ -259,7 +259,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.pvData.channelAccess.ChannelPutGet)
+     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelPutGet)
      */
     @Override
     public boolean remove(ChannelPutGet channelPutGet) {
@@ -270,7 +270,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.pvData.channelAccess.ChannelMonitor)
+     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelMonitor)
      */
     @Override
     public boolean remove(ChannelMonitor channelMonitor) {
@@ -281,7 +281,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.pvData.channelAccess.ChannelArray)
+     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelArray)
      */
     @Override
     public boolean remove(ChannelArray channelArray) {
@@ -292,7 +292,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#createChannelArray(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelArrayRequester, java.lang.String)
+     * @see org.epics.ca.channelAccess.client.Channel#createChannelArray(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelArrayRequester, java.lang.String)
      */
     @Override
     public void createChannelArray(
@@ -302,7 +302,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         channelArrayRequester.channelArrayConnect(null, null);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#createChannelGet(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
+     * @see org.epics.ca.channelAccess.client.Channel#createChannelGet(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
      */
     @Override
     public void createChannelGet(
@@ -320,7 +320,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         channelGet.init(this);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#createChannelMonitor(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelMonitorRequester, org.epics.pvData.pv.PVStructure, java.lang.String, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.Executor)
+     * @see org.epics.ca.channelAccess.client.Channel#createChannelMonitor(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelMonitorRequester, org.epics.pvData.pv.PVStructure, java.lang.String, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.Executor)
      */
     @Override
     public void createChannelMonitor(
@@ -338,7 +338,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         channelMonitor.init(this);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#createChannelProcess(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelProcessRequester)
+     * @see org.epics.ca.channelAccess.client.Channel#createChannelProcess(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelProcessRequester)
      */
     @Override
     public void createChannelProcess(
@@ -349,7 +349,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         channelProcessRequester.channelProcessConnect(null);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#createChannelPut(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
+     * @see org.epics.ca.channelAccess.client.Channel#createChannelPut(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
      */
     @Override
     public void createChannelPut(
@@ -367,7 +367,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         channelPut.init(this);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#createChannelPutGet(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
+     * @see org.epics.ca.channelAccess.client.Channel#createChannelPutGet(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
      */
     @Override
     public void createChannelPutGet(
@@ -380,7 +380,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         channelPutGetRequester.channelPutGetConnect(null, null, null);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#createPVStructure(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.CreatePVStructureRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean)
+     * @see org.epics.ca.channelAccess.client.Channel#createPVStructure(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.CreatePVStructureRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean)
      */
     @Override
     public void createPVStructure(
@@ -397,14 +397,14 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         requester.createDone(v3ChannelStructure.getPVStructure());
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#destroy()
+     * @see org.epics.ca.channelAccess.client.Channel#destroy()
      */
     @Override
     public void destroy() {
         jcaChannel.dispose();
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#getAccessRights(org.epics.pvData.pv.PVField)
+     * @see org.epics.ca.channelAccess.client.Channel#getAccessRights(org.epics.pvData.pv.PVField)
      */
     @Override
     public AccessRights getAccessRights(PVField pvField) {
@@ -412,21 +412,21 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return null;
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#getChannelName()
+     * @see org.epics.ca.channelAccess.client.Channel#getChannelName()
      */
     @Override
     public String getChannelName() {
         return pvName;
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#getChannelRequester()
+     * @see org.epics.ca.channelAccess.client.Channel#getChannelRequester()
      */
     @Override
     public ChannelRequester getChannelRequester() {
         return channelRequester;
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#getField(org.epics.pvData.channelAccess.GetFieldRequester, java.lang.String)
+     * @see org.epics.ca.channelAccess.client.Channel#getField(org.epics.ca.channelAccess.client.GetFieldRequester, java.lang.String)
      */
     @Override
     public void getField(GetFieldRequester requester, String subField) {
@@ -440,14 +440,14 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         requester.getDone(pvField.getField());
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#getProviderName()
+     * @see org.epics.ca.channelAccess.client.Channel#getProviderName()
      */
     @Override
     public String getProviderName() {
         return jcaChannel.getHostName();
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#isConnected()
+     * @see org.epics.ca.channelAccess.client.Channel#isConnected()
      */
     @Override
     public boolean isConnected() {
@@ -511,7 +511,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     }
     
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.Channel#connect()
+     * @see org.epics.ca.channelAccess.client.Channel#connect()
      */
     @Override
     public void connect() {

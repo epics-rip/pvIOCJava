@@ -17,8 +17,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.epics.pvData.channelAccess.Channel;
-import org.epics.pvData.channelAccess.CreatePVStructureRequester;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.CreatePVStructureRequester;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
@@ -142,7 +142,7 @@ public class CreateRequestFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.CreatePVStructureRequester#createDone(org.epics.pvData.pv.PVStructure)
+         * @see org.epics.ca.channelAccess.client.CreatePVStructureRequester#createDone(org.epics.pvData.pv.PVStructure)
          */
         @Override
         public void createDone(PVStructure pvStructure) {

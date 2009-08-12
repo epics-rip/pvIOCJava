@@ -17,8 +17,8 @@ import gov.aps.jca.event.GetListener;
 import gov.aps.jca.event.PutEvent;
 import gov.aps.jca.event.PutListener;
 
-import org.epics.pvData.channelAccess.ChannelPut;
-import org.epics.pvData.channelAccess.ChannelPutRequester;
+import org.epics.ca.channelAccess.client.ChannelPut;
+import org.epics.ca.channelAccess.client.ChannelPutRequester;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.pv.ByteArrayData;
@@ -131,7 +131,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     }
     
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelPut#get()
+     * @see org.epics.ca.channelAccess.client.ChannelPut#get()
      */
     @Override
     public void get() {
@@ -181,7 +181,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         channelPutRequester.getDone(success);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelPut#put(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelPut#put(boolean)
      */
     @Override
     public void put(boolean lastRequest) {

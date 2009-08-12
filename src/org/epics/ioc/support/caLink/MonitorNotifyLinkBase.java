@@ -5,14 +5,14 @@
  */
 package org.epics.ioc.support.caLink;
 
+import org.epics.ca.channelAccess.client.ChannelMonitor;
+import org.epics.ca.channelAccess.client.ChannelMonitorRequester;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.ProcessSelf;
 import org.epics.ioc.support.ProcessSelfRequester;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.channelAccess.ChannelMonitor;
-import org.epics.pvData.channelAccess.ChannelMonitorRequester;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
@@ -98,7 +98,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         }
     } 
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#channelMonitorConnect(org.epics.pvData.channelAccess.ChannelMonitor)
+     * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#channelMonitorConnect(org.epics.ca.channelAccess.client.ChannelMonitor)
      */
     @Override
     public void channelMonitorConnect(ChannelMonitor channelMonitor) {
@@ -106,7 +106,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         channelMonitor.start();
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
+     * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
      */
     @Override
     public void monitorEvent(PVStructure pvStructure, BitSet changeBitSet,BitSet overrunBitSet) {
@@ -117,7 +117,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelMonitorRequester#unlisten()
+     * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#unlisten()
      */
     @Override
     public void unlisten() {

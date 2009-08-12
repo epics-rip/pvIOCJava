@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.support.caLink;
 
+import org.epics.ca.channelAccess.client.ChannelPut;
+import org.epics.ca.channelAccess.client.ChannelPutRequester;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessCallbackRequester;
@@ -12,8 +14,6 @@ import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.channelAccess.ChannelPut;
-import org.epics.pvData.channelAccess.ChannelPutRequester;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
@@ -92,7 +92,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelPutRequester#channelPutConnect(org.epics.pvData.channelAccess.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#channelPutConnect(org.epics.ca.channelAccess.client.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
      */
     @Override
     public void channelPutConnect(ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
@@ -149,12 +149,12 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         channelPut.put(false);  
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelPutRequester#getDone(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#getDone(boolean)
      */
     @Override
     public void getDone(boolean success) {/*nothing to do*/}
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelPutRequester#putDone(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#putDone(boolean)
      */
     @Override
     public void putDone(boolean success) {

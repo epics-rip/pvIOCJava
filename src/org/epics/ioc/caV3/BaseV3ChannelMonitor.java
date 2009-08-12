@@ -16,8 +16,8 @@ import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 
-import org.epics.pvData.channelAccess.ChannelMonitor;
-import org.epics.pvData.channelAccess.ChannelMonitorRequester;
+import org.epics.ca.channelAccess.client.ChannelMonitor;
+import org.epics.ca.channelAccess.client.ChannelMonitorRequester;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;

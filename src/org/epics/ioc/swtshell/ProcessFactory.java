@@ -18,10 +18,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.pvData.channelAccess.Channel;
-import org.epics.pvData.channelAccess.ChannelProcess;
-import org.epics.pvData.channelAccess.ChannelProcessRequester;
-import org.epics.pvData.channelAccess.ChannelRequester;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelProcess;
+import org.epics.ca.channelAccess.client.ChannelProcessRequester;
+import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
@@ -173,7 +173,7 @@ public class ProcessFactory {
             requester.message(message, messageType);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
          */
         @Override
         public void channelCreated(Channel channel) {
@@ -182,7 +182,7 @@ public class ProcessFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
          */
         @Override
         public void channelNotCreated() {
@@ -253,14 +253,14 @@ public class ProcessFactory {
                 executor.execute(executorNode);
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelProcessRequester#channelProcessConnect(org.epics.pvData.channelAccess.ChannelProcess)
+             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(org.epics.ca.channelAccess.client.ChannelProcess)
              */
             @Override
             public void channelProcessConnect(ChannelProcess channelProcess) {
                 this.channelProcess = channelProcess;
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelProcessRequester#processDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(boolean)
              */
             @Override
             public void processDone(boolean success) {

@@ -5,7 +5,11 @@
  */
 package org.epics.ioc.support.caLink;
 
-import org.epics.ioc.channelAccess.ChannelAccessFactory;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelAccess;
+import org.epics.ca.channelAccess.client.ChannelProvider;
+import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
@@ -16,10 +20,6 @@ import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
-import org.epics.pvData.channelAccess.Channel;
-import org.epics.pvData.channelAccess.ChannelAccess;
-import org.epics.pvData.channelAccess.ChannelProvider;
-import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
@@ -146,7 +146,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         afterStart = null;
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
      */
     @Override
     public void channelCreated(Channel channel) {
@@ -155,7 +155,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
     }
 
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
      */
     @Override
     public void channelNotCreated() {
@@ -183,7 +183,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelRequester#destroy(org.epics.pvData.channelAccess.Channel)
+     * @see org.epics.ca.channelAccess.client.ChannelRequester#destroy(org.epics.ca.channelAccess.client.Channel)
      */
     public void destroy(Channel c) {
         pvRecord.lock();
@@ -196,7 +196,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         recordProcess.start(null);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelRequester#channelStateChange(org.epics.pvData.channelAccess.Channel, boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
      */
     public void channelStateChange(Channel c, boolean isConnected) {
         connectionChange(isConnected);

@@ -22,10 +22,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.pvData.channelAccess.Channel;
-import org.epics.pvData.channelAccess.ChannelArray;
-import org.epics.pvData.channelAccess.ChannelArrayRequester;
-import org.epics.pvData.channelAccess.ChannelRequester;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelArray;
+import org.epics.ca.channelAccess.client.ChannelArrayRequester;
+import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -265,7 +265,7 @@ public class ArrayFactory {
             requester.message(message, messageType);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
          */
         @Override
         public void channelCreated(Channel channel) {
@@ -274,7 +274,7 @@ public class ArrayFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
          */
         @Override
         public void channelNotCreated() {
@@ -372,7 +372,7 @@ public class ArrayFactory {
             }
             
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelArrayRequester#channelArrayConnect(org.epics.pvData.channelAccess.ChannelArray, org.epics.pvData.pv.PVArray)
+             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#channelArrayConnect(org.epics.ca.channelAccess.client.ChannelArray, org.epics.pvData.pv.PVArray)
              */
             @Override
             public void channelArrayConnect(ChannelArray channelArray,PVArray pvArray) {
@@ -387,7 +387,7 @@ public class ArrayFactory {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelArrayRequester#getArrayDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#getArrayDone(boolean)
              */
             @Override
             public void getArrayDone(boolean success) {
@@ -403,7 +403,7 @@ public class ArrayFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelArrayRequester#putArrayDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#putArrayDone(boolean)
              */
             @Override
             public void putArrayDone(boolean success) {

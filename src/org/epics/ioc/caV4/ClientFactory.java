@@ -19,20 +19,20 @@ import java.util.TimerTask;
 
 import org.epics.ca.CAConstants;
 import org.epics.ca.CAException;
+import org.epics.ca.channelAccess.client.ChannelFind;
+import org.epics.ca.channelAccess.client.ChannelFindRequester;
+import org.epics.ca.channelAccess.client.ChannelProvider;
+import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ConnectionEvent;
 import org.epics.ca.client.EventListener;
 import org.epics.ca.core.impl.client.ClientContextImpl;
-import org.epics.ioc.channelAccess.ChannelAccessFactory;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
-import org.epics.pvData.channelAccess.ChannelFind;
-import org.epics.pvData.channelAccess.ChannelFindRequester;
-import org.epics.pvData.channelAccess.ChannelProvider;
-import org.epics.pvData.channelAccess.ChannelRequester;
 import org.epics.pvData.misc.ThreadPriority;
 
 public class ClientFactory {

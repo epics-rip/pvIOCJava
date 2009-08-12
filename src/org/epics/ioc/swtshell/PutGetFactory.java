@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.pvData.channelAccess.*;
+import org.epics.ca.channelAccess.client.*;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -255,7 +255,7 @@ public class PutGetFactory {
             
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
          */
         @Override
         public void channelCreated(Channel channel) {
@@ -267,7 +267,7 @@ public class PutGetFactory {
             
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
          */
         @Override
         public void channelNotCreated() {
@@ -424,7 +424,7 @@ public class PutGetFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutGetRequester#channelPutGetConnect(org.epics.pvData.channelAccess.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
             public void channelPutGetConnect(ChannelPutGet channelPutGet,
@@ -439,13 +439,13 @@ public class PutGetFactory {
                 guiPutGet.putGetConnect();
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutGetRequester#getGetDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getGetDone(boolean)
              */
             @Override
             public void getGetDone(boolean success) {}
 
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutGetRequester#getPutDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getPutDone(boolean)
              */
             @Override
             public void getPutDone(boolean success) {
@@ -453,7 +453,7 @@ public class PutGetFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutGetRequester#putGetDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#putGetDone(boolean)
              */
             @Override
             public void putGetDone(boolean success) {

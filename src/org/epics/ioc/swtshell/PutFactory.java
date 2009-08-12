@@ -18,9 +18,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.pvData.channelAccess.Channel;
-import org.epics.pvData.channelAccess.ChannelPut;
-import org.epics.pvData.channelAccess.ChannelPutRequester;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelPut;
+import org.epics.ca.channelAccess.client.ChannelPutRequester;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -208,7 +208,7 @@ public class PutFactory {
             processButton.setEnabled(false);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
          */
         @Override
         public void channelCreated(Channel channel) {
@@ -217,7 +217,7 @@ public class PutFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
          */
         @Override
         public void channelNotCreated() {
@@ -320,7 +320,7 @@ public class PutFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutRequester#channelPutConnect(org.epics.pvData.channelAccess.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#channelPutConnect(org.epics.ca.channelAccess.client.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
             public void channelPutConnect(ChannelPut channelPut,PVStructure pvStructure,BitSet bitSet) {
@@ -331,7 +331,7 @@ public class PutFactory {
                 channelPut.get();
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutRequester#putDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#putDone(boolean)
              */
             @Override
             public void putDone(boolean success) {
@@ -344,7 +344,7 @@ public class PutFactory {
                 });
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelPutRequester#getDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#getDone(boolean)
              */
             @Override
             public void getDone(boolean success) {

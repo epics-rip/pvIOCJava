@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.swtshell;
 
-import org.epics.pvData.channelAccess.ChannelRequester;
+import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.pvData.pv.PVStructure;
 
 /**

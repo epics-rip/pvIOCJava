@@ -19,9 +19,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.pvData.channelAccess.Channel;
-import org.epics.pvData.channelAccess.ChannelGet;
-import org.epics.pvData.channelAccess.ChannelGetRequester;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelGet;
+import org.epics.ca.channelAccess.client.ChannelGetRequester;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -198,7 +198,7 @@ public class GetFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelCreated(org.epics.pvData.channelAccess.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
          */
         @Override
         public void channelCreated(Channel channel) {
@@ -207,7 +207,7 @@ public class GetFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.channelAccess.ChannelRequester#channelNotCreated()
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
          */
         @Override
         public void channelNotCreated() {
@@ -320,7 +320,7 @@ public class GetFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelGetRequester#channelGetConnect(org.epics.pvData.channelAccess.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.channelAccess.client.ChannelGetRequester#channelGetConnect(org.epics.ca.channelAccess.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
             public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure,BitSet bitSet) {
@@ -331,7 +331,7 @@ public class GetFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.pvData.channelAccess.ChannelGetRequester#getDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelGetRequester#getDone(boolean)
              */
             @Override
             public void getDone(boolean success) {

@@ -18,10 +18,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.channelAccess.ChannelAccessFactory;
-import org.epics.pvData.channelAccess.ChannelAccess;
-import org.epics.pvData.channelAccess.ChannelProvider;
-import org.epics.pvData.channelAccess.ChannelRequester;
+import org.epics.ca.channelAccess.client.ChannelAccess;
+import org.epics.ca.channelAccess.client.ChannelProvider;
+import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 

@@ -16,8 +16,8 @@ import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
 
-import org.epics.pvData.channelAccess.ChannelGet;
-import org.epics.pvData.channelAccess.ChannelGetRequester;
+import org.epics.ca.channelAccess.client.ChannelGet;
+import org.epics.ca.channelAccess.client.ChannelGetRequester;
 import org.epics.pvData.pv.MessageType;
 
 
@@ -190,7 +190,7 @@ implements ChannelGet,GetListener,ConnectionListener
         v3Channel.remove(this);
     }
     /* (non-Javadoc)
-     * @see org.epics.pvData.channelAccess.ChannelGet#get(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelGet#get(boolean)
      */
     @Override
     public void get(boolean lastRequest) {
