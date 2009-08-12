@@ -405,9 +405,9 @@ public class PutGetFactory {
                 switch(runRequest) {
                 case create:
                     guiPutGet.channel.createChannelPutGet(
-                            guiPutGet.channel,this,
-                            guiPutGet.pvPutRequest, "arguments", true,
-                            guiPutGet.pvGetRequest, "result", true, process);
+                            this,guiPutGet.pvPutRequest,
+                            "arguments", true, guiPutGet.pvGetRequest,
+                            "result", true, process);
                     break;
                 case disconnect:
                     channelPutGet.destroy();
@@ -428,8 +428,7 @@ public class PutGetFactory {
              */
             @Override
             public void channelPutGetConnect(ChannelPutGet channelPutGet,
-                    PVStructure pvPutStructure, BitSet putBitSet,
-                    PVStructure pvGetStructure, BitSet getBitSet)
+                    PVStructure pvPutStructure, PVStructure pvGetStructure)
             {
                 this.channelPutGet = channelPutGet;
                 this.pvPutStructure = pvPutStructure;

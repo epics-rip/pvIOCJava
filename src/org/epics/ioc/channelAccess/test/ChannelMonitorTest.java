@@ -14,7 +14,6 @@
 
 package org.epics.ioc.channelAccess.test;
 
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
@@ -24,22 +23,9 @@ import org.epics.ca.client.Channel;
 import org.epics.ca.client.ClientContext;
 import org.epics.ca.client.ConnectionEvent;
 import org.epics.ca.client.EventListener;
-
-
 import org.epics.ca.core.impl.client.ClientContextImpl;
-import org.epics.pvData.channelAccess.ChannelArray;
-import org.epics.pvData.channelAccess.ChannelArrayRequester;
-import org.epics.pvData.channelAccess.ChannelGet;
-import org.epics.pvData.channelAccess.ChannelGetRequester;
 import org.epics.pvData.channelAccess.ChannelMonitor;
 import org.epics.pvData.channelAccess.ChannelMonitorRequester;
-import org.epics.pvData.channelAccess.ChannelProcess;
-import org.epics.pvData.channelAccess.ChannelProcessRequester;
-import org.epics.pvData.channelAccess.ChannelPut;
-import org.epics.pvData.channelAccess.ChannelPutGet;
-import org.epics.pvData.channelAccess.ChannelPutGetRequester;
-import org.epics.pvData.channelAccess.ChannelPutRequester;
-import org.epics.pvData.channelAccess.GetFieldRequester;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
@@ -47,25 +33,15 @@ import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.property.TimeStamp;
-import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.Convert;
-import org.epics.pvData.pv.DoubleArrayData;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDataCreate;
-import org.epics.pvData.pv.PVDouble;
-import org.epics.pvData.pv.PVDoubleArray;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.pv.StringArrayData;
-import org.epics.pvData.pv.Type;
 
 /**
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
@@ -267,7 +243,7 @@ public class ChannelMonitorTest extends TestCase {
         Channel ch = syncCreateChannel("psEmbeded");
         
         ChannelMonitorRequesterImpl channelMonitorRequester = new ChannelMonitorRequesterImpl();
-        ch.createChannelMonitor(ch, channelMonitorRequester, pvRequest, "monitor-test", pvOption, executor);
+        ch.createChannelMonitor(channelMonitorRequester, pvRequest, "monitor-test", pvOption, executor);
         channelMonitorRequester.waitAndCheckConnect();
         
         synchronized (channelMonitorRequester) {

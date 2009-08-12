@@ -84,7 +84,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(channelGet==null) {
-                channel.createChannelGet(channel, this, pvRequest, "get", false, process);
+                channel.createChannelGet(this, pvRequest, "get", false, process);
             }
         } else {
             pvRecord.lock();

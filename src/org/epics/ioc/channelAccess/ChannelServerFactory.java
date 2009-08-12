@@ -315,8 +315,8 @@ public class ChannelServerFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createPVStructure(org.epics.pvData.channelAccess.CreatePVStructureRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean)
          */
         @Override
-        public void createPVStructure(Channel channel,
-                CreatePVStructureRequester requester, PVStructure pvRequest, String structureName, boolean shareData)
+        public void createPVStructure(CreatePVStructureRequester requester,
+                PVStructure pvRequest, String structureName, boolean shareData)
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             requester.createDone(pvCopy.createPVStructure());
@@ -341,16 +341,16 @@ public class ChannelServerFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createChannelProcess(org.epics.pvData.channelAccess.ChannelProcessRequester)
          */
         @Override
-        public void createChannelProcess(Channel channel, ChannelProcessRequester channelProcessRequester) {
+        public void createChannelProcess(ChannelProcessRequester channelProcessRequester) {
             new ChannelProcessImpl(this,channelProcessRequester);
         }
         /* (non-Javadoc)
          * @see org.epics.pvData.channelAccess.Channel#createChannelGet(org.epics.pvData.channelAccess.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
          */
         @Override
-        public void createChannelGet(Channel channel,
-                ChannelGetRequester channelGetRequester, PVStructure pvRequest, String structureName,
-                boolean shareData, boolean process)
+        public void createChannelGet(ChannelGetRequester channelGetRequester,
+                PVStructure pvRequest, String structureName, boolean shareData,
+                boolean process)
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             PVStructure pvStructure = pvCopy.createPVStructure();
@@ -360,9 +360,9 @@ public class ChannelServerFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createChannelPut(org.epics.pvData.channelAccess.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean)
          */
         @Override
-        public void createChannelPut(Channel channel,
-                ChannelPutRequester channelPutRequester, PVStructure pvRequest, String structureName,
-                boolean shareData, boolean process)
+        public void createChannelPut(ChannelPutRequester channelPutRequester,
+                PVStructure pvRequest, String structureName, boolean shareData,
+                boolean process)
         {
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest, structureName, shareData);
             PVStructure pvStructure = pvCopy.createPVStructure();
@@ -374,10 +374,10 @@ public class ChannelServerFactory  {
          */
         @Override
         public void createChannelPutGet(
-                Channel channel,
-                ChannelPutGetRequester channelPutGetRequester, PVStructure pvPutRequest,
-                String putStructureName, boolean sharePutData,
-                PVStructure pvGetRequest, String getStructureName, boolean shareGetData, boolean process)
+                ChannelPutGetRequester channelPutGetRequester,
+                PVStructure pvPutRequest, String putStructureName,
+                boolean sharePutData, PVStructure pvGetRequest,
+                String getStructureName, boolean shareGetData, boolean process)
         {
             PVCopy pvPutCopy = PVCopyFactory.create(pvRecord, pvPutRequest, putStructureName, sharePutData);
             PVStructure pvPutStructure = pvPutCopy.createPVStructure();
@@ -390,10 +390,10 @@ public class ChannelServerFactory  {
          */
         @Override
         public void createChannelMonitor(
-                Channel channel,
-                ChannelMonitorRequester channelMonitorRequester, PVStructure pvRequest,
-                String structureName,
-                PVStructure pvOption, Executor executor)
+                ChannelMonitorRequester channelMonitorRequester,
+                PVStructure pvRequest, String structureName,
+                PVStructure pvOption,
+                Executor executor)
         {
             PVString pvAlgorithm = pvOption.getStringField("algorithm");
             if(pvAlgorithm==null) {
@@ -432,8 +432,7 @@ public class ChannelServerFactory  {
          * @see org.epics.pvData.channelAccess.Channel#createChannelArray(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.ChannelArrayRequester, java.lang.String)
          */
         @Override
-        public void createChannelArray(Channel channel,
-                ChannelArrayRequester channelArrayRequester,
+        public void createChannelArray(ChannelArrayRequester channelArrayRequester,
                 String subField)
         {
             PVField pvField = pvRecord.getSubField(subField);
@@ -929,7 +928,7 @@ public class ChannelServerFactory  {
                 synchronized(channelImpl.channelPutGetList) {
                     channelImpl.channelPutGetList.add(this);
                 }
-                channelPutGetRequester.channelPutGetConnect(this, pvPutStructure,putBitSet, pvGetStructure,getBitSet);
+                channelPutGetRequester.channelPutGetConnect(this, pvPutStructure,pvGetStructure);
             }
             
             private ChannelImpl channelImpl;

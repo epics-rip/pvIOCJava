@@ -306,7 +306,7 @@ public class PutFactory {
             public void run() {
                 switch(runRequest) {
                 case create:
-                    channel.createChannelPut(channel, this, pvRequest,pvRequest.getField().getFieldName(),isShared, process);
+                    channel.createChannelPut(this, pvRequest, pvRequest.getField().getFieldName(),isShared,process);
                     break;
                 case disconnect:
                     channelPut.destroy();

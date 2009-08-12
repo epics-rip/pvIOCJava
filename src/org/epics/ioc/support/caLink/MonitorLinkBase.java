@@ -177,7 +177,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(channelMonitor==null) {
-                channel.createChannelMonitor(channel, this, pvRequest, "monitor", pvOption, executor);
+                channel.createChannelMonitor(this, pvRequest, "monitor", pvOption, executor);
             }
         } else {
             pvRecord.lock();

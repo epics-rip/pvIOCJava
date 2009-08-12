@@ -393,8 +393,7 @@ public class ChannelAccessTest extends TestCase {
 		@Override
 		public void channelPutGetConnect(
 				ChannelPutGet channelPutGet,
-				PVStructure pvPutStructure, BitSet putBitSet,
-				PVStructure pvGetStructure, BitSet getBitSet) {
+				PVStructure pvPutStructure, PVStructure pvGetStructure) {
 			synchronized (this)
 			{
 				this.channelPutGet = channelPutGet;
@@ -888,7 +887,7 @@ public class ChannelAccessTest extends TestCase {
         pvRequest.appendPVField(pvString);
 
 		ChannelGetRequesterImpl channelGetRequester = new ChannelGetRequesterImpl();
-		ch.createChannelGet(ch, channelGetRequester, pvRequest, "get-test", share, false);
+		ch.createChannelGet(channelGetRequester, pvRequest, "get-test", share, false);
 		channelGetRequester.waitAndCheckConnect();
 		
 		assertEquals("get-test", channelGetRequester.pvStructure.getFullName());
@@ -926,7 +925,7 @@ public class ChannelAccessTest extends TestCase {
         pvRequest.appendPVField(pvString);
 
 		ChannelGetRequesterImpl channelGetRequester = new ChannelGetRequesterImpl();
-		ch.createChannelGet(ch, channelGetRequester, pvRequest, "get-test", share, true);
+		ch.createChannelGet(channelGetRequester, pvRequest, "get-test", share, true);
 		channelGetRequester.waitAndCheckConnect();
 		
 		assertEquals("get-test", channelGetRequester.pvStructure.getFullName());
@@ -984,7 +983,7 @@ public class ChannelAccessTest extends TestCase {
         pvRequest.appendPVField(pvString);
 
 		ChannelPutRequesterImpl channelPutRequester = new ChannelPutRequesterImpl();
-		ch.createChannelPut(ch, channelPutRequester, pvRequest, "put-test", share, false);
+		ch.createChannelPut(channelPutRequester, pvRequest, "put-test", share, false);
 		channelPutRequester.waitAndCheckConnect();
 		
 		assertEquals("put-test", channelPutRequester.pvStructure.getFullName());
@@ -1036,7 +1035,7 @@ public class ChannelAccessTest extends TestCase {
         pvRequest.appendPVField(pvString);
 
 		ChannelPutRequesterImpl channelPutRequester = new ChannelPutRequesterImpl();
-		ch.createChannelPut(ch, channelPutRequester, pvRequest, "put-test", share, true);
+		ch.createChannelPut(channelPutRequester, pvRequest, "put-test", share, true);
 		channelPutRequester.waitAndCheckConnect();
 		
 		assertEquals("put-test", channelPutRequester.pvStructure.getFullName());
@@ -1108,7 +1107,7 @@ public class ChannelAccessTest extends TestCase {
         pvRequest.appendPVField(pvString);
 
 		ChannelGetRequesterImpl channelGetRequester = new ChannelGetRequesterImpl();
-		ch.createChannelGet(ch, channelGetRequester, pvRequest, "get-process-test", true, false);
+		ch.createChannelGet(channelGetRequester, pvRequest, "get-process-test", true, false);
 		channelGetRequester.waitAndCheckConnect();
 		
 		// get initial state
@@ -1116,7 +1115,7 @@ public class ChannelAccessTest extends TestCase {
 
 		// create process
 		ChannelProcessRequesterImpl channelProcessRequester = new ChannelProcessRequesterImpl();
-		ch.createChannelProcess(ch, channelProcessRequester);
+		ch.createChannelProcess(channelProcessRequester);
 		channelProcessRequester.waitAndCheckConnect();
 		
 		// there should be no changes
@@ -1131,7 +1130,7 @@ public class ChannelAccessTest extends TestCase {
 		
 		// now let's try to create another processor :)
 		ChannelProcessRequesterImpl channelProcessRequester2 = new ChannelProcessRequesterImpl();
-		ch.createChannelProcess(ch, channelProcessRequester2);
+		ch.createChannelProcess(channelProcessRequester2);
 		channelProcessRequester2.waitAndCheckConnect();
 		
 		// and process
@@ -1170,7 +1169,7 @@ public class ChannelAccessTest extends TestCase {
         pvRequest.appendPVField(pvString);
 
 		ChannelGetRequesterImpl channelGetRequester = new ChannelGetRequesterImpl();
-		ch.createChannelGet(ch, channelGetRequester, pvRequest, "get-process-test", true, true);
+		ch.createChannelGet(channelGetRequester, pvRequest, "get-process-test", true, true);
 		channelGetRequester.waitAndCheckConnect();
 		
 		// get initial state
@@ -1182,7 +1181,7 @@ public class ChannelAccessTest extends TestCase {
 
 		// another get
 		ChannelGetRequesterImpl channelGetRequester2 = new ChannelGetRequesterImpl();
-		ch.createChannelGet(ch, channelGetRequester2, pvRequest, "get-process-test-2", true, true);
+		ch.createChannelGet(channelGetRequester2, pvRequest, "get-process-test-2", true, true);
 		channelGetRequester2.waitAndCheckConnect();
 		
 		// get initial state
@@ -1229,7 +1228,7 @@ public class ChannelAccessTest extends TestCase {
         pvGetRequest.appendPVField(pvString);
 
         ChannelPutGetRequesterImpl channelPutGetRequester = new ChannelPutGetRequesterImpl();
-		ch.createChannelPutGet(ch, channelPutGetRequester, pvRequest, "put-test", share, pvGetRequest, "get-test", share, false);
+		ch.createChannelPutGet(channelPutGetRequester, pvRequest, "put-test", share, pvGetRequest, "get-test", share, false);
 		channelPutGetRequester.waitAndCheckConnect();
 		
 		assertEquals("put-test", channelPutGetRequester.pvPutStructure.getFullName());
@@ -1303,7 +1302,7 @@ public class ChannelAccessTest extends TestCase {
         pvGetRequest.appendPVField(pvString);
 
         ChannelPutGetRequesterImpl channelPutGetRequester = new ChannelPutGetRequesterImpl();
-		ch.createChannelPutGet(ch, channelPutGetRequester, pvRequest, "put-test", share, pvGetRequest, "get-test", share, true);
+		ch.createChannelPutGet(channelPutGetRequester, pvRequest, "put-test", share, pvGetRequest, "get-test", share, true);
 		channelPutGetRequester.waitAndCheckConnect();
 		
 		assertEquals("put-test", channelPutGetRequester.pvPutStructure.getFullName());
@@ -1356,7 +1355,7 @@ public class ChannelAccessTest extends TestCase {
 	    Channel ch = syncCreateChannel("simpleCounter");
 	    
 	    ChannelArrayRequesterImpl channelArrayRequester = new ChannelArrayRequesterImpl();
-	    ch.createChannelArray(ch, channelArrayRequester, "alarm.severity.choices");
+	    ch.createChannelArray(channelArrayRequester, "alarm.severity.choices");
 	    channelArrayRequester.waitAndCheckConnect();
 	    
 	    // test get
@@ -1377,7 +1376,7 @@ public class ChannelAccessTest extends TestCase {
 	    
 	    ch = syncCreateChannel("arrayValueOnly");
 	    channelArrayRequester = new ChannelArrayRequesterImpl();
-	    ch.createChannelArray(ch, channelArrayRequester, "value");
+	    ch.createChannelArray(channelArrayRequester, "value");
 	    channelArrayRequester.waitAndCheckConnect();
 	    
 	    // test put
@@ -1432,7 +1431,7 @@ public class ChannelAccessTest extends TestCase {
         Channel ch = syncCreateChannel("counter");
 		
 	    ChannelMonitorRequesterImpl channelMonitorRequester = new ChannelMonitorRequesterImpl();
-	    ch.createChannelMonitor(ch, channelMonitorRequester, pvRequest, "monitor-test", pvOption, executor);
+	    ch.createChannelMonitor(channelMonitorRequester, pvRequest, "monitor-test", pvOption, executor);
 	    channelMonitorRequester.waitAndCheckConnect();
 
 	    // TODO currently we get no pvStructure until first monitor

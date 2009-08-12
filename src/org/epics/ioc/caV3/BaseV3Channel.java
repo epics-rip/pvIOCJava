@@ -296,8 +296,8 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void createChannelArray(
-            org.epics.pvData.channelAccess.Channel channel,
-            ChannelArrayRequester channelArrayRequester, String subField)
+            ChannelArrayRequester channelArrayRequester,
+            String subField)
     {
         channelArrayRequester.channelArrayConnect(null, null);
     }
@@ -306,9 +306,9 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void createChannelGet(
-            org.epics.pvData.channelAccess.Channel channel,
-            ChannelGetRequester channelGetRequester, PVStructure pvRequest,
-            String structureName, boolean shareData, boolean process)
+            ChannelGetRequester channelGetRequester,
+            PVStructure pvRequest, String structureName,
+            boolean shareData, boolean process)
     {
         if(v3ChannelStructure==null) {
             channelGetRequester.message(
@@ -324,10 +324,9 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void createChannelMonitor(
-            org.epics.pvData.channelAccess.Channel channel,
             ChannelMonitorRequester channelMonitorRequester,
-            PVStructure pvRequest, String structureName, PVStructure pvOption,
-            Executor executor)
+            PVStructure pvRequest,
+            String structureName, PVStructure pvOption, Executor executor)
     {
         if(v3ChannelStructure==null) {
             channelMonitorRequester.message(
@@ -343,7 +342,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void createChannelProcess(
-            org.epics.pvData.channelAccess.Channel channel,
             ChannelProcessRequester channelProcessRequester)
     {
         channelProcessRequester.message(
@@ -355,9 +353,9 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void createChannelPut(
-            org.epics.pvData.channelAccess.Channel channel,
-            ChannelPutRequester channelPutRequester, PVStructure pvRequest,
-            String structureName, boolean shareData, boolean process)
+            ChannelPutRequester channelPutRequester,
+            PVStructure pvRequest, String structureName,
+            boolean shareData, boolean process)
     {
         if(v3ChannelStructure==null) {
             channelPutRequester.message(
@@ -373,22 +371,22 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void createChannelPutGet(
-            org.epics.pvData.channelAccess.Channel channel,
             ChannelPutGetRequester channelPutGetRequester,
-            PVStructure pvPutRequest, String putStructureName,
-            boolean sharePutData, PVStructure pvGetRequest,
-            String getStructureName, boolean shareGetData, boolean process)
+            PVStructure pvPutRequest,
+            String putStructureName, boolean sharePutData,
+            PVStructure pvGetRequest, String getStructureName,
+            boolean shareGetData, boolean process)
     {
-        channelPutGetRequester.channelPutGetConnect(null, null, null, null, null);
+        channelPutGetRequester.channelPutGetConnect(null, null, null);
     }
     /* (non-Javadoc)
      * @see org.epics.pvData.channelAccess.Channel#createPVStructure(org.epics.pvData.channelAccess.Channel, org.epics.pvData.channelAccess.CreatePVStructureRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean)
      */
     @Override
     public void createPVStructure(
-            org.epics.pvData.channelAccess.Channel channel,
-            CreatePVStructureRequester requester, PVStructure pvRequest,
-            String structureName, boolean shareData)
+            CreatePVStructureRequester requester,
+            PVStructure pvRequest, String structureName,
+            boolean shareData)
     {
         if(v3ChannelStructure==null) {
             requester.message(

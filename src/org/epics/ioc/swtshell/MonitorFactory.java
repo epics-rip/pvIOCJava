@@ -444,7 +444,7 @@ public class MonitorFactory {
             public void run() {
                 switch(runRequest) {
                 case start:
-                    channel.createChannelMonitor(channel, this, pvRequest, pvRequest.getField().getFieldName(), pvOption, executor);
+                    channel.createChannelMonitor(this, pvRequest, pvRequest.getField().getFieldName(), pvOption, executor);
                     break;
                 case stop:
                     if(channelMonitor!=null) {

@@ -77,7 +77,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(channelPut==null) {
-                channel.createChannelPut(channel, this, pvRequest,"put", false, process);
+                channel.createChannelPut(this, pvRequest, "put",false, process);
             }
         } else {
             pvRecord.lock();

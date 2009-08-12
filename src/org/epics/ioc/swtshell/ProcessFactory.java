@@ -240,7 +240,7 @@ public class ProcessFactory {
                 this.channel = channel;
                 this.requester = requester;
                 executorNode = executor.createNode(this);
-                channel.createChannelProcess(channel, this);
+                channel.createChannelProcess(this);
             }
             
             private void process() {

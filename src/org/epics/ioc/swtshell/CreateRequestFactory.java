@@ -185,7 +185,7 @@ public class CreateRequestFactory {
                 return;
             }
             case createRequest: { // must run as executor thread
-                channel.createPVStructure(channel, this, pvRequestAll, channel.getChannelName(), isShared);
+                channel.createPVStructure(this, pvRequestAll, channel.getChannelName(), isShared);
                 return;
             }
             }

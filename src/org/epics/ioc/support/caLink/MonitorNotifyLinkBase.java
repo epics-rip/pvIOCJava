@@ -91,7 +91,7 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     @Override
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
-            channel.createChannelMonitor(channel, this, pvRequest, "monitorNotify", pvOption, executor);
+            channel.createChannelMonitor(this, pvRequest, "monitorNotify", pvOption, executor);
         } else {
             if(channelMonitor!=null) channelMonitor.destroy();
             channelMonitor = null;
