@@ -380,9 +380,7 @@ public class ChannelAccessTest extends TestCase {
 	{
 		ChannelPutGet channelPutGet;
 		PVStructure pvPutStructure;
-		BitSet putBitSet;
 		PVStructure pvGetStructure;
-		BitSet getBitSet;
 
 		private Boolean connected = null;
 		private Boolean success = null;
@@ -398,9 +396,7 @@ public class ChannelAccessTest extends TestCase {
 			{
 				this.channelPutGet = channelPutGet;
 				this.pvPutStructure = pvPutStructure;
-				this.putBitSet = putBitSet;
 				this.pvGetStructure = pvGetStructure;
-				this.getBitSet = getBitSet;
 
 				connected = new Boolean(true);	// put here connection status
 				this.notify();
@@ -423,9 +419,7 @@ public class ChannelAccessTest extends TestCase {
 				assertNotNull("channel put-get connect timeout", connected);
 				assertTrue("channel put-get failed to connect", connected.booleanValue());
 				assertNotNull(pvPutStructure);
-				assertNotNull(putBitSet);
 				assertNotNull(pvGetStructure);
-				assertNotNull(getBitSet);
 			}
 		}
 
@@ -1239,31 +1233,18 @@ public class ChannelAccessTest extends TestCase {
 		assertNotNull(putValue);
 		final double INIT_VAL = 321.0;
 		putValue.put(INIT_VAL);
-		channelPutGetRequester.putBitSet.set(putValue.getFieldOffset());
 		
 		PVDouble getValue = channelPutGetRequester.pvGetStructure.getDoubleField("value");
 		assertNotNull(getValue);
 
 		
 		channelPutGetRequester.syncPutGet(false);
-		// TODO should put bitSet be reset here
-		//assertEquals(0, channelPutGetRequester.putBitSet.cardinality());
 		assertEquals(INIT_VAL, getValue.get());
-		assertEquals(1, channelPutGetRequester.getBitSet.cardinality());
 
-
-		// value should not change since bitSet is not set
+		// again...
 		putValue.put(INIT_VAL+1);
-		channelPutGetRequester.putBitSet.clear();
-		channelPutGetRequester.syncPutGet(false);
-		assertEquals(INIT_VAL, getValue.get());
-		assertEquals(0, channelPutGetRequester.getBitSet.cardinality());
-		
-		// now should change
-		channelPutGetRequester.putBitSet.set(putValue.getFieldOffset());
 		channelPutGetRequester.syncPutGet(false);
 		assertEquals(INIT_VAL+1, getValue.get());
-		assertEquals(1, channelPutGetRequester.getBitSet.cardinality());
 
 		// test get-put
 		channelPutGetRequester.syncGetPut();
@@ -1313,7 +1294,6 @@ public class ChannelAccessTest extends TestCase {
 		assertNotNull(putValue);
 		final int INIT_VAL = 3;
 		putValue.put(INIT_VAL);
-		channelPutGetRequester.putBitSet.set(putValue.getFieldOffset());
 		
 		PVInt getValue = channelPutGetRequester.pvGetStructure.getIntField("value");
 		assertNotNull(getValue);
@@ -1332,7 +1312,6 @@ public class ChannelAccessTest extends TestCase {
 			long previousTimestampSec = timestamp.getSecondsPastEpoch();
 			
 			putValue.put(previousValue + 1);
-			channelPutGetRequester.putBitSet.set(putValue.getFieldOffset());
 			
 			// 2 seconds to have different timestamps
 			Thread.sleep(1000);
