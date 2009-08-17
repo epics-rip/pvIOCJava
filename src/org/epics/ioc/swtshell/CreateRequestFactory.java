@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.CreatePVStructureRequester;
+import org.epics.ca.channelAccess.client.GetFieldRequester;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
@@ -30,6 +30,7 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Structure;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -55,7 +56,7 @@ public class CreateRequestFactory {
     private static Executor executor = SwtshellFactory.getExecutor();
     
     private static class CreateRequestImpl extends Dialog
-    implements CreateRequest,CreatePVStructureRequester,SelectionListener,Runnable  {
+    implements CreateRequest,GetFieldRequester,SelectionListener,Runnable  {
         
         private CreateRequestImpl(Shell parent,Channel channel,CreateRequestRequester createRequestRequester) {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
@@ -77,8 +78,7 @@ public class CreateRequestFactory {
         private Button showRequestButton;
         private boolean isShow = false;
         private Button createRequestButton;
-        private PVStructure pvRequestAll = pvDataCreate.createPVStructure(null, "", new Field[0]);
-        private PVStructure pvAll = null;
+        private Structure channelStructure = null;
         private PVStructure pvRequest = null;
         
         private enum RunState {
@@ -142,16 +142,18 @@ public class CreateRequestFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.CreatePVStructureRequester#createDone(org.epics.pvData.pv.PVStructure)
+         * @see org.epics.ca.channelAccess.client.GetFieldRequester#getDone(org.epics.pvData.pv.Field)
          */
         @Override
-        public void createDone(PVStructure pvStructure) {
-            this.pvAll = pvStructure;
-            runState = RunState.createDone;
-            display.asyncExec(this);
-            return;
+        public void getDone(Field field) {
+            if(field.getType()!=Type.structure) {
+                message("CreateRequest: channel introspection did not return a Structure",MessageType.error);
+            } else {
+                this.channelStructure = (Structure)field;
+                runState = RunState.createDone;
+                display.asyncExec(this);
+            }
         }
-        
         /* (non-Javadoc)
          * @see org.epics.pvData.pv.Requester#getRequesterName()
          */
@@ -174,9 +176,10 @@ public class CreateRequestFactory {
             switch(runState) {
             case createDone: { // must run as swt thread
                 SelectSubSet selectSubSet = new SelectSubSet(shell);
-                BitSet bitSet = selectSubSet.getSubSet(pvAll,channel.getChannelName());
+                PVStructure pvStructure = pvDataCreate.createPVStructure(null, "", channelStructure);
+                BitSet bitSet = selectSubSet.getSubSet(pvStructure,channel.getChannelName());
                 pvRequest = pvDataCreate.createPVStructure(null,channel.getChannelName(), new Field[0]);
-                createPVRequest(bitSet,pvAll,pvRequest);
+                createPVRequest(bitSet,pvStructure,pvRequest);
                 if(isShow) {
                     message(pvRequest.toString(),MessageType.info);
                 }
@@ -185,7 +188,7 @@ public class CreateRequestFactory {
                 return;
             }
             case createRequest: { // must run as executor thread
-                channel.createPVStructure(this, pvRequestAll, channel.getChannelName(), isShared);
+                channel.getField(this, null);
                 return;
             }
             }
