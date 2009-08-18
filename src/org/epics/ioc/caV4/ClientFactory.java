@@ -17,7 +17,6 @@ package org.epics.ioc.caV4;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.epics.ca.CAConstants;
 import org.epics.ca.CAException;
 import org.epics.ca.channelAccess.client.ChannelFind;
 import org.epics.ca.channelAccess.client.ChannelFindRequester;
@@ -108,14 +107,10 @@ public class ClientFactory {
 			throw new RuntimeException("not implemented");
 		}
 		
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.channelAccess.client.ChannelRequester, short)
-         */
         @Override
-        public org.epics.ca.channelAccess.client.Channel createChannel(
-                String channelName, final ChannelRequester channelRequester,
-                short priority)
-        {
+		public Channel createChannel(String channelName,
+				final ChannelRequester channelRequester, short priority) {
+
 			EventListener<ConnectionEvent> cl = new EventListener<ConnectionEvent>()
 		    {
 		 		public void onEvent(ConnectionEvent connectionEvent) {
@@ -125,7 +120,7 @@ public class ClientFactory {
 
 		    Channel channel;
 			try {
-				channel = context.createChannel(channelName, cl, CAConstants.CA_DEFAULT_PRIORITY);
+				channel = context.createChannel(channelName, cl, priority);
 			} catch (Throwable th) {
 				// TODO error handling missing in IF
 				th.printStackTrace();
