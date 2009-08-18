@@ -65,6 +65,7 @@ public class IntrospectDatabaseFactory {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     private static final String newLine = String.format("%n");
+    private static final Runtime runTime = Runtime.getRuntime();
     
     /**
      * A shell for introspecting the local IOC database.
@@ -90,6 +91,8 @@ public class IntrospectDatabaseFactory {
         private Button timeProcessButton;
         private Button showBadRecordsButton;
         private Button showThreadsButton;
+        private Button showMemoryButton;
+        private Button garbageCollectButton;
         private Button clearButton;
         private Text consoleText;
         private SelectLocalRecord selectLocalRecord;
@@ -178,7 +181,7 @@ public class IntrospectDatabaseFactory {
             releaseProcessorButton.addSelectionListener(this);
             composite = new Composite(shell,SWT.BORDER);
             layout = new GridLayout();
-            layout.numColumns = 2;
+            layout.numColumns = 4;
             composite.setLayout(layout);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             composite.setLayoutData(gridData);
@@ -188,6 +191,12 @@ public class IntrospectDatabaseFactory {
             showThreadsButton = new Button(composite,SWT.PUSH);
             showThreadsButton.setText("&showThreads");
             showThreadsButton.addSelectionListener(this);
+            showMemoryButton = new Button(composite,SWT.PUSH);
+            showMemoryButton.setText("&showMemory");
+            showMemoryButton.addSelectionListener(this);
+            garbageCollectButton = new Button(composite,SWT.PUSH);
+            garbageCollectButton.setText("&garbageCollect");
+            garbageCollectButton.addSelectionListener(this);
             composite = new Composite(shell,SWT.BORDER);
             layout = new GridLayout();
             layout.numColumns = 1;
@@ -339,6 +348,20 @@ public class IntrospectDatabaseFactory {
                 EventScanner eventScanner = ScannerFactory.getEventScanner();
                 consoleText.append(periodicScanner.toString());
                 consoleText.append(eventScanner.toString());
+                return;
+            }
+            if(object==showMemoryButton) {
+                long free = runTime.freeMemory();
+                long total = runTime.totalMemory();
+                long max = runTime.maxMemory();
+                consoleText.append("freeMemory " + free + " totalMemory " + total + " maxMemory " + max + newLine);
+                return;
+            }
+            if(object==garbageCollectButton) {
+                long start = System.currentTimeMillis();
+                runTime.gc();
+                long end = System.currentTimeMillis();
+                consoleText.append("time " + (end-start) + " milliseconds" + newLine);
                 return;
             }
             if(object==clearButton) {

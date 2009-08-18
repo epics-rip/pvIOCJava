@@ -425,7 +425,7 @@ public class ArrayFactory {
                 switch(runCommand) {
                 case get:
                     waiting = true;
-                    channel.createChannelArray(this, subField);
+                    channel.createChannelArray(this, subField,null);
                     lock.lock();
                     try {
                         while(waiting) {
@@ -456,7 +456,7 @@ public class ArrayFactory {
                     break;
                 case put:
                     waiting = true;
-                    channel.createChannelArray(this, subField);
+                    channel.createChannelArray(this, subField,null);
                     lock.lock();
                     try {
                         while(waiting) {

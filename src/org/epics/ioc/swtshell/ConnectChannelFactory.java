@@ -148,7 +148,7 @@ public class ConnectChannelFactory {
         @Override
         public void run() {
             ChannelProvider channelProvider = channelAccess.getProvider(providerName);
-            channelProvider.createChannel(pvName, channelRequester);
+            channelProvider.createChannel(pvName, channelRequester,ChannelProvider.PRIORITY_DEFAULT);
         }
     }
 }

@@ -306,7 +306,7 @@ public class GetFactory {
             public void run() {
                 switch(runRequest) {
                 case create:
-                    channel.createChannelGet(this, pvRequest, pvRequest.getField().getFieldName(),isShared,process);
+                    channel.createChannelGet(this, pvRequest, pvRequest.getField().getFieldName(),isShared,process,null);
                     break;
                 case disconnect:
                     channelGet.destroy();

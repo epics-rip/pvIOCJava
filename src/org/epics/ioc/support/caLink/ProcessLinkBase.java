@@ -39,7 +39,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
      */
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
-            channel.createChannelProcess(this);
+            channel.createChannelProcess(this,null);
         } else {
             ChannelProcess channelProcess = this.channelProcess;
             pvRecord.lock();

@@ -407,7 +407,7 @@ public class PutGetFactory {
                     guiPutGet.channel.createChannelPutGet(
                             this,guiPutGet.pvPutRequest,
                             "arguments", true, guiPutGet.pvGetRequest,
-                            "result", true, process);
+                            "result", true, process,null);
                     break;
                 case disconnect:
                     channelPutGet.destroy();
