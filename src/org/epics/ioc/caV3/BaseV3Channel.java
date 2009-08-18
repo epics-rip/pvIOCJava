@@ -30,7 +30,6 @@ import org.epics.ca.channelAccess.client.ChannelPutGet;
 import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
 import org.epics.ca.channelAccess.client.ChannelPutRequester;
 import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.CreatePVStructureRequester;
 import org.epics.ca.channelAccess.client.GetFieldRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Executor;
@@ -378,23 +377,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             boolean shareGetData, boolean process)
     {
         channelPutGetRequester.channelPutGetConnect(null, null, null);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.Channel#createPVStructure(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.CreatePVStructureRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean)
-     */
-    @Override
-    public void createPVStructure(
-            CreatePVStructureRequester requester,
-            PVStructure pvRequest, String structureName,
-            boolean shareData)
-    {
-        if(v3ChannelStructure==null) {
-            requester.message(
-                    "createPVStructure but not connected",MessageType.warning);
-            requester.createDone(null);
-            return;
-        }
-        requester.createDone(v3ChannelStructure.getPVStructure());
     }
     /* (non-Javadoc)
      * @see org.epics.ca.channelAccess.client.Channel#destroy()
