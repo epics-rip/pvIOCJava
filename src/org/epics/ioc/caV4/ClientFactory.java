@@ -108,10 +108,14 @@ public class ClientFactory {
 			throw new RuntimeException("not implemented");
 		}
 		
+        /* (non-Javadoc)
+         * @see org.epics.ca.channelAccess.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.channelAccess.client.ChannelRequester, short)
+         */
         @Override
-		public void createChannel(String channelName,
-				final ChannelRequester channelRequester) {
-
+        public org.epics.ca.channelAccess.client.Channel createChannel(
+                String channelName, final ChannelRequester channelRequester,
+                short priority)
+        {
 			EventListener<ConnectionEvent> cl = new EventListener<ConnectionEvent>()
 		    {
 		 		public void onEvent(ConnectionEvent connectionEvent) {
@@ -126,9 +130,10 @@ public class ClientFactory {
 				// TODO error handling missing in IF
 				th.printStackTrace();
 				channelRequester.channelNotCreated();
-				return;
+				return null;
 			}
 		    channelRequester.channelCreated(channel);
+		    return channel;
 		}
 		@Override
 		public void destroy() {
