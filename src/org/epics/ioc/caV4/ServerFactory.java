@@ -137,22 +137,29 @@ public class ServerFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
-        public void run(ThreadReady threadReady) {
-            try {
-                // initialize context
-                initialize();
+        public void run(final ThreadReady threadReady) {
+                Thread runThread = new Thread(new Runnable() {
+					@Override
+					public void run() {
+			            try {
+			                // initialize context
+			                initialize();
+			                System.out.println("Running server...");
+			                // run server 
+							context.run(0);
+			                System.out.println("Done.");
+			            } catch (Throwable th) {
+			                th.printStackTrace();
+			            }
+			            finally {
+			                // always finalize
+			                destroy();
+			            }
+					}
+				}, "CA-server");
+                runThread.setDaemon(false);
+                runThread.start();
                 threadReady.ready();
-                System.out.println("Running server...");
-                // run server 
-                context.run(0);
-                System.out.println("Done.");
-            } catch (Throwable th) {
-                th.printStackTrace();
-            }
-            finally {
-                // always finalize
-                destroy();
-            }
         }
     }
 }
