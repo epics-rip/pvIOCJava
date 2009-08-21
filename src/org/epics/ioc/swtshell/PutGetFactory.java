@@ -18,7 +18,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ca.channelAccess.client.*;
+import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelPutGet;
+import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -432,9 +434,7 @@ public class PutGetFactory {
             {
                 this.channelPutGet = channelPutGet;
                 this.pvPutStructure = pvPutStructure;
-                this.putBitSet = putBitSet;
                 this.pvGetStructure = pvGetStructure;
-                this.getBitSet = getBitSet;
                 isCreated = true;
                 guiPutGet.putGetConnect();
             }

@@ -4,6 +4,9 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.swtshell;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -19,21 +22,23 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelMonitor;
-import org.epics.ca.channelAccess.client.ChannelMonitorRequester;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
+import org.epics.pvData.monitor.Monitor;
+import org.epics.pvData.monitor.MonitorElement;
+import org.epics.pvData.monitor.MonitorRequester;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDouble;
+import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Structure;
 
 /**
  * A shell for monitoring a channel.
@@ -80,7 +85,7 @@ public class MonitorFactory {
         private PVDouble pvDeadband = null;
         private Text deadbandText;
         private Text simulateDelayText;
-        private Monitor monitor = new Monitor();
+        private MonitorIt monitor = new MonitorIt();
         
         private int queueSize = 3;
         private double deadband = 0.0;
@@ -413,28 +418,29 @@ public class MonitorFactory {
             }
         }
         
-        private enum MonitorRunRequest {
+        private enum MonitorItRunRequest {
             start,
             stop
         }
         
-        
-        private class Monitor implements
+        private class MonitorIt implements
         Runnable,
-        ChannelMonitorRequester
+        MonitorRequester
         {
             private ExecutorNode executorNode = executor.createNode(this);
-            private MonitorRunRequest runRequest;
-            private ChannelMonitor channelMonitor = null;
+            private MonitorItRunRequest monitorItRunRequest;
+            private Monitor monitor = null;
             private PrintModified printModified = null;
+            private Poll poll = new Poll();
+            
             
             void start() {
-                runRequest = MonitorRunRequest.start;
+                monitorItRunRequest = MonitorItRunRequest.start;
                 executor.execute(executorNode);
             }
             
             void stop() {
-                runRequest = MonitorRunRequest.stop;
+                monitorItRunRequest = MonitorItRunRequest.stop;
                 executor.execute(executorNode);
             }
             /* (non-Javadoc)
@@ -442,26 +448,27 @@ public class MonitorFactory {
              */
             @Override
             public void run() {
-                switch(runRequest) {
+                switch(monitorItRunRequest) {
                 case start:
-                    channel.createChannelMonitor(this, pvRequest, pvRequest.getField().getFieldName(), pvOption, executor);
-                    break;
+                    channel.createMonitor(this, pvRequest, pvRequest.getField().getFieldName(), pvOption);
+                    return;
                 case stop:
-                    if(channelMonitor!=null) {
-                        channelMonitor.destroy();
-                        channelMonitor = null;
+                    if(monitor!=null) {
+                        monitor.destroy();
+                        monitor = null;
                     }
-                    break;
-                }
+                    return;
                 
+                }
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#channelMonitorConnect(org.epics.ca.channelAccess.client.ChannelMonitor)
+             * @see org.epics.pvData.monitor.MonitorRequester#monitorConnect(org.epics.pvData.monitor.Monitor, org.epics.pvData.pv.Structure)
              */
             @Override
-            public void channelMonitorConnect(ChannelMonitor channelMonitor) {
-                this.channelMonitor = channelMonitor;
-                if(channelMonitor==null) {
+            public void monitorConnect(Monitor monitor, Structure structure) {
+                
+                this.monitor = monitor;
+                if(monitor==null) {
                     display.asyncExec( new Runnable() {
                         public void run() {
                             startStopButton.setText("startMonitor");
@@ -470,30 +477,15 @@ public class MonitorFactory {
 
                     });
                 } else {
-                    channelMonitor.start();
+                    monitor.start();
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
+             * @see org.epics.pvData.monitor.MonitorRequester#monitorEvent(org.epics.pvData.monitor.Monitor)
              */
             @Override
-            public void monitorEvent(PVStructure pvStructure,
-                    BitSet changeBitSet, BitSet overrunBitSet)
-            {
-                printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, overrunBitSet, consoleText);
-                display.asyncExec( new Runnable() {
-                    public void run() {
-                        printModified.print();
-                    }
-                });
-                if(simulateDelay>0.0) {
-                    long millis = (long)(simulateDelay*1000.0);
-                    try{
-                        Thread.sleep(millis, 0);
-                    } catch (InterruptedException e) {
-
-                    }
-                }
+            public void monitorEvent(Monitor monitor) {
+                poll.poll();
             }
 
             /* (non-Javadoc)
@@ -517,10 +509,70 @@ public class MonitorFactory {
             @Override
             public void message(final String message, final MessageType messageType) {
                 requester.message(message, MessageType.info);
-            }           
+            }
             
-        }
+            private class Poll implements Runnable {
+                private ExecutorNode executorNode = executor.createNode(this);
+                private ReentrantLock lock = new ReentrantLock();
+                private Condition moreWork = lock.newCondition();
+                private volatile boolean more = true;
 
+                void poll() {
+                    executor.execute(executorNode);
+                }
+
+                /* (non-Javadoc)
+                 * @see java.lang.Runnable#run()
+                 */
+                @Override
+                public void run() {
+                    more = true;
+                    display.asyncExec( new Runnable() {
+                        public void run() {
+                            while(true) {
+                                MonitorElement monitorElement = monitor.poll();
+                                if(monitorElement==null) break;
+                                PVStructure pvStructure = monitorElement.getPVStructure();
+                                BitSet changeBitSet = monitorElement.getChangedBitSet();
+                                BitSet overrunBitSet = monitorElement.getOverrunBitSet();
+                                printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, overrunBitSet, consoleText);
+                                printModified.print();
+                                monitor.release(monitorElement);
+                            }
+                            lock.lock();
+                            try {
+                                more = false;
+                                moreWork.signal();
+                                return;
+                            } finally {
+                                lock.unlock();
+                            }
+                        }
+                    });
+                    lock.lock();
+                    try {
+                        while(more) {
+                            try {
+                                moreWork.await();
+                            } catch(InterruptedException e) {
+
+                            }
+                        }
+                    }finally {
+                        lock.unlock();
+                    }
+                    if(simulateDelay>0.0) {
+                        long millis = (long)(simulateDelay*1000.0);
+                        try{
+                            Thread.sleep(millis, 0);
+                        } catch (InterruptedException e) {
+
+                        }
+                    }
+                }
+            }   
+        }
+        
         private void disableOptions() {
             putButton.setEnabled(false);
             changeButton.setEnabled(false);
