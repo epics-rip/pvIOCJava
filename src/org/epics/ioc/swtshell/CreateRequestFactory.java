@@ -15,10 +15,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelAccess;
 import org.epics.ca.channelAccess.client.GetFieldRequester;
+import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
@@ -52,6 +55,7 @@ public class CreateRequestFactory {
         return new CreateRequestImpl(parent,channel,createRequestRequester);
     }
     
+    private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static Executor executor = SwtshellFactory.getExecutor();
     
@@ -78,6 +82,8 @@ public class CreateRequestFactory {
         private Button showRequestButton;
         private boolean isShow = false;
         private Button createRequestButton;
+        private Button requestButton;
+        private Text requestText = null;
         private Structure channelStructure = null;
         private PVStructure pvRequest = null;
         
@@ -94,7 +100,7 @@ public class CreateRequestFactory {
             shell = new Shell(parent);
             shell.setText("createRequest");
             GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 3;
+            gridLayout.numColumns = 4;
             shell.setLayout(gridLayout);
             shareDataButton = new Button(shell,SWT.CHECK);
             shareDataButton.setText("shareData");
@@ -110,6 +116,20 @@ public class CreateRequestFactory {
             createRequestButton.setText("createRequest");
             createRequestButton.addSelectionListener(this);               
             createRequestButton.setEnabled(true);
+            Composite requestComposite = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            requestComposite.setLayout(gridLayout);
+            requestButton = new Button(requestComposite,SWT.PUSH);
+            requestButton.setText("request");
+            requestButton.addSelectionListener(this);               
+            requestButton.setEnabled(true);
+            requestText = new Text(requestComposite,SWT.BORDER);
+            GridData gridData = new GridData(); 
+            gridData.widthHint = 400;
+            requestText.setLayoutData(gridData);
+            requestText.setText("alarm,timeStamp,value");
+            requestText.addSelectionListener(this);
             shell.pack();
             shell.open();
             while(!shell.isDisposed()) {
@@ -139,6 +159,17 @@ public class CreateRequestFactory {
                 isShow = showRequestButton.getSelection();
             } else if(object==shareDataButton) {
                 isShared = shareDataButton.getSelection();
+            } else if(object==requestButton) {
+                try{
+                    pvRequest = channelAccess.createRequest("", requestText.getText());
+                    createRequestRequester.request(pvRequest,isShared);
+                    if(isShow) {
+                        message(pvRequest.toString(),MessageType.info);
+                    }
+                    shell.close();
+                } catch (IllegalArgumentException e) {
+                    message("illegal request value",MessageType.error);
+                }
             }
         }
         /* (non-Javadoc)
