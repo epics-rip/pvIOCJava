@@ -57,7 +57,7 @@ public class ConnectChannelFactory {
         private ChannelRequester channelRequester;
         private Shell parent = null;
         private Shell shell = null;
-        private ExecutorNode executorNode = null;
+        private ExecutorNode executorNode = executor.createNode(this);
         private Button selectLocalRecordButton = null;
         private Combo providerCombo = null;
         private Text pvNameText = null;
@@ -68,7 +68,6 @@ public class ConnectChannelFactory {
          */
         @Override
         public void connect() {
-            executorNode = executor.createNode(this);
             shell = new Shell(parent);  
             shell.setText("connectChannel");
             GridLayout gridLayout = new GridLayout();

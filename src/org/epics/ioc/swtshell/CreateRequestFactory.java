@@ -128,7 +128,7 @@ public class CreateRequestFactory {
             GridData gridData = new GridData(); 
             gridData.widthHint = 400;
             requestText.setLayoutData(gridData);
-            requestText.setText("alarm,timeStamp,value");
+            requestText.setText("value,timeStamp,alarm");
             requestText.addSelectionListener(this);
             shell.pack();
             shell.open();
@@ -161,7 +161,7 @@ public class CreateRequestFactory {
                 isShared = shareDataButton.getSelection();
             } else if(object==requestButton) {
                 try{
-                    pvRequest = channelAccess.createRequest("", requestText.getText());
+                    pvRequest = channelAccess.createRequest(channel.getChannelName(), requestText.getText());
                     createRequestRequester.request(pvRequest,isShared);
                     if(isShow) {
                         message(pvRequest.toString(),MessageType.info);

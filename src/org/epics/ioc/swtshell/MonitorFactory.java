@@ -466,7 +466,6 @@ public class MonitorFactory {
              */
             @Override
             public void monitorConnect(Monitor monitor, Structure structure) {
-                
                 this.monitor = monitor;
                 if(monitor==null) {
                     display.asyncExec( new Runnable() {
@@ -530,7 +529,9 @@ public class MonitorFactory {
                     display.asyncExec( new Runnable() {
                         public void run() {
                             while(true) {
-                                MonitorElement monitorElement = monitor.poll();
+                                Monitor theMonitor = monitor;
+                                if(theMonitor==null) break;
+                                MonitorElement monitorElement = theMonitor.poll();
                                 if(monitorElement==null) break;
                                 PVStructure pvStructure = monitorElement.getPVStructure();
                                 BitSet changeBitSet = monitorElement.getChangedBitSet();
