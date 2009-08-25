@@ -16,11 +16,11 @@ import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 
-import org.epics.ca.channelAccess.client.ChannelMonitor;
-import org.epics.ca.channelAccess.client.ChannelMonitorRequester;
+
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.monitor.*;
 
 
 /**
@@ -28,11 +28,11 @@ import org.epics.pvData.pv.PVStructure;
  * @author mrk
  *
  */
-public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,ConnectionListener
+public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorListener,ConnectionListener
 {
     private static enum DBRProperty {none,status,time};
 
-    private ChannelMonitorRequester channelMonitorRequester;
+    private MonitorRequester monitorRequester;
     
     private V3Channel v3Channel = null;
     private gov.aps.jca.Channel jcaChannel = null;
@@ -48,12 +48,13 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
     private  PVStructure pvStructure = null;
     private BitSet changeBitSet = null;
     private BitSet overrunBitSet = null;
+    private MonitorElement monitorElement = null;
     /**
      * Constructor.
-     * @param channelMonitorRequester The channelMonitorRequester.
+     * @param monitorRequester The monitorRequester.
      */
-    public BaseV3ChannelMonitor(ChannelMonitorRequester channelMonitorRequester) {
-        this.channelMonitorRequester = channelMonitorRequester;
+    public BaseV3Monitor(MonitorRequester monitorRequester) {
+        this.monitorRequester = monitorRequester;
     }
     /**
      * Initialize the channelMonitor.
@@ -73,10 +74,10 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
             jcaChannel.addConnectionListener(this);
         } catch (CAException e) {
             
-            channelMonitorRequester.message(
+            monitorRequester.message(
                     "addConnectionListener failed " + e.getMessage(),
                     MessageType.error);
-            channelMonitorRequester.channelMonitorConnect(null);
+            monitorRequester.monitorConnect(null,null);
             
             jcaChannel = null;
             return;
@@ -142,7 +143,8 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
         pvStructure = v3ChannelStructure.getPVStructure();
         changeBitSet = v3ChannelStructure.getBitSet();
         overrunBitSet = new BitSet(pvStructure.getNumberFields());
-        channelMonitorRequester.channelMonitorConnect(this);
+        monitorElement = new MonitorElementImpl(pvStructure,changeBitSet,overrunBitSet);
+        monitorRequester.monitorConnect(this,pvStructure.getStructure());
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#destroy()
@@ -157,12 +159,12 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
      */
     public void start() {
         if(isDestroyed) {
-            channelMonitorRequester.message("isDestroyed", MessageType.warning);
+            monitorRequester.message("isDestroyed", MessageType.warning);
         }
         try {
             monitor = jcaChannel.addMonitor(requestDBRType, elementCount, 0x0ff, this);
         } catch (CAException e) {
-            channelMonitorRequester.message(e.getMessage(),MessageType.error);
+            monitorRequester.message(e.getMessage(),MessageType.error);
         }
     }
     /* (non-Javadoc)
@@ -173,7 +175,7 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
         try {
             monitor.clear();
         } catch (CAException e) {
-            channelMonitorRequester.message(e.getMessage(),MessageType.error);
+            monitorRequester.message(e.getMessage(),MessageType.error);
         }
     }
     /* (non-Javadoc)
@@ -182,16 +184,31 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
     public void monitorChanged(MonitorEvent monitorEvent) {
         CAStatus caStatus = monitorEvent.getStatus();
         if(!caStatus.isSuccessful()) {
-            channelMonitorRequester.message(caStatus.getMessage(),MessageType.error);
+            monitorRequester.message(caStatus.getMessage(),MessageType.error);
             return;
         }
         DBR fromDBR = monitorEvent.getDBR();
         if(fromDBR==null) {
-            channelMonitorRequester.message("fromDBR is null", MessageType.error);
+            monitorRequester.message("fromDBR is null", MessageType.error);
         } else {
             v3Channel.getV3ChannelStructure().toStructure(fromDBR);
-            channelMonitorRequester.monitorEvent(pvStructure, changeBitSet, overrunBitSet);
+            monitorRequester.monitorEvent(this);
         }
+    }
+    /* (non-Javadoc)
+     * @see org.epics.pvData.monitor.Monitor#poll()
+     */
+    @Override
+    public MonitorElement poll() {
+        if(changeBitSet.nextSetBit(0)<0) return null;
+        return monitorElement;
+    }
+    /* (non-Javadoc)
+     * @see org.epics.pvData.monitor.Monitor#release(org.epics.pvData.monitor.MonitorElement)
+     */
+    @Override
+    public void release(MonitorElement monitorElement) {
+        changeBitSet.clear();
     }
     /* (non-Javadoc)
      * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
@@ -200,5 +217,41 @@ public class BaseV3ChannelMonitor implements ChannelMonitor,MonitorListener,Conn
         if(!arg0.isConnected()) {
             if(monitor!=null) stop();
         }
+    }
+    
+    private static class MonitorElementImpl implements MonitorElement {
+        private PVStructure pvStructure;
+        private BitSet changedBitSet;
+        private BitSet overrunBitSet;
+        
+
+        MonitorElementImpl(PVStructure pvStructure,BitSet changedBitSet, BitSet overrunBitSet) {
+            super();
+            this.pvStructure = pvStructure;
+            this.changedBitSet = changedBitSet;
+            this.overrunBitSet = overrunBitSet;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.monitor.MonitorElement#getChangedBitSet()
+         */
+        @Override
+        public BitSet getChangedBitSet() {
+            return changedBitSet;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.monitor.MonitorElement#getOverrunBitSet()
+         */
+        @Override
+        public BitSet getOverrunBitSet() {
+            return overrunBitSet;
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.monitor.MonitorElement#getPVStructure()
+         */
+        @Override
+        public PVStructure getPVStructure() {
+            return pvStructure;
+        }
+        
     }
 }

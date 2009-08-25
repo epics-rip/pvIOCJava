@@ -8,12 +8,12 @@ package org.epics.ioc.caV3;
 import org.epics.ca.channelAccess.client.Channel;
 import org.epics.ca.channelAccess.client.ChannelArray;
 import org.epics.ca.channelAccess.client.ChannelGet;
-import org.epics.ca.channelAccess.client.ChannelMonitor;
 import org.epics.ca.channelAccess.client.ChannelProcess;
 import org.epics.ca.channelAccess.client.ChannelPut;
 import org.epics.ca.channelAccess.client.ChannelPutGet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.monitor.*;
 
 
 /**
@@ -48,11 +48,11 @@ public interface V3Channel extends Channel
      */
     boolean add(ChannelPutGet channelPutGet);
     /**
-     * Add a channelMonitor
-     * @param channelMonitor The channelMonitor to add.
-     * @return (false,true) if the channelMonitor (was not, was) added.
+     * Add a monitor
+     * @param monitor The monitor to add.
+     * @return (false,true) if the monitor (was not, was) added.
      */
-    boolean add(ChannelMonitor channelMonitor);
+    boolean add(Monitor monitor);
     /**
      * Add a channelArray
      * @param channelArray The channelArray to add.
@@ -84,11 +84,11 @@ public interface V3Channel extends Channel
      */
     boolean remove(ChannelPutGet channelPutGet);
     /**
-     * Remove a ChannelMonitor 
-     * @param channelMonitor The channelMonitor to remove.
-     * @return (false,true) if the channelMonitor (was not, was) removed.
+     * Remove a Monitor 
+     * @param monitor The monitor to remove.
+     * @return (false,true) if the monitor (was not, was) removed.
      */
-    boolean remove(ChannelMonitor channelMonitor);
+    boolean remove(Monitor monitor);
     /**
      * Remove a ChannelArray 
      * @param channelArray The channelArray to remove.

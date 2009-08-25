@@ -18,6 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
 
+import org.epics.ca.channelAccess.client.Channel;
 import org.epics.ca.channelAccess.client.ChannelFind;
 import org.epics.ca.channelAccess.client.ChannelFindRequester;
 import org.epics.ca.channelAccess.client.ChannelProvider;
@@ -137,12 +138,14 @@ public class ClientFactory  {
             return locateFind;
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.channelAccess.client.ChannelRequester)
+         * @see org.epics.ca.channelAccess.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.channelAccess.client.ChannelRequester, short)
          */
         @Override
-        public void createChannel(String channelName,ChannelRequester channelRequester) {
+        public Channel createChannel(String channelName,
+                ChannelRequester channelRequester, short priority)
+        {
             LocateFind locateFind = new LocateFind(channelName);
-            locateFind.create(channelRequester);
+            return locateFind.create(channelRequester);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#getProviderName()
@@ -202,11 +205,12 @@ public class ClientFactory  {
             v3Channel.connectCaV3();
         }
         
-        void create(ChannelRequester channelRequester) {
+        Channel create(ChannelRequester channelRequester) {
             common();
             v3Channel = new BaseV3Channel(
                     null,channelRequester,context,channelName,recordName,fieldName,enumRequestType,propertys);
             v3Channel.connectCaV3();
+            return v3Channel;
         }
         
         private void common() {
