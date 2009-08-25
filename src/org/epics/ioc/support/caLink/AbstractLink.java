@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.support.caLink;
 
-import org.epics.ca.channelAccess.client.*;
+import org.epics.ca.channelAccess.client.Channel;
 import org.epics.ca.channelAccess.client.ChannelAccess;
 import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelRequester;

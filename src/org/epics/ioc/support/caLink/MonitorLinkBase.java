@@ -5,12 +5,6 @@
  */
 package org.epics.ioc.support.caLink;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.epics.ca.channelAccess.client.ChannelMonitor;
-import org.epics.ca.channelAccess.client.ChannelMonitorRequester;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessSelf;
@@ -22,7 +16,11 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
+import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.monitor.Monitor;
+import org.epics.pvData.monitor.MonitorElement;
+import org.epics.pvData.monitor.MonitorRequester;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
@@ -33,6 +31,7 @@ import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Structure;
 
 /**
  * Implementation for a channel access monitor link.
@@ -40,7 +39,7 @@ import org.epics.pvData.pv.ScalarType;
  *
  */
 public class MonitorLinkBase extends AbstractIOLink
-implements ChannelMonitorRequester,ProcessSelfRequester
+implements MonitorRequester,Runnable,ProcessSelfRequester
 {
     /**
      * The constructor.
@@ -52,12 +51,12 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     }
     
     private static Executor executor = ExecutorFactory.create("caLinkMonitor", ThreadPriority.low);
+    private ExecutorNode executorNode = executor.createNode(this);
     private PVString monitorTypeAccess = null;
     private PVDouble deadbandAccess = null;
     private PVInt queueSizeAccess = null;
     private PVBoolean reportOverrunAccess = null;
     private PVBoolean processAccess = null;
-    
     
     private double deadband = 0.0;
     private int queueSize = 0;
@@ -66,20 +65,11 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     private boolean process = false;
     private PVStructure pvOption = null;
     private PVString pvAlgorithm = null;
-   
-          
-    
-    private PVStructure monitorStructure = null;
-    private BitSet changeBitSet = null;
-    private BitSet overrunBitSet = null;
+
+    private MonitorElement monitorElement = null;
     
     private boolean isReady = false;
-    private ChannelMonitor channelMonitor = null;
-    private ReentrantLock lock = new ReentrantLock();
-    private Condition waitForCopied = lock.newCondition();
-    private volatile boolean cdCopied = false;
-
-   
+    private Monitor monitor = null;   
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
      */
@@ -176,8 +166,8 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     @Override
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
-            if(channelMonitor==null) {
-                channel.createChannelMonitor(this, pvRequest, "monitor", pvOption, executor);
+            if(monitor==null) {
+                monitor = channel.createMonitor(this, pvRequest, "monitor", pvOption);
             }
         } else {
             pvRecord.lock();
@@ -186,57 +176,55 @@ implements ChannelMonitorRequester,ProcessSelfRequester
             } finally {
                 pvRecord.unlock();
             }
-            if(channelMonitor!=null) channelMonitor.destroy();
-            channelMonitor = null;
+            if(monitor!=null) monitor.destroy();
+            monitor = null;
         }
     } 
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#channelMonitorConnect(org.epics.ca.channelAccess.client.ChannelMonitor)
+     * @see org.epics.pvData.monitor.MonitorRequester#monitorConnect(org.epics.pvData.monitor.Monitor, org.epics.pvData.pv.Structure)
      */
     @Override
-    public void channelMonitorConnect(ChannelMonitor channelMonitor) {
-        this.channelMonitor = channelMonitor;
+    public void monitorConnect(Monitor monitor, Structure structure) {
+        this.monitor = monitor;
         pvRecord.lock();
         try {
             isReady = true;
         } finally {
             pvRecord.unlock();
         }
-        channelMonitor.start();
+        monitor.start();
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#monitorEvent(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.misc.BitSet)
+     * @see org.epics.pvData.monitor.MonitorRequester#monitorEvent(org.epics.pvData.monitor.Monitor)
      */
     @Override
-    public void monitorEvent(PVStructure pvStructure, BitSet changeBitSet,BitSet overrunBitSet) {
-        monitorStructure = pvStructure;
-        this.changeBitSet = changeBitSet;
-        this.overrunBitSet = overrunBitSet;
-        if(process) {
-            cdCopied = false;
-            if(isRecordProcessRequester) {
-                becomeProcessor(recordProcess);
-            } else {
-                processSelf.request(this);
+    public void monitorEvent(Monitor monitor) {
+        this.monitor = monitor;
+        executor.execute(executorNode);
+    }
+    /* (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    @Override
+    public void run() {
+        while(true) {
+            monitorElement = monitor.poll();
+            if(monitorElement==null) return;
+            if(process) {
+                if(isRecordProcessRequester) {
+                    becomeProcessor(recordProcess);
+                } else {
+                    processSelf.request(this);
+                }
+                return;
             }
-            lock.lock();
+            pvRecord.lock();
             try {
-                if(!cdCopied) waitForCopied.await(10, TimeUnit.SECONDS);
-            } catch(InterruptedException e) {
-                System.err.println(
-                        e.getMessage()
-                        + " thread did not call ready");
+                getCD();
+                return;
             } finally {
-                lock.unlock();
+                pvRecord.unlock();
             }
-            return;
-        }
-        pvRecord.lock();
-        try {
-            getCD();
-            return;
-        } finally {
-            pvRecord.unlock();
         }
     }
     /* (non-Javadoc)
@@ -246,19 +234,12 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     public void unlisten() {
         recordProcess.stop();
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
      */
     public void recordProcessComplete() {
-        lock.lock();
-        try {
-            cdCopied = true;
-            waitForCopied.signal();
-            if(processSelf!=null) processSelf.endRequest(this);
-        } finally {
-            lock.unlock();
-        }
+        if(processSelf!=null) processSelf.endRequest(this);
+        run();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
@@ -266,7 +247,6 @@ implements ChannelMonitorRequester,ProcessSelfRequester
     public void recordProcessResult(RequestResult requestResult) {
         // nothing to do
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
      */
@@ -278,10 +258,12 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         }
     }
     
-    
     private void getCD() {
+        PVStructure monitorStructure = monitorElement.getPVStructure();
+        BitSet changeBitSet = monitorElement.getChangedBitSet();
+        BitSet overrunBitSet = monitorElement.getOverrunBitSet();
         boolean allSet = changeBitSet.get(0);
-        copyChanged(monitorStructure.getSubField("value"),valuePVField,allSet);
+        copyChanged(monitorStructure.getSubField("value"),valuePVField,changeBitSet,allSet);
         if(alarmIsProperty) {
             PVString pvMessage = monitorStructure.getStringField("alarm.message");
             PVInt pvSeverityIndex = monitorStructure.getIntField("alarm.severity.index");
@@ -291,16 +273,18 @@ implements ChannelMonitorRequester,ProcessSelfRequester
         if(propertyPVFields!=null) length = propertyPVFields.length;
         if(length>=1) for(int i=0; i <length; i++) {
             PVField pvLink = monitorStructure.getSubField(propertyPVFields[i].getField().getFieldName());
-            copyChanged(pvLink,propertyPVFields[i],allSet);
+            copyChanged(pvLink,propertyPVFields[i],changeBitSet,allSet);
         }
         if(overrunBitSet.nextSetBit(0)>=0) {
             alarmSupport.setAlarm(
                     "overrun",
                     AlarmSeverity.none);
         }
+        monitor.release(monitorElement);
+        monitorElement = null;
     }
     
-    private void copyChanged(PVField pvFrom,PVField pvTo,boolean allSet) {
+    private void copyChanged(PVField pvFrom,PVField pvTo,BitSet changeBitSet,boolean allSet) {
         if(allSet) {
             convert.copy(pvFrom, pvTo);
             return;
