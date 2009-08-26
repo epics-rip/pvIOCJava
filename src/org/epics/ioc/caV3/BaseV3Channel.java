@@ -52,6 +52,7 @@ public class BaseV3Channel implements
 ChannelFind,org.epics.ca.channelAccess.client.Channel,
 V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
 {
+    private static final String providerName = "caV3";
     private static Executor executor = ExecutorFactory.create("caV3Connect", ThreadPriority.low);
     private boolean isDestroyed = true;
     private ChannelFindRequester channelFindRequester = null;
@@ -444,15 +445,21 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             requester.getDone(null);
         }
         PVStructure pvStructure = v3ChannelStructure.getPVStructure();
+        if(subField==null) subField = "value";
         PVField pvField = pvStructure.getSubField(subField);
-        requester.getDone(pvField.getField());
+        if(pvField==null) {
+            message("subField " + subField + " not found",MessageType.error);
+            requester.getDone(null);
+        } else {
+            requester.getDone(pvField.getField());
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ca.channelAccess.client.Channel#getProviderName()
      */
     @Override
     public String getProviderName() {
-        return jcaChannel.getHostName();
+        return providerName;
     }
     /* (non-Javadoc)
      * @see org.epics.ca.channelAccess.client.Channel#isConnected()
