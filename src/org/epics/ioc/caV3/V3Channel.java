@@ -6,14 +6,11 @@
 package org.epics.ioc.caV3;
 
 import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelArray;
 import org.epics.ca.channelAccess.client.ChannelGet;
-import org.epics.ca.channelAccess.client.ChannelProcess;
 import org.epics.ca.channelAccess.client.ChannelPut;
-import org.epics.ca.channelAccess.client.ChannelPutGet;
 import org.epics.pvData.misc.Executor;
+import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.monitor.*;
 
 
 /**
@@ -23,12 +20,6 @@ import org.epics.pvData.monitor.*;
  */
 public interface V3Channel extends Channel
 {
-    /**
-     * Add a channelProcess
-     * @param channelProcess The channelProcess to add.
-     * @return (false,true) if the channelProcess (was not, was) added.
-     */
-    boolean add(ChannelProcess channelProcess);
     /**
      * Add a channelGet
      * @param channelGet The channelGet to add.
@@ -42,29 +33,11 @@ public interface V3Channel extends Channel
      */
     boolean add(ChannelPut channelPut);
     /**
-     * Add a channelPutGet
-     * @param channelPutGet The channelPutGet to add.
-     * @return (false,true) if the channelPutGet (was not, was) added.
-     */
-    boolean add(ChannelPutGet channelPutGet);
-    /**
      * Add a monitor
      * @param monitor The monitor to add.
      * @return (false,true) if the monitor (was not, was) added.
      */
     boolean add(Monitor monitor);
-    /**
-     * Add a channelArray
-     * @param channelArray The channelArray to add.
-     * @return (false,true) if the channelArray (was not, was) added.
-     */
-    boolean add(ChannelArray channelArray);
-    /**
-     * Remove a ChannelProcess 
-     * @param channelProcess The channelProcess to remove.
-     * @return (false,true) if the channelProcess (was not, was) removed.
-     */
-    boolean remove(ChannelProcess channelProcess);
     /**
      * Remove a ChannelGet 
      * @param channelGet The channelGet to remove.
@@ -78,23 +51,11 @@ public interface V3Channel extends Channel
      */
     boolean remove(ChannelPut channelPut);
     /**
-     * Remove a ChannelPutGet 
-     * @param channelPutGet The channelPutGet to remove.
-     * @return (false,true) if the channelPutGet (was not, was) removed.
-     */
-    boolean remove(ChannelPutGet channelPutGet);
-    /**
      * Remove a Monitor 
      * @param monitor The monitor to remove.
      * @return (false,true) if the monitor (was not, was) removed.
      */
     boolean remove(Monitor monitor);
-    /**
-     * Remove a ChannelArray 
-     * @param channelArray The channelArray to remove.
-     * @return (false,true) if the channelArray (was not, was) removed.
-     */
-    boolean remove(ChannelArray channelArray);
     /**
      * Get the JCA Channel.
      * @return The interface.

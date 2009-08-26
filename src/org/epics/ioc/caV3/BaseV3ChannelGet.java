@@ -67,6 +67,7 @@ implements ChannelGet,GetListener,ConnectionListener
     public void init(V3Channel v3Channel)
     {
         this.v3Channel = v3Channel;
+        v3Channel.add(this);
         propertyNames = v3Channel.getPropertyNames();
         jcaChannel = v3Channel.getJCAChannel();
         try {
@@ -213,7 +214,7 @@ implements ChannelGet,GetListener,ConnectionListener
             message = e.getMessage();
         }
         if(message!=null) {
-            message(message,MessageType.error);
+            message("get caused exception " +message,MessageType.error);
             getDone(false);
         }
     }

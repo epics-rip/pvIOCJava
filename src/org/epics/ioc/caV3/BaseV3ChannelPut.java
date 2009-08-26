@@ -89,6 +89,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     public void init(V3Channel v3Channel)
     {
         this.v3Channel = v3Channel;
+        v3Channel.add(this);
         DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
         if(nativeDBRType.isENUM()) {
             requestDBRType = DBRType.INT;
@@ -154,7 +155,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
                 message = e.getMessage();
             }
         if(message!=null) {
-            message(message,MessageType.error);
+            message("get caused exception " +message,MessageType.error);
             getDone(false);
         }
     }
@@ -288,7 +289,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             message = e.getMessage();
         }
         if(message!=null) {
-            message(message,MessageType.error);
+            message("put caused exception " +message,MessageType.error);
             putDone(false);
         } else {
             isActive = true;

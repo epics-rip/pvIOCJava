@@ -16,11 +16,11 @@ import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 
-
 import org.epics.pvData.misc.BitSet;
+import org.epics.pvData.monitor.MonitorElement;
+import org.epics.pvData.monitor.MonitorRequester;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.monitor.*;
 
 
 /**
@@ -68,12 +68,12 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
     public void init(V3Channel v3Channel)
     {
         this.v3Channel = v3Channel;
+        v3Channel.add(this);
         propertyNames = v3Channel.getPropertyNames();
         jcaChannel = v3Channel.getJCAChannel();
         try {
             jcaChannel.addConnectionListener(this);
         } catch (CAException e) {
-            
             monitorRequester.message(
                     "addConnectionListener failed " + e.getMessage(),
                     MessageType.error);
@@ -164,7 +164,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
         try {
             monitor = jcaChannel.addMonitor(requestDBRType, elementCount, 0x0ff, this);
         } catch (CAException e) {
-            monitorRequester.message(e.getMessage(),MessageType.error);
+            monitorRequester.message("start caused CAExecption " + e.getMessage(),MessageType.error);
         }
     }
     /* (non-Javadoc)
@@ -175,7 +175,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
         try {
             monitor.clear();
         } catch (CAException e) {
-            monitorRequester.message(e.getMessage(),MessageType.error);
+            monitorRequester.message("stop caused CAExecption " + e.getMessage(),MessageType.error);
         }
     }
     /* (non-Javadoc)

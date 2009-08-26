@@ -54,7 +54,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
 {
     private static final String providerName = "caV3";
     private static Executor executor = ExecutorFactory.create("caV3Connect", ThreadPriority.low);
-    private boolean isDestroyed = true;
+    private boolean isDestroyed = false;
     private ChannelFindRequester channelFindRequester = null;
     private Context context = null;
     private String pvName = null;
@@ -76,19 +76,12 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     
     private gov.aps.jca.Channel jcaChannel = null;
     
-    private LinkedList<ChannelProcess> channelProcessList =
-        new LinkedList<ChannelProcess>();
     private LinkedList<ChannelGet> channelGetList =
         new LinkedList<ChannelGet>();
     private LinkedList<ChannelPut> channelPutList =
         new LinkedList<ChannelPut>();
-    private LinkedList<ChannelPutGet> channelPutGetList =
-        new LinkedList<ChannelPutGet>();
     private LinkedList<Monitor> monitorList = 
         new LinkedList<Monitor>();
-    private LinkedList<ChannelArray> channelArrayList = 
-        new LinkedList<ChannelArray>();
-
     /**
      * The constructor.
      * @param listener The ChannelListener.
@@ -171,18 +164,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     }
 
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelProcess)
-     */
-    @Override
-    public boolean add(ChannelProcess channelProcess)
-    {
-        boolean result = false;
-        synchronized(channelProcessList) {
-            result = channelProcessList.add(channelProcess);
-        }
-        return result;
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelGet)
      */
     @Override
@@ -207,18 +188,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelPutGet)
-     */
-    @Override
-    public boolean add(ChannelPutGet channelPutGet)
-    {
-        boolean result = false;
-        synchronized(channelPutGetList) {
-            result = channelPutGetList.add(channelPutGet);
-        }
-        return result;
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#add(org.epics.pvData.monitor.Monitor)
      */
     @Override
@@ -227,33 +196,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         boolean result = false;
         synchronized(monitorList) {
             result = monitorList.add(monitor);
-        }
-        return result;
-    }
-    /* (non-Javadoc)if(success) {
-            super.add(channelPutGet);
-            return channelPutGet;
-        }
-        return null;
-     * @see org.epics.ioc.caV3.V3Channel#add(org.epics.ca.channelAccess.client.ChannelArray)
-     */
-    @Override
-    public boolean add(ChannelArray channelArray)
-    {
-        boolean result = false;
-        synchronized(channelArrayList) {
-            result = channelArrayList.add(channelArray);
-        }
-        return result;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelProcess)
-     */
-    @Override
-    public boolean remove(ChannelProcess channelProcess) {
-        boolean result = false;
-        synchronized(channelProcessList) {
-            result = channelProcessList.remove(channelProcess);
         }
         return result;
     }
@@ -280,17 +222,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return result;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelPutGet)
-     */
-    @Override
-    public boolean remove(ChannelPutGet channelPutGet) {
-        boolean result = false;
-        synchronized(channelPutGetList) {
-            result = channelPutGetList.remove(channelPutGet);
-        }
-        return result;
-    }
-    /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.pvData.monitor.Monitor)
      */
     @Override
@@ -298,17 +229,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         boolean result = false;
         synchronized(monitorList) {
             result = monitorList.remove(monitor);
-        }
-        return result;
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.caV3.V3Channel#remove(org.epics.ca.channelAccess.client.ChannelArray)
-     */
-    @Override
-    public boolean remove(ChannelArray channelArray) {
-        boolean result = false;
-        synchronized(channelArrayList) {
-            result = channelArrayList.remove(channelArray);
         }
         return result;
     }
@@ -342,7 +262,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return channelGet;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.Channel#createChannelMonitor(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelMonitorRequester, org.epics.pvData.pv.PVStructure, java.lang.String, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.Executor)
+     * @see org.epics.ca.channelAccess.client.Channel#createMonitor(org.epics.pvData.monitor.MonitorRequester, org.epics.pvData.pv.PVStructure, java.lang.String, org.epics.pvData.pv.PVStructure)
      */
     @Override
     public Monitor createMonitor(
@@ -410,8 +330,36 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void destroy() {
-        jcaChannel.dispose();
+        if(isDestroyed) return;
+        isDestroyed = true;
+        while(!channelGetList.isEmpty()) {
+            ChannelGet channelGet = channelGetList.getFirst();
+            channelGet.destroy();
+        }
+        while(!channelPutList.isEmpty()) {
+            ChannelPut channelPut = channelPutList.getFirst();
+            channelPut.destroy();
+        }
+        while(!monitorList.isEmpty()) {
+            Monitor monitor = monitorList.getFirst();
+            monitor.destroy();
+        }
+        try {
+            jcaChannel.destroy();
+        } catch (CAException e) {
+            if(channelRequester!=null) channelRequester.message("destroy caused CAException " + e.getMessage(), MessageType.error);
+            jcaChannel = null;
+        }
+        jcaChannel = null;
+        v3ChannelStructure = null;
     }
+    /* (non-Javadoc)
+     * @see org.epics.ca.channelAccess.client.Channel#disconnect()
+     */
+    public void disconnect() {
+        if(isDestroyed) return;
+        if(channelRequester!=null) channelRequester.message("do not know how to disconnect. ", MessageType.error);
+    }                      
     /* (non-Javadoc)
      * @see org.epics.ca.channelAccess.client.Channel#getAccessRights(org.epics.pvData.pv.PVField)
      */
@@ -532,47 +480,8 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     public void connect() {
         channelRequester.channelStateChange(this, true);
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.ca.AbstractChannel#disconnect()
-     */
-    public void disconnect() {
-        if(isDestroyed) return;
-        this.disconnect();
-        isDestroyed = true;
-        while(!channelProcessList.isEmpty()) {
-            ChannelProcess channelProcess = channelProcessList.getFirst();
-            remove(channelProcess);
-            channelProcess.destroy();
-        }
-        while(!channelGetList.isEmpty()) {
-            ChannelGet channelGet = channelGetList.getFirst();
-            remove(channelGet);
-            channelGet.destroy();
-        }
-        while(!channelPutList.isEmpty()) {
-            ChannelPut channelPut = channelPutList.getFirst();
-            remove(channelPut);
-            channelPut.destroy();
-        }
-        while(!channelPutGetList.isEmpty()) {
-            ChannelPutGet channelPutGet = channelPutGetList.getFirst();
-            remove(channelPutGet);
-            channelPutGet.destroy();
-        }
-        while(!monitorList.isEmpty()) {
-            Monitor monitor = monitorList.getFirst();
-            remove(monitor);
-            monitor.destroy();
-        }
-        while(!channelArrayList.isEmpty()) {
-            ChannelArray channelArray = channelArrayList.getFirst();
-            remove(channelArray);
-            channelArray.destroy();
-        }
-        jcaChannel.dispose();
-        jcaChannel = null;
-        v3ChannelStructure = null;
-    }                      
+    
+    
     /* (non-Javadoc)
      * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
      */
