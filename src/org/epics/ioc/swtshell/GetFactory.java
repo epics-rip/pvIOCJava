@@ -245,7 +245,12 @@ public class GetFactory {
             if(isConnected) {
                 connectButton.setEnabled(false);
                 disconnectButton.setEnabled(true);
-                createRequestButton.setEnabled(true);
+                if(ConnectChannelFactory.pvDataCompatible(channel)) {
+                    createRequestButton.setEnabled(true);
+                } else {
+                    get.create(false, false);
+                    getButton.setEnabled(true);
+                }
             } else {
                 get.disconnect();
                 connectButton.setEnabled(true);
@@ -306,7 +311,9 @@ public class GetFactory {
             public void run() {
                 switch(runRequest) {
                 case create:
-                    channel.createChannelGet(this, pvRequest, pvRequest.getField().getFieldName(),isShared,process,null);
+                    String structureName = "";
+                    if(pvRequest!=null) structureName = pvRequest.getField().getFieldName();
+                    channelGet = channel.createChannelGet(this, pvRequest,structureName,isShared,process,null);
                     break;
                 case disconnect:
                     channelGet.destroy();

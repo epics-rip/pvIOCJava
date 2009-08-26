@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.epics.ca.channelAccess.client.Channel;
 import org.epics.ca.channelAccess.client.ChannelAccess;
 import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelRequester;
@@ -41,6 +42,13 @@ public class ConnectChannelFactory {
      */
     public static ConnectChannel create(Shell parent,ChannelRequester channelRequester) {
         return new ConnectChannelImpl(parent,channelRequester);
+    }
+    
+    public static boolean pvDataCompatible(Channel channel) {
+        String providerName = channel.getProviderName();
+        if(providerName.equals("local")) return true;
+        if(providerName.indexOf('4')>=0) return true;
+        return false;
     }
     
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();

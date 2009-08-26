@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.epics.ca.channelAccess.client.Channel;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
@@ -75,6 +75,7 @@ public class MonitorFactory {
         private Button connectButton;
         private Button createRequestButton = null;
         private Button disconnectButton;
+        private Button statusButton;
         
         private Text consoleText = null;
         private PVStructure pvRequest = null;
@@ -90,10 +91,8 @@ public class MonitorFactory {
         private int queueSize = 3;
         private double deadband = 0.0;
         private double simulateDelay = 0.0;
-        private Button putButton;
-        private Button changeButton;
-        private Button absoluteButton;
-        private Button percentageButton;
+        
+        private Combo algorithmCombo;
         private Button startStopButton;
         
         
@@ -121,11 +120,17 @@ public class MonitorFactory {
             disconnectButton.setText("disconnect");
             disconnectButton.addSelectionListener(this);               
             disconnectButton.setEnabled(false);
-            composite  = new Composite(shell,SWT.BORDER);
+            statusButton = new Button(composite,SWT.PUSH);
+            statusButton.setText("serverInfo");
+            statusButton.addSelectionListener(this);               
+            statusButton.setEnabled(true);
+            
+            Group group  = new Group(shell,SWT.BORDER);
+            group.setText("options for servers that support pvData");
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 3;
-            composite.setLayout(gridLayout);
-            Composite queueComposite = new Composite(composite,SWT.BORDER);
+            gridLayout.numColumns = 4;
+            group.setLayout(gridLayout);
+            Composite queueComposite = new Composite(group,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             queueComposite.setLayout(gridLayout);
@@ -136,19 +141,8 @@ public class MonitorFactory {
             queueSizeText.setLayoutData(gridData);
             queueSizeText.setText(Integer.toString(queueSize));
             queueSizeText.addSelectionListener(this);
-            Composite deadbandComposite = new Composite(composite,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
-            deadbandComposite.setLayout(gridLayout);
-            new Label(deadbandComposite,SWT.NONE).setText("deadband");
-            deadbandText = new Text(deadbandComposite,SWT.BORDER);
-            gridData = new GridData(); 
-            gridData.widthHint = 75;
-            deadbandText.setLayoutData(gridData);
-            deadbandText.setText(Double.toString(deadband));
-            deadbandText.addSelectionListener(this);
             
-            Composite simulateDelayComposite = new Composite(composite,SWT.BORDER);
+            Composite simulateDelayComposite = new Composite(group,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             simulateDelayComposite.setLayout(gridLayout);
@@ -160,27 +154,26 @@ public class MonitorFactory {
             simulateDelayText.setText(Double.toString(simulateDelay));
             simulateDelayText.addSelectionListener(this);
             
-            composite = new Composite(shell,SWT.BORDER);
+            algorithmCombo = new Combo(group,SWT.DROP_DOWN);
+            algorithmCombo.add("onPut");
+            algorithmCombo.add("onChange");
+            algorithmCombo.add("onAbsolute");
+            algorithmCombo.add("onPercentage");
+            algorithmCombo.add("custom");
+            algorithmCombo.select(0);
+            algorithmCombo.addSelectionListener(this);
+            Composite deadbandComposite = new Composite(group,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 1;
-            composite.setLayout(gridLayout);
-            Composite monitorTypeComposite = new Composite(composite,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 4;
-            monitorTypeComposite.setLayout(gridLayout);
-            putButton = new Button(monitorTypeComposite,SWT.RADIO);
-            putButton.setText("onPut");
-            putButton.addSelectionListener(this);
-            putButton.setSelection(true);
-            changeButton = new Button(monitorTypeComposite,SWT.RADIO);
-            changeButton.setText("onChange");
-            changeButton.addSelectionListener(this);
-            absoluteButton = new Button(monitorTypeComposite,SWT.RADIO);
-            absoluteButton.setText("onAbsolute");
-            absoluteButton.addSelectionListener(this);
-            percentageButton = new Button(monitorTypeComposite,SWT.RADIO);
-            percentageButton.setText("onPercentage");
-            percentageButton.addSelectionListener(this);
+            gridLayout.numColumns = 2;
+            deadbandComposite.setLayout(gridLayout);
+            new Label(deadbandComposite,SWT.NONE).setText("deadband");
+            deadbandText = new Text(deadbandComposite,SWT.BORDER);
+            gridData = new GridData(); 
+            gridData.widthHint = 75;
+            deadbandText.setLayoutData(gridData);
+            deadbandText.setText(Double.toString(deadband));
+            deadbandText.addSelectionListener(this);
+            
             Composite startStopComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -278,26 +271,23 @@ public class MonitorFactory {
                 }
                 return;
             }
-            if(object==putButton) {
-                if(!putButton.getSelection()) return;
-                pvAlgorithm.put("onPut");
+            if(object==algorithmCombo) {
+                int item = algorithmCombo.getSelectionIndex();
+                if(item==0) {
+                    pvAlgorithm.put("onPut");
+                } else if(item==1) {
+                    pvAlgorithm.put("onChange");
+                } else if(item==2) {
+                    pvAlgorithm.put("onAbsoluteChange");
+                } else if(item==3) {
+                    pvAlgorithm.put("onPercentChange");
+                } else if(item==4) {
+                    message("custom not implemented",MessageType.info);
+                    algorithmCombo.select(0);
+                }
                 return;
             }
-            if(object==changeButton) {
-                if(!changeButton.getSelection()) return;
-                pvAlgorithm.put("onChange");
-                return;
-            }
-            if(object==absoluteButton) {
-                if(!absoluteButton.getSelection()) return;
-                pvAlgorithm.put("onAbsoluteChange");
-                return;
-            }
-            if(object==percentageButton) {
-                if(!percentageButton.getSelection()) return;
-                pvAlgorithm.put("onPercentChange");
-                return;
-            }
+            
             if(object==queueSizeText) {
                 String value = queueSizeText.getText();
                 try {
@@ -340,6 +330,17 @@ public class MonitorFactory {
                 disableOptions();
                 startStopButton.setEnabled(true);
                 monitor.start();
+                return;
+            }
+            if(object==statusButton) {
+                if(channel==null) {
+                    message("not connected",MessageType.info);
+                    return;
+                }
+                String message = "connectionState:" + channel.getConnectionState().toString();
+                message(message,MessageType.info);
+                message = "provider:" + channel.getProviderName() + " host:" + channel.getRemoteAddress();
+                message(message,MessageType.info);
                 return;
             }
         }
@@ -406,10 +407,14 @@ public class MonitorFactory {
             if(channel==null) return;
             boolean isConnected = channel.isConnected();
             if(isConnected) {
-                connectButton.setEnabled(false);
-                disconnectButton.setEnabled(true);
-                createRequestButton.setEnabled(true);
                 startStopButton.setText("startMonitor");
+                disconnectButton.setEnabled(true);
+                connectButton.setEnabled(false);
+                if(ConnectChannelFactory.pvDataCompatible(channel)) {
+                    createRequestButton.setEnabled(true);
+                } else {
+                    startStopButton.setEnabled(true);
+                }
             } else {
                 connectButton.setEnabled(true);
                 createRequestButton.setEnabled(false);
@@ -450,7 +455,9 @@ public class MonitorFactory {
             public void run() {
                 switch(monitorItRunRequest) {
                 case start:
-                    channel.createMonitor(this, pvRequest, pvRequest.getField().getFieldName(), pvOption);
+                    String structureName = "";
+                    if(pvRequest!=null) structureName = pvRequest.getField().getFieldName();
+                    channel.createMonitor(this, pvRequest,structureName, pvOption);
                     return;
                 case stop:
                     if(monitor!=null) {
@@ -575,19 +582,13 @@ public class MonitorFactory {
         }
         
         private void disableOptions() {
-            putButton.setEnabled(false);
-            changeButton.setEnabled(false);
-            absoluteButton.setEnabled(false);
-            percentageButton.setEnabled(false);
+            algorithmCombo.setEnabled(false);
             deadbandText.setEnabled(false);
             queueSizeText.setEnabled(false);
         }
 
         private void enableOptions() {
-            putButton.setEnabled(true);
-            changeButton.setEnabled(true);
-            absoluteButton.setEnabled(true);
-            percentageButton.setEnabled(true);
+            algorithmCombo.setEnabled(true);
             deadbandText.setEnabled(true);
             queueSizeText.setEnabled(true);
         }

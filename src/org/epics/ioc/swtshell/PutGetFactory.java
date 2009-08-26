@@ -291,7 +291,6 @@ public class PutGetFactory {
                     connectButton.setEnabled(false);
                     disconnectButton.setEnabled(true);
                     putGet.connect(isProcess);
-                    
                 } else {
                     putGet.disconnect();
                     connectButton.setEnabled(true);

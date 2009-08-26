@@ -237,7 +237,12 @@ public class PutFactory {
             if(isConnected) {
                 connectButton.setEnabled(false);
                 disconnectButton.setEnabled(true);
-                createRequestButton.setEnabled(true);
+                if(ConnectChannelFactory.pvDataCompatible(channel)) {
+                    createRequestButton.setEnabled(true);
+                } else {
+                    put.connect(false, false);
+                    putButton.setEnabled(true);
+                }
             } else {
                 put.disconnect();
                 connectButton.setEnabled(true);
@@ -306,7 +311,9 @@ public class PutFactory {
             public void run() {
                 switch(runRequest) {
                 case create:
-                    channel.createChannelPut(this, pvRequest, pvRequest.getField().getFieldName(),isShared,process,null);
+                    String structureName = "";
+                    if(pvRequest!=null) structureName = pvRequest.getField().getFieldName();
+                    channel.createChannelPut(this, pvRequest, structureName,isShared,process,null);
                     break;
                 case disconnect:
                     channelPut.destroy();
