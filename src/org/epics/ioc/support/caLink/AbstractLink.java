@@ -141,7 +141,13 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
      */
     @Override
     public void callback(AfterStartNode node) {
-        channelProvider.createChannel(pvnamePV.get(), this,ChannelProvider.PRIORITY_LINKS_DB);
+        String providerName = channelProvider.getProviderName();
+        String pvname = pvnamePV.get();
+        if(providerName.equals("local") || providerName.indexOf('4')>=0) {
+            int index = pvname.indexOf('.');
+            if(index>0) pvname = pvname.substring(0, index);
+        }
+        channelProvider.createChannel(pvname, this,ChannelProvider.PRIORITY_LINKS_DB);
         afterStart.done(afterStartNode);
         afterStart = null;
     }

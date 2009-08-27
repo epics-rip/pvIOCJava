@@ -181,7 +181,7 @@ abstract class AbstractIOLink extends AbstractLink {
         if(provider.equals("caV3")) fieldname ="VAL";
         int index = pvname.indexOf('.');
         if(index>0) {
-            fieldname = pvname.substring(index-1);
+            fieldname = pvname.substring(index+1);
             pvname = pvname.substring(0, index);
         }
         pvRequest = pvDataCreate.createPVStructure(null, pvname, new Field[0]);
