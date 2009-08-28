@@ -201,7 +201,7 @@ public class RecordProcessFactory {
                     if(pvProcessAfterStart.get()) {
                         afterStartNode = AfterStartFactory.allocNode(this);
                         this.afterStart = afterStart;
-                        afterStart.requestCallback(afterStartNode, true, ThreadPriority.high);
+                        afterStart.requestCallback(afterStartNode, true, ThreadPriority.middle);
                     }
                 }
             } finally {
