@@ -612,11 +612,11 @@ public class RecordProcessFactory {
                 return false;
             }
             if(active) {
-                recordProcessRequester.message("record already active",MessageType.warning);
+                if(trace) traceMessage("record already active");
                 return false;
             }
             if(!isEnabled()) {
-                recordProcessRequester.message("record is disabled ",MessageType.warning);
+                if(trace) traceMessage("record is disabled");
                 return false;
             }
             SupportState supportState = fieldSupport.getSupportState();
