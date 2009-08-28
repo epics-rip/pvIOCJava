@@ -45,7 +45,6 @@ public class DelayFactory {
         private PVDouble minAccess = null;
         private PVDouble maxAccess = null;
         private PVDouble incAccess = null;
-        private double min,max,inc;
         private double delay = 0;
         private SupportProcessRequester supportProcessRequester = null;
 
@@ -87,9 +86,9 @@ public class DelayFactory {
          */
         public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            min = minAccess.get();
-            max = maxAccess.get();
-            inc = incAccess.get();
+            double min = minAccess.get();
+            double max = maxAccess.get();
+            double inc = incAccess.get();
             if(min>max || inc<0) {
                 super.message(
                         "Illegal values for min,max,inc. (min must be <= max) and (inc must be >=0)",
@@ -97,7 +96,6 @@ public class DelayFactory {
                 return;
             }
             delay = min;
-            
             setSupportState(SupportState.ready);
         }
         /* (non-Javadoc)
@@ -113,6 +111,15 @@ public class DelayFactory {
          */
         public void process(SupportProcessRequester supportProcessRequester) {
             this.supportProcessRequester = supportProcessRequester;
+            double min = minAccess.get();
+            double max = maxAccess.get();
+            double inc = incAccess.get();
+            if(min>max || inc<0) {
+                super.message(
+                        "Illegal values for min,max,inc. (min must be <= max) and (inc must be >=0)",
+                        MessageType.error);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
+            }
             timer.scheduleAfterDelay(timerNode, delay);
             delay += inc;
             if(delay>max) delay = min;
