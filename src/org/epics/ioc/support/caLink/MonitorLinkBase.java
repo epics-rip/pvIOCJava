@@ -65,6 +65,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     private boolean process = false;
     private PVStructure pvOption = null;
     private PVString pvAlgorithm = null;
+    private boolean overrun = false;
 
     private MonitorElement monitorElement = null;
     
@@ -157,7 +158,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
-        getCD();
+        getData();
         supportProcessRequester.supportProcessDone(RequestResult.success);
     } 
     /* (non-Javadoc)
@@ -212,15 +213,17 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
             if(monitorElement==null) return;
             if(process) {
                 if(isRecordProcessRequester) {
-                    becomeProcessor(recordProcess);
+                    boolean canProcess = recordProcess.process(this, false, null);
+                    if(canProcess) return;
+                    overrun = true;
                 } else {
                     processSelf.request(this);
+                    return;
                 }
-                return;
             }
             pvRecord.lock();
             try {
-                getCD();
+                getData();
                 return;
             } finally {
                 pvRecord.unlock();
@@ -252,13 +255,18 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
      */
     public void becomeProcessor(RecordProcess recordProcess) {
         boolean canProcess = recordProcess.process(this, false, null);
-        if(!canProcess) {
-            recordProcessComplete();
-            return;
+        if(canProcess) return;
+        pvRecord.lock();
+        try {
+            overrun = true;
+            getData();
+        } finally {
+            pvRecord.unlock();
         }
+        run();
     }
     
-    private void getCD() {
+    private void getData() {
         PVStructure monitorStructure = monitorElement.getPVStructure();
         BitSet changeBitSet = monitorElement.getChangedBitSet();
         BitSet overrunBitSet = monitorElement.getOverrunBitSet();
@@ -275,11 +283,12 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
             PVField pvLink = monitorStructure.getSubField(propertyPVFields[i].getField().getFieldName());
             copyChanged(pvLink,propertyPVFields[i],changeBitSet,allSet);
         }
-        if(overrunBitSet.nextSetBit(0)>=0) {
+        if(overrun || overrunBitSet.nextSetBit(0)>=0) {
             alarmSupport.setAlarm(
                     "overrun",
                     AlarmSeverity.none);
         }
+        overrun = false;
         monitor.release(monitorElement);
         monitorElement = null;
     }
