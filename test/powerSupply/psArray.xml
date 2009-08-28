@@ -4,13 +4,14 @@
 <record recordName = "powerSupplyArray" >
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "supply">
+    <structure name = "supply" extends = "generic">
         <structure name = "0" extends = "generic" >
             <structure name = "alarm" extends = "alarm" />
             <structure name = "voltage" extends = "generic">
                  <scalar name = "value" scalarType = "double">1.0</scalar>
             </structure>
             <structure name = "current" extends = "generic">
+                 <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.genericFactory</auxInfo>
                  <scalar name = "value" scalarType = "double">
                     <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.powerSupplyFactory</auxInfo>
                  </scalar>
