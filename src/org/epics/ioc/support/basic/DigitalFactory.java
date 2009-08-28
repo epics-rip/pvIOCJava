@@ -66,7 +66,7 @@ public class DigitalFactory {
     }
     
     private static final String digitalInputName = "org.epics.ioc.digitalInputFactory";
-    private static final String digitalOutputName = "org.epics.ioc.digitalOutputFcatory";
+    private static final String digitalOutputName = "org.epics.ioc.digitalOutputFactory";
     private static PVDatabase pvDatabaseMaster = PVDatabaseFactory.getMaster();
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static Convert convert = ConvertFactory.getConvert();
