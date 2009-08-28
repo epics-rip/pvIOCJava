@@ -134,7 +134,11 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         }
         super.start(afterStart);
         this.afterStart = afterStart;
-        afterStart.requestCallback(afterStartNode, true, ThreadPriority.low);
+        if(providerName.equals("local")) {
+            afterStart.requestCallback(afterStartNode, true, ThreadPriority.high);
+        } else {
+            channelProvider.createChannel(pvnamePV.get(), this,ChannelProvider.PRIORITY_LINKS_DB);
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
