@@ -386,6 +386,8 @@ public class PutGetFactory {
             }
             
             BitSet getGetBitSet() {
+                getBitSet.clear();
+                getBitSet.set(0);
                 return getBitSet;
             }
             
@@ -434,6 +436,8 @@ public class PutGetFactory {
                 this.channelPutGet = channelPutGet;
                 this.pvPutStructure = pvPutStructure;
                 this.pvGetStructure = pvGetStructure;
+                putBitSet = new BitSet(pvPutStructure.getNumberFields());
+                getBitSet = new BitSet(pvGetStructure.getNumberFields());
                 isCreated = true;
                 guiPutGet.putGetConnect();
             }
