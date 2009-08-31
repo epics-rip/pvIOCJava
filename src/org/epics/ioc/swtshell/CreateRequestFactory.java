@@ -207,7 +207,7 @@ public class CreateRequestFactory {
             switch(runState) {
             case createDone: { // must run as swt thread
                 SelectSubSet selectSubSet = new SelectSubSet(shell);
-                PVStructure pvStructure = pvDataCreate.createPVStructure(null, "", channelStructure);
+                PVStructure pvStructure = pvDataCreate.createPVStructure(null, channelStructure);
                 BitSet bitSet = selectSubSet.getSubSet(pvStructure,channel.getChannelName());
                 pvRequest = pvDataCreate.createPVStructure(null,channel.getChannelName(), new Field[0]);
                 createPVRequest(bitSet,pvStructure,pvRequest);
