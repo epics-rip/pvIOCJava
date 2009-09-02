@@ -15,11 +15,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.*;
 import org.epics.ca.channelAccess.client.Channel;
 import org.epics.pvData.factory.PVDataFactory;
@@ -541,10 +536,15 @@ public class MonitorFactory {
                                 MonitorElement monitorElement = theMonitor.poll();
                                 if(monitorElement==null) break;
                                 PVStructure pvStructure = monitorElement.getPVStructure();
-                                BitSet changeBitSet = monitorElement.getChangedBitSet();
-                                BitSet overrunBitSet = monitorElement.getOverrunBitSet();
-                                printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, overrunBitSet, consoleText);
-                                printModified.print();
+                                if(pvStructure==null) {
+                                    consoleText.append("monitor occured");
+                                    consoleText.append(String.format("%n"));
+                                } else {
+                                    BitSet changeBitSet = monitorElement.getChangedBitSet();
+                                    BitSet overrunBitSet = monitorElement.getOverrunBitSet();
+                                    printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, overrunBitSet, consoleText);
+                                    printModified.print();
+                                }
                                 monitor.release(monitorElement);
                             }
                             lock.lock();

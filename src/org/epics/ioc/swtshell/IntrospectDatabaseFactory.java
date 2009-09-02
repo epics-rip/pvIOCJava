@@ -33,10 +33,7 @@ import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScannerFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadCreateFactory;
-import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.TimeFunction;
 import org.epics.pvData.misc.TimeFunctionFactory;
 import org.epics.pvData.misc.TimeFunctionRequester;
@@ -61,7 +58,6 @@ import org.epics.pvData.pv.Requester;
  *
  */
 public class IntrospectDatabaseFactory {
-    private static final Executor executor = ExecutorFactory.create("swtshell:introspectDatabase",ThreadPriority.low);
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     private static final String newLine = String.format("%n");
@@ -647,7 +643,6 @@ public class IntrospectDatabaseFactory {
                 if(!recordProcess.setRecordProcessRequester(processIt)) return "could not process the record";
                 TimeFunction timeFunction = TimeFunctionFactory.create(processIt);
                 double perCall = timeFunction.timeCall();
-                executor.stop();
                 String result =  " records/second=" + 1.0/perCall;
                 recordProcess.releaseRecordProcessRequester(processIt);
                 return result;
