@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<record recordName = "${IOCNAME}recordListRPC" extends = "recordList" />
+<record recordName = "${IOCNAME}structureListRPC" extends = "structureList" />
+<record recordName = "${IOCNAME}iocShowRPC" extends = "iocShow" />
+<record recordName = "${IOCNAME}recordShowRPC" extends = "recordShow" />
+<record recordName = "${IOCNAME}supportStateSetRPC" extends = "supportStateSet" />
+</database>
