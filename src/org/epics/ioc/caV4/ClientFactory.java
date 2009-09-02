@@ -39,7 +39,7 @@ public class ClientFactory {
     /**
      * This initializes the Channel Access client.
      */
-    public static void start() {
+    public static synchronized void start() {
         if(isRegistered) return;
         isRegistered = true;
         AfterStartDelay afterStartDelay = new AfterStartDelay();

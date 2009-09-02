@@ -33,7 +33,8 @@ public class SwtshellFactory {
      * Create a SWT (Standard Widget Toolkit) shell for a javaIOC.
      */
     public static void swtshell() {
-        new ThreadInstance();
+//       new ThreadInstance();
+       ThreadInstance.createGUI();	// NOTE: Mac OS X requires SWT to be run in main() thread
     }
     
     /**
@@ -59,6 +60,11 @@ public class SwtshellFactory {
         @Override
         public void run(ThreadReady threadReady) {
             threadReady.ready();
+            createGUI();
+        }
+        
+        public static void createGUI()
+        {
             final Display display = new Display();
             Shell shell = new Shell(display);
             shell.setText("swtshell");
