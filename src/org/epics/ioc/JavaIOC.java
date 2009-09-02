@@ -21,9 +21,6 @@ import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
-
-
-
 /**
  * The main program to start a JavaIOC.
  * The program is started with a command line of
@@ -89,8 +86,6 @@ public class JavaIOC {
                     state = State.records;
                 } else if(arg.equals("swtshell")) {
                     SwtshellFactory.swtshell();
-                } else if(arg.equals("javaIOCswtshell")) {
-                    startSWTShell();
                 } else if(arg.equals("server")) {
                     state = State.servers;
                 } else {
@@ -213,56 +208,13 @@ public class JavaIOC {
             System.out.println("IllegalStateException: " + e);
         }
     }
-    
-    static void startSWTShell() {
-        String factoryName = "org.epics.pvData.swtshell.SwtshellFactory";
-        Class startClass;
-        Method method = null;
-        try {
-            startClass = Class.forName(factoryName);
-        }catch (ClassNotFoundException e) {
-            printError("server factory "
-                    + e.getLocalizedMessage()
-                    + " class not found");
-            return;
-        }
-        try {
-            method = startClass.getDeclaredMethod("swtshell", (Class[])null);
-        } catch (NoSuchMethodException e) {
-            printError("server factory "
-                    + e.getLocalizedMessage()
-                    + " method start not found");
-            return;
-        }
-        if(!Modifier.isStatic(method.getModifiers())) {
-            printError("server factory "
-                    + factoryName
-                    + " start is not a static method ");
-            return;
-        }
-        try {
-            method.invoke(null, new Object[0]);
-        } catch(IllegalAccessException e) {
-            printError("server start IllegalAccessException "
-                    + e.getLocalizedMessage());
-            return;
-        } catch(IllegalArgumentException e) {
-            printError("server start IllegalArgumentException "
-                    + e.getLocalizedMessage());
-            return;
-        } catch(InvocationTargetException e) {
-            printError("server start InvocationTargetException "
-                    + e.getLocalizedMessage());
-            return;
-        }
-    }
      
     private static class Listener implements Requester {
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#getRequesterName()
          */
         public String getRequesterName() {
-            return "XMLTODatabase";
+            return "javaIOC";
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
