@@ -341,12 +341,12 @@ public class ScannerFactory {
         private int deltaPeriod = 10;
                 
         private PeriodicScannerImpl() {
-            String envValue = System.getenv("IOCPeriodicScanPeriodMinimum");
+            String envValue = System.getProperty("IOCPeriodicScanPeriodMinimum", System.getenv("IOCPeriodicScanPeriodMinimum"));
             if(envValue!=null) {
                 double value = Double.parseDouble(envValue);
                 minPeriod = (long)(value*1000.0);
             }
-            envValue = System.getenv("IOCPeriodicScanPeriodDelta");
+            envValue = System.getProperty("IOCPeriodicScanPeriodDelta", System.getenv("IOCPeriodicScanPeriodDelta"));
             if(envValue!=null) {
                 double value = Double.parseDouble(envValue);
                 deltaPeriod = (int)(value*1000.0);
