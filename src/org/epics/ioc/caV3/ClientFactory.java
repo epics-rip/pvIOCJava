@@ -144,7 +144,7 @@ public class ClientFactory  {
 		 * @see org.epics.ca.channelAccess.client.ChannelProvider#channelFind(org.epics.pvData.pv.PVField, org.epics.ca.channelAccess.client.QueryRequester)
 		 */
 		@Override
-		public Query channelFind(PVField query, QueryRequester queryRequester) {
+		public Query query(PVField query, QueryRequester queryRequester) {
 			return null;
 		}
         /* (non-Javadoc)
