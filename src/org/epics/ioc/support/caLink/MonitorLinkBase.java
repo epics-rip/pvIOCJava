@@ -31,6 +31,7 @@ import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
 
 /**
@@ -182,10 +183,11 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
         }
     } 
     /* (non-Javadoc)
-     * @see org.epics.pvData.monitor.MonitorRequester#monitorConnect(org.epics.pvData.monitor.Monitor, org.epics.pvData.pv.Structure)
+     * @see org.epics.pvData.monitor.MonitorRequester#monitorConnect(Status,org.epics.pvData.monitor.Monitor, org.epics.pvData.pv.Structure)
      */
     @Override
-    public void monitorConnect(Monitor monitor, Structure structure) {
+    public void monitorConnect(Status status, Monitor monitor, Structure structure) {
+    	// TODO check status
         this.monitor = monitor;
         pvRecord.lock();
         try {

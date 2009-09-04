@@ -22,6 +22,7 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Status;
 
 /**
  * Implementation for a channel access input link.
@@ -99,10 +100,11 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelGetRequester#channelGetConnect(org.epics.ca.channelAccess.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+     * @see org.epics.ca.channelAccess.client.ChannelGetRequester#channelGetConnect(Status, org.epics.ca.channelAccess.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
      */
     @Override
-    public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
+    public void channelGetConnect(Status status, ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
+    	// TODO status check
         this.channelGet = channelGet;
         pvRecord.lock();
         try {
@@ -167,11 +169,11 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         channelGet.get(false);
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelGetRequester#getDone(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelGetRequester#getDone(Status)
      */
     @Override
-    public void getDone(boolean success) {
-        requestResult = (success ? RequestResult.success : RequestResult.failure);
+    public void getDone(Status success) {
+        requestResult = (success.isOK() ? RequestResult.success : RequestResult.failure);
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)

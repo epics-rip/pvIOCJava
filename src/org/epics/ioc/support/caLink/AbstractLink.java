@@ -28,6 +28,7 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Status;
 
 /**
  * Abstract Support for Channel Access Link.
@@ -156,21 +157,17 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         afterStart = null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
      */
     @Override
-    public void channelCreated(Channel channel) {
-        this.channel = channel;
-        channel.connect();
-    }
-
-    /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-     */
-    @Override
-    public void channelNotCreated() {
-        message("pvname " + pvnamePV.get() +  " not created",MessageType.error);
-        return;
+    public void channelCreated(Status status, Channel channel) {
+    	if (status.isOK()) {
+	        this.channel = channel;
+	        channel.connect();
+    	}
+    	else {
+            message("pvname " + pvnamePV.get() +  " not created",MessageType.error);
+    	}
     }
 
     /* (non-Javadoc)

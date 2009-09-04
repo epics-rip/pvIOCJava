@@ -20,6 +20,7 @@ import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Status;
 
 
 /**
@@ -92,10 +93,11 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#channelPutConnect(org.epics.ca.channelAccess.client.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#channelPutConnect(Status,org.epics.ca.channelAccess.client.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
      */
     @Override
-    public void channelPutConnect(ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
+    public void channelPutConnect(Status status, ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
+    	// TODO status
         this.channelPut = channelPut;
         linkPVStructure = pvStructure;
         this.bitSet = bitSet;
@@ -149,16 +151,16 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         channelPut.put(false);  
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#getDone(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#getDone(Status)
      */
     @Override
-    public void getDone(boolean success) {/*nothing to do*/}
+    public void getDone(Status success) {/*nothing to do*/}
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#putDone(boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelPutRequester#putDone(Status)
      */
     @Override
-    public void putDone(boolean success) {
-        requestResult = (success ? RequestResult.success : RequestResult.failure);
+    public void putDone(Status success) {
+        requestResult = (success.isOK() ? RequestResult.success : RequestResult.failure);
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)

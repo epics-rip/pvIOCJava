@@ -34,8 +34,12 @@ import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
+import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.StatusCreate;
+import org.epics.pvData.pv.Status.StatusType;
 
 public class ClientFactory {
     static private boolean isRegistered = false; 
@@ -90,7 +94,10 @@ public class ClientFactory {
         }
 
     }
-	
+
+    private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
+    private static final Status okStatus = statusCreate.getStatusOK();
+
 	private static class ChannelProviderImpl implements ChannelProvider
 	{
 	    static private final String providerName = "caV4";
@@ -131,12 +138,10 @@ public class ClientFactory {
 			try {
 				channel = context.createChannel(channelName, cl, priority);
 			} catch (Throwable th) {
-				// TODO error handling missing in IF
-				th.printStackTrace();
-				channelRequester.channelNotCreated();
+				channelRequester.channelCreated(statusCreate.createStatus(StatusType.ERROR, "failed to create channel", th), null);
 				return null;
 			}
-		    channelRequester.channelCreated(channel);
+		    channelRequester.channelCreated(okStatus, channel);
 		    return channel;
 		}
 		@Override

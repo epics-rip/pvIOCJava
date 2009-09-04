@@ -13,6 +13,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.Status;
 /**
  * Implementation for a channel access output link.
  * @author mrk
@@ -52,10 +53,11 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(org.epics.ca.channelAccess.client.ChannelProcess)
+     * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(Status,org.epics.ca.channelAccess.client.ChannelProcess)
      */
     @Override
-    public void channelProcessConnect(ChannelProcess channelProcess) {
+    public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
+    	// TODO check status
         pvRecord.lock();
         try {
             this.channelProcess = channelProcess;
@@ -96,8 +98,8 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
      * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(boolean)
      */
     @Override
-    public void processDone(boolean success) {
-        this.success = success;
+    public void processDone(Status success) {
+        this.success = success.isOK();
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)
