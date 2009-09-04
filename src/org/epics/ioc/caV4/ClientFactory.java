@@ -22,6 +22,8 @@ import org.epics.ca.channelAccess.client.ChannelFind;
 import org.epics.ca.channelAccess.client.ChannelFindRequester;
 import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.client.Query;
+import org.epics.ca.channelAccess.client.QueryRequester;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ConnectionEvent;
@@ -33,6 +35,7 @@ import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.pv.PVField;
 
 public class ClientFactory {
     static private boolean isRegistered = false; 
@@ -106,7 +109,13 @@ public class ClientFactory {
 			// TODO there is no actual support for find right now in CA... can be done via create
 			throw new RuntimeException("not implemented");
 		}
-		
+        /* (non-Javadoc)
+		 * @see org.epics.ca.channelAccess.client.ChannelProvider#channelFind(org.epics.pvData.pv.PVField, org.epics.ca.channelAccess.client.QueryRequester)
+		 */
+		@Override
+		public Query channelFind(PVField query, QueryRequester queryRequester) {
+			return null;
+		}
         @Override
 		public Channel createChannel(String channelName,
 				final ChannelRequester channelRequester, short priority) {

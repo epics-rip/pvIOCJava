@@ -23,6 +23,8 @@ import org.epics.ca.channelAccess.client.ChannelFind;
 import org.epics.ca.channelAccess.client.ChannelFindRequester;
 import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.client.Query;
+import org.epics.ca.channelAccess.client.QueryRequester;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
@@ -34,6 +36,7 @@ import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
+import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.ScalarType;
 
 
@@ -137,6 +140,13 @@ public class ClientFactory  {
             locateFind.find(channelFindRequester);
             return locateFind;
         }
+        /* (non-Javadoc)
+		 * @see org.epics.ca.channelAccess.client.ChannelProvider#channelFind(org.epics.pvData.pv.PVField, org.epics.ca.channelAccess.client.QueryRequester)
+		 */
+		@Override
+		public Query channelFind(PVField query, QueryRequester queryRequester) {
+			return null;
+		}
         /* (non-Javadoc)
          * @see org.epics.ca.channelAccess.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.channelAccess.client.ChannelRequester, short)
          */
