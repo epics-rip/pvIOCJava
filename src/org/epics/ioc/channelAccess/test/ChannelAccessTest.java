@@ -61,6 +61,7 @@ import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.StringArrayData;
 import org.epics.pvData.pv.Structure;
 import org.epics.pvData.pv.Type;
@@ -99,12 +100,7 @@ public class ChannelAccessTest extends TestCase {
 		}
 		
 		@Override
-		public synchronized void channelNotCreated() {
-			this.notifyAll();
-		}
-		
-		@Override
-		public synchronized void channelCreated(org.epics.ca.channelAccess.client.Channel channel) {
+		public synchronized void channelCreated(Status status,org.epics.ca.channelAccess.client.Channel channel) {
 			this.channel = channel;
 			this.notifyAll();
 		}
@@ -192,13 +188,13 @@ public class ChannelAccessTest extends TestCase {
 		private Boolean success = null;
 		
 		@Override
-		public void channelGetConnect(ChannelGet channelGet, PVStructure pvStructure, BitSet bitSet) {
+		public void channelGetConnect(Status status,ChannelGet channelGet, PVStructure pvStructure, BitSet bitSet) {
 			synchronized (this) {
 				this.channelGet = channelGet;
 				this.pvStructure = pvStructure;
 				this.bitSet = bitSet;
 
-				connected = new Boolean(true);	// put here connection status
+				connected = new Boolean(status.isOK());
 				this.notify();
 			}
 		}
@@ -245,9 +241,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 		
 		@Override
-		public void getDone(boolean success) {
+		public void getDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -274,13 +270,13 @@ public class ChannelAccessTest extends TestCase {
 		private Boolean success = null;
 
 		@Override
-		public void channelPutConnect(ChannelPut channelPut, PVStructure pvStructure, BitSet bitSet) {
+		public void channelPutConnect(Status status,ChannelPut channelPut, PVStructure pvStructure, BitSet bitSet) {
 			synchronized (this) {
 				this.channelPut = channelPut;
 				this.pvStructure = pvStructure;
 				this.bitSet = bitSet;
 
-				connected = new Boolean(true);	// put here connection status
+				connected = new Boolean(status.isOK());
 				this.notify();
 			}
 		}
@@ -327,9 +323,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 		
 		@Override
-		public void getDone(boolean success) {
+		public void getDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -356,9 +352,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 		
 		@Override
-		public void putDone(boolean success) {
+		public void putDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -389,6 +385,7 @@ public class ChannelAccessTest extends TestCase {
 		 */
 		@Override
 		public void channelPutGetConnect(
+				Status status,
 				ChannelPutGet channelPutGet,
 				PVStructure pvPutStructure, PVStructure pvGetStructure) {
 			synchronized (this)
@@ -397,7 +394,7 @@ public class ChannelAccessTest extends TestCase {
 				this.pvPutStructure = pvPutStructure;
 				this.pvGetStructure = pvGetStructure;
 
-				connected = new Boolean(true);	// put here connection status
+				connected = new Boolean(status.isOK());
 				this.notify();
 			}
 		}
@@ -444,9 +441,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 	
 		@Override
-		public void putGetDone(boolean success) {
+		public void putGetDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -473,9 +470,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 	
 		@Override
-		public void getGetDone(boolean success) {
+		public void getGetDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -502,9 +499,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 
 		@Override
-		public void getPutDone(boolean success) {
+		public void getPutDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -526,13 +523,13 @@ public class ChannelAccessTest extends TestCase {
 		volatile ChannelProcess channelProcess;
 		
 		@Override
-		public void processDone(boolean success) {
+		public void processDone(Status success) {
 			System.out.println("processDone: " + success);
 			channelProcess.process(true);
 		}
 		
 		@Override
-		public void channelProcessConnect(ChannelProcess channelProcess) {
+		public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
 			System.out.println("channelProcessConnect done");
 			this.channelProcess = channelProcess;
 			channelProcess.process(false);
@@ -557,10 +554,10 @@ public class ChannelAccessTest extends TestCase {
 		private Boolean success;
 		
 		@Override
-		public void getDone(Field field) {
+		public void getDone(Status status,Field field) {
 			synchronized (this) {
 				this.field = field;
-				this.success = new Boolean(true);
+				this.success = new Boolean(status.isOK());
 				this.notify();
 			}
 		}
@@ -603,19 +600,19 @@ public class ChannelAccessTest extends TestCase {
 		private Boolean connected;
 		
 		@Override
-		public void processDone(boolean success) {
+		public void processDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(true);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
 		
 		@Override
-		public void channelProcessConnect(ChannelProcess channelProcess) {
+		public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
 			synchronized (this) {
 				this.channelProcess = channelProcess;
 	
-				connected = new Boolean(channelProcess != null);	// put here connection status
+				connected = new Boolean(status.isOK());
 				this.notify();
 			}
 		}
@@ -679,13 +676,13 @@ public class ChannelAccessTest extends TestCase {
 		private Boolean success = null;
 
 		@Override
-		public void channelArrayConnect(ChannelArray channelArray, PVArray pvArray) {
+		public void channelArrayConnect(Status status,ChannelArray channelArray, PVArray pvArray) {
 			synchronized (this)
 			{
 				this.channelArray = channelArray;
 				this.pvArray = pvArray;
 
-				connected = new Boolean(true);	// put here connection status
+				connected = new Boolean(status.isOK());	
 				this.notify();
 			}
 		}
@@ -709,9 +706,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 
 		@Override
-		public void getArrayDone(boolean success) {
+		public void getArrayDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -738,9 +735,9 @@ public class ChannelAccessTest extends TestCase {
 		}
 
 		@Override
-		public void putArrayDone(boolean success) {
+		public void putArrayDone(Status success) {
 			synchronized (this) {
-				this.success = new Boolean(success);
+				this.success = new Boolean(success.isOK());
 				this.notify();
 			}
 		}
@@ -791,12 +788,12 @@ public class ChannelAccessTest extends TestCase {
 		private Boolean connected = null;
 
 		@Override
-		public void monitorConnect(Monitor channelMonitor, Structure structure) {
+		public void monitorConnect(Status status,Monitor channelMonitor, Structure structure) {
 			synchronized (this)
 			{
 				this.channelMonitor = channelMonitor;
 
-				connected = new Boolean(true);	// put here connection status
+				connected = new Boolean(status.isOK());
 				this.notify();
 			}
 		}

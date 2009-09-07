@@ -14,8 +14,6 @@
 
 package org.epics.ioc.channelAccess.test;
 
-import java.nio.ByteBuffer;
-
 import junit.framework.TestCase;
 
 import org.epics.ca.channelAccess.client.Channel;
@@ -26,6 +24,7 @@ import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Status;
 
 /**
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
@@ -59,14 +58,9 @@ public class ChannelCreateDestoryTest extends TestCase {
 				boolean isConnected) {
 			// TODO Auto-generated method stub
 		}
-		
+				
 		@Override
-		public synchronized void channelNotCreated() {
-			this.notifyAll();
-		}
-		
-		@Override
-		public synchronized void channelCreated(org.epics.ca.channelAccess.client.Channel channel) {
+		public synchronized void channelCreated(Status status, org.epics.ca.channelAccess.client.Channel channel) {
 			this.channel = channel;
 			this.notifyAll();
 		}
