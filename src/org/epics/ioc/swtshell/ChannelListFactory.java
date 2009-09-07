@@ -27,7 +27,11 @@ import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
 import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.pvData.factory.PVDataFactory;
-import org.epics.pvData.misc.*;
+import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorNode;
+import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.misc.Timer;
+import org.epics.pvData.misc.TimerFactory;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
@@ -37,6 +41,7 @@ import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.StringArrayData;
 
 
@@ -290,19 +295,16 @@ public class ChannelListFactory {
             }
             
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
              */
             @Override
-            public void channelCreated(Channel channel) {
+            public void channelCreated(Status status, Channel channel) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.channel = channel;
                 createPutGet();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-             */
-            @Override
-            public void channelNotCreated() {
-                requester.message("channel not created", MessageType.error);
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
@@ -322,12 +324,16 @@ public class ChannelListFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(Status,org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
              */
             @Override
-            public void channelPutGetConnect(ChannelPutGet channelPutGet,
+            public void channelPutGetConnect(Status status,ChannelPutGet channelPutGet,
                     PVStructure pvPutStructure, PVStructure pvGetStructure)
             {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.channelPutGet = channelPutGet;
                 if(pvPutStructure!=null && pvGetStructure!=null) {
                     pvDatabase = pvPutStructure.getStringField("database");
@@ -338,7 +344,7 @@ public class ChannelListFactory {
                     if(pvDatabase!=null && pvRegularExpression!=null && pvStatus!=null && pvArray!=null) {
                         pvDatabase.put("master");
                         pvRegularExpression.put(regularExpression);
-                        channelPutGet.putGet(true);
+                        this.channelPutGet.putGet(true);
                         return;
                     }
                 }
@@ -363,25 +369,25 @@ public class ChannelListFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getGetDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getGetDone(Status)
              */
             @Override
-            public void getGetDone(boolean success) {}
+            public void getGetDone(Status success) {}
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getPutDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getPutDone(Status)
              */
             @Override
-            public void getPutDone(boolean success) {}
+            public void getPutDone(Status success) {}
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#putGetDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#putGetDone(Status)
              */
             @Override
-            public void putGetDone(boolean success) {
-                if(!success) {
-                    requester.message("request failed",MessageType.error);
-                    return;
+            public void putGetDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
                 }
                 int length = pvRecordNames.getLength();
                 if(length<1) {

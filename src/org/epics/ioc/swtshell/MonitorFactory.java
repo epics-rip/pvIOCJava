@@ -33,6 +33,7 @@ import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
 
 /**
@@ -359,20 +360,17 @@ public class MonitorFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Channel channel) {
+        public void channelCreated(Status status,Channel channel) {
+            if (!status.isOK()) {
+            	message(status.toString(),MessageType.error);
+            	return;
+            }
             this.channel = channel;
             message("channel created",MessageType.info);
             display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-         */
-        @Override
-        public void channelNotCreated() {
-            message("channelNotCreated",MessageType.error);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
@@ -464,10 +462,14 @@ public class MonitorFactory {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.pvData.monitor.MonitorRequester#monitorConnect(org.epics.pvData.monitor.Monitor, org.epics.pvData.pv.Structure)
+             * @see org.epics.pvData.monitor.MonitorRequester#monitorConnect(Status,org.epics.pvData.monitor.Monitor, org.epics.pvData.pv.Structure)
              */
             @Override
-            public void monitorConnect(Monitor monitor, Structure structure) {
+            public void monitorConnect(Status status,Monitor monitor, Structure structure) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.monitor = monitor;
                 if(monitor==null) {
                     display.asyncExec( new Runnable() {

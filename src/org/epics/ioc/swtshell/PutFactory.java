@@ -27,6 +27,7 @@ import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Status;
 
 /*
  * A shell for channelGet.
@@ -208,20 +209,17 @@ public class PutFactory {
             processButton.setEnabled(false);
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Channel channel) {
+        public void channelCreated(Status status,Channel channel) {
+            if (!status.isOK()) {
+            	message(status.toString(),MessageType.error);
+            	return;
+            }
             this.channel = channel;
             message("channel created",MessageType.info);
             display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-         */
-        @Override
-        public void channelNotCreated() {
-            message("channelNotCreated",MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
@@ -327,10 +325,14 @@ public class PutFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#channelPutConnect(org.epics.ca.channelAccess.client.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#channelPutConnect(Status,org.epics.ca.channelAccess.client.ChannelPut, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
-            public void channelPutConnect(ChannelPut channelPut,PVStructure pvStructure,BitSet bitSet) {
+            public void channelPutConnect(Status status,ChannelPut channelPut,PVStructure pvStructure,BitSet bitSet) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.channelPut = channelPut;
                 this.pvStructure = pvStructure;
                 changeBitSet = bitSet;
@@ -338,10 +340,14 @@ public class PutFactory {
                 channelPut.get();
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#putDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#putDone(Status)
              */
             @Override
-            public void putDone(boolean success) {
+            public void putDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 display.asyncExec( new Runnable() {
                     public void run() {
                         PrintModified printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, null, consoleText);
@@ -351,11 +357,15 @@ public class PutFactory {
                 });
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#getDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutRequester#getDone(Status)
              */
             @Override
-            public void getDone(boolean success) {
-             // TODO what to do?
+            public void getDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
+                // TODO what to do?
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#putRequesterName()

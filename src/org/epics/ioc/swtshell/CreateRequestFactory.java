@@ -33,6 +33,7 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
 import org.epics.pvData.pv.Type;
 
@@ -173,10 +174,14 @@ public class CreateRequestFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.GetFieldRequester#getDone(org.epics.pvData.pv.Field)
+         * @see org.epics.ca.channelAccess.client.GetFieldRequester#getDone(Status,org.epics.pvData.pv.Field)
          */
         @Override
-        public void getDone(Field field) {
+        public void getDone(Status status,Field field) {
+            if (!status.isOK()) {
+            	message(status.toString(),MessageType.error);
+            	return;
+            }
             if(field.getType()!=Type.structure) {
                 message("CreateRequest: channel introspection did not return a Structure",MessageType.error);
             } else {

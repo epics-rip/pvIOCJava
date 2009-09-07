@@ -33,6 +33,7 @@ import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Status;
 
 /**
  * Shell for processing a channel.
@@ -265,20 +266,17 @@ public class ArrayFactory {
             requester.message(message, messageType);
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Channel channel) {
+        public void channelCreated(Status status,Channel channel) {
+            if (!status.isOK()) {
+            	message(status.toString(),MessageType.error);
+            	return;
+            }
             this.channel = channel;
             message("channel created",MessageType.info);
             display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-         */
-        @Override
-        public void channelNotCreated() {
-            message("channel not created",MessageType.error);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelRequester#channelStateChange(org.epics.ioc.ca.Channel, boolean)
@@ -372,10 +370,14 @@ public class ArrayFactory {
             }
             
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#channelArrayConnect(org.epics.ca.channelAccess.client.ChannelArray, org.epics.pvData.pv.PVArray)
+             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#channelArrayConnect(Status,org.epics.ca.channelAccess.client.ChannelArray, org.epics.pvData.pv.PVArray)
              */
             @Override
-            public void channelArrayConnect(ChannelArray channelArray,PVArray pvArray) {
+            public void channelArrayConnect(Status status,ChannelArray channelArray,PVArray pvArray) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.channelArray = channelArray;
                 this.pvArray = pvArray;
                 lock.lock();
@@ -387,11 +389,15 @@ public class ArrayFactory {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#getArrayDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#getArrayDone(Status)
              */
             @Override
-            public void getArrayDone(boolean success) {
-                message("getArrayDone success " + success,MessageType.info);
+            public void getArrayDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
+                message("getArrayDone succeeded",MessageType.info);
                 getDone(pvArray.toString());
                 lock.lock();
                 try {
@@ -403,11 +409,15 @@ public class ArrayFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#putArrayDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#putArrayDone(Status)
              */
             @Override
-            public void putArrayDone(boolean success) {
-                message("putArrayDone success " + success,MessageType.info);
+            public void putArrayDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
+                message("putArrayDone succeeded",MessageType.info);
                 lock.lock();
                 try {
                     waiting = false;

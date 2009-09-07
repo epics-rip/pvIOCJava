@@ -27,6 +27,7 @@ import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Status;
 
 /*
  * A shell for channelGet.
@@ -82,7 +83,7 @@ public class PutGetFactory {
         private boolean createPutRequest = false;
         private RunRequest runRequest = null;
         private PrintModified printModified = null;
-        private boolean success = false;
+        private Status success;
         
         private void start() {
             shell = new Shell(display);
@@ -228,12 +229,12 @@ public class PutGetFactory {
             runRequest = RunRequest.putGetConnect;
             display.asyncExec(this);
         }
-        void putGetDone(boolean success) {
+        void putGetDone(Status success) {
             this.success = success;
             runRequest = RunRequest.putGetDone;
             display.asyncExec(this);
         }
-        void getPutDone(boolean success) {
+        void getPutDone(Status success) {
             this.success = success;
             runRequest = RunRequest.getPutDone;
             display.asyncExec(this);
@@ -257,23 +258,20 @@ public class PutGetFactory {
             
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Channel channel) {
+        public void channelCreated(Status status,Channel channel) {
+            if (!status.isOK()) {
+            	message(status.toString(),MessageType.error);
+            	return;
+            }
             this.channel = channel;
             message("channel created",MessageType.info);
             runRequest = RunRequest.channelCreated;
             putGet = new PutGet(this);
             display.asyncExec(this);
             
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-         */
-        @Override
-        public void channelNotCreated() {
-            message("channelNotCreated",MessageType.error);
         }
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
@@ -311,18 +309,18 @@ public class PutGetFactory {
                 putGet.getPut();
                 return;
             case getPutDone:
-                if(success) {
+                if(success.isOK()) {
                     message("getPut done",MessageType.info);
                     putGetButton.setEnabled(true);
                 } else {
-                    message("getPut failed",MessageType.info);
+                	message(success.toString(),MessageType.error);
                 }
                 return;
             case putGetDone:
-                if(success) {
+                if(success.isOK()) {
                 printModified.print();
                 } else {
-                    message("putGet failed",MessageType.info);
+                	message(success.toString(),MessageType.error);
                 }
                 return;
             }
@@ -427,12 +425,16 @@ public class PutGetFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(Status,org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
-            public void channelPutGetConnect(ChannelPutGet channelPutGet,
+            public void channelPutGetConnect(Status status,ChannelPutGet channelPutGet,
                     PVStructure pvPutStructure, PVStructure pvGetStructure)
             {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.channelPutGet = channelPutGet;
                 this.pvPutStructure = pvPutStructure;
                 this.pvGetStructure = pvGetStructure;
@@ -442,24 +444,24 @@ public class PutGetFactory {
                 guiPutGet.putGetConnect();
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getGetDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getGetDone(Status)
              */
             @Override
-            public void getGetDone(boolean success) {}
+            public void getGetDone(Status success) {}
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getPutDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getPutDone(Status)
              */
             @Override
-            public void getPutDone(boolean success) {
+            public void getPutDone(Status success) {
                 guiPutGet.getPutDone(success);
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#putGetDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#putGetDone(Status)
              */
             @Override
-            public void putGetDone(boolean success) {
+            public void putGetDone(Status success) {
                 guiPutGet.putGetDone(success);
             }
             /* (non-Javadoc)

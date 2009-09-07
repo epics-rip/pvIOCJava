@@ -28,6 +28,7 @@ import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Status;
 
 
 /**
@@ -198,20 +199,17 @@ public class GetFactory {
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Channel channel) {
+        public void channelCreated(Status status,Channel channel) {
+            if (!status.isOK()) {
+            	message(status.toString(),MessageType.error);
+            	return;
+            }
             this.channel = channel;
             message("channel created",MessageType.info);
             display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-         */
-        @Override
-        public void channelNotCreated() {
-            message("channelNotCreated",MessageType.error);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
@@ -327,10 +325,14 @@ public class GetFactory {
                 
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelGetRequester#channelGetConnect(org.epics.ca.channelAccess.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.channelAccess.client.ChannelGetRequester#channelGetConnect(Status,org.epics.ca.channelAccess.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
              */
             @Override
-            public void channelGetConnect(ChannelGet channelGet,PVStructure pvStructure,BitSet bitSet) {
+            public void channelGetConnect(Status status,ChannelGet channelGet,PVStructure pvStructure,BitSet bitSet) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.channelGet = channelGet;
                 changeBitSet = bitSet;
                 isCreated = true;
@@ -338,10 +340,14 @@ public class GetFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelGetRequester#getDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelGetRequester#getDone(Status)
              */
             @Override
-            public void getDone(boolean success) {
+            public void getDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 display.asyncExec( new Runnable() {
                     public void run() {
                         printModified.print();

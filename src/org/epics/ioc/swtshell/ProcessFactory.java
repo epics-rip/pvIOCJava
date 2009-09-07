@@ -26,6 +26,7 @@ import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.Status;
 
 /**
  * Shell for processing a channel.
@@ -173,20 +174,17 @@ public class ProcessFactory {
             requester.message(message, messageType);
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.ca.channelAccess.client.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Channel channel) {
+        public void channelCreated(Status status,Channel channel) {
+            if (!status.isOK()) {
+            	message(status.toString(),MessageType.error);
+            	return;
+            }
             this.channel = channel;
             message("channel created",MessageType.info);
             display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelNotCreated()
-         */
-        @Override
-        public void channelNotCreated() {
-            message("channel not created",MessageType.error);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelRequester#channelStateChange(org.epics.ioc.ca.Channel, boolean)
@@ -253,18 +251,26 @@ public class ProcessFactory {
                 executor.execute(executorNode);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(org.epics.ca.channelAccess.client.ChannelProcess)
+             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(Status,org.epics.ca.channelAccess.client.ChannelProcess)
              */
             @Override
-            public void channelProcessConnect(ChannelProcess channelProcess) {
+            public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
                 this.channelProcess = channelProcess;
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(Status)
              */
             @Override
-            public void processDone(boolean success) {
-                message("processDone success " + success,MessageType.info);
+            public void processDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(),MessageType.error);
+                	return;
+                }
+                message("processDone succeeded",MessageType.info);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
