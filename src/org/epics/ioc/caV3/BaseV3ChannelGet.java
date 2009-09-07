@@ -18,7 +18,11 @@ import gov.aps.jca.event.GetListener;
 
 import org.epics.ca.channelAccess.client.ChannelGet;
 import org.epics.ca.channelAccess.client.ChannelGetRequester;
+import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.StatusCreate;
+import org.epics.pvData.pv.Status.StatusType;
 
 
 
@@ -32,6 +36,12 @@ import org.epics.pvData.pv.MessageType;
 public class BaseV3ChannelGet
 implements ChannelGet,GetListener,ConnectionListener
 {
+    private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
+    private static final Status okStatus = statusCreate.getStatusOK();
+    private static Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
+    private static Status channelNotConnectedStatus = statusCreate.createStatus(StatusType.ERROR, "channel not connected", null);
+    private static Status disconnectedWhileActiveStatus = statusCreate.createStatus(StatusType.ERROR, "disconnected while active", null);
+
     private static enum DBRProperty {none,status,time,graphic,control};
     
     private String[] propertyNames = null;
@@ -73,11 +83,7 @@ implements ChannelGet,GetListener,ConnectionListener
         try {
             jcaChannel.addConnectionListener(this);
         } catch (CAException e) {
-            
-            message(
-                    "addConnectionListener failed " + e.getMessage(),
-                    MessageType.error);
-            channelGetRequester.channelGetConnect(null, null, null);
+            channelGetRequester.channelGetConnect(statusCreate.createStatus(StatusType.ERROR, "addConnectionListener failed", e),null,null,null);
             jcaChannel = null;
             return;
         };
@@ -181,7 +187,7 @@ implements ChannelGet,GetListener,ConnectionListener
             break;
         }
         V3ChannelStructure v3ChannelStructure = v3Channel.getV3ChannelStructure();
-        channelGetRequester.channelGetConnect(this, v3ChannelStructure.getPVStructure(),v3ChannelStructure.getBitSet());
+        channelGetRequester.channelGetConnect(okStatus,this,v3ChannelStructure.getPVStructure(),v3ChannelStructure.getBitSet());
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelGet#destroy()
@@ -196,26 +202,18 @@ implements ChannelGet,GetListener,ConnectionListener
     @Override
     public void get(boolean lastRequest) {
         if(isDestroyed) {
-            message("isDestroyed",MessageType.error);
-            getDone(false);
+            getDone(channelDestroyedStatus);
             return;
         }
         if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
-            getDone(false);
+            getDone(channelNotConnectedStatus);
             return;
         }
         isActive = true;
-        String message = null;
         try {
             jcaChannel.get(requestDBRType, elementCount, this);
-        } catch (CAException e) {
-            message = e.getMessage();
-        } catch (IllegalStateException e) {
-            message = e.getMessage();
-        }
-        if(message!=null) {
-            message("get caused exception " +message,MessageType.error);
-            getDone(false);
+        } catch (Throwable th) {
+            getDone(statusCreate.createStatus(StatusType.ERROR, "failed to get", th));
         }
     }
     /* (non-Javadoc)
@@ -237,19 +235,14 @@ implements ChannelGet,GetListener,ConnectionListener
         DBR fromDBR = getEvent.getDBR();
         if(fromDBR==null) {
             CAStatus caStatus = getEvent.getStatus();
-            if(caStatus==null) {
-                message(getEvent.toString(),MessageType.error);
-            } else {
-                message(caStatus.getMessage(),MessageType.error);
-                getDone(false);
-            }
+            getDone(statusCreate.createStatus(StatusType.ERROR, caStatus.toString(), null));
             return;
         }
         v3Channel.getV3ChannelStructure().toStructure(fromDBR);
         if(firstTime) {
             firstTime = false;
         }
-        getDone(true);
+        getDone(okStatus);
     }
     /* (non-Javadoc)
      * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
@@ -257,13 +250,12 @@ implements ChannelGet,GetListener,ConnectionListener
     public void connectionChanged(ConnectionEvent arg0) {
         if(!arg0.isConnected()) {
             if(isActive) {
-                message("disconnected while active",MessageType.error);
-                getDone(false);
+                getDone(disconnectedWhileActiveStatus);
             }
         }
     }
     
-    private void getDone(boolean success) {
+    private void getDone(Status success) {
         isActive = false;
         channelGetRequester.getDone(success);
     }

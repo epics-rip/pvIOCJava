@@ -16,11 +16,15 @@ import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 
+import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.monitor.MonitorElement;
 import org.epics.pvData.monitor.MonitorRequester;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.StatusCreate;
+import org.epics.pvData.pv.Status.StatusType;
 
 
 /**
@@ -30,6 +34,9 @@ import org.epics.pvData.pv.PVStructure;
  */
 public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorListener,ConnectionListener
 {
+    private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
+    private static final Status okStatus = statusCreate.getStatusOK();
+   
     private static enum DBRProperty {none,status,time};
 
     private MonitorRequester monitorRequester;
@@ -45,7 +52,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
     private Monitor monitor = null;
     private boolean isDestroyed = false;
     
-    private  PVStructure pvStructure = null;
+    private PVStructure pvStructure = null;
     private BitSet changeBitSet = null;
     private BitSet overrunBitSet = null;
     private MonitorElement monitorElement = null;
@@ -74,11 +81,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
         try {
             jcaChannel.addConnectionListener(this);
         } catch (CAException e) {
-            monitorRequester.message(
-                    "addConnectionListener failed " + e.getMessage(),
-                    MessageType.error);
-            monitorRequester.monitorConnect(null,null);
-            
+            monitorRequester.monitorConnect(statusCreate.createStatus(StatusType.ERROR, "addConnectionListener failed", e), null,null);
             jcaChannel = null;
             return;
         };
@@ -144,7 +147,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
         changeBitSet = v3ChannelStructure.getBitSet();
         overrunBitSet = new BitSet(pvStructure.getNumberFields());
         monitorElement = new MonitorElementImpl(pvStructure,changeBitSet,overrunBitSet);
-        monitorRequester.monitorConnect(this,pvStructure.getStructure());
+        monitorRequester.monitorConnect(okStatus,this,pvStructure.getStructure());
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#destroy()
@@ -159,11 +162,13 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
      */
     public void start() {
         if(isDestroyed) {
+        	// TODO report
             monitorRequester.message("isDestroyed", MessageType.warning);
         }
         try {
             monitor = jcaChannel.addMonitor(requestDBRType, elementCount, 0x0ff, this);
         } catch (CAException e) {
+        	// TODO report
             monitorRequester.message("start caused CAExecption " + e.getMessage(),MessageType.error);
         }
     }
@@ -175,6 +180,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
         try {
             monitor.clear();
         } catch (CAException e) {
+        	// TODO report
             monitorRequester.message("stop caused CAExecption " + e.getMessage(),MessageType.error);
         }
     }

@@ -30,6 +30,7 @@ import org.epics.ca.channelAccess.client.ChannelPutRequester;
 import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.ca.channelAccess.client.GetFieldRequester;
 import org.epics.ioc.util.RequestResult;
+import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
@@ -40,6 +41,9 @@ import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.StatusCreate;
+import org.epics.pvData.pv.Status.StatusType;
 
 
 
@@ -55,21 +59,25 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     private static final String providerName = "caV3";
     private static Executor executor = ExecutorFactory.create("caV3Connect", ThreadPriority.low);
     private boolean isDestroyed = false;
-    private ChannelFindRequester channelFindRequester = null;
-    private Context context = null;
-    private String pvName = null;
-    private String recordName = null;
-    private String valueFieldName = null;
-    private String[] propertyNames = null;
-    private ScalarType enumRequestType = null;
+    private final ChannelFindRequester channelFindRequester;
+    private final ChannelRequester channelRequester;
+    private final Context context;
+    private final String pvName;
+    private final String recordName;
+    private final String valueFieldName;
+    private final String[] propertyNames;
+    private final ScalarType enumRequestType;
     
-    private ChannelRequester channelRequester = null;
-    private ExecutorNode executorNode = null;
+    private final ExecutorNode executorNode;
+    
     private boolean isCreatingChannel = false;
     private boolean synchCreateChannel = false;
     private boolean gotFirstConnection = false;
     
-    
+    private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
+    private static final Status okStatus = statusCreate.getStatusOK();
+    private static Status notSupportedStatus = statusCreate.createStatus(StatusType.ERROR, "not supported", null);
+    private static Status channelNotConnectedStatus = statusCreate.createStatus(StatusType.ERROR, "channel not connected", null);
    
     private V3ChannelStructure v3ChannelStructure = null;
 
@@ -119,7 +127,10 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
                 synchCreateChannel = false;
             }
         } catch (CAException e) {
-            if(channelFindRequester!=null) channelFindRequester.channelFindResult(this, false);
+            if(channelFindRequester!=null)
+            	channelFindRequester.channelFindResult(
+            		statusCreate.createStatus(StatusType.FATAL, "failed to create channel", e),
+            		this, false);
             jcaChannel = null;
         };
     }
@@ -240,7 +251,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             ChannelArrayRequester channelArrayRequester, String subField,
             PVStructure pvOption)
     {
-        channelArrayRequester.channelArrayConnect(null, null);
+        channelArrayRequester.channelArrayConnect(notSupportedStatus, null, null);
         return null;
     }
     /* (non-Javadoc)
@@ -252,9 +263,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             boolean process, PVStructure pvOption)
     {
         if(v3ChannelStructure==null) {
-            channelGetRequester.message(
-                    "createChannelGet but not connected",MessageType.warning);
-            channelGetRequester.channelGetConnect(null, null, null);
+            channelGetRequester.channelGetConnect(channelNotConnectedStatus, null, null, null);
             return null;
         }
         BaseV3ChannelGet channelGet = new BaseV3ChannelGet(channelGetRequester,process);
@@ -271,9 +280,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             String structureName, PVStructure pvOption)
     {
         if(v3ChannelStructure==null) {
-            monitorRequester.message(
-                    "createMonitor but not connected",MessageType.warning);
-            monitorRequester.monitorConnect(null,null);
+            monitorRequester.monitorConnect(channelNotConnectedStatus,null,null);
             return null;
         }
         BaseV3Monitor monitor = new BaseV3Monitor(monitorRequester);
@@ -288,9 +295,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             ChannelProcessRequester channelProcessRequester,
             PVStructure pvOption)
     {
-        channelProcessRequester.message(
-                "createChannelProcess not supported. Issue a put to .PROC",MessageType.warning);
-        channelProcessRequester.channelProcessConnect(null);
+        channelProcessRequester.channelProcessConnect(notSupportedStatus,null);
         return null;
     }
     /* (non-Javadoc)
@@ -302,9 +307,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             boolean process, PVStructure pvOption)
     {
         if(v3ChannelStructure==null) {
-            channelPutRequester.message(
-                    "createChannelPut but not connected",MessageType.warning);
-            channelPutRequester.channelPutConnect(null, null, null);
+            channelPutRequester.channelPutConnect(channelNotConnectedStatus, null, null, null);
             return null;
         }
         BaseV3ChannelPut channelPut = new BaseV3ChannelPut(channelPutRequester,process);
@@ -322,7 +325,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             String getStructureName, boolean shareGetData, boolean process,
             PVStructure pvOption)
     {
-        channelPutGetRequester.channelPutGetConnect(null, null, null);
+        channelPutGetRequester.channelPutGetConnect(notSupportedStatus, null, null, null);
         return null;
     }
     /* (non-Javadoc)
@@ -382,24 +385,23 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     public ChannelRequester getChannelRequester() {
         return channelRequester;
     }
+    private static final Status subFieldDoesNotExistStatus = statusCreate.createStatus(StatusType.ERROR, "subField does not exist", null);
     /* (non-Javadoc)
      * @see org.epics.ca.channelAccess.client.Channel#getField(org.epics.ca.channelAccess.client.GetFieldRequester, java.lang.String)
      */
     @Override
     public void getField(GetFieldRequester requester, String subField) {
         if(v3ChannelStructure==null) {
-            requester.message(
-                    "not connected",MessageType.warning);
-            requester.getDone(null);
+            requester.getDone(channelNotConnectedStatus,null);
+            return;
         }
         PVStructure pvStructure = v3ChannelStructure.getPVStructure();
         if(subField==null) subField = "value";
         PVField pvField = pvStructure.getSubField(subField);
         if(pvField==null) {
-            message("subField " + subField + " not found",MessageType.error);
-            requester.getDone(null);
+            requester.getDone(subFieldDoesNotExistStatus,null);
         } else {
-            requester.getDone(pvField.getField());
+            requester.getDone(okStatus,pvField.getField());
         }
     }
     /* (non-Javadoc)
@@ -499,22 +501,22 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             message("connection lost", MessageType.warning);
         }
     }
+    private static final Status createStructureFailedStatus = statusCreate.createStatus(StatusType.ERROR, "createPVStructure failed", null);
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
     public void run() {
         if(channelFindRequester!=null) {
-            channelFindRequester.channelFindResult(this, true);
+            channelFindRequester.channelFindResult(okStatus,this, true);
             disconnect();
             return;
         }
         v3ChannelStructure = new BaseV3ChannelStructure(this);
         if(v3ChannelStructure.createPVStructure(this,recordName)) {
-            channelRequester.channelCreated(this);
+            channelRequester.channelCreated(okStatus,this);
             return;
         } else {
-            channelRequester.message("createPVStructure failed", MessageType.error);
-            channelRequester.channelNotCreated();
+            channelRequester.channelCreated(createStructureFailedStatus,null);
         }
         disconnect();
     }
@@ -523,10 +525,9 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     public void createPVStructureDone(RequestResult requestResult) {
         if(requestResult==RequestResult.success) {
-            channelRequester.channelCreated(this);
+            channelRequester.channelCreated(okStatus,this);
         } else {
-            channelRequester.message("createPVStructure failed", MessageType.error);
-            channelRequester.channelNotCreated();
+            channelRequester.channelCreated(createStructureFailedStatus,null);
             disconnect();
         }
     }

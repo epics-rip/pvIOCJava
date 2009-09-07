@@ -19,6 +19,7 @@ import gov.aps.jca.event.PutListener;
 
 import org.epics.ca.channelAccess.client.ChannelPut;
 import org.epics.ca.channelAccess.client.ChannelPutRequester;
+import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.pv.ByteArrayData;
@@ -41,7 +42,10 @@ import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ShortArrayData;
+import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.StatusCreate;
 import org.epics.pvData.pv.StringArrayData;
+import org.epics.pvData.pv.Status.StatusType;
 
 /**
  * Base class that implements ChannelPut for communicating with a V3 IOC.
@@ -51,6 +55,12 @@ import org.epics.pvData.pv.StringArrayData;
 public class BaseV3ChannelPut
 implements ChannelPut,GetListener,PutListener,ConnectionListener
 {
+    private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
+    private static final Status okStatus = statusCreate.getStatusOK();
+    private static Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
+    private static Status channelNotConnectedStatus = statusCreate.createStatus(StatusType.ERROR, "channel not connected", null);
+    private static Status disconnectedWhileActiveStatus = statusCreate.createStatus(StatusType.ERROR, "disconnected while active", null);
+
     private ChannelPutRequester channelPutRequester = null;
     private DBRType requestDBRType = null;
     private V3Channel v3Channel = null;
@@ -100,10 +110,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         try {
             jcaChannel.addConnectionListener(this);
         } catch (CAException e) {
-            message(
-                    "addConnectionListener failed " + e.getMessage(),
-                    MessageType.error);
-            channelPutRequester.channelPutConnect(null, null, null);
+            channelPutRequester.channelPutConnect(statusCreate.createStatus(StatusType.ERROR, "addConnectionListener failed", e),null,null,null);
             jcaChannel = null;
             return;
         };
@@ -114,14 +121,14 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         elementCount = jcaChannel.getElementCount();
         if(nativeDBRType.isENUM()) {
             if(elementCount!=1) {
-                message("array of ENUM not supported",MessageType.error);
+                channelPutRequester.channelPutConnect(statusCreate.createStatus(StatusType.ERROR, "array of ENUM not supported", null),null,null,null);
                 return;
             }
             Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
             pvIndex = enumerated.getIndex();
         }
        
-        channelPutRequester.channelPutConnect(this, pvStructure,v3ChannelStructure.getBitSet());
+        channelPutRequester.channelPutConnect(okStatus,this,pvStructure,v3ChannelStructure.getBitSet());
     } 
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelPut#destroy()
@@ -137,26 +144,18 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     @Override
     public void get() {
         if(isDestroyed) {
-            message("isDestroyed",MessageType.error);
-            getDone(false);
+            getDone(channelDestroyedStatus);
             return;
         }
         if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
-            getDone(false);
+            getDone(channelNotConnectedStatus);
             return;
         }
-        String message = null;
         
-            try {
-                jcaChannel.get(requestDBRType, elementCount, this);
-            } catch (CAException e) {
-                message = e.getMessage();
-            } catch (IllegalStateException e) {
-                message = e.getMessage();
-            }
-        if(message!=null) {
-            message("get caused exception " +message,MessageType.error);
-            getDone(false);
+        try {
+            jcaChannel.get(requestDBRType, elementCount, this);
+        } catch (Throwable th) {
+            getDone(statusCreate.createStatus(StatusType.ERROR, "failed to get", th));
         }
     }
     /* (non-Javadoc)
@@ -167,18 +166,13 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         DBR fromDBR = getEvent.getDBR();
         if(fromDBR==null) {
             CAStatus caStatus = getEvent.getStatus();
-            if(caStatus==null) {
-                message(getEvent.toString(),MessageType.error);
-            } else {
-                message(caStatus.getMessage(),MessageType.error);
-                getDone(false);
-            }
+            getDone(statusCreate.createStatus(StatusType.ERROR, caStatus.toString(), null));
             return;
         }
         v3Channel.getV3ChannelStructure().toStructure(fromDBR);
-        getDone(true);
+        getDone(okStatus);
     }
-    private void getDone(boolean success) {
+    private void getDone(Status success) {
         channelPutRequester.getDone(success);
     }
     /* (non-Javadoc)
@@ -187,16 +181,13 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     @Override
     public void put(boolean lastRequest) {
         if(isDestroyed) {
-            message("isDestroyed",MessageType.error);
-            putDone(false);
+            putDone(channelDestroyedStatus);
             return;
         }
         if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
-            putDone(false);
-            return;
+            putDone(channelNotConnectedStatus);
         }
         DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
-        String message = null;
         isActive = true;
         try {
             if(pvIndex!=null) {
@@ -281,31 +272,25 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
                     jcaChannel.put(from, this);
                 }
             } else {
-                message = "unknown DBRType " + nativeDBRType.getName();
+            	throw new IllegalArgumentException("unknown DBRType " + nativeDBRType.getName());
             }
-        } catch (CAException e) {
-            message = e.getMessage();
-        } catch (IllegalStateException e) {
-            message = e.getMessage();
+        } catch (Throwable th) {
+            putDone(statusCreate.createStatus(StatusType.ERROR, "failed to put", th));
+            return;
         }
-        if(message!=null) {
-            message("put caused exception " +message,MessageType.error);
-            putDone(false);
-        } else {
-            isActive = true;
-        }
+        isActive = true;
     }
     
     /* (non-Javadoc)
      * @see gov.aps.jca.event.PutListener#putCompleted(gov.aps.jca.event.PutEvent)
      */
     public void putCompleted(PutEvent arg0) {
-        if(!arg0.getStatus().isSuccessful()) {
-            message(arg0.getStatus().getMessage(),MessageType.error);
-            putDone(false);
+    	CAStatus caStatus = arg0.getStatus();
+        if(!caStatus.isSuccessful()) {
+            putDone(statusCreate.createStatus(StatusType.ERROR, caStatus.toString(), null));
             return;
         }
-        putDone(true);
+        putDone(okStatus);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()
@@ -326,13 +311,12 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     public void connectionChanged(ConnectionEvent arg0) {
         if(!arg0.isConnected()) {
             if(isActive) {
-                message("disconnected while active",MessageType.error);
-                putDone(false);
+                putDone(disconnectedWhileActiveStatus);
             }
         }
     }
     
-    private void putDone(boolean success) {
+    private void putDone(Status success) {
         isActive = false;
         channelPutRequester.putDone(success);
     }

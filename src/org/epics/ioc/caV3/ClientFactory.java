@@ -38,6 +38,7 @@ import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
 
 
 
@@ -277,11 +278,11 @@ public class ClientFactory  {
         }
 
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelFindRequester#channelFindResult(org.epics.ca.channelAccess.client.ChannelFind, boolean)
+         * @see org.epics.ca.channelAccess.client.ChannelFindRequester#channelFindResult(Stayus,org.epics.ca.channelAccess.client.ChannelFind, boolean)
          */
         @Override
-        public void channelFindResult(ChannelFind channelFind, boolean wasFound) {
-            channelFindRequester.channelFindResult(channelFind, wasFound);
+        public void channelFindResult(Status status, ChannelFind channelFind, boolean wasFound) {
+            channelFindRequester.channelFindResult(status, channelFind, wasFound);
             v3Channel.destroy();
         }
     }
