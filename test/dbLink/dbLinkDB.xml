@@ -2,6 +2,9 @@
 <database>
 <import name = "org.epics.ioc.*" />
 <import name = "org.epics.pvData.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "records.xml" />
+<include removePath = "${JAVAIOC}/xml" />
 <include addPath = "test/dbLink" />
 <include href = "getPut.xml" />
 <include removePath = "test/dbLink" />
