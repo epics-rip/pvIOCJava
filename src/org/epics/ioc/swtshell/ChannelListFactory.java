@@ -304,15 +304,15 @@ public class ChannelListFactory {
                 	return;
                 }
                 this.channel = channel;
-                createPutGet();
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
              */
             @Override
             public void channelStateChange(Channel c, boolean isConnected) {
-                // TODO Auto-generated method stub
-                
+                if(isConnected) {
+                    createPutGet();
+                }
             }
 
             /* (non-Javadoc)
