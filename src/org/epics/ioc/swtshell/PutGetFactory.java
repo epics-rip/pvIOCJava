@@ -63,7 +63,7 @@ public class PutGetFactory {
             putGetDone
         }
         private boolean isDisposed = false;
-        private static String windowName = "put";
+        private static String windowName = "putGet";
         private ExecutorNode executorNode = executor.createNode(this);
         private Display display;
         private Shell shell = null;
