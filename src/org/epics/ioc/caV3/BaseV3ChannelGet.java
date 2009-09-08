@@ -5,7 +5,6 @@
  */
 package org.epics.ioc.caV3;
 
-
 import gov.aps.jca.CAException;
 import gov.aps.jca.CAStatus;
 import gov.aps.jca.Channel;
@@ -15,6 +14,8 @@ import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ca.channelAccess.client.ChannelGet;
 import org.epics.ca.channelAccess.client.ChannelGetRequester;
@@ -55,8 +56,7 @@ implements ChannelGet,GetListener,ConnectionListener
     private boolean isDestroyed = false;
     private DBRProperty dbrProperty = DBRProperty.none;
     
-    private boolean firstTime = true;
-    private boolean isActive = false;
+    private AtomicBoolean isActive = new AtomicBoolean(false);
     /**
      * Constructor.
      * @param channelFieldGroup The channelFieldGroup.
@@ -209,7 +209,7 @@ implements ChannelGet,GetListener,ConnectionListener
             getDone(channelNotConnectedStatus);
             return;
         }
-        isActive = true;
+        isActive.set(true);
         try {
             jcaChannel.get(requestDBRType, elementCount, this);
         } catch (Throwable th) {
@@ -239,9 +239,6 @@ implements ChannelGet,GetListener,ConnectionListener
             return;
         }
         v3Channel.getV3ChannelStructure().toStructure(fromDBR);
-        if(firstTime) {
-            firstTime = false;
-        }
         getDone(okStatus);
     }
     /* (non-Javadoc)
@@ -249,14 +246,12 @@ implements ChannelGet,GetListener,ConnectionListener
      */
     public void connectionChanged(ConnectionEvent arg0) {
         if(!arg0.isConnected()) {
-            if(isActive) {
-                getDone(disconnectedWhileActiveStatus);
-            }
+            getDone(disconnectedWhileActiveStatus);
         }
     }
     
     private void getDone(Status success) {
-        isActive = false;
+        if(!isActive.getAndSet(false)) return;
         channelGetRequester.getDone(success);
     }
 }

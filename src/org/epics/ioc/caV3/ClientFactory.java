@@ -113,7 +113,7 @@ public class ClientFactory  {
                 context = jca.createContext(JCALibrary.CHANNEL_ACCESS_JAVA);
                 context.addContextExceptionListener(this);
                 context.addContextMessageListener(this);
-                caThread = new CAThread("cav3",3);
+                caThread = new CAThread("cav3",ThreadPriority.getJavaPriority(ThreadPriority.low));
             } catch (CAException e) {
                 System.err.println(e.getMessage());
                 return;

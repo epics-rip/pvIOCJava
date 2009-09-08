@@ -17,6 +17,8 @@ import gov.aps.jca.event.GetListener;
 import gov.aps.jca.event.PutEvent;
 import gov.aps.jca.event.PutListener;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.epics.ca.channelAccess.client.ChannelPut;
 import org.epics.ca.channelAccess.client.ChannelPutRequester;
 import org.epics.pvData.factory.StatusFactory;
@@ -77,7 +79,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     private DoubleArrayData doubleArrayData = new DoubleArrayData();
     private StringArrayData stringArrayData = new StringArrayData();
     
-    private boolean isActive = false;
+    private AtomicBoolean isActive = new AtomicBoolean(false);
 
     /**
      * Constructor.
@@ -188,7 +190,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             putDone(channelNotConnectedStatus);
         }
         DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
-        isActive = true;
+        isActive.set(true);
         try {
             if(pvIndex!=null) {
                 short index = (short)pvIndex.get();
@@ -278,7 +280,6 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             putDone(statusCreate.createStatus(StatusType.ERROR, "failed to put", th));
             return;
         }
-        isActive = true;
     }
     
     /* (non-Javadoc)
@@ -310,14 +311,12 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
      */
     public void connectionChanged(ConnectionEvent arg0) {
         if(!arg0.isConnected()) {
-            if(isActive) {
-                putDone(disconnectedWhileActiveStatus);
-            }
+            putDone(disconnectedWhileActiveStatus);
         }
     }
     
     private void putDone(Status success) {
-        isActive = false;
+        if(!isActive.getAndSet(false)) return;
         channelPutRequester.putDone(success);
     }
 }

@@ -12,6 +12,7 @@ import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.ConnectionListener;
 
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ca.channelAccess.client.AccessRights;
 import org.epics.ca.channelAccess.client.ChannelArray;
@@ -70,9 +71,8 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     
     private final ExecutorNode executorNode;
     
-    private boolean isCreatingChannel = false;
-    private boolean synchCreateChannel = false;
-    private boolean gotFirstConnection = false;
+    private AtomicBoolean synchCreateChannel = new AtomicBoolean(false);
+    private AtomicBoolean gotFirstConnection = new AtomicBoolean(false);
     
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
@@ -118,13 +118,9 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     
     public void connectCaV3() {
         try {
-            isCreatingChannel = true;
-            synchCreateChannel = false;
             jcaChannel = context.createChannel(pvName,this);
-            isCreatingChannel = false;
-            if(synchCreateChannel) { // connectionChanged was called synchronously
-                run();
-                synchCreateChannel = false;
+            if(synchCreateChannel.getAndSet(false)) { // connectionChanged was called synchronously
+                executor.execute(executorNode);
             }
         } catch (CAException e) {
             if(channelFindRequester!=null)
@@ -490,13 +486,10 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     public void connectionChanged(ConnectionEvent arg0) {
         boolean isConnected = arg0.isConnected();
         if(isConnected) {
-            if(gotFirstConnection) return;
-            gotFirstConnection = true;
-            if(isCreatingChannel) {
-                synchCreateChannel = true;
-                return;
+            if(gotFirstConnection.getAndSet(true)) return;
+            if(!synchCreateChannel.getAndSet(true)) {
+                executor.execute(executorNode);
             }
-            executor.execute(executorNode);
         } else {
             message("connection lost", MessageType.warning);
         }
