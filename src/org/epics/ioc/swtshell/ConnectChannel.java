@@ -17,4 +17,8 @@ public interface ConnectChannel {
      * The ChannelRequester is called with the result of the request.
      */
     void connect();
+    /**
+     * Called by client when the client has received the first channelStateChange.
+     */
+    void cancelTimeout();
 }
