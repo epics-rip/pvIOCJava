@@ -36,6 +36,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
 {
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
+    private static Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
    
     private static enum DBRProperty {none,status,time};
 
@@ -160,29 +161,26 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#start()
      */
-    public void start() {
-        if(isDestroyed) {
-        	// TODO report
-            monitorRequester.message("isDestroyed", MessageType.warning);
-        }
+    public Status start() {
+        if(isDestroyed) return channelDestroyedStatus;
         try {
             monitor = jcaChannel.addMonitor(requestDBRType, elementCount, 0x0ff, this);
         } catch (CAException e) {
-        	// TODO report
-            monitorRequester.message("start caused CAExecption " + e.getMessage(),MessageType.error);
+        	return statusCreate.createStatus(StatusType.ERROR, "failed to start monitor", e);
         }
+        return okStatus;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#stop()
      */
-    public void stop() {
-        if(isDestroyed) return;
+    public Status stop() {
+        if(isDestroyed) return channelDestroyedStatus;
         try {
             monitor.clear();
         } catch (CAException e) {
-        	// TODO report
-            monitorRequester.message("stop caused CAExecption " + e.getMessage(),MessageType.error);
+        	return statusCreate.createStatus(StatusType.ERROR, "failed to stop monitor", e);
         }
+        return okStatus;
     }
     /* (non-Javadoc)
      * @see gov.aps.jca.event.MonitorListener#monitorChanged(gov.aps.jca.event.MonitorEvent)
