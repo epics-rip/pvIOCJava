@@ -24,7 +24,9 @@ import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorNode;
+import org.epics.pvData.misc.*;
+import org.epics.pvData.misc.Timer.TimerCallback;
+import org.epics.pvData.misc.Timer.TimerNode;
 
 
 /**
@@ -37,11 +39,12 @@ public class ConnectChannelFactory {
      * Create a connect to channel.
      * When connect is called a window appears that allows the user to create a channel that is connected to a record.
      * @param parent The parent shell.
+     * @param connectChannelRequester The connectChannelRequester.
      * @param channelRequester The channel requester.
      * @return The ConnectChannel interface.
      */
-    public static ConnectChannel create(Shell parent,ChannelRequester channelRequester) {
-        return new ConnectChannelImpl(parent,channelRequester);
+    public static ConnectChannel create(Shell parent,ConnectChannelRequester connectChannelRequester,ChannelRequester channelRequester) {
+        return new ConnectChannelImpl(parent,connectChannelRequester,channelRequester);
     }
     
     public static boolean pvDataCompatible(Channel channel) {
@@ -53,24 +56,31 @@ public class ConnectChannelFactory {
     
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     private static Executor executor = SwtshellFactory.getExecutor();
+    private static Timer timer = TimerFactory.create("connectChannel", ThreadPriority.lower);
     
     private static class ConnectChannelImpl extends Dialog
-    implements ConnectChannel,SelectionListener,Runnable
+    implements ConnectChannel,SelectionListener,Runnable,TimerCallback
     {
-        private ConnectChannelImpl(Shell parent,ChannelRequester channelRequester) {
+        private ConnectChannelImpl(Shell parent,ConnectChannelRequester connectChannelRequester,ChannelRequester channelRequester) {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-            this.channelRequester = channelRequester;
             this.parent = parent;
+            this.connectChannelRequester = connectChannelRequester;
+            this.channelRequester = channelRequester;
         }
-        private ChannelRequester channelRequester;
-        private Shell parent = null;
-        private Shell shell = null;
         private ExecutorNode executorNode = executor.createNode(this);
+        private TimerNode timerNode = TimerFactory.createNode(this);
+        private Shell parent = null;
+        private ConnectChannelRequester connectChannelRequester = null;
+        private ChannelRequester channelRequester;
+        
+        private Shell shell = null;
         private Button selectLocalRecordButton = null;
         private Combo providerCombo = null;
-        private Text pvNameText = null;
         private String providerName = null;
+        private Text timeoutText = null;
+        private Text pvNameText = null;
         private String pvName = null;
+        private double delay = 2.0;
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.ConnectChannel#connect()
          */
@@ -79,11 +89,12 @@ public class ConnectChannelFactory {
             shell = new Shell(parent);  
             shell.setText("connectChannel");
             GridLayout gridLayout = new GridLayout();
-            gridLayout.numColumns = 3;
+            gridLayout.numColumns = 4;
             shell.setLayout(gridLayout);
             selectLocalRecordButton = new Button(shell,SWT.PUSH);
             selectLocalRecordButton.setText("selectLocalRecord");
             selectLocalRecordButton.addSelectionListener(this);
+            
             Composite provider = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
@@ -96,11 +107,25 @@ public class ConnectChannelFactory {
                 providerCombo.add(name);
             }
             providerCombo.select(0);
+            
+            Composite timeout = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            timeout.setLayout(gridLayout);
+            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            timeout.setLayoutData(gridData);   
+            new Label(timeout,SWT.RIGHT).setText("timeout");
+            timeoutText = new Text(timeout,SWT.BORDER);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.minimumWidth = 100;
+            timeoutText.setLayoutData(gridData);
+            timeoutText.setText("2.0");
+            
             Composite pvname = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             pvname.setLayout(gridLayout);
-            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
             pvname.setLayoutData(gridData);   
             new Label(pvname,SWT.RIGHT).setText("pvname");
             pvNameText = new Text(pvname,SWT.BORDER);
@@ -117,6 +142,13 @@ public class ConnectChannelFactory {
                 }
             }
             shell.dispose();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.swtshell.ConnectChannel#cancelTimeout()
+         */
+        @Override
+        public void cancelTimeout() {
+            timerNode.cancel();
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -145,6 +177,7 @@ public class ConnectChannelFactory {
             } else if(object==pvNameText) {
                 pvName = pvNameText.getText();
                 providerName = providerCombo.getText();
+                delay = Double.parseDouble(timeoutText.getText());
                 executor.execute(executorNode);
                 shell.close();
             }
@@ -155,7 +188,22 @@ public class ConnectChannelFactory {
         @Override
         public void run() {
             ChannelProvider channelProvider = channelAccess.getProvider(providerName);
+            timer.scheduleAfterDelay(timerNode, delay);
             channelProvider.createChannel(pvName, channelRequester,ChannelProvider.PRIORITY_DEFAULT);
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#callback()
+         */
+        @Override
+        public void callback() {
+            connectChannelRequester.timeout();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvData.misc.Timer.TimerCallback#timerStopped()
+         */
+        @Override
+        public void timerStopped() {
+            connectChannelRequester.timeout();
         }
     }
 }
