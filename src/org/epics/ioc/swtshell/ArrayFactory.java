@@ -5,9 +5,7 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -47,16 +45,16 @@ public class ArrayFactory {
      * @param display The display.
      */
     public static void init(Display display) {
-        ProcessImpl processImpl = new ProcessImpl(display);
+        ArrayImpl processImpl = new ArrayImpl(display);
         processImpl.start();
     }
 
     private static final Convert convert = ConvertFactory.getConvert();
     private static Executor executor = SwtshellFactory.getExecutor();
     
-    private static class ProcessImpl implements DisposeListener,ChannelRequester,SelectionListener,Runnable  {
+    private static class ArrayImpl implements DisposeListener,SelectionListener,ChannelRequester,ConnectChannelRequester,Runnable  {
 
-        private ProcessImpl(Display display) {
+        private ArrayImpl(Display display) {
             this.display = display;
         }
 
@@ -66,9 +64,9 @@ public class ArrayFactory {
         private Display display;
         private Shell shell = null;
         private Requester requester = null;
-        private Channel channel = null;
         private Button connectButton = null;
         private Button disconnectButton = null;
+        private Button createArrayButton = null;
         private Text subFieldText = null;
         
         private Button getButton = null;
@@ -80,12 +78,14 @@ public class ArrayFactory {
         private Text valueText = null;
         
         private Text consoleText = null;
-    
-        private Array array = null;
+        private Button connectArrayButton = null;
         private String subField = "value";
         
+        private Array array = new Array();
         private boolean getFinished = false;
         private String getValue = null;
+        private AtomicReference<Channel> channel = new AtomicReference<Channel>(null);
+        private AtomicReference<ConnectChannel> connectChannel = new AtomicReference<ConnectChannel>(null);
 
         private void start() {
             shell = new Shell(display);
@@ -107,8 +107,12 @@ public class ArrayFactory {
             disconnectButton.setEnabled(false);
             Composite subFieldComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
+            gridLayout.numColumns = 3;
             subFieldComposite.setLayout(gridLayout);
+            createArrayButton = new Button(subFieldComposite,SWT.PUSH);
+            createArrayButton.setText("createArray");
+            createArrayButton.addSelectionListener(this);
+            createArrayButton.setEnabled(false);
             new Label(subFieldComposite,SWT.NONE).setText("subField");
             subFieldText = new Text(subFieldComposite,SWT.BORDER);
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
@@ -137,7 +141,7 @@ public class ArrayFactory {
             getOffsetText.setText("0");
             Composite countComposite = new Composite(getComposite,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
+            gridLayout.numColumns = 3;
             countComposite.setLayout(gridLayout);
             new Label(countComposite,SWT.NONE).setText("count");
             countText = new Text(countComposite,SWT.BORDER);
@@ -147,7 +151,7 @@ public class ArrayFactory {
             countText.setText("-1");
             Composite putComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 3;
+            gridLayout.numColumns = 2;
             putComposite.setLayout(gridLayout);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             putComposite.setLayoutData(gridData);
@@ -167,7 +171,7 @@ public class ArrayFactory {
             putOffsetText.setText("0");
             Composite valueComposite = new Composite(putComposite,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
+            gridLayout.numColumns = 3;
             valueComposite.setLayout(gridLayout);
             gridData = new GridData(GridData.FILL_HORIZONTAL);
             valueComposite.setLayoutData(gridData);
@@ -225,21 +229,24 @@ public class ArrayFactory {
          */
         @Override
         public void widgetSelected(SelectionEvent arg0) {
-            if(isDisposed) {
-                if(channel!=null) channel.destroy();
-                return;
-            }
+            if(isDisposed) return;
             Object object = arg0.getSource();
             if(object==connectButton) {
-                ConnectChannel connectChannel = ConnectChannelFactory.create(shell, this);
-                connectChannel.connect();
+                Channel channel = this.channel.get();
+                if(channel!=null) {
+                    message("must disconnect first",MessageType.error);
+                    return;
+                }
+                connectChannel.set(ConnectChannelFactory.create(shell,this, this));
+                connectChannel.get().connect();
             } else if(object==disconnectButton) {
-                if(channel!=null) channel.destroy();
+                array.disconnect();
                 connectButton.setEnabled(true);
                 disconnectButton.setEnabled(false);
-                channel = null;
                 getButton.setEnabled(false);
                 putButton.setEnabled(false);
+            } else if(object==createArrayButton) {
+                array.create();
             } else if(object==subFieldText) {
                 subField = subFieldText.getText();
             } else if(object==getButton) {
@@ -266,25 +273,32 @@ public class ArrayFactory {
             requester.message(message, messageType);
         }
         /* (non-Javadoc)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
+         */
+        @Override
+        public void channelStateChange(Channel c, boolean isConnected) {
+            if(!isConnected) {
+                message("channel disconnected",MessageType.error);
+                return;
+            }
+            channel.set(c);
+            ConnectChannel connectChannel = this.connectChannel.getAndSet(null);
+            if(connectChannel!=null) connectChannel.cancelTimeout();
+            display.asyncExec(this);
+        }
+        /* (non-Javadoc)
          * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Status status,Channel channel) {
+        public void channelCreated(Status status,Channel c) {
             if (!status.isOK()) {
             	message(status.toString(),MessageType.error);
             	return;
             }
-            this.channel = channel;
-            message("channel created",MessageType.info);
-            display.asyncExec(this);
+            channel.set(c);
+            c.connect();
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelRequester#channelStateChange(org.epics.ioc.ca.Channel, boolean)
-         */
-        @Override
-        public void channelStateChange(Channel c, boolean isConnected) {
-            display.asyncExec(this);
-        }
+        
         /* (non-Javadoc)
          * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
          */
@@ -292,16 +306,27 @@ public class ArrayFactory {
         public void destroy(Channel c) {
             display.asyncExec(this);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
+         */
+        @Override
+        public void timeout() {
+            Channel channel = this.channel.getAndSet(null);
+            if(channel!=null) channel.destroy();
+            message("channel connect timeout",MessageType.info);
+        }
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         @Override
         public void run() {
+            Channel channel = null;
             if(isDisposed) {
+                channel = this.channel.getAndSet(null);
                 if(channel!=null) channel.destroy();
                 return;
             }
+            channel = this.channel.get();
             if(channel==null) return;
             if(getFinished) {
                 valueText.setText(getValue);
@@ -312,14 +337,15 @@ public class ArrayFactory {
             if(isConnected) {
                 connectButton.setEnabled(false);
                 disconnectButton.setEnabled(true);
-                array = new Array(channel,this);
                 getButton.setEnabled(true);
                 putButton.setEnabled(true);
+                createArrayButton.setEnabled(true);
             } else {
                 connectButton.setEnabled(true);
                 disconnectButton.setEnabled(false);
                 getButton.setEnabled(false);
                 putButton.setEnabled(false);
+                createArrayButton.setEnabled(false);
             }
         }
         
@@ -329,43 +355,41 @@ public class ArrayFactory {
             display.asyncExec(this);
         }
         
-        private enum ArrayRunCommand{get,put};
+        private enum ArrayRunRequest{create,disconnect,get,put};
         
         private class Array implements Runnable,ChannelArrayRequester
-        {   
-            private ReentrantLock lock = new ReentrantLock();
-            private Condition wait = lock.newCondition();
-            private volatile boolean waiting = true;
-
-            private Channel channel;
-            private Requester requester;
-            private ChannelArray channelArray = null;
+        {
+            private AtomicReference<ChannelArray> channelArray = new AtomicReference<ChannelArray>(null);
             private PVArray pvArray = null;
-            private ExecutorNode executorNode;
+            private ExecutorNode executorNode = executor.createNode(this);
             private int offset;
             private int count;
             private String value;
             
-            private ArrayRunCommand runCommand = null;
-
-            private Array(Channel channel,Requester requester) {
-                this.channel = channel;
-                this.requester = requester;
-                executorNode = executor.createNode(this);
-                
-            }
+            private ArrayRunRequest runRequest = null;
             
-            private void get(int offset,int count) {
-                this.offset = offset;
-                this.count = count;
-                runCommand = ArrayRunCommand.get;
+            void create() {
+                runRequest = ArrayRunRequest.create;
                 executor.execute(executorNode);
             }
             
-            private void put(int offset,String value) {
+            void disconnect() {
+                pvArray = null;
+                runRequest = ArrayRunRequest.disconnect;
+                executor.execute(executorNode);
+            }
+  
+            void get(int offset,int count) {
+                this.offset = offset;
+                this.count = count;
+                runRequest = ArrayRunRequest.get;
+                executor.execute(executorNode);
+            }
+            
+            void put(int offset,String value) {
                 this.offset = offset;
                 this.value = value;
-                runCommand = ArrayRunCommand.put;
+                runRequest = ArrayRunRequest.put;
                 executor.execute(executorNode);
             }
             
@@ -378,15 +402,9 @@ public class ArrayFactory {
                 	message(status.toString(),MessageType.error);
                 	return;
                 }
-                this.channelArray = channelArray;
+                message("getArrayConnect succeeded",MessageType.info);
+                this.channelArray.compareAndSet(null,channelArray);
                 this.pvArray = pvArray;
-                lock.lock();
-                try {
-                    waiting = false;
-                    wait.signal();
-                } finally {
-                    lock.unlock();
-                }
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#getArrayDone(Status)
@@ -399,13 +417,6 @@ public class ArrayFactory {
                 }
                 message("getArrayDone succeeded",MessageType.info);
                 getDone(pvArray.toString());
-                lock.lock();
-                try {
-                    waiting = false;
-                    wait.signal();
-                } finally {
-                    lock.unlock();
-                }
             }
 
             /* (non-Javadoc)
@@ -418,13 +429,6 @@ public class ArrayFactory {
                 	return;
                 }
                 message("putArrayDone succeeded",MessageType.info);
-                lock.lock();
-                try {
-                    waiting = false;
-                    wait.signal();
-                } finally {
-                    lock.unlock();
-                }
             }
             
             /* (non-Javadoc)
@@ -432,56 +436,30 @@ public class ArrayFactory {
              */
             @Override
             public void run() {
-                switch(runCommand) {
+                Channel c = channel.get();
+                if(c==null) return;
+                switch(runRequest) {
+                case create:
+                    channelArray.compareAndSet(null,c.createChannelArray(this, subField,null));
+                    return;
+                case disconnect:
+                    c.destroy();
+                    channel.set(null);
+                    channelArray.set(null);
+                    return;
                 case get:
-                    waiting = true;
-                    channel.createChannelArray(this, subField,null);
-                    lock.lock();
-                    try {
-                        while(waiting) {
-                            try {
-                            wait.await();
-                            } catch(InterruptedException e) {}
-                        }
-                    } finally {
-                        lock.unlock();
-                    }
-                    if(channelArray==null) {
+                    if(pvArray==null) {
                         message("get failed ",MessageType.error);
                         break;
                     }
-                    waiting = true;
-                    channelArray.getArray(false, offset, count);
-                    lock.lock();
-                    try {
-                        while(waiting) {
-                            try {
-                            wait.await();
-                            } catch(InterruptedException e) {}
-                        }
-                    } finally {
-                        lock.unlock();
-                    }
-                    channelArray.destroy();
-                    break;
+                    channelArray.get().getArray(false, offset, count);
+                    return;
                 case put:
-                    waiting = true;
-                    channel.createChannelArray(this, subField,null);
-                    lock.lock();
-                    try {
-                        while(waiting) {
-                            try {
-                            wait.await();
-                            } catch(InterruptedException e) {}
-                        }
-                    } finally {
-                        lock.unlock();
-                    }
-                    if(channelArray==null) {
+                    if(pvArray==null) {
                         message("put failed ",MessageType.error);
                         break;
                     }
-                    waiting = true;
+                    ChannelArray channelArray = this.channelArray.get();
                     try {
                         int len = convert.fromString(pvArray,value);
                         pvArray.setLength(len);
@@ -494,17 +472,7 @@ public class ArrayFactory {
                     } catch (IllegalArgumentException e) {
                         message("IllegalArgumentException " + e.getMessage(),MessageType.error);
                     }
-                    lock.lock();
-                    try {
-                        while(waiting) {
-                            try {
-                            wait.await();
-                            } catch(InterruptedException e) {}
-                        }
-                    } finally {
-                        lock.unlock();
-                    }
-                    channelArray.destroy();
+                    return;
                 }
             }
             /* (non-Javadoc)
