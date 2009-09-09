@@ -87,7 +87,7 @@ public class SWTMessageFactory {
                     consoleText.append(String.format("%n%d missed messages%n", numOverrun));
                 }
                 if(message!=null) {
-                    consoleText.append(String.format("%s%n",message));
+                    consoleText.append(String.format("%n%s%n",message));
                 }
             }
         }

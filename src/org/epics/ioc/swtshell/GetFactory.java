@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.swtshell;
 
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -20,6 +21,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.channelAccess.client.Channel;
+import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.ca.channelAccess.client.ChannelGet;
 import org.epics.ca.channelAccess.client.ChannelGetRequester;
 import org.epics.pvData.misc.BitSet;
@@ -48,7 +50,7 @@ public class GetFactory {
     
     private static Executor executor = SwtshellFactory.getExecutor();
     
-    private static class GetImpl implements DisposeListener,CreateRequestRequester,SelectionListener,Runnable
+    private static class GetImpl implements DisposeListener,SelectionListener,ChannelRequester,ConnectChannelRequester,CreateRequestRequester,Runnable
     {
 
         private GetImpl(Display display) {
@@ -61,7 +63,6 @@ public class GetFactory {
         private Display display;
         private Shell shell = null;
         private Requester requester = null;
-        private Channel channel = null;
         private Button connectButton;
         private Button processButton;
         private Button createRequestButton = null;
@@ -71,6 +72,8 @@ public class GetFactory {
         private PVStructure pvRequest = null;
         private Get get = new Get();
         private boolean isProcess = false;
+        private AtomicReference<Channel> channel = new AtomicReference<Channel>(null);
+        private AtomicReference<ConnectChannel> connectChannel = new AtomicReference<ConnectChannel>(null);
         
         private void start() {
             shell = new Shell(display);
@@ -154,16 +157,21 @@ public class GetFactory {
             if(isDisposed) return;
             Object object = arg0.getSource(); 
             if(object==connectButton) {
-                Channel channel = this.channel;
+                Channel channel = this.channel.get();
                 if(channel!=null) {
-                    channel.destroy();
-                    this.channel = null;
+                    message("must disconnect first",MessageType.error);
+                    return;
                 }
-                ConnectChannel connectChannel = ConnectChannelFactory.create(shell, this);
-                connectChannel.connect();
+                connectChannel.set(ConnectChannelFactory.create(shell,this, this));
+                connectChannel.get().connect();
             } else if(object==processButton) {
                 isProcess = processButton.getSelection();
             } else if(object==createRequestButton) {
+                Channel channel = this.channel.get();
+                if(channel==null) {
+                    message("channel not connected",MessageType.error);
+                    return;
+                }
                 CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
                 createRequest.create();
             } else if(object==disconnectButton) {
@@ -171,7 +179,6 @@ public class GetFactory {
                 connectButton.setEnabled(true);
                 disconnectButton.setEnabled(false);
                 processButton.setEnabled(true);
-                channel = null;
             } else if(object==getButton) {
                 get.get();
                 return;
@@ -192,25 +199,48 @@ public class GetFactory {
             requester.message(message, messageType);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelRequester#channelStateChange(org.epics.ioc.ca.Channel, boolean)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
          */
         @Override
         public void channelStateChange(Channel c, boolean isConnected) {
+            if(!isConnected) {
+                message("channel disconnected",MessageType.error);
+                return;
+            }
+            channel.set(c);
+            ConnectChannel connectChannel = this.connectChannel.getAndSet(null);
+            if(connectChannel!=null) connectChannel.cancelTimeout();
             display.asyncExec(this);
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
+         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
          */
         @Override
-        public void channelCreated(Status status,Channel channel) {
+        public void channelCreated(Status status,Channel c) {
             if (!status.isOK()) {
-            	message(status.toString(),MessageType.error);
-            	return;
+                message(status.toString(),MessageType.error);
+                return;
             }
-            this.channel = channel;
-            message("channel created",MessageType.info);
+            channel.set(c);
+            c.connect();
+        }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
+         */
+        @Override
+        public void destroy(Channel c) {
             display.asyncExec(this);
         }
+        /* (non-Javadoc)
+         * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
+         */
+        @Override
+        public void timeout() {
+            Channel channel = this.channel.getAndSet(null);
+            if(channel!=null) channel.destroy();
+            message("channel connect timeout",MessageType.info);
+        }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
          */
@@ -223,21 +253,17 @@ public class GetFactory {
             processButton.setEnabled(false);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
-         */
-        @Override
-        public void destroy(Channel c) {
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         @Override
         public void run() {
+            Channel channel = null;
             if(isDisposed) {
+                channel = this.channel.getAndSet(null);
                 if(channel!=null) channel.destroy();
                 return;
             }
+            channel = this.channel.get();
             if(channel==null) return;
             boolean isConnected = channel.isConnected();
             if(isConnected) {
@@ -269,9 +295,8 @@ public class GetFactory {
         Runnable,
         ChannelGetRequester
         {
-            boolean isCreated = false;
             private ExecutorNode executorNode = executor.createNode(this);
-            private ChannelGet channelGet = null;
+            private AtomicReference<ChannelGet> channelGet = new AtomicReference<ChannelGet>(null);
             private BitSet changeBitSet = null;
             private GetRunRequest runRequest;
             private boolean isShared;
@@ -279,10 +304,6 @@ public class GetFactory {
             private PrintModified printModified = null;
 
             void create(boolean isShared,boolean process) {
-                if(isCreated) {
-                    requester.message("already created", MessageType.warning);
-                    return;
-                }
                 this.isShared = isShared;
                 this.process = process;
                 runRequest = GetRunRequest.create;
@@ -290,10 +311,6 @@ public class GetFactory {
             }
             
             void disconnect() {
-                if(!isCreated) {
-                    requester.message("not created", MessageType.warning);
-                    return;
-                }
                 runRequest = GetRunRequest.disconnect;
                 executor.execute(executorNode);
             }
@@ -307,19 +324,22 @@ public class GetFactory {
              */
             @Override
             public void run() {
+                Channel c = channel.get();
+                if(c==null) return;
                 switch(runRequest) {
                 case create:
                     String structureName = "";
                     if(pvRequest!=null) structureName = pvRequest.getField().getFieldName();
-                    channelGet = channel.createChannelGet(this, pvRequest,structureName,isShared,process,null);
-                    break;
+                    channelGet.compareAndSet(null,c.createChannelGet(this, pvRequest,structureName,isShared,process,null));
+                    return;
                 case disconnect:
-                    channelGet.destroy();
-                    channel.destroy();
-                    isCreated = false;
-                    break;
+                    c.destroy();
+                    channel.set(null);
+                    channelGet.set(null);
+                    return;
                 case get:
-                    channelGet.get(false);
+                    ChannelGet channelGet = this.channelGet.get();
+                    if(channelGet!=null) channelGet.get(false);
                     break;
                 }
                 
@@ -333,9 +353,8 @@ public class GetFactory {
                 	message(status.toString(),MessageType.error);
                 	return;
                 }
-                this.channelGet = channelGet;
+                this.channelGet.compareAndSet(null, channelGet);
                 changeBitSet = bitSet;
-                isCreated = true;
                 printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, null, consoleText);
             }
 
