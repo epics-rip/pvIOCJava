@@ -214,8 +214,8 @@ public class PutFactory {
         @Override
         public void channelCreated(Status status,Channel c) {
             if (!status.isOK()) {
-                message(status.toString(),MessageType.error);
-                return;
+            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+            	if (!status.isSuccess()) return;
             }
             channel.set(c);
             c.connect();
@@ -352,8 +352,8 @@ public class PutFactory {
             @Override
             public void channelPutConnect(Status status,ChannelPut channelPut,PVStructure pvStructure,BitSet bitSet) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 this.channelPut.compareAndSet(null, channelPut);
                 this.pvStructure = pvStructure;
@@ -366,8 +366,8 @@ public class PutFactory {
             @Override
             public void putDone(Status status) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 display.asyncExec( new Runnable() {
                     public void run() {
@@ -383,8 +383,8 @@ public class PutFactory {
             @Override
             public void getDone(Status status) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 // TODO what to do?
             }

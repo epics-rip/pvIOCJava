@@ -245,8 +245,8 @@ public class PutGetFactory {
         @Override
         public void channelCreated(Status status,Channel c) {
             if (!status.isOK()) {
-                message(status.toString(),MessageType.error);
-                return;
+            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+            	if (!status.isSuccess()) return;
             }
             channel.set(c);
             c.connect();
@@ -333,19 +333,19 @@ public class PutGetFactory {
                 putGet.getPut();
                 return;
             case getPutDone:
-                if(success.isOK()) {
-                    message("getPut done",MessageType.info);
-                    putGetButton.setEnabled(true);
-                } else {
-                	message(success.toString(),MessageType.error);
+                if (!success.isOK()) {
+                	message(success.toString(), success.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!success.isSuccess()) return;
                 }
+                message("getPut done",MessageType.info);
+                putGetButton.setEnabled(true);
                 return;
             case putGetDone:
-                if(success.isOK()) {
-                printModified.print();
-                } else {
-                	message(success.toString(),MessageType.error);
+                if (!success.isOK()) {
+                	message(success.toString(), success.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!success.isSuccess()) return;
                 }
+                printModified.print();
                 return;
             }
         }
@@ -453,8 +453,8 @@ public class PutGetFactory {
                     PVStructure pvPutStructure, PVStructure pvGetStructure)
             {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 this.channelPutGet.compareAndSet(null,channelPutGet);
                 this.pvPutStructure = pvPutStructure;

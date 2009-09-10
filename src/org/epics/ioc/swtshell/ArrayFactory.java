@@ -292,8 +292,8 @@ public class ArrayFactory {
         @Override
         public void channelCreated(Status status,Channel c) {
             if (!status.isOK()) {
-            	message(status.toString(),MessageType.error);
-            	return;
+            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+            	if (!status.isSuccess()) return;
             }
             channel.set(c);
             c.connect();
@@ -399,8 +399,8 @@ public class ArrayFactory {
             @Override
             public void channelArrayConnect(Status status,ChannelArray channelArray,PVArray pvArray) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 message("getArrayConnect succeeded",MessageType.info);
                 this.channelArray.compareAndSet(null,channelArray);
@@ -412,8 +412,8 @@ public class ArrayFactory {
             @Override
             public void getArrayDone(Status status) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 message("getArrayDone succeeded",MessageType.info);
                 getDone(pvArray.toString());
@@ -425,8 +425,8 @@ public class ArrayFactory {
             @Override
             public void putArrayDone(Status status) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 message("putArrayDone succeeded",MessageType.info);
             }

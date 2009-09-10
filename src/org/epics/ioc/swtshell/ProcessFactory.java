@@ -191,8 +191,8 @@ public class ProcessFactory {
         @Override
         public void channelCreated(Status status,Channel c) {
             if (!status.isOK()) {
-                message(status.toString(),MessageType.error);
-                return;
+            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+            	if (!status.isSuccess()) return;
             }
             channel.set(c);
             c.connect();
@@ -268,8 +268,8 @@ public class ProcessFactory {
             @Override
             public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 this.channelProcess.compareAndSet(null, channelProcess);
             }
@@ -279,8 +279,8 @@ public class ProcessFactory {
             @Override
             public void processDone(Status status) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 message("processDone succeeded",MessageType.info);
             }

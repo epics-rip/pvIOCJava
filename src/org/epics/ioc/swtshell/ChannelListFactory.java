@@ -300,8 +300,8 @@ public class ChannelListFactory {
             @Override
             public void channelCreated(Status status, Channel channel) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 this.channel = channel;
             }
@@ -331,8 +331,8 @@ public class ChannelListFactory {
                     PVStructure pvPutStructure, PVStructure pvGetStructure)
             {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 this.channelPutGet = channelPutGet;
                 if(pvPutStructure!=null && pvGetStructure!=null) {
@@ -386,8 +386,8 @@ public class ChannelListFactory {
             @Override
             public void putGetDone(Status status) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 int length = pvRecordNames.getLength();
                 if(length<1) {

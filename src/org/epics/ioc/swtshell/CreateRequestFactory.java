@@ -179,8 +179,8 @@ public class CreateRequestFactory {
         @Override
         public void getDone(Status status,Field field) {
             if (!status.isOK()) {
-            	message(status.toString(),MessageType.error);
-            	return;
+            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+            	if (!status.isSuccess()) return;
             }
             if(field.getType()!=Type.structure) {
                 message("CreateRequest: channel introspection did not return a Structure",MessageType.error);

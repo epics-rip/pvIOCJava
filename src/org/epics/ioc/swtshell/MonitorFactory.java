@@ -390,8 +390,8 @@ public class MonitorFactory {
         @Override
         public void channelCreated(Status status,Channel c) {
             if (!status.isOK()) {
-                message(status.toString(),MessageType.error);
-                return;
+            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+            	if (!status.isSuccess()) return;
             }
             channel.set(c);
             c.connect();
@@ -528,8 +528,8 @@ public class MonitorFactory {
             @Override
             public void monitorConnect(Status status,Monitor monitor, Structure structure) {
                 if (!status.isOK()) {
-                	message(status.toString(),MessageType.error);
-                	return;
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
                 }
                 this.monitor.compareAndSet(null, monitor);
                 monitorConnectCallback();
