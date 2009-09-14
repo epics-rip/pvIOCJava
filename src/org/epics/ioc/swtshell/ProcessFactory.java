@@ -4,7 +4,6 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.swtshell;
-import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -19,12 +18,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelGet;
 import org.epics.ca.channelAccess.client.ChannelProcess;
 import org.epics.ca.channelAccess.client.ChannelProcessRequester;
 import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Status;
@@ -35,39 +31,35 @@ import org.epics.pvData.pv.Status;
  *
  */
 public class ProcessFactory {
-
     /**
      * Create the process shell.
      * @param display The display.
      */
     public static void init(Display display) {
-        ProcessImpl processImpl = new ProcessImpl(display);
-        processImpl.start();
+        ProcessImpl processImpl = new ProcessImpl();
+        processImpl.start(display);
     }
-
-    private static Executor executor = SwtshellFactory.getExecutor();
     
-    private static class ProcessImpl implements DisposeListener,SelectionListener,ChannelRequester,ConnectChannelRequester,Runnable  {
-
-        private ProcessImpl(Display display) {
-            this.display = display;
-        }
-
-        private boolean isDisposed = false;
-        private static String windowName = "process";
-        private ExecutorNode executorNode = executor.createNode(this);
-        private Display display;
-        private Shell shell = null;
+    private static class ProcessImpl implements DisposeListener,SelectionListener  { 
+        // following are global to embedded classes
+        private enum State{
+            readyForConnect,connecting,
+            readyForCreateProcess,creatingProcess,
+            ready,processActive
+        };
+        private StateMachine stateMachine = new StateMachine();
+        private ChannelClient channelClient = new ChannelClient();
         private Requester requester = null;
+        private boolean isDisposed = false;
+        
+        private static String windowName = "process";
+        private Shell shell = null;
         private Button connectButton = null;
-        private Button disconnectButton = null;
+        private Button createProcessButton = null;
         private Button processButton = null;
         private Text consoleText = null; 
-        private Process process = null;
-        private AtomicReference<Channel> channel = new AtomicReference<Channel>(null);
-        private AtomicReference<ConnectChannel> connectChannel = new AtomicReference<ConnectChannel>(null);
-
-        private void start() {
+        
+        void start(Display display) {
             shell = new Shell(display);
             shell.setText(windowName);
             GridLayout gridLayout = new GridLayout();
@@ -77,17 +69,15 @@ public class ProcessFactory {
             RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
             composite.setLayout(rowLayout);
             connectButton = new Button(composite,SWT.PUSH);
-            connectButton.setText("connect");
+            connectButton.setText("disconnect");
             connectButton.addSelectionListener(this);               
-            connectButton.setEnabled(true);
-            disconnectButton = new Button(composite,SWT.PUSH);
-            disconnectButton.setText("disconnect");
-            disconnectButton.addSelectionListener(this);               
-            disconnectButton.setEnabled(false);
+
+            createProcessButton = new Button(composite,SWT.PUSH);
+            createProcessButton.setText("destroyProcess");
+            createProcessButton.addSelectionListener(this);               
             processButton = new Button(composite,SWT.PUSH);
             processButton.setText("process");
             processButton.addSelectionListener(this);               
-            processButton.setEnabled(false);
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -113,6 +103,7 @@ public class ProcessFactory {
             consoleText.setLayoutData(gridData);
             requester = SWTMessageFactory.create(windowName,display,consoleText);
             shell.pack();
+            stateMachine.setState(State.readyForConnect);
             shell.open();
             shell.addDisposeListener(this);
         }
@@ -122,8 +113,7 @@ public class ProcessFactory {
         @Override
         public void widgetDisposed(DisposeEvent e) {
             isDisposed = true;
-            executor.execute(executorNode);
-            
+            channelClient.disconnect();
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -140,127 +130,174 @@ public class ProcessFactory {
             if(isDisposed) return;
             Object object = arg0.getSource();
             if(object==connectButton) {
-                Channel channel = this.channel.get();
-                if(channel!=null) {
-                    message("must disconnect first",MessageType.error);
+                State state = stateMachine.getState();
+                if(state==State.readyForConnect) {
+                    stateMachine.setState(State.connecting);
+                    channelClient.connect(shell);
+                } else {
+                    channelClient.disconnect();
+                    stateMachine.setState(State.readyForConnect);
+                }
+            } else if(object==createProcessButton) {
+                State state = stateMachine.getState();
+                if(state==State.readyForCreateProcess) {
+                    stateMachine.setState(State.creatingProcess);
+                    channelClient.createProcess();
+                } else {
+                    channelClient.destroyProcess();
+                    stateMachine.setState(State.readyForCreateProcess);
+                }
+            } else if(object==processButton) {
+                State state = stateMachine.getState();
+                if(state==State.ready) {
+                    stateMachine.setState(State.processActive);
+                    channelClient.process();
+                } else {
+                    requester.message("process request but not ready",MessageType.error);
+                }
+                return;
+            }
+        }
+       
+        private class StateMachine {
+            private State state = null;
+            
+            void setState(State newState) {
+                if(isDisposed) return;
+                state = newState;
+                switch(state) {
+                case readyForConnect:
+                    connectButton.setText("connect");
+                    createProcessButton.setText("createProcess");
+                    createProcessButton.setEnabled(false);
+                    processButton.setEnabled(false);
+                    return;
+                case connecting:
+                    connectButton.setText("disconnect");
+                    createProcessButton.setText("createProcess");
+                    createProcessButton.setEnabled(false);
+                    processButton.setEnabled(false);
+                    return;
+                case readyForCreateProcess:
+                    connectButton.setText("disconnect");
+                    createProcessButton.setText("createProcess");
+                    createProcessButton.setEnabled(true);
+                    processButton.setEnabled(false);
+                    return;
+                case creatingProcess:
+                    connectButton.setText("disconnect");
+                    createProcessButton.setText("destroyProcess");
+                    createProcessButton.setEnabled(true);
+                    processButton.setEnabled(false);
+                    return;
+                case ready:
+                    connectButton.setText("disconnect");
+                    createProcessButton.setText("destroyProcess");
+                    createProcessButton.setEnabled(true);
+                    processButton.setEnabled(true);
+                    return;
+                case processActive:
+                    connectButton.setText("disconnect");
+                    createProcessButton.setText("destroyProcess");
+                    createProcessButton.setEnabled(true);
+                    processButton.setEnabled(false);
                     return;
                 }
-                connectChannel.set(ConnectChannelFactory.create(shell,this, this));
-                connectChannel.get().connect();
-            } else if(object==disconnectButton) {
-                process.disconnect();
-                connectButton.setEnabled(true);
-                disconnectButton.setEnabled(false);
-                processButton.setEnabled(false);
-            } else if(object==processButton) {
-                process.process();
-                return;
+                
             }
+            State getState() {return state;}
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        @Override
-        public String getRequesterName() {
-            return requester.getRequesterName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        @Override
-        public void message(String message, MessageType messageType) {
-            requester.message(message, messageType);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
-         */
-        @Override
-        public void channelStateChange(Channel c, boolean isConnected) {
-            if(!isConnected) {
-                message("channel disconnected",MessageType.error);
-                return;
-            }
-            channel.set(c);
-            ConnectChannel connectChannel = this.connectChannel.getAndSet(null);
-            if(connectChannel!=null) connectChannel.cancelTimeout();
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
-         */
-        @Override
-        public void channelCreated(Status status,Channel c) {
-            if (!status.isOK()) {
-            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
-            	if (!status.isSuccess()) return;
-            }
-            channel.set(c);
-            c.connect();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
-         */
-        @Override
-        public void destroy(Channel c) {
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
-         */
-        @Override
-        public void timeout() {
-            Channel channel = this.channel.getAndSet(null);
-            if(channel!=null) channel.destroy();
-            message("channel connect timeout",MessageType.info);
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        @Override
-        public void run() {
-            Channel channel = null;
-            if(isDisposed) {
-                channel = this.channel.getAndSet(null);
-                if(channel!=null) channel.destroy();
-                return;
-            }
-            channel = this.channel.get();
-            if(channel==null) return;
-            boolean isConnected = channel.isConnected();
-            if(isConnected) {
-                connectButton.setEnabled(false);
-                disconnectButton.setEnabled(true);
-                process = new Process(channel);
-                processButton.setEnabled(true);
-            } else {
-                connectButton.setEnabled(true);
-                disconnectButton.setEnabled(false);
-                processButton.setEnabled(false);
-            }
-        }
-        private enum RunCommand{process,disconnect};
         
-        private class Process implements Runnable,ChannelProcessRequester
+        private enum RunCommand{channelConnected,timeout,destroy,channelProcessConnect,processDone};
+        private class ChannelClient implements ChannelRequester,ConnectChannelRequester,Runnable,ChannelProcessRequester
         {   
-            private AtomicReference<ChannelProcess> channelProcess = new AtomicReference<ChannelProcess>(null);
-            private ExecutorNode executorNode;
-            
+            private Channel channel = null;
+            private ConnectChannel connectChannel = null;
+            private ChannelProcess channelProcess = null;
             private RunCommand runCommand = null;
 
-            private Process(Channel channel) {
-                executorNode = executor.createNode(this);
-                channelProcess.compareAndSet(null,channel.createChannelProcess(this,null));
+            void connect(Shell shell) {
+                if(connectChannel!=null) {
+                    message("connect in propress",MessageType.error);
+                }
+                connectChannel = ConnectChannelFactory.create(shell, this,this);
+                connectChannel.connect();
+            }
+            void createProcess() {
+                channelProcess = channel.createChannelProcess(this,null);
             }
             
-            private void process() {
-                runCommand = RunCommand.process;
-                executor.execute(executorNode);
+            void destroyProcess() {
+                ChannelProcess channelProcess = this.channelProcess;
+                if(channelProcess!=null) {
+                    this.channelProcess = null;
+                    channelProcess.destroy();
+                }
+            }
+            void process() {
+                channelProcess.process(false);
             }
             
-            private void disconnect() {
-                runCommand = RunCommand.disconnect;
-                executor.execute(executorNode);
+            void disconnect() {
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    this.channel = null;
+                    channel.destroy();
+                }
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
+             */
+            @Override
+            public void channelStateChange(Channel c, boolean isConnected) {
+                if(!isConnected) {
+                    message("channel disconnected",MessageType.error);
+                    return;
+                }
+                channel = c;
+                ConnectChannel connectChannel = this.connectChannel;
+                if(connectChannel!=null) {
+                    connectChannel.cancelTimeout();
+                    this.connectChannel = null;
+                }
+                runCommand = RunCommand.channelConnected;
+                shell.getDisplay().asyncExec(this);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
+             */
+            @Override
+            public void channelCreated(Status status,Channel c) {
+                if (!status.isOK()) {
+                    message(status.toString(),MessageType.error);
+                    return;
+                }
+                channel = c;;
+                c.connect();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
+             */
+            @Override
+            public void destroy(Channel c) {
+                this.channel = null;
+                runCommand = RunCommand.destroy;
+                shell.getDisplay().asyncExec(this);
+                message("channel destroyed",MessageType.error);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
+             */
+            @Override
+            public void timeout() {
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    this.channel = null;
+                    channel.destroy();
+                }
+                message("channel connect timeout",MessageType.info);
+                runCommand = RunCommand.destroy;
+                shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(Status,org.epics.ca.channelAccess.client.ChannelProcess)
@@ -271,7 +308,8 @@ public class ProcessFactory {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
-                this.channelProcess.compareAndSet(null, channelProcess);
+                runCommand = RunCommand.channelProcessConnect;
+                shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(Status)
@@ -283,29 +321,32 @@ public class ProcessFactory {
                 	if (!status.isSuccess()) return;
                 }
                 message("processDone succeeded",MessageType.info);
+                runCommand = RunCommand.processDone;
+                shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             @Override
             public void run() {
-                Channel c = channel.get();
-                if(c==null) return;
                 switch(runCommand) {
-                case process:
-                    ChannelProcess channelProcess = this.channelProcess.get();
-                    if(channelProcess!=null) {
-                        channelProcess.process(false);
-                    } else {
-                        message("not channelProcessor ",MessageType.info);
-                    }
+                case channelConnected:
+                    stateMachine.setState(State.readyForCreateProcess);
                     return;
-                case disconnect:
-                    c.destroy();
-                    channel.set(null);
-                    this.channelProcess.set(null);
+                case timeout:
+                    stateMachine.setState(State.readyForConnect);
+                    return;
+                case destroy:
+                    stateMachine.setState(State.readyForConnect);
+                    return;
+                case channelProcessConnect:
+                    stateMachine.setState(State.ready);
+                    return;
+                case processDone:
+                    stateMachine.setState(State.ready);
                     return;
                 }
+                
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()

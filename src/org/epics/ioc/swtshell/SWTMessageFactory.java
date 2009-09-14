@@ -55,7 +55,6 @@ public class SWTMessageFactory {
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(final String message, MessageType messageType) {
-            if(display.isDisposed()) return;
             boolean syncExec = false;
             synchronized(messageQueue) {
                 if(messageQueue.isEmpty()) syncExec = true;
@@ -65,6 +64,8 @@ public class SWTMessageFactory {
                     messageQueue.put(message, messageType);
                 }
             }
+            if(consoleText.isDisposed()) return;
+            if(display.isDisposed()) return;
             if(syncExec) {
                 display.asyncExec(this);
             }
@@ -74,7 +75,6 @@ public class SWTMessageFactory {
          */
         public void run() {
             while(true) {
-                if(display.isDisposed()) break;
                 String message = null;
                 int numOverrun = 0;
                 synchronized(messageQueue) {
@@ -83,6 +83,8 @@ public class SWTMessageFactory {
                     if(messageNode==null && numOverrun==0) break;
                     message = messageNode.message;
                 }
+                if(display.isDisposed()) break;
+                if(consoleText.isDisposed()) break;
                 if(numOverrun>0) {
                     consoleText.append(String.format("%n%d missed messages%n", numOverrun));
                 }

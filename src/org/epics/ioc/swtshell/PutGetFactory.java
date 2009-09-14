@@ -5,8 +5,6 @@
  */
 package org.epics.ioc.swtshell;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -21,13 +19,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelGet;
 import org.epics.ca.channelAccess.client.ChannelPutGet;
 import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
 import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.pvData.misc.BitSet;
-import org.epics.pvData.misc.Executor;
-import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
@@ -45,51 +40,40 @@ public class PutGetFactory {
      * @param display The display.
      */
     public static void init(Display display) {
-        PutGetImpl channelPutGetImpl = new PutGetImpl(display);
-        channelPutGetImpl.start();
+        PutGetImpl channelPutGetImpl = new PutGetImpl();
+        channelPutGetImpl.start(display);
     }
     
-    private static Executor executor = SwtshellFactory.getExecutor();
 
-    private static class PutGetImpl implements DisposeListener,SelectionListener,ChannelRequester,ConnectChannelRequester,CreateRequestRequester,Runnable 
+    private static class PutGetImpl implements DisposeListener,SelectionListener
+    
     {
-
-        private PutGetImpl(Display display) {
-            this.display = display;
-        }
-        
-        private enum RunRequest {
-            channelStateChange,
-            dispose,
-            putGetConnect,
-            getPutDone,
-            putGetDone
-        }
-        private boolean isDisposed = false;
-        private static String windowName = "putGet";
-        private ExecutorNode executorNode = executor.createNode(this);
-        private Display display;
-        private Shell shell = null;
+     // following are global to embedded classes
+        private enum State{
+            readyForConnect,connecting,
+            readyForCreatePutRequest,creatingPutRequest,
+            readyForCreateGetRequest,creatingGetRequest,
+            readyForCreatePutGet,creatingPutGet,
+            ready,putActive
+        };
+        private StateMachine stateMachine = new StateMachine();
+        private ChannelClient channelClient = new ChannelClient();
         private Requester requester = null;
+        private boolean isDisposed = false;
+
+        private static String windowName = "putGet";
+        private Shell shell = null;
         private Button connectButton;
         private Button processButton;
         private Button createPutRequestButton = null;
         private Button createGetRequestButton = null;
-        private Button disconnectButton;
+        private Button createPutGetButton = null;
         private Button putGetButton;
         private Text consoleText = null;
-        private PVStructure pvPutRequest = null;
-        private PVStructure pvGetRequest = null;
-        private PutGet putGet = new PutGet();
         private boolean isProcess = false;
-        private boolean createPutRequest = false;
-        private RunRequest runRequest = null;
-        private PrintModified printModified = null;
-        private Status success;
-        private AtomicReference<Channel> channel = new AtomicReference<Channel>(null);
-        private AtomicReference<ConnectChannel> connectChannel = new AtomicReference<ConnectChannel>(null);
         
-        private void start() {
+        
+        private void start(Display display) {
             shell = new Shell(display);
             shell.setText(windowName);
             GridLayout gridLayout = new GridLayout();
@@ -99,30 +83,31 @@ public class PutGetFactory {
             RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
             composite.setLayout(rowLayout);
             connectButton = new Button(composite,SWT.PUSH);
-            connectButton.setText("connect");
+            connectButton.setText("disconnect");
             connectButton.addSelectionListener(this);               
-            connectButton.setEnabled(true);
+
             processButton = new Button(composite,SWT.CHECK);
             processButton.setText("process");
             processButton.setSelection(false);
             processButton.addSelectionListener(this);               
-            processButton.setEnabled(true);
+
             createPutRequestButton = new Button(composite,SWT.PUSH);
             createPutRequestButton.setText("createPutRequest");
             createPutRequestButton.addSelectionListener(this);               
-            createPutRequestButton.setEnabled(false);
+            
             createGetRequestButton = new Button(composite,SWT.PUSH);
             createGetRequestButton.setText("createGetRequest");
-            createGetRequestButton.addSelectionListener(this);               
-            createGetRequestButton.setEnabled(false);
-            disconnectButton = new Button(composite,SWT.PUSH);
-            disconnectButton.setText("disconnect");
-            disconnectButton.addSelectionListener(this);               
-            disconnectButton.setEnabled(false);
+            createGetRequestButton.addSelectionListener(this);
+            
+            createPutGetButton = new Button(composite,SWT.PUSH);
+            createPutGetButton.setText("destroyPutGet");
+            createPutGetButton.addSelectionListener(this);
+           
+
             putGetButton = new Button(composite,SWT.NONE);
             putGetButton.setText("putGet");
             putGetButton.addSelectionListener(this);
-            putGetButton.setEnabled(false);
+
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
@@ -148,6 +133,7 @@ public class PutGetFactory {
             consoleText.setLayoutData(gridData);
             requester = SWTMessageFactory.create(windowName,display,consoleText);
             shell.pack();
+            stateMachine.setState(State.readyForConnect);
             shell.open();
             shell.addDisposeListener(this);
         }
@@ -155,9 +141,8 @@ public class PutGetFactory {
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
-            runRequest = RunRequest.dispose;
             isDisposed = true;
-            executor.execute(executorNode);
+            channelClient.disconnect();
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -172,213 +157,191 @@ public class PutGetFactory {
             if(isDisposed) return;
             Object object = arg0.getSource(); 
             if(object==connectButton) {
-                Channel channel = this.channel.get();
-                if(channel!=null) {
-                    message("must disconnect first",MessageType.error);
-                    return;
+                State state = stateMachine.getState();
+                if(state==State.readyForConnect) {
+                    stateMachine.setState(State.connecting);
+                    channelClient.connect(shell);
+                } else {
+                    channelClient.disconnect();
+                    stateMachine.setState(State.readyForConnect);
                 }
-                connectChannel.set(ConnectChannelFactory.create(shell,this, this));
-                connectChannel.get().connect();
-                
             } else if(object==processButton) {
                 isProcess = processButton.getSelection();
             } else if(object==createPutRequestButton) {
-                Channel channel = this.channel.get();
-                if(channel==null) {
-                    message("channel not connected",MessageType.error);
-                    return;
-                }
-                createPutRequest = true;
-                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
-                createRequest.create();
+               stateMachine.setState(State.creatingPutRequest);
+               channelClient.createPutRequest(shell);
             } else if(object==createGetRequestButton) {
-                Channel channel = this.channel.get();
-                if(channel==null) {
-                    message("channel not connected",MessageType.error);
-                    return;
-                }
-                createPutRequest = false;
-                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
-                createRequest.create();
-            } else if(object==disconnectButton) {
-                putGet.disconnect();
-                connectButton.setEnabled(true);
-                disconnectButton.setEnabled(false);
-                processButton.setEnabled(true);
+                stateMachine.setState(State.creatingGetRequest);
+                channelClient.createGetRequest(shell);
+            } else if(object==createPutGetButton) {
+                stateMachine.setState(State.creatingPutGet);
+                channelClient.createPutGet(isProcess);
             } else if(object==putGetButton) {
                 GUIData guiData = GUIDataFactory.create(shell);
-                guiData.get(putGet.getPutPVStructure(), putGet.getPutBitSet());
-                putGet.putGet();
-                return;
+                guiData.get(channelClient.getPutPVStructure(),channelClient.getPutBitSet());
+                channelClient.putGet();
             }
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        public String getRequesterName() {
-            return requester.getRequesterName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            requester.message(message, messageType);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
-         */
-        @Override
-        public void channelStateChange(Channel c, boolean isConnected) {
-            if(!isConnected) {
-                message("channel disconnected",MessageType.error);
-                return;
-            }
-            channel.set(c);
-            ConnectChannel connectChannel = this.connectChannel.getAndSet(null);
-            if(connectChannel!=null) connectChannel.cancelTimeout();
-            runRequest = RunRequest.channelStateChange;
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
-         */
-        @Override
-        public void channelCreated(Status status,Channel c) {
-            if (!status.isOK()) {
-            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
-            	if (!status.isSuccess()) return;
-            }
-            channel.set(c);
-            c.connect();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
-         */
-        @Override
-        public void destroy(Channel c) {
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
-         */
-        @Override
-        public void timeout() {
-            Channel channel = this.channel.getAndSet(null);
-            if(channel!=null) channel.destroy();
-            message("channel connect timeout",MessageType.info);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
-         */
-        @Override
-        public void request(PVStructure pvRequest, boolean isShared) {
-            if(createPutRequest) {
-                pvPutRequest = pvRequest;
-                createPutRequestButton.setEnabled(false);
-                createGetRequestButton.setEnabled(true);
-            } else {
-                pvGetRequest = pvRequest;
-                createGetRequestButton.setEnabled(false);
-                processButton.setEnabled(false);
-                putGet.connect(isProcess);
-            }
-        }
-        void putGetConnect() {
-            runRequest = RunRequest.putGetConnect;
-            display.asyncExec(this);
-        }
-        void putGetCallback(Status success) {
-            this.success = success;
-            runRequest = RunRequest.putGetDone;
-            display.asyncExec(this);
-        }
-        void getPutCallback(Status success) {
-            this.success = success;
-            runRequest = RunRequest.getPutDone;
-            display.asyncExec(this);
         }
         
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        @Override
-        public void run() {
-            Channel channel = this.channel.get();
-            if(channel==null) return;
-            switch(runRequest) {
-            case channelStateChange:
-                boolean isConnected = channel.isConnected();
-                if(isConnected) {
-                    connectButton.setEnabled(false);
-                    disconnectButton.setEnabled(true);
-                    createPutRequestButton.setEnabled(true);
-                } else {
-                    putGet.disconnect();
-                    connectButton.setEnabled(true);
+        private class StateMachine {
+            private State state = null;
+            
+            void setState(State newState) {
+                if(isDisposed) return;
+                state = newState;
+                switch(state) {
+                case readyForConnect:
+                    connectButton.setText("connect");
+                    createPutGetButton.setText("createPutGet");
+                    processButton.setEnabled(true);
                     createPutRequestButton.setEnabled(false);
                     createGetRequestButton.setEnabled(false);
-                    disconnectButton.setEnabled(false);
-                    processButton.setEnabled(false);
+                    createPutGetButton.setEnabled(false);
                     putGetButton.setEnabled(false);
+                    return;
+                case connecting:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("createPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createGetRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(false);
+                    putGetButton.setEnabled(false);
+                    return;
+                case readyForCreatePutRequest:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("createPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(true);
+                    createGetRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(false);
+                    putGetButton.setEnabled(false);
+                    return;
+                case creatingPutRequest:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("createPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(false);
+                    putGetButton.setEnabled(false);
+                    return;
+                case readyForCreateGetRequest:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("createPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createGetRequestButton.setEnabled(true);
+                    createPutGetButton.setEnabled(false);
+                    putGetButton.setEnabled(false);
+                    return;
+                case creatingGetRequest:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("createPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(false);
+                    putGetButton.setEnabled(false);
+                    return;
+                case readyForCreatePutGet:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("createPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createGetRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(true);
+                    putGetButton.setEnabled(false);
+                    return;
+                case creatingPutGet:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("destroyPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(true);
+                    putGetButton.setEnabled(false);
+                    return;
+                case ready:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("destroyPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createGetRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(true);
+                    putGetButton.setEnabled(true);
+                    return;
+                case putActive:
+                    connectButton.setText("disconnect");
+                    createPutGetButton.setText("destroyPutGet");
+                    processButton.setEnabled(true);
+                    createPutRequestButton.setEnabled(false);
+                    createGetRequestButton.setEnabled(false);
+                    createPutGetButton.setEnabled(true);
+                    putGetButton.setEnabled(false);
+                    return;
                 }
-                return;
-            case dispose:
-                channel = this.channel.getAndSet(null);
-                if(channel!=null) channel.destroy();
-                return;
-            case putGetConnect:
-                message("putGetConnect",MessageType.info);
-                putGetButton.setEnabled(true);
-                printModified = PrintModifiedFactory.create(putGet.getGetPVStructure(), putGet.getGetBitSet(), null, consoleText);
-                putGet.getPut();
-                return;
-            case getPutDone:
-                if (!success.isOK()) {
-                	message(success.toString(), success.isSuccess() ? MessageType.warning : MessageType.error);
-                	if (!success.isSuccess()) return;
-                }
-                message("getPut done",MessageType.info);
-                putGetButton.setEnabled(true);
-                return;
-            case putGetDone:
-                if (!success.isOK()) {
-                	message(success.toString(), success.isSuccess() ? MessageType.warning : MessageType.error);
-                	if (!success.isSuccess()) return;
-                }
-                printModified.print();
-                return;
             }
+            State getState() {return state;}
         }
         
-        private enum PutGetRunRequest {
-            create,
-            disconnect,
-            getPut,
-            putGet
+        private enum RunCommand {
+            channelConnected,timeout,destroy,putRequestDone,getRequestDone,getPutDone,putGetDone
         }
+       
         
-        private class PutGet implements
-        Runnable,
-        ChannelPutGetRequester
+        private class ChannelClient implements
+        ChannelRequester,ConnectChannelRequester,CreateRequestRequester,Runnable,ChannelPutGetRequester
         {
-            private ExecutorNode executorNode = executor.createNode(this);
-            private AtomicReference<ChannelPutGet> channelPutGet = new AtomicReference<ChannelPutGet>(null);
+            private Channel channel = null;
+            private ConnectChannel connectChannel = null;
+            private PVStructure pvPutRequest = null;
+            private PVStructure pvGetRequest = null;
+            private ChannelPutGet channelPutGet = null;
             private PVStructure pvPutStructure = null;
             private BitSet putBitSet = null;
             private PVStructure pvGetStructure = null;
             private BitSet getBitSet = null;
-            private PutGetRunRequest runRequest;
-            private boolean process;
+            private RunCommand runCommand = null;
+            private boolean isPutRequest = true;
+            private boolean putIsShared = false;
+            private boolean getIsShared = false;
+            private PrintModified printModified = null;
 
-            void connect(boolean process) {
-                this.process = process;
-                runRequest = PutGetRunRequest.create;
-                executor.execute(executorNode);
+            void connect(Shell shell) {
+                if(connectChannel!=null) {
+                    message("connect in propress",MessageType.error);
+                }
+                connectChannel = ConnectChannelFactory.create(shell, this,this);
+                connectChannel.connect();
             }
-            
+            void createPutRequest(Shell shell) {
+                isPutRequest = true;
+                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
+                createRequest.create();
+            }
+            void createGetRequest(Shell shell) {
+                isPutRequest = false;
+                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
+                createRequest.create();
+            }
+            void createPutGet(boolean process) {
+                channelPutGet = channel.createChannelPutGet(
+                    this,
+                    pvPutRequest,"arguments",putIsShared,
+                    pvGetRequest,"result", getIsShared, process,null);
+                return;
+            }
+            void destroyPutGet() {
+                ChannelPutGet channelPutGet = this.channelPutGet;
+                if(channelPutGet!=null) {
+                    this.channelPutGet = null;
+                    channelPutGet.destroy();
+                }
+            }
             void disconnect() {
-                runRequest = PutGetRunRequest.disconnect;
-                executor.execute(executorNode);
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    this.channel = null;
+                    channel.destroy();
+                }
             }
             
             PVStructure getPutPVStructure() {
@@ -400,50 +363,79 @@ public class PutGetFactory {
             }
             
             void putGet() {
-                runRequest = PutGetRunRequest.putGet;
-                executor.execute(executorNode);
-            }
-            void getPut() {
-                runRequest = PutGetRunRequest.getPut;
-                executor.execute(executorNode);
+                channelPutGet.putGet(false);
             }
             
             /* (non-Javadoc)
-             * @see java.lang.Runnable#run()
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
              */
             @Override
-            public void run() {
-                Channel c = channel.get();
-                if(c==null) return;
-                ChannelPutGet channelPutGet = this.channelPutGet.get();
-                switch(runRequest) {
-                case create:
-                    this.channelPutGet.compareAndSet(null,c.createChannelPutGet(
-                            this,pvPutRequest,
-                            "arguments", true,pvGetRequest,
-                            "result", true, process,null));
+            public void channelStateChange(Channel c, boolean isConnected) {
+                if(!isConnected) {
+                    message("channel disconnected",MessageType.error);
                     return;
-                case disconnect:
-                    c.destroy();
-                    channel.set(null);
-                    this.channelPutGet.set(null);
-                    return;
-                case getPut:
-                    if(channelPutGet!=null) {
-                        channelPutGet.getPut();
-                    } else {
-                        message("getPut request but channelPutGet is null",MessageType.error);
-                    }
-                    return;
-                case putGet:
-                    if(channelPutGet!=null)  {
-                        channelPutGet.putGet(false);
-                    } else {
-                        message("getPut request but channelPutGet is null",MessageType.error);
-                    }
-                    return;
-                   
                 }
+                channel = c;
+                ConnectChannel connectChannel = this.connectChannel;
+                if(connectChannel!=null) {
+                    connectChannel.cancelTimeout();
+                    this.connectChannel = null;
+                }
+                runCommand = RunCommand.channelConnected;
+                shell.getDisplay().asyncExec(this);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
+             */
+            @Override
+            public void channelCreated(Status status,Channel c) {
+                if (!status.isOK()) {
+                    message(status.toString(),MessageType.error);
+                    return;
+                }
+                channel = c;;
+                c.connect();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
+             */
+            @Override
+            public void destroy(Channel c) {
+                this.channel = null;
+                runCommand = RunCommand.destroy;
+                shell.getDisplay().asyncExec(this);
+                message("channel destroyed",MessageType.error);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
+             */
+            @Override
+            public void timeout() {
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    this.channel = null;
+                    channel.destroy();
+                }
+                message("channel connect timeout",MessageType.info);
+                runCommand = RunCommand.destroy;
+                shell.getDisplay().asyncExec(this);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
+             */
+            @Override
+            public void request(PVStructure pvRequest, boolean isShared) {
+                if(isPutRequest) {
+                    pvPutRequest = pvRequest;
+                    putIsShared = isShared;
+                    runCommand = RunCommand.putRequestDone;
+                } else {
+                    pvGetRequest = pvRequest;
+                    getIsShared = isShared;
+                    runCommand = RunCommand.getRequestDone;
+                }
+                
+                shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(Status,org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
@@ -456,12 +448,12 @@ public class PutGetFactory {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
-                this.channelPutGet.compareAndSet(null,channelPutGet);
+                this.channelPutGet = channelPutGet;
                 this.pvPutStructure = pvPutStructure;
                 this.pvGetStructure = pvGetStructure;
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
                 getBitSet = new BitSet(pvGetStructure.getNumberFields());
-                putGetConnect();
+                channelPutGet.getPut();
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getGetDone(Status)
@@ -474,7 +466,8 @@ public class PutGetFactory {
              */
             @Override
             public void getPutDone(Status success) {
-                getPutCallback(success);
+                runCommand = RunCommand.getPutDone;
+                shell.getDisplay().asyncExec(this);
             }
 
             /* (non-Javadoc)
@@ -482,8 +475,44 @@ public class PutGetFactory {
              */
             @Override
             public void putGetDone(Status success) {
-                putGetCallback(success);
+                runCommand = RunCommand.putGetDone;
+                shell.getDisplay().asyncExec(this);
             }
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            @Override
+            public void run() {
+                switch(runCommand) {
+                case channelConnected:
+                    stateMachine.setState(State.readyForCreatePutRequest);
+                    return;
+                case timeout:
+                    stateMachine.setState(State.readyForConnect);
+                    return;
+                case destroy:
+                    stateMachine.setState(State.readyForConnect);
+                    return;
+                case putRequestDone:
+                    stateMachine.setState(State.readyForCreateGetRequest);
+                    return;
+                case getRequestDone:
+                    stateMachine.setState(State.readyForCreatePutGet);
+                    return;
+                case getPutDone:
+                    printModified = PrintModifiedFactory.create(
+                            channel.getChannelName(),pvGetStructure,getBitSet, null, consoleText);
+                    stateMachine.setState(State.ready);
+                    return;
+                case putGetDone:
+                    stateMachine.setState(State.ready);
+                    getBitSet.clear();
+                    getBitSet.set(0);
+                    printModified.print();
+                    return;
+                }
+            }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#putRequesterName()
              */

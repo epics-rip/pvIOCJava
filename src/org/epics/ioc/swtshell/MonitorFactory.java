@@ -6,7 +6,6 @@
 package org.epics.ioc.swtshell;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -16,9 +15,15 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelGet;
 import org.epics.ca.channelAccess.client.ChannelRequester;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
@@ -51,40 +56,38 @@ public class MonitorFactory {
      * @param display The display.
      */
     public static void init(Display display) {
-        MonitorImpl monitorImpl = new MonitorImpl(display);
-        monitorImpl.start();
+        MonitorImpl monitorImpl = new MonitorImpl();
+        monitorImpl.start(display);
     }
     
+    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+    private static Executor executor = SwtshellFactory.getExecutor();
     private static class MonitorImpl
-    implements  DisposeListener,SelectionListener,ChannelRequester,ConnectChannelRequester,CreateRequestRequester,Runnable
+    implements  DisposeListener,SelectionListener
     {
-
-        private MonitorImpl(Display display) {
-            this.display = display;
-        }
-
-        private enum RunRequest {
-            channelStateChange,
-            dispose,
-            monitorConnected
-        }
-        
-        private static final Executor executor = SwtshellFactory.getExecutor();
-        private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-        private RunRequest runRequest = null;
-        private static final String windowName = "monitor";
-        private ExecutorNode executorNode = executor.createNode(this);
-        private Display display;
-        //private boolean isDisposed = false;
-        private Shell shell = null;
+        // following are global to embedded classes
+        private enum State{
+            readyForConnect,connecting,
+            readyForCreateRequest,creatingRequest,
+            readyForCreateMonitor,creatingMonitor,
+            readyForStart, active
+        };
+        private StateMachine stateMachine = new StateMachine();
+        private ChannelClient channelClient = new ChannelClient();
         private Requester requester = null;
+        private boolean isDisposed = false;
+        
+        
+        private static final String windowName = "monitor";
+        private Shell shell = null;
         private Button connectButton;
         private Button createRequestButton = null;
-        private Button disconnectButton;
+        private Button createMonitorButton;
+        private Button startStopButton;
         private Button statusButton;
         
         private Text consoleText = null;
-        private PVStructure pvRequest = null;
+        //private PVStructure pvRequest = null;
         private PVStructure pvOption = null;
         private PVString pvAlgorithm = null;
         private PVInt pvQueueSize = null;
@@ -92,22 +95,16 @@ public class MonitorFactory {
         private PVDouble pvDeadband = null;
         private Text deadbandText;
         private Text simulateDelayText;
-        private MonitorIt monitor = new MonitorIt();
         
         private int queueSize = 3;
         private double deadband = 0.0;
         private double simulateDelay = 0.0;
         
-        private Combo algorithmCombo;
-        private Button startStopButton;
-        
-        private AtomicReference<Channel> channel = new AtomicReference<Channel>(null);
-        private AtomicReference<ConnectChannel> connectChannel = new AtomicReference<ConnectChannel>(null);
-        
+        private Combo algorithmCombo; 
         
         private boolean isMonitoring = false;
         
-        private void start() {
+        private void start(Display display) {
             initPVOption();
             shell = new Shell(display);
             shell.setText(windowName);
@@ -118,17 +115,17 @@ public class MonitorFactory {
             RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
             composite.setLayout(rowLayout);
             connectButton = new Button(composite,SWT.PUSH);
-            connectButton.setText("connect");
+            connectButton.setText("disconnect");
             connectButton.addSelectionListener(this);               
             connectButton.setEnabled(true);
             createRequestButton = new Button(composite,SWT.PUSH);
             createRequestButton.setText("createRequest");
-            createRequestButton.addSelectionListener(this);               
-            createRequestButton.setEnabled(false);
-            disconnectButton = new Button(composite,SWT.PUSH);
-            disconnectButton.setText("disconnect");
-            disconnectButton.addSelectionListener(this);               
-            disconnectButton.setEnabled(false);
+            createRequestButton.addSelectionListener(this);  
+            
+            createMonitorButton = new Button(composite,SWT.PUSH);
+            createMonitorButton.setText("destroyMonitor");
+            createMonitorButton.addSelectionListener(this);               
+
             statusButton = new Button(composite,SWT.PUSH);
             statusButton.setText("serverInfo");
             statusButton.addSelectionListener(this);               
@@ -215,8 +212,8 @@ public class MonitorFactory {
             gridData.widthHint = 200;
             consoleText.setLayoutData(gridData);
             requester = SWTMessageFactory.create(windowName,display,consoleText);
-            enableOptions();
             shell.pack();
+            stateMachine.setState(State.readyForConnect);
             shell.open();
             shell.addDisposeListener(this);
         }
@@ -237,8 +234,8 @@ public class MonitorFactory {
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
         public void widgetDisposed(DisposeEvent e) {
-            runRequest = RunRequest.dispose;
-            executor.execute(executorNode);
+            isDisposed = true;
+            channelClient.disconnect();
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -250,38 +247,31 @@ public class MonitorFactory {
          * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
          */
         public void widgetSelected(SelectionEvent arg0) {
+            if(isDisposed) return;
             Object object = arg0.getSource();
             if(object==connectButton) {
-                Channel channel = this.channel.get();
-                if(channel!=null) {
-                    message("must disconnect first",MessageType.error);
-                    return;
+                State state = stateMachine.getState();
+                if(state==State.readyForConnect) {
+                    stateMachine.setState(State.connecting);
+                    channelClient.connect(shell);
+                } else {
+                    channelClient.disconnect();
+                    stateMachine.setState(State.readyForConnect);
                 }
-                connectChannel.set(ConnectChannelFactory.create(shell,this, this));
-                connectChannel.get().connect();
-                return;
             }
             if(object==createRequestButton) {
-                Channel channel = this.channel.get();
-                if(channel==null) {
-                    message("channel not connected",MessageType.error);
-                    return;
-                }
-                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
-                createRequest.create();
-                return;
+                stateMachine.setState(State.creatingRequest);
+                channelClient.createRequest(shell);
             }
-            if(object==disconnectButton) {
-                monitor.disconnect();
-                connectButton.setEnabled(true);
-                disconnectButton.setEnabled(false);
-                if(isMonitoring) {
-                    isMonitoring = false;
-                    startStopButton.setEnabled(false);
-                    startStopButton.setText("startMonitor");
-                    enableOptions();
+            if(object==createMonitorButton) {
+                State state = stateMachine.getState();
+                if(state==State.readyForCreateMonitor) {
+                    stateMachine.setState(State.creatingMonitor);
+                    channelClient.createMonitor();
+                } else {
+                    channelClient.destroyMonitor();
+                    stateMachine.setState(State.readyForCreateMonitor);
                 }
-                return;
             }
             if(object==algorithmCombo) {
                 int item = algorithmCombo.getSelectionIndex();
@@ -294,7 +284,7 @@ public class MonitorFactory {
                 } else if(item==3) {
                     pvAlgorithm.put("onPercentChange");
                 } else if(item==4) {
-                    message("custom not implemented",MessageType.info);
+                    requester.message("custom not implemented",MessageType.info);
                     algorithmCombo.select(0);
                 }
                 return;
@@ -306,7 +296,7 @@ public class MonitorFactory {
                     queueSize = Integer.decode(value);
                     pvQueueSize.put(queueSize);
                 } catch (NumberFormatException e) {
-                    message("Illegal value", MessageType.error);
+                    requester.message("Illegal value", MessageType.error);
                 }
                 return;
             }
@@ -316,7 +306,7 @@ public class MonitorFactory {
                     deadband = Double.parseDouble(value);
                     pvDeadband.put(deadband);
                 } catch (NumberFormatException e) {
-                    message("Illegal value", MessageType.error);
+                    requester.message("Illegal value", MessageType.error);
                 }
                 return;
             }
@@ -325,202 +315,233 @@ public class MonitorFactory {
                 try {
                     simulateDelay = Double.parseDouble(value);
                 } catch (NumberFormatException e) {
-                    message("Illegal value", MessageType.error);
+                    requester.message("Illegal value", MessageType.error);
                 }
                 return;
             }
             if(object==startStopButton) {
                 if(isMonitoring) {
                     isMonitoring = false;
-                    monitor.stop();
-                    startStopButton.setText("startMonitor");
-                    enableOptions();
+                    channelClient.stop();
+                    stateMachine.setState(State.readyForStart);
                     return;
                 }
                 isMonitoring = true;
-                startStopButton.setText("stopMonitor");
-                disableOptions();
-                startStopButton.setEnabled(true);
-                monitor.start();
+                stateMachine.setState(State.active);
+                channelClient.start();
                 return;
             }
             if(object==statusButton) {
-                Channel channel = this.channel.get();
+                Channel channel = channelClient.getChannel();
                 if(channel==null) {
-                    message("not connected",MessageType.info);
+                    requester.message("not connected",MessageType.info);
                     return;
                 }
                 String message = "connectionState:" + channel.getConnectionState().toString();
-                message(message,MessageType.info);
+                requester.message(message,MessageType.info);
                 message = "provider:" + channel.getProviderName() + " host:" + channel.getRemoteAddress();
-                message(message,MessageType.info);
+                requester.message(message,MessageType.info);
                 return;
             }
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#getRequesterName()
-         */
-        public String getRequesterName() {
-            return requester.getRequesterName();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
-         */
-        public void message(String message, MessageType messageType) {
-            requester.message(message, messageType);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
-         */
-        @Override
-        public void channelStateChange(Channel c, boolean isConnected) {
-            if(!isConnected) {
-                message("channel disconnected",MessageType.error);
-                return;
-            }
-            channel.set(c);
-            ConnectChannel connectChannel = this.connectChannel.getAndSet(null);
-            if(connectChannel!=null) connectChannel.cancelTimeout();
-            runRequest = RunRequest.channelStateChange;
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
-         */
-        @Override
-        public void channelCreated(Status status,Channel c) {
-            if (!status.isOK()) {
-            	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
-            	if (!status.isSuccess()) return;
-            }
-            channel.set(c);
-            c.connect();
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
-         */
-        @Override
-        public void destroy(Channel c) {
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
-         */
-        @Override
-        public void timeout() {
-            Channel channel = this.channel.getAndSet(null);
-            if(channel!=null) channel.destroy();
-            message("channel connect timeout",MessageType.info);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
-         */
-        @Override
-        public void request(PVStructure pvRequest, boolean isShared) {
-            this.pvRequest = pvRequest;
-            createRequestButton.setEnabled(false);
-            monitor.create();
-        }
-        void monitorConnectCallback() {
-            runRequest = RunRequest.monitorConnected;
-            display.asyncExec(this);
-        }
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
-         */
-        @Override
-        public void run() {
-            Channel channel = this.channel.get();
-            if(channel==null) return;
-            switch(runRequest) {
-            case channelStateChange:
-                boolean isConnected = channel.isConnected();
-                if(isConnected) {
-                    startStopButton.setText("startMonitor");
-                    connectButton.setEnabled(false);
-                    disconnectButton.setEnabled(true);
-                    createRequestButton.setEnabled(true);
-                } else {
-                    monitor.disconnect();
-                    connectButton.setEnabled(true);
+        
+        private class StateMachine {
+            private State state = null;
+            
+            void setState(State newState) {
+                if(isDisposed) return;
+                state = newState;
+                switch(state) {
+                case readyForConnect:
+                    connectButton.setText("connect");
+                    createMonitorButton.setText("createMonitor");
                     createRequestButton.setEnabled(false);
-                    disconnectButton.setEnabled(false);
+                    createMonitorButton.setEnabled(false);
                     startStopButton.setEnabled(false);
+                    return;
+                case connecting:
+                    connectButton.setText("disconnect");
+                    createMonitorButton.setText("createMonitor");
+                    startStopButton.setText("start");
+                    createRequestButton.setEnabled(false);
+                    createMonitorButton.setEnabled(false);
+                    startStopButton.setEnabled(false);
+                    return;
+                case readyForCreateRequest:
+                    connectButton.setText("disconnect");
+                    createMonitorButton.setText("createMonitor");
+                    startStopButton.setText("start");
+                    createRequestButton.setEnabled(true);
+                    createMonitorButton.setEnabled(false);
+                    startStopButton.setEnabled(false);
+                    return;
+                case creatingRequest:
+                    connectButton.setText("disconnect");
+                    createMonitorButton.setText("createMonitor");
+                    startStopButton.setText("start");
+                    createRequestButton.setEnabled(false);
+                    createMonitorButton.setEnabled(false);
+                    startStopButton.setEnabled(false);
+                    return;
+                case readyForCreateMonitor:
+                    connectButton.setText("disconnect");
+                    createMonitorButton.setText("createMonitor");
+                    startStopButton.setText("start");
+                    createRequestButton.setEnabled(false);
+                    createMonitorButton.setEnabled(true);
+                    startStopButton.setEnabled(false);
+                    return;
+                case creatingMonitor:
+                    connectButton.setText("disconnect");
+                    createMonitorButton.setText("destroyMonitor");
+                    startStopButton.setText("start");
+                    createRequestButton.setEnabled(false);
+                    createMonitorButton.setEnabled(true);
+                    startStopButton.setEnabled(false);
+                    return;
+                case readyForStart:
+                    connectButton.setText("disconnect");
+                    createMonitorButton.setText("destroyMonitor");
+                    startStopButton.setText("start");
+                    createRequestButton.setEnabled(false);
+                    createMonitorButton.setEnabled(true);
+                    startStopButton.setEnabled(true);
+                    return;
+                case active:
+                    connectButton.setText("disconnect");
+                    createMonitorButton.setText("destroyMonitor");
+                    startStopButton.setText("stop");
+                    createRequestButton.setEnabled(false);
+                    createMonitorButton.setEnabled(true);
+                    startStopButton.setEnabled(true);
+                    return;
                 }
-                return;
-            case dispose:
-                channel = this.channel.getAndSet(null);
-                if(channel!=null) channel.destroy();
-                return;
-            case monitorConnected:
-                startStopButton.setEnabled(true);
-                startStopButton.setText("startMonitor");
-                enableOptions();
-                return;
+                
             }
+            State getState() {return state;}
         }
         
-        
-        
-        private enum MonitorItRunRequest {
-            create,
-            disconnect,
-            start,
-            stop
+        private enum RunCommand {
+            channelConnected,timeout,destroy,channelrequestDone,monitorConnect
         }
-        
-        private class MonitorIt implements
+         
+        private class ChannelClient implements
+        ChannelRequester,ConnectChannelRequester,CreateRequestRequester,
         Runnable,
         MonitorRequester
         {
-            private ExecutorNode executorNode = executor.createNode(this);
-            private MonitorItRunRequest monitorItRunRequest;
-            private AtomicReference<Monitor> monitor = new AtomicReference<Monitor>(null);
+            private Channel channel = null;
+            private ConnectChannel connectChannel = null;
+            private PVStructure pvRequest = null;
+            private RunCommand runCommand;
+            private Monitor monitor = null;
             private PrintModified printModified = null;
             private Poll poll = new Poll();
             
-            void create() {
-                monitorItRunRequest = MonitorItRunRequest.create;
-                executor.execute(executorNode);
+            void connect(Shell shell) {
+                if(connectChannel!=null) {
+                    message("connect in propress",MessageType.error);
+                }
+                connectChannel = ConnectChannelFactory.create(shell, this,this);
+                connectChannel.connect();
+            }
+            void createRequest(Shell shell) {
+                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
+                createRequest.create();
             }
             void disconnect() {
-                monitorItRunRequest = MonitorItRunRequest.disconnect;
-                executor.execute(executorNode);
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    this.channel = null;
+                    channel.destroy();
+                }
+            }
+            
+            void createMonitor() {
+                monitor = channel.createMonitor(this, pvRequest, "", pvOption);
+            }
+
+            void destroyMonitor() {
+                Monitor monitor = this.monitor;
+                if(monitor!=null) {
+                    this.monitor = null;
+                    monitor.destroy();
+                }
             }
             
             void start() {
-                monitorItRunRequest = MonitorItRunRequest.start;
-                executor.execute(executorNode);
+                monitor.start();
             }
             
             void stop() {
-                monitorItRunRequest = MonitorItRunRequest.stop;
-                executor.execute(executorNode);
+                monitor.stop();
+            }
+            
+            Channel getChannel() {
+                return channel;
             }
             /* (non-Javadoc)
-             * @see java.lang.Runnable#run()
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
              */
             @Override
-            public void run() {
-                Channel c = channel.get();
-                if(c==null) return;
-                switch(monitorItRunRequest) {
-                case create:
-                    monitor.compareAndSet(null,c.createMonitor(this, pvRequest,"", pvOption));
+            public void channelStateChange(Channel c, boolean isConnected) {
+                if(!isConnected) {
+                    message("channel disconnected",MessageType.error);
                     return;
-                case disconnect:
-                    c.destroy();
-                    channel.set(null);
-                    monitor.set(null);
-                    return;
-                case start:
-                    monitor.get().start();
-                    return;
-                case stop:
-                    monitor.get().stop();
-                    return;
-                
                 }
+                channel = c;
+                ConnectChannel connectChannel = this.connectChannel;
+                if(connectChannel!=null) {
+                    connectChannel.cancelTimeout();
+                    this.connectChannel = null;
+                }
+                runCommand = RunCommand.channelConnected;
+                shell.getDisplay().asyncExec(this);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
+             */
+            @Override
+            public void channelCreated(Status status,Channel c) {
+                if (!status.isOK()) {
+                    message(status.toString(),MessageType.error);
+                    return;
+                }
+                channel = c;;
+                c.connect();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
+             */
+            @Override
+            public void destroy(Channel c) {
+                this.channel = null;
+                runCommand = RunCommand.destroy;
+                shell.getDisplay().asyncExec(this);
+                message("channel destroyed",MessageType.error);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
+             */
+            @Override
+            public void timeout() {
+                Channel channel = this.channel;
+                if(channel!=null) {
+                    this.channel = null;
+                    channel.destroy();
+                }
+                message("channel connect timeout",MessageType.info);
+                runCommand = RunCommand.destroy;
+                shell.getDisplay().asyncExec(this);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
+             */
+            @Override
+            public void request(PVStructure pvRequest, boolean isShared) {
+                this.pvRequest = pvRequest;
+                runCommand = RunCommand.channelrequestDone;
+                shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.monitor.MonitorRequester#monitorConnect(Status,org.epics.pvData.monitor.Monitor, org.epics.pvData.pv.Structure)
@@ -531,8 +552,9 @@ public class MonitorFactory {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
-                this.monitor.compareAndSet(null, monitor);
-                monitorConnectCallback();
+                this.monitor = monitor;
+                runCommand = RunCommand.monitorConnect;
+                shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
              * @see org.epics.pvData.monitor.MonitorRequester#monitorEvent(org.epics.pvData.monitor.Monitor)
@@ -550,6 +572,30 @@ public class MonitorFactory {
                 // TODO Auto-generated method stub
                 
             } 
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            @Override
+            public void run() {
+                switch(runCommand) {
+                case channelConnected:
+                    stateMachine.setState(State.readyForCreateRequest);
+                    return;
+                case timeout:
+                    stateMachine.setState(State.readyForConnect);
+                    return;
+                case destroy:
+                    stateMachine.setState(State.readyForConnect);
+                    return;
+                case channelrequestDone:
+                    stateMachine.setState(State.readyForCreateMonitor);
+                    return;
+                case monitorConnect:
+                    stateMachine.setState(State.readyForStart);
+                    return;
+                }
+            }
+            
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
@@ -581,12 +627,10 @@ public class MonitorFactory {
                 @Override
                 public void run() {
                     more = true;
-                    display.asyncExec( new Runnable() {
+                    shell.getDisplay().asyncExec( new Runnable() {
                         public void run() {
                             while(true) {
-                                Monitor theMonitor = monitor.get();
-                                if(theMonitor==null) break;
-                                MonitorElement monitorElement = theMonitor.poll();
+                                MonitorElement monitorElement = monitor.poll();
                                 if(monitorElement==null) break;
                                 PVStructure pvStructure = monitorElement.getPVStructure();
                                 if(pvStructure==null) {
@@ -595,10 +639,10 @@ public class MonitorFactory {
                                 } else {
                                     BitSet changeBitSet = monitorElement.getChangedBitSet();
                                     BitSet overrunBitSet = monitorElement.getOverrunBitSet();
-                                    printModified = PrintModifiedFactory.create(pvStructure, changeBitSet, overrunBitSet, consoleText);
+                                    printModified = PrintModifiedFactory.create(channel.getChannelName(),pvStructure, changeBitSet, overrunBitSet, consoleText);
                                     printModified.print();
                                 }
-                                theMonitor.release(monitorElement);
+                                monitor.release(monitorElement);
                             }
                             lock.lock();
                             try {
@@ -632,18 +676,6 @@ public class MonitorFactory {
                     }
                 }
             }   
-        }
-        
-        private void disableOptions() {
-            algorithmCombo.setEnabled(false);
-            deadbandText.setEnabled(false);
-            queueSizeText.setEnabled(false);
-        }
-
-        private void enableOptions() {
-            algorithmCombo.setEnabled(true);
-            deadbandText.setEnabled(true);
-            queueSizeText.setEnabled(true);
         }
     }
 }

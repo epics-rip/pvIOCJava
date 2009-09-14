@@ -24,23 +24,26 @@ public class PrintModifiedFactory {
    
     /**
      * Create a PrintModified.
+     * @param structureName The structure name.
      * @param pvStructure The structure holding data to print.
      * @param changeBitSet The bitset that shows which fields have been changed.
      * @param overrunBitSet The bitset that shows which fields have been changed multiple times.
      * @param text The text widget in which the output will be printed.
      * @return The PrintModified interface.
      */
-    public static PrintModified create(PVStructure pvStructure,BitSet changeBitSet,BitSet overrunBitSet,Text text) {
-        return new PrintModifiedImpl(pvStructure,changeBitSet,overrunBitSet,text);
+    public static PrintModified create(String structureName,PVStructure pvStructure,BitSet changeBitSet,BitSet overrunBitSet,Text text) {
+        return new PrintModifiedImpl(structureName,pvStructure,changeBitSet,overrunBitSet,text);
     }
     
     private static class PrintModifiedImpl implements PrintModified{
+        private String structureName;
         private PVStructure pvStructure;
         private BitSet changeBitSet;
         private BitSet overrunBitSet;
         private Text text;
         
-        private PrintModifiedImpl(PVStructure pvStructure,BitSet changeBitSet,BitSet overrunBitSet,Text text) {
+        private PrintModifiedImpl(String structureName,PVStructure pvStructure,BitSet changeBitSet,BitSet overrunBitSet,Text text) {
+            this.structureName = structureName;
             this.pvStructure = pvStructure;
             this.changeBitSet = changeBitSet;
             this.overrunBitSet = overrunBitSet;
@@ -52,7 +55,7 @@ public class PrintModifiedFactory {
        @Override
         public void print() {
             newLine(0);
-            text.append(pvStructure.getFullName());
+            if(structureName!=null) text.append(structureName);
             int offset = changeBitSet.nextSetBit(0);
             if(offset<0) {
                 text.append(" no changes");

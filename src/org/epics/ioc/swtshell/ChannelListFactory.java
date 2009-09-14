@@ -304,13 +304,15 @@ public class ChannelListFactory {
                 	if (!status.isSuccess()) return;
                 }
                 this.channel = channel;
+                channel.connect();
             }
             /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
              */
             @Override
-            public void channelStateChange(Channel c, boolean isConnected) {
+            public void channelStateChange(Channel channel, boolean isConnected) {
                 if(isConnected) {
+                    this.channel = channel;
                     createPutGet();
                 }
             }
