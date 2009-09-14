@@ -63,7 +63,6 @@ public class ScanFactory {
         private boolean isActive = false;
         private boolean isStarted = false;
         
-        private PVStructure pvScanType;
         private PVInt pvScanTypeIndex;
         
         private PVDouble pvRate;
@@ -82,8 +81,6 @@ public class ScanFactory {
             super(supportName,pvScan);
             this.scanField = scanField;
             pvRecord = pvScan.getPVRecord();
-            pvRecord.registerListener(this);
-            pvScanType = pvScan.getStructureField("type");
             pvScanTypeIndex = scanField.getScanTypeIndexPV();
             pvRate = scanField.getRatePV();
             pvEventName = scanField.getEventNamePV();
@@ -98,11 +95,7 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVField)
          */
-        public void dataPut(PVStructure requested, PVField pvField) {
-            if(!isStarted || !isActive) return;
-            if(pvField!=pvScanTypeIndex) return;
-            callScanModify();
-        }
+        public void dataPut(PVStructure requested, PVField pvField) {}
 
         /* (non-Javadoc)
          * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
@@ -135,6 +128,7 @@ public class ScanFactory {
             if(isActive) {
                 addListeners();
                 callScanModify();
+                return;
             }
             this.afterStart = afterStart;
             afterStart.requestCallback(afterStartNode, true, ThreadPriority.lower);
@@ -172,15 +166,14 @@ public class ScanFactory {
         }
 
         private void addListeners() {
-            pvScanType.addListener(this);
+            pvRecord.registerListener(this);
+            pvScanTypeIndex.addListener(this);
             pvRate.addListener(this);
             pvEventName.addListener(this);
         }
         
         private void removeListeners() {
-            pvScanType.removeListener(this);
-            pvRate.removeListener(this);
-            pvEventName.removeListener(this);
+            pvRecord.unregisterListener(this);
         }
         
         private void callScanModify() {
