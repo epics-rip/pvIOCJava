@@ -19,7 +19,7 @@
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.scanFactory</auxInfo>
   <structure name = "priority" extends = "scanPriority" />
   <structure name = "type" extends = "scanType" />
-  <scalar name = "rate" scalarType = "double"  default = "1.0" />
+  <scalar name = "rate" scalarType = "double">1.0</scalar>
   <scalar name = "eventName" scalarType = "string" />
   <scalar name = "processSelf" scalarType = "boolean" />
   <scalar name = "processAfterStart" scalarType = "boolean">false</scalar>
