@@ -84,7 +84,7 @@
 
 <structure structureName = "supportStateCommand" extends = "enumerated" >
   <array name = "choices"  immutable = "true">
-    idle,initialize,start,stop,uninitialize
+    [idle,initialize,start,stop,uninitialize]
     </array>
 </structure>
 
