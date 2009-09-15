@@ -83,7 +83,6 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
 
     /**
      * Constructor.
-     * @param channelFieldGroup The channelFieldGroup.
      * @param channelPutRequester The channelPutRequester.
      * @param process Should the record be processed after the put.
      */

@@ -27,7 +27,7 @@ public interface V3ChannelStructure {
     /**
      * Create the PVStructure.
      * @param v3ChannelRecordRequester The requester.
-     * @param recordName The field name for the structure.
+     * @param fieldName The field name for the structure.
      * @return (false,true) if the request can be satisfied.
      */
     boolean createPVStructure(V3ChannelStructureRequester v3ChannelRecordRequester,String fieldName);
@@ -38,7 +38,7 @@ public interface V3ChannelStructure {
     PVStructure getPVStructure();
     /**
      * Get the bitSet for changes.
-     * @return
+     * @return The bitSet.
      */
     BitSet getBitSet();
     /**

@@ -59,7 +59,6 @@ implements ChannelGet,GetListener,ConnectionListener
     private AtomicBoolean isActive = new AtomicBoolean(false);
     /**
      * Constructor.
-     * @param channelFieldGroup The channelFieldGroup.
      * @param channelGetRequester The channelGetRequester.
      * @param process Should the record be processed before get.
      */

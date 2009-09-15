@@ -71,7 +71,6 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
      */
     /**
      * @param v3Channel
-     * @return
      */
     public void init(V3Channel v3Channel)
     {
