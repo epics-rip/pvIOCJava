@@ -1,9 +1,7 @@
 org.epics.ioc
-org.epics.ioc.ca
-org.epics.ioc.caLocal
 org.epics.ioc.caV3
 org.epics.ioc.caV4
-org.epics.ioc.channelAccess
+org.epics.ioc.channelAccess.test
 org.epics.ioc.install
 org.epics.ioc.pdrv
 org.epics.ioc.pdrv.interfaces
@@ -14,7 +12,7 @@ org.epics.ioc.pdrv.vxi11.rpc
 org.epics.ioc.support
 org.epics.ioc.support.alarm
 org.epics.ioc.support.basic
-org.epics.ioc.support.ca
+org.epics.ioc.support.caLink
 org.epics.ioc.support.calc
 org.epics.ioc.support.calc.example
 org.epics.ioc.support.dbLink
@@ -24,6 +22,7 @@ org.epics.ioc.support.pdrv.array
 org.epics.ioc.support.pdrv.digital
 org.epics.ioc.support.pdrv.scalar
 org.epics.ioc.support.pdrv.serial
+org.epics.ioc.support.rpc
 org.epics.ioc.support.test
 org.epics.ioc.swtshell
 org.epics.ioc.util
