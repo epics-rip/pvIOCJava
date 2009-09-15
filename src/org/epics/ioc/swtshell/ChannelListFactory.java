@@ -122,6 +122,7 @@ public class ChannelListFactory {
             gridData.minimumWidth = 300;
             regularExpressionText.setLayoutData(gridData);
             regularExpressionText.addSelectionListener(this);
+            regularExpressionText.setText(".*");
             
             composite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
