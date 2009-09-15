@@ -39,7 +39,7 @@ public class SwtshellFactory {
     
     /**
      * Get an Executor that can be shared by swtshell objects.
-     * @return
+     * @return A common executor for swtshell windows.
      */
     public static Executor getExecutor() {
         return executor;
