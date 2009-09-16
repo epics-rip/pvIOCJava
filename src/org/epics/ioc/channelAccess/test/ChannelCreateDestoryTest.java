@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 import org.epics.ca.channelAccess.client.Channel;
 import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.client.Channel.ConnectionState;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
@@ -55,7 +56,7 @@ public class ChannelCreateDestoryTest extends TestCase {
 		
 		@Override
 		public void channelStateChange(org.epics.ca.channelAccess.client.Channel c,
-				boolean isConnected) {
+				ConnectionState isConnected) {
 			// TODO Auto-generated method stub
 		}
 				

@@ -18,28 +18,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.epics.ca.CAException;
-import org.epics.ca.channelAccess.client.ChannelFind;
-import org.epics.ca.channelAccess.client.ChannelFindRequester;
-import org.epics.ca.channelAccess.client.ChannelProvider;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.Query;
-import org.epics.ca.channelAccess.client.QueryRequester;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
-import org.epics.ca.client.Channel;
-import org.epics.ca.client.event.ConnectionEvent;
-import org.epics.ca.client.event.EventListener;
 import org.epics.ca.core.impl.client.ClientContextImpl;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
-import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.Status;
-import org.epics.pvData.pv.StatusCreate;
-import org.epics.pvData.pv.Status.StatusType;
 
 public class ClientFactory {
     static private boolean isRegistered = false; 
@@ -52,7 +38,9 @@ public class ClientFactory {
         AfterStartDelay afterStartDelay = new AfterStartDelay();
         afterStartDelay.start();
         try {
-            ChannelAccessFactory.registerChannelProvider(new ChannelProviderImpl());
+        	ClientContextImpl context = new ClientContextImpl();
+			context.initialize();
+            ChannelAccessFactory.registerChannelProvider(context.getProvider());
         } catch (CAException e) {
             throw new RuntimeException("Failed to initializa client channel access.", e);
         }
@@ -94,64 +82,4 @@ public class ClientFactory {
         }
 
     }
-
-    private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
-    private static final Status okStatus = statusCreate.getStatusOK();
-
-	private static class ChannelProviderImpl implements ChannelProvider
-	{
-	    static private final String providerName = "caV4";
-		private final ClientContextImpl context;
-		
-		
-		public ChannelProviderImpl() throws CAException
-		{
-			context = new ClientContextImpl();
-			context.initialize();
-		}		
-		@Override
-		public ChannelFind channelFind(String channelName,
-				ChannelFindRequester channelFindRequester)
-		{
-			// TODO there is no actual support for find right now in CA... can be done via create
-			throw new RuntimeException("not implemented");
-		}
-        /* (non-Javadoc)
-		 * @see org.epics.ca.channelAccess.client.ChannelProvider#channelFind(org.epics.pvData.pv.PVField, org.epics.ca.channelAccess.client.QueryRequester)
-		 */
-		@Override
-		public Query query(PVField query, QueryRequester queryRequester) {
-			return null;
-		}
-        @Override
-		public Channel createChannel(String channelName,
-				final ChannelRequester channelRequester, short priority) {
-
-			EventListener<ConnectionEvent> cl = new EventListener<ConnectionEvent>()
-		    {
-		 		public void onEvent(ConnectionEvent connectionEvent) {
-		 			channelRequester.channelStateChange(connectionEvent.getChannel(), connectionEvent.isConnected());
-				}
-		    };
-
-		    Channel channel;
-			try {
-				channel = context.createChannel(channelName, cl, priority);
-			} catch (Throwable th) {
-				channelRequester.channelCreated(statusCreate.createStatus(StatusType.ERROR, "failed to create channel", th), null);
-				return null;
-			}
-		    channelRequester.channelCreated(okStatus, channel);
-		    return channel;
-		}
-		@Override
-		public void destroy() {
-			context.dispose();
-		}
-		@Override
-		public String getProviderName() {
-			return providerName;
-		}
-		
-	}
 }

@@ -137,7 +137,7 @@ public class ClientFactory  {
          */
         @Override
         public ChannelFind channelFind(String channelName,ChannelFindRequester channelFindRequester) {
-            LocateFind locateFind = new LocateFind(channelName);
+            LocateFind locateFind = new LocateFind(this,channelName);
             locateFind.find(channelFindRequester);
             return locateFind;
         }
@@ -155,7 +155,7 @@ public class ClientFactory  {
         public Channel createChannel(String channelName,
                 ChannelRequester channelRequester, short priority)
         {
-            LocateFind locateFind = new LocateFind(channelName);
+            LocateFind locateFind = new LocateFind(this,channelName);
             return locateFind.create(channelRequester);
         }
         /* (non-Javadoc)
@@ -195,6 +195,7 @@ public class ClientFactory  {
         static private final Pattern leftBracePattern = Pattern.compile("[{]");
         static private final Pattern rightBracePattern = Pattern.compile("[}]");
         static private final Pattern commaPattern = Pattern.compile("[,]");
+        private final ChannelProvider channelProvider;
         private ChannelFindRequester channelFindRequester = null;
         private BaseV3Channel v3Channel = null;
         private String channelName = null;
@@ -204,21 +205,22 @@ public class ClientFactory  {
         private ScalarType enumRequestType = null;
         
         
-        LocateFind(String channelName) {
+        LocateFind(ChannelProvider channelProvider, String channelName) {
+        	this.channelProvider = channelProvider;
             this.channelName = channelName;
         }
         
         void find(ChannelFindRequester channelFindRequester) {
             this.channelFindRequester = channelFindRequester;
             common();
-            v3Channel = new BaseV3Channel(
+            v3Channel = new BaseV3Channel(channelProvider,
                     this,null,context,channelName,recordName,fieldName,enumRequestType,propertys);
             v3Channel.connectCaV3();
         }
         
         Channel create(ChannelRequester channelRequester) {
             common();
-            v3Channel = new BaseV3Channel(
+            v3Channel = new BaseV3Channel(channelProvider,
                     null,channelRequester,context,channelName,recordName,fieldName,enumRequestType,propertys);
             v3Channel.connectCaV3();
             return v3Channel;

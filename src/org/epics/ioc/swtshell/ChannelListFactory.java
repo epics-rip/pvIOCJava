@@ -25,6 +25,7 @@ import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelPutGet;
 import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
 import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.client.Channel.ConnectionState;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.Executor;
@@ -308,11 +309,11 @@ public class ChannelListFactory {
                 channel.connect();
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
              */
             @Override
-            public void channelStateChange(Channel channel, boolean isConnected) {
-                if(isConnected) {
+            public void channelStateChange(Channel channel, ConnectionState state) {
+                if(state == ConnectionState.CONNECTED) {
                     this.channel = channel;
                     createPutGet();
                 }

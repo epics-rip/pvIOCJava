@@ -21,6 +21,7 @@ import org.epics.ca.channelAccess.client.Channel;
 import org.epics.ca.channelAccess.client.ChannelProcess;
 import org.epics.ca.channelAccess.client.ChannelProcessRequester;
 import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.client.Channel.ConnectionState;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Status;
@@ -246,12 +247,12 @@ public class ProcessFactory {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
+             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
              */
             @Override
-            public void channelStateChange(Channel c, boolean isConnected) {
-                if(!isConnected) {
-                    message("channel disconnected",MessageType.error);
+            public void channelStateChange(Channel c, ConnectionState state) {
+                if(state != ConnectionState.CONNECTED) {
+                    message("channel " + state,MessageType.error);
                     return;
                 }
                 channel = c;

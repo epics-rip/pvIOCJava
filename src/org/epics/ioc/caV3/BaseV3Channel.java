@@ -57,9 +57,9 @@ public class BaseV3Channel implements
 ChannelFind,org.epics.ca.channelAccess.client.Channel,
 V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
 {
-    private static final String providerName = "caV3";
     private static Executor executor = ExecutorFactory.create("caV3Connect", ThreadPriority.low);
     private boolean isDestroyed = false;
+    private final ChannelProvider channelProvider;
     private final ChannelFindRequester channelFindRequester;
     private final ChannelRequester channelRequester;
     private final Context context;
@@ -96,6 +96,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      * @param enumRequestType Request type for ENUM native type.
      */
     BaseV3Channel(
+    		ChannelProvider channelProvider,
             ChannelFindRequester channelFindRequester,
             ChannelRequester channelRequester,
             Context context,
@@ -105,6 +106,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             ScalarType enumRequestType,
             String[] propertyNames)
     {
+    	this.channelProvider = channelProvider;
         this.channelFindRequester = channelFindRequester;
         this.channelRequester = channelRequester;
         this.context = context;
@@ -401,11 +403,11 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.Channel#getProviderName()
+     * @see org.epics.ca.channelAccess.client.Channel#getProvider()
      */
     @Override
-    public String getProviderName() {
-        return providerName;
+    public ChannelProvider getProvider() {
+        return channelProvider;
     }
     /* (non-Javadoc)
      * @see org.epics.ca.channelAccess.client.Channel#isConnected()
@@ -476,7 +478,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
      */
     @Override
     public void connect() {
-        channelRequester.channelStateChange(this, true);
+        channelRequester.channelStateChange(this, ConnectionState.CONNECTED);
     }
     
     

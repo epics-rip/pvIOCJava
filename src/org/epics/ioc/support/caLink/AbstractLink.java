@@ -9,6 +9,7 @@ import org.epics.ca.channelAccess.client.Channel;
 import org.epics.ca.channelAccess.client.ChannelAccess;
 import org.epics.ca.channelAccess.client.ChannelProvider;
 import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.channelAccess.client.Channel.ConnectionState;
 import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
@@ -203,9 +204,9 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         recordProcess.start(null);
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)
+     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
      */
-    public void channelStateChange(Channel c, boolean isConnected) {
-        connectionChange(isConnected);
+    public void channelStateChange(Channel c, ConnectionState connectionState) {
+        connectionChange(connectionState == ConnectionState.CONNECTED);
     }
 }

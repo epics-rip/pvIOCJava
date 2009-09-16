@@ -51,7 +51,7 @@ public class ConnectChannelFactory {
     }
     
     public static boolean pvDataCompatible(Channel channel) {
-        String providerName = channel.getProviderName();
+        String providerName = channel.getProvider().getProviderName();
         if(providerName.equals("local")) return true;
         if(providerName.indexOf('4')>=0) return true;
         return false;
