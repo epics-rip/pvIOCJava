@@ -50,11 +50,6 @@ public class ChannelCreateDestoryTest extends TestCase {
 		}
 		
 		@Override
-		public void destroy(org.epics.ca.channelAccess.client.Channel c) {
-			// TODO Auto-generated method stub
-		}
-		
-		@Override
 		public void channelStateChange(org.epics.ca.channelAccess.client.Channel c,
 				ConnectionState isConnected) {
 			// TODO Auto-generated method stub
