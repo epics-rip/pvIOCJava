@@ -320,14 +320,6 @@ public class ChannelListFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#destroy(org.epics.ca.channelAccess.client.Channel)
-             */
-            @Override
-            public void destroy(Channel c) {
-                // TODO Auto-generated method stub
-                
-            }
-            /* (non-Javadoc)
              * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(Status,org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
              */
             @Override

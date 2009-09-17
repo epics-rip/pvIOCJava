@@ -314,10 +314,18 @@ public class GetFactory {
              */
             @Override
             public void channelStateChange(Channel c, ConnectionState state) {
+
+            	if(state == ConnectionState.DESTROYED) {
+                    this.channel = null;
+                    runCommand = RunCommand.destroy;
+                    shell.getDisplay().asyncExec(this);
+            	}
+            	
                 if(state != ConnectionState.CONNECTED) {
                     message("channel " + state,MessageType.error);
                     return;
                 }
+
                 channel = c;
                 ConnectChannel connectChannel = this.connectChannel;
                 if(connectChannel!=null) {
@@ -338,16 +346,6 @@ public class GetFactory {
                 }
                 channel = c;;
                 c.connect();
-            }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.ca.ChannelRequester#disconnect(org.epics.ioc.ca.Channel)
-             */
-            @Override
-            public void destroy(Channel c) {
-                this.channel = null;
-                runCommand = RunCommand.destroy;
-                shell.getDisplay().asyncExec(this);
-                message("channel destroyed",MessageType.error);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
