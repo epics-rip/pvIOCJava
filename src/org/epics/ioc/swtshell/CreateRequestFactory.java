@@ -18,10 +18,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelAccess;
-import org.epics.ca.channelAccess.client.GetFieldRequester;
-import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelAccess;
+import org.epics.ca.client.GetFieldRequester;
+import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
@@ -174,7 +174,7 @@ public class CreateRequestFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.ca.channelAccess.client.GetFieldRequester#getDone(Status,org.epics.pvData.pv.Field)
+         * @see org.epics.ca.client.GetFieldRequester#getDone(Status,org.epics.pvData.pv.Field)
          */
         @Override
         public void getDone(Status status,Field field) {

@@ -128,7 +128,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#unlisten()
+     * @see org.epics.ca.client.ChannelMonitorRequester#unlisten()
      */
     @Override
     public void unlisten() {

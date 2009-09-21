@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.caLink;
 
-import org.epics.ca.channelAccess.client.ChannelProcess;
-import org.epics.ca.channelAccess.client.ChannelProcessRequester;
+import org.epics.ca.client.ChannelProcess;
+import org.epics.ca.client.ChannelProcessRequester;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -53,7 +53,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(Status,org.epics.ca.channelAccess.client.ChannelProcess)
+     * @see org.epics.ca.client.ChannelProcessRequester#channelProcessConnect(Status,org.epics.ca.client.ChannelProcess)
      */
     @Override
     public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
@@ -95,7 +95,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         channelProcess.process(false);
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(boolean)
+     * @see org.epics.ca.client.ChannelProcessRequester#processDone(boolean)
      */
     @Override
     public void processDone(Status success) {

@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.caLink;
 
-import org.epics.ca.channelAccess.client.ChannelGet;
-import org.epics.ca.channelAccess.client.ChannelGetRequester;
+import org.epics.ca.client.ChannelGet;
+import org.epics.ca.client.ChannelGetRequester;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessCallbackRequester;
@@ -100,7 +100,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelGetRequester#channelGetConnect(Status, org.epics.ca.channelAccess.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+     * @see org.epics.ca.client.ChannelGetRequester#channelGetConnect(Status, org.epics.ca.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
      */
     @Override
     public void channelGetConnect(Status status, ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
@@ -169,7 +169,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         channelGet.get(false);
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelGetRequester#getDone(Status)
+     * @see org.epics.ca.client.ChannelGetRequester#getDone(Status)
      */
     @Override
     public void getDone(Status success) {

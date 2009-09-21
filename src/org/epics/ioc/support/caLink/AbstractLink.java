@@ -5,12 +5,12 @@
  */
 package org.epics.ioc.support.caLink;
 
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelAccess;
-import org.epics.ca.channelAccess.client.ChannelProvider;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.Channel.ConnectionState;
-import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelAccess;
+import org.epics.ca.client.ChannelProvider;
+import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.Channel.ConnectionState;
+import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
@@ -158,7 +158,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         afterStart = null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
+     * @see org.epics.ca.client.ChannelRequester#channelCreated(Status,org.epics.ca.client.Channel)
      */
     @Override
     public void channelCreated(Status status, Channel channel) {
@@ -191,7 +191,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelRequester#destroy(org.epics.ca.channelAccess.client.Channel)
+     * @see org.epics.ca.client.ChannelRequester#destroy(org.epics.ca.client.Channel)
      */
     public void destroy(Channel c) {
         pvRecord.lock();
@@ -204,7 +204,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         recordProcess.start(null);
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
+     * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
      */
     public void channelStateChange(Channel c, ConnectionState connectionState) {
         connectionChange(connectionState == ConnectionState.CONNECTED);

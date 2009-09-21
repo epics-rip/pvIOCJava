@@ -44,7 +44,7 @@ import gov.aps.jca.dbr.DBR_TIME_String;
 import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
 
-import org.epics.ca.channelAccess.client.ChannelRequester;
+import org.epics.ca.client.ChannelRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;

@@ -5,9 +5,9 @@
  */
 package org.epics.ioc.caV3;
 
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelGet;
-import org.epics.ca.channelAccess.client.ChannelPut;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelGet;
+import org.epics.ca.client.ChannelPut;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.pv.ScalarType;

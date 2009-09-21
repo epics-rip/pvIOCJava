@@ -18,11 +18,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelArray;
-import org.epics.ca.channelAccess.client.ChannelArrayRequester;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.Channel.ConnectionState;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelArray;
+import org.epics.ca.client.ChannelArrayRequester;
+import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
@@ -367,7 +367,7 @@ public class ArrayFactory {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
+             * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
              */
             @Override
             public void channelStateChange(Channel c, ConnectionState state) {
@@ -393,7 +393,7 @@ public class ArrayFactory {
                 shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
+             * @see org.epics.ca.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.client.Channel)
              */
             @Override
             public void channelCreated(Status status,Channel c) {
@@ -419,7 +419,7 @@ public class ArrayFactory {
                 shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#channelArrayConnect(Status,org.epics.ca.channelAccess.client.ChannelArray, org.epics.pvData.pv.PVArray)
+             * @see org.epics.ca.client.ChannelArrayRequester#channelArrayConnect(Status,org.epics.ca.client.ChannelArray, org.epics.pvData.pv.PVArray)
              */
             @Override
             public void channelArrayConnect(Status status,ChannelArray channelArray,PVArray pvArray) {
@@ -432,7 +432,7 @@ public class ArrayFactory {
                 shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#getArrayDone(Status)
+             * @see org.epics.ca.client.ChannelArrayRequester#getArrayDone(Status)
              */
             @Override
             public void getArrayDone(Status status) {
@@ -446,7 +446,7 @@ public class ArrayFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelArrayRequester#putArrayDone(Status)
+             * @see org.epics.ca.client.ChannelArrayRequester#putArrayDone(Status)
              */
             @Override
             public void putArrayDone(Status status) {

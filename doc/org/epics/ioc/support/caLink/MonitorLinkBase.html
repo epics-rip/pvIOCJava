@@ -97,7 +97,7 @@ java.lang.Object
       <IMG SRC="../../../../../resources/inherit.gif" ALT="extended by "><B>org.epics.ioc.support.caLink.MonitorLinkBase</B>
 </PRE>
 <DL>
-<DT><B>All Implemented Interfaces:</B> <DD>java.lang.Runnable, org.epics.ca.channelAccess.client.ChannelRequester, <A HREF="../../../../../org/epics/ioc/install/AfterStartRequester.html" title="interface in org.epics.ioc.install">AfterStartRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessSelfRequester.html" title="interface in org.epics.ioc.support">ProcessSelfRequester</A>, <A HREF="../../../../../org/epics/ioc/support/RecordProcessRequester.html" title="interface in org.epics.ioc.support">RecordProcessRequester</A>, <A HREF="../../../../../org/epics/ioc/support/Support.html" title="interface in org.epics.ioc.support">Support</A>, org.epics.pvData.monitor.MonitorRequester, org.epics.pvData.pv.Requester</DD>
+<DT><B>All Implemented Interfaces:</B> <DD>java.lang.Runnable, org.epics.ca.client.ChannelRequester, <A HREF="../../../../../org/epics/ioc/install/AfterStartRequester.html" title="interface in org.epics.ioc.install">AfterStartRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessSelfRequester.html" title="interface in org.epics.ioc.support">ProcessSelfRequester</A>, <A HREF="../../../../../org/epics/ioc/support/RecordProcessRequester.html" title="interface in org.epics.ioc.support">RecordProcessRequester</A>, <A HREF="../../../../../org/epics/ioc/support/Support.html" title="interface in org.epics.ioc.support">Support</A>, org.epics.pvData.monitor.MonitorRequester, org.epics.pvData.pv.Requester</DD>
 </DL>
 <HR>
 <DL>
@@ -161,8 +161,8 @@ Implementation for a channel access monitor link.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/MonitorLinkBase.html#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)">channelCreated</A></B>(org.epics.pvData.pv.Status&nbsp;status,
-               org.epics.ca.channelAccess.client.Channel&nbsp;channel)</CODE>
+<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/MonitorLinkBase.html#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.client.Channel)">channelCreated</A></B>(org.epics.pvData.pv.Status&nbsp;status,
+               org.epics.ca.client.Channel&nbsp;channel)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
@@ -170,7 +170,7 @@ Implementation for a channel access monitor link.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/MonitorLinkBase.html#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)">channelStateChange</A></B>(org.epics.ca.channelAccess.client.Channel&nbsp;c,
+<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/MonitorLinkBase.html#channelStateChange(org.epics.ca.client.Channel, boolean)">channelStateChange</A></B>(org.epics.ca.client.Channel&nbsp;c,
                    boolean&nbsp;isConnected)</CODE>
 
 <BR>
@@ -187,7 +187,7 @@ Implementation for a channel access monitor link.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/MonitorLinkBase.html#destroy(org.epics.ca.channelAccess.client.Channel)">destroy</A></B>(org.epics.ca.channelAccess.client.Channel&nbsp;c)</CODE>
+<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/MonitorLinkBase.html#destroy(org.epics.ca.client.Channel)">destroy</A></B>(org.epics.ca.client.Channel&nbsp;c)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
@@ -583,14 +583,14 @@ public void <B>callback</B>(<A HREF="../../../../../org/epics/ioc/install/AfterS
 </DL>
 <HR>
 
-<A NAME="channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)"><!-- --></A><H3>
+<A NAME="channelCreated(org.epics.pvData.pv.Status, org.epics.ca.client.Channel)"><!-- --></A><H3>
 channelCreated</H3>
 <PRE>
 public void <B>channelCreated</B>(org.epics.pvData.pv.Status&nbsp;status,
-                           org.epics.ca.channelAccess.client.Channel&nbsp;channel)</PRE>
+                           org.epics.ca.client.Channel&nbsp;channel)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>channelCreated</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>channelCreated</CODE> in interface <CODE>org.epics.ca.client.ChannelRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -613,13 +613,13 @@ public void <B>message</B>(java.lang.String&nbsp;message,
 </DL>
 <HR>
 
-<A NAME="destroy(org.epics.ca.channelAccess.client.Channel)"><!-- --></A><H3>
+<A NAME="destroy(org.epics.ca.client.Channel)"><!-- --></A><H3>
 destroy</H3>
 <PRE>
-public void <B>destroy</B>(org.epics.ca.channelAccess.client.Channel&nbsp;c)</PRE>
+public void <B>destroy</B>(org.epics.ca.client.Channel&nbsp;c)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>destroy</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>destroy</CODE> in interface <CODE>org.epics.ca.client.ChannelRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -627,14 +627,14 @@ public void <B>destroy</B>(org.epics.ca.channelAccess.client.Channel&nbsp;c)</PR
 </DL>
 <HR>
 
-<A NAME="channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)"><!-- --></A><H3>
+<A NAME="channelStateChange(org.epics.ca.client.Channel, boolean)"><!-- --></A><H3>
 channelStateChange</H3>
 <PRE>
-public void <B>channelStateChange</B>(org.epics.ca.channelAccess.client.Channel&nbsp;c,
+public void <B>channelStateChange</B>(org.epics.ca.client.Channel&nbsp;c,
                                boolean&nbsp;isConnected)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>channelStateChange</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>channelStateChange</CODE> in interface <CODE>org.epics.ca.client.ChannelRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>

@@ -97,11 +97,11 @@ java.lang.Object
       <IMG SRC="../../../../../resources/inherit.gif" ALT="extended by "><B>org.epics.ioc.support.caLink.ProcessLinkBase</B>
 </PRE>
 <DL>
-<DT><B>All Implemented Interfaces:</B> <DD>org.epics.ca.channelAccess.client.ChannelProcessRequester, org.epics.ca.channelAccess.client.ChannelRequester, <A HREF="../../../../../org/epics/ioc/install/AfterStartRequester.html" title="interface in org.epics.ioc.install">AfterStartRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessCallbackRequester.html" title="interface in org.epics.ioc.support">ProcessCallbackRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessContinueRequester.html" title="interface in org.epics.ioc.support">ProcessContinueRequester</A>, <A HREF="../../../../../org/epics/ioc/support/Support.html" title="interface in org.epics.ioc.support">Support</A>, org.epics.pvData.pv.Requester</DD>
+<DT><B>All Implemented Interfaces:</B> <DD>org.epics.ca.client.ChannelProcessRequester, org.epics.ca.client.ChannelRequester, <A HREF="../../../../../org/epics/ioc/install/AfterStartRequester.html" title="interface in org.epics.ioc.install">AfterStartRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessCallbackRequester.html" title="interface in org.epics.ioc.support">ProcessCallbackRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessContinueRequester.html" title="interface in org.epics.ioc.support">ProcessContinueRequester</A>, <A HREF="../../../../../org/epics/ioc/support/Support.html" title="interface in org.epics.ioc.support">Support</A>, org.epics.pvData.pv.Requester</DD>
 </DL>
 <HR>
 <DL>
-<DT><PRE>public class <B>ProcessLinkBase</B><DT>extends <A HREF="../../../../../org/epics/ioc/support/AbstractSupport.html" title="class in org.epics.ioc.support">AbstractSupport</A><DT>implements <A HREF="../../../../../org/epics/ioc/support/ProcessCallbackRequester.html" title="interface in org.epics.ioc.support">ProcessCallbackRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessContinueRequester.html" title="interface in org.epics.ioc.support">ProcessContinueRequester</A>, org.epics.ca.channelAccess.client.ChannelProcessRequester</DL>
+<DT><PRE>public class <B>ProcessLinkBase</B><DT>extends <A HREF="../../../../../org/epics/ioc/support/AbstractSupport.html" title="class in org.epics.ioc.support">AbstractSupport</A><DT>implements <A HREF="../../../../../org/epics/ioc/support/ProcessCallbackRequester.html" title="interface in org.epics.ioc.support">ProcessCallbackRequester</A>, <A HREF="../../../../../org/epics/ioc/support/ProcessContinueRequester.html" title="interface in org.epics.ioc.support">ProcessContinueRequester</A>, org.epics.ca.client.ChannelProcessRequester</DL>
 </PRE>
 
 <P>
@@ -153,8 +153,8 @@ Implementation for a channel access output link.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)">channelCreated</A></B>(org.epics.pvData.pv.Status&nbsp;status,
-               org.epics.ca.channelAccess.client.Channel&nbsp;channel)</CODE>
+<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.client.Channel)">channelCreated</A></B>(org.epics.pvData.pv.Status&nbsp;status,
+               org.epics.ca.client.Channel&nbsp;channel)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
@@ -162,8 +162,8 @@ Implementation for a channel access output link.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#channelProcessConnect(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.ChannelProcess)">channelProcessConnect</A></B>(org.epics.pvData.pv.Status&nbsp;status,
-                      org.epics.ca.channelAccess.client.ChannelProcess&nbsp;channelProcess)</CODE>
+<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#channelProcessConnect(org.epics.pvData.pv.Status, org.epics.ca.client.ChannelProcess)">channelProcessConnect</A></B>(org.epics.pvData.pv.Status&nbsp;status,
+                      org.epics.ca.client.ChannelProcess&nbsp;channelProcess)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
@@ -171,7 +171,7 @@ Implementation for a channel access output link.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)">channelStateChange</A></B>(org.epics.ca.channelAccess.client.Channel&nbsp;c,
+<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#channelStateChange(org.epics.ca.client.Channel, boolean)">channelStateChange</A></B>(org.epics.ca.client.Channel&nbsp;c,
                    boolean&nbsp;isConnected)</CODE>
 
 <BR>
@@ -188,7 +188,7 @@ Implementation for a channel access output link.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#destroy(org.epics.ca.channelAccess.client.Channel)">destroy</A></B>(org.epics.ca.channelAccess.client.Channel&nbsp;c)</CODE>
+<TD><CODE><B><A HREF="../../../../../org/epics/ioc/support/caLink/ProcessLinkBase.html#destroy(org.epics.ca.client.Channel)">destroy</A></B>(org.epics.ca.client.Channel&nbsp;c)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
@@ -337,14 +337,14 @@ public void <B>connectionChange</B>(boolean&nbsp;isConnected)</PRE>
 </DL>
 <HR>
 
-<A NAME="channelProcessConnect(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.ChannelProcess)"><!-- --></A><H3>
+<A NAME="channelProcessConnect(org.epics.pvData.pv.Status, org.epics.ca.client.ChannelProcess)"><!-- --></A><H3>
 channelProcessConnect</H3>
 <PRE>
 public void <B>channelProcessConnect</B>(org.epics.pvData.pv.Status&nbsp;status,
-                                  org.epics.ca.channelAccess.client.ChannelProcess&nbsp;channelProcess)</PRE>
+                                  org.epics.ca.client.ChannelProcess&nbsp;channelProcess)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>channelProcessConnect</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelProcessRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>channelProcessConnect</CODE> in interface <CODE>org.epics.ca.client.ChannelProcessRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -410,7 +410,7 @@ processDone</H3>
 public void <B>processDone</B>(org.epics.pvData.pv.Status&nbsp;success)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>processDone</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelProcessRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>processDone</CODE> in interface <CODE>org.epics.ca.client.ChannelProcessRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -486,14 +486,14 @@ public void <B>callback</B>(<A HREF="../../../../../org/epics/ioc/install/AfterS
 </DL>
 <HR>
 
-<A NAME="channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)"><!-- --></A><H3>
+<A NAME="channelCreated(org.epics.pvData.pv.Status, org.epics.ca.client.Channel)"><!-- --></A><H3>
 channelCreated</H3>
 <PRE>
 public void <B>channelCreated</B>(org.epics.pvData.pv.Status&nbsp;status,
-                           org.epics.ca.channelAccess.client.Channel&nbsp;channel)</PRE>
+                           org.epics.ca.client.Channel&nbsp;channel)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>channelCreated</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>channelCreated</CODE> in interface <CODE>org.epics.ca.client.ChannelRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -516,13 +516,13 @@ public void <B>message</B>(java.lang.String&nbsp;message,
 </DL>
 <HR>
 
-<A NAME="destroy(org.epics.ca.channelAccess.client.Channel)"><!-- --></A><H3>
+<A NAME="destroy(org.epics.ca.client.Channel)"><!-- --></A><H3>
 destroy</H3>
 <PRE>
-public void <B>destroy</B>(org.epics.ca.channelAccess.client.Channel&nbsp;c)</PRE>
+public void <B>destroy</B>(org.epics.ca.client.Channel&nbsp;c)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>destroy</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>destroy</CODE> in interface <CODE>org.epics.ca.client.ChannelRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -530,14 +530,14 @@ public void <B>destroy</B>(org.epics.ca.channelAccess.client.Channel&nbsp;c)</PR
 </DL>
 <HR>
 
-<A NAME="channelStateChange(org.epics.ca.channelAccess.client.Channel, boolean)"><!-- --></A><H3>
+<A NAME="channelStateChange(org.epics.ca.client.Channel, boolean)"><!-- --></A><H3>
 channelStateChange</H3>
 <PRE>
-public void <B>channelStateChange</B>(org.epics.ca.channelAccess.client.Channel&nbsp;c,
+public void <B>channelStateChange</B>(org.epics.ca.client.Channel&nbsp;c,
                                boolean&nbsp;isConnected)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>channelStateChange</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelRequester</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>channelStateChange</CODE> in interface <CODE>org.epics.ca.client.ChannelRequester</CODE></DL>
 </DD>
 <DD><DL>
 </DL>

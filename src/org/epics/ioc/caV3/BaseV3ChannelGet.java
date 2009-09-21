@@ -17,8 +17,8 @@ import gov.aps.jca.event.GetListener;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.epics.ca.channelAccess.client.ChannelGet;
-import org.epics.ca.channelAccess.client.ChannelGetRequester;
+import org.epics.ca.client.ChannelGet;
+import org.epics.ca.client.ChannelGetRequester;
 import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Status;
@@ -196,7 +196,7 @@ implements ChannelGet,GetListener,ConnectionListener
         v3Channel.remove(this);
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.channelAccess.client.ChannelGet#get(boolean)
+     * @see org.epics.ca.client.ChannelGet#get(boolean)
      */
     @Override
     public void get(boolean lastRequest) {
