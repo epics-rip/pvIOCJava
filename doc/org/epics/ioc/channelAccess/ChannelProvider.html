@@ -121,8 +121,8 @@ Interface implemented by code that can provide access to the record
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#destroyMonitor(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelMonitor)">destroyMonitor</A></B>(org.epics.ca.channelAccess.client.Channel&nbsp;channel,
-               org.epics.ca.channelAccess.client.ChannelMonitor&nbsp;channelMonitor)</CODE>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#destroyMonitor(org.epics.ca.client.Channel, org.epics.ca.client.ChannelMonitor)">destroyMonitor</A></B>(org.epics.ca.client.Channel&nbsp;channel,
+               org.epics.ca.client.ChannelMonitor&nbsp;channelMonitor)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Destroy a monitor.</TD>
@@ -130,8 +130,8 @@ Interface implemented by code that can provide access to the record
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#findChannel(java.lang.String, org.epics.ca.channelAccess.client.ChannelRequester, double)">findChannel</A></B>(java.lang.String&nbsp;channelName,
-            org.epics.ca.channelAccess.client.ChannelRequester&nbsp;channelRequester,
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#findChannel(java.lang.String, org.epics.ca.client.ChannelRequester, double)">findChannel</A></B>(java.lang.String&nbsp;channelName,
+            org.epics.ca.client.ChannelRequester&nbsp;channelRequester,
             double&nbsp;timeOut)</CODE>
 
 <BR>
@@ -148,7 +148,7 @@ Interface implemented by code that can provide access to the record
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;boolean</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#registerChannelProcessProvider(org.epics.ca.channelAccess.server.ChannelProcessorProvider)">registerChannelProcessProvider</A></B>(<A HREF="../../../../org/epics/ioc/channelAccess/ChannelProcessorProvider.html" title="interface in org.epics.ioc.channelAccess">ChannelProcessorProvider</A>&nbsp;channelProcessProvider)</CODE>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#registerChannelProcessProvider(org.epics.ca.server.ChannelProcessorProvider)">registerChannelProcessProvider</A></B>(<A HREF="../../../../org/epics/ioc/channelAccess/ChannelProcessorProvider.html" title="interface in org.epics.ioc.channelAccess">ChannelProcessorProvider</A>&nbsp;channelProcessProvider)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Register an interface for a channelProcessProvider.</TD>
@@ -156,7 +156,7 @@ Interface implemented by code that can provide access to the record
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#registerMonitor(org.epics.ca.channelAccess.server.MonitorCreate)">registerMonitor</A></B>(<A HREF="../../../../org/epics/ioc/channelAccess/MonitorCreate.html" title="interface in org.epics.ioc.channelAccess">MonitorCreate</A>&nbsp;monitorCreate)</CODE>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/channelAccess/ChannelProvider.html#registerMonitor(org.epics.ca.server.MonitorCreate)">registerMonitor</A></B>(<A HREF="../../../../org/epics/ioc/channelAccess/MonitorCreate.html" title="interface in org.epics.ioc.channelAccess">MonitorCreate</A>&nbsp;monitorCreate)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Register an interface for creating monitors.</TD>
@@ -189,11 +189,11 @@ java.lang.String <B>getProviderName</B>()</PRE>
 </DL>
 <HR>
 
-<A NAME="findChannel(java.lang.String, org.epics.ca.channelAccess.client.ChannelRequester, double)"><!-- --></A><H3>
+<A NAME="findChannel(java.lang.String, org.epics.ca.client.ChannelRequester, double)"><!-- --></A><H3>
 findChannel</H3>
 <PRE>
 void <B>findChannel</B>(java.lang.String&nbsp;channelName,
-                 org.epics.ca.channelAccess.client.ChannelRequester&nbsp;channelRequester,
+                 org.epics.ca.client.ChannelRequester&nbsp;channelRequester,
                  double&nbsp;timeOut)</PRE>
 <DL>
 <DD>Find a channel.
@@ -204,7 +204,7 @@ void <B>findChannel</B>(java.lang.String&nbsp;channelName,
 </DL>
 <HR>
 
-<A NAME="registerMonitor(org.epics.ca.channelAccess.server.MonitorCreate)"><!-- --></A><H3>
+<A NAME="registerMonitor(org.epics.ca.server.MonitorCreate)"><!-- --></A><H3>
 registerMonitor</H3>
 <PRE>
 void <B>registerMonitor</B>(<A HREF="../../../../org/epics/ioc/channelAccess/MonitorCreate.html" title="interface in org.epics.ioc.channelAccess">MonitorCreate</A>&nbsp;monitorCreate)</PRE>
@@ -217,11 +217,11 @@ void <B>registerMonitor</B>(<A HREF="../../../../org/epics/ioc/channelAccess/Mon
 </DL>
 <HR>
 
-<A NAME="destroyMonitor(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelMonitor)"><!-- --></A><H3>
+<A NAME="destroyMonitor(org.epics.ca.client.Channel, org.epics.ca.client.ChannelMonitor)"><!-- --></A><H3>
 destroyMonitor</H3>
 <PRE>
-void <B>destroyMonitor</B>(org.epics.ca.channelAccess.client.Channel&nbsp;channel,
-                    org.epics.ca.channelAccess.client.ChannelMonitor&nbsp;channelMonitor)</PRE>
+void <B>destroyMonitor</B>(org.epics.ca.client.Channel&nbsp;channel,
+                    org.epics.ca.client.ChannelMonitor&nbsp;channelMonitor)</PRE>
 <DL>
 <DD>Destroy a monitor.
 <P>
@@ -231,7 +231,7 @@ void <B>destroyMonitor</B>(org.epics.ca.channelAccess.client.Channel&nbsp;channe
 </DL>
 <HR>
 
-<A NAME="registerChannelProcessProvider(org.epics.ca.channelAccess.server.ChannelProcessorProvider)"><!-- --></A><H3>
+<A NAME="registerChannelProcessProvider(org.epics.ca.server.ChannelProcessorProvider)"><!-- --></A><H3>
 registerChannelProcessProvider</H3>
 <PRE>
 boolean <B>registerChannelProcessProvider</B>(<A HREF="../../../../org/epics/ioc/channelAccess/ChannelProcessorProvider.html" title="interface in org.epics.ioc.channelAccess">ChannelProcessorProvider</A>&nbsp;channelProcessProvider)</PRE>
