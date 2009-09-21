@@ -96,11 +96,11 @@ java.lang.Object
   <IMG SRC="../../../../resources/inherit.gif" ALT="extended by "><B>org.epics.ioc.caV3.BaseV3ChannelGet</B>
 </PRE>
 <DL>
-<DT><B>All Implemented Interfaces:</B> <DD>gov.aps.jca.event.ConnectionListener, gov.aps.jca.event.GetListener, java.util.EventListener, org.epics.ca.channelAccess.client.ChannelGet, org.epics.ca.channelAccess.client.ChannelRequest, org.epics.pvData.misc.Destroyable</DD>
+<DT><B>All Implemented Interfaces:</B> <DD>gov.aps.jca.event.ConnectionListener, gov.aps.jca.event.GetListener, java.util.EventListener, org.epics.ca.client.ChannelGet, org.epics.ca.client.ChannelRequest, org.epics.pvData.misc.Destroyable</DD>
 </DL>
 <HR>
 <DL>
-<DT><PRE>public class <B>BaseV3ChannelGet</B><DT>extends java.lang.Object<DT>implements org.epics.ca.channelAccess.client.ChannelGet, gov.aps.jca.event.GetListener, gov.aps.jca.event.ConnectionListener</DL>
+<DT><PRE>public class <B>BaseV3ChannelGet</B><DT>extends java.lang.Object<DT>implements org.epics.ca.client.ChannelGet, gov.aps.jca.event.GetListener, gov.aps.jca.event.ConnectionListener</DL>
 </PRE>
 
 <P>
@@ -125,7 +125,7 @@ Base class that implements ChannelGet for communicating with a V3 IOC.
 <B>Constructor Summary</B></FONT></TH>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3ChannelGet.html#BaseV3ChannelGet(org.epics.ca.channelAccess.client.ChannelGetRequester, boolean)">BaseV3ChannelGet</A></B>(org.epics.ca.channelAccess.client.ChannelGetRequester&nbsp;channelGetRequester,
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3ChannelGet.html#BaseV3ChannelGet(org.epics.ca.client.ChannelGetRequester, boolean)">BaseV3ChannelGet</A></B>(org.epics.ca.client.ChannelGetRequester&nbsp;channelGetRequester,
                  boolean&nbsp;process)</CODE>
 
 <BR>
@@ -221,10 +221,10 @@ Base class that implements ChannelGet for communicating with a V3 IOC.
 </TR>
 </TABLE>
 
-<A NAME="BaseV3ChannelGet(org.epics.ca.channelAccess.client.ChannelGetRequester, boolean)"><!-- --></A><H3>
+<A NAME="BaseV3ChannelGet(org.epics.ca.client.ChannelGetRequester, boolean)"><!-- --></A><H3>
 BaseV3ChannelGet</H3>
 <PRE>
-public <B>BaseV3ChannelGet</B>(org.epics.ca.channelAccess.client.ChannelGetRequester&nbsp;channelGetRequester,
+public <B>BaseV3ChannelGet</B>(org.epics.ca.client.ChannelGetRequester&nbsp;channelGetRequester,
                         boolean&nbsp;process)</PRE>
 <DL>
 <DD>Constructor.
@@ -279,7 +279,7 @@ get</H3>
 public void <B>get</B>(boolean&nbsp;lastRequest)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>get</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelGet</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>get</CODE> in interface <CODE>org.epics.ca.client.ChannelGet</CODE></DL>
 </DD>
 <DD><DL>
 </DL>

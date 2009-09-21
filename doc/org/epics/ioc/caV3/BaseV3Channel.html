@@ -96,11 +96,11 @@ java.lang.Object
   <IMG SRC="../../../../resources/inherit.gif" ALT="extended by "><B>org.epics.ioc.caV3.BaseV3Channel</B>
 </PRE>
 <DL>
-<DT><B>All Implemented Interfaces:</B> <DD>gov.aps.jca.event.ConnectionListener, java.lang.Runnable, java.util.EventListener, org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.ChannelFind, <A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A>, <A HREF="../../../../org/epics/ioc/caV3/V3ChannelStructureRequester.html" title="interface in org.epics.ioc.caV3">V3ChannelStructureRequester</A>, org.epics.pvData.pv.Requester</DD>
+<DT><B>All Implemented Interfaces:</B> <DD>gov.aps.jca.event.ConnectionListener, java.lang.Runnable, java.util.EventListener, org.epics.ca.client.Channel, org.epics.ca.client.ChannelFind, <A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A>, <A HREF="../../../../org/epics/ioc/caV3/V3ChannelStructureRequester.html" title="interface in org.epics.ioc.caV3">V3ChannelStructureRequester</A>, org.epics.pvData.pv.Requester</DD>
 </DL>
 <HR>
 <DL>
-<DT><PRE>public class <B>BaseV3Channel</B><DT>extends java.lang.Object<DT>implements org.epics.ca.channelAccess.client.ChannelFind, org.epics.ca.channelAccess.client.Channel, <A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A>, gov.aps.jca.event.ConnectionListener, java.lang.Runnable, <A HREF="../../../../org/epics/ioc/caV3/V3ChannelStructureRequester.html" title="interface in org.epics.ioc.caV3">V3ChannelStructureRequester</A></DL>
+<DT><PRE>public class <B>BaseV3Channel</B><DT>extends java.lang.Object<DT>implements org.epics.ca.client.ChannelFind, org.epics.ca.client.Channel, <A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A>, gov.aps.jca.event.ConnectionListener, java.lang.Runnable, <A HREF="../../../../org/epics/ioc/caV3/V3ChannelStructureRequester.html" title="interface in org.epics.ioc.caV3">V3ChannelStructureRequester</A></DL>
 </PRE>
 
 <P>
@@ -127,10 +127,10 @@ Base class that implements V3Channel.
 &nbsp;<A NAME="nested_classes_inherited_from_class_org.epics.ca.channelAccess.client.Channel"><!-- --></A>
 <TABLE BORDER="1" WIDTH="100%" CELLPADDING="3" CELLSPACING="0" SUMMARY="">
 <TR BGCOLOR="#EEEEFF" CLASS="TableSubHeadingColor">
-<TH ALIGN="left"><B>Nested classes/interfaces inherited from interface org.epics.ca.channelAccess.client.Channel</B></TH>
+<TH ALIGN="left"><B>Nested classes/interfaces inherited from interface org.epics.ca.client.Channel</B></TH>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
-<TD><CODE>org.epics.ca.channelAccess.client.Channel.ConnectionState</CODE></TD>
+<TD><CODE>org.epics.ca.client.Channel.ConnectionState</CODE></TD>
 </TR>
 </TABLE>
 &nbsp;
@@ -146,7 +146,7 @@ Base class that implements V3Channel.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;boolean</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#add(org.epics.ca.channelAccess.client.ChannelGet)">add</A></B>(org.epics.ca.channelAccess.client.ChannelGet&nbsp;channelGet)</CODE>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#add(org.epics.ca.client.ChannelGet)">add</A></B>(org.epics.ca.client.ChannelGet&nbsp;channelGet)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add a channelGet</TD>
@@ -154,7 +154,7 @@ Base class that implements V3Channel.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;boolean</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#add(org.epics.ca.channelAccess.client.ChannelPut)">add</A></B>(org.epics.ca.channelAccess.client.ChannelPut&nbsp;channelPut)</CODE>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#add(org.epics.ca.client.ChannelPut)">add</A></B>(org.epics.ca.client.ChannelPut&nbsp;channelPut)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add a channelPut</TD>
@@ -201,8 +201,8 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.ChannelArray</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelArray(org.epics.ca.channelAccess.client.ChannelArrayRequester, java.lang.String, org.epics.pvData.pv.PVStructure)">createChannelArray</A></B>(org.epics.ca.channelAccess.client.ChannelArrayRequester&nbsp;channelArrayRequester,
+<CODE>&nbsp;org.epics.ca.client.ChannelArray</CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelArray(org.epics.ca.client.ChannelArrayRequester, java.lang.String, org.epics.pvData.pv.PVStructure)">createChannelArray</A></B>(org.epics.ca.client.ChannelArrayRequester&nbsp;channelArrayRequester,
                    java.lang.String&nbsp;subField,
                    org.epics.pvData.pv.PVStructure&nbsp;pvOption)</CODE>
 
@@ -211,8 +211,8 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.ChannelGet</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelGet(org.epics.ca.channelAccess.client.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)">createChannelGet</A></B>(org.epics.ca.channelAccess.client.ChannelGetRequester&nbsp;channelGetRequester,
+<CODE>&nbsp;org.epics.ca.client.ChannelGet</CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelGet(org.epics.ca.client.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)">createChannelGet</A></B>(org.epics.ca.client.ChannelGetRequester&nbsp;channelGetRequester,
                  org.epics.pvData.pv.PVStructure&nbsp;pvRequest,
                  java.lang.String&nbsp;structureName,
                  boolean&nbsp;shareData,
@@ -224,8 +224,8 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.ChannelProcess</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelProcess(org.epics.ca.channelAccess.client.ChannelProcessRequester, org.epics.pvData.pv.PVStructure)">createChannelProcess</A></B>(org.epics.ca.channelAccess.client.ChannelProcessRequester&nbsp;channelProcessRequester,
+<CODE>&nbsp;org.epics.ca.client.ChannelProcess</CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelProcess(org.epics.ca.client.ChannelProcessRequester, org.epics.pvData.pv.PVStructure)">createChannelProcess</A></B>(org.epics.ca.client.ChannelProcessRequester&nbsp;channelProcessRequester,
                      org.epics.pvData.pv.PVStructure&nbsp;pvOption)</CODE>
 
 <BR>
@@ -233,8 +233,8 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.ChannelPut</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelPut(org.epics.ca.channelAccess.client.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)">createChannelPut</A></B>(org.epics.ca.channelAccess.client.ChannelPutRequester&nbsp;channelPutRequester,
+<CODE>&nbsp;org.epics.ca.client.ChannelPut</CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelPut(org.epics.ca.client.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)">createChannelPut</A></B>(org.epics.ca.client.ChannelPutRequester&nbsp;channelPutRequester,
                  org.epics.pvData.pv.PVStructure&nbsp;pvRequest,
                  java.lang.String&nbsp;structureName,
                  boolean&nbsp;shareData,
@@ -246,8 +246,8 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.ChannelPutGet</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelPutGet(org.epics.ca.channelAccess.client.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)">createChannelPutGet</A></B>(org.epics.ca.channelAccess.client.ChannelPutGetRequester&nbsp;channelPutGetRequester,
+<CODE>&nbsp;org.epics.ca.client.ChannelPutGet</CODE></FONT></TD>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#createChannelPutGet(org.epics.ca.client.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)">createChannelPutGet</A></B>(org.epics.ca.client.ChannelPutGetRequester&nbsp;channelPutGetRequester,
                     org.epics.pvData.pv.PVStructure&nbsp;pvPutRequest,
                     java.lang.String&nbsp;putStructureName,
                     boolean&nbsp;sharePutData,
@@ -297,7 +297,7 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.AccessRights</CODE></FONT></TD>
+<CODE>&nbsp;org.epics.ca.client.AccessRights</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#getAccessRights(org.epics.pvData.pv.PVField)">getAccessRights</A></B>(org.epics.pvData.pv.PVField&nbsp;pvField)</CODE>
 
 <BR>
@@ -313,7 +313,7 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.ChannelProvider</CODE></FONT></TD>
+<CODE>&nbsp;org.epics.ca.client.ChannelProvider</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#getChannelProvider()">getChannelProvider</A></B>()</CODE>
 
 <BR>
@@ -321,7 +321,7 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.ChannelRequester</CODE></FONT></TD>
+<CODE>&nbsp;org.epics.ca.client.ChannelRequester</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#getChannelRequester()">getChannelRequester</A></B>()</CODE>
 
 <BR>
@@ -329,7 +329,7 @@ Base class that implements V3Channel.
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;org.epics.ca.channelAccess.client.Channel.ConnectionState</CODE></FONT></TD>
+<CODE>&nbsp;org.epics.ca.client.Channel.ConnectionState</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#getConnectionState()">getConnectionState</A></B>()</CODE>
 
 <BR>
@@ -354,7 +354,7 @@ Base class that implements V3Channel.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#getField(org.epics.ca.channelAccess.client.GetFieldRequester, java.lang.String)">getField</A></B>(org.epics.ca.channelAccess.client.GetFieldRequester&nbsp;requester,
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#getField(org.epics.ca.client.GetFieldRequester, java.lang.String)">getField</A></B>(org.epics.ca.client.GetFieldRequester&nbsp;requester,
          java.lang.String&nbsp;subField)</CODE>
 
 <BR>
@@ -444,7 +444,7 @@ Base class that implements V3Channel.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;boolean</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#remove(org.epics.ca.channelAccess.client.ChannelGet)">remove</A></B>(org.epics.ca.channelAccess.client.ChannelGet&nbsp;channelGet)</CODE>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#remove(org.epics.ca.client.ChannelGet)">remove</A></B>(org.epics.ca.client.ChannelGet&nbsp;channelGet)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove a ChannelGet</TD>
@@ -452,7 +452,7 @@ Base class that implements V3Channel.
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;boolean</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#remove(org.epics.ca.channelAccess.client.ChannelPut)">remove</A></B>(org.epics.ca.channelAccess.client.ChannelPut&nbsp;channelPut)</CODE>
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3Channel.html#remove(org.epics.ca.client.ChannelPut)">remove</A></B>(org.epics.ca.client.ChannelPut&nbsp;channelPut)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove a ChannelPut</TD>
@@ -516,7 +516,7 @@ cancelChannelFind</H3>
 public void <B>cancelChannelFind</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>cancelChannelFind</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelFind</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>cancelChannelFind</CODE> in interface <CODE>org.epics.ca.client.ChannelFind</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -527,10 +527,10 @@ public void <B>cancelChannelFind</B>()</PRE>
 <A NAME="getChannelProvider()"><!-- --></A><H3>
 getChannelProvider</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.ChannelProvider <B>getChannelProvider</B>()</PRE>
+public org.epics.ca.client.ChannelProvider <B>getChannelProvider</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getChannelProvider</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelFind</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getChannelProvider</CODE> in interface <CODE>org.epics.ca.client.ChannelFind</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -541,10 +541,10 @@ public org.epics.ca.channelAccess.client.ChannelProvider <B>getChannelProvider</
 <A NAME="getConnectionState()"><!-- --></A><H3>
 getConnectionState</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.Channel.ConnectionState <B>getConnectionState</B>()</PRE>
+public org.epics.ca.client.Channel.ConnectionState <B>getConnectionState</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getConnectionState</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getConnectionState</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -558,7 +558,7 @@ getRemoteAddress</H3>
 public java.lang.String <B>getRemoteAddress</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getRemoteAddress</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getRemoteAddress</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -566,16 +566,16 @@ public java.lang.String <B>getRemoteAddress</B>()</PRE>
 </DL>
 <HR>
 
-<A NAME="add(org.epics.ca.channelAccess.client.ChannelGet)"><!-- --></A><H3>
+<A NAME="add(org.epics.ca.client.ChannelGet)"><!-- --></A><H3>
 add</H3>
 <PRE>
-public boolean <B>add</B>(org.epics.ca.channelAccess.client.ChannelGet&nbsp;channelGet)</PRE>
+public boolean <B>add</B>(org.epics.ca.client.ChannelGet&nbsp;channelGet)</PRE>
 <DL>
-<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.channelAccess.client.ChannelGet)">V3Channel</A></CODE></B></DD>
+<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.client.ChannelGet)">V3Channel</A></CODE></B></DD>
 <DD>Add a channelGet
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.channelAccess.client.ChannelGet)">add</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.client.ChannelGet)">add</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
 </DD>
 <DD><DL>
 <DT><B>Parameters:</B><DD><CODE>channelGet</CODE> - The channelGet to add.
@@ -584,16 +584,16 @@ public boolean <B>add</B>(org.epics.ca.channelAccess.client.ChannelGet&nbsp;chan
 </DL>
 <HR>
 
-<A NAME="add(org.epics.ca.channelAccess.client.ChannelPut)"><!-- --></A><H3>
+<A NAME="add(org.epics.ca.client.ChannelPut)"><!-- --></A><H3>
 add</H3>
 <PRE>
-public boolean <B>add</B>(org.epics.ca.channelAccess.client.ChannelPut&nbsp;channelPut)</PRE>
+public boolean <B>add</B>(org.epics.ca.client.ChannelPut&nbsp;channelPut)</PRE>
 <DL>
-<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.channelAccess.client.ChannelPut)">V3Channel</A></CODE></B></DD>
+<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.client.ChannelPut)">V3Channel</A></CODE></B></DD>
 <DD>Add a channelPut
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.channelAccess.client.ChannelPut)">add</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#add(org.epics.ca.client.ChannelPut)">add</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
 </DD>
 <DD><DL>
 <DT><B>Parameters:</B><DD><CODE>channelPut</CODE> - The channelPut to add.
@@ -620,16 +620,16 @@ public boolean <B>add</B>(org.epics.pvData.monitor.Monitor&nbsp;monitor)</PRE>
 </DL>
 <HR>
 
-<A NAME="remove(org.epics.ca.channelAccess.client.ChannelGet)"><!-- --></A><H3>
+<A NAME="remove(org.epics.ca.client.ChannelGet)"><!-- --></A><H3>
 remove</H3>
 <PRE>
-public boolean <B>remove</B>(org.epics.ca.channelAccess.client.ChannelGet&nbsp;channelGet)</PRE>
+public boolean <B>remove</B>(org.epics.ca.client.ChannelGet&nbsp;channelGet)</PRE>
 <DL>
-<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.channelAccess.client.ChannelGet)">V3Channel</A></CODE></B></DD>
+<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.client.ChannelGet)">V3Channel</A></CODE></B></DD>
 <DD>Remove a ChannelGet
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.channelAccess.client.ChannelGet)">remove</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.client.ChannelGet)">remove</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
 </DD>
 <DD><DL>
 <DT><B>Parameters:</B><DD><CODE>channelGet</CODE> - The channelGet to remove.
@@ -638,16 +638,16 @@ public boolean <B>remove</B>(org.epics.ca.channelAccess.client.ChannelGet&nbsp;c
 </DL>
 <HR>
 
-<A NAME="remove(org.epics.ca.channelAccess.client.ChannelPut)"><!-- --></A><H3>
+<A NAME="remove(org.epics.ca.client.ChannelPut)"><!-- --></A><H3>
 remove</H3>
 <PRE>
-public boolean <B>remove</B>(org.epics.ca.channelAccess.client.ChannelPut&nbsp;channelPut)</PRE>
+public boolean <B>remove</B>(org.epics.ca.client.ChannelPut&nbsp;channelPut)</PRE>
 <DL>
-<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.channelAccess.client.ChannelPut)">V3Channel</A></CODE></B></DD>
+<DD><B>Description copied from interface: <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.client.ChannelPut)">V3Channel</A></CODE></B></DD>
 <DD>Remove a ChannelPut
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.channelAccess.client.ChannelPut)">remove</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html#remove(org.epics.ca.client.ChannelPut)">remove</A></CODE> in interface <CODE><A HREF="../../../../org/epics/ioc/caV3/V3Channel.html" title="interface in org.epics.ioc.caV3">V3Channel</A></CODE></DL>
 </DD>
 <DD><DL>
 <DT><B>Parameters:</B><DD><CODE>channelPut</CODE> - The channelPut to remove.
@@ -674,15 +674,15 @@ public boolean <B>remove</B>(org.epics.pvData.monitor.Monitor&nbsp;monitor)</PRE
 </DL>
 <HR>
 
-<A NAME="createChannelArray(org.epics.ca.channelAccess.client.ChannelArrayRequester, java.lang.String, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
+<A NAME="createChannelArray(org.epics.ca.client.ChannelArrayRequester, java.lang.String, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
 createChannelArray</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.ChannelArray <B>createChannelArray</B>(org.epics.ca.channelAccess.client.ChannelArrayRequester&nbsp;channelArrayRequester,
+public org.epics.ca.client.ChannelArray <B>createChannelArray</B>(org.epics.ca.client.ChannelArrayRequester&nbsp;channelArrayRequester,
                                                                          java.lang.String&nbsp;subField,
                                                                          org.epics.pvData.pv.PVStructure&nbsp;pvOption)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>createChannelArray</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>createChannelArray</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -690,10 +690,10 @@ public org.epics.ca.channelAccess.client.ChannelArray <B>createChannelArray</B>(
 </DL>
 <HR>
 
-<A NAME="createChannelGet(org.epics.ca.channelAccess.client.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
+<A NAME="createChannelGet(org.epics.ca.client.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
 createChannelGet</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.ChannelGet <B>createChannelGet</B>(org.epics.ca.channelAccess.client.ChannelGetRequester&nbsp;channelGetRequester,
+public org.epics.ca.client.ChannelGet <B>createChannelGet</B>(org.epics.ca.client.ChannelGetRequester&nbsp;channelGetRequester,
                                                                      org.epics.pvData.pv.PVStructure&nbsp;pvRequest,
                                                                      java.lang.String&nbsp;structureName,
                                                                      boolean&nbsp;shareData,
@@ -701,7 +701,7 @@ public org.epics.ca.channelAccess.client.ChannelGet <B>createChannelGet</B>(org.
                                                                      org.epics.pvData.pv.PVStructure&nbsp;pvOption)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>createChannelGet</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>createChannelGet</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -718,7 +718,7 @@ public org.epics.pvData.monitor.Monitor <B>createMonitor</B>(org.epics.pvData.mo
                                                       org.epics.pvData.pv.PVStructure&nbsp;pvOption)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>createMonitor</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>createMonitor</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -726,14 +726,14 @@ public org.epics.pvData.monitor.Monitor <B>createMonitor</B>(org.epics.pvData.mo
 </DL>
 <HR>
 
-<A NAME="createChannelProcess(org.epics.ca.channelAccess.client.ChannelProcessRequester, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
+<A NAME="createChannelProcess(org.epics.ca.client.ChannelProcessRequester, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
 createChannelProcess</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.ChannelProcess <B>createChannelProcess</B>(org.epics.ca.channelAccess.client.ChannelProcessRequester&nbsp;channelProcessRequester,
+public org.epics.ca.client.ChannelProcess <B>createChannelProcess</B>(org.epics.ca.client.ChannelProcessRequester&nbsp;channelProcessRequester,
                                                                              org.epics.pvData.pv.PVStructure&nbsp;pvOption)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>createChannelProcess</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>createChannelProcess</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -741,10 +741,10 @@ public org.epics.ca.channelAccess.client.ChannelProcess <B>createChannelProcess<
 </DL>
 <HR>
 
-<A NAME="createChannelPut(org.epics.ca.channelAccess.client.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
+<A NAME="createChannelPut(org.epics.ca.client.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
 createChannelPut</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.ChannelPut <B>createChannelPut</B>(org.epics.ca.channelAccess.client.ChannelPutRequester&nbsp;channelPutRequester,
+public org.epics.ca.client.ChannelPut <B>createChannelPut</B>(org.epics.ca.client.ChannelPutRequester&nbsp;channelPutRequester,
                                                                      org.epics.pvData.pv.PVStructure&nbsp;pvRequest,
                                                                      java.lang.String&nbsp;structureName,
                                                                      boolean&nbsp;shareData,
@@ -752,7 +752,7 @@ public org.epics.ca.channelAccess.client.ChannelPut <B>createChannelPut</B>(org.
                                                                      org.epics.pvData.pv.PVStructure&nbsp;pvOption)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>createChannelPut</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>createChannelPut</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -760,10 +760,10 @@ public org.epics.ca.channelAccess.client.ChannelPut <B>createChannelPut</B>(org.
 </DL>
 <HR>
 
-<A NAME="createChannelPutGet(org.epics.ca.channelAccess.client.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
+<A NAME="createChannelPutGet(org.epics.ca.client.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)"><!-- --></A><H3>
 createChannelPutGet</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.ChannelPutGet <B>createChannelPutGet</B>(org.epics.ca.channelAccess.client.ChannelPutGetRequester&nbsp;channelPutGetRequester,
+public org.epics.ca.client.ChannelPutGet <B>createChannelPutGet</B>(org.epics.ca.client.ChannelPutGetRequester&nbsp;channelPutGetRequester,
                                                                            org.epics.pvData.pv.PVStructure&nbsp;pvPutRequest,
                                                                            java.lang.String&nbsp;putStructureName,
                                                                            boolean&nbsp;sharePutData,
@@ -774,7 +774,7 @@ public org.epics.ca.channelAccess.client.ChannelPutGet <B>createChannelPutGet</B
                                                                            org.epics.pvData.pv.PVStructure&nbsp;pvOption)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>createChannelPutGet</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>createChannelPutGet</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -788,7 +788,7 @@ destroy</H3>
 public void <B>destroy</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>destroy</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>destroy</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -802,7 +802,7 @@ disconnect</H3>
 public void <B>disconnect</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>disconnect</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>disconnect</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -813,10 +813,10 @@ public void <B>disconnect</B>()</PRE>
 <A NAME="getAccessRights(org.epics.pvData.pv.PVField)"><!-- --></A><H3>
 getAccessRights</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.AccessRights <B>getAccessRights</B>(org.epics.pvData.pv.PVField&nbsp;pvField)</PRE>
+public org.epics.ca.client.AccessRights <B>getAccessRights</B>(org.epics.pvData.pv.PVField&nbsp;pvField)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getAccessRights</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getAccessRights</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -830,7 +830,7 @@ getChannelName</H3>
 public java.lang.String <B>getChannelName</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getChannelName</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getChannelName</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -841,10 +841,10 @@ public java.lang.String <B>getChannelName</B>()</PRE>
 <A NAME="getChannelRequester()"><!-- --></A><H3>
 getChannelRequester</H3>
 <PRE>
-public org.epics.ca.channelAccess.client.ChannelRequester <B>getChannelRequester</B>()</PRE>
+public org.epics.ca.client.ChannelRequester <B>getChannelRequester</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getChannelRequester</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getChannelRequester</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -852,14 +852,14 @@ public org.epics.ca.channelAccess.client.ChannelRequester <B>getChannelRequester
 </DL>
 <HR>
 
-<A NAME="getField(org.epics.ca.channelAccess.client.GetFieldRequester, java.lang.String)"><!-- --></A><H3>
+<A NAME="getField(org.epics.ca.client.GetFieldRequester, java.lang.String)"><!-- --></A><H3>
 getField</H3>
 <PRE>
-public void <B>getField</B>(org.epics.ca.channelAccess.client.GetFieldRequester&nbsp;requester,
+public void <B>getField</B>(org.epics.ca.client.GetFieldRequester&nbsp;requester,
                      java.lang.String&nbsp;subField)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getField</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getField</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -873,7 +873,7 @@ getProviderName</H3>
 public java.lang.String <B>getProviderName</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>getProviderName</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>getProviderName</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -887,7 +887,7 @@ isConnected</H3>
 public boolean <B>isConnected</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>isConnected</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>isConnected</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -1056,7 +1056,7 @@ connect</H3>
 public void <B>connect</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>connect</CODE> in interface <CODE>org.epics.ca.channelAccess.client.Channel</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>connect</CODE> in interface <CODE>org.epics.ca.client.Channel</CODE></DL>
 </DD>
 <DD><DL>
 </DL>

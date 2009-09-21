@@ -96,11 +96,11 @@ java.lang.Object
   <IMG SRC="../../../../resources/inherit.gif" ALT="extended by "><B>org.epics.ioc.caV3.BaseV3ChannelPut</B>
 </PRE>
 <DL>
-<DT><B>All Implemented Interfaces:</B> <DD>gov.aps.jca.event.ConnectionListener, gov.aps.jca.event.GetListener, gov.aps.jca.event.PutListener, java.util.EventListener, org.epics.ca.channelAccess.client.ChannelPut, org.epics.ca.channelAccess.client.ChannelRequest, org.epics.pvData.misc.Destroyable</DD>
+<DT><B>All Implemented Interfaces:</B> <DD>gov.aps.jca.event.ConnectionListener, gov.aps.jca.event.GetListener, gov.aps.jca.event.PutListener, java.util.EventListener, org.epics.ca.client.ChannelPut, org.epics.ca.client.ChannelRequest, org.epics.pvData.misc.Destroyable</DD>
 </DL>
 <HR>
 <DL>
-<DT><PRE>public class <B>BaseV3ChannelPut</B><DT>extends java.lang.Object<DT>implements org.epics.ca.channelAccess.client.ChannelPut, gov.aps.jca.event.GetListener, gov.aps.jca.event.PutListener, gov.aps.jca.event.ConnectionListener</DL>
+<DT><PRE>public class <B>BaseV3ChannelPut</B><DT>extends java.lang.Object<DT>implements org.epics.ca.client.ChannelPut, gov.aps.jca.event.GetListener, gov.aps.jca.event.PutListener, gov.aps.jca.event.ConnectionListener</DL>
 </PRE>
 
 <P>
@@ -125,7 +125,7 @@ Base class that implements ChannelPut for communicating with a V3 IOC.
 <B>Constructor Summary</B></FONT></TH>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
-<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3ChannelPut.html#BaseV3ChannelPut(org.epics.ca.channelAccess.client.ChannelPutRequester, boolean)">BaseV3ChannelPut</A></B>(org.epics.ca.channelAccess.client.ChannelPutRequester&nbsp;channelPutRequester,
+<TD><CODE><B><A HREF="../../../../org/epics/ioc/caV3/BaseV3ChannelPut.html#BaseV3ChannelPut(org.epics.ca.client.ChannelPutRequester, boolean)">BaseV3ChannelPut</A></B>(org.epics.ca.client.ChannelPutRequester&nbsp;channelPutRequester,
                  boolean&nbsp;process)</CODE>
 
 <BR>
@@ -237,10 +237,10 @@ Base class that implements ChannelPut for communicating with a V3 IOC.
 </TR>
 </TABLE>
 
-<A NAME="BaseV3ChannelPut(org.epics.ca.channelAccess.client.ChannelPutRequester, boolean)"><!-- --></A><H3>
+<A NAME="BaseV3ChannelPut(org.epics.ca.client.ChannelPutRequester, boolean)"><!-- --></A><H3>
 BaseV3ChannelPut</H3>
 <PRE>
-public <B>BaseV3ChannelPut</B>(org.epics.ca.channelAccess.client.ChannelPutRequester&nbsp;channelPutRequester,
+public <B>BaseV3ChannelPut</B>(org.epics.ca.client.ChannelPutRequester&nbsp;channelPutRequester,
                         boolean&nbsp;process)</PRE>
 <DL>
 <DD>Constructor.
@@ -295,7 +295,7 @@ get</H3>
 public void <B>get</B>()</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>get</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelPut</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>get</CODE> in interface <CODE>org.epics.ca.client.ChannelPut</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -323,7 +323,7 @@ put</H3>
 public void <B>put</B>(boolean&nbsp;lastRequest)</PRE>
 <DL>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE>put</CODE> in interface <CODE>org.epics.ca.channelAccess.client.ChannelPut</CODE></DL>
+<DT><B>Specified by:</B><DD><CODE>put</CODE> in interface <CODE>org.epics.ca.client.ChannelPut</CODE></DL>
 </DD>
 <DD><DL>
 </DL>
