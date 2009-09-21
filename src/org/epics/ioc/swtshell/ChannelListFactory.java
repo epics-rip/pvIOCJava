@@ -19,14 +19,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelAccess;
-import org.epics.ca.channelAccess.client.ChannelProvider;
-import org.epics.ca.channelAccess.client.ChannelPutGet;
-import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.Channel.ConnectionState;
-import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelAccess;
+import org.epics.ca.client.ChannelProvider;
+import org.epics.ca.client.ChannelPutGet;
+import org.epics.ca.client.ChannelPutGetRequester;
+import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.Channel.ConnectionState;
+import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -297,7 +297,7 @@ public class ChannelListFactory {
             }
             
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(Status,org.epics.ca.channelAccess.client.Channel)
+             * @see org.epics.ca.client.ChannelRequester#channelCreated(Status,org.epics.ca.client.Channel)
              */
             @Override
             public void channelCreated(Status status, Channel channel) {
@@ -309,7 +309,7 @@ public class ChannelListFactory {
                 channel.connect();
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
+             * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
              */
             @Override
             public void channelStateChange(Channel channel, ConnectionState state) {
@@ -320,7 +320,7 @@ public class ChannelListFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(Status,org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
+             * @see org.epics.ca.client.ChannelPutGetRequester#channelPutGetConnect(Status,org.epics.ca.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
              */
             @Override
             public void channelPutGetConnect(Status status,ChannelPutGet channelPutGet,
@@ -365,19 +365,19 @@ public class ChannelListFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getGetDone(Status)
+             * @see org.epics.ca.client.ChannelPutGetRequester#getGetDone(Status)
              */
             @Override
             public void getGetDone(Status success) {}
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#getPutDone(Status)
+             * @see org.epics.ca.client.ChannelPutGetRequester#getPutDone(Status)
              */
             @Override
             public void getPutDone(Status success) {}
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#putGetDone(Status)
+             * @see org.epics.ca.client.ChannelPutGetRequester#putGetDone(Status)
              */
             @Override
             public void putGetDone(Status status) {

@@ -17,11 +17,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelProcess;
-import org.epics.ca.channelAccess.client.ChannelProcessRequester;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.Channel.ConnectionState;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelProcess;
+import org.epics.ca.client.ChannelProcessRequester;
+import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Status;
@@ -247,7 +247,7 @@ public class ProcessFactory {
                 }
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
+             * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
              */
             @Override
             public void channelStateChange(Channel c, ConnectionState state) {
@@ -273,7 +273,7 @@ public class ProcessFactory {
                 shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
+             * @see org.epics.ca.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.client.Channel)
              */
             @Override
             public void channelCreated(Status status,Channel c) {
@@ -299,7 +299,7 @@ public class ProcessFactory {
                 shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#channelProcessConnect(Status,org.epics.ca.channelAccess.client.ChannelProcess)
+             * @see org.epics.ca.client.ChannelProcessRequester#channelProcessConnect(Status,org.epics.ca.client.ChannelProcess)
              */
             @Override
             public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
@@ -311,7 +311,7 @@ public class ProcessFactory {
                 shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelProcessRequester#processDone(Status)
+             * @see org.epics.ca.client.ChannelProcessRequester#processDone(Status)
              */
             @Override
             public void processDone(Status status) {

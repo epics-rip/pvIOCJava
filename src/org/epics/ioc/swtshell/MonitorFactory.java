@@ -23,9 +23,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.Channel.ConnectionState;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
@@ -482,7 +482,7 @@ public class MonitorFactory {
                 return channel;
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelStateChange(org.epics.ca.channelAccess.client.Channel, org.epics.ca.channelAccess.client.Channel.ConnectionState)
+             * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
              */
             @Override
             public void channelStateChange(Channel c, ConnectionState state) {
@@ -508,7 +508,7 @@ public class MonitorFactory {
                 shell.getDisplay().asyncExec(this);
             }
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.channelAccess.client.Channel)
+             * @see org.epics.ca.client.ChannelRequester#channelCreated(org.epics.pvData.pv.Status, org.epics.ca.client.Channel)
              */
             @Override
             public void channelCreated(Status status,Channel c) {
@@ -564,7 +564,7 @@ public class MonitorFactory {
             }
 
             /* (non-Javadoc)
-             * @see org.epics.ca.channelAccess.client.ChannelMonitorRequester#unlisten()
+             * @see org.epics.ca.client.ChannelMonitorRequester#unlisten()
              */
             @Override
             public void unlisten() {

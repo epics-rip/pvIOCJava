@@ -5,11 +5,11 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.ca.channelAccess.server.ChannelProcessor;
-import org.epics.ca.channelAccess.server.ChannelProcessorProvider;
-import org.epics.ca.channelAccess.server.ChannelProcessorRequester;
-import org.epics.ca.channelAccess.server.ChannelServer;
-import org.epics.ca.channelAccess.server.impl.ChannelServerFactory;
+import org.epics.ca.server.ChannelProcessor;
+import org.epics.ca.server.ChannelProcessorProvider;
+import org.epics.ca.server.ChannelProcessorRequester;
+import org.epics.ca.server.ChannelServer;
+import org.epics.ca.server.impl.local.ChannelServerFactory;
 import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;

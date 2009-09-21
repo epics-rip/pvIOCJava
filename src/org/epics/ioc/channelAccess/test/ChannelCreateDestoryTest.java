@@ -16,11 +16,11 @@ package org.epics.ioc.channelAccess.test;
 
 import junit.framework.TestCase;
 
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelProvider;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.Channel.ConnectionState;
-import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelProvider;
+import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.Channel.ConnectionState;
+import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.pvData.pv.MessageType;
@@ -50,13 +50,13 @@ public class ChannelCreateDestoryTest extends TestCase {
 		}
 		
 		@Override
-		public void channelStateChange(org.epics.ca.channelAccess.client.Channel c,
+		public void channelStateChange(org.epics.ca.client.Channel c,
 				ConnectionState isConnected) {
 			// TODO Auto-generated method stub
 		}
 				
 		@Override
-		public synchronized void channelCreated(Status status, org.epics.ca.channelAccess.client.Channel channel) {
+		public synchronized void channelCreated(Status status, org.epics.ca.client.Channel channel) {
 			this.channel = channel;
 			this.notifyAll();
 		}

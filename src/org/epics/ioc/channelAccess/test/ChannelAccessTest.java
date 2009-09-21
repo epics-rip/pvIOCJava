@@ -19,22 +19,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
-import org.epics.ca.channelAccess.client.Channel;
-import org.epics.ca.channelAccess.client.ChannelArray;
-import org.epics.ca.channelAccess.client.ChannelArrayRequester;
-import org.epics.ca.channelAccess.client.ChannelGet;
-import org.epics.ca.channelAccess.client.ChannelGetRequester;
-import org.epics.ca.channelAccess.client.ChannelProcess;
-import org.epics.ca.channelAccess.client.ChannelProcessRequester;
-import org.epics.ca.channelAccess.client.ChannelProvider;
-import org.epics.ca.channelAccess.client.ChannelPut;
-import org.epics.ca.channelAccess.client.ChannelPutGet;
-import org.epics.ca.channelAccess.client.ChannelPutGetRequester;
-import org.epics.ca.channelAccess.client.ChannelPutRequester;
-import org.epics.ca.channelAccess.client.ChannelRequester;
-import org.epics.ca.channelAccess.client.GetFieldRequester;
-import org.epics.ca.channelAccess.client.Channel.ConnectionState;
-import org.epics.ca.channelAccess.server.impl.ChannelAccessFactory;
+import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelArray;
+import org.epics.ca.client.ChannelArrayRequester;
+import org.epics.ca.client.ChannelGet;
+import org.epics.ca.client.ChannelGetRequester;
+import org.epics.ca.client.ChannelProcess;
+import org.epics.ca.client.ChannelProcessRequester;
+import org.epics.ca.client.ChannelProvider;
+import org.epics.ca.client.ChannelPut;
+import org.epics.ca.client.ChannelPutGet;
+import org.epics.ca.client.ChannelPutGetRequester;
+import org.epics.ca.client.ChannelPutRequester;
+import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.GetFieldRequester;
+import org.epics.ca.client.Channel.ConnectionState;
+import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.pvData.factory.ConvertFactory;
@@ -90,13 +90,13 @@ public class ChannelAccessTest extends TestCase {
 		}
 		
 		@Override
-		public void channelStateChange(org.epics.ca.channelAccess.client.Channel c,
+		public void channelStateChange(org.epics.ca.client.Channel c,
 				ConnectionState isConnected) {
 			// TODO Auto-generated method stub
 		}
 		
 		@Override
-		public synchronized void channelCreated(Status status,org.epics.ca.channelAccess.client.Channel channel) {
+		public synchronized void channelCreated(Status status,org.epics.ca.client.Channel channel) {
 			this.channel = channel;
 			this.notifyAll();
 		}
@@ -377,7 +377,7 @@ public class ChannelAccessTest extends TestCase {
 		private Boolean success = null;
 
 		/* (non-Javadoc)
-		 * @see org.epics.ca.channelAccess.client.ChannelPutGetRequester#channelPutGetConnect(org.epics.ca.channelAccess.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
+		 * @see org.epics.ca.client.ChannelPutGetRequester#channelPutGetConnect(org.epics.ca.client.ChannelPutGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
 		 */
 		@Override
 		public void channelPutGetConnect(
