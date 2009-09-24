@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.TestCase;
 
 import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelArray;
 import org.epics.ca.client.ChannelArrayRequester;
 import org.epics.ca.client.ChannelGet;
@@ -34,7 +35,6 @@ import org.epics.ca.client.ChannelPutRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.GetFieldRequester;
 import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.pvData.factory.ConvertFactory;

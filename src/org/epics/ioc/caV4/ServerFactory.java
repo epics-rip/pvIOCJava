@@ -15,7 +15,7 @@
 package org.epics.ioc.caV4;
 
 import org.epics.ca.CAException;
-import org.epics.ca.server.impl.local.ChannelAccessFactory;
+import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.server.impl.remote.ServerContextImpl;
 import org.epics.ca.server.impl.remote.plugins.DefaultBeaconServerDataProvider;
 import org.epics.pvData.misc.RunnableReady;

@@ -18,8 +18,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.epics.ca.CAException;
+import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.impl.remote.ClientContextImpl;
-import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
