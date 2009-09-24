@@ -281,8 +281,7 @@ public class ProcessFactory {
                     message(status.toString(),MessageType.error);
                     return;
                 }
-                channel = c;;
-                c.connect();
+                channel = c;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
