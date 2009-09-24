@@ -355,13 +355,6 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         v3ChannelStructure = null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.Channel#disconnect()
-     */
-    public void disconnect() {
-        if(isDestroyed) return;
-        if(channelRequester!=null) channelRequester.message("do not know how to disconnect. ", MessageType.error);
-    }                      
-    /* (non-Javadoc)
      * @see org.epics.ca.client.Channel#getAccessRights(org.epics.pvData.pv.PVField)
      */
     @Override
@@ -474,25 +467,18 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     }
     
     /* (non-Javadoc)
-     * @see org.epics.ca.client.Channel#connect()
-     */
-    @Override
-    public void connect() {
-        channelRequester.channelStateChange(this, ConnectionState.CONNECTED);
-    }
-    
-    
-    /* (non-Javadoc)
      * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
      */
     public void connectionChanged(ConnectionEvent arg0) {
         boolean isConnected = arg0.isConnected();
         if(isConnected) {
+            channelRequester.channelStateChange(this, ConnectionState.CONNECTED);
             if(gotFirstConnection.getAndSet(true)) return;
             if(!synchCreateChannel.getAndSet(true)) {
                 executor.execute(executorNode);
             }
         } else {
+            channelRequester.channelStateChange(this, ConnectionState.DISCONNECTED);
             message("connection lost", MessageType.warning);
         }
     }
@@ -503,7 +489,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     public void run() {
         if(channelFindRequester!=null) {
             channelFindRequester.channelFindResult(okStatus,this, true);
-            disconnect();
+            destroy();
             return;
         }
         v3ChannelStructure = new BaseV3ChannelStructure(this);
@@ -513,7 +499,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         } else {
             channelRequester.channelCreated(createStructureFailedStatus,null);
         }
-        disconnect();
+        destroy();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.caV3.V3ChannelStructureRequester#createPVStructureDone(org.epics.ioc.util.RequestResult)
@@ -523,7 +509,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
             channelRequester.channelCreated(okStatus,this);
         } else {
             channelRequester.channelCreated(createStructureFailedStatus,null);
-            disconnect();
+            destroy();
         }
     }
 }

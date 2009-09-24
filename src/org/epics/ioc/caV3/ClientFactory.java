@@ -19,13 +19,13 @@ import java.util.TimerTask;
 import java.util.regex.Pattern;
 
 import org.epics.ca.client.Channel;
+import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelFind;
 import org.epics.ca.client.ChannelFindRequester;
 import org.epics.ca.client.ChannelProvider;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.Query;
 import org.epics.ca.client.QueryRequester;
-import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
