@@ -21,12 +21,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelAccess;
+import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelProvider;
 import org.epics.ca.client.ChannelPutGet;
 import org.epics.ca.client.ChannelPutGetRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.ca.server.impl.local.ChannelAccessFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
@@ -306,7 +306,6 @@ public class ChannelListFactory {
                 	if (!status.isSuccess()) return;
                 }
                 this.channel = channel;
-                channel.connect();
             }
             /* (non-Javadoc)
              * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
