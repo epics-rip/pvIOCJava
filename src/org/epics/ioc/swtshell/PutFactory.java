@@ -352,7 +352,6 @@ public class PutFactory {
                     return;
                 }
                 channel = c;
-                c.connect();
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
