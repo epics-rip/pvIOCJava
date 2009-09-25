@@ -205,6 +205,8 @@ public class JavaIOC {
     }
     
     static void parseRecords(String fileName,Requester iocRequester) {
+        System.out.println("Starting local channel Access");
+        org.epics.ca.LocalFactory.start();
         System.out.printf("\nparsing PV file %s\n",fileName);
         try {
             install.installRecords(fileName,iocRequester);
