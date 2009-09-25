@@ -17,9 +17,6 @@ package org.epics.ioc.caV4;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.epics.ca.CAException;
-import org.epics.ca.client.ChannelAccessFactory;
-import org.epics.ca.client.impl.remote.ClientContextImpl;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
@@ -30,20 +27,14 @@ import org.epics.pvData.misc.ThreadPriority;
 public class ClientFactory {
     static private boolean isRegistered = false; 
     /**
-     * This initializes the Channel Access client.
+     * This initializes the Channel Access client and invokes AfterStart to wait for 2 seconds after database initialization.
      */
     public static synchronized void start() {
         if(isRegistered) return;
         isRegistered = true;
         AfterStartDelay afterStartDelay = new AfterStartDelay();
         afterStartDelay.start();
-        try {
-        	ClientContextImpl context = new ClientContextImpl();
-			context.initialize();
-            ChannelAccessFactory.registerChannelProvider(context.getProvider());
-        } catch (CAException e) {
-            throw new RuntimeException("Failed to initializa client channel access.", e);
-        }
+        org.epics.ca.ClientFactory.start();
     }
     
     // afterStartDelay ensures that no run method gets called until after 2 seconds after
