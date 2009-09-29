@@ -70,6 +70,7 @@ public class ChannelProcessorProviderFactory {
         private ChannelProcessorRequester channelProcessRequester;
         private boolean isRecordProcessRequester = false;
         private ProcessSelf processSelf = null;
+        private boolean leaveActive = false;
         
         
         private Process(ChannelProcessorRequester channelProcessRequester,RecordProcess recordProcess) {
@@ -121,7 +122,8 @@ public class ChannelProcessorProviderFactory {
          */
         @Override
         public boolean process(boolean leaveActive, TimeStamp timeStamp) {
-                return recordProcess.process(this, leaveActive, timeStamp);
+            this.leaveActive = leaveActive;
+            return recordProcess.process(this, leaveActive, timeStamp);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProcess#setInactive()
@@ -129,13 +131,14 @@ public class ChannelProcessorProviderFactory {
         @Override
         public void setInactive() {
             recordProcess.setInactive(this);
+            if(!isRecordProcessRequester) processSelf.endRequest(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
          */
         @Override
         public void recordProcessComplete() {
-            if(!isRecordProcessRequester) processSelf.endRequest(this);
+            if(!isRecordProcessRequester && !leaveActive) processSelf.endRequest(this);
             channelProcessRequester.recordProcessComplete();
         }
 

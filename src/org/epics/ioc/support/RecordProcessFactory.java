@@ -426,7 +426,7 @@ public class RecordProcessFactory {
         public void setInactive(RecordProcessRequester recordProcessRequester) {
             pvRecord.lock();
             try {
-                if(trace) traceMessage("setInactive" + recordProcessRequester.getRequesterName());
+                if(trace) traceMessage("setInactive " + recordProcessRequester.getRequesterName());
                 if(!active) {
                     throw new IllegalStateException("record is not active");
                 }
