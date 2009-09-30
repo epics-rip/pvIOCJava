@@ -104,7 +104,10 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      */
     @Override
     public void channelGetConnect(Status status, ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
-    	// TODO status check
+        if(!status.isSuccess()) {
+            message("createChannelGet failed " + status.getMessage(),MessageType.error);
+            return;
+        }
         this.channelGet = channelGet;
         pvRecord.lock();
         try {

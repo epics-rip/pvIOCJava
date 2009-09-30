@@ -97,7 +97,10 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
      */
     @Override
     public void channelPutConnect(Status status, ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
-    	// TODO status
+    	if(!status.isSuccess()) {
+    	    message("createChannelPut failed " + status.getMessage(),MessageType.error);
+    	    return;
+    	}
         this.channelPut = channelPut;
         linkPVStructure = pvStructure;
         this.bitSet = bitSet;

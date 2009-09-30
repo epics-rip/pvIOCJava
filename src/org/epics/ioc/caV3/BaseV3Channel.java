@@ -472,8 +472,10 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
     public void connectionChanged(ConnectionEvent arg0) {
         boolean isConnected = arg0.isConnected();
         if(isConnected) {
-            channelRequester.channelStateChange(this, ConnectionState.CONNECTED);
-            if(gotFirstConnection.getAndSet(true)) return;
+            if(gotFirstConnection.getAndSet(true)) {
+                channelRequester.channelStateChange(this, ConnectionState.CONNECTED);
+                return;
+            }
             if(!synchCreateChannel.getAndSet(true)) {
                 executor.execute(executorNode);
             }
@@ -495,6 +497,7 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         v3ChannelStructure = new BaseV3ChannelStructure(this);
         if(v3ChannelStructure.createPVStructure(this,recordName)) {
             channelRequester.channelCreated(okStatus,this);
+            channelRequester.channelStateChange(this, ConnectionState.CONNECTED);
             return;
         } else {
             channelRequester.channelCreated(createStructureFailedStatus,null);

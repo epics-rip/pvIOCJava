@@ -103,7 +103,7 @@ public class MonitorFactory {
         
         private Combo algorithmCombo; 
         
-        private boolean isMonitoring = false;
+        //private boolean isMonitoring = false;
         
         private void start(Display display) {
             initPVOption();
@@ -250,8 +250,8 @@ public class MonitorFactory {
         public void widgetSelected(SelectionEvent arg0) {
             if(isDisposed) return;
             Object object = arg0.getSource();
+            State state = stateMachine.getState();
             if(object==connectButton) {
-                State state = stateMachine.getState();
                 if(state==State.readyForConnect) {
                     stateMachine.setState(State.connecting);
                     channelClient.connect(shell);
@@ -265,7 +265,6 @@ public class MonitorFactory {
                 channelClient.createRequest(shell);
             }
             if(object==createMonitorButton) {
-                State state = stateMachine.getState();
                 if(state==State.readyForCreateMonitor) {
                     stateMachine.setState(State.creatingMonitor);
                     channelClient.createMonitor();
@@ -321,15 +320,14 @@ public class MonitorFactory {
                 return;
             }
             if(object==startStopButton) {
-                if(isMonitoring) {
-                    isMonitoring = false;
+                if(state==State.active) {
                     channelClient.stop();
                     stateMachine.setState(State.readyForStart);
                     return;
+                } else if(state==State.readyForStart) {
+                    stateMachine.setState(State.active);
+                    channelClient.start();
                 }
-                isMonitoring = true;
-                stateMachine.setState(State.active);
-                channelClient.start();
                 return;
             }
             if(object==statusButton) {
@@ -347,7 +345,7 @@ public class MonitorFactory {
         }
         
         private class StateMachine {
-            private State state = null;
+            private State state = State.readyForConnect;;
             
             void setState(State newState) {
                 if(isDisposed) return;

@@ -187,7 +187,10 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
      */
     @Override
     public void monitorConnect(Status status, Monitor monitor, Structure structure) {
-    	// TODO check status
+        if(!status.isSuccess()) {
+            message("createMonitor failed " + status.getMessage(),MessageType.error);
+            return;
+        }
         this.monitor = monitor;
         pvRecord.lock();
         try {

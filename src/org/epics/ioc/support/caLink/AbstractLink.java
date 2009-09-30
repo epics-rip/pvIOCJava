@@ -206,6 +206,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
      * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
      */
     public void channelStateChange(Channel c, ConnectionState connectionState) {
+        this.channel = c;
         connectionChange(connectionState == ConnectionState.CONNECTED);
     }
 }
