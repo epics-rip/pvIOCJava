@@ -215,7 +215,7 @@ public class ServerFactory {
                     options = names[0];
                 }
             }
-            if(fieldName==null || fieldName.length()<=0) fieldName = "value";
+            if(fieldName==null || fieldName.length()<=0 || fieldName.equals("VAL")) fieldName = "value";
             PVField pvField = pvRecord.getSubField(fieldName);
             if(pvField==null) {
                 throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + fieldName);
