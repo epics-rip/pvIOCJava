@@ -79,6 +79,13 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         if(isConnected) {
             if(channelPut==null) {
                 channel.createChannelPut(this, pvRequest, "put",false, process,null);
+            } else {
+                pvRecord.lock();
+                try {
+                    isReady = true;
+                } finally {
+                    pvRecord.unlock();
+                }
             }
         } else {
             pvRecord.lock();
@@ -87,9 +94,6 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
             } finally {
                 pvRecord.unlock();
             }
-            if(channelPut!=null) channelPut.destroy();
-            channelPut = null;
-            linkPVStructure = null;
         }
     }
     /* (non-Javadoc)
@@ -101,7 +105,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
     	    message("createChannelPut failed " + status.getMessage(),MessageType.error);
     	    return;
     	}
-        this.channelPut = channelPut;
+    	this.channelPut = channelPut;
         linkPVStructure = pvStructure;
         this.bitSet = bitSet;
         boolean isCompatible = false;

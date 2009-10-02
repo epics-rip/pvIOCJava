@@ -170,6 +170,14 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
         if(isConnected) {
             if(monitor==null) {
                 monitor = channel.createMonitor(this, pvRequest, "monitor", pvOption);
+            } else {
+                pvRecord.lock();
+                try {
+                    isReady = true;
+                } finally {
+                    pvRecord.unlock();
+                }
+                executor.execute(executorNode);
             }
         } else {
             pvRecord.lock();
@@ -178,8 +186,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
             } finally {
                 pvRecord.unlock();
             }
-            if(monitor!=null) monitor.destroy();
-            monitor = null;
+            executor.execute(executorNode);
         }
     } 
     /* (non-Javadoc)
@@ -215,7 +222,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     public void run() {
         while(true) {
             monitorElement = monitor.poll();
-            if(monitorElement==null) return;
+            if(monitorElement==null && isReady) return;
             if(process) {
                 if(isRecordProcessRequester) {
                     boolean canProcess = recordProcess.process(this, false, null);
@@ -229,10 +236,10 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
             pvRecord.lock();
             try {
                 getData();
-                return;
             } finally {
                 pvRecord.unlock();
             }
+            if(!isReady) return;
         }
     }
     /* (non-Javadoc)
@@ -247,7 +254,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
      */
     public void recordProcessComplete() {
         if(processSelf!=null) processSelf.endRequest(this);
-        run();
+        if(isReady) run();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
@@ -272,6 +279,10 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     }
     
     private void getData() {
+        if(!isReady) {
+            alarmSupport.setAlarm("connection lost", AlarmSeverity.invalid);
+            return;
+        }
         PVStructure monitorStructure = monitorElement.getPVStructure();
         BitSet changeBitSet = monitorElement.getChangedBitSet();
         BitSet overrunBitSet = monitorElement.getOverrunBitSet();

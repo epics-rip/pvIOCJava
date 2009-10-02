@@ -86,6 +86,13 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         if(isConnected) {
             if(channelGet==null) {
                 channel.createChannelGet(this, pvRequest, "get", false, process,null);
+            } else {
+                pvRecord.lock();
+                try {
+                    isReady = true;
+                } finally {
+                    pvRecord.unlock();
+                }
             }
         } else {
             pvRecord.lock();
@@ -94,9 +101,6 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
             } finally {
                 pvRecord.unlock();
             }
-            if(channelGet!=null) channelGet.destroy();
-            channelGet = null;
-            linkPVStructure = null;
         }
     }
     /* (non-Javadoc)
@@ -108,9 +112,10 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
             message("createChannelGet failed " + status.getMessage(),MessageType.error);
             return;
         }
-        this.channelGet = channelGet;
+        
         pvRecord.lock();
         try {
+            this.channelGet = channelGet;
             isReady = true;
         } finally {
             pvRecord.unlock();

@@ -12,6 +12,7 @@ import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Status;
 /**
@@ -31,6 +32,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         super(supportName,pvField);
     }
     
+    private boolean isReady = false;
     private ChannelProcess channelProcess = null;
     private SupportProcessRequester supportProcessRequester = null;
     private boolean success = true;
@@ -40,16 +42,23 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
      */
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
+            if(channelProcess==null) {
             channel.createChannelProcess(this,null);
+            } else {
+                pvRecord.lock();
+                try {
+                    isReady = true;
+                } finally {
+                    pvRecord.unlock();
+                }
+            }
         } else {
-            ChannelProcess channelProcess = this.channelProcess;
             pvRecord.lock();
             try {
-                this.channelProcess = null;
+                isReady = false;
             } finally {
                 pvRecord.unlock();
             }
-            if(channelProcess!=null) channelProcess.destroy();
         }
     }
     /* (non-Javadoc)
@@ -57,10 +66,14 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
      */
     @Override
     public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
-    	// TODO check status
+        if(!status.isSuccess()) {
+            message("createChannelProcess failed " + status.getMessage(),MessageType.error);
+            return;
+        }
         pvRecord.lock();
         try {
             this.channelProcess = channelProcess;
+            isReady = true;
         } finally {
             pvRecord.unlock();
         }
