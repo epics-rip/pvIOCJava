@@ -58,7 +58,7 @@
 </record>
 
 
-<record recordName = "floatArrayIn${num}">
+<record recordName = "floatArray${num}">
     <array name = "value" scalarType = "float"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
@@ -73,7 +73,7 @@
 
 
 
-<record recordName = "doubleArrayIn${num}">
+<record recordName = "doubleArray${num}">
     <array name = "value" scalarType = "double"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
@@ -87,7 +87,7 @@
 </record>
 
 
-<record recordName = "stringArrayIn${num}">
+<record recordName = "stringArray${num}">
     <array name = "value" scalarType = "string"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
