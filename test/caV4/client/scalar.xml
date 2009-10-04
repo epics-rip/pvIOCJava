@@ -2,7 +2,7 @@
 <database>
 
 <record recordName = "enumCounter${num}">
-    <scalar name = "value" scalarType = "byte" />
+    <scalar name = "value" scalarType = "int" />
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
@@ -10,6 +10,11 @@
         <scalar name ="expression">(value+1)&lt;=3 ? value+1 : 0</scalar>
       </structure>
     </structure>
+    <structure name = "output" extends = "dbOutputLink">
+            <scalar name = "wait" scalarType = "boolean">true</scalar>
+            <scalar name = "pvname">enumOut${num}.value.index</scalar>
+            <scalar name = "process">true</scalar>
+        </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
         <scalar name = "rate">1.0</scalar>
@@ -17,24 +22,51 @@
 </record>
 
 <record recordName = "enumOut${num}">
-    <scalar name = "value" scalarType = "int"/>
+    <structure name = "value" extends = "enumerated"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "pvname">enumCounter${num}</scalar>
-        <scalar name = "process">true</scalar>
+     <structure name = "input" extends = "digital">
+        <structure name = "alarm" extends = "alarm" />
+        <structure name = "states" >
+             <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.digitalInputFactory</auxInfo>
+             <structure name = "0" extends = "digitalState">
+                 <scalar name = "name">zero</scalar>
+                 <scalar name = "value">0</scalar>
+             </structure>
+             <structure name = "1" extends = "digitalState">
+                 <scalar name = "name">one</scalar>
+                 <scalar name = "value">1</scalar>
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+             </structure>
+             <structure name = "2" extends = "digitalState">
+                 <scalar name = "name">two</scalar>
+                 <scalar name = "value">2</scalar>
+                 <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                 <scalar name = "message">ZERO ALARM</scalar>
+             </structure>
+             <structure name = "3" extends = "digitalState">
+                 <scalar name = "name">three</scalar>
+                 <scalar name = "value">3</scalar>
+                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                 <scalar name = "message">THREE ALARM</scalar>
+             </structure>
+        </structure>
+    </structure>
+    <structure name = "valueAlarm" extends = "enumeratedAlarm">
+            <scalar name = "active">true</scalar>
+            <structure name = "changeStateAlarm">
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                 <scalar name = "message">Change State</scalar>
+             </structure>
     </structure>
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
-        <scalar name = "pvname">enum${num}.value.index</scalar>
+        <scalar name = "pvname">enum${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process0" extends = "caProcessLink">
        <scalar name = "wait" scalarType = "boolean">false</scalar>
        <scalar name = "pvname">enumIn${num}</scalar>
-    </structure>
-    <structure name = "process1" extends = "caProcessLink">
-       <scalar name = "wait" scalarType = "boolean">false</scalar>
-       <scalar name = "pvname">enumInIndex${num}</scalar>
     </structure>
 </record>
 
@@ -44,7 +76,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV4</scalar>
-        <scalar name = "pvname">enum${num}.value</scalar>
+        <scalar name = "pvname">enum${num}</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
@@ -56,33 +88,12 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "providerName">caV4</scalar>
-        <scalar name = "pvname">enum${num}.value</scalar>
+        <scalar name = "pvname">enum${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
 
-<record recordName = "enumInIndex${num}">
-    <scalar name = "value" scalarType = "int"/>
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV4</scalar>
-        <scalar name = "pvname">enum${num}.value.index</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
-    </structure>
-</record>
-<record recordName = "enumMonitorIndex${num}">
-    <scalar name = "value" scalarType = "int"/>
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV4</scalar>
-        <scalar name = "pvname">enum${num}.value.index</scalar>
-        <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
-    </structure>
-</record>
 
 <record recordName = "byteCounter${num}">
     <scalar name = "value" scalarType = "byte" />
@@ -111,6 +122,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">byte${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
        <scalar name = "pvname">byteIn${num}</scalar>
@@ -153,6 +165,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">short${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
        <scalar name = "pvname">shortIn${num}</scalar>
@@ -195,6 +208,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">int${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
        <scalar name = "pvname">intIn${num}</scalar>
@@ -237,6 +251,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">long${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
        <scalar name = "pvname">longIn${num}</scalar>
@@ -281,6 +296,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">float${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
        <scalar name = "pvname">floatIn${num}</scalar>
@@ -323,6 +339,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">double${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
        <scalar name = "pvname">doubleIn${num}</scalar>
@@ -366,6 +383,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">string${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
        <scalar name = "pvname">stringIn${num}</scalar>

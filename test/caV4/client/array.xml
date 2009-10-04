@@ -34,6 +34,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
       <scalar name = "pvname">byteArrayIn${num}</scalar>
@@ -74,6 +75,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
       <scalar name = "pvname">shortArrayIn${num}</scalar>
@@ -114,6 +116,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
       <scalar name = "pvname">intArrayIn${num}</scalar>
@@ -154,6 +157,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
       <scalar name = "pvname">floatArrayIn${num}</scalar>
@@ -194,6 +198,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
       <scalar name = "pvname">doubleArrayIn${num}</scalar>
@@ -234,6 +239,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV4</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
       <scalar name = "pvname">stringArrayIn${num}</scalar>
