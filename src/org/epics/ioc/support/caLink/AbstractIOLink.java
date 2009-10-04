@@ -202,8 +202,8 @@ abstract class AbstractIOLink extends AbstractLink {
             }
         }
         String providerName = providerPV.get();
-        pvname = pvnamePV.get();
         if(providerName.equals("caV3")) {
+            pvname = pvnamePV.get();
             if(alarmIsProperty || (propertyNames!=null && propertyNames.length>0)) {
                 boolean addComma = false;
                 int indexPeriod = pvname.indexOf('.');
@@ -223,6 +223,8 @@ abstract class AbstractIOLink extends AbstractLink {
                 }
                 pvnamePV.put(pvname);
             }
+        } else  {
+            pvnamePV.put(pvname);
         }
         super.start(afterStart);
     }
