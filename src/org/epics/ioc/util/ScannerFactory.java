@@ -556,6 +556,10 @@ public class ScannerFactory {
     {
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForWork = lock.newCondition();
+        /* gotWork prevents following race condition:
+         *  super.runList results in announce being called before waitForWork is called.
+         */
+        private volatile boolean gotWork = false;
         private Thread thread;
         private long startTime = 0;
 
@@ -576,7 +580,11 @@ public class ScannerFactory {
                             firstTime = false;
                             threadReady.ready();
                         }
-                        waitForWork.await();
+                        if(gotWork) {
+                            gotWork = false;
+                        } else {
+                            waitForWork.await();
+                        }
                     } finally {
                         lock.unlock();
                     }
@@ -587,6 +595,7 @@ public class ScannerFactory {
         public void announce() {
             lock.lock();
             try {
+                gotWork = true;
                 waitForWork.signal();
             } finally {
                 lock.unlock();
