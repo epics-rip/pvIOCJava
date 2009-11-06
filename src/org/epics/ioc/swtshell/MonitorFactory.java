@@ -457,7 +457,7 @@ public class MonitorFactory {
             }
             
             void createMonitor() {
-                monitor = channel.createMonitor(this, pvRequest, "", pvOption);
+                monitor = channel.createMonitor(this, pvRequest, pvOption);
             }
 
             void destroyMonitor() {
