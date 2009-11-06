@@ -253,11 +253,11 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.Channel#createChannelGet(org.epics.ca.client.ChannelGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)
+     * @see org.epics.ca.client.Channel#createChannelGet(org.epics.ca.client.ChannelGetRequester, org.epics.pvData.pv.PVStructure, boolean, boolean, org.epics.pvData.pv.PVStructure)
      */
     @Override
     public ChannelGet createChannelGet(ChannelGetRequester channelGetRequester,
-            PVStructure pvRequest, String structureName, boolean shareData,
+            PVStructure pvRequest,boolean shareData,
             boolean process, PVStructure pvOption)
     {
         if(v3ChannelStructure==null) {
@@ -269,13 +269,13 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return channelGet;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.Channel#createMonitor(org.epics.pvData.monitor.MonitorRequester, org.epics.pvData.pv.PVStructure, java.lang.String, org.epics.pvData.pv.PVStructure)
+     * @see org.epics.ca.client.Channel#createMonitor(org.epics.pvData.monitor.MonitorRequester, org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVStructure)
      */
     @Override
     public Monitor createMonitor(
             MonitorRequester monitorRequester,
             PVStructure pvRequest,
-            String structureName, PVStructure pvOption)
+            PVStructure pvOption)
     {
         if(v3ChannelStructure==null) {
             monitorRequester.monitorConnect(channelNotConnectedStatus,null,null);
@@ -297,11 +297,11 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return null;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.Channel#createChannelPut(org.epics.ca.client.ChannelPutRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)
+     * @see org.epics.ca.client.Channel#createChannelPut(org.epics.ca.client.ChannelPutRequester, org.epics.pvData.pv.PVStructure, boolean, boolean, org.epics.pvData.pv.PVStructure)
      */
     @Override
     public ChannelPut createChannelPut(ChannelPutRequester channelPutRequester,
-            PVStructure pvRequest, String structureName, boolean shareData,
+            PVStructure pvRequest,boolean shareData,
             boolean process, PVStructure pvOption)
     {
         if(v3ChannelStructure==null) {
@@ -313,14 +313,14 @@ V3Channel,ConnectionListener,Runnable,V3ChannelStructureRequester
         return channelPut;
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.Channel#createChannelPutGet(org.epics.ca.client.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, org.epics.pvData.pv.PVStructure, java.lang.String, boolean, boolean, org.epics.pvData.pv.PVStructure)
+     * @see org.epics.ca.client.Channel#createChannelPutGet(org.epics.ca.client.ChannelPutGetRequester, org.epics.pvData.pv.PVStructure, boolean, org.epics.pvData.pv.PVStructure, boolean, boolean, org.epics.pvData.pv.PVStructure)
      */
     @Override
     public ChannelPutGet createChannelPutGet(
             ChannelPutGetRequester channelPutGetRequester,
-            PVStructure pvPutRequest, String putStructureName,
+            PVStructure pvPutRequest,
             boolean sharePutData, PVStructure pvGetRequest,
-            String getStructureName, boolean shareGetData, boolean process,
+            boolean shareGetData, boolean process,
             PVStructure pvOption)
     {
         channelPutGetRequester.channelPutGetConnect(notSupportedStatus, null, null, null);

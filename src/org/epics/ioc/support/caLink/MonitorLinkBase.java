@@ -169,7 +169,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(monitor==null) {
-                monitor = channel.createMonitor(this, pvRequest, "monitor", pvOption);
+                monitor = channel.createMonitor(this, pvRequest, pvOption);
             } else {
                 pvRecord.lock();
                 try {

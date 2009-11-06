@@ -353,7 +353,7 @@ public class ServerFactory {
                 pvString.put(pvControl.getFullFieldName());
                 pvRequest.appendPVField(pvString);
             }
-            pvCopy = PVCopyFactory.create(pvRecord, pvRequest, pvRecord.getRecordName(), shareData);
+            pvCopy = PVCopyFactory.create(pvRecord, pvRequest, shareData);
             pvCopyStructure = pvCopy.createPVStructure();
             copyBitSet = new BitSet(pvCopyStructure.getNumberFields());
             copyBitSet.set(0);

@@ -3,11 +3,11 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="lib" path="jar/CAJ.jar"/>
-	<classpathentry kind="lib" path="jar/JCA.jar"/>
 	<classpathentry kind="lib" path="jar/remoteTea.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CAJv4"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/pvData"/>
+	<classpathentry kind="lib" path="jar/caj-1.1.6.jar"/>
+	<classpathentry kind="lib" path="jar/jca-2.3.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

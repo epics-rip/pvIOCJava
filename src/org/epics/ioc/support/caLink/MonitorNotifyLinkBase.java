@@ -93,7 +93,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     @Override
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
-            monitor = channel.createMonitor(this, pvRequest, "monitorNotify", pvOption);
+            monitor = channel.createMonitor(this, pvRequest, pvOption);
         } else {
             if(monitor!=null) monitor.destroy();
             monitor = null;
