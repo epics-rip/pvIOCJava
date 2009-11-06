@@ -326,8 +326,8 @@ public class PutGetFactory {
             void createPutGet(boolean process) {
                 channelPutGet = channel.createChannelPutGet(
                     this,
-                    pvPutRequest,"arguments",putIsShared,
-                    pvGetRequest,"result", getIsShared, process,null);
+                    pvPutRequest,putIsShared,
+                    pvGetRequest, getIsShared, process,null);
                 return;
             }
             void destroyPutGet() {

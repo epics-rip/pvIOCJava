@@ -286,8 +286,7 @@ public class PutFactory {
                 createRequest.create();
             }
             void createPut(boolean process) {
-                String structureName = pvRequest.getField().getFieldName();
-                channelPut = channel.createChannelPut(this, pvRequest,structureName,isShared,process,null);
+                channelPut = channel.createChannelPut(this, pvRequest,isShared,process,null);
                 return;
             }
             void destroyPut() {
