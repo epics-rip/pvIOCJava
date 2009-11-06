@@ -287,8 +287,7 @@ public class GetFactory {
                 createRequest.create();
             }
             void createGet(boolean process) {
-                String structureName = pvRequest.getField().getFieldName();
-                channelGet = channel.createChannelGet(this, pvRequest,structureName,isShared,process,null);
+                channelGet = channel.createChannelGet(this, pvRequest,isShared,process,null);
                 return;
             }
             void destroyGet() {

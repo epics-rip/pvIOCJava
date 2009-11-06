@@ -162,7 +162,7 @@ public class CreateRequestFactory {
                 isShared = shareDataButton.getSelection();
             } else if(object==requestButton) {
                 try{
-                    pvRequest = channelAccess.createRequest(channel.getChannelName(), requestText.getText());
+                    pvRequest = channelAccess.createRequest( requestText.getText());
                     createRequestRequester.request(pvRequest,isShared);
                     if(isShow) {
                         message(pvRequest.toString(),MessageType.info);
