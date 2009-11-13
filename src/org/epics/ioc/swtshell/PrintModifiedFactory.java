@@ -82,11 +82,6 @@ public class PrintModifiedFactory {
                 }
             }
             printStructure(pvStructure,0);
-            this.structureName = null;
-            this.pvStructure = null;
-            this.changeBitSet = null;
-            this.overrunBitSet = null;
-            this.text = null;
         }
         
         private void printStructure(PVStructure pvStructure,int indentLevel) {
