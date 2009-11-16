@@ -1,7 +1,47 @@
 <?xml version="1.0" ?>
 <database>
 
-
+<record recordName = "simpleCounter${num" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+    <structure name = "valueAlarm" extends = "intAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "0" extends = "intAlarmInterval">
+                  <scalar name = "value">2</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "1" extends = "intAlarmInterval">
+                  <scalar name = "value">4</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "2" extends = "intAlarmInterval">
+                  <scalar name = "value">6</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "3" extends = "intAlarmInterval">
+                  <scalar name = "value">8</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "4" extends = "intAlarmInterval">
+                  <scalar name = "value">10</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
 
 <record recordName = "enum${num}">
     <structure name = "value" extends = "enumerated"/>
