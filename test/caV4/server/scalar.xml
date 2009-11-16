@@ -14,6 +14,8 @@
              <structure name = "0" extends = "digitalState">
                  <scalar name = "name">zero</scalar>
                  <scalar name = "value">0</scalar>
+                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                 <scalar name = "message">ZERO ALARM</scalar>
              </structure>
              <structure name = "1" extends = "digitalState">
                  <scalar name = "name">one</scalar>
@@ -23,14 +25,19 @@
              <structure name = "2" extends = "digitalState">
                  <scalar name = "name">two</scalar>
                  <scalar name = "value">2</scalar>
-                 <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                 <scalar name = "message">ZERO ALARM</scalar>
+                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
              </structure>
              <structure name = "3" extends = "digitalState">
                  <scalar name = "name">three</scalar>
                  <scalar name = "value">3</scalar>
-                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                 <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
                  <scalar name = "message">THREE ALARM</scalar>
+             </structure>
+             <structure name = "4" extends = "digitalState">
+                 <scalar name = "name">four</scalar>
+                 <scalar name = "value">4</scalar>
+                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                 <scalar name = "message">FOUR ALARM</scalar>
              </structure>
         </structure>
     </structure>
