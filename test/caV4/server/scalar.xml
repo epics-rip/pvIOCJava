@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <database>
 
-<record recordName = "simpleCounter${num" >
+<record recordName = "simpleCounter${num}" >
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <scalar name = "value" scalarType = "int" />
