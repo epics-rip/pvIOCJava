@@ -10,9 +10,10 @@ import gov.aps.jca.CAException;
 import gov.aps.jca.CAStatus;
 import gov.aps.jca.Monitor;
 import gov.aps.jca.dbr.DBR;
-import gov.aps.jca.dbr.DBRType;
 import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.ConnectionListener;
+import gov.aps.jca.event.GetEvent;
+import gov.aps.jca.event.GetListener;
 import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 
@@ -32,29 +33,23 @@ import org.epics.pvData.pv.Status.StatusType;
  * @author mrk
  *
  */
-public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorListener,ConnectionListener
+public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorListener,GetListener,ConnectionListener
 {
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
     private static Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
-   
-    private static enum DBRProperty {none,status,time};
+    private static Status createChannelStructureStatus = statusCreate.createStatus(StatusType.ERROR, "createChannelStructure failed", null);
+    private static Status getInitialStatus = statusCreate.createStatus(StatusType.ERROR, "get initial failed", null);
 
     private MonitorRequester monitorRequester;
     
     private V3Channel v3Channel = null;
     private gov.aps.jca.Channel jcaChannel = null;
-    private int elementCount = 0;
-    
-    private String[] propertyNames = null;
-    private DBRProperty dbrProperty = DBRProperty.none;
-    private DBRType requestDBRType = null;
-
+    private V3ChannelStructure v3ChannelStructure = null;
+   
     private Monitor monitor = null;
     private boolean isDestroyed = false;
     
-    private PVStructure pvStructure = null;
-    private BitSet changeBitSet = null;
     private BitSet overrunBitSet = null;
     private MonitorElement monitorElement = null;
     /**
@@ -67,16 +62,17 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
     /**
      * Initialize the channelMonitor.
      * @param v3Channel The V3Channel
-     * @return (false,true) if the channelMonitor (did not, did) properly initialize.
+     * @param pvRequest The request structure.
      */
-    /**
-     * @param v3Channel
-     */
-    public void init(V3Channel v3Channel)
+    public void init(V3Channel v3Channel,PVStructure pvRequest)
     {
         this.v3Channel = v3Channel;
         v3Channel.add(this);
-        propertyNames = v3Channel.getPropertyNames();
+        v3ChannelStructure = new BaseV3ChannelStructure(v3Channel);
+        if(v3ChannelStructure.createPVStructure(pvRequest,true)==null) {
+            monitorRequester.monitorConnect(createChannelStructureStatus,null,null);
+            destroy();
+        }
         jcaChannel = v3Channel.getJCAChannel();
         try {
             jcaChannel.addConnectionListener(this);
@@ -85,69 +81,15 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
             jcaChannel = null;
             return;
         };
-        DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
-        requestDBRType = null;
-        elementCount = jcaChannel.getElementCount();
-        dbrProperty = DBRProperty.none;
-        for(String property : propertyNames) {
-            if(property.equals("alarm")&& (dbrProperty.compareTo(DBRProperty.status)<0)) {
-                dbrProperty = DBRProperty.status;
-                continue;
-            }
-            if(property.equals("timeStamp")&& (dbrProperty.compareTo(DBRProperty.time)<0)) {
-                dbrProperty = DBRProperty.time;
-                continue;
-            }
+        try {
+            jcaChannel.get(v3ChannelStructure.getRequestDBRType(),jcaChannel.getElementCount(), this);
+        } catch (Throwable th) {
+            monitorRequester.monitorConnect(getInitialStatus,null,null);
+            return;
         }
-        switch(dbrProperty) {
-        case none:
-            if(nativeDBRType.isENUM()) {
-                requestDBRType = DBRType.INT;
-            } else {
-                requestDBRType = nativeDBRType;
-            }
-            break;
-        case status:
-            if(nativeDBRType==DBRType.BYTE) {
-                requestDBRType = DBRType.STS_BYTE;
-            } else if(nativeDBRType==DBRType.SHORT) {
-                requestDBRType = DBRType.STS_SHORT;
-            } else if(nativeDBRType==DBRType.INT) {
-                requestDBRType = DBRType.STS_INT;
-            } else if(nativeDBRType==DBRType.FLOAT) {
-                requestDBRType = DBRType.STS_FLOAT;
-            } else if(nativeDBRType==DBRType.DOUBLE) {
-                requestDBRType = DBRType.STS_DOUBLE;
-            } else if(nativeDBRType==DBRType.STRING) {
-                requestDBRType = DBRType.STS_STRING;
-            } else if(nativeDBRType==DBRType.ENUM) {
-                requestDBRType = DBRType.STS_INT;
-            }
-            break;
-        case time:
-            if(nativeDBRType==DBRType.BYTE) {
-                requestDBRType = DBRType.TIME_BYTE;
-            } else if(nativeDBRType==DBRType.SHORT) {
-                requestDBRType = DBRType.TIME_SHORT;
-            } else if(nativeDBRType==DBRType.INT) {
-                requestDBRType = DBRType.TIME_INT;
-            } else if(nativeDBRType==DBRType.FLOAT) {
-                requestDBRType = DBRType.TIME_FLOAT;
-            } else if(nativeDBRType==DBRType.DOUBLE) {
-                requestDBRType = DBRType.TIME_DOUBLE;
-            } else if(nativeDBRType==DBRType.STRING) {
-                requestDBRType = DBRType.TIME_STRING;
-            } else if(nativeDBRType==DBRType.ENUM) {
-                requestDBRType = DBRType.TIME_INT;
-            }
-            break;
-        }
-        V3ChannelStructure v3ChannelStructure = v3Channel.getV3ChannelStructure();
-        pvStructure = v3ChannelStructure.getPVStructure();
-        changeBitSet = v3ChannelStructure.getBitSet();
+        PVStructure pvStructure = v3ChannelStructure.getPVStructure();
         overrunBitSet = new BitSet(pvStructure.getNumberFields());
-        monitorElement = new MonitorElementImpl(pvStructure,changeBitSet,overrunBitSet);
-        monitorRequester.monitorConnect(okStatus,this,pvStructure.getStructure());
+        monitorElement = new MonitorElementImpl(pvStructure,v3ChannelStructure.getBitSet(),overrunBitSet);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelMonitor#destroy()
@@ -163,7 +105,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
     public Status start() {
         if(isDestroyed) return channelDestroyedStatus;
         try {
-            monitor = jcaChannel.addMonitor(requestDBRType, elementCount, 0x0ff, this);
+            monitor = jcaChannel.addMonitor(v3ChannelStructure.getRequestDBRType(), jcaChannel.getElementCount(), 0x0ff, this);
         } catch (CAException e) {
         	return statusCreate.createStatus(StatusType.ERROR, "failed to start monitor", e);
         }
@@ -194,7 +136,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
         if(fromDBR==null) {
             monitorRequester.message("fromDBR is null", MessageType.error);
         } else {
-            v3Channel.getV3ChannelStructure().toStructure(fromDBR);
+            v3ChannelStructure.toStructure(fromDBR);
             monitorRequester.monitorEvent(this);
         }
     }
@@ -203,7 +145,7 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
      */
     @Override
     public MonitorElement poll() {
-        if(changeBitSet.nextSetBit(0)<0) return null;
+        if(v3ChannelStructure.getBitSet().nextSetBit(0)<0) return null;
         return monitorElement;
     }
     /* (non-Javadoc)
@@ -211,7 +153,22 @@ public class BaseV3Monitor implements org.epics.pvData.monitor.Monitor,MonitorLi
      */
     @Override
     public void release(MonitorElement monitorElement) {
-        changeBitSet.clear();
+        v3ChannelStructure.getBitSet().clear();
+    }
+    /* (non-Javadoc)
+     * @see gov.aps.jca.event.GetListener#getCompleted(gov.aps.jca.event.GetEvent)
+     */
+    public void getCompleted(GetEvent getEvent) {
+        DBR fromDBR = getEvent.getDBR();
+        if(fromDBR==null) {
+            CAStatus caStatus = getEvent.getStatus();
+            monitorRequester.monitorConnect(
+                    statusCreate.createStatus(StatusType.ERROR, caStatus.getMessage(),null),null,null);
+        } else {
+            v3ChannelStructure.toStructure(fromDBR);
+            monitorRequester.monitorConnect(okStatus, this, v3ChannelStructure.getPVStructure().getStructure());
+            monitorRequester.monitorEvent(this);
+        }
     }
     /* (non-Javadoc)
      * @see gov.aps.jca.event.ConnectionListener#connectionChanged(gov.aps.jca.event.ConnectionEvent)
