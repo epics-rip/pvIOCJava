@@ -5,7 +5,7 @@
 <include addPath = "${JAVAIOC}/xml" />
 <include href = "records.xml" />
 <include removePath = "${JAVAIOC}/xml" />
-<include addPath = "test/caV3" />
+<include addPath = "${JAVAIOC}/test/caV3" />
 <substitute from = "num" to = "01" />
 
 <include href = "scalar.xml" />
