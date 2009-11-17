@@ -47,7 +47,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -59,7 +59,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -87,7 +87,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -99,7 +99,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -127,7 +127,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -139,7 +139,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -167,7 +167,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -179,7 +179,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -207,7 +207,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -219,7 +219,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -247,7 +247,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -259,7 +259,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 <!--
