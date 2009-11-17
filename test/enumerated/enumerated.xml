@@ -19,7 +19,10 @@
     </structure>
     <structure name = "link" extends = "generic">
         <structure name = "output" extends = "caOutputLink">
-            <scalar name = "pvname">enumerated.value.index</scalar>
+            <scalar name = "pvname">enumerated</scalar>
+            <structure name = "request">
+                <scalar name = "value" scalarType = "string">value.index</scalar>
+            </structure>
             <scalar name = "process">true</scalar>
         </structure>
         <structure name = "process0" extends = "caProcessLink">
@@ -87,7 +90,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">enumerated.value</scalar>
         <scalar name = "process">false</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -99,7 +102,7 @@
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">enumerated.value</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -108,9 +111,12 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "pvname">enumerated.value.index</scalar>
+        <scalar name = "pvname">enumerated</scalar>
+        <structure name = "request">
+            <scalar name = "value" scalarType = "string">value.index</scalar>
+            <scalar name = "alarm" scalarType = "string">alarm</scalar>
+        </structure>
         <scalar name = "process">false</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
 
@@ -119,9 +125,12 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "pvname">enumerated.value.index</scalar>
+        <scalar name = "pvname">enumerated</scalar>
+        <structure name = "request">
+            <scalar name = "value" scalarType = "string">value.index</scalar>
+            <scalar name = "alarm" scalarType = "string">alarm</scalar>
+        </structure>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
     </structure>
 </record>
 
