@@ -44,7 +44,7 @@
   <scalar name = "process" scalarType = "boolean">
       <!-- process this record when monitor occurs -->
   </scalar>
-  <scalar name = "propertyNames" scalarType = "string" />
+  <!-- must have either structure or scalar request -->
 </structure>
 
 <structure structureName = "caMonitorNotifyLink" extends = "generic" >
@@ -62,7 +62,7 @@
   <structure name = "alarm" extends = "alarm" />
   <scalar name = "providerName" scalarType = "string" >local</scalar>
   <scalar name = "process" scalarType = "boolean" />
-  <scalar name = "propertyNames" scalarType = "string" />
+  <!-- must have either structure or scalar request -->
 </structure>
 
 <structure structureName = "caOutputLink" extends = "generic">
@@ -72,6 +72,7 @@
   <structure name = "alarm" extends = "alarm" />
   <scalar name = "providerName" scalarType = "string" >local</scalar>
   <scalar name = "process" scalarType = "boolean" />
+  <!-- must have either structure or scalar request -->
 </structure>
 
 </database>

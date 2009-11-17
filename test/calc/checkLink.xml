@@ -3,7 +3,8 @@
     <structure name = "output" extends = "generic">
         <scalar name = "wait" scalarType = "boolean" >true</scalar>
         <structure name = "link" extends = "caOutputLink">
-            <scalar name = "pvname">${checkRecord}Check.input.calcArgs.a.value</scalar>
+            <scalar name = "pvname">${checkRecord}Check</scalar>
+            <scalar name = "request" scalarType = "string">input.calcArgs.a.value</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
