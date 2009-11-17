@@ -4,19 +4,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-  <title>EPICS JavaIOC: support</title>
+  <title>EPICS JavaIOC: caLink support</title>
 </head>
 
 <body>
-<h1 style="text-align: center">EPICS JavaIOC: support.ca<br />
-package: org.epics.ioc.support.ca<br />
-2008.03.04</h1>
+<h1 style="text-align: center">EPICS JavaIOC: support.caLink<br />
+package: org.epics.ioc.support.caLink<br />
+2009.11.17</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#Data">Data Types Supported</a></li>
+  <li><a href="#Support">Support Structure Definition</a></li>
 </ul>
 </div>
 <hr />
@@ -68,8 +69,33 @@ call them.</p>
   <dt>linkType</dt>
     <dd>The Type for the pvname.</dd>
 </dl>
+<hr />
+
+<h2 style="text-align: center" id="Support">Support Structure Definition</h2>
+<hr />
 
 <p>Look at the structure definitions in javaIOC/dbd/structures/caLink.xml for
 a description of how the various structures are defined.</p>
+
+<p>The following is an example of a definition for using caInputLink.</p>
+<pre>&lt;record recordName = "exampleInput"&gt;
+    &lt;scalar name = "value" scalarType = "double"/&gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;structure name = "display" extends = "display" /&gt;
+    &lt;structure name = "input" extends = "caInputLink"&gt;
+        &lt;scalar name = "providerName"&gt;caV4&lt;/scalar&gt;
+        &lt;scalar name = "pvname"&gt;targetRecord&lt;/scalar&gt;
+        &lt;scalar name = "request" scalarType = "string"&gt;value,alarm,display&lt;/scalar&gt;
+    &lt;/structure&gt;
+&lt;/record&gt;
+</pre>
+
+<p>The request must provide a request definition as defined in package
+org.epics.pvData.pvCopy. It can be given as either a scalar string or as a
+structure. The example above uses the easiest method, which is to define a
+scalar string field. The value of the field is a comma separated list of top
+level fields in the record to which the support is attached. The example asks
+to get the value, alarm, and display from the target record.</p>
 </body>
 </html>
