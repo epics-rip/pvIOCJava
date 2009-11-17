@@ -21,16 +21,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutRequester;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.pv.ByteArrayData;
 import org.epics.pvData.pv.DoubleArrayData;
+import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FloatArrayData;
 import org.epics.pvData.pv.IntArrayData;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVByte;
 import org.epics.pvData.pv.PVByteArray;
+import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVField;
@@ -43,6 +46,7 @@ import org.epics.pvData.pv.PVShortArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.ShortArrayData;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.StatusCreate;
@@ -57,18 +61,20 @@ import org.epics.pvData.pv.Status.StatusType;
 public class BaseV3ChannelPut
 implements ChannelPut,GetListener,PutListener,ConnectionListener
 {
+    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
     private static Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
     private static Status channelNotConnectedStatus = statusCreate.createStatus(StatusType.ERROR, "channel not connected", null);
     private static Status disconnectedWhileActiveStatus = statusCreate.createStatus(StatusType.ERROR, "disconnected while active", null);
+    private static Status createChannelStructureStatus = statusCreate.createStatus(StatusType.ERROR, "createChannelStructure failed", null);
 
-    private ChannelPutRequester channelPutRequester = null;
-    private DBRType requestDBRType = null;
     private V3Channel v3Channel = null;
     private gov.aps.jca.Channel jcaChannel = null;
-    private int elementCount = 0;
-   
+    private int elementCount = 1;
+    private ChannelPutRequester channelPutRequester = null;
+    private V3ChannelStructure v3ChannelStructure = null;
+
     private boolean isDestroyed = false;
     private PVField pvField = null;
     private PVInt pvIndex = null; // only if nativeDBRType.isENUM()
@@ -84,29 +90,28 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     /**
      * Constructor.
      * @param channelPutRequester The channelPutRequester.
-     * @param process Should the record be processed after the put.
      */
-    public BaseV3ChannelPut(ChannelPutRequester channelPutRequester, boolean process)
+    public BaseV3ChannelPut(ChannelPutRequester channelPutRequester)
     {
         this.channelPutRequester = channelPutRequester;
-        if(process) {
-            channelPutRequester.message("process not supported for caV3", MessageType.warning);
-        }
     }
     /**
      * Initialize the channelPut.
      * @param v3Channel The V3Channel
      */
-    public void init(V3Channel v3Channel)
+    public void init(V3Channel v3Channel,PVStructure pvRequest)
     {
         this.v3Channel = v3Channel;
         v3Channel.add(this);
-        DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
-        if(nativeDBRType.isENUM()) {
-            requestDBRType = DBRType.INT;
-        } else {
-            requestDBRType = nativeDBRType;
+        v3ChannelStructure = new BaseV3ChannelStructure(v3Channel);
+        if(v3ChannelStructure.createPVStructure(pvRequest,true)==null) {
+            channelPutRequester.channelPutConnect(createChannelStructureStatus,null,null,null);
         }
+        PVStructure pvStructure = pvDataCreate.createPVStructure(null, "", new Field[0]);
+        PVString pvString = (PVString)pvDataCreate.createPVScalar(pvStructure, "value", ScalarType.pvString);
+        pvString.put("value");
+        pvStructure.appendPVField(pvString);
+        DBRType nativeDBRType = v3ChannelStructure.getNativeDBRType();
         jcaChannel = v3Channel.getJCAChannel();
         try {
             jcaChannel.addConnectionListener(this);
@@ -114,11 +119,9 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             channelPutRequester.channelPutConnect(statusCreate.createStatus(StatusType.ERROR, "addConnectionListener failed", e),null,null,null);
             jcaChannel = null;
             return;
-        };
-        String valueFieldName = v3Channel.getValueFieldName();
-        V3ChannelStructure v3ChannelStructure = v3Channel.getV3ChannelStructure();
-        PVStructure pvStructure = v3ChannelStructure.getPVStructure();
-        pvField = pvStructure.getSubField(valueFieldName);
+        }
+        pvStructure = v3ChannelStructure.getPVStructure();
+        pvField = pvStructure.getSubField("value");
         elementCount = jcaChannel.getElementCount();
         if(nativeDBRType.isENUM()) {
             if(elementCount!=1) {
@@ -128,8 +131,8 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
             pvIndex = enumerated.getIndex();
         }
-       
-        channelPutRequester.channelPutConnect(okStatus,this,pvStructure,v3ChannelStructure.getBitSet());
+        channelPutRequester.channelPutConnect(okStatus,this,
+            v3ChannelStructure.getPVStructure(),v3ChannelStructure.getBitSet());
     } 
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelPut#destroy()
@@ -154,7 +157,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         }
         
         try {
-            jcaChannel.get(requestDBRType, elementCount, this);
+            jcaChannel.get(v3ChannelStructure.getRequestDBRType(), elementCount, this);
         } catch (Throwable th) {
             getDone(statusCreate.createStatus(StatusType.ERROR, "failed to get", th));
         }
@@ -170,7 +173,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             getDone(statusCreate.createStatus(StatusType.ERROR, caStatus.toString(), null));
             return;
         }
-        v3Channel.getV3ChannelStructure().toStructure(fromDBR);
+        v3ChannelStructure.toStructure(fromDBR);
         getDone(okStatus);
     }
     private void getDone(Status success) {
@@ -188,7 +191,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
             putDone(channelNotConnectedStatus);
         }
-        DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
+        DBRType nativeDBRType = v3ChannelStructure.getNativeDBRType();
         isActive.set(true);
         try {
             if(pvIndex!=null) {

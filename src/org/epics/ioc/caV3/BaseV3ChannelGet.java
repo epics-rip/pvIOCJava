@@ -5,11 +5,9 @@
  */
 package org.epics.ioc.caV3;
 
-import gov.aps.jca.CAException;
 import gov.aps.jca.CAStatus;
 import gov.aps.jca.Channel;
 import gov.aps.jca.dbr.DBR;
-import gov.aps.jca.dbr.DBRType;
 import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.ConnectionListener;
 import gov.aps.jca.event.GetEvent;
@@ -21,6 +19,7 @@ import org.epics.ca.client.ChannelGet;
 import org.epics.ca.client.ChannelGetRequester;
 import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.StatusCreate;
 import org.epics.pvData.pv.Status.StatusType;
@@ -42,151 +41,39 @@ implements ChannelGet,GetListener,ConnectionListener
     private static Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
     private static Status channelNotConnectedStatus = statusCreate.createStatus(StatusType.ERROR, "channel not connected", null);
     private static Status disconnectedWhileActiveStatus = statusCreate.createStatus(StatusType.ERROR, "disconnected while active", null);
-
-    private static enum DBRProperty {none,status,time,graphic,control};
-    
-    private String[] propertyNames = null;
-    private ChannelGetRequester channelGetRequester = null;
-    private gov.aps.jca.Channel jcaChannel = null;
+    private static Status createChannelStructureStatus = statusCreate.createStatus(StatusType.ERROR, "createChannelStructure failed", null);
     
     private V3Channel v3Channel = null;
-    private DBRType requestDBRType = null;
-    private int elementCount = 0;
+    private ChannelGetRequester channelGetRequester = null;
+    private V3ChannelStructure v3ChannelStructure = null;
     
     private boolean isDestroyed = false;
-    private DBRProperty dbrProperty = DBRProperty.none;
     
     private AtomicBoolean isActive = new AtomicBoolean(false);
     /**
      * Constructor.
      * @param channelGetRequester The channelGetRequester.
-     * @param process Should the record be processed before get.
      */
-    public BaseV3ChannelGet(ChannelGetRequester channelGetRequester,boolean process)
+    public BaseV3ChannelGet(ChannelGetRequester channelGetRequester)
     {
         this.channelGetRequester = channelGetRequester;
-        if(process) {
-            channelGetRequester.message("process not supported for caV3", MessageType.warning);
-        }
     }
     /**
      * Initialize the channelGet.
      * @param v3Channel The V3Channel
+     * @param pvRequest The request structure.
      */
-    public void init(V3Channel v3Channel)
+    public void init(V3Channel v3Channel,PVStructure pvRequest)
     {
         this.v3Channel = v3Channel;
         v3Channel.add(this);
-        propertyNames = v3Channel.getPropertyNames();
-        jcaChannel = v3Channel.getJCAChannel();
-        try {
-            jcaChannel.addConnectionListener(this);
-        } catch (CAException e) {
-            channelGetRequester.channelGetConnect(statusCreate.createStatus(StatusType.ERROR, "addConnectionListener failed", e),null,null,null);
-            jcaChannel = null;
-            return;
-        };
-        DBRType nativeDBRType = v3Channel.getV3ChannelStructure().getNativeDBRType();
-        requestDBRType = null;
-        elementCount = jcaChannel.getElementCount();
-        dbrProperty = DBRProperty.none;
-        for(String property : propertyNames) {
-            if(property.equals("alarm")&& (dbrProperty.compareTo(DBRProperty.status)<0)) {
-                dbrProperty = DBRProperty.status;
-                continue;
-            }
-            if(property.equals("timeStamp")&& (dbrProperty.compareTo(DBRProperty.time)<0)) {
-                dbrProperty = DBRProperty.time;
-                continue;
-            }
-            if(property.equals("display")&& (dbrProperty.compareTo(DBRProperty.graphic)<0)) {
-                dbrProperty = DBRProperty.graphic;
-                continue;
-            }
-            if(property.equals("control")&& (dbrProperty.compareTo(DBRProperty.control)<0)) {
-                dbrProperty = DBRProperty.control;
-                continue;
-            }
+        v3ChannelStructure = new BaseV3ChannelStructure(v3Channel);
+        if(v3ChannelStructure.createPVStructure(pvRequest,true)==null) {
+            channelGetRequester.channelGetConnect(createChannelStructureStatus,null,null,null);
+            destroy();
+        } else {
+            channelGetRequester.channelGetConnect(okStatus, this, v3ChannelStructure.getPVStructure(), v3ChannelStructure.getBitSet());
         }
-        switch(dbrProperty) {
-        case none:
-            if(nativeDBRType.isENUM()) {
-                requestDBRType = DBRType.INT;
-            } else {
-                requestDBRType = nativeDBRType;
-            }
-            break;
-        case status:
-            if(nativeDBRType==DBRType.BYTE) {
-                requestDBRType = DBRType.STS_BYTE;
-            } else if(nativeDBRType==DBRType.SHORT) {
-                requestDBRType = DBRType.STS_SHORT;
-            } else if(nativeDBRType==DBRType.INT) {
-                requestDBRType = DBRType.STS_INT;
-            } else if(nativeDBRType==DBRType.FLOAT) {
-                requestDBRType = DBRType.STS_FLOAT;
-            } else if(nativeDBRType==DBRType.DOUBLE) {
-                requestDBRType = DBRType.STS_DOUBLE;
-            } else if(nativeDBRType==DBRType.STRING) {
-                requestDBRType = DBRType.STS_STRING;
-            } else if(nativeDBRType==DBRType.ENUM) {
-                requestDBRType = DBRType.STS_INT;
-            }
-            break;
-        case time:
-            if(nativeDBRType==DBRType.BYTE) {
-                requestDBRType = DBRType.TIME_BYTE;
-            } else if(nativeDBRType==DBRType.SHORT) {
-                requestDBRType = DBRType.TIME_SHORT;
-            } else if(nativeDBRType==DBRType.INT) {
-                requestDBRType = DBRType.TIME_INT;
-            } else if(nativeDBRType==DBRType.FLOAT) {
-                requestDBRType = DBRType.TIME_FLOAT;
-            } else if(nativeDBRType==DBRType.DOUBLE) {
-                requestDBRType = DBRType.TIME_DOUBLE;
-            } else if(nativeDBRType==DBRType.STRING) {
-                requestDBRType = DBRType.TIME_STRING;
-            } else if(nativeDBRType==DBRType.ENUM) {
-                requestDBRType = DBRType.TIME_INT;
-            }
-            break;
-        case graphic:
-            if(nativeDBRType==DBRType.BYTE) {
-                requestDBRType = DBRType.GR_BYTE;
-            } else if(nativeDBRType==DBRType.SHORT) {
-                requestDBRType = DBRType.GR_SHORT;
-            } else if(nativeDBRType==DBRType.INT) {
-                requestDBRType = DBRType.GR_INT;
-            } else if(nativeDBRType==DBRType.FLOAT) {
-                requestDBRType = DBRType.GR_FLOAT;
-            } else if(nativeDBRType==DBRType.DOUBLE) {
-                requestDBRType = DBRType.GR_DOUBLE;
-            } else if(nativeDBRType==DBRType.STRING) {
-                requestDBRType = DBRType.GR_STRING;
-            } else if(nativeDBRType==DBRType.ENUM) {
-                requestDBRType = DBRType.CTRL_ENUM;
-            }
-            break;
-        case control:
-            if(nativeDBRType==DBRType.BYTE) {
-                requestDBRType = DBRType.CTRL_BYTE;
-            } else if(nativeDBRType==DBRType.SHORT) {
-                requestDBRType = DBRType.CTRL_SHORT;
-            } else if(nativeDBRType==DBRType.INT) {
-                requestDBRType = DBRType.CTRL_INT;
-            } else if(nativeDBRType==DBRType.FLOAT) {
-                requestDBRType = DBRType.CTRL_FLOAT;
-            } else if(nativeDBRType==DBRType.DOUBLE) {
-                requestDBRType = DBRType.CTRL_DOUBLE;
-            } else if(nativeDBRType==DBRType.STRING) {
-                requestDBRType = DBRType.CTRL_STRING;
-            } else if(nativeDBRType==DBRType.ENUM) {
-                requestDBRType = DBRType.CTRL_ENUM;
-            }
-            break;
-        }
-        V3ChannelStructure v3ChannelStructure = v3Channel.getV3ChannelStructure();
-        channelGetRequester.channelGetConnect(okStatus,this,v3ChannelStructure.getPVStructure(),v3ChannelStructure.getBitSet());
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.ca.ChannelGet#destroy()
@@ -204,13 +91,14 @@ implements ChannelGet,GetListener,ConnectionListener
             getDone(channelDestroyedStatus);
             return;
         }
+        gov.aps.jca.Channel jcaChannel = v3Channel.getJCAChannel();
         if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
             getDone(channelNotConnectedStatus);
             return;
         }
         isActive.set(true);
         try {
-            jcaChannel.get(requestDBRType, elementCount, this);
+            jcaChannel.get(v3ChannelStructure.getRequestDBRType(),jcaChannel.getElementCount(), this);
         } catch (Throwable th) {
             getDone(statusCreate.createStatus(StatusType.ERROR, "failed to get", th));
         }
@@ -237,7 +125,7 @@ implements ChannelGet,GetListener,ConnectionListener
             getDone(statusCreate.createStatus(StatusType.ERROR, caStatus.toString(), null));
             return;
         }
-        v3Channel.getV3ChannelStructure().toStructure(fromDBR);
+        v3ChannelStructure.toStructure(fromDBR);
         getDone(okStatus);
     }
     /* (non-Javadoc)
