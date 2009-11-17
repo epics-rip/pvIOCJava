@@ -10,7 +10,6 @@ import org.epics.ca.client.ChannelGet;
 import org.epics.ca.client.ChannelPut;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.monitor.Monitor;
-import org.epics.pvData.pv.ScalarType;
 
 
 /**
@@ -62,33 +61,8 @@ public interface V3Channel extends Channel
      */
     gov.aps.jca.Channel getJCAChannel();
     /**
-     * Get the pvName for this channel.
-     * @return The name.
-     */
-    String getPVName();
-    /**
-     * Get the V3ChannelRecord for this channel.
-     * @return The v3ChannelRecord or null if not connected.
-     */
-    V3ChannelStructure getV3ChannelStructure();
-    /**
-     * Get the name of the value field for this channel.
-     * @return The fieldName.
-     */
-    String getValueFieldName();
-    /**
-     * Get the array of propertyNames for this channel.
-     * @return An array of strings.
-     */
-    String[] getPropertyNames();
-    /**
      * Get a general purpose IOCExecutor.
      * @return The iocExecutor;
      */
     Executor getExecutor();
-    /**
-     * If the native type is enum what is the request type.
-     * @return The Type.
-     */
-    ScalarType getEnumRequestScalarType();
 }
