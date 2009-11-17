@@ -284,20 +284,27 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
             return;
         }
         PVStructure monitorStructure = monitorElement.getPVStructure();
+        if(super.linkPVFields==null) {
+            if(!super.setLinkPVStructure(monitorStructure)) {
+                monitor.destroy();
+                return;
+            }
+        } else {
+            super.linkPVStructure = monitorStructure;
+            super.linkPVFields = monitorStructure.getPVFields();
+        }
         BitSet changeBitSet = monitorElement.getChangedBitSet();
         BitSet overrunBitSet = monitorElement.getOverrunBitSet();
         boolean allSet = changeBitSet.get(0);
-        copyChanged(monitorStructure.getSubField("value"),valuePVField,changeBitSet,allSet);
-        if(alarmIsProperty) {
-            PVString pvMessage = monitorStructure.getStringField("alarm.message");
-            PVInt pvSeverityIndex = monitorStructure.getIntField("alarm.severity.index");
-            alarmSupport.setAlarm(pvMessage.get(), AlarmSeverity.getSeverity(pvSeverityIndex.get()));
-        }
-        int length = 0;
-        if(propertyPVFields!=null) length = propertyPVFields.length;
-        if(length>=1) for(int i=0; i <length; i++) {
-            PVField pvLink = monitorStructure.getSubField(propertyPVFields[i].getField().getFieldName());
-            copyChanged(pvLink,propertyPVFields[i],changeBitSet,allSet);
+        for(int i=0; i< linkPVFields.length; i++) {
+            if(i==indexAlarmLinkField) {
+                super.pvAlarmMessage = monitorStructure.getStringField("alarm.message");
+                super.pvAlarmSeverityIndex = monitorStructure.getIntField("alarm.severity.index");
+                alarmSupport.setAlarm(pvAlarmMessage.get(),
+                    AlarmSeverity.getSeverity(pvAlarmSeverityIndex.get()));
+            } else {
+                copyChanged(linkPVFields[i],pvFields[i],changeBitSet,allSet);
+            }
         }
         if(overrun || overrunBitSet.nextSetBit(0)>=0) {
             alarmSupport.setAlarm(
