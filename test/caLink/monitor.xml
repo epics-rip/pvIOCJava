@@ -56,7 +56,7 @@
         <scalar name = "pvname">monitorCounter</scalar>
         <scalar name = "type">onPut</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
     <structure name = "link" extends = "caOutputLink">
         <scalar name = "pvname">cachePut</scalar>
@@ -81,7 +81,7 @@
         <scalar name = "pvname">monitorCounter</scalar>
         <scalar name = "type">onChange</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -94,7 +94,7 @@
         <scalar name = "type">onAbsoluteChange</scalar>
         <scalar name = "deadband">1.001</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -107,7 +107,7 @@
         <scalar name = "type">onPercentChange</scalar>
         <scalar name = "deadband">20.0</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -121,7 +121,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <scalar name = "process">false</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
@@ -133,7 +133,7 @@
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">monitorCounter</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
 </record>
 
