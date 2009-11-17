@@ -19,8 +19,6 @@ import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
 
@@ -47,14 +45,8 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      
     private boolean isReady = false;
     private ChannelGet channelGet = null;
-    private PVStructure linkPVStructure = null;
-    private PVField linkValuePVField = null;
+   
     private BitSet bitSet = null;
-    private PVField[] linkPropertyPVFields = null;
-    // if alarmIsProperty following are in linkPVStructure
-    private PVString alarmMessagePV = null;
-    private PVInt alarmSeverityIndexPV = null;
-    
     
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult;   
@@ -108,47 +100,19 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      */
     @Override
     public void channelGetConnect(Status status, ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
-        if(!status.isSuccess()) {
-            message("createChannelGet failed " + status.getMessage(),MessageType.error);
-            return;
-        }
-        
         pvRecord.lock();
         try {
+            if(!status.isSuccess()) {
+                message("createChannelGet failed " + status.getMessage(),MessageType.error);
+                return;
+            }
+            if(!super.setLinkPVStructure(pvStructure)) {
+                channelGet.destroy();
+                return;
+            }
             this.channelGet = channelGet;
+            this.bitSet = bitSet;
             isReady = true;
-        } finally {
-            pvRecord.unlock();
-        }
-        linkPVStructure = pvStructure;
-        this.bitSet = bitSet;
-        linkValuePVField = linkPVStructure.getSubField("value");
-        boolean isCompatible = convert.isCopyCompatible(valuePVField.getField(), linkValuePVField.getField());
-        if(alarmIsProperty) {
-            PVStructure pvAlarm = (PVStructure)linkPVStructure.getSubField("alarm");
-            alarmMessagePV = pvAlarm.getStringField("message");
-            if(alarmMessagePV==null) isCompatible = false;
-            alarmSeverityIndexPV = pvAlarm.getIntField("severity.index");
-            if(alarmSeverityIndexPV==null) isCompatible = false;
-        }
-        int length = 0;
-        if(propertyPVFields!=null) length = propertyPVFields.length;
-        if(length>=1) {
-            linkPropertyPVFields = new PVField[length];
-            for(int i=0; i <length; i++) {
-                linkPropertyPVFields[i] = linkPVStructure.getSubField(propertyPVFields[i].getField().getFieldName());
-                if(!convert.isCopyCompatible(propertyPVFields[i].getField(), linkPropertyPVFields[i].getField())) {
-                    isCompatible = false;
-                }
-            }
-        }
-        pvRecord.lock();
-        try {
-            if(isCompatible) {
-                isReady = true;
-            } else {
-                message("link type is not compatible with pvname " + pvnamePV.get(),MessageType.error);
-            }
         } finally {
             pvRecord.unlock();
         }
@@ -189,18 +153,15 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      */
     public void processContinue() {
         boolean allSet = bitSet.get(0);
-        if(allSet) {
-            bitSet.set(linkValuePVField.getFieldOffset());
-        }
-        copyChanged(linkValuePVField,valuePVField);
-        if(alarmIsProperty) alarmSupport.setAlarm(alarmMessagePV.get(), AlarmSeverity.getSeverity(alarmSeverityIndexPV.get()));
-        int length = 0;
-        if(propertyPVFields!=null) length = propertyPVFields.length;
-        if(length>=1) for(int i=0; i <length; i++) {
-            if(allSet) {
-                bitSet.set(linkPropertyPVFields[i].getFieldOffset());
+        for(int i=0; i< linkPVFields.length; i++) {
+            if(i==indexAlarmLinkField) {
+                alarmSupport.setAlarm(pvAlarmMessage.get(),
+                    AlarmSeverity.getSeverity(pvAlarmSeverityIndex.get()));
+            } else if(allSet){
+                convert.copy(linkPVFields[i],pvFields[i]);
+            } else {
+                copyChanged(linkPVFields[i],pvFields[i]);
             }
-            copyChanged(linkPropertyPVFields[i],propertyPVFields[i]);
         }
         supportProcessRequester.supportProcessDone(requestResult);
     }
