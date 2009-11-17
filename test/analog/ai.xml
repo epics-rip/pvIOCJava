@@ -48,7 +48,7 @@
         <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">aiRaw</scalar>
             <scalar name = "process">false</scalar>
-            <scalar name = "propertyNames">alarm</scalar>
+            <scalar name = "request" scalarType = "string" >value,alarm</scalar>
         </structure>
     </structure>
 </record>

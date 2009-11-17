@@ -147,7 +147,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">counterOutput</scalar>
         <scalar name = "process">false</scalar>
-        <scalar name = "propertyNames">alarm,display</scalar>
+        <scalar name = "request" scalarType = "string" >value,alarm,display</scalar>
     </structure>
 </record>
 
@@ -159,7 +159,7 @@
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">counterOutput</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "propertyNames">alarm,display</scalar>
+        <scalar name = "request" scalarType = "string" >value,alarm,display</scalar>
     </structure>
     <structure name = "delay" extends = "delay"> 
          <scalar name = "min">.1</scalar>
@@ -180,7 +180,7 @@
                 <structure name = "input" extends = "caMonitorLink">
                     <scalar name = "pvname">counterOutput</scalar>
                     <scalar name = "process">true</scalar>
-                    <scalar name = "propertyNames">alarm</scalar>
+                    <scalar name = "request" scalarType = "string" >value,alarm</scalar>
                 </structure>
             </structure>
             <structure name = "arg1" extends = "generic">
