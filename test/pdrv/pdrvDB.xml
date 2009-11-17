@@ -5,7 +5,6 @@
 <include addPath = "${JAVAIOC}/xml" />
 <include href = "records.xml" />
 <include removePath = "${JAVAIOC}/xml" />
-<record recordName = "processControl" extends = "processControl" />
 <record recordName = "portDeviceControl" extends = "portDeviceControl" />
 <include addPath = "${JAVAIOC}/test/pdrv" />
 
