@@ -16,7 +16,6 @@ import gov.aps.jca.event.ContextVirtualCircuitExceptionEvent;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Pattern;
 
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelAccessFactory;
@@ -37,7 +36,6 @@ import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
 
 
@@ -102,7 +100,7 @@ public class ClientFactory  {
     implements ChannelProvider,ContextExceptionListener, ContextMessageListener
     {
         static private final String providerName = "caV3";
-        private boolean isRegistered = false; 
+        private volatile boolean isRegistered = false; 
         private CAThread caThread = null;
         
         synchronized private void register() {
@@ -191,18 +189,11 @@ public class ClientFactory  {
     }
     
     private static class LocateFind implements ChannelFind,ChannelFindRequester{
-        static private final Pattern periodPattern = Pattern.compile("[.]");
-        static private final Pattern leftBracePattern = Pattern.compile("[{]");
-        static private final Pattern rightBracePattern = Pattern.compile("[}]");
-        static private final Pattern commaPattern = Pattern.compile("[,]");
+        
         private final ChannelProvider channelProvider;
         private ChannelFindRequester channelFindRequester = null;
         private BaseV3Channel v3Channel = null;
         private String channelName = null;
-        private String recordName = null;
-        private String fieldName = null;
-        private String[] propertys = new String[0];
-        private ScalarType enumRequestType = null;
         
         
         LocateFind(ChannelProvider channelProvider, String channelName) {
@@ -212,57 +203,16 @@ public class ClientFactory  {
         
         void find(ChannelFindRequester channelFindRequester) {
             this.channelFindRequester = channelFindRequester;
-            common();
             v3Channel = new BaseV3Channel(channelProvider,
-                    this,null,context,channelName,recordName,fieldName,enumRequestType,propertys);
+                    this,null,context,channelName);
             v3Channel.connectCaV3();
         }
         
         Channel create(ChannelRequester channelRequester) {
-            common();
             v3Channel = new BaseV3Channel(channelProvider,
-                    null,channelRequester,context,channelName,recordName,fieldName,enumRequestType,propertys);
+                    null,channelRequester,context,channelName);
             v3Channel.connectCaV3();
             return v3Channel;
-        }
-        
-        private void common() {
-            String[] names = periodPattern.split(channelName,2);
-            recordName = names[0];
-            if(names.length==2) {
-                names = leftBracePattern.split(names[1], 2);
-                fieldName = names[0];
-                if(fieldName.length()==0) fieldName = null;
-                if(names.length==2) {
-                    names = rightBracePattern.split(names[1], 2);
-                    propertys = commaPattern.split(names[0]);
-                }
-            }
-            String remoteFieldName = null;
-            
-            if(fieldName!=null) {
-                if(fieldName.equals("value")) {
-                    remoteFieldName = "VAL";
-                } else if(fieldName.equals("value.index")) {
-                    enumRequestType = ScalarType.pvInt;
-                    fieldName = "value";
-                    remoteFieldName = "VAL";
-                } else if(fieldName.equals("value.choice")) {
-                    enumRequestType = ScalarType.pvString;
-                    fieldName = "value";
-                    remoteFieldName = "VAL";
-                } else if(fieldName.equals("VAL")) {
-                    remoteFieldName = "VAL";
-                    fieldName = "value";
-                } else {
-                    remoteFieldName = fieldName;
-                }
-            } else {
-                fieldName = "value";
-                remoteFieldName = "VAL";
-            }
-            channelName =  recordName + "." + remoteFieldName;
-           
         }
         /* (non-Javadoc)
          * @see org.epics.ca.client.ChannelFind#cancelChannelFind()
