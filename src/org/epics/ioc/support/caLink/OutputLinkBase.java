@@ -48,8 +48,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
     
     private boolean isReady = false;
     private ChannelPut channelPut = null;
-    protected PVStructure linkPVStructure = null;
-    protected PVField linkValuePVField = null;
+    
     protected BitSet bitSet = null;
     
     /* (non-Javadoc)
@@ -101,28 +100,19 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
      */
     @Override
     public void channelPutConnect(Status status, ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
-    	if(!status.isSuccess()) {
-    	    message("createChannelPut failed " + status.getMessage(),MessageType.error);
-    	    return;
-    	}
-    	this.channelPut = channelPut;
-        linkPVStructure = pvStructure;
-        this.bitSet = bitSet;
-        boolean isCompatible = false;
-        if(valueIsEnumerated) {
-            linkValuePVField = linkPVStructure.getSubField("value.index");
-            isCompatible = convert.isCopyCompatible(valueIndexPV.getField(), linkValuePVField.getField());
-        } else {
-            linkValuePVField = linkPVStructure.getSubField("value");
-            isCompatible = convert.isCopyCompatible(valuePVField.getField(), linkValuePVField.getField());
-        }
         pvRecord.lock();
         try {
-            if(isCompatible) {
-                isReady = true;
-            } else {
-                message("link type is not compatible with pvname " + pvnamePV.get(),MessageType.error);
+            if(!status.isSuccess()) {
+                message("createChannelPut failed " + status.getMessage(),MessageType.error);
+                return;
             }
+            if(!super.setLinkPVStructure(pvStructure)) {
+                channelPut.destroy();
+                return;
+            }
+            this.channelPut = channelPut;
+            this.bitSet = bitSet;
+            isReady = true;
         } finally {
             pvRecord.unlock();
         }
@@ -140,12 +130,14 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
-        if(valueIsEnumerated) {
-            convert.copy(valueIndexPV, linkValuePVField);
-        } else {
-            convert.copy(valuePVField, linkValuePVField);
+        for(int i=0; i< linkPVFields.length; i++) {
+            if(i==indexAlarmLinkField) continue;
+            PVField pvFrom = pvFields[i];
+            PVField pvTo = linkPVFields[i];
+            if(pvFrom.equals(pvTo)) continue;
+            convert.copy(pvFrom, pvTo);
+            bitSet.set(pvTo.getFieldOffset());
         }
-        bitSet.set(linkValuePVField.getFieldOffset());
         this.supportProcessRequester = supportProcessRequester;
         recordProcess.requestProcessCallback(this);
         return;
