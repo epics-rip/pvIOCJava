@@ -128,7 +128,6 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         String providerName = providerPV.get();
-        ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
         channelProvider = channelAccess.getProvider(providerName);
         if(channelProvider==null) {
             message("providerName " + providerName +  " not found",MessageType.error);
