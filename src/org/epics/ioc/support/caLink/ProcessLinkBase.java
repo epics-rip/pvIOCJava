@@ -32,7 +32,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         super(supportName,pvField);
     }
     
-    private boolean isReady = false;
+    private volatile boolean isReady = false;
     private ChannelProcess channelProcess = null;
     private SupportProcessRequester supportProcessRequester = null;
     private boolean success = true;
@@ -43,7 +43,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(channelProcess==null) {
-            channel.createChannelProcess(this,null);
+                channelProcess = channel.createChannelProcess(this,null);
             } else {
                 pvRecord.lock();
                 try {
@@ -68,14 +68,21 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
     public void channelProcessConnect(Status status,ChannelProcess channelProcess) {
         if(!status.isSuccess()) {
             message("createChannelProcess failed " + status.getMessage(),MessageType.error);
-            return;
-        }
-        pvRecord.lock();
-        try {
-            this.channelProcess = channelProcess;
-            isReady = true;
-        } finally {
-            pvRecord.unlock();
+            try {
+                this.channelProcess = channelProcess;
+                channelProcess = null;
+                isReady = false;
+            } finally {
+                pvRecord.unlock();
+            }
+        } else {
+            pvRecord.lock();
+            try {
+                this.channelProcess = channelProcess;
+                isReady = true;
+            } finally {
+                pvRecord.unlock();
+            }
         }
     }
     /* (non-Javadoc)
@@ -90,7 +97,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
      * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
      */
     public void process(SupportProcessRequester supportProcessRequester) {
-        if(channelProcess==null) {
+        if(!isReady) {
             if(alarmSupport!=null) alarmSupport.setAlarm(
                     pvStructure.getFullFieldName() + " not connected",
                     AlarmSeverity.major);
