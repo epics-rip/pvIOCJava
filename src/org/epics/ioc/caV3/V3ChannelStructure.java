@@ -26,11 +26,16 @@ public interface V3ChannelStructure {
     DBRType getNativeDBRType();
     /**
      * Create the PVStructure.
-     * @param v3ChannelRecordRequester The requester.
-     * @param fieldName The field name for the structure.
-     * @return (false,true) if the request can be satisfied.
+     * @param pvRequest The pvRequest.
+     * @param propertiesAllowed Are properties are allowed, i.e. alarm, timeStamp, control, display?
+     * @return pvStructure or null if failure.
      */
-    boolean createPVStructure(V3ChannelStructureRequester v3ChannelRecordRequester,String fieldName);
+    PVStructure createPVStructure(PVStructure pvRequest,boolean propertiesAllowed);
+    /**
+     * Get the request DBRType.
+     * @return The DBRType.
+     */
+    DBRType getRequestDBRType();
     /**
      * Get the PVStructure interface.
      * @return The interface.
