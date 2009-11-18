@@ -64,7 +64,6 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     public void initialize(LocateSupport recordSupport) {
         if(!super.checkSupportState(SupportState.readyForInitialize,super.getSupportName())) return;
         processRequesterName = pvStructure.getFullName();
-        SupportState supportState = SupportState.readyForStart;
         PVField[] pvFields = pvStructure.getPVFields();
         int n = pvFields.length;
         int numberSupport = 0;
@@ -103,7 +102,6 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
             }
             support.initialize(recordSupport);
             if(support.getSupportState()!=SupportState.readyForStart) {
-                supportState = SupportState.readyForInitialize;
                 for(int j=0; j<indSupport-1; j++) {
                     supports[j].uninitialize();
                 }
@@ -118,7 +116,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
                 return;
             }
         }
-        setSupportState(supportState);
+        setSupportState(SupportState.readyForStart);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
