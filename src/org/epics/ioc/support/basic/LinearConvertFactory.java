@@ -56,14 +56,10 @@ public class LinearConvertFactory {
         if(supportName.equals(linearConvertOutput)) {
             return new LinearConvertOutput(pvStructure);
         }
-        if(!supportName.equals(supportName)) {
-            pvStructure.message(
-                "does not have support " + supportName,MessageType.error);
-            return null;
-        }
-        return new LinearConvertInput(pvStructure);
+        pvStructure.message("no support for " + supportName,MessageType.error);
+        return null;
     }
-    
+
     private static final String linearConvertInput = "org.epics.ioc.linearConvertInputFactory";
     private static final String linearConvertOutput = "org.epics.ioc.linearConvertOutputFactory";
     
@@ -161,6 +157,7 @@ public class LinearConvertFactory {
             PVField pvField = parent.getSubField(fieldName);
             if(pvField==null) {
                 parent.message("does not have field " + fieldName, MessageType.error);
+                return null;
             }
             if(pvField.getField().getType()!=Type.scalar) {
                 pvField.message("type is not double", MessageType.error);
@@ -178,6 +175,7 @@ public class LinearConvertFactory {
             PVField pvField = parent.getSubField(fieldName);
             if(pvField==null) {
                 parent.message("does not have field " + fieldName, MessageType.error);
+                return null;
             }
             if(pvField.getField().getType()!=Type.scalar) {
                 pvField.message("type is not double", MessageType.error);
