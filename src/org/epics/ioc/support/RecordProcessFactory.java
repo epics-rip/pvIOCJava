@@ -701,20 +701,21 @@ public class RecordProcessFactory {
              * @see org.epics.ioc.support.ProcessSelf#endRequest(org.epics.ioc.support.ProcessSelfRequester)
              */
             public void endRequest(ProcessSelfRequester requester) {
+                ProcessSelfRequester nextRequester = null;
                 synchronized(this) {
                     if(requester!=this.requester) {
                         throw new IllegalStateException("not the ProcessSelfRequester");
                     }
                     recordProcess.releaseRecordProcessRequester(requester);
                     if(requesterList.size()>0) {
-                        this.requester = requesterList.remove(0);
+                        nextRequester = this.requester = requesterList.remove(0);
                     } else {
                         this.requester = null;
-                        return;
                     }
                 }
-                recordProcess.processSelfSetRecordProcessRequester(this.requester);
-                this.requester.becomeProcessor(recordProcess);
+                if(nextRequester==null) return;
+                recordProcess.processSelfSetRecordProcessRequester(nextRequester);
+                nextRequester.becomeProcessor(recordProcess);
             }
 
             /* (non-Javadoc)

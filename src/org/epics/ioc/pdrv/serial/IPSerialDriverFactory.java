@@ -172,12 +172,11 @@ public class IPSerialDriverFactory {
             private OutputStream out = null;
             private InputStream in = null;
 
-            private boolean init(Device device) {
+            private void init(Device device) {
                
                 this.device = device;
                 trace = device.getTrace();
                 new IPSerialOctet(device);
-                return true;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pdrv.DeviceDriver#report(int)
