@@ -105,7 +105,7 @@ public class DigitalFactory {
                 return;
             }
             Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
-            if(pvField==null) {
+            if(enumerated==null) {
                 pvField.message("this is not an enumerated field", MessageType.error);
                 return;
             }

@@ -38,7 +38,7 @@ public class ChannelCreateDestoryTest extends TestCase {
 		LocalFactory.start();
 	}
 	
-	private class ChannelRequesterImpl implements ChannelRequester {
+	private static class ChannelRequesterImpl implements ChannelRequester {
 		
 		Channel channel;
 		

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: portDriver<br />
 package: org.epics.ioc.pdrv<br />
-2009.04.23</h1>
+2009.11.18</h1>
 <hr />
 
 <h2 style="text-align: center" id="Preface">Preface</h2>
@@ -894,7 +894,7 @@ of a device changes. i.e. the connect state itself, the enable state, or the
 autoConnect state.</p>
 
 <p>The type of exception is defined by: </p>
-<pre>public enum ConnectException {
+<pre>public enum ConnectExceptionType {
     connect,
     enable,
     autoConnect
@@ -915,7 +915,7 @@ autoConnect state.</p>
 
 <p>The listener must implement the interface:</p>
 <pre>public interface ConnectExceptionListener {
-    void exception(ConnectException connectException);
+    void exception(ConnectExceptionType connectException);
 }</pre>
 <hr />
 
