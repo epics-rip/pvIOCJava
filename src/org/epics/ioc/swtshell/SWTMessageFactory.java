@@ -81,7 +81,7 @@ public class SWTMessageFactory {
                     MessageNode messageNode = messageQueue.get();
                     numOverrun = messageQueue.getClearOverrun();
                     if(messageNode==null && numOverrun==0) break;
-                    message = messageNode.message;
+                    if(messageNode!=null) message = messageNode.message;
                 }
                 if(display.isDisposed()) break;
                 if(consoleText.isDisposed()) break;
