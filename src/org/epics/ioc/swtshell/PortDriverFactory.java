@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.pdrv.ConnectException;
+import org.epics.ioc.pdrv.ConnectExceptionType;
 import org.epics.ioc.pdrv.ConnectExceptionListener;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
@@ -450,7 +450,7 @@ public class PortDriverFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.ConnectExceptionListener#exception(org.epics.ioc.pdrv.ConnectException)
          */
-        public void exception(ConnectException connectException) {
+        public void exception(ConnectExceptionType connectException) {
             display.asyncExec( new Runnable() {
                 public void run() {
                     setWidgets();
@@ -584,7 +584,7 @@ public class PortDriverFactory {
             return iomask;
         }
         
-        private class SelectName extends Dialog implements SelectionListener {
+        private static class SelectName extends Dialog implements SelectionListener {
             private Shell shell;
             private List list;
             private String[] names = null;
