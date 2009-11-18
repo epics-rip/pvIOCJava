@@ -6,14 +6,21 @@
 package org.epics.ioc.pdrv;
 
 /**
+ * Connection exception type.
  * @author mrk
  *
  */
-public interface ConnectExceptionListener {
+public enum ConnectExceptionType {
     /**
-     * A connection exception has occured.
-     * This is normally called with the port owned by another user.
-     * @param connectException The type of exception.
+     * A connect or disconnect exception has been raised.
      */
-    void exception(ConnectExceptionType connectException);
+    connect,
+    /**
+     * An enable state has changed.
+     */
+    enable,
+    /**
+     * The autoConnect state has changed.
+     */
+    autoConnect
 }
