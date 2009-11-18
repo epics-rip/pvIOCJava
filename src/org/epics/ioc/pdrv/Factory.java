@@ -242,19 +242,22 @@ public class Factory {
          */
         @Override
         public void queueRequest(QueuePriority queuePriority) { 
+            if(queueRequestCallback==null) {
+                throw new IllegalStateException("queueRequestCallback is null");
+            }
         	clearErrorParms();
+        	if(port==null) {
+        	    setMessage("not connected to a port");
+        	    queueRequestCallback.callback(Status.error,this);
+                return;
+        	}
             Trace trace = port.getTrace();
             String portName = port.getPortName();
             if((trace.getMask()&Trace.FLOW)!=0) {
                 trace.print(Trace.FLOW, "%s User.queueRequest",portName);
             }
-            if(queueRequestCallback==null) {
-                throw new IllegalStateException("queueRequestCallback is null");
-            }
             boolean notConnected = true;
-            if(port==null) {
-                setMessage("not connected to a port");
-            } else  if(!port.isConnected()) {
+            if(!port.isConnected()) {
                 setMessage("port is not connected");
             } else if(device==null) {
                 setMessage("not connected to a device");
@@ -690,7 +693,7 @@ public class Factory {
                 trace.print(Trace.FLOW, "%s Port.enable %b wasChanged %b", portName,trueFalse,changed);
             }
             if(changed) {
-                raiseException(ConnectException.enable);
+                raiseException(ConnectExceptionType.enable);
                 if(trueFalse) scanQueues();
             }
         }
@@ -713,7 +716,7 @@ public class Factory {
                 trace.print(Trace.FLOW, "%s Port.autoConnect %b was changed %b", portName,trueFalse,changed);
             }
             if(changed) {
-                raiseException(ConnectException.autoConnect);
+                raiseException(ConnectExceptionType.autoConnect);
                 if(trueFalse) {
                     startAutoConnect(0.0);
                 } else {
@@ -888,6 +891,7 @@ public class Factory {
                     if(node.getObject().deviceName.equals(deviceName)) {
                         throw new IllegalStateException("port already exists");
                     }
+                    node = deviceList.getNext(node);
                 }
                 deviceList.addTail(device.deviceListNode);
             }
@@ -916,7 +920,7 @@ public class Factory {
                     node = deviceList.getNext(node);
                 }
             }
-            raiseException(ConnectException.connect);
+            raiseException(ConnectExceptionType.connect);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.asyn.PortDriver#exceptionDisconnect()
@@ -934,7 +938,7 @@ public class Factory {
             }
             scanQueues();
             if(autoConnect) startAutoConnect(1.0);
-            raiseException(ConnectException.connect);
+            raiseException(ConnectExceptionType.connect);
         }
         
         
@@ -965,7 +969,10 @@ public class Factory {
             } finally {
                 lockPortLock.unlock();
             }
-            LockPortNotify notify = lockPortNotify;
+            LockPortNotify notify = null;
+            synchronized(this) {
+                notify = lockPortNotify;
+            }
             if(notify!=null) notify.lock(user);
             return Status.success;
         }
@@ -985,12 +992,15 @@ public class Factory {
             } finally {
                 lockPortLock.unlock();
             }
+            LockPortNotify notify = null;
+            synchronized(this) {
+                notify = lockPortNotify;
+            }
             // notice possible race condition, i.e. lockPortNotify.lock may again be called before this
-            LockPortNotify notify = lockPortNotify;
             if(notify!=null) notify.unlock();
         }   
         
-        private void raiseException(ConnectException connectException) {
+        private void raiseException(ConnectExceptionType connectException) {
             synchronized(this){
                 exceptionActive = true;
             }
@@ -1191,7 +1201,7 @@ public class Factory {
                 trace.print(Trace.FLOW, "%s Device.enable %b was changed %b", fullName,trueFalse,changed);
             }
             if(changed) {
-                raiseException(ConnectException.enable);
+                raiseException(ConnectExceptionType.enable);
                 if(trueFalse) port.scanQueues();
             }
         }
@@ -1211,7 +1221,7 @@ public class Factory {
                 trace.print(Trace.FLOW, "%s Device.autoConnect %b was changed %b", fullName,trueFalse,changed);
             }
             if(changed) {
-                raiseException(ConnectException.autoConnect);
+                raiseException(ConnectExceptionType.autoConnect);
                 if(trueFalse) startAutoConnect(0.0);
             }
         }
@@ -1409,7 +1419,7 @@ public class Factory {
                 }
                 connected = true;
             }
-            raiseException(ConnectException.connect);
+            raiseException(ConnectExceptionType.connect);
             
         }
         /* (non-Javadoc)
@@ -1427,7 +1437,7 @@ public class Factory {
                 connected = false;
             }
             port.scanQueues();
-            raiseException(ConnectException.connect);
+            raiseException(ConnectExceptionType.connect);
         }
         
         private Status lockPort(UserImpl user) {
@@ -1449,7 +1459,7 @@ public class Factory {
             return Status.success;
         }
         
-        private void raiseException(ConnectException connectException) {
+        private void raiseException(ConnectExceptionType connectException) {
             synchronized(this){
                 exceptionActive = true;
             }
@@ -1562,7 +1572,7 @@ public class Factory {
             }
             return Status.success;
         }
-        private void raiseException(ConnectException connectException) {
+        private void raiseException(ConnectExceptionType connectException) {
             LinkedListNode<ConnectExceptionNode> linkedListNode = list.getHead();
             while(linkedListNode!=null) {
                 ConnectExceptionNode node = linkedListNode.getObject();
@@ -1667,9 +1677,8 @@ public class Factory {
         
         private void unblock() {
             synchronized(this){
-                LinkedListNode<UserImpl> listNode = waitUnblockList.getHead();
-                while(listNode!=null) {
-                    waitUnblockList.remove(listNode);
+                while(waitUnblockList.getLength()>0) {
+                    LinkedListNode<UserImpl> listNode = waitUnblockList.removeHead();
                     queueListArray[queuePriorityMedium].addTail(listNode);
                 }
             }
