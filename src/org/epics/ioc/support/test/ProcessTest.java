@@ -192,7 +192,7 @@ public class ProcessTest extends TestCase {
             if(!allDone) {
                 lock.lock();
                 try {
-                    if(!allDone) {
+                    while(!allDone) {
                         waitDone.await();
                     }
                 } catch (InterruptedException ie) {

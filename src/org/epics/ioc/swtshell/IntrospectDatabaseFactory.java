@@ -624,7 +624,7 @@ public class IntrospectDatabaseFactory {
             
         }
         
-        private class TimeProcess 
+        private static class TimeProcess 
         {   
             private Requester requester;
             private PVRecord pvRecord;
