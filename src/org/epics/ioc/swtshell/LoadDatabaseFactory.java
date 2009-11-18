@@ -155,7 +155,7 @@ public class LoadDatabaseFactory {
                     }
                     file.close();
                 } catch (IOException ex) {
-                    consoleText.append(String.format("%s%s",ex.getMessage()));
+                    consoleText.append(String.format("%s%n",ex.getMessage()));
                 }
                 return;
             }
