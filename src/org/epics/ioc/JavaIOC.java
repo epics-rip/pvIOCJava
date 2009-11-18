@@ -129,7 +129,6 @@ public class JavaIOC {
         System.out.println("starting servers fileName " + fileName);
         try {
             BufferedReader in = new BufferedReader(new FileReader(fileName));
-
             String factoryName = null;
             while((factoryName = in.readLine()) !=null) {
                 System.out.println("starting server factoryName " + factoryName);
@@ -173,6 +172,7 @@ public class JavaIOC {
                     continue;
                 }
             }
+            in.close();
         } catch (IOException e) {
             System.err.println("startServer error " + e.getMessage());
             return;

@@ -204,7 +204,7 @@ public class ServerFactory {
             recordName = names[0];
             PVRecord pvRecord = masterPVDatabase.findRecord(recordName);
             if(pvRecord==null) {
-                throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find record " + pvRecord);
+                throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find record " + recordName);
             }
             if(names.length==2) {
                 names = leftBracePattern.split(names[1], 2);
@@ -592,10 +592,10 @@ public class ServerFactory {
                     throw new IllegalStateException("interestRegister but already monitoring");
                 }
                 pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
-                monitorPVStructure = pvCopy.createPVStructure();
-                monitorChangeBitSet = new BitSet(monitorPVStructure.getNumberFields());
-                monitorOverrunBitSet = new BitSet(monitorPVStructure.getNumberFields());
             }
+            monitorPVStructure = pvCopy.createPVStructure();
+            monitorChangeBitSet = new BitSet(monitorPVStructure.getNumberFields());
+            monitorOverrunBitSet = new BitSet(monitorPVStructure.getNumberFields());
             super.interestRegister();
             pvCopyMonitor.startMonitoring(monitorChangeBitSet,monitorOverrunBitSet);
         }
