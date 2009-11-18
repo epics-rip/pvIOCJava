@@ -109,7 +109,7 @@ public class ScannerFactory {
                 lock.lock();
                 try {
                     release = true;
-                    if(isActive) {
+                    while(isActive) {
                         waitForNotActive.await();
                     }
                 } finally {
@@ -170,7 +170,7 @@ public class ScannerFactory {
         private void runList(long startTime) {                      
             lock.lock();
             try {
-                if(listModify) {
+                while(listModify) {
                     try {
                         waitForModify.await();
                     } catch(InterruptedException e) {
@@ -210,7 +210,7 @@ public class ScannerFactory {
                 }
                 if(recordExecutor==null) return false;
                 listModify = true;
-                if(isActive) {
+                while(isActive) {
                     try {
                         waitForNotActive.await();
                     } catch(InterruptedException e) {
@@ -231,7 +231,7 @@ public class ScannerFactory {
             lock.lock();
             try {
                 listModify = true;
-                if(isActive) {
+                while(isActive) {
                     try {
                         waitForNotActive.await();
                     } catch(InterruptedException e) {
@@ -708,7 +708,7 @@ public class ScannerFactory {
             lock.lock();
             try {
                 listModify = true;
-                if(isActive) {
+                while(isActive) {
                     try {
                         waitForNotActive.await();
                     } catch(InterruptedException e) {
@@ -750,7 +750,7 @@ public class ScannerFactory {
             lock.lock();
             try {
                 listModify = true;
-                if(isActive) {
+                while(isActive) {
                     try {
                         waitForNotActive.await();
                     } catch(InterruptedException e) {

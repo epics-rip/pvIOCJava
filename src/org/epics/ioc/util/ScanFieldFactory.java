@@ -56,7 +56,7 @@ public class ScanFieldFactory {
         PVInt pvPriority = enumerated.getIndex();
         
         PVStructure type = pvScan.getStructureField("type");
-        if(priority==null) {
+        if(type==null) {
             pvScan.message("type not found or is not a structure", MessageType.fatalError);
             return null;
         }
