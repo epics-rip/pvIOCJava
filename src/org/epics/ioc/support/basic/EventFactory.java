@@ -111,7 +111,7 @@ public class EventFactory {
                 supportProcessRequester.supportProcessDone(RequestResult.failure);
             }
             String newName = pvEventName.get();
-            if(newName!=eventName) {
+            if(eventName!=null && !eventName.equals(newName)) {
                 eventScanner.removeEventAnnouncer(eventAnnounce, pvRecord.getRecordName());
                 eventAnnounce = null;
                 eventName = newName;
