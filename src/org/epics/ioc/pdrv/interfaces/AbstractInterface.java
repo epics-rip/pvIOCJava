@@ -46,9 +46,14 @@ public abstract class AbstractInterface implements Interface {
      */
     protected void print(int reason,String format, Object... args) {
     	if((reason&trace.getMask())==0) return;
-    	trace.print(reason,format,
-            	"port " + device.getPort().getPortName()
-            	+ ":" + device.getDeviceName() + " " + args);
+    	StringBuilder builder = new StringBuilder();
+    	builder.append("port ");
+    	builder.append(device.getPort().getPortName());
+    	builder.append(':');
+    	builder.append(device.getDeviceName());
+    	builder.append(' ');
+    	trace.print(reason, builder.toString());
+    	trace.print(reason,format,args);
     }
 	/* (non-Javadoc)
 	 * @see org.epics.ioc.pdrv.interfaces.Interface#getDevice()

@@ -50,7 +50,6 @@ public abstract class AbstractUInt32Digital extends AbstractInterface  implement
     
     private static class UserPvt {
         int mask;
-        User user;
         UInt32DigitalInterruptListener listener;
     }
     
@@ -121,7 +120,6 @@ public abstract class AbstractUInt32Digital extends AbstractInterface  implement
         try {
             UserPvt userPvt = new UserPvt();
             userPvt.mask = mask;
-            userPvt.user = user;
             userPvt.listener = uint32DigitalInterruptListener;
             user.setDeviceDriverPvt(userPvt);
             if(interruptActive) {
