@@ -703,58 +703,40 @@ public abstract class ExpressionCalculatorFactory  {
                 char nextChar = string.charAt(offset);
                 char nextNextChar = ((offset+1)<string.length()) ? string.charAt(offset+1) : 0;
                 char nextNextNextChar = ((offset+2)<string.length()) ? string.charAt(offset+2) : 0;
-                if(nextChar=='+') {
-                    return new String("+");
-                }
-                if(nextChar=='-') {
-                    return new String("-");
-                }
-                if(nextChar=='*') {
-                    return new String("*");
-                }
-                if(nextChar=='/') {
-                    return new String("/");
-                }
-                if(nextChar=='%') {
-                    return new String("/");
-                }
-                if(nextChar=='^') {
-                    return new String("^");
-                }
+                if(nextChar=='+') return "+";
+                if(nextChar=='-') return "-";
+                if(nextChar=='*') return "*";
+                if(nextChar=='/') return "/";
+                if(nextChar=='%') return "/";
+                if(nextChar=='^') return "^";
                 if(nextChar=='<') {
-                    String value = "<";
-                    if(nextNextChar=='=') value += "=";
-                    if(nextNextChar=='<') value += "<";
-                    return value;
+                    if(nextNextChar=='=') return "<=";
+                    if(nextNextChar=='<') return "<<";
+                    return "<";
                 }
                 if(nextChar=='>') {
-                    String value = ">";
-                    if(nextNextChar=='=') value += "=";
+                    if(nextNextChar=='=') return ">=";
                     if(nextNextChar=='>') {
-                        value += ">";
-                        if(nextNextNextChar=='>') value+= ">";
+                        if(nextNextNextChar=='>') return ">>>";
+                        return ">>";
                     }
-                    return value;
+                    return ">";
                 }
                 if(nextChar=='=') {
-                    String value = "=";
-                    if(nextNextChar=='=') value += "=";
-                    return value;
+                    if(nextNextChar=='=') return "==";
+                    return "=";
                 }
                 if(nextChar=='!') {
-                    String value = "!";
-                    if(nextNextChar=='=') value += "=";
-                    return value;
+                    if(nextNextChar=='=') return "!=";
+                    return "!";
                 }
                 if(nextChar=='|') {
-                    String value = "|";
-                    if(nextNextChar=='|') value += "|";
-                    return value;
+                    if(nextNextChar=='|') return "||";
+                    return  "|";
                 }
                 if(nextChar=='&') {
-                    String value = "&";
-                    if(nextNextChar=='&') value += "&";
-                    return value;
+                    if(nextNextChar=='&') return "&&";
+                    return "&";
                 }
                 return null;
             }
@@ -1185,7 +1167,7 @@ public abstract class ExpressionCalculatorFactory  {
                     ScalarType scalarType = (lastChar=='L') ? ScalarType.pvLong : ScalarType.pvInt;
                     pvScalar = pvDataCreate.createPVScalar(pvStructure,"result", scalarType);
                     if(scalarType==ScalarType.pvLong) {
-                        Long scalar = new Long(0);
+                        Long scalar = null;
                         try {
                             scalar = Long.decode(value.substring(0, length-1));
                         } catch (NumberFormatException e) {
@@ -1195,7 +1177,7 @@ public abstract class ExpressionCalculatorFactory  {
                         PVLong pv = (PVLong)pvScalar;
                         pv.put(scalar);
                     } else {
-                        Long scalar = new Long(0);
+                        Long scalar = null;
                         try {
                             scalar = Long.decode(value);
                         } catch (NumberFormatException e) {
@@ -1453,11 +1435,15 @@ public abstract class ExpressionCalculatorFactory  {
                     System.out.println(message + " tokenList");
                 }
                 int nlev = 0;
+                StringBuilder builder = new StringBuilder();
                 for(Token token : tokenList) {
                     if(token.type==TokenType.rightParen) nlev--;
-                    String blanks = "";
-                    for (int i=0; i<nlev; i++) blanks += "  ";
-                    System.out.println(blanks + token.type.name() + " " + token.value);
+                    builder.setLength(0);
+                    for (int i=0; i<nlev; i++) builder.append("  ");
+                    builder.append(token.type.name());
+                    builder.append(' ');
+                    builder.append(token.value);
+                    System.out.println(builder.toString());
                     if(token.type == TokenType.leftParen) nlev++;
 
                 }

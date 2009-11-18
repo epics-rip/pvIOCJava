@@ -80,7 +80,6 @@ public class CalcArgsFactory {
          */
         public void initialize(LocateSupport recordSupport) {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            SupportState supportState = SupportState.readyForStart;
             PVField[] pvFields = pvStructure.getPVFields();
             int length = pvFields.length;
             valuePVFields = new PVField[length];
@@ -106,14 +105,13 @@ public class CalcArgsFactory {
                 numSupports++;
                 support.initialize(recordSupport);
                 if(support.getSupportState()!=SupportState.readyForStart) {
-                    supportState = SupportState.readyForInitialize;
                     for(int j=0; j<i; j++) {
                         if(supports[j]!=null) supports[j].uninitialize();
                     }
                     return;
                 }
             }
-            setSupportState(supportState);
+            setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()

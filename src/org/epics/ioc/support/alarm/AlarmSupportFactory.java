@@ -61,25 +61,23 @@ public class AlarmSupportFactory {
      */
     public static AlarmSupport findAlarmSupport(PVField startPVField,LocateSupport locateSupport) {
         if(startPVField==null) return null;
-        PVField parentPVField;
+        PVStructure parentPVField;
         if(startPVField instanceof PVStructure) {
-            parentPVField = startPVField;
+            parentPVField = (PVStructure)startPVField;
         } else {
             parentPVField = startPVField.getParent();
         }
         while(parentPVField!=null) {
-            if(parentPVField instanceof PVStructure) {
-                PVStructure parentPVStructure = (PVStructure)parentPVField;
-                PVField[] pvFields = parentPVStructure.getPVFields();
-                for(PVField pvField : pvFields) {
-                    Field field = pvField.getField();
-                    Type type = field.getType();
-                    if(type==Type.structure) {
-                        if(field.getFieldName().equals("alarm")) {
-                            Support support = locateSupport.getSupport(pvField);
-                            if(support!=null && (support instanceof AlarmSupportImpl)) {
-                                return (AlarmSupport)support;
-                            }
+            PVStructure parentPVStructure = (PVStructure)parentPVField;
+            PVField[] pvFields = parentPVStructure.getPVFields();
+            for(PVField pvField : pvFields) {
+                Field field = pvField.getField();
+                Type type = field.getType();
+                if(type==Type.structure) {
+                    if(field.getFieldName().equals("alarm")) {
+                        Support support = locateSupport.getSupport(pvField);
+                        if(support!=null && (support instanceof AlarmSupportImpl)) {
+                            return (AlarmSupport)support;
                         }
                     }
                 }
