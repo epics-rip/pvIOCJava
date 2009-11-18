@@ -74,8 +74,6 @@ public class UInt32DigitalDriverFactory {
         private double delay;
         private long milliseconds;
         private Port port;
-        private String portName;
-        private Trace trace;
         
         private UInt32DigitalDriver(String portName,boolean autoConnect,ThreadPriority priority,
             int numberRegisters,boolean canBlock,double delay)
@@ -84,8 +82,6 @@ public class UInt32DigitalDriverFactory {
             this.delay = delay;
             milliseconds = (long)(delay * 1000.0);
             port = Factory.createPort(portName, this, "uint32DigitalDriver",canBlock, autoConnect,priority);
-            portName = port.getPortName();
-            trace = port.getTrace();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.PortDriver#report(boolean, int)
@@ -98,10 +94,10 @@ public class UInt32DigitalDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#connect(org.epics.ioc.pdrv.User)
          */
         public Status connect(User user) {
-            trace.print(Trace.FLOW ,portName + " connect");
+            port.getTrace().print(Trace.FLOW ,port.getPortName() + " connect");
             if(port.isConnected()) {
                 user.setMessage("already connected");
-                trace.print(Trace.ERROR ,portName + " already connected");
+                port.getTrace().print(Trace.ERROR ,port.getPortName() + " already connected");
                 return Status.error;
             }
             if(delay>0.0) {
@@ -132,10 +128,10 @@ public class UInt32DigitalDriverFactory {
          * @see org.epics.ioc.pdrv.PortDriver#disconnect(org.epics.ioc.pdrv.User)
          */
         public Status disconnect(User user) {
-            trace.print(Trace.FLOW ,portName + " disconnect");
+            port.getTrace().print(Trace.FLOW ,port.getPortName() + " disconnect");
             if(!port.isConnected()) {
                 user.setMessage("not connected");
-                trace.print(Trace.ERROR ,portName + " not connected");
+                port.getTrace().print(Trace.ERROR ,port.getPortName() + " not connected");
                 return Status.error;
             }
             port.exceptionDisconnect();
