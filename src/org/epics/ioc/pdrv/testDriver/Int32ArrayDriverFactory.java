@@ -313,6 +313,20 @@ public class Int32ArrayDriverFactory {
                     System.arraycopy(from,fromOffset,value,offset,len);                       
                     return len;
                 }
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.factory.BasePVIntArray#equals(java.lang.Object)
+                 */
+                @Override
+                public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                    return super.equals(obj);
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.factory.BasePVIntArray#hashCode()
+                 */
+                @Override
+                public int hashCode() { // implemented to satisfy FindBugs
+                    return super.hashCode();
+                }
             }
         }
     }

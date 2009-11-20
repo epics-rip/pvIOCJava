@@ -162,7 +162,7 @@ public class RecordShowFactory {
             pvField = pvRecord.getSubField("alarm.message");
             if(pvField!=null) alarmMessage = pvField.toString();
             stringBuilder.setLength(0);
-            stringBuilder.append(pvRecord.getPVRecord().getRecordName());
+            stringBuilder.append(pvRecord.getPVRecordField().getPVRecord().getRecordName());
             stringBuilder.append(newLine);
             stringBuilder.append("  processSelf ");
             stringBuilder.append(Boolean.toString(processSelf));

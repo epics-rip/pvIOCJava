@@ -90,7 +90,7 @@ abstract class AbstractLink extends AbstractSupport {
         if(!super.checkSupportState(SupportState.readyForInitialize,null)) return;
         pvnamePV = (PVString)super.getPVField();
         pvDatabaseLink = pvnamePV.getParent();
-        pvRecord = pvnamePV.getPVRecord();
+        pvRecord = pvnamePV.getPVRecordField().getPVRecord();
         PVField pvField = pvRecord.getSubField("timeStamp");
         if(pvField!=null && pvField.getField().getType()==Type.structure) {
             timeStamp = TimeStampFactory.getTimeStamp((PVStructure)pvField);

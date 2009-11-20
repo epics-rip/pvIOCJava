@@ -39,6 +39,7 @@ public class ScanTest extends TestCase {
         Requester iocRequester = new RequesterForTesting("scanTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
+        org.epics.ca.LocalFactory.start();
         boolean ok = install.installRecords("src/org/epics/ioc/support/test/scanPV.xml", iocRequester);
         if(!ok) {
             System.out.printf("\nrecords\n");
@@ -75,21 +76,18 @@ public class ScanTest extends TestCase {
         PVField counterPushValue = pvData[index];
         pvRecord = masterPVDatabase.findRecord("doubleReceive09");
         assertNotNull(pvRecord);
-        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField doubleReceive09Value = pvData[index];
         pvRecord = masterPVDatabase.findRecord("counterEvent0");
         assertNotNull(pvRecord);
-        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterEvent0Value = pvData[index];
         pvRecord = masterPVDatabase.findRecord("counterEvent1");
         assertNotNull(pvRecord);
-        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
@@ -122,14 +120,12 @@ public class ScanTest extends TestCase {
         System.out.println();
         pvRecord = masterPVDatabase.findRecord("counter");
         assertNotNull(pvRecord);
-        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField counterValue = pvData[index];
         pvRecord = masterPVDatabase.findRecord("double02");
         assertNotNull(pvRecord);
-        pvRecord = pvRecord.getPVRecord();
         structure = (Structure)pvRecord.getField();
         pvData = pvRecord.getPVFields();        
         index = structure.getFieldIndex("value");

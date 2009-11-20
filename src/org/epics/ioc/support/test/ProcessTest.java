@@ -52,6 +52,7 @@ public class ProcessTest extends TestCase {
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
         new NewAfterStartRequesterImpl(0);
+        org.epics.ca.LocalFactory.start();
         boolean ok = install.installRecords("src/org/epics/ioc/support/test/processTestPV.xml", iocRequester);
         PVRecord[] pvRecords;
         if(!ok) {

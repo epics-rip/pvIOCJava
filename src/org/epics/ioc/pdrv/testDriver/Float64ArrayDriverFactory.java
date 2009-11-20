@@ -312,6 +312,20 @@ public class Float64ArrayDriverFactory {
                     System.arraycopy(from,fromOffset,value,offset,len);                       
                     return len;
                 }
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.factory.BasePVDoubleArray#equals(java.lang.Object)
+                 */
+                @Override
+                public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                    return super.equals(obj);
+                }
+                /* (non-Javadoc)
+                 * @see org.epics.pvData.factory.BasePVDoubleArray#hashCode()
+                 */
+                @Override
+                public int hashCode() { // implemented to satisfy FindBugs
+                    return super.hashCode();
+                }
             }
         }
     }
