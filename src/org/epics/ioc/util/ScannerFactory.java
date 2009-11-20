@@ -410,7 +410,7 @@ public class ScannerFactory {
                 lock.unlock();
             }
             if(processPeriodic==null) {
-                pvRecord.getPVRecord().message(
+                pvRecord.message(
                         "PeriodicScanner.unschedule but not in list",
                         MessageType.error);
                 return false;
@@ -543,7 +543,7 @@ public class ScannerFactory {
                 ProcessRecord processRecord = processRecords[i];
                 if(processRecord==null) continue;
                 RecordProcess recordProcess = processRecord.recordProcess;
-                String name = recordProcess.getRecord().getPVRecord().getRecordName();
+                String name = recordProcess.getRecord().getRecordName();
                 builder.append(lineBreak + "    " + name);
             }
             builder.append(lineBreak + "}");
@@ -924,7 +924,7 @@ public class ScannerFactory {
                     }
                 }
                 if(processEvent==null || !processEvent.remove(pvRecord)) {
-                    pvRecord.getPVRecord().message(
+                    pvRecord.message(
                             "EventScanner.removeRecord but not in list",
                             MessageType.error);
                 }
@@ -999,7 +999,7 @@ public class ScannerFactory {
                     ProcessRecord recordExecutor = recordExecutors[j];
                     if(recordExecutor==null) continue;
                     RecordProcess recordProcess = recordExecutor.recordProcess;
-                    String name = recordProcess.getRecord().getPVRecord().getRecordName();
+                    String name = recordProcess.getRecord().getRecordName();
                     builder.append(lineBreak + "        " + name);
                 }
                 builder.append(lineBreak + "    }");
