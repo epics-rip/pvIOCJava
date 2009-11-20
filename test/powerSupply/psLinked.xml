@@ -35,7 +35,7 @@
     <structure name = "voltage" extends = "generic">
         <scalar name = "value" scalarType = "double" />
         <structure name = "input" extends = "caInputLink">
-            <scalar name = "pvname">adcVoltageSupported</scalar>
+            <scalar name = "pvname">voltage</scalar>
             <scalar name = "process">true</scalar>
         </structure>
     </structure>
@@ -49,7 +49,7 @@
         </structure>
     </structure>
     <structure name = "power">
-        <scalar name = "value" scalarType = "double" />
+        <scalar name = "value" scalarType = "double">1</scalar>
     </structure>
 </record>
 
