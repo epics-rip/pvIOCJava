@@ -156,7 +156,7 @@ public class SupportCreationFactory {
         PVAuxInfo pvAuxInfo = pvField.getPVAuxInfo();
         PVScalar pvAuxField = pvAuxInfo.getInfo(supportFactory);
         if(pvAuxField==null) {
-            if(pvField!=pvField.getPVRecord()) return true;
+            if(pvField!=pvField.getPVRecordField().getPVRecord()) return true;
             pvAuxField = pvAuxInfo.createInfo(supportFactory, ScalarType.pvString);
             PVString pvString = (PVString)pvAuxField;
             pvString.put("org.epics.ioc.genericFactory");
