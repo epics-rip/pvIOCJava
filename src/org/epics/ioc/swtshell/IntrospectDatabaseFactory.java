@@ -652,7 +652,7 @@ public class IntrospectDatabaseFactory {
                 private TimeStamp timeStamp = TimeStampFactory.create(0,0);
                 private ReentrantLock lock = new ReentrantLock();
                 private Condition waitProcessDone = lock.newCondition();
-                private boolean processDone = false;
+                private volatile boolean processDone = false;
 
                 private ProcessIt() {
                     long start = System.currentTimeMillis();
