@@ -54,7 +54,7 @@ implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
         this.supportName = supportName;
         this.pvStructure = pvStructure;
         fullName = pvStructure.getFullName();
-        pvRecord = pvStructure.getPVRecord();
+        pvRecord = pvStructure.getPVRecordField().getPVRecord();
         recordName = pvRecord.getRecordName();
     }  
     
