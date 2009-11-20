@@ -580,11 +580,10 @@ public class ScannerFactory {
                             firstTime = false;
                             threadReady.ready();
                         }
-                        if(gotWork) {
-                            gotWork = false;
-                        } else {
+                        if(!gotWork) {
                             waitForWork.await();
                         }
+                        gotWork = false;
                     } finally {
                         lock.unlock();
                     }
