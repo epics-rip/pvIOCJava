@@ -224,9 +224,9 @@ public class IntrospectDatabaseFactory {
                     consoleText.append("record not found"+ newLine);
                     setButtonsEnabled(false);
                 } else {
-                    consoleText.append(pvRecord.getPVRecord().getRecordName() + String.format("%n"));
+                    consoleText.append(pvRecord.getRecordName() + String.format("%n"));
                     setButtonsEnabled(true);
-                    selectText.setText(pvRecord.getPVRecord().getRecordName());
+                    selectText.setText(pvRecord.getRecordName());
                 }
                 return;
             }
@@ -240,7 +240,7 @@ public class IntrospectDatabaseFactory {
                 }
             }
             if(object==dumpButton) {
-                consoleText.append(pvRecord.getPVRecord().toString());
+                consoleText.append(pvRecord.toString());
                 return;
             }
             if(object==timeProcessButton) {
@@ -266,7 +266,7 @@ public class IntrospectDatabaseFactory {
                 String alarmMessage = null;
                 pvField = pvRecord.getSubField("alarm.message");
                 if(pvField!=null) alarmMessage = pvField.toString();
-                consoleText.append(pvRecord.getPVRecord().getRecordName() + newLine);
+                consoleText.append(pvRecord.getRecordName() + newLine);
                 consoleText.append(
                     "  processSelf " + processSelf + " processRequester " + processRequesterName
                     + " supportState " + supportState.name() + newLine);
