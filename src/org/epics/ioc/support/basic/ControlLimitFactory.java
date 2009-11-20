@@ -119,7 +119,7 @@ public class ControlLimitFactory {
         
         private void raiseAlarm(boolean isHigh) {
             if(alarmSupport==null) {
-                LocateSupport recordSupport = IOCDatabaseFactory.get(masterPVDatabase).getLocateSupport(valuePVField.getPVRecord());
+                LocateSupport recordSupport = IOCDatabaseFactory.get(masterPVDatabase).getLocateSupport(valuePVField.getPVRecordField().getPVRecord());
                 alarmSupport = AlarmSupportFactory.findAlarmSupport(valuePVField,recordSupport);
                 if(alarmSupport==null) {
                     valuePVField.message("ControlLimit: no alarmSupport", MessageType.warning);
@@ -170,6 +170,20 @@ public class ControlLimitFactory {
                 this.value = value;
                 super.postPut();
             }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVByte#equals(java.lang.Object)
+             */
+            @Override
+            public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                return super.equals(obj);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVByte#hashCode()
+             */
+            @Override
+            public int hashCode() { // implemented to satisfy FindBugs
+                return super.hashCode();
+            }
         }
         
         private class ShortValue extends BasePVShort implements PVShort {
@@ -204,6 +218,20 @@ public class ControlLimitFactory {
                 this.value = value;
                 super.postPut();
             }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVShort#equals(java.lang.Object)
+             */
+            @Override
+            public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                return super.equals(obj);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVShort#hashCode()
+             */
+            @Override
+            public int hashCode() { // implemented to satisfy FindBugs
+                return super.hashCode();
+            }
         }
         private class IntValue extends BasePVInt implements PVInt {
             private PVScalar lowPVField;
@@ -236,6 +264,20 @@ public class ControlLimitFactory {
                 }
                 this.value = value;
                 super.postPut();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVInt#equals(java.lang.Object)
+             */
+            @Override
+            public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                return super.equals(obj);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVInt#hashCode()
+             */
+            @Override
+            public int hashCode() { // implemented to satisfy FindBugs
+                return super.hashCode();
             }
         }
         private class LongValue extends BasePVLong implements PVLong {
@@ -270,6 +312,20 @@ public class ControlLimitFactory {
                 this.value = value;
                 super.postPut();
             }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVLong#equals(java.lang.Object)
+             */
+            @Override
+            public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                return super.equals(obj);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVLong#hashCode()
+             */
+            @Override
+            public int hashCode() { // implemented to satisfy FindBugs
+                return super.hashCode();
+            }
         }
         private class FloatValue extends BasePVFloat implements PVFloat {
             private PVScalar lowPVField;
@@ -303,6 +359,20 @@ public class ControlLimitFactory {
                 this.value = value;
                 super.postPut();
             }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVFloat#equals(java.lang.Object)
+             */
+            @Override
+            public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                return super.equals(obj);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVFloat#hashCode()
+             */
+            @Override
+            public int hashCode() { // implemented to satisfy FindBugs
+                return super.hashCode();
+            }
         }
         private class DoubleValue extends BasePVDouble implements PVDouble {
             private PVScalar lowPVField;
@@ -335,6 +405,20 @@ public class ControlLimitFactory {
                 }
                 this.value = value;
                 super.postPut();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVDouble#equals(java.lang.Object)
+             */
+            @Override
+            public boolean equals(Object obj) { // implemented to satisfy FindBugs
+                return super.equals(obj);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvData.factory.BasePVDouble#hashCode()
+             */
+            @Override
+            public int hashCode() { // implemented to satisfy FindBugs
+                return super.hashCode();
             }
         }
     }

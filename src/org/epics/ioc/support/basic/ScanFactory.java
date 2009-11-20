@@ -49,7 +49,7 @@ public class ScanFactory {
      * @return The support or null if the scan field is improperly defined.
      */
     public static Support create(PVStructure pvStructure) {
-        ScanField  scanField = ScanFieldFactory.create(pvStructure.getPVRecord());
+        ScanField  scanField = ScanFieldFactory.create(pvStructure.getPVRecordField().getPVRecord());
         if(scanField==null) return null;
         return new ScanImpl(pvStructure,scanField);
     }
@@ -80,7 +80,7 @@ public class ScanFactory {
         private ScanImpl(PVStructure pvScan,ScanField scanField) {
             super(supportName,pvScan);
             this.scanField = scanField;
-            pvRecord = pvScan.getPVRecord();
+            pvRecord = pvScan.getPVRecordField().getPVRecord();
             pvScanTypeIndex = scanField.getScanTypeIndexPV();
             pvRate = scanField.getRatePV();
             pvEventName = scanField.getEventNamePV();
@@ -167,9 +167,9 @@ public class ScanFactory {
 
         private void addListeners() {
             pvRecord.registerListener(this);
-            pvScanTypeIndex.addListener(this);
-            pvRate.addListener(this);
-            pvEventName.addListener(this);
+            pvScanTypeIndex.getPVRecordField().addListener(this);
+            pvRate.getPVRecordField().addListener(this);
+            pvEventName.getPVRecordField().addListener(this);
         }
         
         private void removeListeners() {

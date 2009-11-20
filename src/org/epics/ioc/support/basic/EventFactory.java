@@ -65,7 +65,7 @@ public class EventFactory {
         private EventImpl(PVString pvField) {
             super(supportName,pvField);
             this.pvEventName = pvField;
-            pvRecord = pvField.getPVRecord();
+            pvRecord = pvField.getPVRecordField().getPVRecord();
         }
         
         /* (non-Javadoc)

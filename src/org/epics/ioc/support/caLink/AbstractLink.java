@@ -92,7 +92,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
     {
         super(supportName,pvField);
         this.pvStructure = pvField.getParent();
-        pvRecord = pvStructure.getPVRecord();
+        pvRecord = pvStructure.getPVRecordField().getPVRecord();
         channelRequesterName = pvField.getFullName();
     }
     /**
