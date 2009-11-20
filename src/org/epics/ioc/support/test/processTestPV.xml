@@ -34,7 +34,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">counter</scalar>
         <scalar name = "process">false</scalar>
-        <scalar name = "propertyNames">alarm,display</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
 </record>
 <record recordName = "double02" extends = "generic">
