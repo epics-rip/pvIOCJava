@@ -1,0 +1,126 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+
+<record recordName = "counter" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1.0)&lt;=10.0 ? value+1.0 : 0.0</scalar>
+      </structure>
+    </structure>
+</record>
+
+<record recordName = "counterWithScan" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">passive</scalar></structure>
+        <scalar name = "eventName">eventTest</scalar>
+        <structure name = "priority"><scalar name = "choice">higher</scalar></structure>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1.0)</scalar>
+      </structure>
+    </structure>
+</record>
+
+
+<record recordName = "counterWithScan10" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">passive</scalar></structure>
+        <scalar name = "eventName">eventTest</scalar>
+        <structure name = "priority"><scalar name = "choice">higher</scalar></structure>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1.0)&lt;=10.0 ? value+1.0 : 0.0</scalar>
+      </structure>
+    </structure>
+</record>
+
+<record recordName = "counterWithScan1000" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">passive</scalar></structure>
+        <scalar name = "eventName">eventTest</scalar>
+        <structure name = "priority"><scalar name = "choice">higher</scalar></structure>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1.0)&lt;=1000.0 ? value+1.0 : 0.0</scalar>
+      </structure>
+    </structure>
+</record>
+
+<record recordName = "counter00000" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">passive</scalar></structure>
+        <scalar name = "eventName">eventTest</scalar>
+        <structure name = "priority"><scalar name = "choice">higher</scalar></structure>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1.0)&lt;=1000.0 ? value+1.0 : 0.0</scalar>
+      </structure>
+    </structure>
+</record>
+
+<record recordName = "counterWithValueAlarm" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1.0)&lt;=10.0 ? value+1.0 : 0.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "valueAlarm" extends = "doubleAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "0" extends = "doubleAlarmInterval">
+                  <scalar name = "value">2.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "1" extends = "doubleAlarmInterval">
+                  <scalar name = "value">4.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "2" extends = "doubleAlarmInterval">
+                  <scalar name = "value">6.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "3" extends = "doubleAlarmInterval">
+                  <scalar name = "value">8.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "4" extends = "doubleAlarmInterval">
+                  <scalar name = "value">10.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
+
+
+
+</database>
