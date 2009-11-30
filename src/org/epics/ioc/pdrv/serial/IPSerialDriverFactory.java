@@ -221,7 +221,7 @@ public class IPSerialDriverFactory {
             }
 
             private class IPSerialOctet extends  AbstractSerial{
-                private byte[] buffer = null;
+                private byte[] buffer = new byte[80];
 
                 private IPSerialOctet(Device device) {
                     super(device);
