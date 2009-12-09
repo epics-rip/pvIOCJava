@@ -29,7 +29,9 @@ import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
+import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
+import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.monitor.MonitorElement;
 import org.epics.pvData.monitor.MonitorRequester;
@@ -62,7 +64,7 @@ public class MonitorFactory {
     }
     
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private static Executor executor = SwtshellFactory.getExecutor();
+    private static Executor executor = ExecutorFactory.create("swtshell:display",ThreadPriority.low);
     private static class MonitorImpl
     implements  DisposeListener,SelectionListener
     {
@@ -622,6 +624,14 @@ public class MonitorFactory {
                  */
                 @Override
                 public void run() {
+                	if(simulateDelay>0.0) {
+                        long millis = (long)(simulateDelay*1000.0);
+                        try{
+                            Thread.sleep(millis, 0);
+                        } catch (InterruptedException e) {
+
+                        }
+                    }
                     more = true;
                     shell.getDisplay().asyncExec( new Runnable() {
                         public void run() {
@@ -661,14 +671,6 @@ public class MonitorFactory {
                         }
                     }finally {
                         lock.unlock();
-                    }
-                    if(simulateDelay>0.0) {
-                        long millis = (long)(simulateDelay*1000.0);
-                        try{
-                            Thread.sleep(millis, 0);
-                        } catch (InterruptedException e) {
-
-                        }
                     }
                 }
             }   
