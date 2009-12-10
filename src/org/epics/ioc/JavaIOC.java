@@ -62,6 +62,7 @@ public class JavaIOC {
             return;
         }
         boolean runSWTShell = false;
+        boolean runForever = false;
         Requester iocRequester = new Listener();
         int nextArg = 0;
         State state = null;
@@ -87,6 +88,8 @@ public class JavaIOC {
                     state = State.records;
                 } else if(arg.equals("swtshell")) {
                 	runSWTShell = true;
+                } else if(arg.equals("run")) {
+                	runForever = true;
                 } else if(arg.equals("server")) {
                     state = State.servers;
                 } else {
@@ -105,9 +108,20 @@ public class JavaIOC {
                 usage();
                 return;
             }
-            
-            if (runSWTShell)
+            if (runSWTShell) {
                 SwtshellFactory.swtshell();
+                return;
+            }
+            if (runForever) {
+                while(true) {
+                	try{
+                        Thread.sleep(1000000);
+                    } catch (InterruptedException e) {
+                    	return;
+                    }
+                	
+                }
+            }
         }
     }
     
