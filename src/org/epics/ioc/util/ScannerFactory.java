@@ -310,9 +310,6 @@ public class ScannerFactory {
         PeriodNode(long period) {
             this.period = period;
         }
-        LinkedList<ProcessPeriodic> getPriorityList() {
-            return priorityList;
-        }
         
         ProcessPeriodic getProcessPeriodioc(int priority,boolean addNew,String name) {
             ListIterator<ProcessPeriodic> iter = priorityList.listIterator();
@@ -732,34 +729,6 @@ public class ScannerFactory {
                 processEvents[index] = processEvent;
                 listModify = false;
                 waitForModify.signal();
-            } finally {
-                lock.unlock();
-            }
-        }
-        
-        boolean removeProcessEvent(ProcessEvent processEvent) {
-            int index = -1;
-            for(int i=0; i< processEvents.length; i++) {
-                if(processEvents[i]==processEvent) {
-                    index = i;
-                    break;
-                }
-            }
-            if(index<0) return false;
-            lock.lock();
-            try {
-                listModify = true;
-                while(isActive) {
-                    try {
-                        waitForNotActive.await();
-                    } catch(InterruptedException e) {
-                        return false;
-                    }
-                }
-                processEvents[index] = null;
-                listModify = false;
-                waitForModify.signal();
-                return true;
             } finally {
                 lock.unlock();
             }
