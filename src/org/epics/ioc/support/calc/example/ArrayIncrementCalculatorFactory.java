@@ -42,6 +42,16 @@ public class ArrayIncrementCalculatorFactory {
 
         protected void setValuePVField(PVField pvValue) {
             valuePV = (PVDoubleArray)pvValue;
+            valueLength = valuePV.getLength();
+            if(valueLength>0) return;
+            valueLength = valuePV.getCapacity();
+            if(valueLength==0) return;
+            valuePV.get(0,valueLength,valueData);
+            value = valueData.data;
+            for(int i=0; i<valueLength; i++) {
+                value[i] = i;
+            }
+            valuePV.setLength(valueLength);
         };
 
         public void process(SupportProcessRequester supportProcessRequester) {
