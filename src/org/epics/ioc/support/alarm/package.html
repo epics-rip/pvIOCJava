@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: alarm support<br />
 package: org.epics.ioc.alarm.support<br />
-2010.01.07</h1>
+2010.01.08</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#definition">XML definitions For alarms</a>
+  <li><a href="#definition">XML definitions For alarms</a> 
     <ul>
       <li><a href="#Numeric">Numeric Scalar</a></li>
       <li><a href="#Boolean">Boolean</a></li>
@@ -24,7 +24,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Alarm">Alarm Support</a></li>
-  <li><a href="#Value">Value Alarms</a>
+  <li><a href="#Value">Value Alarms</a> 
     <ul>
       <li><a href="#Boolean1">Boolean Alarms</a></li>
       <li><a href="#Numeric1">Numeric Alarms</a></li>
@@ -38,11 +38,12 @@ CONTENTS
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>Support is provided for the alarm field itself and alarm calculation for
-the primitive types and for an enumerated structure.</p>
+<p>Support is provided for the alarm field itself and raising alarms for the
+primitive types and for an enumerated structure.</p>
 
 <p>The next section describes the xml syntax for attaching alarm support to a
-value field. The remaining sections describe the support. </p>
+value field and raising alarms for the value field. The remaining sections
+describe the support. </p>
 
 <p>Project pvData defines an alarm as follows:</p>
 <pre>&lt;structure structureName = "alarmSeverity" extends = "enumerated" &gt;
@@ -59,9 +60,9 @@ value field. The remaining sections describe the support. </p>
 <dl>
   <dt>severity</dt>
     <dd>An enumerated structure. An enumerated strtucture has just two
-      fields: An integer field that has the name index. It selects an element
-      of the choices. The choices field is an immutable array of chracter
-      strings with that values shown above.</dd>
+      fields: An integer field named index. It selects an element of the
+      choices. The choices field is an immutable array of chracter strings
+      with the values shown above.</dd>
   <dt>message</dt>
     <dd>A string field named message.</dd>
 </dl>
@@ -92,10 +93,10 @@ value field. The remaining sections describe the support. </p>
 <h2 style="text-align: center" id="definition">XML definitions For alarms</h2>
 <hr />
 
-<p>Alarm support is provided for all the primitive types and for an
-enumerated structure. Each can be defined for any field of a record that has
-the corresponding type and has the field name "value". A record instance can
-have multiple fields with associated alarm support. Since a structure can
+<p>Support for raising alarms is provided for all the primitive types and for
+an enumerated structure. Each can be defined for any field of a record that
+has the corresponding type and has the field name "value". A record instance
+can have multiple fields with associated alarm support. Since a structure can
 have only one field named value, the top level of a structure can only have a
 single alarm support but each substructure can also have alarm support. Three
 basic types of support are provided: numeric, boolean, and enumerated. Each
@@ -104,10 +105,53 @@ is discussed in a separate section below.</p>
 <h3 id="Numeric">Numeric Scalar</h3>
 
 <p>Support is provided for all the numeric scalar types: byte, short, long,
-float, and double. The following description is for double but the support
-for the other types is similar.</p>
+float, and double. The following desription is for double but the support for
+the other types is similar.</p>
 
-<p>An example of definining support for a double field is:</p>
+<p>The structures associated with doubleAlarm are :</p>
+<pre>&lt;structure structureName = "doubleAlarmInterval"&gt;
+  &lt;scalar name = "value" scalarType = "double" /&gt;
+  &lt;structure name = "severity" extends = "alarmSeverity" /&gt;
+  &lt;scalar name = "message" scalarType = "string" /&gt;
+&lt;/structure&gt;
+&lt;structure structureName = "doubleAlarm" &gt;
+  &lt;auxInfo name = "supportFactory" scalarType = "string"&gt;org.epics.ioc.doubleAlarmFactory&lt;/auxInfo&gt;
+  &lt;scalar name = "active" scalarType = "boolean" /&gt;
+  &lt;structure name = "interval" /&gt;
+  &lt;structure name = "outOfRange"  extends = "alarmSeverity" /&gt;
+  &lt;scalar name = "hystersis" scalarType = "double" /&gt;
+&lt;/structure&gt;</pre>
+
+<p>The doubleAlarm structure must appear in a structure at the same level as
+a double scalar field named value. There must be an alarm field at the same
+level. The doubleAlarm structure has the following fields:</p>
+<dl>
+  <dt>active</dt>
+    <dd>Is alarm processing active?</dd>
+  <dt>interval</dt>
+    <dd>This is a structure. Each subfield of the structure must be a
+      doubleAlarmInterval structure. The order of the subFields, not the
+      name, detemines the interval order.</dd>
+  <dt>outOfRange</dt>
+    <dd>This is the alarmSeverity if the associated value field's value does
+      not appear in any of the interval definitions.</dd>
+</dl>
+
+<p>A doubleAlarmInterval structure has the following fields:</p>
+<dl>
+  <dt>value</dt>
+    <dd>This is the value for the interval. The alarm algoithm starts with
+      the first interval and compares vaue with interval.value and if the
+      result is &lt;= then this is the interval that is used to raise an
+      alarm. If &gt; then it looks at the next interval. If no interval is
+      found then outOfRange determines the alarm severity.</dd>
+  <dt>severity</dt>
+    <dd>The alarm severity for this interval.</dd>
+  <dt>message</dt>
+    <dd>The alarm message for this interval.</dd>
+</dl>
+
+<p>An example for a double field is:</p>
 <pre>&lt;record recordName = "simpleExample" &gt;
     &lt;scalar name = "value"  scalarType = "double" /&gt;
     &lt;structure name = "alarm" extends = "alarm" /&gt;
@@ -150,38 +194,10 @@ record but the details are different. The above xml definition is for a
 record instance but it could also apply to a substructure of a record if
 record is replaced by structure in the above example. What is important is
 that the structure has fields named value and alarm and that a structure
-field that extends doubleAlarm is defined. The doubleAlarm structure has the
-following fields:</p>
-<dl>
-  <dt>active</dt>
-    <dd>Is alarm processing active?</dd>
-  <dt>interval</dt>
-    <dd>A structure which defines an arbitrary number of doubleAlarmInterval
-      structures.</dd>
-  <dt>outOfRange</dt>
-    <dd>The alarm severity if the record value is greater than the value
-      defined in the last interval structure.</dd>
-</dl>
-
-<p>Each doubleAlarmInterval structure has the following fields:</p>
-<dl>
-  <dt>value</dt>
-    <dd>A value for the interval.</dd>
-  <dt>severity</dt>
-    <dd>An alarm severity if the value for the record value falls in this
-      interval.</dd>
-</dl>
-
-<p>When the record is processed the alarm support looks for an interval for
-the current value of the record value field. It starts with the first
-interval and if the record value is &lt;= the interval value then this is the
-interval. Otherwise it looks at the next interval, etc. If no interval is
-found and outOfRange determines the alarm severity.</p>
-
-<p>The names of the doubleAlarm fields in internal do not matter.</p>
+field that extends doubleAlarm is defined.</p>
 
 <p>An arbitrary number of intervals can be defined. For example if only a
-high alarm is needed than the following definition can be used/</p>
+high alarm is needed than the following definition can be used:</p>
 <pre>    &lt;structure name = "valueAlarm" extends = "doubleAlarm"&gt;
           &lt;scalar name = "active"&gt;true&lt;/scalar&gt;
           &lt;structure name = "interval"&gt;
@@ -236,14 +252,14 @@ with enumerated alarm support.</p>
   &lt;structure name = "changeStateAlarm" extends = "enumeratedAlarmState" /&gt;
 &lt;/structure&gt;</pre>
 
-<p>An enumerated structure is attached to an enumerated field named value. It
-has the fields:</p>
+<p>An enumerated structure appears in a structure at the same level as an
+enumerated field named value. It has the fields:</p>
 <dl>
   <dt>active</dt>
     <dd>Is alarm processing active?</dd>
   <dt>stateAlarm</dt>
-    <dd>A structure field with substructure fields each of which must be an
-      enumeratedAlarmState structure.</dd>
+    <dd>A structure field with sub fields each of which must be an
+      enumeratedAlarmState structure. The fields must be named</dd>
   <dt>changeStateAlarm</dt>
     <dd>An enumeratedAlarmState for change of state.</dd>
 </dl>
@@ -256,10 +272,51 @@ has the fields:</p>
     <dd>An alarm message.</dd>
 </dl>
 
-<p>Although enumerated alarm support can be defined without using digital
-support, using digital support is the easiest way to also define enumerated
-alarm support. The following is an example that also uses digital
-suppport.</p>
+<p>The following shows how to create a record with enumerated alarms.</p>
+<pre>&lt;record recordName = "enumerated"&gt;
+    &lt;structure name = "value" extends = "enumerated"&gt;
+        &lt;scalar name = "choices"&gt;[zero,one,two,three,four]&lt;/scalar&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "alarm" extends = "alarm" /&gt;
+    &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
+    &lt;structure name = "valueAlarm" extends = "enumeratedAlarm"&gt;
+            &lt;scalar name = "active"&gt;true&lt;/scalar&gt;
+            &lt;structure name = "stateAlarm"&gt;
+                 &lt;structure name = "0" extends = "enumeratedAlarmState"&gt;
+                      &lt;scalar name = "value"&gt;0&lt;/scalar&gt;
+                      &lt;structure name = "severity"&gt;&lt;scalar name = "choice"&gt;major&lt;/scalar&gt;&lt;/structure&gt;
+                      &lt;scalar name = "message"&gt;ZERO ALARM&lt;/scalar&gt;
+                 &lt;/structure&gt;
+                 &lt;structure name = "1" extends = "enumeratedAlarmState"&gt;
+                      &lt;scalar name = "value"&gt;1&lt;/scalar&gt;
+                      &lt;structure name = "severity"&gt;&lt;scalar name = "choice"&gt;minor&lt;/scalar&gt;&lt;/structure&gt;
+                      &lt;scalar name = "message"&gt;ONE ALARM&lt;/scalar&gt;
+                 &lt;/structure&gt;
+                 &lt;structure name = "2" extends = "enumeratedAlarmState"&gt;
+                      &lt;scalar name = "value"&gt;2&lt;/scalar&gt;
+                      &lt;structure name = "severity"&gt;&lt;scalar name = "choice"&gt;none&lt;/scalar&gt;&lt;/structure&gt;
+                      &lt;scalar name = "message"&gt;TWO ALARM&lt;/scalar&gt;
+                 &lt;/structure&gt;
+                 &lt;structure name = "3" extends = "enumeratedAlarmState"&gt;
+                      &lt;scalar name = "value"&gt;3&lt;/scalar&gt;
+                      &lt;structure name = "severity"&gt;&lt;scalar name = "choice"&gt;minor&lt;/scalar&gt;&lt;/structure&gt;
+                      &lt;scalar name = "message"&gt;THREE ALARM&lt;/scalar&gt;
+                 &lt;/structure&gt;
+                 &lt;structure name = "4" extends = "enumeratedAlarmState"&gt;
+                      &lt;scalar name = "value"&gt;4&lt;/scalar&gt;
+                      &lt;structure name = "severity"&gt;&lt;scalar name = "choice"&gt;major&lt;/scalar&gt;&lt;/structure&gt;
+                      &lt;scalar name = "message"&gt;FOUR ALARM&lt;/scalar&gt;
+                 &lt;/structure&gt;
+            &lt;/structure&gt;
+            &lt;structure name = "changeStateAlarm"&gt;
+                 &lt;structure name = "severity"&gt;&lt;scalar name = "choice"&gt;none&lt;/scalar&gt;&lt;/structure&gt;
+                 &lt;scalar name = "message"&gt;Change State&lt;/scalar&gt;
+             &lt;/structure&gt;
+    &lt;/structure&gt;
+&lt;/record&gt;</pre>
+
+<p>Another way to create enumerated alarm support is via support digital. The
+following is an example:</p>
 <pre>&lt;record recordName = "enumerated"&gt;
     &lt;structure name = "value" extends = "enumerated"/&gt;
     &lt;structure name = "alarm" extends = "alarm" /&gt;
@@ -316,6 +373,15 @@ suppport.</p>
   <li>It uses the severity and message fields to create enumeratedAlarmState
     structures and add them to the record.valueAlarm.stateAlarm
   structure.</li>
+  <li>Note that digitalState.value is NOT an index for the record.value
+    field. The digital structure also must have an integer field named value.
+    It is assumed to be a register integer value. The digitalState.value is
+    compared with digital.value. If they are equal than this is the
+    digitalState that is used to set record.value.index. The order of the
+    digitalState fields determines the value of record.value.index. For
+    example digitalState.value could be set to "0x11". portDriver provides
+    support for digital devices that provides additional features that allow
+    an arbitray set of bits of a register to be selected.</li>
 </ul>
 
 <p>The enumeratedAlarm support looks at the current and previous value of the
@@ -332,16 +398,16 @@ calls the support for the alarm field defined in the top level structure
 (defined in common.xml). If multiple alarm fields reside in a record then the
 top level alarm field, which is what the outside world normally accesses has
 a severity at least as great as any of the lower level alarms.</p>
-<pre>    interface AlarmSupport extends Support{
-void beginProcess();
-void endProcess();
-boolean setAlarm(String message, AlarmSeverity severity);
-Alarm getAlarm();
+<pre>interface AlarmSupport extends Support{
+    void beginProcess();
+    void endProcess();
+    boolean setAlarm(String message, AlarmSeverity severity);
+    Alarm getAlarm();
 }
 
 class AlarmSupportFactory {
-public static Support create(PVStructure pvStructure);
-public static AlarmSupport getAlarmSupport(PVField pvField,RecordSupport recordSupport);
+    public static Support create(PVStructureStructure)
+    public static AlarmSupport getAlarmSupport(PVField pvField,RecordSupport recordSupport);
 }</pre>
 
 <p>AlarmSupport provides the methods:</p>
