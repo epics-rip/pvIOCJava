@@ -7,7 +7,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CAJv4"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/pvData"/>
-	<classpathentry kind="lib" path="jar/caj-1.1.6.jar"/>
-	<classpathentry kind="lib" path="jar/jca-2.3.3.jar"/>
+	<classpathentry kind="lib" path="jar/CAJ.jar"/>
+	<classpathentry kind="lib" path="jar/JCA.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
