@@ -170,19 +170,21 @@ public class RecordProcessFactory {
                 if(index>=0) {
                     timeStamp = TimeStampFactory.getTimeStamp((PVStructure)pvFields[index]);
                 }
+                boolean createProcessSelf = true;
                 index = structure.getFieldIndex("scan");
                 if(index>=0) {
                     scanSupport = locateSupport.getSupport(pvFields[index]);
                     scanField = ScanFieldFactory.create(pvRecord);
                     if(scanField!=null) {
                         PVBoolean pvProcessSelf = scanField.getProcessSelfPV();
-                        if(pvProcessSelf.get()) {
-                            processSelf = new ProcessSelfImpl(this);
+                        if(!pvProcessSelf.get()) {
+                        	createProcessSelf = false;
                         }
                         pvProcessSelf.setImmutable();
                         pvProcessAfterStart = scanField.getProcessAfterStartPV();
                     }
                 }
+                if(createProcessSelf) processSelf = new ProcessSelfImpl(this);
                 fieldSupport.initialize(locateSupport);
             } finally {
                 pvRecord.unlock();

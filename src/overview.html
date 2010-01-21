@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2009.10.06</h1>
+2010.01.21</h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -676,12 +676,14 @@ call field support code. RecordProcess has methods for the following: </p>
 </ul>
 
 <p>The primary purpose of recordProcess is to be the "gatekeeper" for record
-processing. Only one object can process a record. Methods are available to
-request being the record processor and methods involved with processing. A
-process can be synchronous or asynchronous. An asynchronous operation is an
-operation that blocks, e.g. file I/O. recordProcess provides methods that
-allow asynchronous support but that only lock a record instance while the
-record is being accessed. </p>
+processing. Only one object can process a record. A record can be declared to
+be self processed which allows an arbitrary number of clients to request
+processing. The default is self process true. Methods are available to
+request being the record processor and to request processing. A process can
+be synchronous or asynchronous. An asynchronous operation is an operation
+that blocks, e.g. file I/O. recordProcess provides methods that allow
+asynchronous support but that only lock a record instance while the record is
+being accessed. </p>
 
 <p>Whenever any field of a record is being accessed or whenever anything is
 done that can modify the state of a record, the record must be locked. In
@@ -1994,7 +1996,7 @@ id="structures1">xml/structures/commonFields.xml</h3>
   &lt;structure name = "type" extends = "scanType" /&gt;
   &lt;scalar name = "rate" scalarType = "double"&gt;1.0&lt;/scalar&gt;
   &lt;scalar name = "eventName" scalarType = "string" /&gt;
-  &lt;scalar name = "processSelf" scalarType = "boolean" /&gt;
+  &lt;scalar name = "processSelf" scalarType = "boolean"&gt;true&lt;/scalar&gt;
   &lt;scalar name = "processAfterStart" scalarType = "boolean"&gt;false&lt;/scalar&gt;
   &lt;scalar name = "maxConsecutiveActive" scalarType = "int"&gt;1&lt;/scalar&gt;
 &lt;/structure&gt;
@@ -2042,7 +2044,9 @@ id="structures1">xml/structures/commonFields.xml</h3>
         <dt>eventName</dt>
           <dd>The event name for event scanned records.</dd>
         <dt>processSelf</dt>
-          <dd>Should the record process itself?</dd>
+          <dd>Should the record process itself? Note that the default is
+            true. This must be set false to ensure that only one requester
+            can ask the record to process.</dd>
         <dt>processAfterStart</dt>
           <dd>determines if the record instance should be processed one time
             after the record enters the ready state. If the value is true
