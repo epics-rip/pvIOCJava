@@ -104,7 +104,7 @@ public class ScannerFactory {
         		if(++numberConsecutiveActive == maxConsecutiveActive) {
         			pvRecord.lock();
         			try {
-        				pvRecord.message("record active too long", MessageType.warning);
+        				pvRecord.message("record " + pvRecord.getFullName() + " active too long", MessageType.info);
         			} finally {
         				pvRecord.unlock();
         			}
