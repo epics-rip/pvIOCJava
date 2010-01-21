@@ -13,6 +13,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.install.IOCDatabase;
 import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.support.ProcessSelf;
+import org.epics.ioc.support.ProcessSelfRequester;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.pvData.factory.PVDatabaseFactory;
@@ -57,10 +59,12 @@ public class ScannerFactory {
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static String lineBreak = System.getProperty("line.separator");
 
-    private static class ProcessRecord implements RecordProcessRequester {
+    private static class ProcessRecord implements RecordProcessRequester,ProcessSelfRequester {
         private String name;
         private RecordProcess recordProcess;
         private PVRecord pvRecord;
+        private boolean isRecordProcessRequester = false;
+        private ProcessSelf processSelf = null;
         private volatile boolean isActive = false;
         private int numberConsecutiveActive = 0;
         private PVInt pvMaxConsecutiveActive = null;
@@ -68,37 +72,62 @@ public class ScannerFactory {
         private volatile boolean release = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForNotActive = lock.newCondition();
+        private TimeStamp timeStamp = null;
+       
 
         private ProcessRecord(String name,RecordProcess recordProcess) {
-            this.name = name;
-            this.recordProcess = recordProcess;
-            pvRecord = recordProcess.getRecord();
-            PVField pvField = pvRecord.getSubField("scan.maxConsecutiveActive");
-            if(pvField!=null && (pvField instanceof PVInt)) {
-                pvMaxConsecutiveActive = (PVInt)pvField;
-            }
+        	this.name = name;
+        	this.recordProcess = recordProcess;
+        	isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
+        	if(!isRecordProcessRequester) {
+        		processSelf = recordProcess.canProcessSelf();
+        		if(processSelf==null)  return;
+        	}
+        	pvRecord = recordProcess.getRecord();
+        	PVField pvField = pvRecord.getSubField("scan.maxConsecutiveActive");
+        	if(pvField!=null && (pvField instanceof PVInt)) {
+        		pvMaxConsecutiveActive = (PVInt)pvField;
+        	}
         }
-        
+
+        private boolean canProcess() {
+        	if(isRecordProcessRequester || processSelf!=null) return true;
+        	return false;
+        }
+
         private void execute(TimeStamp timeStamp) {
-            if(release) return;
-            if(isActive) {
-                if(pvMaxConsecutiveActive!=null && numberConsecutiveActive==0) {
-                    maxConsecutiveActive = pvMaxConsecutiveActive.get();
-                }
-                if(++numberConsecutiveActive == maxConsecutiveActive) {
-                    pvRecord.lock();
-                    try {
-                        pvRecord.message("record active too long", MessageType.warning);
-                    } finally {
-                        pvRecord.unlock();
-                    }
-                }
-            } else {
-                isActive = true;
-                numberConsecutiveActive = 0;
-                recordProcess.process(this, false,timeStamp);
-            }
+        	if(release) return;
+        	if(isActive) {
+        		if(pvMaxConsecutiveActive!=null && numberConsecutiveActive==0) {
+        			maxConsecutiveActive = pvMaxConsecutiveActive.get();
+        		}
+        		if(++numberConsecutiveActive == maxConsecutiveActive) {
+        			pvRecord.lock();
+        			try {
+        				pvRecord.message("record active too long", MessageType.warning);
+        			} finally {
+        				pvRecord.unlock();
+        			}
+        		}
+        	} else {
+        		isActive = true;
+        		numberConsecutiveActive = 0;
+        		if(isRecordProcessRequester) {
+        			recordProcess.process(this, false,timeStamp);
+        		} else {
+        			this.timeStamp = timeStamp;
+        			processSelf.request(this);
+        		}
+        	}
         }
+		
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
+		 */
+		@Override
+		public void becomeProcessor(RecordProcess recordProcess) {
+        	recordProcess.process(this, false,timeStamp);
+		}
         
         private PVRecord getPVRecord() {
             return pvRecord;
@@ -138,6 +167,9 @@ public class ScannerFactory {
             lock.lock();
             try {
                 isActive = false;
+                if(!isRecordProcessRequester) {
+                	processSelf.endRequest(this);
+                }
                 if(release) waitForNotActive.signal();
             } finally {
                 lock.unlock();
@@ -384,7 +416,7 @@ public class ScannerFactory {
             }
             RecordProcess recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
             processRecord = new ProcessRecord(processPeriodic.getName(),recordProcess);
-            if(!recordProcess.setRecordProcessRequester(processRecord)){
+            if(!processRecord.canProcess()) {
                 return false;
             }
             processPeriodic.add(processRecord);
@@ -851,9 +883,9 @@ public class ScannerFactory {
                 }
                 RecordProcess recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
                 ProcessRecord processRecord = new ProcessRecord(processEvent.getName(),recordProcess);
-                if(!recordProcess.setRecordProcessRequester(processRecord)){
+                if(!processRecord.canProcess()) {
                     return false;
-                }         
+                }     
                 processEvent.add(processRecord);
             } finally {
                 lock.unlock();
