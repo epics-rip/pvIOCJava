@@ -68,9 +68,6 @@
     <scalar name = "value" scalarType = "double"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "scan" extends = "scan">
-        <scalar name = "processSelf">true</scalar>
-    </structure>
 </record>
 
 <record recordName = "monitorChange">
