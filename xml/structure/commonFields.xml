@@ -21,7 +21,7 @@
   <structure name = "type" extends = "scanType" />
   <scalar name = "rate" scalarType = "double">1.0</scalar>
   <scalar name = "eventName" scalarType = "string" />
-  <scalar name = "processSelf" scalarType = "boolean">true</scalar>
+  <scalar name = "singleProcessRequester" scalarType = "boolean">false</scalar>
   <scalar name = "processAfterStart" scalarType = "boolean">false</scalar>
   <scalar name = "maxConsecutiveActive" scalarType = "int">1</scalar>
 </structure>
