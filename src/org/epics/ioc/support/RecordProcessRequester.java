@@ -15,6 +15,20 @@ import org.epics.pvData.pv.Requester;
  *
  */
 public interface RecordProcessRequester extends Requester{
+	/**
+     * The requester has become the current RecordProcessRequester.
+     */
+    void becomeProcessor();
+    /**
+     * A queueProcessRequest failed.
+     * @param reason The reason why the request failed.
+     */
+    void canNotProcess(String reason);
+    /**
+     * The recordProcessRequester has lost the right to queue a process request.
+     * The requester does not have to call releaseProcessToken.
+     */
+    void lostRightToProcess();
     /**
      * The result of the process request.
      * This is called with the record still active and locked.
