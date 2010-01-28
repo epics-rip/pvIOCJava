@@ -13,6 +13,7 @@ import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
+import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.Support;
@@ -32,6 +33,7 @@ import org.epics.pvData.misc.TimeFunctionRequester;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
@@ -134,7 +136,7 @@ public class RecordShowFactory {
                         recordProcess.setEnabled(false);
                         pvResult.put("disabled");
                     } else if(cmd.equals("releaseProcessor")) {
-                        recordProcess.releaseRecordProcessRequester();
+                        recordProcess.forceInactive();
                         pvResult.put("releaseRecordProcessRequester");
                     }
                 }
@@ -149,7 +151,8 @@ public class RecordShowFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         private void showState() {
-            boolean processSelf = ((recordProcess.canProcessSelf()==null) ? false : true);
+        	PVBoolean pvBoolean= pvRecord.getBooleanField("scan.singleProcessRequester");
+            boolean singleProcessRequester = ((pvBoolean==null) ? false : pvBoolean.get());
             String processRequesterName = recordProcess.getRecordProcessRequesterName();
             SupportState supportState = recordProcess.getSupportState();
             boolean isActive = recordProcess.isActive();
@@ -164,8 +167,8 @@ public class RecordShowFactory {
             stringBuilder.setLength(0);
             stringBuilder.append(pvRecord.getPVRecordField().getPVRecord().getRecordName());
             stringBuilder.append(newLine);
-            stringBuilder.append("  processSelf ");
-            stringBuilder.append(Boolean.toString(processSelf));
+            stringBuilder.append("  singleProcessRequester ");
+            stringBuilder.append(Boolean.toString(singleProcessRequester));
             stringBuilder.append(" processRequester ");
             stringBuilder.append(processRequesterName);
             stringBuilder.append(" supportState ");
@@ -196,6 +199,7 @@ public class RecordShowFactory {
         private class TimeProcess 
         {   
             private RecordProcess recordProcess = null;
+            private ProcessToken processToken = null;
             private ProcessIt processIt = null;
 
 
@@ -205,15 +209,17 @@ public class RecordShowFactory {
 
             private void doIt() {
                 recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                if(!recordProcess.setRecordProcessRequester(processIt)) {
+                processToken = recordProcess.requestProcessToken(processIt);
+                if(processToken==null) {
                     stringBuilder.append("could not process the record");
                     return;
                 }
+                processIt.setToken(processToken);
                 TimeFunction timeFunction = TimeFunctionFactory.create(processIt);
                 double perCall = timeFunction.timeCall();
                 stringBuilder.append(" records/second=");
                 stringBuilder.append(Double.toString(1.0/perCall));
-                recordProcess.releaseRecordProcessRequester(processIt);
+                recordProcess.releaseProcessToken(processToken);
             }
             
             private class ProcessIt implements TimeFunctionRequester, RecordProcessRequester {
@@ -221,10 +227,15 @@ public class RecordShowFactory {
                 private ReentrantLock lock = new ReentrantLock();
                 private Condition waitProcessDone = lock.newCondition();
                 private boolean processDone = false;
+                private ProcessToken processToken = null;
 
                 private ProcessIt() {
                     long start = System.currentTimeMillis();
                     timeStamp.put(start);
+                }
+                
+                private void setToken(ProcessToken processToken) {
+                	this.processToken = processToken;
                 }
 
                 /* (non-Javadoc)
@@ -232,7 +243,7 @@ public class RecordShowFactory {
                  */
                 public void function() {
                     processDone = false;
-                    recordProcess.process(this, false, timeStamp);
+                    recordProcess.queueProcessRequest(processToken);
                     lock.lock();
                     try {
                         while(!processDone) {
@@ -244,7 +255,29 @@ public class RecordShowFactory {
                         lock.unlock();
                     }
                 }
-                /* (non-Javadoc)
+                @Override
+				public void becomeProcessor() {
+                	recordProcess.process(processToken,false, timeStamp);
+				}
+
+				@Override
+				public void canNotProcess(String reason) {
+					message("can not process " + reason,MessageType.error);
+					lock.lock();
+                    try {
+                        processDone = true;
+                        waitProcessDone.signal();
+                    } finally {
+                        lock.unlock();
+                    }
+				}
+
+				@Override
+				public void lostRightToProcess() {
+					throw new IllegalStateException(" lost right to process");
+				}
+
+				/* (non-Javadoc)
                  * @see org.epics.pvData.pv.Requester#getRequesterName()
                  */
                 public String getRequesterName() {
