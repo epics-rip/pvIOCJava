@@ -6,9 +6,9 @@
 package org.epics.ioc.support.dbLink;
 
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.install.IOCDatabase;
 import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportState;

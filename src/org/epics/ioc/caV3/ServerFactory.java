@@ -53,8 +53,7 @@ import java.util.regex.Pattern;
 
 import org.epics.ioc.install.IOCDatabase;
 import org.epics.ioc.install.IOCDatabaseFactory;
-import org.epics.ioc.support.ProcessSelf;
-import org.epics.ioc.support.ProcessSelfRequester;
+import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.RequestResult;
@@ -242,7 +241,7 @@ public class ServerFactory {
     /**
      * Channel process variable implementation. 
      */
-    private static class ChannelProcessVariable extends ProcessVariable implements RecordProcessRequester,ProcessSelfRequester,PVCopyMonitorRequester
+    private static class ChannelProcessVariable extends ProcessVariable implements RecordProcessRequester,PVCopyMonitorRequester
     {
         private static final String[] YES_NO_LABELS = new String[] { "false", "true" };
         private ReentrantLock lock = new ReentrantLock();
@@ -264,17 +263,16 @@ public class ServerFactory {
         private PVStructure pvCopyStructure = null;
         private BitSet copyBitSet = null;
         
+        private PVRecord pvRecord = null;
         private RecordProcess recordProcess = null;
-
-        private GetRequest getRequest = null;
-        private PutRequest putRequest = null;
+        private DBR dbr = null;
         private boolean getProcess = false;
         private boolean putProcess = false;
         private boolean canProcess = false;
         private boolean processActive = false;
         private boolean getProcessActive = false;
         private boolean putProcessActive = false;
-        private ProcessSelf processSelf = null;
+        private ProcessToken processToken = null;
         
         private PVCopyMonitor pvCopyMonitor = null;
         private PVStructure monitorPVStructure = null;
@@ -296,6 +294,7 @@ public class ServerFactory {
                 throws CAStatusException, IllegalArgumentException, IllegalStateException
         {
             super(aliasName, eventCallback);
+            this.pvRecord = pvRecord;
             this.options = options;
             this.eventCallback = eventCallback;
             PVStructure pvTimeStamp = null;
@@ -367,20 +366,12 @@ public class ServerFactory {
             if(option!=null) putProcess = Boolean.valueOf(option);
             if(getProcess||putProcess) {
                 recordProcess = iocDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                if(recordProcess.setRecordProcessRequester(this)) {
-                    canProcess = true;
-                } else {
-                    processSelf = recordProcess.canProcessSelf();
-                    canProcess = ((processSelf==null) ? false : true);
-                }
-                if(!canProcess) {
+                processToken = recordProcess.requestProcessToken(this);
+            	if(processToken==null) {
                     throw new CAStatusException(CAStatus.DEFUNCT, "Could not become processor ");
                 }
-            }
-            if(canProcess) {
-                if(getProcess) getRequest = new GetRequest(this);
-                if(putProcess) putRequest = new PutRequest(this);
-            } 
+            	canProcess = true;
+            }   
         }
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#destroy()
@@ -389,11 +380,8 @@ public class ServerFactory {
         public void destroy() {
             super.destroy();
             if(canProcess) {
-                if(processSelf!=null) {
-                    processSelf.cancelRequest(this);
-                } else {
-                    recordProcess.releaseRecordProcessRequester(this);
-                }
+            	recordProcess.releaseProcessToken(processToken);
+            	processToken = null;
             }
         }
         /* (non-Javadoc)
@@ -434,7 +422,8 @@ public class ServerFactory {
          * @see gov.aps.jca.cas.ProcessVariable#read(gov.aps.jca.dbr.DBR, gov.aps.jca.cas.ProcessVariableReadCallback)
          */
         public CAStatus read(DBR dbr, ProcessVariableReadCallback asyncReadCallback) throws CAException {
-            if(getProcess) {
+            this.dbr = dbr;
+        	if(getProcess) {
                 boolean ok = true;
                 synchronized(this) {
                     if(processActive) {
@@ -449,10 +438,7 @@ public class ServerFactory {
                     return CAStatus.DBLCLFAIL;
                 }
                 done = false;
-                if(!getRequest.startRequest(dbr)) {
-                    message("process request failed",MessageType.warning);
-                    return CAStatus.DBLCLFAIL;
-                }
+                recordProcess.queueProcessRequest(processToken);
                 lock.lock();
                 try {
                     while(!done) {
@@ -491,10 +477,7 @@ public class ServerFactory {
                     return CAStatus.DBLCLFAIL;
                 }
                 done = false;
-                if(!putRequest.startRequest(dbr)) {
-                    message("process request failed",MessageType.warning);
-                    return CAStatus.DBLCLFAIL;
-                }
+                recordProcess.queueProcessRequest(processToken);
                 lock.lock();
                 try {
                     while(!done) {
@@ -521,16 +504,14 @@ public class ServerFactory {
         @Override
         public void recordProcessComplete() {
             if(getProcessActive) {
-                getRequest.recordProcessComplete();
+            	pvCopy.initCopy(pvCopyStructure, copyBitSet, true);
+                getData(dbr,pvCopyStructure);
+                dbr = null;
                 getProcessActive = false;
+                recordProcess.setInactive(processToken);
             } else if(putProcessActive) {
-                putRequest.recordProcessComplete();
+                dbr = null;
                 putProcessActive = false;
-            }
-            if(processSelf==null) {
-                recordProcess.releaseRecordProcessRequester(this);
-            } else {
-                processSelf.endRequest(this);
             }
             lock.lock();
             try {
@@ -550,24 +531,42 @@ public class ServerFactory {
                 message("recordProcessResult " + requestResult.toString(),MessageType.warning);
             }
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
          */
         @Override
-        public void becomeProcessor(RecordProcess recordProcess) {
-            if(getProcessActive) {
-                if(!getRequest.becomeProcessor()) {
-                    processSelf.endRequest(this);
-                }
-            } else if(putProcessActive) {
-                if(!putRequest.becomeProcessor()) {
-                    processSelf.endRequest(this);
-                }
-            }
+        public void becomeProcessor()
+        {
+        	if(getProcessActive) {
+        		recordProcess.process(processToken, true, null);
+        	} else if(putProcessActive) {
+        		pvRecord.lock();
+        		try {
+        			putValueField(dbr);
+        			copyBitSet.clear();
+        			pvCopy.updateRecord(pvCopyStructure, copyBitSet, true);
+        		} finally {
+        			pvRecord.unlock();
+        		}
+        		recordProcess.process(processToken, false, null);
+        	}
         }
-
-        /* (non-Javadoc)
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+		 */
+		@Override
+		public void canNotProcess(String reason) {
+			message("canNotProcess " + reason,MessageType.warning);
+			recordProcessComplete();
+		}
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+		 */
+		@Override
+		public void lostRightToProcess(){
+			throw new IllegalStateException("lostRightToProcess");
+		}
+		/* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#interestDelete()
          */
         @Override
@@ -581,7 +580,6 @@ public class ServerFactory {
                 monitorOverrunBitSet = null;
             }
         }
-
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#interestRegister()
          */
@@ -625,7 +623,6 @@ public class ServerFactory {
         public String getRequesterName() {
             return name;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
@@ -633,7 +630,6 @@ public class ServerFactory {
             System.err.println("Message received [" + messageType + "] : " + message);
             //Thread.dumpStack();
         }
-
         /**
          * Extract value field type and return DBR type equvivalent.
          * @return DBR type.
@@ -965,74 +961,6 @@ public class ServerFactory {
                     PVDouble highField = pvControl.getDoubleField("limit.high");
                     ctrl.setUpperCtrlLimit(highField.get());
                 }
-            }
-        }
-        
-        private class GetRequest {
-            private ChannelProcessVariable channelProcessVariable;
-            private DBR dbr;
-
-            GetRequest(ChannelProcessVariable channelProcessVariable) {
-                this.channelProcessVariable = channelProcessVariable;
-                
-            }
-
-            boolean startRequest(DBR dbr) {
-                this.dbr = dbr;
-                if(processSelf==null) {
-                    return recordProcess.process(channelProcessVariable, true, null);
-                }
-                processSelf.request(channelProcessVariable);
-                return true;
-            }
-
-            boolean becomeProcessor() {
-                return recordProcess.process(channelProcessVariable, true, null);
-            }
-
-           
-            void recordProcessComplete() {
-                recordProcess.setInactive(channelProcessVariable);
-                pvCopy.initCopy(pvCopyStructure, copyBitSet, true);
-                getData(dbr,pvCopyStructure);
-                dbr = null;
-            }
-        }
-        
-        private class PutRequest {
-            private ChannelProcessVariable channelProcessVariable;
-            private DBR dbr;
-
-            PutRequest(ChannelProcessVariable channelProcessVariable) {
-                this.channelProcessVariable = channelProcessVariable;
-                
-            }
-
-            boolean startRequest(DBR dbr) {
-                this.dbr = dbr;
-                if(processSelf==null) {
-                    if(!recordProcess.setActive(channelProcessVariable)) return false;
-                    putValueField(dbr);
-                    copyBitSet.clear();
-                    pvCopy.updateRecord(pvCopyStructure, copyBitSet, true);
-                    return recordProcess.process(channelProcessVariable, false, null);
-                }
-                processSelf.request(channelProcessVariable);
-                return true;
-            }
-
-            boolean becomeProcessor() {
-                boolean ok = recordProcess.setActive(channelProcessVariable);
-                if(!ok) return ok;
-                putValueField(dbr);
-                copyBitSet.clear();
-                pvCopy.updateRecord(pvCopyStructure, copyBitSet, true);
-                if(!recordProcess.process(channelProcessVariable, false, null)) return false;
-                return true;
-            }
-
-            void recordProcessComplete() {
-                dbr = null;
             }
         }
     }
