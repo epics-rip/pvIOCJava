@@ -28,7 +28,7 @@ public interface RecordProcess {
      */
     boolean setEnabled(boolean value);
     /**
-     * Is the record active.
+     * Is the record active, i.e. is the record being processed.
      * @return (false,true) if the record (is not, is) active.
      */
     boolean isActive();
@@ -84,70 +84,51 @@ public interface RecordProcess {
      */
     void uninitialize();
     /**
-     * Attempt to become the record processor, i.e. the code that can call process and preProcess.
+     * Request a token that will allow the caller to call queueProcessRequest.
      * @param recordProcessRequester The interface implemented by the record processor.
-     * @return (false,true) if the caller (is not, is) has become the record processor.
+     * @return A ProcessToken if the caller can become the record processor.
+     * null is returned if the caller can not call queueProcessRequest.
      */
-    boolean setRecordProcessRequester(RecordProcessRequester recordProcessRequester);
+    ProcessToken requestProcessToken(RecordProcessRequester recordProcessRequester);
     /**
      * Release the current record processor.
-     * @param recordProcessRequester The current record processor.
-     * @return (false,true) if the caller (is not, is) has been released as the record processor.
-     * This should only fail if the caller was not the record processor.
+     * @param processToken The token returned by setRecordProcessRequester
      */
-    boolean releaseRecordProcessRequester(RecordProcessRequester recordProcessRequester);
+    void releaseProcessToken(ProcessToken processToken);
     /**
      * Release the record processor unconditionally.
-     * This should only be used if a record processor failed without calling releaseRecordProcessor.
+     * This should only be used if a record processor failed leaving the record active.
      */
-    void releaseRecordProcessRequester();
+    void forceInactive();
     /**
      * Get the name of the current record processor.
      * @return The name of the current record processor or null if no record processor is registered.
      */
     String getRecordProcessRequesterName();
     /**
-     * Prepare for processing a record but do not call record support.
-     * A typical use of this method is when the processor wants to modify nodes
-     * of the record before it is processed.
-     * If successful the record is active but unlocked.
-     * @param recordProcessRequester The recordProcessRequester.
-     * @return (false,true) if the request was successful.
-     * If false is returned then recordProcessRequester.message is called to report
-     * the reason.
-     * @throws IllegalStateException if recordProcessRequester is null.
+     * queue a request to become record process requester.
+     * @param processToken The token returned by requestProcessToken.
      */
-    boolean setActive(RecordProcessRequester recordProcessRequester);
+    void queueProcessRequest(ProcessToken processToken);
     /**
      * Process the record instance.
      * Unless the record was activated by setActive,
      * the record is prepared for processing just like for setActive.
      * All results of record processing are reported
      * via the RecordProcessRequester methods.
-     * @param recordProcessRequester The recordProcessRequester.
+     * @param processToken The token returned by requestProcessToken.
      * @param leaveActive Leave the record active when process is done.
      * The requester must call setInactive.
      * @param timeStamp The initial timeStamp for record processing.
      * If null the initial timeStamp will be the current time.
-     * @return (false,true) if the request was successful.
-     * If false is returned then recordProcessRequester.message is called to report
-     * the reason.
-     * @throws IllegalStateException if recordProcessRequester is null.
      */
-    boolean process(RecordProcessRequester recordProcessRequester,
-        boolean leaveActive, TimeStamp timeStamp);
+    void process(ProcessToken processToken,boolean leaveActive,TimeStamp timeStamp);
     /**
      * Called by the recordProcessRequester when it has called process with leaveActive
      * true and is done.
-     * @param recordProcessRequester
+     * @param processToken The token returned by requestProcessToken.
      */
-    void setInactive(RecordProcessRequester recordProcessRequester);
-    /**
-     * Is the record self processed.
-     * A self processed record allows multiple Record Process Requesters.
-     * @return Return the ProcessSelf interface or null if the record is not self processed.
-     */
-    ProcessSelf canProcessSelf();    
+    void setInactive(ProcessToken processToken);
     /**
      * Ask recordProcess to continue processing.
      * This must be called with the record unlocked.
