@@ -16,9 +16,6 @@
       <scalar name = "status" scalarType = "string" />
       <array name = "names" scalarType = "string" />
   </structure>
-  <structure name = "scan" extends = "scan">
-        <scalar name = "processSelf">true</scalar>
-    </structure>
 </structure>
 
 <structure structureName = "structureListFactory">
@@ -36,9 +33,6 @@
       <scalar name = "status" scalarType = "string" />
       <array name = "names" scalarType = "string" />
   </structure>
-  <structure name = "scan" extends = "scan">
-        <scalar name = "processSelf">true</scalar>
-    </structure>
 </structure>
 
 <structure structureName = "iocShowFactory">
@@ -59,9 +53,6 @@
    <structure name = "result" >
       <scalar name = "value" scalarType = "string" />
    </structure>
-   <structure name = "scan" extends = "scan">
-        <scalar name = "processSelf">true</scalar>
-    </structure>
 </structure>
 
 <structure structureName = "recordShowFactory">
@@ -82,10 +73,7 @@
    </structure>
    <structure name = "result" >
       <scalar name = "value" scalarType = "string" />
-   </structure>
-   <structure name = "scan" extends = "scan">
-        <scalar name = "processSelf">true</scalar>
-    </structure>
+   </structure>   
 </structure>
 
 <structure structureName = "supportStateSetFactory">
@@ -110,9 +98,6 @@
       <scalar name = "message" scalarType = "string" />
       <structure name = "supportState" extends = "supportState" />
   </structure>
-  <structure name = "scan" extends = "scan">
-        <scalar name = "processSelf">true</scalar>
-    </structure>
 </structure>
 
 </database>
