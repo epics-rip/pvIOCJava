@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ioc.install.IOCDatabase;
 import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportState;
@@ -40,6 +41,7 @@ import org.epics.pvData.misc.TimeFunctionRequester;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVRecord;
@@ -254,7 +256,8 @@ public class IntrospectDatabaseFactory {
             }
             if(object==showStateButton) {
                 RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                boolean processSelf = ((recordProcess.canProcessSelf()==null) ? false : true);
+                PVBoolean pvBoolean = pvRecord.getBooleanField("scan.singleProcessRequester");
+                boolean singleProcessRequester = (pvBoolean==null) ? false : pvBoolean.get();
                 String processRequesterName = recordProcess.getRecordProcessRequesterName();
                 SupportState supportState = recordProcess.getSupportState();
                 boolean isActive = recordProcess.isActive();
@@ -268,7 +271,7 @@ public class IntrospectDatabaseFactory {
                 if(pvField!=null) alarmMessage = pvField.toString();
                 consoleText.append(pvRecord.getRecordName() + newLine);
                 consoleText.append(
-                    "  processSelf " + processSelf + " processRequester " + processRequesterName
+                    "  singleProcessRequester " + singleProcessRequester + " processRequester " + processRequesterName
                     + " supportState " + supportState.name() + newLine);
                 consoleText.append(
                     "  isActive " + isActive + " isEnabled " + isEnabled + " isTrace " + isTrace + newLine);
@@ -302,7 +305,7 @@ public class IntrospectDatabaseFactory {
                 mb.setMessage("VERY DANGEROUS. DO YOU WANT TO PROCEED?");
                 int rc = mb.open();
                 if(rc==SWT.YES) {
-                    recordProcess.releaseRecordProcessRequester();
+                    recordProcess.forceInactive();
                 }
                 return;
             }
@@ -629,6 +632,7 @@ public class IntrospectDatabaseFactory {
             private Requester requester;
             private PVRecord pvRecord;
             private RecordProcess recordProcess = null;
+            private ProcessToken processToken = null;
             private ProcessIt processIt = null;
 
 
@@ -640,11 +644,12 @@ public class IntrospectDatabaseFactory {
 
             private String doIt() {
                 recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                if(!recordProcess.setRecordProcessRequester(processIt)) return "could not process the record";
+                processToken = recordProcess.requestProcessToken(processIt);
+                if(processToken==null) return "could not process the record";
                 TimeFunction timeFunction = TimeFunctionFactory.create(processIt);
                 double perCall = timeFunction.timeCall();
                 String result =  " records/second=" + 1.0/perCall;
-                recordProcess.releaseRecordProcessRequester(processIt);
+                recordProcess.releaseProcessToken(processToken);
                 return result;
             }
             
@@ -662,9 +667,10 @@ public class IntrospectDatabaseFactory {
                 /* (non-Javadoc)
                  * @see org.epics.pvData.misc.TimeFunctionRequester#function()
                  */
+                @Override
                 public void function() {
                     processDone = false;
-                    recordProcess.process(this, false, timeStamp);
+                    recordProcess.queueProcessRequest(processToken);
                     lock.lock();
                     try {
                         while(!processDone) {
@@ -679,18 +685,43 @@ public class IntrospectDatabaseFactory {
                 /* (non-Javadoc)
                  * @see org.epics.pvData.pv.Requester#getRequesterName()
                  */
+                @Override
                 public String getRequesterName() {
                     return requester.getRequesterName();
                 }
                 /* (non-Javadoc)
                  * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
                  */
+                @Override
                 public void message(final String message, final MessageType messageType) {
                     requester.message(message, MessageType.info);
                 }
                 /* (non-Javadoc)
+                 * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+                 */
+                @Override
+				public void becomeProcessor() {
+					recordProcess.process(processToken, false, timeStamp);
+				}
+				/* (non-Javadoc)
+				 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+				 */
+				@Override
+				public void canNotProcess(String reason) {
+					message("canNotProcess " + reason,MessageType.error);
+					recordProcessComplete();
+				}
+				/* (non-Javadoc)
+				 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+				 */
+				@Override
+				public void lostRightToProcess() {
+					throw new IllegalStateException("listRightToProcess");
+				}
+				/* (non-Javadoc)
                  * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
                  */
+				@Override
                 public void recordProcessComplete() {
                     lock.lock();
                     try {
@@ -703,9 +734,8 @@ public class IntrospectDatabaseFactory {
                 /* (non-Javadoc)
                  * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
                  */
-                public void recordProcessResult(RequestResult requestResult) {
-                    // nothing to do
-                }
+				@Override
+                public void recordProcessResult(RequestResult requestResult) {}
             }
         }
     }
