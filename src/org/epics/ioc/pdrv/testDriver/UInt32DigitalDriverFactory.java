@@ -7,12 +7,12 @@ package org.epics.ioc.pdrv.testDriver;
 
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.DeviceDriver;
+import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.PortDriver;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
-import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.interfaces.AbstractUInt32Digital;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.PVDouble;
