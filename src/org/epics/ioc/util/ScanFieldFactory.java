@@ -77,15 +77,15 @@ public class ScanFieldFactory {
             pvScan.message("eventName not found or is not a string", MessageType.fatalError);
         }
         
-        PVBoolean pvProcessSelf = pvScan.getBooleanField("processSelf");
-        if(pvProcessSelf==null) {
-            pvScan.message("processSelf not found or is not a boolean", MessageType.fatalError);
+        PVBoolean pvSingleProcessRequester = pvScan.getBooleanField("singleProcessRequester");
+        if(pvSingleProcessRequester==null) {
+            pvScan.message("SingleProcessRequester not found or is not a boolean", MessageType.fatalError);
         }
         PVBoolean pvProcessAfterStart = pvScan.getBooleanField("processAfterStart");
         if(pvProcessAfterStart==null) {
             pvScan.message("processAfterStart not found or is not a boolean", MessageType.fatalError);
         }
-        return new ScanFieldInstance(pvScan,pvPriority,pvType,pvRate,pvEventName,pvProcessSelf,pvProcessAfterStart);
+        return new ScanFieldInstance(pvScan,pvPriority,pvType,pvRate,pvEventName,pvSingleProcessRequester,pvProcessAfterStart);
     }
     
     
@@ -94,89 +94,101 @@ public class ScanFieldFactory {
         private PVInt pvType;
         private PVDouble pvRate;
         private PVString pvEventName;
-        private PVBoolean pvProcessSelf;
+        private PVBoolean pvSingleProcessRequester;
         private PVBoolean pvProcessAfterStart;
         
         private ScanFieldInstance(PVField scanField,PVInt pvPriority, PVInt pvType,
-            PVDouble pvRate, PVString pvEventName, PVBoolean pvProcessSelfField, PVBoolean pvProcessAfterStart)
+            PVDouble pvRate, PVString pvEventName, PVBoolean pvSingleProcessRequester, PVBoolean pvProcessAfterStart)
         {
             super();
             this.pvPriority = pvPriority;
             this.pvType = pvType;
             this.pvRate = pvRate;
             this.pvEventName = pvEventName;
-            this.pvProcessSelf = pvProcessSelfField;
+            this.pvSingleProcessRequester = pvSingleProcessRequester;
             this.pvProcessAfterStart = pvProcessAfterStart;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getEventName()
          */
+        @Override
         public String getEventName() {
             return pvEventName.get();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getPriority()
          */
+        @Override
         public ThreadPriority getPriority() {
             return ThreadPriority.values()[pvPriority.get()];
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getRate()
          */
+        @Override
         public double getRate() {
             return pvRate.get();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getScanType()
          */
+        @Override
         public ScanType getScanType() {
             return ScanType.values()[pvType.get()];
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ScanField#getProcessSelf()
+         * @see org.epics.ioc.util.ScanField#getSingleProcessRequester()
          */
-        public boolean getProcessSelf() {
-            return pvProcessSelf.get();
+        @Override
+        public boolean getSingleProcessRequester() {
+            return pvSingleProcessRequester.get();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getEventNamePV()
          */
+        @Override
         public PVString getEventNamePV() {
             return pvEventName;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getPriorityPV()
          */
+        @Override
         public PVInt getPriorityIndexPV() {
             return pvPriority;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.util.ScanField#getProcessSelfPV()
+         * @see org.epics.ioc.util.ScanField#getSingleProcessRequesterPV()
          */
-        public PVBoolean getProcessSelfPV() {
-            return pvProcessSelf;
+        @Override
+        public PVBoolean getSingleProcessRequesterPV() {
+            return pvSingleProcessRequester;
         }
-        /* (non-Javadoc)
+		/* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getRatePV()
          */
+        @Override
         public PVDouble getRatePV() {
             return pvRate;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getScanTypePV()
          */
+        @Override
         public PVInt getScanTypeIndexPV() {
             return pvType;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getProcessAfterStart()
          */
+        @Override
         public boolean getProcessAfterStart() {
             return pvProcessAfterStart.get();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.util.ScanField#getProcessAfterStartPV()
          */
+        @Override
         public PVBoolean getProcessAfterStartPV() {
             return pvProcessAfterStart;
         }        

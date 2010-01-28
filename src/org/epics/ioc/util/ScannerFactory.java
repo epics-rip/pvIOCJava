@@ -13,8 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ioc.install.IOCDatabase;
 import org.epics.ioc.install.IOCDatabaseFactory;
-import org.epics.ioc.support.ProcessSelf;
-import org.epics.ioc.support.ProcessSelfRequester;
+import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.pvData.factory.PVDatabaseFactory;
@@ -29,6 +28,8 @@ import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVStructure;
+
 
 /**
  * Factory for periodic and event scanning.
@@ -59,12 +60,12 @@ public class ScannerFactory {
     private static ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static String lineBreak = System.getProperty("line.separator");
 
-    private static class ProcessRecord implements RecordProcessRequester,ProcessSelfRequester {
+    private static class ProcessRecord implements RecordProcessRequester {
         private String name;
         private RecordProcess recordProcess;
         private PVRecord pvRecord;
-        private boolean isRecordProcessRequester = false;
-        private ProcessSelf processSelf = null;
+        private PVStructure pvStructure;
+        private ProcessToken processToken = null;
         private volatile boolean isActive = false;
         private int numberConsecutiveActive = 0;
         private PVInt pvMaxConsecutiveActive = null;
@@ -73,26 +74,25 @@ public class ScannerFactory {
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitForNotActive = lock.newCondition();
         private TimeStamp timeStamp = null;
+        private ScanField scanField = null;
        
 
         private ProcessRecord(String name,RecordProcess recordProcess) {
         	this.name = name;
         	this.recordProcess = recordProcess;
-        	isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-        	if(!isRecordProcessRequester) {
-        		processSelf = recordProcess.canProcessSelf();
-        		if(processSelf==null)  return;
-        	}
+        	processToken = recordProcess.requestProcessToken(this);
+        	if(processToken==null) return;
         	pvRecord = recordProcess.getRecord();
+        	pvStructure = pvRecord.getPVStructure();
         	PVField pvField = pvRecord.getSubField("scan.maxConsecutiveActive");
         	if(pvField!=null && (pvField instanceof PVInt)) {
         		pvMaxConsecutiveActive = (PVInt)pvField;
         	}
+        	scanField = ScanFieldFactory.create(pvRecord);
         }
 
         private boolean canProcess() {
-        	if(isRecordProcessRequester || processSelf!=null) return true;
-        	return false;
+        	return (processToken==null) ? false : true;
         }
 
         private void execute(TimeStamp timeStamp) {
@@ -104,7 +104,7 @@ public class ScannerFactory {
         		if(++numberConsecutiveActive == maxConsecutiveActive) {
         			pvRecord.lock();
         			try {
-        				pvRecord.message("record " + pvRecord.getFullName() + " active too long", MessageType.info);
+        				message(" active too long", MessageType.info);
         			} finally {
         				pvRecord.unlock();
         			}
@@ -112,24 +112,36 @@ public class ScannerFactory {
         	} else {
         		isActive = true;
         		numberConsecutiveActive = 0;
-        		if(isRecordProcessRequester) {
-        			recordProcess.process(this, false,timeStamp);
-        		} else {
-        			this.timeStamp = timeStamp;
-        			processSelf.request(this);
-        		}
+        		this.timeStamp = timeStamp;
+        		recordProcess.queueProcessRequest(processToken);
         	}
         }
-		
 		/* (non-Javadoc)
-		 * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
+		 * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
 		 */
 		@Override
-		public void becomeProcessor(RecordProcess recordProcess) {
-        	recordProcess.process(this, false,timeStamp);
+		public void becomeProcessor() {
+        	recordProcess.process(processToken,false, timeStamp);
 		}
         
-        private PVRecord getPVRecord() {
+        @Override
+		public void canNotProcess(String reason) {
+        	message("can not process " + reason,MessageType.error);
+			recordProcessComplete();
+		}
+
+		@Override
+		public void lostRightToProcess() {
+			if(scanField!=null) {
+				PVInt pvInt = scanField.getScanTypeIndexPV();
+				pvInt.put(0); // set scan type passive
+				return;
+			}
+			throw new IllegalStateException(
+                    pvRecord.getRecordName() + " lostRightToProcess");
+		}
+
+		private PVRecord getPVRecord() {
             return pvRecord;
         }
         
@@ -145,7 +157,7 @@ public class ScannerFactory {
                     lock.unlock();
                 }
             } catch(InterruptedException e) {}
-            recordProcess.releaseRecordProcessRequester(this);
+            recordProcess.releaseProcessToken(processToken);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#getRecordProcessRequesterName()
@@ -158,7 +170,7 @@ public class ScannerFactory {
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
         public void message(String message, MessageType messageType) {
-            pvRecord.message(message, messageType);
+            pvRecord.message(pvRecord.getRecordName() + " " + message, messageType);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
@@ -167,9 +179,6 @@ public class ScannerFactory {
             lock.lock();
             try {
                 isActive = false;
-                if(!isRecordProcessRequester) {
-                	processSelf.endRequest(this);
-                }
                 if(release) waitForNotActive.signal();
             } finally {
                 lock.unlock();

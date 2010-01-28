@@ -44,7 +44,6 @@ public class ChannelProcessorProviderFactory {
     
 
     static private class Provider implements ChannelProcessorProvider {
-
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProcessProvider#requestChannelProcess(org.epics.pvData.pv.PVRecord, org.epics.ioc.channelAccess.ChannelProcessRequester)
          */
@@ -65,12 +64,10 @@ public class ChannelProcessorProviderFactory {
         }
     }
     
-    static private class Process implements ChannelProcessor, RecordProcessRequester,ProcessSelfRequester {
+    static private class Process implements ChannelProcessor, RecordProcessRequester {
         private RecordProcess recordProcess = null;
         private ChannelProcessorRequester channelProcessRequester;
-        private boolean isRecordProcessRequester = false;
-        private ProcessSelf processSelf = null;
-        private boolean leaveActive = false;
+        private ProcessToken processToken = null;
         
         
         private Process(ChannelProcessorRequester channelProcessRequester,RecordProcess recordProcess) {
@@ -79,16 +76,8 @@ public class ChannelProcessorProviderFactory {
         }
         
         boolean isProcessor() {
-            isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-            if(!isRecordProcessRequester) {
-                processSelf = recordProcess.canProcessSelf();
-                if(processSelf==null) {
-                    channelProcessRequester.message(
-                            "already has process requester other than self", MessageType.error);
-                    return false;
-                }
-            }
-            return true;
+        	processToken = recordProcess.requestProcessToken(this);
+        	return (processToken!=null) ? true : false;
         }
 
         /* (non-Javadoc)
@@ -96,52 +85,58 @@ public class ChannelProcessorProviderFactory {
          */
         @Override
         public void detach() {
-            recordProcess.releaseRecordProcessRequester(this);
+            recordProcess.releaseProcessToken(processToken);
+            processToken = null;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProcessor#requestProcess()
          */
         @Override
         public void requestProcess() {
-            if(isRecordProcessRequester) {
-                channelProcessRequester.becomeProcessor();
-                return;
-            }
-            processSelf.request(this);
+        	recordProcess.queueProcessRequest(processToken);
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcess#setActive()
+         * @see org.epics.ca.server.ChannelProcessor#process(boolean, org.epics.pvData.property.TimeStamp)
          */
         @Override
-        public boolean setActive() {
-            return recordProcess.setActive(this);
+        public void process(boolean leaveActive, TimeStamp timeStamp) {
+            recordProcess.process(processToken,leaveActive, timeStamp);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcess#process(boolean, org.epics.pvData.property.TimeStamp)
-         */
-        @Override
-        public boolean process(boolean leaveActive, TimeStamp timeStamp) {
-            this.leaveActive = leaveActive;
-            return recordProcess.process(this, leaveActive, timeStamp);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcess#setInactive()
+         * @see org.epics.ca.server.ChannelProcessor#setInactive()
          */
         @Override
         public void setInactive() {
-            recordProcess.setInactive(this);
-            if(!isRecordProcessRequester) processSelf.endRequest(this);
+            recordProcess.setInactive(processToken);
         }
         /* (non-Javadoc)
+         * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+         */
+        @Override
+		public void becomeProcessor() {
+        	channelProcessRequester.becomeProcessor();
+		}
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+		 */
+		@Override
+		public void canNotProcess(String reason) {
+			channelProcessRequester.canNotProcess(reason);
+		}
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+		 */
+		@Override
+		public void lostRightToProcess() {
+			channelProcessRequester.lostRightToProcess();
+		}
+		/* (non-Javadoc)
          * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
          */
         @Override
         public void recordProcessComplete() {
-            if(!isRecordProcessRequester && !leaveActive) processSelf.endRequest(this);
             channelProcessRequester.recordProcessComplete();
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
          */
@@ -153,14 +148,6 @@ public class ChannelProcessorProviderFactory {
             }
             channelProcessRequester.recordProcessResult(okStatus);
         }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
-         */
-        @Override
-        public void becomeProcessor(RecordProcess recordProcess) {
-            channelProcessRequester.becomeProcessor();
-        }
-
         /* (non-Javadoc)
          * @see org.epics.pvData.pv.Requester#getRequesterName()
          */
