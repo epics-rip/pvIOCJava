@@ -46,6 +46,8 @@ implements SerialInterruptListener
     
     private Serial octet = null;
     private char[] charArray = null;
+    private byte[] data = null;
+    private int nbytes = 0;
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#initialize()
      */
@@ -98,10 +100,10 @@ implements SerialInterruptListener
      * @see org.epics.ioc.pdrv.interfaces.SerialInterruptListener#interrupt(byte[], int)
      */
     public void interrupt(byte[] data, int nbytes) {
-        if(super.isProcess()) {
-            recordProcess.setActive(this);
-            putData(data,nbytes);
-            recordProcess.process(this, false, null);
+    	this.data = data;
+    	this.nbytes = nbytes;
+    	if(isProcessor) {
+    		recordProcess.queueProcessRequest(processToken);
         } else {
             pvRecord.lock();
             try {
@@ -115,6 +117,34 @@ implements SerialInterruptListener
             }
         }
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+     */
+    @Override
+    public void becomeProcessor() {
+    	putData(data,nbytes);
+    	recordProcess.process(processToken,false, null);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+     */
+    @Override
+    public void canNotProcess(String reason) {
+    	pvRecord.lock();
+    	try {
+    		putData(data,nbytes);
+    	} finally {
+    		pvRecord.unlock();
+    	}
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+     */
+    @Override
+    public void lostRightToProcess() {
+    	isProcessor = false;
+    	processToken = null;
+    }	
     
     private void putData(byte[] data, int nbytes) {
         if(valueIsArray) {

@@ -37,9 +37,9 @@ implements Float64ArrayInterruptListener
     public BaseFloat64ArrayInterrupt(PVStructure pvStructure,String supportName) {
         super(supportName,pvStructure);
     }
-
     private PVArray valuePVArray = null;
     private Float64Array float64Array = null;
+    private PVDoubleArray pvDoubleArray = null;
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
      */
@@ -88,19 +88,12 @@ implements Float64ArrayInterruptListener
      * @see org.epics.ioc.pdrv.interfaces.Float64ArrayInterruptListener#interrupt(org.epics.ioc.pdrv.interfaces.Float64Array)
      */
     public void interrupt(Float64Array float64Array) {
-        PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
-        if(super.isProcess()) {
-            recordProcess.setActive(this);
-            Status status = float64Array.startRead(user);
-            if(status==Status.success) {
-                convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
-                float64Array.endRead(user);
-            }
-            recordProcess.process(this, false, null);
+        pvDoubleArray = float64Array.getPVDoubleArray();
+        if(isProcessor) {
+        	recordProcess.queueProcessRequest(processToken);
         } else {
             pvRecord.lock();
             try {
-
                 Status status = float64Array.startRead(user);
                 if(status==Status.success) {
                     convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
@@ -118,4 +111,42 @@ implements Float64ArrayInterruptListener
             }
         }
     }
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+	 */
+	@Override
+	public void becomeProcessor() {
+		Status status = float64Array.startRead(user);
+        if(status==Status.success) {
+            convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
+            float64Array.endRead(user);
+        }
+        recordProcess.process(processToken,false, null);
+	}
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+	 */
+	@Override
+	public void canNotProcess(String reason) {
+		pvRecord.lock();
+        try {
+            Status status = float64Array.startRead(user);
+            if(status==Status.success) {
+                convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
+                float64Array.endRead(user);
+            } else {
+                alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
+            } 
+        } finally {
+            pvRecord.unlock();
+        }
+	}
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+	 */
+	@Override
+	public void lostRightToProcess() {
+		isProcessor = false;
+		processToken = null;
+	}
 }

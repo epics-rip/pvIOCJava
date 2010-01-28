@@ -40,6 +40,7 @@ implements Int32ArrayInterruptListener
 
     private PVArray valuePVArray = null;
     private Int32Array int32Array = null;
+    private PVIntArray pvIntArray = null;
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
      */
@@ -89,33 +90,65 @@ implements Int32ArrayInterruptListener
      * @see org.epics.ioc.pdrv.interfaces.Int32ArrayInterruptListener#interrupt(org.epics.ioc.pdrv.interfaces.Int32Array)
      */
     public void interrupt(Int32Array int32Array) {
-        PVIntArray pvIntArray = int32Array.getPVIntArray();
-        if(super.isProcess()) {
-            recordProcess.setActive(this);
-            Status status = int32Array.startRead(user);
-            if(status==Status.success) {
-                convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
-                int32Array.endRead(user);
-            }
-            recordProcess.process(this, false, null);
-        } else {
-            pvRecord.lock();
-            try {
-                Status status = int32Array.startRead(user);
-                if(status==Status.success) {
-                    convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
-                    int32Array.endRead(user);
-                } else {
-                    alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
-                } 
-            }finally {
-                pvRecord.unlock();
-            }
-            if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
-                deviceTrace.print(Trace.SUPPORT,
-                    "pv %s support %s interrupt and record not processed",
-                    fullName,supportName);
-            }
-        }
+    	pvIntArray = int32Array.getPVIntArray();
+    	if(isProcessor) {
+    		recordProcess.queueProcessRequest(processToken);
+    	} else {
+    		pvRecord.lock();
+    		try {
+    			Status status = int32Array.startRead(user);
+    			if(status==Status.success) {
+    				convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
+    				int32Array.endRead(user);
+    			} else {
+    				alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
+    			} 
+    		}finally {
+    			pvRecord.unlock();
+    		}
+    		if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+    			deviceTrace.print(Trace.SUPPORT,
+    					"pv %s support %s interrupt and record not processed",
+    					fullName,supportName);
+    		}
+    	}
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+     */
+    @Override
+    public void becomeProcessor() {
+    	Status status = int32Array.startRead(user);
+    	if(status==Status.success) {
+    		convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
+    		int32Array.endRead(user);
+    	}
+    	recordProcess.process(processToken,false, null);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+     */
+    @Override
+    public void canNotProcess(String reason) {
+    	pvRecord.lock();
+    	try {
+    		Status status = int32Array.startRead(user);
+    		if(status==Status.success) {
+    			convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
+    			int32Array.endRead(user);
+    		} else {
+    			alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
+    		} 
+    	} finally {
+    		pvRecord.unlock();
+    	}
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+     */
+    @Override
+    public void lostRightToProcess() {
+    	isProcessor = false;
+    	processToken = null;
     }
 }
