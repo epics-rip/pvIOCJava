@@ -7,9 +7,8 @@ package org.epics.ioc.support.caLink;
 
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
-import org.epics.ioc.support.ProcessSelf;
-import org.epics.ioc.support.ProcessSelfRequester;
-import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.ProcessToken;
+import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
@@ -40,7 +39,7 @@ import org.epics.pvData.pv.Structure;
  *
  */
 public class MonitorLinkBase extends AbstractIOLink
-implements MonitorRequester,Runnable,ProcessSelfRequester
+implements MonitorRequester,Runnable,RecordProcessRequester
 {
     /**
      * The constructor.
@@ -61,8 +60,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     
     private double deadband = 0.0;
     private int queueSize = 0;
-    private boolean isRecordProcessRequester = false;
-    private ProcessSelf processSelf = null;
+    private ProcessToken processToken = null;
     private boolean process = false;
     private PVStructure pvOption = null;
     private PVString pvAlgorithm = null;
@@ -127,15 +125,11 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
         pvOption.appendPVField(pvDeadband);
         process = processAccess.get();
         if(process) {
-            isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-            if(!isRecordProcessRequester) {
-                processSelf = recordProcess.canProcessSelf();
-                if(processSelf==null) {
-                    pvStructure.message("process may fail",
-                            MessageType.warning);
-                    this.process = false;
-                }
-            }
+        	processToken = recordProcess.requestProcessToken(this);
+        	if(processToken==null) {
+        		pvStructure.message("can not process",MessageType.warning);
+                this.process = false;
+        	}
         }
     }
     /* (non-Javadoc)
@@ -144,8 +138,8 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     @Override
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
-        if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
-        isRecordProcessRequester = false;
+        if(processToken!=null) recordProcess.releaseProcessToken(processToken);
+        processToken = null;
         super.stop();
     }
     
@@ -159,7 +153,13 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
-        getData();
+        if(process) {
+        	if(monitorElement==null) {
+                alarmSupport.setAlarm("process request not by MonitorLink support",AlarmSeverity.minor);
+        	} else {
+        		getData();
+        	}
+        }
         supportProcessRequester.supportProcessDone(RequestResult.success);
     } 
     /* (non-Javadoc)
@@ -220,27 +220,21 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
      */
     @Override
     public void run() {
-        while(true) {
-            monitorElement = monitor.poll();
-            if(monitorElement==null && isReady) return;
-            if(process) {
-                if(isRecordProcessRequester) {
-                    boolean canProcess = recordProcess.process(this, false, null);
-                    if(canProcess) return;
-                    overrun = true;
-                } else {
-                    processSelf.request(this);
-                    return;
-                }
-            }
-            pvRecord.lock();
-            try {
-                getData();
-            } finally {
-                pvRecord.unlock();
-            }
-            if(!isReady) return;
-        }
+    	while(true) {
+    		monitorElement = monitor.poll();
+    		if(monitorElement==null && isReady) return;
+    		if(processToken!=null) {
+    			recordProcess.queueProcessRequest(processToken);
+    			return;
+    		}
+    		pvRecord.lock();
+    		try {
+    			getData();
+    		} finally {
+    			pvRecord.unlock();
+    		}
+    		if(!isReady) return;
+    	}
     }
     /* (non-Javadoc)
      * @see org.epics.ca.client.ChannelMonitorRequester#unlisten()
@@ -250,70 +244,81 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
         recordProcess.stop();
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+     */
+    @Override
+	public void becomeProcessor() {
+    	recordProcess.process(processToken,false, null);
+	}
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+	 */
+	@Override
+	public void canNotProcess(String reason) {
+		pvRecord.lock();
+		try {
+			overrun = true;
+			getData();
+		} finally {
+			pvRecord.unlock();
+		}
+	}
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+	 */
+	@Override
+	public void lostRightToProcess() {
+        this.process = false;
+        processToken = null;
+        super.stop();
+	}
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
      */
     public void recordProcessComplete() {
-        if(processSelf!=null) processSelf.endRequest(this);
         if(isReady) run();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
      */
-    public void recordProcessResult(RequestResult requestResult) {
-        // nothing to do
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
-     */
-    public void becomeProcessor(RecordProcess recordProcess) {
-        boolean canProcess = recordProcess.process(this, false, null);
-        if(canProcess) return;
-        pvRecord.lock();
-        try {
-            overrun = true;
-            getData();
-        } finally {
-            pvRecord.unlock();
-        }
-        run();
-    }
-    
+    public void recordProcessResult(RequestResult requestResult) {}  
+
     private void getData() {
-        if(!isReady) {
-            alarmSupport.setAlarm("connection lost", AlarmSeverity.invalid);
-            return;
-        }
-        PVStructure monitorStructure = monitorElement.getPVStructure();
-        if(super.linkPVFields==null) {
-            if(!super.setLinkPVStructure(monitorStructure)) {
-                monitor.destroy();
-                return;
-            }
-        } else {
-            super.linkPVStructure = monitorStructure;
-            super.linkPVFields = monitorStructure.getPVFields();
-        }
-        BitSet changeBitSet = monitorElement.getChangedBitSet();
-        BitSet overrunBitSet = monitorElement.getOverrunBitSet();
-        boolean allSet = changeBitSet.get(0);
-        for(int i=0; i< linkPVFields.length; i++) {
-            if(i==indexAlarmLinkField) {
-                super.pvAlarmMessage = monitorStructure.getStringField("alarm.message");
-                super.pvAlarmSeverityIndex = monitorStructure.getIntField("alarm.severity.index");
-                alarmSupport.setAlarm(pvAlarmMessage.get(),
-                    AlarmSeverity.getSeverity(pvAlarmSeverityIndex.get()));
-            } else {
-                copyChanged(linkPVFields[i],pvFields[i],changeBitSet,allSet);
-            }
-        }
-        if(overrun || overrunBitSet.nextSetBit(0)>=0) {
-            alarmSupport.setAlarm(
-                    "overrun",
-                    AlarmSeverity.none);
-        }
-        overrun = false;
-        monitor.release(monitorElement);
-        monitorElement = null;
+    	if(!isReady) {
+    		alarmSupport.setAlarm("connection lost", AlarmSeverity.invalid);
+    		return;
+    	}
+    	PVStructure monitorStructure = monitorElement.getPVStructure();
+    	if(super.linkPVFields==null) {
+    		if(!super.setLinkPVStructure(monitorStructure)) {
+    			monitor.destroy();
+    			return;
+    		}
+    	} else {
+    		super.linkPVStructure = monitorStructure;
+    		super.linkPVFields = monitorStructure.getPVFields();
+    	}
+    	BitSet changeBitSet = monitorElement.getChangedBitSet();
+    	BitSet overrunBitSet = monitorElement.getOverrunBitSet();
+    	boolean allSet = changeBitSet.get(0);
+    	for(int i=0; i< linkPVFields.length; i++) {
+    		if(i==indexAlarmLinkField) {
+    			super.pvAlarmMessage = monitorStructure.getStringField("alarm.message");
+    			super.pvAlarmSeverityIndex = monitorStructure.getIntField("alarm.severity.index");
+    			alarmSupport.setAlarm(pvAlarmMessage.get(),
+    					AlarmSeverity.getSeverity(pvAlarmSeverityIndex.get()));
+    		} else {
+    			copyChanged(linkPVFields[i],pvFields[i],changeBitSet,allSet);
+    		}
+    	}
+    	if(overrun || overrunBitSet.nextSetBit(0)>=0) {
+    		alarmSupport.setAlarm(
+    				"overrun",
+    				AlarmSeverity.none);
+    	}
+    	overrun = false;
+    	monitor.release(monitorElement);
+    	monitorElement = null;
     }
     
     private void copyChanged(PVField pvFrom,PVField pvTo,BitSet changeBitSet,boolean allSet) {

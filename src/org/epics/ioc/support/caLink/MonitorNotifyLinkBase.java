@@ -6,9 +6,8 @@
 package org.epics.ioc.support.caLink;
 
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.support.ProcessSelf;
-import org.epics.ioc.support.ProcessSelfRequester;
-import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.ProcessToken;
+import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Executor;
@@ -33,7 +32,7 @@ import org.epics.pvData.pv.Structure;
  *
  */
 public class MonitorNotifyLinkBase extends AbstractIOLink
-implements MonitorRequester,Runnable,ProcessSelfRequester
+implements MonitorRequester,Runnable,RecordProcessRequester
 {
     /**
      * The constructor.
@@ -45,8 +44,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     }
     private static Executor executor = ExecutorFactory.create("caNotifyLinkMonitor", ThreadPriority.low);
     private ExecutorNode executorNode = executor.createNode(this);
-    private boolean isRecordProcessRequester = false;
-    private ProcessSelf processSelf = null;
+    private ProcessToken processToken = null;
     private PVStructure pvOption = null;
     private PVString pvAlgorithm = null;
     
@@ -66,15 +64,11 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
         PVInt pvQueueSize = (PVInt)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvInt);
         pvQueueSize.put(0);
         pvOption.appendPVField(pvQueueSize);
-        isRecordProcessRequester = recordProcess.setRecordProcessRequester(this);
-        if(!isRecordProcessRequester) {
-            processSelf = recordProcess.canProcessSelf();
-            if(processSelf==null) {
-                pvStructure.message("process not possible",
-                        MessageType.error);
-                super.stop();
-            }
-        }
+        processToken = recordProcess.requestProcessToken(this);
+    	if(processToken==null) {
+    		pvStructure.message("can not process",MessageType.warning);
+    		super.stop();
+    	}
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#stop()
@@ -82,8 +76,8 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     @Override
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
-        if(isRecordProcessRequester) recordProcess.releaseRecordProcessRequester(this);
-        isRecordProcessRequester = false;
+        if(processToken!=null) recordProcess.releaseProcessToken(processToken);
+        processToken = null;
         super.stop();
     }
     
@@ -124,11 +118,7 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
      */
     @Override
     public void run() {
-        if(isRecordProcessRequester) {
-            becomeProcessor(recordProcess);
-        } else {
-            processSelf.request(this);
-        }
+    	recordProcess.queueProcessRequest(processToken);
     }
     /* (non-Javadoc)
      * @see org.epics.ca.client.ChannelMonitorRequester#unlisten()
@@ -140,20 +130,33 @@ implements MonitorRequester,Runnable,ProcessSelfRequester
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessComplete(org.epics.ioc.process.RequestResult)
      */
+    @Override
     public void recordProcessComplete() {}
     /* (non-Javadoc)
      * @see org.epics.ioc.process.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
      */
+    @Override
     public void recordProcessResult(RequestResult requestResult) {}
-    
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
      */
-    public void becomeProcessor(RecordProcess recordProcess) {
-        boolean canProcess = recordProcess.process(this, false, null);
-        if(!canProcess) {
-            recordProcessComplete();
-            return;
-        }
+    @Override
+    public void becomeProcessor() {
+    	recordProcess.process(processToken,false, null);
     } 
+    /* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+	 */
+	@Override
+	public void canNotProcess(String reason) {
+		recordProcessComplete();
+	}
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+	 */
+	@Override
+	public void lostRightToProcess() {
+        processToken = null;
+        super.stop();
+	}
 }
