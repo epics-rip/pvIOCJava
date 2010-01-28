@@ -8,9 +8,8 @@ package org.epics.ioc.support.dbLink;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
-import org.epics.ioc.support.ProcessSelf;
-import org.epics.ioc.support.ProcessSelfRequester;
-import org.epics.ioc.support.RecordProcess;
+import org.epics.ioc.support.ProcessToken;
+import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
@@ -24,11 +23,10 @@ import org.epics.pvData.pv.PVField;
  *
  */
 public class OutputLinkBase extends AbstractIOLink
-implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfRequester
+implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequester
 {
     private boolean process = false;
-    private boolean isRecordProcessRequester = false;
-    private ProcessSelf processSelf = null;
+    private ProcessToken processToken = null;
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult = RequestResult.success;
     private String alarmMessage = null;
@@ -49,14 +47,11 @@ implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfReques
         if(!super.checkSupportState(SupportState.ready,null)) return;
         process = pvProcess.get();
         if(process) {
-            isRecordProcessRequester = linkRecordProcess.setRecordProcessRequester(this);
-            if(!isRecordProcessRequester) {
-                processSelf = linkRecordProcess.canProcessSelf();
-                if(processSelf==null) {
-                    super.message(
-                            "already has process requester other than self", MessageType.error);
-                    super.stop();
-                }
+        	processToken = linkRecordProcess.requestProcessToken(this);
+            if(processToken==null) {
+            	super.message(
+                        "can not process record", MessageType.error);
+                super.stop();
             }
         }
     }
@@ -65,9 +60,9 @@ implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfReques
      */
     @Override
     public void stop() {
-        if(isRecordProcessRequester) {
-            linkRecordProcess.releaseRecordProcessRequester(this);
-            isRecordProcessRequester = false;
+        if(processToken!=null) {
+            linkRecordProcess.releaseProcessToken(processToken);
+            processToken = null;
         }
         super.stop();
     }
@@ -88,51 +83,61 @@ implements ProcessCallbackRequester, ProcessContinueRequester, ProcessSelfReques
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessCallbackRequester#processCallback()
      */
+    @Override
     public void processCallback() {
-        if(isRecordProcessRequester) {
-            becomeProcessor(linkRecordProcess);
-        } else {
-            processSelf.request(this);
-        }
+    	linkRecordProcess.queueProcessRequest(processToken);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ProcessContinueRequester#processContinue()
      */
+    @Override
     public void processContinue() {
         if(alarmMessage!=null) {
             alarmSupport.setAlarm(alarmMessage, AlarmSeverity.minor);
         }
         supportProcessRequester.supportProcessDone(requestResult);
-        if(processSelf!=null) processSelf.endRequest(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
      */
+    @Override
     public void recordProcessComplete() {
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
      */
+    @Override
     public void recordProcessResult(RequestResult requestResult) {
         this.requestResult = requestResult;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.ProcessSelfRequester#becomeProcessor(org.epics.ioc.support.RecordProcess)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
      */
-    public void becomeProcessor(RecordProcess recordProcess) {
-        boolean setActive =linkRecordProcess.setActive(this);
-        putData();
-        if(!setActive) {
-            alarmMessage = "could not set record active";
-            recordProcess.processContinue(this);
-        }
-        if(!recordProcess.process(this,false, super.timeStamp)) {
-            alarmMessage = "could not process record";
-            recordProcess.processContinue(this);
-        }
+    @Override
+    public void becomeProcessor() {
+    	 putData();
+    	linkRecordProcess.process(processToken,false, super.timeStamp);
     }
-   
+    /* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+	 */
+	@Override
+	public void canNotProcess(String reason) {
+		this.requestResult = RequestResult.failure;
+		alarmMessage = "could not process record";
+        recordProcess.processContinue(this);
+	}
+	/* (non-Javadoc)
+	 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+	 */
+	@Override
+	public void lostRightToProcess() {
+		processToken = null;
+		super.message(
+                "can not process record", MessageType.error);
+        super.stop();
+	}
 
     private void putData() {
         pvRecord.lockOtherRecord(linkPVRecord);
