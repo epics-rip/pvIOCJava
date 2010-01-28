@@ -44,6 +44,7 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
     private PVBoolean valuePVBoolean = null;
     private PVInt pvIndex = null;
     private UInt32Digital uint32Digital = null;
+    private int value = 0;
     private PVInt pvMask = null;
     private int mask;
     private int shift = 0;
@@ -135,40 +136,67 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
      * @see org.epics.ioc.pdrv.interfaces.UInt32DigitalInterruptListener#interrupt(int)
      */
     public void interrupt(int value) {
-        if(super.isProcess()) {
-            recordProcess.setActive(this);
-            putData(value);
-            recordProcess.process(this, false, null);
-        } else {
-            pvRecord.lock();
-            try {
-                putData(value);
-                if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
-                    deviceTrace.print(Trace.SUPPORT,
-                        "pv %s support %s interrupt and record not processed",
-                        fullName,supportName);
-                }
-            } finally {
-                pvRecord.unlock();
-            }
-        }
+    	this.value = value;
+    	if(isProcessor) {
+    		recordProcess.queueProcessRequest(processToken);
+    	} else {
+    		pvRecord.lock();
+    		try {
+    			putData(value);
+    			if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
+    				deviceTrace.print(Trace.SUPPORT,
+    						"pv %s support %s interrupt and record not processed",
+    						fullName,supportName);
+    			}
+    		} finally {
+    			pvRecord.unlock();
+    		}
+    	}
     }
-    
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+     */
+    @Override
+    public void becomeProcessor() {
+    	putData(value);
+    	recordProcess.process(processToken,false, null);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+     */
+    @Override
+    public void canNotProcess(String reason) {
+    	pvRecord.lock();
+    	try {
+    		putData(value);
+    	} finally {
+    		pvRecord.unlock();
+    	}
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+     */
+    @Override
+    public void lostRightToProcess() {
+    	isProcessor = false;
+    	processToken = null;
+    }	
+
     private void putData(int value) {
-        if(valueScalarType!=null) {
-            value = value&mask;
-            value >>>= shift;
-        }
-        if(valuePVBoolean!=null) {
-            valuePVBoolean.put((value==0) ? false : true);
-        } else if(pvIndex!=null)  {
-            pvIndex.put(value);
-        } else {
-            pvStructure.message(" logic error", MessageType.fatalError);
-        }
-        if((deviceTrace.getMask()&Trace.FLOW)!=0) {
-            deviceTrace.print(Trace.FLOW,
-                "pv %s support %s putData",fullName,supportName);
-        }
+    	if(valueScalarType!=null) {
+    		value = value&mask;
+    		value >>>= shift;
+    	}
+    	if(valuePVBoolean!=null) {
+    		valuePVBoolean.put((value==0) ? false : true);
+    	} else if(pvIndex!=null)  {
+    		pvIndex.put(value);
+    	} else {
+    		pvStructure.message(" logic error", MessageType.fatalError);
+    	}
+    	if((deviceTrace.getMask()&Trace.FLOW)!=0) {
+    		deviceTrace.print(Trace.FLOW,
+    				"pv %s support %s putData",fullName,supportName);
+    	}
     }
 }
