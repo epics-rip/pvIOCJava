@@ -16,6 +16,7 @@ import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.User;
 import org.epics.ioc.support.AbstractSupport;
+import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -42,7 +43,7 @@ import org.epics.pvData.pv.PVStructure;
  *
  */
 public abstract class AbstractPortDriverInterruptLink extends AbstractSupport
-implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
+implements RecordProcessRequester,QueueRequestCallback
 {
     /**
      * Constructor for derived PortDriverInterruptLink Support.
@@ -67,6 +68,7 @@ implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
     protected String recordName = null;
     
     protected RecordProcess recordProcess = null;
+    protected ProcessToken processToken = null;
     protected PVField valuePVField = null;
     protected AlarmSupport alarmSupport = null;
     protected PVString pvPortName = null;
@@ -78,7 +80,7 @@ implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
     protected Trace portTrace = null;
     protected Device device = null;
     protected Trace deviceTrace = null;
-    private boolean isProcessor = false;
+    protected boolean isProcessor = false;
     
     protected SupportProcessRequester supportProcessRequester = null;
     
@@ -143,7 +145,8 @@ implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
         }
         deviceTrace = device.getTrace();
         if(pvProcess!=null && pvProcess.get()) {
-            isProcessor =recordProcess.setRecordProcessRequester(this);
+        	processToken = recordProcess.requestProcessToken(this);
+            isProcessor = (processToken==null) ? false : true;
             if(!isProcessor) {
                 pvStructure.message("could not become record processor", MessageType.error);
             }
@@ -156,7 +159,7 @@ implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
      */
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
-        if(isProcessor) recordProcess.releaseRecordProcessRequester(this);
+        if(isProcessor) recordProcess.releaseProcessToken(processToken);
         isProcessor = false;
         user.disconnectPort();
         device = null;
@@ -166,12 +169,6 @@ implements RecordProcessRequester,QueueRequestCallback,PortDriverInterruptLink
         user = null;
         setSupportState(SupportState.readyForStart);
     } 
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.PDRVInterruptSupport#isProcess()
-     */
-    public boolean isProcess() {
-        return isProcessor;
-    }
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
      */
