@@ -11,7 +11,7 @@
 <h1 style="text-align: center">EPICS JavaIOC: Java Input/Output Controller<br
 />
 Overview<br />
-2010.01.21</h1>
+2010.01.27</h1>
 
 <h2 id="Preface">Preface</h2>
 
@@ -1996,7 +1996,7 @@ id="structures1">xml/structures/commonFields.xml</h3>
   &lt;structure name = "type" extends = "scanType" /&gt;
   &lt;scalar name = "rate" scalarType = "double"&gt;1.0&lt;/scalar&gt;
   &lt;scalar name = "eventName" scalarType = "string" /&gt;
-  &lt;scalar name = "processSelf" scalarType = "boolean"&gt;true&lt;/scalar&gt;
+  &lt;scalar name = "singleProcessRequester" scalarType = "boolean"&gt;false&lt;/scalar&gt;
   &lt;scalar name = "processAfterStart" scalarType = "boolean"&gt;false&lt;/scalar&gt;
   &lt;scalar name = "maxConsecutiveActive" scalarType = "int"&gt;1&lt;/scalar&gt;
 &lt;/structure&gt;
@@ -2043,10 +2043,9 @@ id="structures1">xml/structures/commonFields.xml</h3>
           <dd>Periodic scan rate in seconds</dd>
         <dt>eventName</dt>
           <dd>The event name for event scanned records.</dd>
-        <dt>processSelf</dt>
-          <dd>Should the record process itself? Note that the default is
-            true. This must be set false to ensure that only one requester
-            can ask the record to process.</dd>
+        <dt>singleProcessRequester</dt>
+          <dd>Is only a single requester allowed to request processing? The
+            default is false..</dd>
         <dt>processAfterStart</dt>
           <dd>determines if the record instance should be processed one time
             after the record enters the ready state. If the value is true
