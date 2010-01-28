@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "valueSingleProcessRequesterTrue">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <scalar name = "singleProcessRequester">true</scalar>
+    </structure>
+</record>
+
+<record recordName = "valueSingleProcessRequesterFalse">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+</record>
+
+<record recordName = "valueSingleProcessRequesterFalseDelay">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "delay" extends = "delay"> 
+         <scalar name = "min">1.0</scalar>
+         <scalar name = "max">1.0</scalar>
+         <scalar name = "inc">1.0</scalar>
+    </structure>
+</record>
+
+<record recordName = "counterSingleProcessRequesterTrue" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+     <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+        <scalar name = "singleProcessRequester">true</scalar>
+    </structure>
+    
+</record>
+
+<record recordName = "counterSingleProcessRequesterFalse" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+     <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+</record>
+
+<record recordName = "counterSingleProcessRequesterFalseDelay" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
+      </structure>
+    </structure>
+     <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+     <structure name = "delay" extends = "delay"> 
+         <scalar name = "min">0.9</scalar>
+         <scalar name = "max">0.9</scalar>
+         <scalar name = "inc">0.9</scalar>
+   </structure>
+</record>
+</database>

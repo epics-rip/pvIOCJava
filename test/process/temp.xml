@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+
+<record recordName = "valueSingleProcessRequesterFalseDelay">
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "delay" extends = "delay"> 
+         <scalar name = "min">10.0</scalar>
+         <scalar name = "max">10.0</scalar>
+         <scalar name = "inc">10.0</scalar>
+    </structure>
+</record>
+
+</database>

@@ -40,9 +40,6 @@
     <scalar name = "value" scalarType = "double"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "scan" extends = "scan">
-        <scalar name = "processSelf">true</scalar>
-    </structure>
     <structure name = "valueAlarm" extends = "doubleAlarm">
           <scalar name = "active">true</scalar>
           <structure name = "interval">
