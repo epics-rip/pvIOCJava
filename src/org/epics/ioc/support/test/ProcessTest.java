@@ -20,6 +20,7 @@ import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.install.NewAfterStartRequester;
+import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.RequestResult;
@@ -84,9 +85,6 @@ public class ProcessTest extends TestCase {
         } 
         System.out.println("starting performance test"); 
         testProcess.testPerform();
-        
-
-        
         ok = install.installRecords("src/org/epics/ioc/support/test/loopPV.xml", iocRequester);
         if(!ok) return;
         
@@ -156,10 +154,12 @@ public class ProcessTest extends TestCase {
     }
     
     private static class TestProcess implements RecordProcessRequester {
+    	private ProcessToken processToken = null;
         private RecordProcess recordProcess = null;
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
+        private TimeStamp timeStamp = TimeStampFactory.create(0, 0);
         
         private TestProcess(PVRecord record) {
             recordProcess = masterSupportDatabase.getLocateSupport(record).getRecordProcess();
@@ -181,15 +181,14 @@ public class ProcessTest extends TestCase {
         }
 
         void test() {
-            TimeStamp timeStamp = TimeStampFactory.create(0, 0);
             allDone = false;
             timeStamp.put(System.currentTimeMillis());
-            boolean gotIt =recordProcess.setRecordProcessRequester(this);
-            if(!gotIt) {
+            processToken = recordProcess.requestProcessToken(this);
+            if(processToken==null) {
                 System.out.println("could not become recordProcessor");
                 return;
             }
-            recordProcess.process(this,false,timeStamp);
+            recordProcess.queueProcessRequest(processToken);
             if(!allDone) {
                 lock.lock();
                 try {
@@ -202,26 +201,25 @@ public class ProcessTest extends TestCase {
                     lock.unlock();
                 }
             }
-            recordProcess.releaseRecordProcessRequester(this);
+            recordProcess.releaseProcessToken(processToken);
         }
         
-        void testPerform() {
+		void testPerform() {
+			processToken = recordProcess.requestProcessToken(this);
+            if(processToken==null) {
+                System.out.println("could not become recordProcessor");
+                return;
+            }
             long startTime,endTime;
             int nwarmup = 1000;
             int ntimes = 100000;
             double microseconds;
             double processPerSecond;
             startTime = System.nanoTime();
-            TimeStamp timeStamp = TimeStampFactory.create(0, 0);
-            allDone = false;
-            boolean gotIt =recordProcess.setRecordProcessRequester(this);
-            if(!gotIt) {
-                System.out.printf("could not become recordProcessor");
-            }
             for(int i=0; i< nwarmup + ntimes; i++) {
                 allDone = false;
                 timeStamp.put(System.currentTimeMillis());
-                recordProcess.process(this,false,timeStamp);
+                recordProcess.queueProcessRequest(processToken);
                 if(!allDone) {
                     lock.lock();
                     try {
@@ -235,12 +233,11 @@ public class ProcessTest extends TestCase {
                 if(i==nwarmup) startTime = System.nanoTime();
             }
             endTime = System.nanoTime();
-            recordProcess.releaseRecordProcessRequester(this);
             microseconds = (double)(endTime - startTime)/(double)ntimes/1000.0;
             processPerSecond = 1e6/microseconds;
             System.out.printf("time per process %f microseconds processPerSecond %f\n",
                 microseconds,processPerSecond);
-            recordProcess.releaseRecordProcessRequester(this);
+            recordProcess.releaseProcessToken(processToken);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#getRecordProcessRequestorName()
@@ -248,32 +245,46 @@ public class ProcessTest extends TestCase {
         public String getRequesterName() {
             return "testProcess";
         }
-
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+         */
+        @Override
+		public void becomeProcessor() {
+        	recordProcess.process(processToken,false,timeStamp);
+		}
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+		 */
+		@Override
+		public void canNotProcess(String reason) {
+			 throw new IllegalStateException("canNotProcess");
+		}
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+		 */
+		@Override
+		public void lostRightToProcess() {
+			throw new IllegalStateException("lostRightToProcess");
+		}
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#processComplete(org.epics.ioc.process.Support, org.epics.ioc.process.ProcessResult)
          */
+		@Override
         public void recordProcessComplete() {
             lock.lock();
             try {
                 allDone = true;
                     waitDone.signal();
             } finally {
-                lock.unlock();
+            	lock.unlock();
             }
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessRequester#requestResult(org.epics.ioc.util.AlarmSeverity, java.lang.String, org.epics.ioc.util.TimeStamp)
          */
+		@Override
         public void recordProcessResult(RequestResult requestResult) {
-            // nothing to do 
-        }
-
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.RecordProcessRequester#ready()
-         */
-        public RequestResult ready() {
-            System.out.println("Why did ready get called");
-            return RequestResult.failure;
+        	// nothing to do 
         }
     }
     

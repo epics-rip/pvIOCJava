@@ -37,6 +37,7 @@ implements Int32InterruptListener
     }
     
     private Int32 int32 = null;
+    private int value = 0;
     private PVScalar pvValue = null;
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
@@ -79,10 +80,9 @@ implements Int32InterruptListener
      * @see org.epics.ioc.pdrv.interfaces.Int32InterruptListener#interrupt(int)
      */
     public void interrupt(int value) {
-        if(super.isProcess()) {
-            recordProcess.setActive(this);
-            putData(value);
-            recordProcess.process(this, false, null);
+    	this.value = value;
+    	if(isProcessor) {
+    		recordProcess.queueProcessRequest(processToken);
         } else {
             pvRecord.lock();
             try {
@@ -96,6 +96,35 @@ implements Int32InterruptListener
             }
         }
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+     */
+    @Override
+    public void becomeProcessor() {
+    	putData(value);
+    	recordProcess.process(processToken,false, null);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+     */
+    @Override
+    public void canNotProcess(String reason) {
+    	pvRecord.lock();
+    	try {
+    		putData(value);
+    	} finally {
+    		pvRecord.unlock();
+    	}
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+     */
+    @Override
+    public void lostRightToProcess() {
+    	isProcessor = false;
+    	processToken = null;
+    }	
+
     
     private void putData(int value) {
         convert.fromInt(pvValue, value);

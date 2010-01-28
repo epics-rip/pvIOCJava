@@ -112,4 +112,10 @@ implements Int32InterruptListener
             super.pvRecord.unlock();
         }
     }
+	@Override
+	public void becomeProcessor() {}
+	@Override
+	public void canNotProcess(String reason) {}
+	@Override
+	public void lostRightToProcess() {}
 }

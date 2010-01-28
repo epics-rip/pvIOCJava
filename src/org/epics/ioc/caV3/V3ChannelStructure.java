@@ -9,8 +9,8 @@ package org.epics.ioc.caV3;
 import gov.aps.jca.dbr.DBR;
 import gov.aps.jca.dbr.DBRType;
 
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.misc.BitSet;
+import org.epics.pvData.pv.PVStructure;
 
 
 /**

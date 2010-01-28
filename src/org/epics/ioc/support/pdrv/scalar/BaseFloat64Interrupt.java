@@ -40,6 +40,7 @@ implements Float64InterruptListener
     }
 
     private Float64 float64 = null;
+    private double value = 0.0;
     private PVDouble pvLowLimit = null;
     private PVDouble pvHighLimit = null;
     private PVString pvUnits = null;
@@ -121,10 +122,9 @@ implements Float64InterruptListener
      * @see org.epics.ioc.pdrv.interfaces.Float64InterruptListener#interrupt(double)
      */
     public void interrupt(double value) {
-        if(super.isProcess()) {
-            recordProcess.setActive(this);
-            putData(value);
-            recordProcess.process(this, false, null);
+    	this.value = value;
+    	if(isProcessor) {
+    		recordProcess.queueProcessRequest(processToken);
         } else {
             pvRecord.lock();
             try {
@@ -138,6 +138,34 @@ implements Float64InterruptListener
             }
         }
     }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#becomeProcessor()
+     */
+    @Override
+    public void becomeProcessor() {
+    	putData(value);
+    	recordProcess.process(processToken,false, null);
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
+     */
+    @Override
+    public void canNotProcess(String reason) {
+    	pvRecord.lock();
+    	try {
+    		putData(value);
+    	} finally {
+    		pvRecord.unlock();
+    	}
+    }
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
+     */
+    @Override
+    public void lostRightToProcess() {
+    	isProcessor = false;
+    	processToken = null;
+    }	
     
     private void putData(double value) {
         convert.fromDouble((PVScalar)valuePVField, value);

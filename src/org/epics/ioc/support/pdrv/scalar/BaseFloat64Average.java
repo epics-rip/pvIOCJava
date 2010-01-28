@@ -40,6 +40,7 @@ public class BaseFloat64Average extends AbstractPortDriverInterruptLink implemen
     private Float64 float64 = null;
     private int numValues = 0;
     private double sum = 0.0;
+    private double value = 0.0;
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
      */
@@ -112,5 +113,11 @@ public class BaseFloat64Average extends AbstractPortDriverInterruptLink implemen
             super.pvRecord.unlock();
         }
     }
+	@Override
+	public void becomeProcessor() {}
+	@Override
+	public void canNotProcess(String reason) {}
+	@Override
+	public void lostRightToProcess() {}
 }
 

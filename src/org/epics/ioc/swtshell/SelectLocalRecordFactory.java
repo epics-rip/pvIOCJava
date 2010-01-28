@@ -76,7 +76,7 @@ public class SelectLocalRecordFactory {
             list.addSelectionListener(this);
             GridData listGridData = new GridData();
             listGridData.heightHint = 600;
-            listGridData.widthHint = 200;
+            listGridData.widthHint = 600;
             list.setLayoutData(listGridData);
             Display display = shell.getDisplay();
             shell.pack();
