@@ -60,16 +60,16 @@ public interface ScanField {
      */
     PVString getEventNamePV();
     /**
-     * Get processSelf.
-     * If processSelf is true then the record can be processed by calling processSelf.
-     * @return The current value of scan.processSelf.
+     * Get single process requester.
+     * If true that only one record process requester is allowed.
+     * @return The current value of scan.singleProcessRequester
      */
-    boolean getProcessSelf();
+    boolean getSingleProcessRequester();
     /**
-     * Get processSelf interface.
-     * @return The processSelf interface.
+     * Get singleProcessRequester interface.
+     * @return The interface.
      */
-    PVBoolean getProcessSelfPV();
+    PVBoolean getSingleProcessRequesterPV();
     /**
      * Get processAfterStart.
      * Should the record be processed once after record is started.
