@@ -87,7 +87,7 @@ abstract class AbstractIOLink extends AbstractLink {
         } else {
             name = name.substring(ind+1);
         }
-        linkValuePVField = super.linkPVRecord.getSubField(name);
+        linkValuePVField = super.linkPVRecord.getPVStructure().getSubField(name);
         if(linkValuePVField==null) {
             super.message("pvname field not found", MessageType.error);
             super.uninitialize();
