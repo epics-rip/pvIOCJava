@@ -71,7 +71,7 @@ public class SupportCreationFactory {
             for(PVRecord pvRecord : pvRecords) {
                 LocateSupport locateSupport = supportDatabase.getLocateSupport(pvRecord);
                 if(locateSupport.getRecordProcess()!=null) continue;
-                result = SupportCreationFactory.createSupportPvt(requester,locateSupport,pvRecord);
+                result = SupportCreationFactory.createSupportPvt(requester,locateSupport,pvRecord.getPVStructure());
                 if(!result) return result;
                     if(locateSupport.getRecordProcess()!=null) continue;
                     RecordProcess recordProcess =
@@ -80,7 +80,7 @@ public class SupportCreationFactory {
             }
             for(PVRecord pvRecord : pvRecords) {
                 LocateSupport recordSupport = supportDatabase.getLocateSupport(pvRecord);
-                if(!createStructureSupport(recordSupport,pvRecord)) result = false;
+                if(!createStructureSupport(recordSupport,pvRecord.getPVStructure())) result = false;
             }
             return result;
         }
@@ -92,12 +92,12 @@ public class SupportCreationFactory {
             boolean result = true;
             for(PVRecord pvRecord : pvRecords) {
                 LocateSupport locateSupport = supportDatabase.getLocateSupport(pvRecord);
-                Support support = locateSupport.getSupport(pvRecord);
+                Support support = locateSupport.getSupport(pvRecord.getPVStructure());
                 RecordProcess process = locateSupport.getRecordProcess();
                 process.initialize();
                 SupportState supportState = support.getSupportState();
                 if(supportState!=SupportState.readyForStart) {
-                    printError(requester,pvRecord,
+                    printError(requester,pvRecord.getPVStructure(),
                         " state " + supportState.toString()
                         + " but should be readyForStart");
                     result = false;
@@ -114,12 +114,12 @@ public class SupportCreationFactory {
             for(int i=0; i<pvRecords.length; i++) {
                 PVRecord pvRecord = pvRecords[i];
                 LocateSupport recordSupport = locateSupports[i];
-                Support support = recordSupport.getSupport(pvRecord);
+                Support support = recordSupport.getSupport(pvRecord.getPVStructure());
                 RecordProcess process = recordSupport.getRecordProcess();
                 process.start(afterStart);
                 SupportState supportState = support.getSupportState();
                 if(supportState!=SupportState.ready) {
-                    printError(requester,pvRecord,
+                    printError(requester,pvRecord.getPVStructure(),
                         " state " + supportState.toString()
                         + " but should be ready");
                     result = false;
@@ -156,7 +156,7 @@ public class SupportCreationFactory {
         PVAuxInfo pvAuxInfo = pvField.getPVAuxInfo();
         PVScalar pvAuxField = pvAuxInfo.getInfo(supportFactory);
         if(pvAuxField==null) {
-            if(pvField!=pvField.getPVRecordField().getPVRecord()) return true;
+            if(pvField!=pvField.getPVRecordField().getPVRecord().getPVStructure()) return true;
             pvAuxField = pvAuxInfo.createInfo(supportFactory, ScalarType.pvString);
             PVString pvString = (PVString)pvAuxField;
             pvString.put("org.epics.ioc.genericFactory");
