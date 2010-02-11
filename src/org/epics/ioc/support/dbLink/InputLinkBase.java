@@ -66,7 +66,7 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
                     "inheritSeverity not found", MessageType.error);
             super.stop();
         }
-        PVField pvField = linkPVRecord.getSubField("alarm");
+        PVField pvField = linkPVRecord.getPVStructure().getSubField("alarm");
         if(pvField!=null) {
             
             AlarmSupport alarmSupport = AlarmSupportFactory.findAlarmSupport(
