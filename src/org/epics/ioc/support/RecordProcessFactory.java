@@ -171,13 +171,13 @@ public class RecordProcessFactory {
                 if(trace) traceMessage(" initialize");
                 PVStructure pvStructure = pvRecord.getPVStructure();
                 recordProcessSupportName = "recordProcess(" + pvRecord.getRecordName() + ")";
-                fieldSupport = locateSupport.getSupport(pvRecord);
+                fieldSupport = locateSupport.getSupport(pvRecord.getPVStructure());
                 if(fieldSupport==null) {
                     throw new IllegalStateException(
                         pvRecord.getRecordName() + " has no support");
                 }
                 PVField[] pvFields = pvStructure.getPVFields();
-                Structure structure = (Structure)pvRecord.getField();
+                Structure structure = (Structure)pvRecord.getPVStructure().getField();
                 int index;
                 index = structure.getFieldIndex("timeStamp");
                 if(index>=0) {
