@@ -215,7 +215,7 @@ public class ServerFactory {
                 }
             }
             if(fieldName==null || fieldName.length()<=0 || fieldName.equals("VAL")) fieldName = "value";
-            PVField pvField = pvRecord.getSubField(fieldName);
+            PVField pvField = pvRecord.getPVStructure().getSubField(fieldName);
             if(pvField==null) {
                 throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + fieldName);
             }
@@ -572,6 +572,11 @@ public class ServerFactory {
         @Override
         public void interestDelete() {
             super.interestDelete();
+            PVCopyMonitor pvCopyMonitor = null;
+            synchronized(this) {
+            	if(this.pvCopyMonitor==null) return;
+            	pvCopyMonitor = this.pvCopyMonitor;
+            }
             pvCopyMonitor.stopMonitoring();
             synchronized(this) {
                 pvCopyMonitor = null;
@@ -585,11 +590,12 @@ public class ServerFactory {
          */
         @Override
         public void interestRegister() {
+        	PVCopyMonitor pvCopyMonitor = null;
             synchronized(this) {
-                if(pvCopyMonitor!=null) {
+                if(this.pvCopyMonitor!=null) {
                     throw new IllegalStateException("interestRegister but already monitoring");
                 }
-                pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
+                this.pvCopyMonitor = pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
             }
             monitorPVStructure = pvCopy.createPVStructure();
             monitorChangeBitSet = new BitSet(monitorPVStructure.getNumberFields());
