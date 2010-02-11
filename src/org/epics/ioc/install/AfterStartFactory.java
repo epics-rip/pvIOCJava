@@ -111,10 +111,13 @@ public class AfterStartFactory {
                     length = asrListArray.getLength();
                 }
                 for(int i=0; i<length; i++) {
-                    LinkedListNode<ASRNode> node = nodes[i];
-                    ASRNode nodeImpl = (ASRNode)node.getObject();
-                    AfterStartRequester requester = nodeImpl.requester;
-                    requester.callback(nodeImpl);
+                	LinkedListNode<ASRNode> node = nodes[i];
+                	ASRNode nodeImpl = (ASRNode)node.getObject();
+                	if(!nodeImpl.isActive) {
+                		nodeImpl.isActive = true;
+                		AfterStartRequester requester = nodeImpl.requester;
+                		requester.callback(nodeImpl);
+                	}
                 }
                 while(true) {
                     lock.lock();
@@ -152,6 +155,7 @@ public class AfterStartFactory {
             int index = priority.ordinal();
             if(lists[index]==null) lists[index] = asrListCreate.create();
             ASRNode nodeImpl = (ASRNode)node;
+            LinkedList<ASRNode> list = lists[index];
             lists[index].addTail(nodeImpl.listNode);
         }
         /* (non-Javadoc)
@@ -164,6 +168,7 @@ public class AfterStartFactory {
             boolean isEmpty = false;
             synchronized(list) {
                 list.remove(nodeImpl.listNode);
+                nodeImpl.isActive = false;
                 isEmpty = list.isEmpty();
             }
             if(isEmpty) {
@@ -216,6 +221,7 @@ public class AfterStartFactory {
     private static class ASRNode implements AfterStartNode {
         private LinkedListNode<ASRNode> listNode = asrListCreate.createNode(this);
         private AfterStartRequester requester = null;
+        private boolean isActive = false;
         
         private ASRNode(AfterStartRequester requester) {
             this.requester = requester;
