@@ -151,7 +151,7 @@ public class RecordShowFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         private void showState() {
-        	PVBoolean pvBoolean= pvRecord.getBooleanField("scan.singleProcessRequester");
+        	PVBoolean pvBoolean= pvRecord.getPVStructure().getBooleanField("scan.singleProcessRequester");
             boolean singleProcessRequester = ((pvBoolean==null) ? false : pvBoolean.get());
             String processRequesterName = recordProcess.getRecordProcessRequesterName();
             SupportState supportState = recordProcess.getSupportState();
@@ -159,13 +159,13 @@ public class RecordShowFactory {
             boolean isEnabled = recordProcess.isEnabled();
             boolean isTrace = recordProcess.isTrace();
             String alarmSeverity = null;
-            PVField pvField = pvRecord.getSubField("alarm.severity.choice");
+            PVField pvField = pvRecord.getPVStructure().getSubField("alarm.severity.choice");
             if(pvField!=null) alarmSeverity = pvField.toString();
             String alarmMessage = null;
-            pvField = pvRecord.getSubField("alarm.message");
+            pvField = pvRecord.getPVStructure().getSubField("alarm.message");
             if(pvField!=null) alarmMessage = pvField.toString();
             stringBuilder.setLength(0);
-            stringBuilder.append(pvRecord.getPVRecordField().getPVRecord().getRecordName());
+            stringBuilder.append(pvRecord.getPVStructure().getPVRecordField().getPVRecord().getRecordName());
             stringBuilder.append(newLine);
             stringBuilder.append("  singleProcessRequester ");
             stringBuilder.append(Boolean.toString(singleProcessRequester));

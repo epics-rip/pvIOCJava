@@ -105,10 +105,10 @@ public class IocShowFactory {
                 boolean isEnabled = recordProcess.isEnabled();
                 SupportState supportState = recordProcess.getSupportState();
                 String alarmSeverity = null;
-                PVField pvField = pvRecord.getSubField("alarm.severity.choice");
+                PVField pvField = pvRecord.getPVStructure().getSubField("alarm.severity.choice");
                 if(pvField!=null) alarmSeverity = pvField.toString();
                 String alarmMessage = null;
-                pvField = pvRecord.getSubField("alarm.message");
+                pvField = pvRecord.getPVStructure().getSubField("alarm.message");
                 if(pvField!=null) alarmMessage = pvField.toString();
                 if(isActive) subStringBuilder.append(" isActive");
                 if(!isEnabled) subStringBuilder.append(" disabled");
