@@ -51,7 +51,6 @@ import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.factory.PVReplaceFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
@@ -61,7 +60,6 @@ import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
-import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVDouble;
@@ -256,10 +254,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         pvStructure = pvDataCreate.createPVStructure(null,"", fields);
         if(nativeDBRType.isENUM()) {
             PVStructure pvStruct = (PVStructure)pvStructure.getPVFields()[0];
-            PVAuxInfo pvAuxInfo = pvStruct.getPVAuxInfo();
-            PVString pvString = (PVString)pvAuxInfo.createInfo("pvReplaceFactory", ScalarType.pvString);
-            pvString.put("org.epics.pvData.enumeratedFactory");
-            PVReplaceFactory.replace(masterPVDatabase, pvStruct);
+            EnumeratedFactory.replacePVField(pvStruct);
             pvStruct = (PVStructure)pvStructure.getPVFields()[0];
             pvEnumerated = EnumeratedFactory.getEnumerated(pvStruct);
         }
