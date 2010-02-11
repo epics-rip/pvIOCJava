@@ -14,8 +14,7 @@
 
 package org.epics.ioc.caV4;
 
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
@@ -23,9 +22,13 @@ import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.misc.Timer;
+import org.epics.pvData.misc.TimerFactory;
+import org.epics.pvData.misc.Timer.TimerCallback;
+import org.epics.pvData.misc.Timer.TimerNode;
 
 public class ClientFactory {
-    static private boolean isRegistered = false; 
+    static private boolean isRegistered = false;
     /**
      * This initializes the Channel Access client and invokes AfterStart to wait for 2 seconds after database initialization.
      */
@@ -39,20 +42,24 @@ public class ClientFactory {
     
     // afterStartDelay ensures that no run method gets called until after 2 seconds after
     // the last record has started. This allows time to connect to servers.
-    private static class AfterStartDelay extends TimerTask  implements NewAfterStartRequester,AfterStartRequester {
-        private static final Timer timer = new Timer("caClientDelay");
+    private static class AfterStartDelay implements NewAfterStartRequester,AfterStartRequester,TimerCallback {
         private AfterStartNode afterStartNode = null;
         private AfterStart afterStart = null;
+        private Timer timer = null;
+        private TimerNode timerNode = null;
 
         private AfterStartDelay() {}
 
         private void start() {
+        	timer = TimerFactory.create("caV4Delay", ThreadPriority.low);
+        	timerNode = TimerFactory.createNode(this);
             afterStartNode = AfterStartFactory.allocNode(this);
             AfterStartFactory.newAfterStartRegister(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.install.NewAfterStartRequester#callback(org.epics.ioc.install.AfterStart)
          */
+        @Override
         public void callback(AfterStart afterStart) {
             this.afterStart = afterStart;
             afterStart.requestCallback(afterStartNode, false, ThreadPriority.middle);
@@ -60,17 +67,19 @@ public class ClientFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
-        public void callback(AfterStartNode node) {
-            timer.schedule(this, 2000);
-        }
-        /* (non-Javadoc)
-         * @see java.util.TimerTask#run()
-         */
         @Override
-        public void run() {
-            afterStart.done(afterStartNode);
-            afterStart = null;
+        public void callback(AfterStartNode node) {
+        	timer.scheduleAfterDelay(timerNode, 2.0);
         }
-
+        @Override
+		public void callback() {
+        	afterStart.done(afterStartNode);
+            afterStart = null;
+		}
+		@Override
+		public void timerStopped() {
+			afterStart.done(afterStartNode);
+            afterStart = null;
+		}
     }
 }
