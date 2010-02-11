@@ -77,7 +77,7 @@ public class SelectFieldFactory {
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
             treeItem.setText(pvRecord.getRecordName());
             treeItem.setData(pvRecord);
-            createStructureTreeItem(treeItem,pvRecord);
+            createStructureTreeItem(treeItem,pvRecord.getPVStructure());
             shell.open();
             Display display = shell.getDisplay();
             while(!shell.isDisposed()) {

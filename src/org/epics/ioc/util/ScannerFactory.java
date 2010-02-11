@@ -84,7 +84,7 @@ public class ScannerFactory {
         	if(processToken==null) return;
         	pvRecord = recordProcess.getRecord();
         	pvStructure = pvRecord.getPVStructure();
-        	PVField pvField = pvRecord.getSubField("scan.maxConsecutiveActive");
+        	PVField pvField = pvRecord.getPVStructure().getSubField("scan.maxConsecutiveActive");
         	if(pvField!=null && (pvField instanceof PVInt)) {
         		pvMaxConsecutiveActive = (PVInt)pvField;
         	}

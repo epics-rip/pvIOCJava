@@ -256,7 +256,8 @@ public class IntrospectDatabaseFactory {
             }
             if(object==showStateButton) {
                 RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                PVBoolean pvBoolean = pvRecord.getBooleanField("scan.singleProcessRequester");
+                PVStructure pvStructure = pvRecord.getPVStructure();
+                PVBoolean pvBoolean = pvStructure.getBooleanField("scan.singleProcessRequester");
                 boolean singleProcessRequester = (pvBoolean==null) ? false : pvBoolean.get();
                 String processRequesterName = recordProcess.getRecordProcessRequesterName();
                 SupportState supportState = recordProcess.getSupportState();
@@ -264,10 +265,10 @@ public class IntrospectDatabaseFactory {
                 boolean isEnabled = recordProcess.isEnabled();
                 boolean isTrace = recordProcess.isTrace();
                 String alarmSeverity = null;
-                PVField pvField = pvRecord.getSubField("alarm.severity.choice");
+                PVField pvField = pvStructure.getSubField("alarm.severity.choice");
                 if(pvField!=null) alarmSeverity = pvField.toString();
                 String alarmMessage = null;
-                pvField = pvRecord.getSubField("alarm.message");
+                pvField = pvStructure.getSubField("alarm.message");
                 if(pvField!=null) alarmMessage = pvField.toString();
                 consoleText.append(pvRecord.getRecordName() + newLine);
                 consoleText.append(
@@ -317,10 +318,11 @@ public class IntrospectDatabaseFactory {
                     boolean isEnabled = recordProcess.isEnabled();
                     SupportState supportState = recordProcess.getSupportState();
                     String alarmSeverity = null;
-                    PVField pvField = pvRecord.getSubField("alarm.severity.choice");
+                    PVStructure pvStructure = pvRecord.getPVStructure();
+                    PVField pvField = pvStructure.getSubField("alarm.severity.choice");
                     if(pvField!=null) alarmSeverity = pvField.toString();
                     String alarmMessage = null;
-                    pvField = pvRecord.getSubField("alarm.message");
+                    pvField = pvStructure.getSubField("alarm.message");
                     if(pvField!=null) alarmMessage = pvField.toString();
                     String status = "";
                     if(isActive) status += " isActive";

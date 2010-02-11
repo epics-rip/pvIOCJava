@@ -38,7 +38,7 @@ public class ScanFieldFactory {
      * a valid pvType field.
      */
     public static ScanField create(PVRecord pvRecord) {
-        PVStructure pvScan = pvRecord.getStructureField("scan");
+        PVStructure pvScan = pvRecord.getPVStructure().getStructureField("scan");
         if(pvScan==null) {
             pvRecord.message("scan not found or is not a structure", MessageType.fatalError);
             return null;
