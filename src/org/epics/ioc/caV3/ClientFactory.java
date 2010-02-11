@@ -14,9 +14,6 @@ import gov.aps.jca.event.ContextMessageEvent;
 import gov.aps.jca.event.ContextMessageListener;
 import gov.aps.jca.event.ContextVirtualCircuitExceptionEvent;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelFind;
@@ -35,8 +32,13 @@ import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
+import org.epics.pvData.misc.Timer;
+import org.epics.pvData.misc.TimerFactory;
+import org.epics.pvData.misc.Timer.TimerCallback;
+import org.epics.pvData.misc.Timer.TimerNode;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Status;
+
 
 
 
@@ -62,14 +64,18 @@ public class ClientFactory  {
     
     // afterStartDelay ensures that no run method gets called until after 2 seconds after
     // the last record has started. This allows time to connect to servers.
-    private static class AfterStartDelay extends TimerTask  implements NewAfterStartRequester,AfterStartRequester {
-        private static final Timer timer = new Timer("caClientDelay");
+    private static class AfterStartDelay implements NewAfterStartRequester,AfterStartRequester,TimerCallback
+    {
         private AfterStartNode afterStartNode = null;
         private AfterStart afterStart = null;
+        private Timer timer = null;
+        private TimerNode timerNode = null;
       
         private AfterStartDelay() {}
         
         private void start() {
+        	timer = TimerFactory.create("caV3Delay", ThreadPriority.low);
+        	timerNode = TimerFactory.createNode(this);
             afterStartNode = AfterStartFactory.allocNode(this);
             AfterStartFactory.newAfterStartRegister(this);
         }
@@ -84,17 +90,18 @@ public class ClientFactory  {
          * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
         public void callback(AfterStartNode node) {
-            timer.schedule(this, 2000);
+        	timer.scheduleAfterDelay(timerNode, 2.0);
         }
-        /* (non-Javadoc)
-         * @see java.util.TimerTask#run()
-         */
         @Override
-        public void run() {
-            afterStart.done(afterStartNode);
+		public void callback() {
+        	afterStart.done(afterStartNode);
             afterStart = null;
-        }
-        
+		}
+		@Override
+		public void timerStopped() {
+			afterStart.done(afterStartNode);
+            afterStart = null;
+		}
     }
     private static class ChannelProviderImpl
     implements ChannelProvider,ContextExceptionListener, ContextMessageListener
