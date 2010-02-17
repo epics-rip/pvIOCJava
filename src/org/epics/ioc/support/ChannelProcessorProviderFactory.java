@@ -45,7 +45,7 @@ public class ChannelProcessorProviderFactory {
 
     static private class Provider implements ChannelProcessorProvider {
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcessProvider#requestChannelProcess(org.epics.pvData.pv.PVRecord, org.epics.ioc.channelAccess.ChannelProcessRequester)
+         * @see org.epics.ca.server.ChannelProcessorProvider#requestChannelProcessor(org.epics.pvData.pv.PVRecord, org.epics.ca.server.ChannelProcessorRequester)
          */
         @Override
         public ChannelProcessor requestChannelProcessor(PVRecord pvRecord,ChannelProcessorRequester channelProcessorRequester) {
@@ -79,9 +79,8 @@ public class ChannelProcessorProviderFactory {
         	processToken = recordProcess.requestProcessToken(this);
         	return (processToken!=null) ? true : false;
         }
-
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcess#detach()
+         * @see org.epics.ca.server.ChannelProcessor#detach()
          */
         @Override
         public void detach() {
@@ -89,7 +88,7 @@ public class ChannelProcessorProviderFactory {
             processToken = null;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.channelAccess.ChannelProcessor#requestProcess()
+         * @see org.epics.ca.server.ChannelProcessor#requestProcess()
          */
         @Override
         public void requestProcess() {
