@@ -61,7 +61,6 @@ public class RecordProcessFactory {
 		private boolean trace = false;
         private PVRecord pvRecord;
         private LocateSupport locateSupport;
-        private String recordProcessSupportName = null;
         private boolean enabled = true;
         private Support fieldSupport = null;
         private ScanField  scanField = null;
@@ -170,7 +169,6 @@ public class RecordProcessFactory {
             try {
                 if(trace) traceMessage(" initialize");
                 PVStructure pvStructure = pvRecord.getPVStructure();
-                recordProcessSupportName = "recordProcess(" + pvRecord.getRecordName() + ")";
                 fieldSupport = locateSupport.getSupport(pvRecord.getPVStructure());
                 if(fieldSupport==null) {
                     throw new IllegalStateException(
@@ -546,14 +544,7 @@ public class RecordProcessFactory {
             checkForIllegalRequest();
             if(this.timeStamp==null) return;
             timeStamp.put(this.timeStamp.getSecondsPastEpoch(), this.timeStamp.getNanoSeconds());
-        }       
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequester#getSupportProcessRequesterName()
-         */
-        public String getRequesterName() {
-            return recordProcessSupportName;
         }
-      
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
          */
