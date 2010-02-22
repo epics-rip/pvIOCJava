@@ -10,18 +10,18 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2010.01.27</h1>
+2010.02.22</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a>
+  <li><a href="#Overview">Overview</a> 
     <ul>
       <li><a href="#RecordProc">RecordProcess</a></li>
       <li><a href="#Support">Support</a></li>
     </ul>
   </li>
-  <li><a href="#Record">Record Processing Theory of Operation</a>
+  <li><a href="#Record">Record Processing Theory of Operation</a> 
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#Requester">Requester Examples</a></li>
@@ -32,7 +32,7 @@ CONTENTS
       <li><a href="#Support1">Support Overview</a></li>
     </ul>
   </li>
-  <li><a href="#Record1">Record Process</a>
+  <li><a href="#Record1">Record Process</a> 
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
       <li><a href="#RecordProc2">RecordProcess - General Purpose
@@ -49,14 +49,14 @@ CONTENTS
       <li><a href="#RecordProc7">RecordProcessFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Support2">Support</a>
+  <li><a href="#Support2">Support</a> 
     <ul>
       <li><a href="#Support3">Support State</a></li>
       <li><a href="#Support4">Support</a></li>
       <li><a href="#Record2">Record Support</a></li>
     </ul>
   </li>
-  <li><a href="#AbstractSu">AbstractSupport</a>
+  <li><a href="#AbstractSu">AbstractSupport</a> 
     <ul>
       <li><a href="#AbstractSu1">AbstractSupport</a></li>
       <li><a href="#Definition2">Definitions</a></li>
@@ -1054,8 +1054,12 @@ id="ChannelPro">ChannelProcessorProviderFactory</h2>
 from the javaIOC for channel access V4.</p>
 <pre>class ChannelProcessorProviderFactory {
      public void register();
+     public boolean registerAlternateProvider(ChannelProcessorProvider channelProcessorProvider);
 }</pre>
 
-<p>register is called by ioc.install.Install.</p>
+<p>register is called by ioc.install.Install. Alternate
+ChannelProcessorProviders can also be registered. The alternate providers are
+called to see if they can process a record before a RecordProcess is created
+to process the record.</p>
 </body>
 </html>

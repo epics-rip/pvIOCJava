@@ -4,6 +4,7 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.support;
+import java.util.ArrayList;
 
 import org.epics.ca.server.ChannelProcessor;
 import org.epics.ca.server.ChannelProcessorProvider;
@@ -13,11 +14,9 @@ import org.epics.ca.server.impl.local.ChannelServerFactory;
 import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.StatusCreate;
@@ -29,9 +28,8 @@ import org.epics.pvData.pv.Status.StatusType;
  */
 public class ChannelProcessorProviderFactory {
     
-    private static final ChannelProcessorProvider channelProcessProvider = new Provider();
+    private static final Provider channelProcessProvider = new Provider();
     private static final ChannelServer channelServer = ChannelServerFactory.getChannelServer();
-    private static final PVDatabase pvDatabase = PVDatabaseFactory.getMaster();
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
 	
@@ -43,25 +41,41 @@ public class ChannelProcessorProviderFactory {
     }
     
 
+    static public boolean registerAlternateProvider(ChannelProcessorProvider channelProcessorProvider) {
+    	return channelProcessProvider.registerAlternateProvide(channelProcessorProvider);
+    }
+    
     static private class Provider implements ChannelProcessorProvider {
-        /* (non-Javadoc)
-         * @see org.epics.ca.server.ChannelProcessorProvider#requestChannelProcessor(org.epics.pvData.pv.PVRecord, org.epics.ca.server.ChannelProcessorRequester)
-         */
-        @Override
-        public ChannelProcessor requestChannelProcessor(PVRecord pvRecord,ChannelProcessorRequester channelProcessorRequester) {
-          LocateSupport locateSupport = IOCDatabaseFactory.get(pvDatabase).getLocateSupport(pvRecord);
-          if(locateSupport==null) {
-              PVDatabase pvDatabase = PVDatabaseFactory.getBeingInstalled();
-              locateSupport = IOCDatabaseFactory.get(pvDatabase).getLocateSupport(pvRecord);
-          }
-          if(locateSupport==null) {
-              channelProcessorRequester.message("locateSupport not found", MessageType.error);
-              return null;
-          }
-          RecordProcess recordProcess = locateSupport.getRecordProcess();
-          Process process =  new Process(channelProcessorRequester,recordProcess);
-          return (process.isProcessor() ? process : null);
-        }
+    	ArrayList<ChannelProcessorProvider> alternateProviderList = new ArrayList<ChannelProcessorProvider>();
+    	/* (non-Javadoc)
+    	 * @see org.epics.ca.server.ChannelProcessorProvider#requestChannelProcessor(org.epics.pvData.pv.PVRecord, org.epics.ca.server.ChannelProcessorRequester)
+    	 */
+    	@Override
+    	public ChannelProcessor requestChannelProcessor(PVRecord pvRecord,ChannelProcessorRequester channelProcessorRequester) {
+    		synchronized(alternateProviderList) {
+    			for(int i=0; i<alternateProviderList.size(); i++) {
+    				ChannelProcessorProvider provider = alternateProviderList.get(i);
+    				ChannelProcessor channelProcessor = provider.requestChannelProcessor(pvRecord, channelProcessorRequester);
+    				if(channelProcessor!=null) return channelProcessor;
+    			}
+    		}
+    		LocateSupport locateSupport = IOCDatabaseFactory.getLocateSupport(pvRecord);
+    		if(locateSupport!=null) {
+    			RecordProcess recordProcess = locateSupport.getRecordProcess();
+    			Process process =  new Process(channelProcessorRequester,recordProcess);
+    			return (process.isProcessor() ? process : null);
+    		}
+    		channelProcessorRequester.message("locateSupport not found", MessageType.error);
+    		return null;
+    	}
+    	
+    	boolean registerAlternateProvide(ChannelProcessorProvider channelProcessorProvider) {
+    		synchronized(alternateProviderList) {
+    			if(alternateProviderList.contains(channelProcessorProvider)) return false;
+    			alternateProviderList.add(channelProcessorProvider);
+    			return true;
+    		}
+    	}
     }
     
     static private class Process implements ChannelProcessor, RecordProcessRequester {
