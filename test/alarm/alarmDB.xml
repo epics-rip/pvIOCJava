@@ -1,0 +1,519 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "records.xml" />
+<include removePath = "${JAVAIOC}/xml" />
+<record recordName = "floatCounter">
+    <scalar name = "value"  scalarType = "float" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "double" >0.0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "double" >11.0</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "double" >0.2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
+    </structure>
+    <structure name = "link" extends = "generic">
+        <structure name = "process" extends = "caProcessLink">
+            <scalar name = "pvname">floatRecord</scalar>
+        </structure>
+    </structure>
+    
+</record>
+
+<record recordName = "floatRecord" >
+    <scalar name = "value"  scalarType = "float" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">floatCounter</scalar>
+    </structure>
+    <structure name = "valueAlarm" extends = "floatAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "1" extends = "floatAlarmInterval">
+                  <scalar name = "value">2.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "2" extends = "floatAlarmInterval">
+                  <scalar name = "value">4.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "3" extends = "floatAlarmInterval">
+                  <scalar name = "value">6.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "4" extends = "floatAlarmInterval">
+                  <scalar name = "value">8.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "15" extends = "floatAlarmInterval">
+                  <scalar name = "value">10.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
+
+<record recordName = "doubleCounter">
+    <scalar name = "value"  scalarType = "double" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "double" >0.0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "double" >11.0</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "double" >0.2</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
+    </structure>
+    <structure name = "link" extends = "generic">
+        <structure name = "process" extends = "caProcessLink">
+            <scalar name = "pvname">doubleRecord</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record recordName = "doubleRecord" >
+    <scalar name = "value"  scalarType = "double" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">doubleCounter</scalar>
+    </structure>
+    <structure name = "valueAlarm" extends = "doubleAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "1" extends = "doubleAlarmInterval">
+                  <scalar name = "value">2.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "2" extends = "doubleAlarmInterval">
+                  <scalar name = "value">4.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "3" extends = "doubleAlarmInterval">
+                  <scalar name = "value">6.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "4" extends = "doubleAlarmInterval">
+                  <scalar name = "value">8.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "5" extends = "doubleAlarmInterval">
+                  <scalar name = "value">10.0</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
+
+<record recordName = "byteCounter">
+    <scalar name = "value"  scalarType = "byte" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "double" >0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "double" >11</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "double" >1</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
+    </structure>
+    <structure name = "link" extends = "generic">
+        <structure name = "process" extends = "caProcessLink">
+            <scalar name = "pvname">byteRecord</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record recordName = "byteRecord" >
+    <scalar name = "value"  scalarType = "byte" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">11</scalar>
+        </structure>
+    </structure>
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">byteCounter</scalar>
+    </structure>
+    <structure name = "valueAlarm" extends = "byteAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "1" extends = "byteAlarmInterval">
+                  <scalar name = "value">2</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "2" extends = "byteAlarmInterval">
+                  <scalar name = "value">4</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "3" extends = "byteAlarmInterval">
+                  <scalar name = "value">6</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "4" extends = "byteAlarmInterval">
+                  <scalar name = "value">8</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "5" extends = "byteAlarmInterval">
+                  <scalar name = "value">10</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
+
+<record recordName = "shortCounter">
+    <scalar name = "value"  scalarType = "short" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "double" >0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "double" >11</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "double" >1</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
+    </structure>
+    <structure name = "link" extends = "generic">
+        <structure name = "process" extends = "caProcessLink">
+            <scalar name = "pvname">shortRecord</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record recordName = "shortRecord" >
+    <scalar name = "value"  scalarType = "short" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+     <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">11</scalar>
+        </structure>
+    </structure>
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">shortCounter</scalar>
+    </structure>
+    <structure name = "valueAlarm" extends = "shortAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "1" extends = "shortAlarmInterval">
+                  <scalar name = "value">2</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "2" extends = "shortAlarmInterval">
+                  <scalar name = "value">4</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "3" extends = "shortAlarmInterval">
+                  <scalar name = "value">6</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "4" extends = "shortAlarmInterval">
+                  <scalar name = "value">8</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "5" extends = "shortAlarmInterval">
+                  <scalar name = "value">10</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
+
+<record recordName = "intCounter">
+    <scalar name = "value"  scalarType = "int" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "double" >0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "double" >11</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "double" >1</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
+    </structure>
+    <structure name = "link" extends = "generic">
+        <structure name = "process" extends = "caProcessLink">
+            <scalar name = "pvname">intRecord</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record recordName = "intRecord" >
+    <scalar name = "value"  scalarType = "int" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">11</scalar>
+        </structure>
+    </structure>
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">intCounter</scalar>
+    </structure>
+    <structure name = "valueAlarm" extends = "intAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "1" extends = "intAlarmInterval">
+                  <scalar name = "value">2</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "2" extends = "intAlarmInterval">
+                  <scalar name = "value">4</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "3" extends = "intAlarmInterval">
+                  <scalar name = "value">6</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "4" extends = "intAlarmInterval">
+                  <scalar name = "value">8</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "5" extends = "intAlarmInterval">
+                  <scalar name = "value">10</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
+
+<record recordName = "longCounter">
+    <scalar name = "value"  scalarType = "long" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0.0</scalar>
+            <scalar name = "high">11.0</scalar>
+        </structure>
+    </structure>
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "double" >0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "double" >11</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "double" >1</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
+    </structure>
+    <structure name = "link" extends = "generic">
+        <structure name = "process" extends = "caProcessLink">
+            <scalar name = "pvname">longRecord</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record recordName = "longRecord" >
+    <scalar name = "value"  scalarType = "long" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "units">increment</scalar>
+        <structure name = "limit">
+            <scalar name = "low">0</scalar>
+            <scalar name = "high">11</scalar>
+        </structure>
+    </structure>
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">longCounter</scalar>
+    </structure>
+    <structure name = "valueAlarm" extends = "longAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "1" extends = "longAlarmInterval">
+                  <scalar name = "value">2</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "2" extends = "longAlarmInterval">
+                  <scalar name = "value">4</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "3" extends = "longAlarmInterval">
+                  <scalar name = "value">6</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "4" extends = "longAlarmInterval">
+                  <scalar name = "value">8</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "5" extends = "longAlarmInterval">
+                  <scalar name = "value">10</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+    </structure> 
+</record>
+
+</database>

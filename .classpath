@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="jar/remoteTea.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="jar/CAJ.jar"/>
+	<classpathentry kind="lib" path="jar/JCA.jar"/>
+	<classpathentry kind="lib" path="/home/install/eclipse/plugins/org.eclipse.swt.gtk.linux.x86_3.5.1.v3555a.jar"/>
+	<classpathentry kind="lib" path="/home/install/eclipse/plugins/org.eclipse.swt_3.5.1.v3555a.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CAJv4Branch"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/pvDataBranch"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

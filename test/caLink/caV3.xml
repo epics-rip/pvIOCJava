@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "aiExample">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "pvname">mrkHost:aiExample<</scalar>
+        <scalar name = "inheritSeverity">true</scalar>
+    </structure>
+</record>
+
+</database>

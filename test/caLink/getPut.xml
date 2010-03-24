@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<database>
+<record recordName = "getPutCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=10.0 ? value+1 : 0.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "link" extends = "generic">
+        <structure name = "output" extends = "caOutputLink">
+            <scalar name = "pvname">putFromCounter</scalar>
+            <scalar name = "request">record[process=true]</scalar>
+        </structure>
+        <structure name = "process" extends = "caProcessLink">
+             <scalar name = "pvname">getFromCounter</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record recordName = "putFromCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "valueAlarm" extends = "doubleAlarm">
+          <scalar name = "active">true</scalar>
+          <structure name = "interval">
+              <structure name = "0" extends = "doubleAlarmInterval">
+                  <scalar name = "value">2</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">LOWLOW</scalar>
+              </structure>
+              <structure name = "1" extends = "doubleAlarmInterval">
+                  <scalar name = "value">4</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">LOW</scalar>
+              </structure>
+              <structure name = "2" extends = "doubleAlarmInterval">
+                  <scalar name = "value">6</scalar>
+                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
+                  <scalar name = "message">none</scalar>
+              </structure>
+              <structure name = "3" extends = "doubleAlarmInterval">
+                  <scalar name = "value">8</scalar>
+                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
+                  <scalar name = "message">HIGH</scalar>
+              </structure>
+              <structure name = "4" extends = "doubleAlarmInterval">
+                  <scalar name = "value">10</scalar>
+                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <scalar name = "message">HIGHHIGH</scalar>
+              </structure>
+          </structure>
+          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+          <scalar name = "hystersis">0.3</scalar>
+    </structure> 
+</record>
+
+<record recordName = "getFromCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">putFromCounter</scalar>
+        <scalar name = "request">value,alarm</scalar>
+    </structure>
+</record>
+
+
+
+</database>

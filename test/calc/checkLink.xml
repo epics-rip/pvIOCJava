@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<database>
+    <structure name = "output" extends = "generic">
+        <scalar name = "wait" scalarType = "boolean" >true</scalar>
+        <structure name = "link" extends = "caOutputLink">
+            <scalar name = "pvname">${checkRecord}Check</scalar>
+            <scalar name = "request">record[process=true]field(input.calcArgs.a.value)</scalar>
+        </structure>
+    </structure>
+</database>

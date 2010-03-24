@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+
+<record recordName = "valueAlarmTimeStamp">
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+</record>
+
+<record recordName = "counter" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1.0)&lt;=10.0 ? value+1.0 : 0.0</scalar>
+      </structure>
+    </structure>
+</record>
+
+<record recordName = "doubleArray">
+    <array name = "value" scalarType = "double" >[0,1,2,3]</array>
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+</record>
+
+</database>
