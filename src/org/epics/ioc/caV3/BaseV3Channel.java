@@ -308,7 +308,7 @@ V3Channel,ConnectionListener
 	public ChannelRPC createChannelRPC(ChannelRPCRequester channelRPCRequester,
 			PVStructure pvRequest)
     {
-    	channelRPCRequester.channelRPCConnect(notSupportedStatus,null,null);
+    	channelRPCRequester.channelRPCConnect(notSupportedStatus,null,null,null);
 		return null;
 	}
 

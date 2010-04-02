@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "exampleChannelRPC">
+   <scalar name = "factoryName" scalarType = "string">org.epics.ioc.support.rpc.ExampleChannelRPCFactory</scalar>
+    <structure name = "arguments">
+        <scalar name = "size" scalarType = "int">2</scalar>
+    </structure>
+    <structure name = "element">
+        <scalar name = "value" scalarType = "double"/>
+        <structure name = "alarm" extends = "alarm"/>
+        <structure name = "timeStamp" extends = "timeStamp"/>
+    </structure>
+</record>
+</database>
