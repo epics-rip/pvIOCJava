@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "adcVoltageEmbeded" >
+    <scalar name = "value" scalarType = "int" >2048</scalar>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+</record>
+
+<record recordName = "psEmbeded">
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "voltage" extends = "generic">
+        <scalar name = "value" scalarType = "double" />
+        <structure name = "alarm" extends = "alarm" />
+        <structure name = "input" extends = "linearConvertInput">
+            <structure name = "linearConvert">
+                <scalar name = "deviceHigh">4095</scalar>
+                <scalar name = "deviceLow">0</scalar>
+                <scalar name = "engUnitsLow">0.0</scalar>
+                <scalar name = "engUnitsHigh">10.0</scalar>
+            </structure>
+            <structure name = "input" extends = "caInputLink">
+                <scalar name = "pvname">adcVoltageEmbeded</scalar>
+            </structure>
+        </structure>  
+    </structure>
+    <structure name = "current" extends = "generic">
+        <scalar name = "value" scalarType = "double">
+            <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.powerSupplyFactory</auxInfo>
+        </scalar>
+        <structure name = "alarm" extends = "alarm" />
+        <structure name = "output" extends = "linearConvertOutput">
+            <structure name = "linearConvert">
+                <scalar name = "deviceHigh">4095</scalar>
+                <scalar name = "deviceLow">0</scalar>
+                <scalar name = "engUnitsLow">0.0</scalar>
+                <scalar name = "engUnitsHigh">10.0</scalar>
+            </structure>
+            <structure name = "output" extends = "caOutputLink">
+                <scalar name = "pvname">dacCurrentEmbeded</scalar>
+                <scalar name = "request">record[process=true]</scalar>
+            </structure>
+        </structure>
+    </structure>
+    <structure name = "power">
+        <scalar name = "value" scalarType = "double" />
+    </structure>
+</record>
+
+<record recordName = "dacCurrentEmbeded">
+    <scalar name = "value" scalarType = "int" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+</record>
+
+</database>

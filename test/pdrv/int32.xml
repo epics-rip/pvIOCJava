@@ -1,0 +1,190 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "syncInt32Port" extends = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Int32DriverFactory</scalar>
+    <scalar name = "portName">syncInt32Port</scalar>
+    <structure name = "driverParameters" extends = "int32Driver" >
+        <scalar name = "delay">0.0</scalar>
+        <scalar name = "numberRegisters">2</scalar>
+        <scalar name = "low">-2048</scalar>
+        <scalar name = "high">2047</scalar>
+    </structure>
+</record>
+
+<record recordName = "syncInt32DeviceControl" extends = "portDeviceControl" >
+    <scalar name = "portName">syncInt32Port</scalar>
+    <scalar name = "deviceName">0</scalar>
+<!--
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
+-->
+</record>
+
+<record recordName = "syncInt32Counter">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+100)&lt;=2047 ? value+100 : -2048</scalar>
+      </structure>
+    </structure>
+    <structure name = "link" extends = "caOutputLink">
+         <scalar name = "pvname">syncInt32Out</scalar>
+         <scalar name = "request">record[process=true]</scalar>
+    </structure>
+</record>
+
+<record recordName = "syncInt32Out">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
+        <scalar name = "portName">syncInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "output" extends = "pdrvInt32Output"/>
+    </structure>
+    <structure name = "link" extends = "caProcessLink">
+         <scalar name = "pvname">syncInt32In</scalar>
+    </structure>
+</record>
+
+<record recordName = "syncInt32In">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
+        <scalar name = "portName">syncInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "input" extends = "pdrvInt32Input"/>
+    </structure>
+</record>
+
+<record recordName = "syncInt32Interrupt">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "pdrvInt32Interrupt">
+        <scalar name = "portName">syncInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+</record>
+
+<record recordName = "syncInt32InAverage">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">5.0</scalar>
+    </structure>
+    <structure name = "link" extends = "pdrvInt32Average">
+        <scalar name = "portName">syncInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+    </structure>
+</record>
+
+<record recordName = "asynInt32Port" extends = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Int32DriverFactory</scalar>
+    <scalar name = "portName">asynInt32Port</scalar>
+    <structure name = "driverParameters" extends = "int32Driver" >
+        <scalar name = "delay">0.1</scalar>
+        <scalar name = "numberRegisters">2</scalar>
+        <scalar name = "low">0</scalar>
+        <scalar name = "high">4095</scalar>
+    </structure>
+</record>
+
+<record recordName = "asynInt32DeviceControl" extends = "portDeviceControl" >
+    <scalar name = "portName">asynInt32Port</scalar>
+    <scalar name = "deviceName">0</scalar>
+<!--
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
+-->
+</record>
+
+<record recordName = "asynInt32Counter">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+100)&lt;=4100 ? value+100 : -100</scalar>
+      </structure>
+    </structure>
+    <structure name = "link" extends = "caOutputLink">
+         <scalar name = "pvname">asynInt32Out</scalar>
+         <scalar name = "request">record[process=true]</scalar>
+    </structure>
+</record>
+
+<record recordName = "asynInt32Out">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
+        <scalar name = "portName">asynInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "output" extends = "pdrvInt32Output"/>
+    </structure>
+    <structure name = "link" extends = "caProcessLink">
+         <scalar name = "pvname">asynInt32In</scalar>
+    </structure>
+</record>
+
+<record recordName = "asynInt32In">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
+        <scalar name = "portName">asynInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "input" extends = "pdrvInt32Input"/>
+    </structure>
+</record>
+
+<record recordName = "asynInt32Interrupt">
+    <scalar name = "value" scalarType = "int"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "input" extends = "pdrvInt32Interrupt">
+        <scalar name = "portName">asynInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "process">true</scalar>
+    </structure>
+</record>
+
+<record recordName = "asynInt32Average">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">5.0</scalar>
+    </structure>
+    <structure name = "link" extends = "pdrvInt32Average">
+        <scalar name = "portName">asynInt32Port</scalar>
+        <scalar name = "deviceName">0</scalar>
+    </structure>
+</record>
+
+<!--
+-->
+
+
+</database>

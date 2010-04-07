@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<database>
+<record recordName = "booleanArrayToggle">
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <array name = "value" scalarType = "boolean">
+        false,true,false
+    </array>
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator" extends = "generic">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.booleanArrayToggleCalculatorFactory</auxInfo>
+      </structure>
+    </structure>
+    <structure name = "link" extends = "generic" >
+        <structure name = "1" extends = "caProcessLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
+            <scalar name = "pvname">booleanArray1FromToggle</scalar>
+        </structure>
+        <structure name = "2" extends = "caOutputLink">
+            <scalar name = "wait" scalarType = "boolean" >false</scalar>
+            <scalar name = "pvname">booleanArray2FromToggle</scalar>
+            <scalar name = "request">record[process=true]</scalar>
+        </structure>
+    </structure>
+</record>
+
+<record recordName = "booleanArray1FromToggle">
+    <array name = "value" scalarType = "boolean" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">booleanArrayToggle</scalar>
+    </structure>
+</record>
+
+<record recordName = "booleanArray2FromToggle" >
+    <array name = "value" scalarType = "boolean" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+</record>
+<record recordName = "booleanArray3FromToggle">
+    <array name = "value" scalarType = "boolean" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "input" extends = "caMonitorLink">
+        <scalar name = "pvname">booleanArrayToggle</scalar>
+        <scalar name = "request">record[process=true]</scalar>
+    </structure>
+</record>
+
+</database>

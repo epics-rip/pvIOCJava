@@ -109,6 +109,15 @@ abstract class AbstractIOLink extends AbstractLink {
                 if(pvField!=null) break;
                 pvParent = pvParent.getParent();
             }
+            if(pvField==null && fieldName.equals("index")) {
+            	// enumerated structure is a special case
+            	pvParent = super.pvStructure;
+                while(pvParent!=null) {
+                    pvField = pvParent.getSubField("value");
+                    if(pvField!=null) break;
+                    pvParent = pvParent.getParent();
+                }
+            }
             if(pvField==null) {
                 pvStructure.message("request for field " + fieldName + " is not a parent of this field", MessageType.error);
                 return false;

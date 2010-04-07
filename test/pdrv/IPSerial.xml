@@ -1,0 +1,87 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "IPSerialPort" extends = "portCreate">
+    <scalar name = "factoryName">org.epics.ioc.pdrv.serial.IPSerialDriverFactory</scalar>
+    <scalar name = "portName">IPserialPort</scalar>
+    <structure name = "driverParameters" extends = "IPSerialDriver" >
+        <scalar name = "host">192.168.1.9</scalar>
+        <scalar name = "port">4001</scalar>
+        <scalar name = "eosInput">NLCR</scalar>
+        <scalar name = "eosOutput">NLCR</scalar>
+    </structure>
+</record>
+
+<record recordName = "IPDeviceControl" extends = "portDeviceControl" >
+    <scalar name = "portName">IPserialPort</scalar>
+    <scalar name = "deviceName">0</scalar>
+<!--
+    <scalar name = "traceMask">0xfff</scalar>
+    <scalar name = "traceIOMask">0xfff</scalar>
+-->
+</record>
+
+<record recordName = "stringCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+.5)&lt;=10.0? value+.5 : -10.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "link" extends = "caOutputLink">
+         <scalar name = "pvname">stringOut</scalar>
+         <scalar name = "request">record[process=true]</scalar>
+    </structure>
+</record>
+
+<record recordName = "stringOut">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
+        <scalar name = "portName">IPserialPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "output" extends = "pdrvSerialOutput"/>
+    </structure>
+    <structure name = "link" extends = "caProcessLink">
+         <scalar name = "pvname">stringIn</scalar>
+    </structure>
+</record>
+
+<record recordName = "stringIn">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "link" extends = "portDriverLink">
+        <scalar name = "portName">IPserialPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "input" extends = "pdrvSerialInput"/>
+    </structure>
+</record>
+
+<record recordName = "stringOutIn">
+    <scalar name = "value" scalarType = "string"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "outlink" extends = "portDriverLink">
+        <scalar name = "portName">IPserialPort</scalar>
+        <scalar name = "deviceName">0</scalar>
+        <scalar name = "timeout">.2</scalar>
+        <structure name = "output" extends = "pdrvSerialOutput"/>
+        <structure name = "input" extends = "pdrvSerialInput"/>
+    </structure>
+</record>
+
+<!--
+-->
+
+
+</database>
