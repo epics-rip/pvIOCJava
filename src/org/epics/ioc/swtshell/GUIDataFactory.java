@@ -19,9 +19,23 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.epics.pvData.factory.*;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.Array;
+import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
+import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.PVStructureArray;
+import org.epics.pvData.pv.PVStructureScalar;
+import org.epics.pvData.pv.Scalar;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.StructureArrayData;
+import org.epics.pvData.pv.Type;
 
 /**
  * Factory which implements CDGet.

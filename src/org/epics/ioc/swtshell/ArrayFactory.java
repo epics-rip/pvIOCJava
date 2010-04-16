@@ -23,13 +23,18 @@ import org.epics.ca.client.ChannelArray;
 import org.epics.ca.client.ChannelArrayRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.pvData.factory.*;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.pvCopy.PVCopyFactory;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.Status;
 
 /**
  * Shell for processing a channel.
