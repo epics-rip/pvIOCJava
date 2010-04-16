@@ -12,66 +12,79 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.client.Channel;
-import org.epics.ca.client.ChannelGet;
-import org.epics.ca.client.ChannelGetRequester;
+import org.epics.ca.client.ChannelArray;
+import org.epics.ca.client.ChannelArrayRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.Channel.ConnectionState;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
+import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.PVStructureArray;
 import org.epics.pvData.pv.Requester;
+import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
-import org.epics.pvData.pvCopy.PVCopyFactory;
-
+import org.epics.pvData.pv.StructureArrayData;
 
 /**
- * A shell for getting values from a channel.
+ * Shell for processing a channel.
  * @author mrk
  *
  */
-public class GetFactory {
+public class StructureArrayFactory {
+
     /**
-     * Create the shell. 
-     * @param display The display to which the shell belongs.
+     * Create the process shell.
+     * @param display The display.
      */
     public static void init(Display display) {
-        GetImpl getImpl = new GetImpl();
-        getImpl.start(display);
+        ArrayImpl processImpl = new ArrayImpl();
+        processImpl.start(display);
     }
+
+    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     
-    
-    private static class GetImpl implements DisposeListener,SelectionListener
-    
+    private static class ArrayImpl implements DisposeListener,SelectionListener
     {
         // following are global to embedded classes
         private enum State{
             readyForConnect,connecting,
-            readyForCreateGet,creatingGet,
-            ready,getActive
+            readyForCreateArray,creatingArray,
+            ready,active
         };
         private StateMachine stateMachine = new StateMachine();
         private ChannelClient channelClient = new ChannelClient();
         private Requester requester = null;
         private boolean isDisposed = false;
+
+        private static String windowName = "structureArray";
+        private Shell shell = null;
+        private Button connectButton = null;
+        private Button createArrayButton = null;
+        private Text subFieldText = null;
         
-        private static final String windowName = "get";
-        private static final String defaultRequest = "record[]field(value,alarm,timeStamp)";
-        private Shell shell;
-        private Button connectButton;
-        private Button createRequestButton;
-        private Text requestText = null;
-        private Button createGetButton;
-        private Button getButton;
-        private Button dumpButton;
-        private Text consoleText = null; 
+        private Button getButton = null;
+        private Text getOffsetText = null;
+        private Text countText = null;
         
+        private Button putButton = null;
+        private Button putElementButton = null;
+        private Text putOffsetText = null;
+        
+        private Text consoleText = null;
+        private String subField = "value";
+
         private void start(Display display) {
             shell = new Shell(display);
             shell.setText(windowName);
@@ -79,37 +92,80 @@ public class GetFactory {
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
             Composite composite = new Composite(shell,SWT.BORDER);
-            RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
-            composite.setLayout(rowLayout);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
+            composite.setLayout(gridLayout);
             connectButton = new Button(composite,SWT.PUSH);
             connectButton.setText("disconnect");
-            connectButton.addSelectionListener(this);
+            connectButton.addSelectionListener(this);               
             
-            Composite requestComposite = new Composite(composite,SWT.BORDER);
+            Composite subFieldComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
-            requestComposite.setLayout(gridLayout);
-            createRequestButton = new Button(requestComposite,SWT.PUSH);
-            createRequestButton.setText("createRequest");
-            createRequestButton.addSelectionListener(this);
-            requestText = new Text(requestComposite,SWT.BORDER);
-            GridData gridData = new GridData(); 
-            gridData.widthHint = 400;
-            requestText.setLayoutData(gridData);
-            requestText.setText(defaultRequest);
-            requestText.addSelectionListener(this);
+            gridLayout.numColumns = 3;
+            subFieldComposite.setLayout(gridLayout);
+            createArrayButton = new Button(subFieldComposite,SWT.PUSH);
+            createArrayButton.setText("destroyArray");
+            createArrayButton.addSelectionListener(this);
 
-            createGetButton = new Button(composite,SWT.PUSH);
-            createGetButton.setText("destroyGet");
-            createGetButton.addSelectionListener(this);
-             
-            getButton = new Button(composite,SWT.NONE);
+            new Label(subFieldComposite,SWT.NONE).setText("subField");
+            subFieldText = new Text(subFieldComposite,SWT.BORDER);
+            GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.minimumWidth = 500;
+            subFieldText.setLayoutData(gridData);
+            subFieldText.setText(subField);
+            subFieldText.addSelectionListener(this);
+            
+            Composite getComposite = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
+            getComposite.setLayout(gridLayout);
+            getButton = new Button(getComposite,SWT.PUSH);
             getButton.setText("get");
             getButton.addSelectionListener(this);
+
+            Composite offsetComposite = new Composite(getComposite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            offsetComposite.setLayout(gridLayout);
+            new Label(offsetComposite,SWT.NONE).setText("offset");
+            getOffsetText = new Text(offsetComposite,SWT.BORDER);
+            gridData = new GridData(); 
+            gridData.widthHint = 100;
+            getOffsetText.setLayoutData(gridData);
+            getOffsetText.setText("0");
+            Composite countComposite = new Composite(getComposite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
+            countComposite.setLayout(gridLayout);
+            new Label(countComposite,SWT.NONE).setText("count");
+            countText = new Text(countComposite,SWT.BORDER);
+            gridData = new GridData(); 
+            gridData.widthHint = 100;
+            countText.setLayoutData(gridData);
+            countText.setText("-1");
             
-            dumpButton = new Button(composite,SWT.NONE);
-            dumpButton.setText("dump");
-            dumpButton.addSelectionListener(this);
+            Composite putComposite = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
+            putComposite.setLayout(gridLayout);
+            gridData = new GridData(GridData.FILL_HORIZONTAL);
+            putComposite.setLayoutData(gridData);
+            putButton = new Button(putComposite,SWT.PUSH);
+            putButton.setText("put");
+            putButton.addSelectionListener(this);
+            putElementButton = new Button(putComposite,SWT.PUSH);
+            putElementButton.setText("putElement");
+            putElementButton.addSelectionListener(this);
+            offsetComposite = new Composite(putComposite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            offsetComposite.setLayout(gridLayout);
+            new Label(offsetComposite,SWT.NONE).setText("index");
+            putOffsetText = new Text(offsetComposite,SWT.BORDER);
+            gridData = new GridData(); 
+            gridData.widthHint = 100;
+            putOffsetText.setLayoutData(gridData);
+            putOffsetText.setText("0");
             
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -140,7 +196,6 @@ public class GetFactory {
             shell.open();
             shell.addDisposeListener(this);
         }
-        
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
@@ -148,6 +203,7 @@ public class GetFactory {
         public void widgetDisposed(DisposeEvent e) {
             isDisposed = true;
             channelClient.disconnect();
+            
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -162,7 +218,7 @@ public class GetFactory {
         @Override
         public void widgetSelected(SelectionEvent arg0) {
             if(isDisposed) return;
-            Object object = arg0.getSource(); 
+            Object object = arg0.getSource();
             if(object==connectButton) {
                 State state = stateMachine.getState();
                 if(state==State.readyForConnect) {
@@ -172,23 +228,32 @@ public class GetFactory {
                     channelClient.disconnect();
                     stateMachine.setState(State.readyForConnect);
                 }
-            } else if(object==createRequestButton) {
-                channelClient.createRequest(shell);
-            } else if(object==createGetButton) {
+            } else if(object==createArrayButton) {
                 State state = stateMachine.getState();
-                if(state==State.readyForCreateGet) {
-                    stateMachine.setState(State.creatingGet);
-                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText());
-                    channelClient.createGet(pvStructure);
+                if(state==State.readyForCreateArray) {
+                    stateMachine.setState(State.creatingArray);
+                    channelClient.createArray();
                 } else {
-                    channelClient.destroyGet();
-                    stateMachine.setState(State.readyForCreateGet);
+                    channelClient.destroyArray();
+                    stateMachine.setState(State.readyForCreateArray);
                 }
+            } else if(object==subFieldText) {
+                subField = subFieldText.getText();
             } else if(object==getButton) {
-               stateMachine.setState(State.getActive);
-               channelClient.get();
-            } else if(object==dumpButton) {
-                channelClient.dump();
+                stateMachine.setState(State.active);
+                int offset = Integer.parseInt(getOffsetText.getText());
+                int count = Integer.parseInt(countText.getText());
+                channelClient.get(offset, count);
+            } else if(object==putElementButton) {
+            	int offset = Integer.parseInt(putOffsetText.getText());
+            	PVStructure pvStructure = channelClient.getPVStructure(offset);
+            	GUIData guiData = GUIDataFactory.create(shell);
+            	BitSet bitSet = new BitSet(pvStructure.getNumberFields());
+            	guiData.get(pvStructure, bitSet);
+            } else if(object==putButton) {
+                stateMachine.setState(State.active);
+                int offset = Integer.parseInt(getOffsetText.getText());
+                channelClient.put(offset);
             }
         }
         
@@ -201,51 +266,45 @@ public class GetFactory {
                 switch(state) {
                 case readyForConnect:
                     connectButton.setText("connect");
-                    createGetButton.setText("createGet");
-                    createRequestButton.setEnabled(false);
-                    createGetButton.setEnabled(false);
+                    createArrayButton.setText("createArray");
+                    subFieldText.setEnabled(true);
                     getButton.setEnabled(false);
-                    dumpButton.setEnabled(false);
+                    putButton.setEnabled(false);
                     return;
                 case connecting:
                     connectButton.setText("disconnect");
-                    createGetButton.setText("createGet");
-                    createRequestButton.setEnabled(false);
-                    createGetButton.setEnabled(false);
+                    createArrayButton.setText("createArray");
+                    subFieldText.setEnabled(true);
                     getButton.setEnabled(false);
-                    dumpButton.setEnabled(false);
+                    putButton.setEnabled(false);
                     return;
-                case readyForCreateGet:
+                case readyForCreateArray:
                     connectButton.setText("disconnect");
-                    createGetButton.setText("createGet");
-                    createRequestButton.setEnabled(true);
-                    createGetButton.setEnabled(true);
+                    createArrayButton.setText("createArray");
+                    subFieldText.setEnabled(true);
                     getButton.setEnabled(false);
-                    dumpButton.setEnabled(false);
+                    putButton.setEnabled(false);
                     return;
-                case creatingGet:
+                case creatingArray:
                     connectButton.setText("disconnect");
-                    createGetButton.setText("destroyGet");
-                    createRequestButton.setEnabled(false);
-                    createGetButton.setEnabled(true);
+                    createArrayButton.setText("destroyArray");
+                    subFieldText.setEnabled(false);
                     getButton.setEnabled(false);
-                    dumpButton.setEnabled(false);
+                    putButton.setEnabled(false);
                     return;
                 case ready:
                     connectButton.setText("disconnect");
-                    createGetButton.setText("destroyGet");
-                    createRequestButton.setEnabled(false);
-                    createGetButton.setEnabled(true);
+                    createArrayButton.setText("destroyArray");
+                    subFieldText.setEnabled(false);
                     getButton.setEnabled(true);
-                    dumpButton.setEnabled(true);
+                    putButton.setEnabled(true);
                     return;
-                case getActive:
-                    connectButton.setText("disconnect");
-                    createGetButton.setText("destroyGet");
-                    createRequestButton.setEnabled(false);
-                    createGetButton.setEnabled(true);
+                case active:
+                	connectButton.setText("disconnect");
+                    createArrayButton.setText("destroyArray");
+                    subFieldText.setEnabled(false);
                     getButton.setEnabled(false);
-                    dumpButton.setEnabled(false);
+                    putButton.setEnabled(false);
                     return;
                 }
                 
@@ -254,19 +313,19 @@ public class GetFactory {
         }
         
         private enum RunCommand {
-            channelConnected,timeout,destroy,channelrequestDone,channelGetConnect,getDone
+            channelConnected,timeout,destroy,channelArrayConnect,getDone,putDone
         }
         
-        private class ChannelClient implements
-        ChannelRequester,ConnectChannelRequester,CreateFieldRequestRequester,Runnable,ChannelGetRequester
+        
+        private class ChannelClient implements ChannelRequester,ConnectChannelRequester,Runnable,ChannelArrayRequester
         {
+        	private StructureArrayData structureArrayData = new StructureArrayData();
             private Channel channel = null;
             private ConnectChannel connectChannel = null;
-            private ChannelGet channelGet = null;
-            private BitSet changeBitSet = null;
+            private ChannelArray channelArray = null;
+            private PVStructureArray pvArray = null;
             private RunCommand runCommand;
-            private PrintModified printModified = null;
-
+            
             void connect(Shell shell) {
                 if(connectChannel!=null) {
                     message("connect in propress",MessageType.error);
@@ -274,19 +333,21 @@ public class GetFactory {
                 connectChannel = ConnectChannelFactory.create(shell, this,this);
                 connectChannel.connect();
             }
-            void createRequest(Shell shell) {
-                CreateFieldRequest createRequest = CreateFieldRequestFactory.create(shell, channel, this);
-                createRequest.create();
+            
+            
+            void createArray() {
+            	PVStructure pvRequest = pvDataCreate.createPVStructure(null, "", new Field[0]);
+            	PVString pvFieldName = (PVString)pvDataCreate.createPVScalar(pvRequest, "field", ScalarType.pvString);
+            	pvFieldName.put(subField);
+            	pvRequest.appendPVField(pvFieldName);
+                channelArray = channel.createChannelArray(this, pvRequest);
             }
-            void createGet(PVStructure pvRequest) {
-                channelGet = channel.createChannelGet(this, pvRequest);
-                return;
-            }
-            void destroyGet() {
-                ChannelGet channelGet = this.channelGet;
-                if(channelGet!=null) {
-                    this.channelGet = null;
-                    channelGet.destroy();
+            
+            void destroyArray() {
+                ChannelArray channelArray = this.channelArray;
+                if(channelArray!=null) {
+                    this.channelArray = null;
+                    channelArray.destroy();
                 }
             }
             void disconnect() {
@@ -297,14 +358,26 @@ public class GetFactory {
                 }
             }
             
-            void get() {
-                channelGet.get(false);
+            PVStructure getPVStructure(int offset) {
+            	int length = offset+1;
+            	if(pvArray.getLength()<length) {
+            		pvArray.setLength(length);
+            	}
+            	pvArray.get(0, offset+1, structureArrayData);
+            	PVStructure[] pvStructures = structureArrayData.data;
+            	
+            	if(pvStructures[offset]==null) {
+            		pvStructures[offset] = pvDataCreate.createPVStructure(null, pvArray.getStructureArray().getStructure());
+            	}
+            	return pvStructures[offset];
+            }
+  
+            void get(int offset,int count) {
+                channelArray.getArray(false, offset, count);
             }
             
-            void dump() {
-            	changeBitSet.clear();
-            	changeBitSet.set(0);
-            	printModified.print();
+            void put(int offset) {
+            	channelArray.putArray(false, offset, pvArray.getLength());
             }
             /* (non-Javadoc)
              * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
@@ -317,13 +390,13 @@ public class GetFactory {
                     runCommand = RunCommand.destroy;
                     shell.getDisplay().asyncExec(this);
             	}
-            	
-                if(state != ConnectionState.CONNECTED) {
+                
+            	if(state != ConnectionState.CONNECTED) {
                     message("channel " + state,MessageType.error);
                     return;
                 }
-
-                channel = c;
+                
+            	channel = c;
                 ConnectChannel connectChannel = this.connectChannel;
                 if(connectChannel!=null) {
                     connectChannel.cancelTimeout();
@@ -341,7 +414,7 @@ public class GetFactory {
                     message(status.toString(),MessageType.error);
                     return;
                 }
-                channel = c;
+                channel = c;;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.swtshell.ConnectChannelRequester#timeout()
@@ -357,55 +430,50 @@ public class GetFactory {
                 runCommand = RunCommand.destroy;
                 shell.getDisplay().asyncExec(this);
             }
-            @Override
-			public String getDefault() {
-				return "value,alarm,timeStamp";
-			}
-			/* (non-Javadoc)
-			 * @see org.epics.ioc.swtshell.CreateFieldRequestRequester#request(java.lang.String)
-			 */
-			@Override
-			public void request(String request) {
-				requestText.selectAll();
-                requestText.clearSelection();
-                requestText.setText("record[]field(" + request + ")");
-                runCommand = RunCommand.channelrequestDone;
-                shell.getDisplay().asyncExec(this);
-            }
             /* (non-Javadoc)
-             * @see org.epics.ca.client.ChannelGetRequester#channelGetConnect(Status,org.epics.ca.client.ChannelGet, org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+             * @see org.epics.ca.client.ChannelArrayRequester#channelArrayConnect(Status,org.epics.ca.client.ChannelArray, org.epics.pvData.pv.PVArray)
              */
             @Override
-            public void channelGetConnect(Status status,ChannelGet channelGet,PVStructure pvStructure,BitSet bitSet) {
+            public void channelArrayConnect(Status status,ChannelArray channelArray,PVArray pvArray) {
                 if (!status.isOK()) {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
-                this.channelGet = channelGet;
-                changeBitSet = bitSet;
-                printModified = PrintModifiedFactory.create(channel.getChannelName(),pvStructure, changeBitSet, null, consoleText);
-                runCommand = RunCommand.channelGetConnect;
+                if(pvArray.getArray().getElementType()!=ScalarType.pvStructure) {
+                	message("The elementType is not structure. Use array to access.",MessageType.error);
+                	return;
+                }
+                this.pvArray = (PVStructureArray)pvArray;
+                runCommand = RunCommand.channelArrayConnect;
                 shell.getDisplay().asyncExec(this);
             }
-
             /* (non-Javadoc)
-             * @see org.epics.ca.client.ChannelGetRequester#getDone(Status)
+             * @see org.epics.ca.client.ChannelArrayRequester#getArrayDone(Status)
              */
             @Override
-            public void getDone(Status status) {
+            public void getArrayDone(Status status) {
                 if (!status.isOK()) {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
-                shell.getDisplay().asyncExec( new Runnable() {
-                    public void run() {
-                        printModified.print();
-                    }
-
-                });
                 runCommand = RunCommand.getDone;
                 shell.getDisplay().asyncExec(this);
+                
             }
+
+            /* (non-Javadoc)
+             * @see org.epics.ca.client.ChannelArrayRequester#putArrayDone(Status)
+             */
+            @Override
+            public void putArrayDone(Status status) {
+                if (!status.isOK()) {
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
+                }
+                runCommand = RunCommand.putDone;
+                shell.getDisplay().asyncExec(this);
+            }
+            
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
@@ -413,7 +481,7 @@ public class GetFactory {
             public void run() {
                 switch(runCommand) {
                 case channelConnected:
-                    stateMachine.setState(State.readyForCreateGet);
+                    stateMachine.setState(State.readyForCreateArray);
                     return;
                 case timeout:
                     stateMachine.setState(State.readyForConnect);
@@ -421,18 +489,20 @@ public class GetFactory {
                 case destroy:
                     stateMachine.setState(State.readyForConnect);
                     return;
-                case channelrequestDone:
-                    stateMachine.setState(State.readyForCreateGet);
-                    return;
-                case channelGetConnect:
+                case channelArrayConnect:
                     stateMachine.setState(State.ready);
                     return;
                 case getDone:
+                    message(pvArray.toString(),MessageType.info);
+                    stateMachine.setState(State.ready);
+                    return;
+                case putDone:
+                    message("putDone",MessageType.info);
                     stateMachine.setState(State.ready);
                     return;
                 }
+                
             }
-            
             /* (non-Javadoc)
              * @see org.epics.ioc.util.Requester#getRequesterName()
              */
@@ -446,7 +516,7 @@ public class GetFactory {
             @Override
             public void message(final String message, final MessageType messageType) {
                 requester.message(message, MessageType.info);
-            }           
+            }
         }
     }
 }

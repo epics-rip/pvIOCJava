@@ -23,12 +23,13 @@ import org.epics.ca.client.ChannelArray;
 import org.epics.ca.client.ChannelArrayRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.factory.*;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /**
  * Shell for processing a channel.
@@ -47,6 +48,7 @@ public class ArrayFactory {
     }
 
     private static final Convert convert = ConvertFactory.getConvert();
+    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     
     private static class ArrayImpl implements DisposeListener,SelectionListener
     {
@@ -330,7 +332,11 @@ public class ArrayFactory {
             
             
             void createArray() {
-                channelArray = channel.createChannelArray(this, null);
+            	PVStructure pvRequest = pvDataCreate.createPVStructure(null, "", new Field[0]);
+            	PVString pvFieldName = (PVString)pvDataCreate.createPVScalar(pvRequest, "field", ScalarType.pvString);
+            	pvFieldName.put(subField);
+            	pvRequest.appendPVField(pvFieldName);
+                channelArray = channel.createChannelArray(this, pvRequest);
             }
             
             void destroyArray() {
@@ -425,6 +431,10 @@ public class ArrayFactory {
                 if (!status.isOK()) {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
+                }
+                if(pvArray.getArray().getElementType()==ScalarType.pvStructure) {
+                	message("The elementType is structure. Use structureArray to access.",MessageType.error);
+                	return;
                 }
                 this.pvArray = pvArray;
                 runCommand = RunCommand.channelArrayConnect;

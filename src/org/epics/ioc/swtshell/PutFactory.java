@@ -66,6 +66,7 @@ public class PutFactory {
         private Text requestText = null;
         private Button createPutButton;
         private Button putButton;
+        private Button dumpButton;
         private Text consoleText = null;
         
         private void start(Display display) {
@@ -102,6 +103,10 @@ public class PutFactory {
             putButton = new Button(composite,SWT.NONE);
             putButton.setText("put");
             putButton.addSelectionListener(this);
+            
+            dumpButton = new Button(composite,SWT.NONE);
+            dumpButton.setText("dump");
+            dumpButton.addSelectionListener(this);
 
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -178,6 +183,10 @@ public class PutFactory {
                guiData.get(channelClient.getPVStructure(), channelClient.getBitSet());
                stateMachine.setState(State.putActive);
                channelClient.put();
+            } else if(object==dumpButton) {
+            	consoleText.selectAll();
+                consoleText.clearSelection();
+                consoleText.setText(channelClient.getPVStructure().toString());
             }
         }
 
@@ -194,6 +203,7 @@ public class PutFactory {
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(false);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case connecting:
                     connectButton.setText("disconnect");
@@ -201,6 +211,7 @@ public class PutFactory {
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(false);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case readyForCreatePut:
                     connectButton.setText("disconnect");
@@ -208,6 +219,7 @@ public class PutFactory {
                     createRequestButton.setEnabled(true);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case creatingPut:
                     connectButton.setText("disconnect");
@@ -215,6 +227,7 @@ public class PutFactory {
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case ready:
                     connectButton.setText("disconnect");
@@ -222,6 +235,7 @@ public class PutFactory {
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(true);
+                    dumpButton.setEnabled(true);
                     return;
                 case putActive:
                     connectButton.setText("disconnect");
@@ -229,6 +243,7 @@ public class PutFactory {
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 }
                 
@@ -287,7 +302,7 @@ public class PutFactory {
             void put() {
                 channelPut.put(false);
             }
-            
+             
             PVStructure getPVStructure() {
                 return pvStructure;
             }

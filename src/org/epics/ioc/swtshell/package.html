@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2010.04.01</h1>
+2010.04.16</h1>
 
 <p>CONTENTS</p>
 
@@ -29,6 +29,7 @@ package: org.epics.ioc.swtshell<br />
       <li><a href="#putGet">putGet</a></li>
       <li><a href="#channelRPC">channelRPC</a></li>
       <li><a href="#array">array</a></li>
+      <li><a href="#structureA">structureArray</a></li>
       <li><a href="#monitor">monitor</a></li>
     </ul>
   </li>
@@ -70,7 +71,8 @@ IOC then the option "-server server/beforeStartCAV3.txt" must be given. </p>
 <ul>
   <li>channelList:<br />
     This obtains a list of the channels in a javaIOC. </li>
-  <li>process,get,put,putGet,channelRPC, monitor, and array:<br />
+  <li>process,get,put,putGet,channelRPC, monitor, array, and
+    structureArray:<br />
     Each of these brings up another window which provides the ability to
     access data via channel access. The next section describes these
   windows:</li>
@@ -95,9 +97,9 @@ text input window, the enter key must be pressed.</p>
 <h2 style="text-align: center" id="Channel">Channel Access</h2>
 <hr />
 
-<p>The channelList, get, put, process,putGet,channelRPC, monitor, and array
-buttons each start a new window. Each window provides the ability to connect
-to a PV (Process Variable). </p>
+<p>The channelList, get, put, process,putGet,channelRPC, monitor,array, and
+structureArray buttons each start a new window. Each window provides the
+ability to connect to a PV (Process Variable). </p>
 
 <p>The window gets data from a local or remote IOC. The data is accessed via
 Channel Access, which can be either V3 or V4 channelAccess</p>
@@ -226,6 +228,8 @@ clicking createGet.:</p>
     <dd>Create and destroy a channelGet request.</dd>
   <dt>get</dt>
     <dd>Issue a get request. The result is shown in the text window.</dd>
+  <dt>dump</dt>
+    <dd>This shows the current data values.</dd>
 </dl>
 
 <h3 id="put">put</h3>
@@ -333,6 +337,28 @@ button. It has a text entry for subField. The get button issues a array get
 request. The offset and count can be specified. The result is written into
 the value field of the put row. The put button issues a put array request.
 The offset can be specified. The value field provides the array values.</p>
+
+<h3 id="structureA">structureArray</h3>
+
+<p>This is used to get and modify elements of a PVStructureArray. You must
+get before issuing a put. The puts will modify the data obtained via the get
+and then put the data back.</p>
+
+<p>The following window appears when the structureArray button is pushed:</p>
+
+<center>
+<p><img src="./structureArray.gif" alt="structureArray" /></p>
+</center>
+
+<p>This window has a connect/disconnect button and a createArray/destroyArray
+button. It has a text entry for subField. The get button issues a array get
+request. The offset and count can be specified. The result is written to the
+consoleText window. You must issue a get before using put.</p>
+
+<p>The put row acts on the data received from a put. You change elements by
+giving a value to index and clicking putElement. A tree structured window
+just like for put appears. This is changing the local data. When you click
+put the data is written to the actual record.</p>
 
 <h3 id="monitor">monitor</h3>
 

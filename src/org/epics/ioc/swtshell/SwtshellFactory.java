@@ -130,6 +130,13 @@ public class SwtshellFactory {
                     ArrayFactory.init(display);
                 }
             });
+            Button structureArrayDB = new Button(shell,SWT.PUSH);
+            structureArrayDB.setText("structureArray");
+            structureArrayDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    StructureArrayFactory.init(display);
+                }
+            });
             Button iocConsoleDB = new Button(shell,SWT.PUSH);
             iocConsoleDB.setText("iocConsole");
             iocConsoleDB.addSelectionListener( new SelectionAdapter() {
