@@ -172,7 +172,8 @@ public class PutFactory {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreatePut) {
                     stateMachine.setState(State.creatingPut);
-                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText());
+                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    if(pvStructure==null) return;
                     channelClient.createPut(pvStructure);
                 } else {
                     channelClient.destroyPut();

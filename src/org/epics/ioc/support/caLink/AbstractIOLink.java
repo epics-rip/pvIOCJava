@@ -79,7 +79,7 @@ abstract class AbstractIOLink extends AbstractLink {
         if(pvRequest==null) {
         	String request = requestPVString.get();
             if(request==null || request.length()==0) {
-                pvRequest = PVCopyFactory.createRequest("field(value)");
+                pvRequest = PVCopyFactory.createRequest("field(value)",this);
             } else {
             	int index = request.indexOf("field(");
             	if(index<0) {
@@ -90,9 +90,10 @@ abstract class AbstractIOLink extends AbstractLink {
             			request = request + "field(value)";
             		}
             	}
-                pvRequest = PVCopyFactory.createRequest(request);
+                pvRequest = PVCopyFactory.createRequest(request,this);
             }
         }
+        if(pvRequest==null) return;
         super.start(afterStart);
     }
     

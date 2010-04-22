@@ -173,7 +173,8 @@ public class ChannelRPCFactory {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreateChannelRPC) {
                     stateMachine.setState(State.creatingChannelRPC);
-                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText());
+                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    if(pvStructure==null) return;
                     channelClient.createChannelRPC(pvStructure);
                 } else {
                     channelClient.destroyChannelRPC();

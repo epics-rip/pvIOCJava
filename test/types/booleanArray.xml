@@ -48,7 +48,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "input" extends = "caMonitorLink">
         <scalar name = "pvname">booleanArrayToggle</scalar>
-        <scalar name = "request">record[process=true]</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
 </record>
 

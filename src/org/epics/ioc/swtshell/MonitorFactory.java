@@ -205,7 +205,8 @@ public class MonitorFactory {
             } else if(object==createMonitorButton) {
                 if(state==State.readyForCreateMonitor) {
                     stateMachine.setState(State.creatingMonitor);
-                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText());
+                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    if(pvStructure==null) return;
                     channelClient.createMonitor(pvStructure);
                 } else {
                     channelClient.destroyMonitor();

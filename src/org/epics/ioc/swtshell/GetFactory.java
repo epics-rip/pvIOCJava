@@ -178,7 +178,8 @@ public class GetFactory {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreateGet) {
                     stateMachine.setState(State.creatingGet);
-                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText());
+                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    if(pvStructure==null) return;
                     channelClient.createGet(pvStructure);
                 } else {
                     channelClient.destroyGet();

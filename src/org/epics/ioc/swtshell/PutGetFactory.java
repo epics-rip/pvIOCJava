@@ -174,7 +174,7 @@ public class PutGetFactory {
                 channelClient.createGetRequest(shell);
             } else if(object==createPutGetButton) {
                 stateMachine.setState(State.creatingPutGet);
-                PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText());
+                PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
                 channelClient.createPutGet(pvStructure);
             } else if(object==putGetButton) {
                 GUIData guiData = GUIDataFactory.create(shell);
