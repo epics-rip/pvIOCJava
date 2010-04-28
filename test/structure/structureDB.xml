@@ -6,7 +6,6 @@
 <include href = "records.xml" />
 <include removePath = "${JAVAIOC}/xml" />
 
-
 <record recordName = "structureScalarTest">
     <structure name = "timeStamp" extends = "timeStamp" />
     <scalar name = "value" scalarType = "structure" extends = "test.testStructure">

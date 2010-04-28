@@ -27,7 +27,6 @@
    <scalar name = "pvname" scalarType = "string">
       <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.caProcessLinkFactory</auxInfo>
   </scalar>
-  <scalar name = "request" scalarType = "string"/>
   <structure name = "alarm" extends = "alarm" />
   <scalar name = "providerName" scalarType = "string">local</scalar>
 </structure>
