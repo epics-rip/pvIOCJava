@@ -7,7 +7,7 @@ package org.epics.ioc.support.rpc;
 
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelRPCRequester;
-import org.epics.ca.client.RPCServer;
+import org.epics.ca.server.impl.local.RPCServer;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.StatusFactory;
@@ -30,9 +30,8 @@ import org.epics.pvData.pv.Status.StatusType;
  */
 public class ExampleChannelRPCFactory {
     /**
-     * Create support for an array of calcArg structures.
-     * @param pvStructure The processControlStructure
-     * @return An interface to the support or null if the supportName was not "linkArray".
+     * Create an example RPCServer
+     * @return The interface.
      */
     public static RPCServer create() {
         return new RPCServerImpl();

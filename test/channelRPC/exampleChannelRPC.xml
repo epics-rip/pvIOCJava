@@ -2,7 +2,7 @@
 <database>
 
 <record recordName = "exampleChannelRPC">
-   <scalar name = "factoryName" scalarType = "string">org.epics.ioc.support.rpc.ExampleChannelRPCFactory</scalar>
+   <scalar name = "factoryRPC" scalarType = "string">org.epics.ioc.support.rpc.ExampleChannelRPCFactory</scalar>
     <structure name = "arguments">
         <scalar name = "size" scalarType = "int">2</scalar>
     </structure>
