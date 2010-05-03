@@ -21,15 +21,10 @@ import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.monitor.MonitorElement;
 import org.epics.pvData.monitor.MonitorRequester;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
-import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
 
@@ -52,18 +47,10 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     
     private static Executor executor = ExecutorFactory.create("caLinkMonitor", ThreadPriority.low);
     private ExecutorNode executorNode = executor.createNode(this);
-    private PVString monitorTypeAccess = null;
-    private PVDouble deadbandAccess = null;
-    private PVInt queueSizeAccess = null;
     private PVBoolean reportOverrunAccess = null;
     private PVBoolean processAccess = null;
-    
-    private double deadband = 0.0;
-    private int queueSize = 0;
     private ProcessToken processToken = null;
     private boolean process = false;
-    private PVStructure pvOption = null;
-    private PVString pvAlgorithm = null;
     private boolean overrun = false;
 
     private MonitorElement monitorElement = null;
@@ -77,18 +64,6 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(super.getSupportState()!=SupportState.readyForStart) return;
-        monitorTypeAccess = pvStructure.getStringField("type");
-        if(monitorTypeAccess==null) {
-            uninitialize(); return;
-        }
-        deadbandAccess = pvStructure.getDoubleField("deadband");
-        if(deadbandAccess==null)  {
-            uninitialize(); return;
-        }
-        queueSizeAccess = pvStructure.getIntField("queueSize");
-        if(queueSizeAccess==null)  {
-            uninitialize(); return;
-        }
         reportOverrunAccess = pvStructure.getBooleanField("reportOverrun");
         if(reportOverrunAccess==null)  {
             uninitialize(); return;
@@ -106,23 +81,6 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
-        String monitorType = monitorTypeAccess.get();
-        deadband = deadbandAccess.get();
-        queueSize = queueSizeAccess.get();
-        if(queueSize<=1) {
-            pvStructure.message("queueSize being put to 2", MessageType.warning);
-            queueSize = 2;
-        }
-        pvOption = pvDataCreate.createPVStructure(null, "pvOption", new Field[0]);
-        pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvOption, "algorithm", ScalarType.pvString);
-        pvAlgorithm.put(monitorType);
-        pvOption.appendPVField(pvAlgorithm);
-        PVInt pvQueueSize = (PVInt)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvInt);
-        pvQueueSize.put(queueSize);
-        pvOption.appendPVField(pvQueueSize);
-        PVDouble pvDeadband = (PVDouble)pvDataCreate.createPVScalar(pvOption, "deadband", ScalarType.pvDouble);
-        pvDeadband.put(deadband);
-        pvOption.appendPVField(pvDeadband);
         process = processAccess.get();
         if(process) {
         	processToken = recordProcess.requestProcessToken(this);
@@ -169,7 +127,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(monitor==null) {
-                monitor = channel.createMonitor(this, pvRequest, pvOption);
+                monitor = channel.createMonitor(this, pvRequest);
             } else {
                 pvRecord.lock();
                 try {
@@ -237,10 +195,10 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	}
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.ChannelMonitorRequester#unlisten()
+     * @see org.epics.pvData.monitor.MonitorRequester#unlisten(org.epics.pvData.monitor.Monitor)
      */
     @Override
-    public void unlisten() {
+	public void unlisten(Monitor monitor) {
         recordProcess.stop();
     }
     /* (non-Javadoc)

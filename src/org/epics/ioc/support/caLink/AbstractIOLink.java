@@ -10,15 +10,12 @@ import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.pv.Convert;
-import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Scalar;
-import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.pv.Type;
+import org.epics.pvData.pvCopy.PVCopyFactory;
 
 
 /**
@@ -31,6 +28,13 @@ abstract class AbstractIOLink extends AbstractLink {
      * The convert implementation.
      */
     protected static final Convert convert = ConvertFactory.getConvert();
+    /**
+     * request is a string that can be passed to PVCopyFactory.createRequest.
+     */
+    protected PVString requestPVString = null;
+    /**
+     * pvRequest is passed to one of the channel.createXXX methods.
+     */
     protected PVStructure pvRequest = null;
     protected PVStructure linkPVStructure = null;
     protected PVField[] linkPVFields = null;
@@ -47,10 +51,7 @@ abstract class AbstractIOLink extends AbstractLink {
      * If alarm is a request the interface for the alarm severity index.
      */
     protected PVInt pvAlarmSeverityIndex = null;
-    /**
-     * request is a string that can be passed to channelAccess.createRequest.
-     */
-    private PVString requestPVString = null;
+   
     /**
      * Constructor.
      * @param supportName The support name.
@@ -63,22 +64,11 @@ abstract class AbstractIOLink extends AbstractLink {
     public void initialize(LocateSupport recordSupport) {
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
-        PVField pvRequest = pvStructure.getSubField("request");
-        if(pvRequest==null) {
-            return; // if no request then done
-        }
-        Field field = pvRequest.getField();
-        Type type = field.getType();
-        if(type==Type.scalar) {
-            if(((Scalar)field).getScalarType()==ScalarType.pvString) {
-                requestPVString = (PVString)pvRequest;
-                return;
-            }
+        requestPVString = pvStructure.getStringField("request");
+        if(requestPVString==null) {
             pvStructure.message("request is invalid scalarType", MessageType.error);
             super.uninitialize();
             return;
-        } else if(type==Type.structure) {
-            this.pvRequest = (PVStructure) pvRequest;
         }
     }
     /* (non-Javadoc)
@@ -87,29 +77,23 @@ abstract class AbstractIOLink extends AbstractLink {
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         if(pvRequest==null) {
-            if(requestPVString==null) {
-                pvRequest = channelAccess.createRequest("value");
+        	String request = requestPVString.get();
+            if(request==null || request.length()==0) {
+                pvRequest = PVCopyFactory.createRequest("field(value)",this);
             } else {
-                pvRequest = channelAccess.createRequest(requestPVString.get());
+            	int index = request.indexOf("field(");
+            	if(index<0) {
+            		int indRecord = request.indexOf("record[");
+            		if(indRecord<0) {
+            			request = "field(" + request + ")";
+            		} else {
+            			request = request + "field(value)";
+            		}
+            	}
+                pvRequest = PVCopyFactory.createRequest(request,this);
             }
         }
-        PVField[] pvRequestFields = pvRequest.getPVFields();
-        for(int i=0; i<pvRequestFields.length; i++) {
-            PVField pvRequestField = pvRequestFields[i];
-            String fieldName = pvRequestField.getField().getFieldName();
-            PVField pvField = null;
-            PVStructure pvParent = super.pvStructure;
-            while(pvParent!=null) {
-                pvField = pvParent.getSubField(fieldName);
-                if(pvField!=null) break;
-                pvParent = pvParent.getParent();
-            }
-            if(pvField==null) {
-                pvStructure.message("request for field " + fieldName + " is not a parent of this field", MessageType.error);
-                super.uninitialize();
-                return;
-            }
-        }
+        if(pvRequest==null) return;
         super.start(afterStart);
     }
     
@@ -125,6 +109,15 @@ abstract class AbstractIOLink extends AbstractLink {
                 pvField = pvParent.getSubField(fieldName);
                 if(pvField!=null) break;
                 pvParent = pvParent.getParent();
+            }
+            if(pvField==null && fieldName.equals("index")) {
+            	// enumerated structure is a special case
+            	pvParent = super.pvStructure;
+                while(pvParent!=null) {
+                    pvField = pvParent.getSubField("value");
+                    if(pvField!=null) break;
+                    pvParent = pvParent.getParent();
+                }
             }
             if(pvField==null) {
                 pvStructure.message("request for field " + fieldName + " is not a parent of this field", MessageType.error);
@@ -161,5 +154,6 @@ abstract class AbstractIOLink extends AbstractLink {
         linkPVFields = null;
         linkPVStructure = null;
         pvRequest = null;
+        super.uninitialize();
     }
 }

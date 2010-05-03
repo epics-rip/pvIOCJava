@@ -7,17 +7,13 @@ package org.epics.ioc.support.caLink;
 
 import org.epics.ca.client.ChannelGet;
 import org.epics.ca.client.ChannelGetRequester;
-import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
@@ -38,11 +34,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     public InputLinkBase(String supportName,PVField pvField) {
         super(supportName,pvField);
     }
-    
-   
-    private PVBoolean processPV = null;  
-    private boolean process = false;
-     
+      
     private boolean isReady = false;
     private ChannelGet channelGet = null;
    
@@ -50,34 +42,13 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult;   
-    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
-     */
-    public void initialize(LocateSupport recordSupport) {   
-        super.initialize(recordSupport);
-        if(super.getSupportState()!=SupportState.readyForStart) return;
-        processPV = pvStructure.getBooleanField("process");
-        if(processPV==null) {
-            uninitialize();
-            return;
-        }
-    }       
-    /* (non-Javadoc)
-     * @see org.epics.ioc.process.Support#start()
-     */
-    public void start(AfterStart afterStart) {
-        super.start(afterStart);
-        if(super.getSupportState()!=SupportState.ready) return;
-        process = processPV.get();
-    }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#connectionChange(boolean)
      */
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(channelGet==null) {
-                channel.createChannelGet(this, pvRequest, false, process,null);
+                channel.createChannelGet(this, pvRequest);
             } else {
                 pvRecord.lock();
                 try {
