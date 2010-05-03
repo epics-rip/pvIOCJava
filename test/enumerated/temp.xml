@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <database>
-
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
 <record recordName = "enumeratedCounter">
     <scalar name = "value" scalarType = "byte"/>
     <structure name = "alarm" extends = "alarm" />
@@ -90,7 +91,7 @@
     </structure>
 </record>
 
-
+<!-- 
 <record recordName = "enumeratedMonitor" >
     <structure name = "value" extends = "enumerated"/>
     <structure name = "alarm" extends = "alarm" />
@@ -101,6 +102,7 @@
         <scalar name = "request">value,alarm</scalar>
     </structure>
 </record>
+-->
 
 <record recordName = "enumeratedInputIndex">
     <scalar name = "value" scalarType = "int"/>
@@ -112,6 +114,7 @@
     </structure>
 </record>
 
+<!--
 <record recordName = "enumeratedMonitorIndex">
     <scalar name = "value" scalarType = "int"/>
     <structure name = "alarm" extends = "alarm" />
@@ -122,6 +125,7 @@
         <scalar name = "process">true</scalar>
     </structure>
 </record>
+-->
 
 
 

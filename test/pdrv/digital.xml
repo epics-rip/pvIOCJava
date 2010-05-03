@@ -41,7 +41,7 @@
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">syncDigitalOut</scalar>
-         <scalar name = "process">true</scalar>
+         <scalar name = "request">record[process=true]</scalar>
     </structure>
 </record>
 

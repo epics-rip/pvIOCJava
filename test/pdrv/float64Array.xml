@@ -36,7 +36,7 @@
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">syncFloat64ArrayOutput</scalar>
-         <scalar name = "process">true</scalar>
+         <scalar name = "request">record[process=true]</scalar>
     </structure>
 </record>
 
@@ -72,7 +72,7 @@
     <structure name = "input" extends = "pdrvFloat64ArrayInterrupt">
         <scalar name = "portName">syncFloat64ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "process" >true</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
 </record>
 
@@ -111,7 +111,7 @@
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">asynFloat64ArrayOutput</scalar>
-         <scalar name = "process">true</scalar>
+         <scalar name = "request">record[process=true]</scalar>
     </structure>
 </record>
 
@@ -147,7 +147,7 @@
     <structure name = "input" extends = "pdrvFloat64ArrayInterrupt">
         <scalar name = "portName">asynFloat64ArrayPort</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "process" >true</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
 </record>
 

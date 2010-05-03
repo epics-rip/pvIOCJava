@@ -36,7 +36,7 @@
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">syncInt32Out</scalar>
-         <scalar name = "process">true</scalar>
+         <scalar name = "request">record[process=true]</scalar>
     </structure>
 </record>
 
@@ -74,7 +74,7 @@
     <structure name = "input" extends = "pdrvInt32Interrupt">
         <scalar name = "portName">syncInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "process" >true</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
 </record>
 
@@ -127,7 +127,7 @@
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">asynInt32Out</scalar>
-         <scalar name = "process">true</scalar>
+         <scalar name = "request">record[process=true]</scalar>
     </structure>
 </record>
 
@@ -165,7 +165,7 @@
     <structure name = "input" extends = "pdrvInt32Interrupt">
         <scalar name = "portName">asynInt32Port</scalar>
         <scalar name = "deviceName">0</scalar>
-        <scalar name = "process" >true</scalar>
+        <scalar name = "process">true</scalar>
     </structure>
 </record>
 

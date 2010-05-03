@@ -34,7 +34,7 @@
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">syncBooleanOut</scalar>
-         <scalar name = "process">true</scalar>
+         <scalar name = "request">record[process=true]</scalar>
     </structure>
 </record>
 
@@ -161,7 +161,7 @@
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">asynBooleanOut</scalar>
-         <scalar name = "process">true</scalar>
+         <scalar name = "request">record[process=true]</scalar>
     </structure>
 </record>
 

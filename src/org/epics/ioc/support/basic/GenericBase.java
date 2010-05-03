@@ -98,7 +98,9 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
             supports[indSupport] = support;
             if(pvField.getField().getType()==Type.structure) {
                 PVStructure pvStruct = (PVStructure)pvField;
-                pvWaits[indSupport] = pvStruct.getBooleanField("wait");
+                if(pvStruct.getSubField("wait")!=null) {
+                    pvWaits[indSupport] = pvStruct.getBooleanField("wait");
+                }
             }
             support.initialize(recordSupport);
             if(support.getSupportState()!=SupportState.readyForStart) {

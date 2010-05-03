@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: basic support<br />
 package: org.epics.ioc.support.basic<br />
-2009.02.25</h1>
+2009.04.29</h1>
 CONTENTS 
 
 <div class="toc">
@@ -21,14 +21,14 @@ CONTENTS
   <li><a href="#ScanSuppor">ScanSupport</a></li>
   <li><a href="#ProcessCon">ProcessControl Support</a></li>
   <li><a href="#Control">Control Limit</a></li>
-  <li><a href="#Linear">Linear Conversion</a>
+  <li><a href="#Linear">Linear Conversion</a> 
     <ul>
       <li><a href="#linearConv">linearConversion</a></li>
       <li><a href="#LinearConv">LinearConvertInputFactory</a></li>
       <li><a href="#LinearConv1">LinearConvertOutputFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Digital">Digital Support</a>
+  <li><a href="#Digital">Digital Support</a> 
     <ul>
       <li><a href="#Java">Java Definitions</a></li>
     </ul>
@@ -100,16 +100,13 @@ support modules. It implements the following semantics:
   <dt style="font-family: courier;">alarm</dt>
     <dd>If field alarm is present and has AlarmSupport then it is handled
       properly.</dd>
-  <dt style="font-family: courier;">wait</dt>
-    <dd>If a subfield is a structure that has a boolean field named wait,
-      then generic support gets the PVBoolean interface for then wait field.
-      It uses the value to decide if it must want for the associated support
-      to complete before it processes the next support. If no wait field is
-      defined it waits.</dd>
   <dt>fields with associated support.</dt>
     <dd>For each field with support, the support methods are called, i.e.
-      initialize,start,stop,uninitialize, and process. Each process must
-      complete before process for the next support module is called.</dd>
+      initialize,start,stop,uninitialize, and process. For process, by
+      default, generic waits for each support to finish before it calls the
+      next support. For a stucture subfield the default can be changed by
+      appending a boolean scalar field to the structure and setting the value
+      to false.</dd>
 </dl>
 
 <p>The generic support does not force the support for input to do input, the
