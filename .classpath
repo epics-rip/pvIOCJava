@@ -8,7 +8,7 @@
 	<classpathentry kind="lib" path="jar/CAJ.jar"/>
 	<classpathentry kind="lib" path="jar/JCA.jar"/>
 	<classpathentry kind="lib" path="/usr/lib/eclipse/swt.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/pvAccess"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/pvData"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/pvAccess"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
