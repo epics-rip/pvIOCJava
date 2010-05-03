@@ -10,14 +10,14 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2009.09.15</h1>
+2010.04.30</h1>
 
 <p>CONTENTS</p>
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Channel">Channel Access</a>
+  <li><a href="#Channel">Channel Access</a> 
     <ul>
       <li><a href="#Getting">Getting a list of the channels in a
       javaIOC.</a></li>
@@ -27,14 +27,16 @@ package: org.epics.ioc.swtshell<br />
       <li><a href="#get">get</a></li>
       <li><a href="#put">put</a></li>
       <li><a href="#putGet">putGet</a></li>
+      <li><a href="#channelRPC">channelRPC</a></li>
       <li><a href="#array">array</a></li>
+      <li><a href="#structureA">structureArray</a></li>
       <li><a href="#monitor">monitor</a></li>
     </ul>
   </li>
-  <li><a href="#Local">Local JavaIOC</a>
+  <li><a href="#Local">Local JavaIOC</a> 
     <ul>
       <li><a href="#loadDataba">loadDatabase</a></li>
-      <li><a href="#introspect">introspectDatabase</a>
+      <li><a href="#introspect">introspectDatabase</a> 
         <ul>
           <li><a href="#Database">Database Definitions</a></li>
           <li><a href="#Local1">Local Record Instance</a></li>
@@ -47,8 +49,6 @@ package: org.epics.ioc.swtshell<br />
   <li><a href="#iocConsole">iocConsole</a></li>
 </ul>
 </div>
-
-<p> </p>
 <hr />
 
 <h2 style="text-align: center" id="Overview">Overview</h2>
@@ -71,7 +71,8 @@ IOC then the option "-server server/beforeStartCAV3.txt" must be given. </p>
 <ul>
   <li>channelList:<br />
     This obtains a list of the channels in a javaIOC. </li>
-  <li>get, put, process, monitor, and array:<br />
+  <li>process,get,put,putGet,channelRPC, monitor, array, and
+    structureArray:<br />
     Each of these brings up another window which provides the ability to
     access data via channel access. The next section describes these
   windows:</li>
@@ -96,11 +97,11 @@ text input window, the enter key must be pressed.</p>
 <h2 style="text-align: center" id="Channel">Channel Access</h2>
 <hr />
 
-<p>The channelList, get, put, process, monitor, and array buttons each start
-a new window. Each window provides the ability to connect to a PV (Process
-Variable). </p>
+<p>The channelList, get, put, process,putGet,channelRPC, monitor,array, and
+structureArray buttons each start a new window. Each window provides the
+ability to connect to a PV (Process Variable). </p>
 
-<p>This window gets data from a local or remote IOC. The data is accessed via
+<p>The window gets data from a local or remote IOC. The data is accessed via
 Channel Access, which can be either V3 or V4 channelAccess</p>
 
 <p>For EPICS V3 Channel Access only the following data can be accessed:</p>
@@ -139,8 +140,9 @@ descibed below) that provides the record list. The record must be named
 
 <h3 id="Connecting">Connecting to a Channel</h3>
 
-<p>The get, put, putGet, process, monitor, and array windows all have a
-connect button. When this button is pressed the following window appears:</p>
+<p>The process,get, put, putGet, channelRPC, monitor, and array windows all
+have a connect button. When this button is pressed the following window
+appears:</p>
 
 <center>
 <p><img src="./connectChannel.gif" alt="connectChannel" /></p>
@@ -153,30 +155,29 @@ that has the connect button.</p>
 
 <p>For a remote record a pvname can be entered. Note that the record name can
 be obtained from the channelList described in the previous sub-section. When
-return is given a request is made to create a channel to the selected record
-and control returned to the window that has the connect button.</p>
+return is clicked a request is made to create a channel to the selected
+record and control returned to the window that has the connect button.</p>
 
 <h3 id="Creating">Creating a Request</h3>
 
 <p>The get, put, putGet and monotor windows all have a createRequest button,
-which is activated after connecting to a channel. createRequest allows you to
-select an arbitarary set of fields from the PVRecord to which the channel is
-connected. When the createRequest button is pressed the following window
-appears:</p>
+which can activated after connecting to a channel. createRequest allows you
+to select an arbitarary set of fields from the PVRecord to which the channel
+is connected. All also show a text window with the curent request string
+displayed. This text window can be modified or the createRequest button can
+be clicked to use introspection to select a set of fields.</p>
+
+<p>When the createRequest button is pressed the following window appears:</p>
 
 <center>
 <p><img src="./createRequest.gif" alt="createRequest" /></p>
 </center>
 
-<p>If shareData is selected then when a request is made it is a request for
-shared data. This means that the server will share the scalar and array data
-with the record itself instead of keeping a copy. If showRequest is selected
-then when createRequest is done the created request structure is shown. A
-request can be created via the createRequest button or by directly entering
-the request in a text window.</p>
+<p>Again the text window can be edited. If options are provided for fields
+thety must be manually entered.</p>
 
-<p>When the createRequest button is clicked a window like the following
-appears. The details depend on the record structure.</p>
+<p>When the introspect button is clicked a window like the following appears.
+The details depend on the record structure.</p>
 
 <center>
 <p><img src="./getSubSet.gif" alt="getSubSet" /></p>
@@ -190,39 +191,7 @@ the entire structure is selected.</p>
 
 <p>A request can also be specified via a text window and then clicking the
 request button. The rules for specifying the request via a text string are
-specified by channel access but are repeated here. </p>
-
-<p>ChannelAccess provides the method:</p>
-<pre>    PVStructure createRequest(String structureName,String request);</pre>
-
-<p>This creates a request structure. structureName will be the field name of
-the PVStructure. request is of the form:</p>
-<pre>    fieldDef,...,fieldDef</pre>
-
-<p>That is request is a comma separated set of fieldDef which is of the
-form:</p>
-<pre>    fullFieldName</pre>
-or 
-<pre>    fieldName{request}</pre>
-
-<p>A fullFieldName is the full name of a field in the PVRecord. The name in a
-generated data structure will have just the field name. If fieldName{request}
-is given then the generated data structure will have a structure field with
-subfields defined by request. Note that request is a recursive definition.</p>
-
-<p>A simple example is:</p>
-<pre>    value,alarm,timeStamp</pre>
-
-<p>This works if the record has top level fields named value, alarm, and
-timeStamp.</p>
-
-<p>An more complicated example is:</p>
-<pre>    alarm,timeStamp,power{power.value,power.alarm},
-    current{current.value,current.alarm},
-    voltage{voltage.value,voltage.alarm}</pre>
-
-<p>This works for the powerSupply example provided with the javaIOC test
-examples.</p>
+specified by org.epics.pvData.pvCopy See the package overview for details.</p>
 
 <h3 id="process">process</h3>
 
@@ -252,14 +221,15 @@ clicking createGet.:</p>
   <dt>conect</dt>
     <dd>This was described above. Note that after connecting to a channel the
       button becomes disconnect.</dd>
-  <dt>process</dt>
-    <dd>This says if a get is a get or a getProcess.</dd>
   <dt>createRequest</dt>
-    <dd>This was described above.</dd>
+    <dd>This was described above. Note that the test window can also be
+      edited.</dd>
   <dt>crateGet</dt>
-    <dd>Create and destroy a channelGer request.</dd>
+    <dd>Create and destroy a channelGet request.</dd>
   <dt>get</dt>
     <dd>Issue a get request. The result is shown in the text window.</dd>
+  <dt>dump</dt>
+    <dd>This shows the current data values.</dd>
 </dl>
 
 <h3 id="put">put</h3>
@@ -277,7 +247,7 @@ fields where selected from the PVRecord. If only a single scalar or array
 field was selected, then a text entry box apppears. When a value is entered
 and the return key is pressed then this value is sent via channel access.</p>
 
-<p>If more than a single scalar or array field waas selected then when put is
+<p>If more than a single scalar or array field was selected then when put is
 clicked a window appears that allows the user to provide values to each
 scalar or array field of the selected fields. This window is:</p>
 
@@ -309,8 +279,8 @@ specified.</p>
 <p><img src="./putGet.gif" alt="putGet" /></p>
 </center>
 
-<p>A typical use of putGet is to issue the jacaIOC version of a remote
-procedure call (RPC). An RPC record, by convention, has the following:</p>
+<p>A typical use of putGet is to issue a remote procedure call. An RPC
+record, by convention, has the following:</p>
 <ol>
   <li>A top level feld named arguments.</li>
   <li>A top level field named result.</li>
@@ -344,6 +314,16 @@ the following window.</p>
 <p><img src="./putGet.gif" alt="putGet" /></p>
 </center>
 
+<h3 id="channelRPC">channelRPC</h3>
+
+<p>The following window appears when the channelRPC button is pushed. A
+channelRPC returns a new PVStructure for each request. The record must
+support a channelRPC request.</p>
+
+<center>
+<p><img src="./channelRPC.gif" alt="channelRPC" /></p>
+</center>
+
 <h3 id="array">array</h3>
 
 <p>The following window appears when the array button is pushed:</p>
@@ -358,6 +338,28 @@ request. The offset and count can be specified. The result is written into
 the value field of the put row. The put button issues a put array request.
 The offset can be specified. The value field provides the array values.</p>
 
+<h3 id="structureA">structureArray</h3>
+
+<p>This is used to get and modify elements of a PVStructureArray. You must
+get before issuing a put. The puts will modify the data obtained via the get
+and then put the data back.</p>
+
+<p>The following window appears when the structureArray button is pushed:</p>
+
+<center>
+<p><img src="./structureArray.gif" alt="structureArray" /></p>
+</center>
+
+<p>This window has a connect/disconnect button and a createArray/destroyArray
+button. It has a text entry for subField. The get button issues a array get
+request. The offset and count can be specified. The result is written to the
+consoleText window. You must issue a get before using put.</p>
+
+<p>The put row acts on the data received from a put. You change elements by
+giving a value to index and clicking putElement. A tree structured window
+just like for put appears. This is changing the local data. When you click
+put the data is written to the actual record.</p>
+
 <h3 id="monitor">monitor</h3>
 
 <p>The following window appears when the monitor button is pushed:</p>
@@ -366,25 +368,16 @@ The offset can be specified. The value field provides the array values.</p>
 <p><img src="./monitor.gif" alt="monitor" /></p>
 </center>
 
-<p>The controls in the first row are similat to get and put.</p>
+<p>The controls in the first row are similat to get and put. Note that the
+queueSize can be set.</p>
 
-<p>The second row allows you to set the:</p>
+<p>The other controls provide:</p>
 <dl>
-  <dt>queueSize</dt>
-    <dd>The queue size. A value of 3 or more means that a queue will be kept
-      on the server. A value of 2 is automatically set to 3. A value &lt;2
-      means that no queue will be created on the server. Also if shareData
-      was specified on createRequest than no queue is created. </dd>
+  <dt>serverInfo</dt>
+    <dd>The status of the connection is shown </dd>
   <dt>simulateDelay</dt>
     <dd>This is for testing channel access. If a non-zero value is specified
       a delay occurs after each monitor is received.</dd>
-  <dt>onPut, ..., custom</dt>
-    <dd>This is for specifying the algorithm that detemines when monitors are
-      generated. If custom is selected the user must know the algoritm name
-      and the format of a configuration structure for the algorithm. The
-      javaIOC must have support registered for the selected algorithm. </dd>
-  <dt>deadband</dt>
-    <dd>A deadband to use if onAbsolute or onPercentage are seleccted.</dd>
   <dt>When start is clicked monitoring is started. It changes to a stop
   button while monitoring is active.</dt>
 </dl>
