@@ -29,6 +29,8 @@ import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutGet;
 import org.epics.ca.client.ChannelPutGetRequester;
 import org.epics.ca.client.ChannelPutRequester;
+import org.epics.ca.client.ChannelRPC;
+import org.epics.ca.client.ChannelRPCRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.GetFieldRequester;
 import org.epics.pvData.factory.FieldFactory;
@@ -241,8 +243,7 @@ V3Channel,ConnectionListener
      */
     @Override
     public ChannelArray createChannelArray(
-            ChannelArrayRequester channelArrayRequester, String subField,
-            PVStructure pvOption)
+            ChannelArrayRequester channelArrayRequester, PVStructure pvRequest)
     {
         channelArrayRequester.channelArrayConnect(notSupportedStatus, null, null);
         return null;
@@ -252,12 +253,8 @@ V3Channel,ConnectionListener
      */
     @Override
     public ChannelGet createChannelGet(ChannelGetRequester channelGetRequester,
-            PVStructure pvRequest,boolean shareData,
-            boolean process, PVStructure pvOption)
+            PVStructure pvRequest)
     {
-        if(process) {
-            channelGetRequester.message("process not supported", MessageType.warning);
-        }
         BaseV3ChannelGet channelGet = new BaseV3ChannelGet(channelGetRequester);
         channelGet.init(this,pvRequest);
         return channelGet;
@@ -268,8 +265,7 @@ V3Channel,ConnectionListener
     @Override
     public Monitor createMonitor(
             MonitorRequester monitorRequester,
-            PVStructure pvRequest,
-            PVStructure pvOption)
+            PVStructure pvRequest)
     {
         BaseV3Monitor monitor = new BaseV3Monitor(monitorRequester);
         monitor.init(this,pvRequest);
@@ -281,7 +277,7 @@ V3Channel,ConnectionListener
     @Override
     public ChannelProcess createChannelProcess(
             ChannelProcessRequester channelProcessRequester,
-            PVStructure pvOption)
+            PVStructure pvRequest)
     {
         channelProcessRequester.channelProcessConnect(notSupportedStatus,null);
         return null;
@@ -291,12 +287,8 @@ V3Channel,ConnectionListener
      */
     @Override
     public ChannelPut createChannelPut(ChannelPutRequester channelPutRequester,
-            PVStructure pvRequest,boolean shareData,
-            boolean process, PVStructure pvOption)
+            PVStructure pvRequest)
     {
-        if(process) {
-            channelPutRequester.message("process not supported", MessageType.warning);
-        }
         BaseV3ChannelPut channelPut = new BaseV3ChannelPut(channelPutRequester);
         channelPut.init(this,pvRequest);
         return channelPut;
@@ -307,15 +299,20 @@ V3Channel,ConnectionListener
     @Override
     public ChannelPutGet createChannelPutGet(
             ChannelPutGetRequester channelPutGetRequester,
-            PVStructure pvPutRequest,
-            boolean sharePutData, PVStructure pvGetRequest,
-            boolean shareGetData, boolean process,
-            PVStructure pvOption)
+            PVStructure pvRequest)
     {
         channelPutGetRequester.channelPutGetConnect(notSupportedStatus, null, null, null);
         return null;
     }
-    /* (non-Javadoc)
+    @Override
+	public ChannelRPC createChannelRPC(ChannelRPCRequester channelRPCRequester,
+			PVStructure pvRequest)
+    {
+    	channelRPCRequester.channelRPCConnect(notSupportedStatus,null,null,null);
+		return null;
+	}
+
+	/* (non-Javadoc)
      * @see org.epics.ca.client.Channel#destroy()
      */
     @Override

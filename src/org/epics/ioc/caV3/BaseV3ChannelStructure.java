@@ -124,7 +124,14 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         gov.aps.jca.Channel jcaChannel = v3Channel.getJCAChannel();
         int elementCount = jcaChannel.getElementCount();
         nativeDBRType = jcaChannel.getFieldType();
-        PVField[] pvFields = pvRequest.getPVFields();
+        PVField[] pvFields = null;
+        PVField pvf = pvRequest.getSubField("field");
+        if(pvf!=null && pvf.getField().getType()==Type.structure) {
+            PVStructure pvStruct = pvRequest.getStructureField("field");
+            pvFields = pvStruct.getPVFields();
+        } else {
+        	pvFields = pvRequest.getPVFields();
+        } 
         boolean valueIsIndex = false;
         boolean valueIsChoice = false;
         if(pvFields.length==0 && propertiesAllowed) {
@@ -147,7 +154,12 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                 String fieldList = pvString.get();
                 String[] fields = commaPattern.split(fieldList);
                 for(int i=0; i<fields.length; i++) {
-                    if(!fields[i].equals("value")) {
+                	String val = fields[i];
+                	if(val.equals("value.index")) {
+                        valueIsIndex = true;
+                    } else if(val.equals("value.choice")) {
+                        valueIsChoice = true;
+                    } else if(!fields[i].equals("value")) {
                         propertyList.add(fields[i]);
                     }
                 }
