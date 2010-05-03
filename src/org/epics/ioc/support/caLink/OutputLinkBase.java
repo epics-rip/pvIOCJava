@@ -7,17 +7,13 @@ package org.epics.ioc.support.caLink;
 
 import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutRequester;
-import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
-import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
@@ -40,44 +36,18 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         super(supportName,pvField);
     }
     
-    private PVBoolean processAccess = null;
-    private boolean process = false;
-    
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult = null;   
-    
     private boolean isReady = false;
     private ChannelPut channelPut = null;
-    
     protected BitSet bitSet = null;
-    
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
-     */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
-        if(super.getSupportState()!=SupportState.readyForStart) return;
-        processAccess = pvStructure.getBooleanField("process");
-        if(processAccess==null) {
-            uninitialize();
-            return;
-        }
-    }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.ca.AbstractLinkSupport#start()
-     */
-    public void start(AfterStart afterStart) {
-        super.start(afterStart);
-        if(super.getSupportState()!=SupportState.ready) return;
-        process = processAccess.get();
-    }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.ca.AbstractLinkSupport#connectionChange(boolean)
      */
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
             if(channelPut==null) {
-                channel.createChannelPut(this, pvRequest,false, process,null);
+                channel.createChannelPut(this, pvRequest);
             } else {
                 pvRecord.lock();
                 try {

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support.caLink<br />
 package: org.epics.ioc.support.caLink<br />
-2009.11.17</h1>
+2010.04.30</h1>
 CONTENTS 
 
 <div class="toc">
@@ -84,12 +84,11 @@ a description of how the various structures are defined.</p>
     &lt;structure name = "timeStamp" extends = "timeStamp" /&gt;
     &lt;structure name = "display" extends = "display" /&gt;
     &lt;structure name = "input" extends = "caInputLink"&gt;
-        &lt;scalar name = "providerName"&gt;caV4&lt;/scalar&gt;
+        &lt;scalar name = "providerName"&gt;pvAccess&lt;/scalar&gt;
         &lt;scalar name = "pvname"&gt;targetRecord&lt;/scalar&gt;
         &lt;scalar name = "request" scalarType = "string"&gt;value,alarm,display&lt;/scalar&gt;
     &lt;/structure&gt;
-&lt;/record&gt;
-</pre>
+&lt;/record&gt;</pre>
 
 <p>The request must provide a request definition as defined in package
 org.epics.pvData.pvCopy. It can be given as either a scalar string or as a
