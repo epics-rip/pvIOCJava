@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<database>
+<structure structureName = "test.point">
+  <scalar name = "x" scalarType = "double" />
+  <scalar name = "y" scalarType = "double" />
+</structure>
+
+<structure structureName = "test.testStructure">
+    <scalar name = "value" scalarType = "double">10.0</scalar>
+    <structure name = "location" extends = "test.point" />
+</structure>
+<!--
+-->
+</database>
+
