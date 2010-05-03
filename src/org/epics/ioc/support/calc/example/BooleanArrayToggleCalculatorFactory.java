@@ -1,4 +1,8 @@
-/* generated code */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS JavaIOC is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 package org.epics.ioc.support.calc.example;
 
 import org.epics.ioc.support.Support;
@@ -12,6 +16,12 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
+/**
+ * This example expects no arguments and that the value field is a boolean array.
+ * Each time the record is processed each element is toggled between true and false.
+ * @author mrk
+ *
+ */
 public class BooleanArrayToggleCalculatorFactory {
     public static Support create(PVStructure pvStructure) {
         return new BooleanArrayToggleCalculator(pvStructure);
