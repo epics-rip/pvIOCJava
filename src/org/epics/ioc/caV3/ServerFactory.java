@@ -329,9 +329,24 @@ public class ServerFactory {
             String option = getOption("shareData");
             boolean shareData = Boolean.getBoolean(option);
             PVStructure pvRequest = pvDataCreate.createPVStructure(null, pvRecord.getRecordName(), new Field[0]);
-            PVString pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"value", ScalarType.pvString);
-            pvString.put(valuePV.getFullFieldName());
-            pvRequest.appendPVField(pvString);
+            PVString pvString = null;
+            if(shareData) {
+            	PVStructure pvStruct = pvDataCreate.createPVStructure(pvRequest, "value", new Field[0]);
+            	PVStructure pvLeaf = pvDataCreate.createPVStructure(pvStruct, "leaf", new Field[0]);
+            	pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"source", ScalarType.pvString);
+                pvString.put(valuePV.getFullFieldName());
+                pvLeaf.appendPVField(pvString);
+                pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"shareData", ScalarType.pvString);
+                pvString.put("true");
+                pvLeaf.appendPVField(pvString);
+                pvStruct.appendPVField(pvLeaf);
+                pvRequest.appendPVField(pvStruct);
+            	
+            } else {
+            	pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"value", ScalarType.pvString);
+                pvString.put(valuePV.getFullFieldName());
+                pvRequest.appendPVField(pvString);
+            }
             if(pvAlarm!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"alarm", ScalarType.pvString);
                 pvString.put(pvAlarm.getFullFieldName());
@@ -352,7 +367,7 @@ public class ServerFactory {
                 pvString.put(pvControl.getFullFieldName());
                 pvRequest.appendPVField(pvString);
             }
-            pvCopy = PVCopyFactory.create(pvRecord, pvRequest, shareData);
+            pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
             pvCopyStructure = pvCopy.createPVStructure();
             copyBitSet = new BitSet(pvCopyStructure.getNumberFields());
             copyBitSet.set(0);
