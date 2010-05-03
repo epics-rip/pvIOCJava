@@ -22,7 +22,6 @@ public interface CreateFieldRequestRequester extends ChannelRequester
     /**
      * The request has been created.
      * @param request The request.
-     * @param isShared Should the request be a shared request?
      */
     void request(String request);
 }
