@@ -1,4 +1,8 @@
-/* generated code */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS JavaIOC is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 package org.epics.ioc.support.calc.example;
 
 import org.epics.ioc.support.Support;
@@ -13,6 +17,12 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 
+/**
+ * This example expects no arguments and a value field that is a double array.
+ * Each time the record io processed 1 is added to each element.
+ * @author mrk
+ *
+ */
 public class ArrayIncrementCalculatorFactory {
     public static Support create(PVStructure pvStructure) {
         return new ArrayIncrementCalculator(pvStructure);

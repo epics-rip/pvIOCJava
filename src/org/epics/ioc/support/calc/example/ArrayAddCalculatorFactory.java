@@ -1,4 +1,8 @@
-/* generated code */
+/**
+ * Copyright - See the COPYRIGHT that is included with this distribution.
+ * EPICS JavaIOC is distributed subject to a Software License Agreement found
+ * in file LICENSE that is included with this distribution.
+ */
 package org.epics.ioc.support.calc.example;
 
 import org.epics.ioc.support.Support;
@@ -13,6 +17,12 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
+/**
+ * Example of how to extend AbstractCalculatorSupport.
+ * This example accepts two 
+ * @author mrk
+ *
+ */
 public class ArrayAddCalculatorFactory {
     public static Support create(PVStructure pvStructure) {
         return new ArrayAddCalculator(pvStructure);
