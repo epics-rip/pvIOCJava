@@ -28,6 +28,7 @@ import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Status;
+import org.epics.pvData.pvCopy.PVCopyFactory;
 
 
 /**
@@ -52,7 +53,6 @@ public class GetFactory {
         // following are global to embedded classes
         private enum State{
             readyForConnect,connecting,
-            readyForCreateRequest,creatingRequest,
             readyForCreateGet,creatingGet,
             ready,getActive
         };
@@ -61,15 +61,16 @@ public class GetFactory {
         private Requester requester = null;
         private boolean isDisposed = false;
         
-        private static String windowName = "get";
+        private static final String windowName = "get";
+        private static final String defaultRequest = "record[]field(value,alarm,timeStamp)";
         private Shell shell;
         private Button connectButton;
-        private Button processButton;
         private Button createRequestButton;
+        private Text requestText = null;
         private Button createGetButton;
         private Button getButton;
+        private Button dumpButton;
         private Text consoleText = null; 
-        private boolean isProcess = false;
         
         private void start(Display display) {
             shell = new Shell(display);
@@ -84,28 +85,37 @@ public class GetFactory {
             connectButton.setText("disconnect");
             connectButton.addSelectionListener(this);
             
-            processButton = new Button(composite,SWT.CHECK);
-            processButton.setText("process");
-            processButton.setSelection(false);
-            processButton.addSelectionListener(this);               
-
-            createRequestButton = new Button(composite,SWT.PUSH);
+            Composite requestComposite = new Composite(composite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            requestComposite.setLayout(gridLayout);
+            createRequestButton = new Button(requestComposite,SWT.PUSH);
             createRequestButton.setText("createRequest");
-            createRequestButton.addSelectionListener(this);               
+            createRequestButton.addSelectionListener(this);
+            requestText = new Text(requestComposite,SWT.BORDER);
+            GridData gridData = new GridData(); 
+            gridData.widthHint = 400;
+            requestText.setLayoutData(gridData);
+            requestText.setText(defaultRequest);
+            requestText.addSelectionListener(this);
 
             createGetButton = new Button(composite,SWT.PUSH);
             createGetButton.setText("destroyGet");
             createGetButton.addSelectionListener(this);
-            
+             
             getButton = new Button(composite,SWT.NONE);
             getButton.setText("get");
             getButton.addSelectionListener(this);
+            
+            dumpButton = new Button(composite,SWT.NONE);
+            dumpButton.setText("dump");
+            dumpButton.addSelectionListener(this);
             
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             consoleComposite.setLayout(gridLayout);
-            GridData gridData = new GridData(GridData.FILL_BOTH);
+            gridData = new GridData(GridData.FILL_BOTH);
             consoleComposite.setLayoutData(gridData);
             Button clearItem = new Button(consoleComposite,SWT.PUSH);
             clearItem.setText("&Clear");
@@ -162,16 +172,15 @@ public class GetFactory {
                     channelClient.disconnect();
                     stateMachine.setState(State.readyForConnect);
                 }
-            } else if(object==processButton) {
-                isProcess = processButton.getSelection();
             } else if(object==createRequestButton) {
-                stateMachine.setState(State.creatingRequest);
                 channelClient.createRequest(shell);
             } else if(object==createGetButton) {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreateGet) {
                     stateMachine.setState(State.creatingGet);
-                    channelClient.createGet(isProcess);
+                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    if(pvStructure==null) return;
+                    channelClient.createGet(pvStructure);
                 } else {
                     channelClient.destroyGet();
                     stateMachine.setState(State.readyForCreateGet);
@@ -179,6 +188,8 @@ public class GetFactory {
             } else if(object==getButton) {
                stateMachine.setState(State.getActive);
                channelClient.get();
+            } else if(object==dumpButton) {
+                channelClient.dump();
             }
         }
         
@@ -192,66 +203,50 @@ public class GetFactory {
                 case readyForConnect:
                     connectButton.setText("connect");
                     createGetButton.setText("createGet");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createGetButton.setEnabled(false);
                     getButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case connecting:
                     connectButton.setText("disconnect");
                     createGetButton.setText("createGet");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createGetButton.setEnabled(false);
                     getButton.setEnabled(false);
-                    return;
-                case readyForCreateRequest:
-                    connectButton.setText("disconnect");
-                    createGetButton.setText("createGet");
-                    processButton.setEnabled(true);
-                    createRequestButton.setEnabled(true);
-                    createGetButton.setEnabled(false);
-                    getButton.setEnabled(false);
-                    return;
-                case creatingRequest:
-                    connectButton.setText("disconnect");
-                    createGetButton.setText("createGet");
-                    processButton.setEnabled(true);
-                    createRequestButton.setEnabled(false);
-                    createGetButton.setEnabled(false);
-                    getButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case readyForCreateGet:
                     connectButton.setText("disconnect");
                     createGetButton.setText("createGet");
-                    processButton.setEnabled(true);
-                    createRequestButton.setEnabled(false);
+                    createRequestButton.setEnabled(true);
                     createGetButton.setEnabled(true);
                     getButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case creatingGet:
                     connectButton.setText("disconnect");
                     createGetButton.setText("destroyGet");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createGetButton.setEnabled(true);
                     getButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case ready:
                     connectButton.setText("disconnect");
                     createGetButton.setText("destroyGet");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createGetButton.setEnabled(true);
                     getButton.setEnabled(true);
+                    dumpButton.setEnabled(true);
                     return;
                 case getActive:
                     connectButton.setText("disconnect");
                     createGetButton.setText("destroyGet");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createGetButton.setEnabled(true);
                     getButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 }
                 
@@ -264,12 +259,10 @@ public class GetFactory {
         }
         
         private class ChannelClient implements
-        ChannelRequester,ConnectChannelRequester,CreateRequestRequester,Runnable,ChannelGetRequester
+        ChannelRequester,ConnectChannelRequester,CreateFieldRequestRequester,Runnable,ChannelGetRequester
         {
             private Channel channel = null;
             private ConnectChannel connectChannel = null;
-            private PVStructure pvRequest = null;
-            private boolean isShared = false;
             private ChannelGet channelGet = null;
             private BitSet changeBitSet = null;
             private RunCommand runCommand;
@@ -283,11 +276,11 @@ public class GetFactory {
                 connectChannel.connect();
             }
             void createRequest(Shell shell) {
-                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
+                CreateFieldRequest createRequest = CreateFieldRequestFactory.create(shell, channel, this);
                 createRequest.create();
             }
-            void createGet(boolean process) {
-                channelGet = channel.createChannelGet(this, pvRequest,isShared,process,null);
+            void createGet(PVStructure pvRequest) {
+                channelGet = channel.createChannelGet(this, pvRequest);
                 return;
             }
             void destroyGet() {
@@ -307,6 +300,12 @@ public class GetFactory {
             
             void get() {
                 channelGet.get(false);
+            }
+            
+            void dump() {
+            	changeBitSet.clear();
+            	changeBitSet.set(0);
+            	printModified.print();
             }
             /* (non-Javadoc)
              * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
@@ -359,13 +358,18 @@ public class GetFactory {
                 runCommand = RunCommand.destroy;
                 shell.getDisplay().asyncExec(this);
             }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
-             */
             @Override
-            public void request(PVStructure pvRequest, boolean isShared) {
-                this.pvRequest = pvRequest;
-                this.isShared = isShared;
+			public String getDefault() {
+				return "value,alarm,timeStamp";
+			}
+			/* (non-Javadoc)
+			 * @see org.epics.ioc.swtshell.CreateFieldRequestRequester#request(java.lang.String)
+			 */
+			@Override
+			public void request(String request) {
+				requestText.selectAll();
+                requestText.clearSelection();
+                requestText.setText("record[]field(" + request + ")");
                 runCommand = RunCommand.channelrequestDone;
                 shell.getDisplay().asyncExec(this);
             }
@@ -410,7 +414,7 @@ public class GetFactory {
             public void run() {
                 switch(runCommand) {
                 case channelConnected:
-                    stateMachine.setState(State.readyForCreateRequest);
+                    stateMachine.setState(State.readyForCreateGet);
                     return;
                 case timeout:
                     stateMachine.setState(State.readyForConnect);

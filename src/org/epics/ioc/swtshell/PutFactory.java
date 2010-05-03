@@ -28,6 +28,7 @@ import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Status;
+import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /*
  * A shell for channelGet.
@@ -49,7 +50,6 @@ public class PutFactory {
         // following are global to embedded classes
         private enum State{
             readyForConnect,connecting,
-            readyForCreateRequest,creatingRequest,
             readyForCreatePut,creatingPut,
             ready,putActive
         };
@@ -58,15 +58,16 @@ public class PutFactory {
         private Requester requester = null;
         private boolean isDisposed = false;
         
-        private static String windowName = "put";
+        private static final String windowName = "put";
+        private static final String defaultRequest = "record[]field(value)";
         private Shell shell = null;
         private Button connectButton;
-        private Button processButton;
         private Button createRequestButton = null;
+        private Text requestText = null;
         private Button createPutButton;
         private Button putButton;
+        private Button dumpButton;
         private Text consoleText = null;
-        private boolean isProcess = false;
         
         private void start(Display display) {
             shell = new Shell(display);
@@ -81,14 +82,19 @@ public class PutFactory {
             connectButton.setText("disconnect");
             connectButton.addSelectionListener(this);               
 
-            processButton = new Button(composite,SWT.CHECK);
-            processButton.setText("process");
-            processButton.setSelection(false);
-            processButton.addSelectionListener(this);               
-
-            createRequestButton = new Button(composite,SWT.PUSH);
+            Composite requestComposite = new Composite(composite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            requestComposite.setLayout(gridLayout);
+            createRequestButton = new Button(requestComposite,SWT.PUSH);
             createRequestButton.setText("createRequest");
             createRequestButton.addSelectionListener(this);
+            requestText = new Text(requestComposite,SWT.BORDER);
+            GridData gridData = new GridData(); 
+            gridData.widthHint = 400;
+            requestText.setLayoutData(gridData);
+            requestText.setText(defaultRequest);
+            requestText.addSelectionListener(this);
             
             createPutButton = new Button(composite,SWT.PUSH);
             createPutButton.setText("destroyPut");
@@ -97,12 +103,16 @@ public class PutFactory {
             putButton = new Button(composite,SWT.NONE);
             putButton.setText("put");
             putButton.addSelectionListener(this);
+            
+            dumpButton = new Button(composite,SWT.NONE);
+            dumpButton.setText("dump");
+            dumpButton.addSelectionListener(this);
 
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             consoleComposite.setLayout(gridLayout);
-            GridData gridData = new GridData(GridData.FILL_BOTH);
+            gridData = new GridData(GridData.FILL_BOTH);
             consoleComposite.setLayoutData(gridData);
             Button clearItem = new Button(consoleComposite,SWT.PUSH);
             clearItem.setText("&Clear");
@@ -155,16 +165,16 @@ public class PutFactory {
                     channelClient.disconnect();
                     stateMachine.setState(State.readyForConnect);
                 }
-            } else if(object==processButton) {
-                isProcess = processButton.getSelection();
+            
             } else if(object==createRequestButton) {
-                stateMachine.setState(State.creatingRequest);
                 channelClient.createRequest(shell);
             } else if(object==createPutButton) {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreatePut) {
                     stateMachine.setState(State.creatingPut);
-                    channelClient.createPut(isProcess);
+                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    if(pvStructure==null) return;
+                    channelClient.createPut(pvStructure);
                 } else {
                     channelClient.destroyPut();
                     stateMachine.setState(State.readyForCreatePut);
@@ -174,6 +184,10 @@ public class PutFactory {
                guiData.get(channelClient.getPVStructure(), channelClient.getBitSet());
                stateMachine.setState(State.putActive);
                channelClient.put();
+            } else if(object==dumpButton) {
+            	consoleText.selectAll();
+                consoleText.clearSelection();
+                consoleText.setText(channelClient.getPVStructure().toString());
             }
         }
 
@@ -187,66 +201,50 @@ public class PutFactory {
                 case readyForConnect:
                     connectButton.setText("connect");
                     createPutButton.setText("createPut");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(false);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case connecting:
                     connectButton.setText("disconnect");
                     createPutButton.setText("createPut");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(false);
                     putButton.setEnabled(false);
-                    return;
-                case readyForCreateRequest:
-                    connectButton.setText("disconnect");
-                    createPutButton.setText("createPut");
-                    processButton.setEnabled(true);
-                    createRequestButton.setEnabled(true);
-                    createPutButton.setEnabled(false);
-                    putButton.setEnabled(false);
-                    return;
-                case creatingRequest:
-                    connectButton.setText("disconnect");
-                    createPutButton.setText("createPut");
-                    processButton.setEnabled(true);
-                    createRequestButton.setEnabled(false);
-                    createPutButton.setEnabled(false);
-                    putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case readyForCreatePut:
                     connectButton.setText("disconnect");
                     createPutButton.setText("createPut");
-                    processButton.setEnabled(true);
-                    createRequestButton.setEnabled(false);
+                    createRequestButton.setEnabled(true);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case creatingPut:
                     connectButton.setText("disconnect");
                     createPutButton.setText("destroyPut");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 case ready:
                     connectButton.setText("disconnect");
                     createPutButton.setText("destroyPut");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(true);
+                    dumpButton.setEnabled(true);
                     return;
                 case putActive:
                     connectButton.setText("disconnect");
                     createPutButton.setText("destroyPut");
-                    processButton.setEnabled(true);
                     createRequestButton.setEnabled(false);
                     createPutButton.setEnabled(true);
                     putButton.setEnabled(false);
+                    dumpButton.setEnabled(false);
                     return;
                 }
                 
@@ -262,12 +260,10 @@ public class PutFactory {
        
         
         private class ChannelClient implements
-        ChannelRequester,ConnectChannelRequester,CreateRequestRequester,Runnable,ChannelPutRequester
+        ChannelRequester,ConnectChannelRequester,CreateFieldRequestRequester,Runnable,ChannelPutRequester
         {
             private Channel channel = null;
             private ConnectChannel connectChannel = null;
-            private PVStructure pvRequest = null;
-            private boolean isShared = false;
             private ChannelPut channelPut = null;
             private BitSet bitSet = null;
             private RunCommand runCommand;
@@ -282,11 +278,11 @@ public class PutFactory {
                 connectChannel.connect();
             }
             void createRequest(Shell shell) {
-                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
+                CreateFieldRequest createRequest = CreateFieldRequestFactory.create(shell, channel, this);
                 createRequest.create();
             }
-            void createPut(boolean process) {
-                channelPut = channel.createChannelPut(this, pvRequest,isShared,process,null);
+            void createPut(PVStructure pvRequest) {
+                channelPut = channel.createChannelPut(this, pvRequest);
                 return;
             }
             void destroyPut() {
@@ -307,7 +303,7 @@ public class PutFactory {
             void put() {
                 channelPut.put(false);
             }
-            
+             
             PVStructure getPVStructure() {
                 return pvStructure;
             }
@@ -366,13 +362,15 @@ public class PutFactory {
                 runCommand = RunCommand.destroy;
                 shell.getDisplay().asyncExec(this);
             }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
-             */
             @Override
-            public void request(PVStructure pvRequest, boolean isShared) {
-                this.pvRequest = pvRequest;
-                this.isShared = isShared;
+			public String getDefault() {
+				return "value";
+			}
+			@Override
+			public void request(String request) {
+				requestText.selectAll();
+                requestText.clearSelection();
+                requestText.setText("record[]field(" + request + ")");
                 runCommand = RunCommand.channelrequestDone;
                 shell.getDisplay().asyncExec(this);
             }
@@ -421,7 +419,7 @@ public class PutFactory {
             public void run() {
                 switch(runCommand) {
                 case channelConnected:
-                    stateMachine.setState(State.readyForCreateRequest);
+                    stateMachine.setState(State.readyForCreatePut);
                     return;
                 case timeout:
                     stateMachine.setState(State.readyForConnect);

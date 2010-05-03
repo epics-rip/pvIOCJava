@@ -16,17 +16,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.Channel.ConnectionState;
-import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
@@ -35,17 +32,12 @@ import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.monitor.MonitorElement;
 import org.epics.pvData.monitor.MonitorRequester;
-import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDataCreate;
-import org.epics.pvData.pv.PVDouble;
-import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
+import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /**
  * A shell for monitoring a channel.
@@ -63,7 +55,6 @@ public class MonitorFactory {
         monitorImpl.start(display);
     }
     
-    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static Executor executor = ExecutorFactory.create("swtshell:display",ThreadPriority.low);
     private static class MonitorImpl
     implements  DisposeListener,SelectionListener
@@ -71,7 +62,6 @@ public class MonitorFactory {
         // following are global to embedded classes
         private enum State{
             readyForConnect,connecting,
-            readyForCreateRequest,creatingRequest,
             readyForCreateMonitor,creatingMonitor,
             readyForStart, active
         };
@@ -82,33 +72,21 @@ public class MonitorFactory {
         
         
         private static final String windowName = "monitor";
+        private static final String defaultRequest = "record[queueSize=2]field(value,alarm,timeStamp)";
         private Shell shell = null;
         private Button connectButton;
         private Button createRequestButton = null;
+        private Text requestText = null;
         private Button createMonitorButton;
         private Button startStopButton;
         private Button statusButton;
         
         private Text consoleText = null;
-        //private PVStructure pvRequest = null;
-        private PVStructure pvOption = null;
-        private PVString pvAlgorithm = null;
-        private PVInt pvQueueSize = null;
-        private Text queueSizeText = null;
-        private PVDouble pvDeadband = null;
-        private Text deadbandText;
         private Text simulateDelayText;
         
-        private int queueSize = 3;
-        private double deadband = 0.0;
-        private double simulateDelay = 0.0;
-        
-        private Combo algorithmCombo; 
-        
-        //private boolean isMonitoring = false;
+        private double simulateDelay = 0.0; 
         
         private void start(Display display) {
-            initPVOption();
             shell = new Shell(display);
             shell.setText(windowName);
             GridLayout gridLayout = new GridLayout();
@@ -121,10 +99,21 @@ public class MonitorFactory {
             connectButton.setText("disconnect");
             connectButton.addSelectionListener(this);               
             connectButton.setEnabled(true);
-            createRequestButton = new Button(composite,SWT.PUSH);
-            createRequestButton.setText("createRequest");
-            createRequestButton.addSelectionListener(this);  
             
+            Composite requestComposite = new Composite(composite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            requestComposite.setLayout(gridLayout);
+            createRequestButton = new Button(requestComposite,SWT.PUSH);
+            createRequestButton.setText("createRequest");
+            createRequestButton.addSelectionListener(this);
+            requestText = new Text(requestComposite,SWT.BORDER);
+            GridData gridData = new GridData(); 
+            gridData.widthHint = 400;
+            requestText.setLayoutData(gridData);
+            requestText.setText(defaultRequest);
+            requestText.addSelectionListener(this);
+             
             createMonitorButton = new Button(composite,SWT.PUSH);
             createMonitorButton.setText("destroyMonitor");
             createMonitorButton.addSelectionListener(this);               
@@ -133,25 +122,8 @@ public class MonitorFactory {
             statusButton.setText("serverInfo");
             statusButton.addSelectionListener(this);               
             statusButton.setEnabled(true);
-            
-            Group group  = new Group(shell,SWT.BORDER);
-            group.setText("options for servers that support pvData");
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 4;
-            group.setLayout(gridLayout);
-            Composite queueComposite = new Composite(group,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
-            queueComposite.setLayout(gridLayout);
-            new Label(queueComposite,SWT.NONE).setText("queueSize");
-            queueSizeText = new Text(queueComposite,SWT.BORDER);
-            GridData gridData = new GridData(); 
-            gridData.widthHint = 25;
-            queueSizeText.setLayoutData(gridData);
-            queueSizeText.setText(Integer.toString(queueSize));
-            queueSizeText.addSelectionListener(this);
-            
-            Composite simulateDelayComposite = new Composite(group,SWT.BORDER);
+             
+            Composite simulateDelayComposite = new Composite(composite,SWT.BORDER);
             gridLayout = new GridLayout();
             gridLayout.numColumns = 2;
             simulateDelayComposite.setLayout(gridLayout);
@@ -162,26 +134,6 @@ public class MonitorFactory {
             simulateDelayText.setLayoutData(gridData);
             simulateDelayText.setText(Double.toString(simulateDelay));
             simulateDelayText.addSelectionListener(this);
-            
-            algorithmCombo = new Combo(group,SWT.DROP_DOWN);
-            algorithmCombo.add("onPut");
-            algorithmCombo.add("onChange");
-            algorithmCombo.add("onAbsolute");
-            algorithmCombo.add("onPercentage");
-            algorithmCombo.add("custom");
-            algorithmCombo.select(0);
-            algorithmCombo.addSelectionListener(this);
-            Composite deadbandComposite = new Composite(group,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
-            deadbandComposite.setLayout(gridLayout);
-            new Label(deadbandComposite,SWT.NONE).setText("deadband");
-            deadbandText = new Text(deadbandComposite,SWT.BORDER);
-            gridData = new GridData(); 
-            gridData.widthHint = 75;
-            deadbandText.setLayoutData(gridData);
-            deadbandText.setText(Double.toString(deadband));
-            deadbandText.addSelectionListener(this);
             
             Composite startStopComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -220,19 +172,6 @@ public class MonitorFactory {
             shell.open();
             shell.addDisposeListener(this);
         }
-        
-        private void initPVOption() {
-            pvOption = pvDataCreate.createPVStructure(null, "pvOption", new Field[0]);
-            pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvOption, "algorithm", ScalarType.pvString);
-            pvAlgorithm.put("onPut");
-            pvOption.appendPVField(pvAlgorithm);
-            pvQueueSize = (PVInt)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvInt);
-            pvQueueSize.put(queueSize);
-            pvOption.appendPVField(pvQueueSize);
-            pvDeadband = (PVDouble)pvDataCreate.createPVScalar(pvOption, "deadband", ScalarType.pvDouble);
-            pvDeadband.put(deadband);
-            pvOption.appendPVField(pvDeadband);
-        }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
          */
@@ -261,58 +200,19 @@ public class MonitorFactory {
                     channelClient.disconnect();
                     stateMachine.setState(State.readyForConnect);
                 }
-            }
-            if(object==createRequestButton) {
-                stateMachine.setState(State.creatingRequest);
+            } else if(object==createRequestButton) {
                 channelClient.createRequest(shell);
-            }
-            if(object==createMonitorButton) {
+            } else if(object==createMonitorButton) {
                 if(state==State.readyForCreateMonitor) {
                     stateMachine.setState(State.creatingMonitor);
-                    channelClient.createMonitor();
+                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    if(pvStructure==null) return;
+                    channelClient.createMonitor(pvStructure);
                 } else {
                     channelClient.destroyMonitor();
                     stateMachine.setState(State.readyForCreateMonitor);
                 }
-            }
-            if(object==algorithmCombo) {
-                int item = algorithmCombo.getSelectionIndex();
-                if(item==0) {
-                    pvAlgorithm.put("onPut");
-                } else if(item==1) {
-                    pvAlgorithm.put("onChange");
-                } else if(item==2) {
-                    pvAlgorithm.put("onAbsoluteChange");
-                } else if(item==3) {
-                    pvAlgorithm.put("onPercentChange");
-                } else if(item==4) {
-                    requester.message("custom not implemented",MessageType.info);
-                    algorithmCombo.select(0);
-                }
-                return;
-            }
-            
-            if(object==queueSizeText) {
-                String value = queueSizeText.getText();
-                try {
-                    queueSize = Integer.decode(value);
-                    pvQueueSize.put(queueSize);
-                } catch (NumberFormatException e) {
-                    requester.message("Illegal value", MessageType.error);
-                }
-                return;
-            }
-            if(object==deadbandText) {
-                String value = deadbandText.getText();
-                try {
-                    deadband = Double.parseDouble(value);
-                    pvDeadband.put(deadband);
-                } catch (NumberFormatException e) {
-                    requester.message("Illegal value", MessageType.error);
-                }
-                return;
-            }
-            if(object==simulateDelayText) {
+            } else if(object==simulateDelayText) {
                 String value = simulateDelayText.getText();
                 try {
                     simulateDelay = Double.parseDouble(value);
@@ -320,8 +220,7 @@ public class MonitorFactory {
                     requester.message("Illegal value", MessageType.error);
                 }
                 return;
-            }
-            if(object==startStopButton) {
+            } else if(object==startStopButton) {
                 if(state==State.active) {
                     channelClient.stop();
                     stateMachine.setState(State.readyForStart);
@@ -331,8 +230,7 @@ public class MonitorFactory {
                     channelClient.start();
                 }
                 return;
-            }
-            if(object==statusButton) {
+            } else if(object==statusButton) {
                 Channel channel = channelClient.getChannel();
                 if(channel==null) {
                     requester.message("not connected",MessageType.info);
@@ -348,7 +246,7 @@ public class MonitorFactory {
         
         private class StateMachine {
             private State state = State.readyForConnect;;
-            
+
             void setState(State newState) {
                 if(isDisposed) return;
                 state = newState;
@@ -368,27 +266,11 @@ public class MonitorFactory {
                     createMonitorButton.setEnabled(false);
                     startStopButton.setEnabled(false);
                     return;
-                case readyForCreateRequest:
-                    connectButton.setText("disconnect");
-                    createMonitorButton.setText("createMonitor");
-                    startStopButton.setText("start");
-                    createRequestButton.setEnabled(true);
-                    createMonitorButton.setEnabled(false);
-                    startStopButton.setEnabled(false);
-                    return;
-                case creatingRequest:
-                    connectButton.setText("disconnect");
-                    createMonitorButton.setText("createMonitor");
-                    startStopButton.setText("start");
-                    createRequestButton.setEnabled(false);
-                    createMonitorButton.setEnabled(false);
-                    startStopButton.setEnabled(false);
-                    return;
                 case readyForCreateMonitor:
                     connectButton.setText("disconnect");
                     createMonitorButton.setText("createMonitor");
                     startStopButton.setText("start");
-                    createRequestButton.setEnabled(false);
+                    createRequestButton.setEnabled(true);
                     createMonitorButton.setEnabled(true);
                     startStopButton.setEnabled(false);
                     return;
@@ -427,13 +309,12 @@ public class MonitorFactory {
         }
          
         private class ChannelClient implements
-        ChannelRequester,ConnectChannelRequester,CreateRequestRequester,
+        ChannelRequester,ConnectChannelRequester,CreateFieldRequestRequester,
         Runnable,
         MonitorRequester
         {
             private Channel channel = null;
             private ConnectChannel connectChannel = null;
-            private PVStructure pvRequest = null;
             private RunCommand runCommand;
             private Monitor monitor = null;
             private PrintModified printModified = null;
@@ -447,19 +328,16 @@ public class MonitorFactory {
                 connectChannel.connect();
             }
             void createRequest(Shell shell) {
-                CreateRequest createRequest = CreateRequestFactory.create(shell, channel, this);
+                CreateFieldRequest createRequest = CreateFieldRequestFactory.create(shell, channel, this);
                 createRequest.create();
             }
             void disconnect() {
-                Channel channel = this.channel;
-                if(channel!=null) {
-                    this.channel = null;
-                    channel.destroy();
-                }
+            	if(monitor!=null) monitor.stop();
+                if(channel!=null) channel.destroy();
             }
             
-            void createMonitor() {
-                monitor = channel.createMonitor(this, pvRequest, pvOption);
+            void createMonitor(PVStructure pvRequest) {
+                monitor = channel.createMonitor(this, pvRequest);
             }
 
             void destroyMonitor() {
@@ -486,18 +364,15 @@ public class MonitorFactory {
              */
             @Override
             public void channelStateChange(Channel c, ConnectionState state) {
-            	
             	if (state == ConnectionState.DESTROYED) {
                     this.channel = null;
                     runCommand = RunCommand.destroy;
                     shell.getDisplay().asyncExec(this);
             	}
-            	
                 if(state != ConnectionState.CONNECTED) {
                     message("channel " + state,MessageType.error);
                     return;
                 }
-                
                 channel = c;
                 ConnectChannel connectChannel = this.connectChannel;
                 if(connectChannel!=null) {
@@ -525,19 +400,24 @@ public class MonitorFactory {
             public void timeout() {
                 Channel channel = this.channel;
                 if(channel!=null) {
-                    this.channel = null;
                     channel.destroy();
                 }
                 message("channel connect timeout",MessageType.info);
                 runCommand = RunCommand.destroy;
                 shell.getDisplay().asyncExec(this);
             }
-            /* (non-Javadoc)
-             * @see org.epics.ioc.swtshell.CreateRequestRequester#request(org.epics.pvData.pv.PVStructure, boolean)
-             */
             @Override
-            public void request(PVStructure pvRequest, boolean isShared) {
-                this.pvRequest = pvRequest;
+			public String getDefault() {
+				return "value,alarm,timeStamp";
+			}
+			/* (non-Javadoc)
+			 * @see org.epics.ioc.swtshell.CreateFieldRequestRequester#request(java.lang.String)
+			 */
+			@Override
+			public void request(String request) {
+				requestText.selectAll();
+                requestText.clearSelection();
+                requestText.setText("record[queueSize=2]field(" + request + ")");
                 runCommand = RunCommand.channelrequestDone;
                 shell.getDisplay().asyncExec(this);
             }
@@ -561,14 +441,12 @@ public class MonitorFactory {
             public void monitorEvent(Monitor monitor) {
                 poll.poll();
             }
-
             /* (non-Javadoc)
-             * @see org.epics.ca.client.ChannelMonitorRequester#unlisten()
+             * @see org.epics.pvData.monitor.MonitorRequester#unlisten(org.epics.pvData.monitor.Monitor)
              */
             @Override
-            public void unlisten() {
-                // TODO Auto-generated method stub
-                
+            public void unlisten(Monitor monitor) {
+            	// What to do???
             } 
             /* (non-Javadoc)
              * @see java.lang.Runnable#run()
@@ -577,7 +455,7 @@ public class MonitorFactory {
             public void run() {
                 switch(runCommand) {
                 case channelConnected:
-                    stateMachine.setState(State.readyForCreateRequest);
+                    stateMachine.setState(State.readyForCreateMonitor);
                     return;
                 case timeout:
                     stateMachine.setState(State.readyForConnect);
