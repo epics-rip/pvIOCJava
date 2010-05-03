@@ -87,7 +87,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     @Override
     public void connectionChange(boolean isConnected) {
         if(isConnected) {
-            monitor = channel.createMonitor(this, pvRequest, pvOption);
+            monitor = channel.createMonitor(this, pvRequest);
         } else {
             if(monitor!=null) monitor.destroy();
             monitor = null;
@@ -121,10 +121,10 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	recordProcess.queueProcessRequest(processToken);
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.ChannelMonitorRequester#unlisten()
+     * @see org.epics.pvData.monitor.MonitorRequester#unlisten(org.epics.pvData.monitor.Monitor)
      */
     @Override
-    public void unlisten() {
+	public void unlisten(Monitor monitor) {
         recordProcess.stop();
     }
     /* (non-Javadoc)
