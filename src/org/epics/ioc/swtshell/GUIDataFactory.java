@@ -20,13 +20,21 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
+import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.PVArray;
+import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.PVStructureArray;
+import org.epics.pvData.pv.PVStructureScalar;
+import org.epics.pvData.pv.Scalar;
+import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.StructureArrayData;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -47,7 +55,7 @@ public class GUIDataFactory {
     private static final Convert convert = ConvertFactory.getConvert();
     
     private static class GUIDataImpl extends Dialog implements GUIData, SelectionListener {
-        
+    	private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         private Shell parent;
         private Shell shell;
         private Button doneButton;
@@ -59,6 +67,7 @@ public class GUIDataFactory {
         
         private PVField pvField = null;
         private Type type = null;
+        private StructureArrayData structureArrayData = new StructureArrayData();
         
         
         /**
@@ -85,15 +94,60 @@ public class GUIDataFactory {
             bitSet.clear();
             PVField[] pvFields = pvStructure.getPVFields();
             if(pvFields.length==1) {
-                PVField pvField = pvFields[0];
-                Field field = pvField.getField();
-                Type type = field.getType();
-                if(type!=Type.structure) {
-                    GetSimple getSimple = new GetSimple(parent,pvField);
-                    boolean isModified = getSimple.get();
-                    if(isModified) bitSet.set(pvField.getFieldOffset());
-                    return;
-                }
+            	PVField pvField = pvFields[0];
+            	Field field = pvField.getField();
+            	Type type = field.getType();
+            	if(type==Type.scalar) {
+            		Scalar scalar = (Scalar)field;
+            		if(scalar.getScalarType()!=ScalarType.pvStructure) {
+            			GetSimple getSimple = new GetSimple(parent,pvField);
+            			boolean isModified = getSimple.get();
+            			if(isModified) bitSet.set(pvField.getFieldOffset());
+            			return;
+            		} else {
+            			PVStructureScalar pvStructureScalar = (PVStructureScalar)pvField;
+                		PVStructure pvStruct = pvStructureScalar.getPVStructure();
+                		BitSet newBitSet = new BitSet(pvStruct.getNumberFields());
+                		newBitSet.clear();
+                		GUIData guiData = GUIDataFactory.create(parent);
+                		guiData.get(pvStruct, newBitSet);
+                		bitSet.set(pvField.getFieldOffset());
+                		return;
+            		}
+            	}
+            	if(type==Type.scalarArray) {
+            		Array array = (Array)field;
+            		if(array.getElementType()!=ScalarType.pvStructure) {
+            			GetSimple getSimple = new GetSimple(parent,pvField);
+            			boolean isModified = getSimple.get();
+            			if(isModified) bitSet.set(pvField.getFieldOffset());
+            			return;
+            		} else {
+            			PVStructureArray pvStructureArray = (PVStructureArray)pvField;
+                		PVStructure[] pvStructures = new PVStructure[1];
+                		while(true) {
+                			GetStructureArrayIndex getStructureArray = new GetStructureArrayIndex(parent,pvStructureArray);
+                			int index = getStructureArray.getIndex();
+                			if(index<0) break;
+                			int num = pvStructureArray.get(index, 1, structureArrayData);
+                			pvStructures[0] = null;
+                			if(num==1) {
+                				pvStructures[0] = structureArrayData.data[structureArrayData.offset];
+                			}
+                			if(pvStructures[0]==null) {
+                				pvStructures[0] = pvDataCreate.createPVStructure(null, pvStructureArray.getStructureArray().getStructure());
+                			}
+                			PVStructure pvStruct = pvStructures[0];
+                			BitSet newBitSet = new BitSet(pvStruct.getNumberFields());
+                    		newBitSet.clear();
+                    		GUIData guiData = GUIDataFactory.create(parent);
+                    		guiData.get(pvStruct, newBitSet);
+                    		pvStructureArray.put(index, 1, pvStructures, 0);
+                    		bitSet.set(pvStructureArray.getFieldOffset());
+                		}
+                		return;
+            		}
+            	}
             }
             shell = new Shell(parent);
             shell.setText("getValue");
@@ -167,12 +221,50 @@ public class GUIDataFactory {
                         type = field.getType();
                         boolean ok = false;
                         if(type==Type.scalar) {
-                            ok = true;
-                            textMessage(text,pvField.toString());
+                        	Scalar scalar = (Scalar)field;
+                        	if(scalar.getScalarType()!=ScalarType.pvStructure) {
+                        		ok = true;
+                        		textMessage(text,pvField.toString());
+                        	} else {
+                        		PVStructureScalar pvStructureScalar = (PVStructureScalar)pvField;
+                        		PVStructure pvStruct = pvStructureScalar.getPVStructure();
+                        		BitSet newBitSet = new BitSet(pvStruct.getNumberFields());
+                        		newBitSet.clear();
+                        		GUIData guiData = GUIDataFactory.create(shell);
+                        		guiData.get(pvStruct, newBitSet);
+                        		bitSet.set(pvField.getFieldOffset());
+                        		ok=true;
+                        	}
                         } else if(type==Type.scalarArray) {
-                            ok = true;
-                            String values = pvField.toString();
-                            textMessage(text,values);
+                        	Array array = (Array)field;
+                        	if(array.getElementType()!=ScalarType.pvStructure) {
+                        		ok = true;
+                        		String values = pvField.toString();
+                        		textMessage(text,values);
+                        	} else {
+                        		PVStructureArray pvStructureArray = (PVStructureArray)pvField;
+                        		PVStructure[] pvStructures = new PVStructure[1];
+                        		while(true) {
+                        			GetStructureArrayIndex getStructureArray = new GetStructureArrayIndex(shell,pvStructureArray);
+                        			int index = getStructureArray.getIndex();
+                        			if(index<0) break;
+                        			int num = pvStructureArray.get(index, 1, structureArrayData);
+                        			pvStructures[0] = null;
+                        			if(num==1) {
+                        				pvStructures[0] = structureArrayData.data[structureArrayData.offset];
+                        			}
+                        			if(pvStructures[0]==null) {
+                        				pvStructures[0] = pvDataCreate.createPVStructure(null, pvStructureArray.getStructureArray().getStructure());
+                        			}
+                        			PVStructure pvStruct = pvStructures[0];
+                        			BitSet newBitSet = new BitSet(pvStruct.getNumberFields());
+                            		newBitSet.clear();
+                            		GUIData guiData = GUIDataFactory.create(parent);
+                            		guiData.get(pvStruct, newBitSet);
+                            		pvStructureArray.put(index, 1, pvStructures, 0);
+                            		bitSet.set(pvStructureArray.getFieldOffset());
+                        		}
+                        	}
                         }
                         if(!ok) {
                             textMessage(text,"cant handle type");
@@ -224,6 +316,66 @@ public class GUIDataFactory {
                     createStructureTreeItem(treeItem,(PVStructure)pvField);
                 } else {
                     treeItem.setData(pvField);
+                }
+            }
+        }
+        
+        private static class GetStructureArrayIndex extends Dialog implements SelectionListener{
+        	private PVStructureArray pvStructureArray;
+        	private Shell shell;
+            private Text text;
+            private int index=0;
+        	
+        	private GetStructureArrayIndex(Shell parent,PVStructureArray pvStructureArray) {
+        		super(parent,SWT.DIALOG_TRIM|SWT.NONE);
+        		this.pvStructureArray = pvStructureArray;
+        	}
+
+        	private int getIndex() {
+        		shell = new Shell(super.getParent());
+                shell.setText("arrayIndex");
+                GridLayout gridLayout = new GridLayout();
+                gridLayout.numColumns = 1;
+                shell.setLayout(gridLayout);
+                text = new Text(shell,SWT.BORDER);
+                GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+                gridData.minimumWidth = 100;
+                text.setLayoutData(gridData);
+                text.addSelectionListener(this);
+                textMessage(text,String.valueOf(index));
+                shell.pack();
+                shell.open();
+                Display display = shell.getDisplay();
+                while(!shell.isDisposed()) {
+                    if(!display.readAndDispatch()) {
+                        display.sleep();
+                    }
+                }
+                shell.dispose();
+                return index;
+        	}
+        	/* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            @Override
+            public void widgetDefaultSelected(SelectionEvent e) {
+                widgetSelected(e);
+            }
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Object object = e.getSource();
+                if(object==text) {  
+                    try {
+                    	index = Integer.parseInt(text.getText());
+                    }catch (NumberFormatException ex) {
+                        textMessage(text,"exception " + ex.getMessage());
+                        return;
+                    }
+                    shell.close();
+                    return;
                 }
             }
         }
