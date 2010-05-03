@@ -8,7 +8,6 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">mrkHost:aiExample<</scalar>
-        <scalar name = "process">false</scalar>
         <scalar name = "inheritSeverity">true</scalar>
     </structure>
 </record>

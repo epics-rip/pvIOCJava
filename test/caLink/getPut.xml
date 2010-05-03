@@ -16,7 +16,7 @@
     <structure name = "link" extends = "generic">
         <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">putFromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "process" extends = "caProcessLink">
              <scalar name = "pvname">getFromCounter</scalar>
@@ -68,8 +68,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">putFromCounter</scalar>
-        <scalar name = "process">false</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm</scalar>
+        <scalar name = "request">value,alarm</scalar>
     </structure>
 </record>
 
