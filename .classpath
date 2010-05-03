@@ -7,9 +7,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="jar/CAJ.jar"/>
 	<classpathentry kind="lib" path="jar/JCA.jar"/>
-	<classpathentry kind="lib" path="/home/install/eclipse/plugins/org.eclipse.swt.gtk.linux.x86_3.5.1.v3555a.jar"/>
-	<classpathentry kind="lib" path="/home/install/eclipse/plugins/org.eclipse.swt_3.5.1.v3555a.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/CAJv4"/>
+	<classpathentry kind="lib" path="/usr/lib/eclipse/swt.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/pvAccess"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/pvData"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
