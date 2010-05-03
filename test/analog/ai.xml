@@ -18,7 +18,7 @@
     <structure name = "link" extends = "generic">
         <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">aiRaw</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
 </record>
@@ -47,8 +47,7 @@
         </structure>
         <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">aiRaw</scalar>
-            <scalar name = "process">false</scalar>
-            <scalar name = "request" scalarType = "string" >value,alarm</scalar>
+            <scalar name = "request" >value,alarm</scalar>
         </structure>
     </structure>
 </record>

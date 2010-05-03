@@ -18,7 +18,7 @@
     <structure name = "link" extends = "generic">
         <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">ao</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
 </record>
@@ -36,7 +36,7 @@
         </structure>
         <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">aoRaw</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
 </record>
