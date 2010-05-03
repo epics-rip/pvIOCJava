@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "records.xml" />
+<include removePath = "${JAVAIOC}/xml" />
+
+<record recordName = "structureScalarTest">
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "structure" extends = "test.testStructure">
+        <scalar name = "value">100.0</scalar>
+        <structure name = "location">
+           <scalar name = "x">1.0</scalar>
+            <scalar name = "y">2.0</scalar>>
+        </structure>
+    </scalar>
+</record>
+
+<record recordName = "structureArrayTest">
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <array name = "value" scalarType = "structure" extends = "test.testStructure" capacity = "2">
+       <structure>
+          <scalar name = "value">100.0</scalar>
+          <structure name = "location">
+             <scalar name = "x">0.0</scalar>
+              <scalar name = "y">0.0</scalar>>
+          </structure>
+       </structure>
+        <structure>
+          <scalar name = "value">200.0</scalar>
+          <structure name = "location">
+             <scalar name = "x">5.0</scalar>
+              <scalar name = "y">10.0</scalar>>
+          </structure>
+       </structure>
+       
+    </array>
+</record>
+
+</database>
