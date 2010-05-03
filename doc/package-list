@@ -1,6 +1,5 @@
 org.epics.ioc
 org.epics.ioc.caV3
-org.epics.ioc.caV4
 org.epics.ioc.channelAccess.test
 org.epics.ioc.install
 org.epics.ioc.pdrv
@@ -9,6 +8,7 @@ org.epics.ioc.pdrv.serial
 org.epics.ioc.pdrv.testDriver
 org.epics.ioc.pdrv.vxi11
 org.epics.ioc.pdrv.vxi11.rpc
+org.epics.ioc.pvAccess
 org.epics.ioc.support
 org.epics.ioc.support.alarm
 org.epics.ioc.support.basic
