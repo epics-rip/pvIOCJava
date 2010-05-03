@@ -26,7 +26,7 @@
         <structure name = "2" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">byteArray2FromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "3" extends = "caProcessLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
@@ -35,7 +35,7 @@
         <structure name = "4" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">shortArray2FromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "5" extends = "caProcessLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
@@ -44,7 +44,7 @@
         <structure name = "6" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">intArray2FromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "7" extends = "caProcessLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
@@ -53,7 +53,7 @@
         <structure name = "8" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">longArray2FromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "9" extends = "caProcessLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
@@ -62,7 +62,7 @@
         <structure name = "10" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">floatArray2FromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "11" extends = "caProcessLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
@@ -71,7 +71,7 @@
         <structure name = "12" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">doubleArray2FromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "13" extends = "caProcessLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
@@ -80,7 +80,7 @@
         <structure name = "14" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">stringArray2FromCounter</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
     <structure name = "display" extends = "display" >

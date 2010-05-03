@@ -23,7 +23,7 @@
         <structure name = "2" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
             <scalar name = "pvname">booleanArray2FromToggle</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
 </record>

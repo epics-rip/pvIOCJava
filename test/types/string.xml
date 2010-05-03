@@ -26,7 +26,7 @@
         <structure name = "1" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean" >true</scalar>
             <scalar name = "pvname">stringOut</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
         <structure name = "2" extends = "caProcessLink">
             <scalar name = "wait" scalarType = "boolean" >false</scalar>
