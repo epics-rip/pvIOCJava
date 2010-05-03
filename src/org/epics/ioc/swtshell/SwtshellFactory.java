@@ -109,6 +109,13 @@ public class SwtshellFactory {
                     PutGetFactory.init(display);
                 }
             });
+            Button channelRPCDB = new Button(shell,SWT.PUSH);
+            channelRPCDB.setText("channelRPC");
+            channelRPCDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    ChannelRPCFactory.init(display);
+                }
+            });
             Button monitorDB = new Button(shell,SWT.PUSH);
             monitorDB.setText("monitor");
             monitorDB.addSelectionListener( new SelectionAdapter() {
@@ -121,6 +128,13 @@ public class SwtshellFactory {
             arrayDB.addSelectionListener( new SelectionAdapter() {
                 public void widgetSelected(SelectionEvent e) {
                     ArrayFactory.init(display);
+                }
+            });
+            Button structureArrayDB = new Button(shell,SWT.PUSH);
+            structureArrayDB.setText("structureArray");
+            structureArrayDB.addSelectionListener( new SelectionAdapter() {
+                public void widgetSelected(SelectionEvent e) {
+                    StructureArrayFactory.init(display);
                 }
             });
             Button iocConsoleDB = new Button(shell,SWT.PUSH);
