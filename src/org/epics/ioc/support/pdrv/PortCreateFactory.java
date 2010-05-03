@@ -88,13 +88,13 @@ public class PortCreateFactory {
             method.invoke(null,parameters);
         } catch(IllegalAccessException e) {
             throw new IllegalStateException(
-                " create IllegalAccessException "+ e.getLocalizedMessage());
+                " create IllegalAccessException "+ e.getMessage());
         } catch(IllegalArgumentException e) {
             throw new IllegalStateException(
-                " create IllegalArgumentException " + e.getLocalizedMessage());
+                " create IllegalArgumentException " + e.getMessage());
         } catch(InvocationTargetException e) {
             throw new IllegalStateException(
-                " create InvocationTargetException " + e.getLocalizedMessage());
+                " create InvocationTargetException " + e.getMessage());
         }
         return new PortCreate(pvStructure,supportName);
     }

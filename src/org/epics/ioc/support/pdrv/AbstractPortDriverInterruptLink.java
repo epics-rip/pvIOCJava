@@ -105,7 +105,11 @@ implements RecordProcessRequester,QueueRequestCallback
         if(pvPortName==null) return;
         pvDeviceName = pvStructure.getStringField("deviceName");
         if(pvDeviceName==null) return;
-        pvProcess = pvStructure.getBooleanField("process");
+        if(pvStructure.getSubField("process")!=null) {
+        	pvProcess = pvStructure.getBooleanField("process");
+        } else {
+        	pvProcess = null;
+        }
         setSupportState(SupportState.readyForStart);
     }
     

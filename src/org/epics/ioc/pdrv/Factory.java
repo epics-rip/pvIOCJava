@@ -62,13 +62,14 @@ public class Factory {
             LinkedListNode<PortImpl> node = portList.getHead();
             while(node!=null) {
                 if(node.getObject().portName.equals(portName)) {
+                	System.err.printf("port %s already exists%n",portName);
                     throw new IllegalStateException("port already exists");
                 }
                 node = portList.getNext(node);
             }
             portList.addTail(port.portListNode);
         }
-        if(autoConnect) port.startAutoConnect(.01);
+        if(autoConnect) port.startAutoConnect(.1);
         return port;
     }
     /**
