@@ -22,7 +22,6 @@
         </structure>
         <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">adcVoltageSupported</scalar>
-            <scalar name = "process">false</scalar>
         </structure>
     </structure>  
 </record>
@@ -36,7 +35,7 @@
         <scalar name = "value" scalarType = "double" />
         <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">voltage</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
     <structure name = "current" extends = "generic">
@@ -45,7 +44,7 @@
         </scalar>
         <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">current</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
     <structure name = "power">
@@ -66,7 +65,7 @@
         </structure>
         <structure name = "output" extends = "caOutputLink">
             <scalar name = "pvname">dacCurrentSupported</scalar>
-            <scalar name = "process">true</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>
 </record>

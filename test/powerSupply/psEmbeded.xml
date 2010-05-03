@@ -22,7 +22,6 @@
             </structure>
             <structure name = "input" extends = "caInputLink">
                 <scalar name = "pvname">adcVoltageEmbeded</scalar>
-                <scalar name = "process">false</scalar>
             </structure>
         </structure>  
     </structure>
@@ -40,7 +39,7 @@
             </structure>
             <structure name = "output" extends = "caOutputLink">
                 <scalar name = "pvname">dacCurrentEmbeded</scalar>
-                <scalar name = "process">true</scalar>
+                <scalar name = "request">record[process=true]</scalar>
             </structure>
         </structure>
     </structure>
