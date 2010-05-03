@@ -293,7 +293,7 @@ public class ChannelListFactory {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvPutRequest, "fieldList", ScalarType.pvString);
                 pvString.put("result.status,result.names");
                 pvGetRequest.appendPVField(pvString);
-                channelPutGet = channel.createChannelPutGet(this, pvPutRequest, true, pvGetRequest, true, true, null);
+                channelPutGet = channel.createChannelPutGet(this, pvPutRequest);
             }
             
             /* (non-Javadoc)
