@@ -10,12 +10,18 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support.rpc<br />
 package: org.epics.ioc.support.rpc<br />
-2009.08.04</h1>
-CONTENTS
+2010.04.01</h1>
+CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Overview">Overview</a>
+    <ul>
+      <li><a href="#putProcess">putProcessGet RPC</a></li>
+      <li><a href="#channelRPC">channelRPC</a></li>
+    </ul>
+  </li>
+  <li><a href="#ExampleCha">ExampleChannelRPC</a></li>
   <li><a href="#RecordList">RecordList</a></li>
   <li><a href="#StructureL">StructureList</a></li>
   <li><a href="#IocShow">IocShow</a></li>
@@ -23,16 +29,24 @@ CONTENTS
   <li><a href="#SupportSta">SupportStateSet</a></li>
 </ul>
 </div>
-
-<p> </p>
 <hr />
 
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
 <p>This package provides support for remote procedure calls from a channel
-access client. A RPC is implemented via a structure that has the following
-fields:</p>
+access client. Two types of RPCs are possible:</p>
+<dl>
+  <dt>putProcessGet</dt>
+    <dd>This is used if the PVStructure for the data returned by a request
+      always has the same structure.</dd>
+  <dt>channelRPC</dt>
+    <dd>This is used if a new PVStructure must be send for each request.</dd>
+</dl>
+
+<h3 id="putProcess">putProcessGet RPC</h3>
+
+<p>A RPC is implemented via a structure that has the following fields:</p>
 <dl>
   <dt>arguments</dt>
     <dd>A structure that has a set of fields that are defined by the
@@ -48,6 +62,44 @@ arguments and the get retrieves the result.</p>
 <p>javaIOC/xml/structure/rpc.xml has the definitions for the structures
 required by the support provided by this package. The following sections
 provide a brief description of the arguments and result for each support.</p>
+
+<h3 id="channelRPC">channelRPC</h3>
+
+<p>A ChannelRPC allows a different PVStructure to be created and returned to
+the client for each request.</p>
+<hr />
+
+<h2 style="text-align: center" id="ExampleCha">ExampleChannelRPC</h2>
+<hr />
+
+<p>This is an example of how to implement support for a record that supports
+a ChannelRPC request. See the package description for org.epics.ca.client for
+details about ChannelRPC.</p>
+
+<p>The example uses the record instance that is in
+test/channelRPC/channelRPCDB.xml :</p>
+<pre>&lt;record recordName = "exampleChannelRPC"&gt;
+    &lt;scalar name = "factoryName" scalarType = "string"&gt;
+      org.epics.ioc.support.rpc.ExampleChannelRPCFactory
+    &lt;/scalar&gt;
+    &lt;structure name = "arguments"&gt;
+        &lt;scalar name = "size" scalarType = "int"&gt;2&lt;/scalar&gt;
+    &lt;/structure&gt;
+    &lt;structure name = "element"&gt;
+        &lt;scalar name = "value" scalarType = "double"/&gt;
+        &lt;structure name = "alarm" extends = "alarm"/&gt;
+        &lt;structure name = "timeStamp" extends = "timeStamp"/&gt;
+    &lt;/structure&gt;
+&lt;/record&gt;
+&lt;/database&gt;
+</pre>
+
+<p>Note that factoryName field. It must give the name of the factory that
+creates an objec that implements interface RPCServer. The example create a
+PVStructure that has size subfields each of which is a clone of element. Look
+at the source code for details.</p>
+<pre>
+</pre>
 <hr />
 
 <h2 style="text-align: center" id="RecordList">RecordList</h2>

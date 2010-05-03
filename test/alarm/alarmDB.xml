@@ -57,7 +57,6 @@
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">floatCounter</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "floatAlarm">
           <scalar name = "active">true</scalar>
@@ -143,7 +142,6 @@
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">doubleCounter</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "doubleAlarm">
           <scalar name = "active">true</scalar>
@@ -229,7 +227,6 @@
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">byteCounter</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "byteAlarm">
           <scalar name = "active">true</scalar>
@@ -315,7 +312,6 @@
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">shortCounter</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "shortAlarm">
           <scalar name = "active">true</scalar>
@@ -401,7 +397,6 @@
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">intCounter</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "intAlarm">
           <scalar name = "active">true</scalar>
@@ -487,7 +482,6 @@
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">longCounter</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "longAlarm">
           <scalar name = "active">true</scalar>

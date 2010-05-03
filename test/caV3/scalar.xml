@@ -27,9 +27,7 @@
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}</scalar>
-         <structure name = "request">
-            <scalar name = "value" scalarType = "string">value.index</scalar>
-         </structure>
+         <scalar name = "request">value.index</scalar>
     </structure>
     <structure name = "process0" extends = "caProcessLink">
        <scalar name = "wait" scalarType = "boolean">false</scalar>
@@ -48,7 +46,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm</scalar>
+        <scalar name = "request">value,alarm</scalar>
     </structure>
 </record>
 
@@ -61,7 +59,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm</scalar>
+        <scalar name = "request">value,alarm</scalar>
     </structure>
 </record>
 
@@ -72,10 +70,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}</scalar>
-        <structure name = "request">
-            <scalar name = "value" scalarType = "string">value.index</scalar>
-            <scalar name = "alarm" scalarType = "string">alarm</scalar>
-        </structure>
+        <scalar name = "request">value.index,alarm</scalar>
     </structure>
 </record>
 <record recordName = "enumMonitorIndex${num}">
@@ -86,10 +81,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">enum${num}</scalar>
         <scalar name = "process">true</scalar>
-        <structure name = "request">
-            <scalar name = "value" scalarType = "string">value.index</scalar>
-            <scalar name = "alarm" scalarType = "string">alarm</scalar>
-        </structure>
+        <scalar name = "request">value.index,alarm</scalar>
     </structure>
 </record>
 
@@ -135,7 +127,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byte${num}</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -149,7 +141,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">byte${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -179,7 +171,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">short${num}</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -193,7 +185,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">short${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -223,7 +215,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">int${num}</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -237,7 +229,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">int${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -268,7 +260,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">float${num}</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -282,7 +274,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">float${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -312,7 +304,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">double${num}</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -326,7 +318,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">double${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm,display,control</scalar>
+        <scalar name = "request">value,alarm,display,control</scalar>
     </structure>
 </record>
 
@@ -355,7 +347,7 @@
     <structure name = "input" extends = "caInputLink">
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">string${num}</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm</scalar>
+        <scalar name = "request">value,alarm</scalar>
     </structure>
 </record>
 
@@ -367,7 +359,7 @@
         <scalar name = "providerName">caV3</scalar>
         <scalar name = "pvname">string${num}</scalar>
         <scalar name = "process">true</scalar>
-        <scalar name = "request" scalarType = "string">value,alarm</scalar>
+        <scalar name = "request">value,alarm</scalar>
     </structure>
 </record>
 
