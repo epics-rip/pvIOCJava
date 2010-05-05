@@ -2,42 +2,25 @@
 <database>
 
 
-<record recordName = "aiRawCounter">
-    <scalar name = "value" scalarType = "int" />
+<record recordName = "aiRaw">
+    <scalar name = "value" scalarType = "int"/>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
-        <scalar name = "rate">1.0</scalar>
-    </structure>
     <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
         <scalar name ="expression">value+100&lt;=2047?value+100:-2048</scalar>
       </structure>
     </structure> 
-    <structure name = "link" extends = "generic">
-        <structure name = "output" extends = "caOutputLink">
-            <scalar name = "pvname">aiRaw</scalar>
-            <scalar name = "request">record[process=true]</scalar>
-        </structure>
-    </structure>
-</record>
-
-<record recordName = "aiRaw">
-    <scalar name = "value" scalarType = "int"/>
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "link" extends = "generic">
-        <structure name = "process" extends = "caProcessLink">
-            <scalar name = "pvname">ai</scalar>
-        </structure>
-    </structure>
 </record>
 
 <record recordName = "ai">
     <scalar name = "value" scalarType = "double" />
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
     <structure name = "input" extends = "linearConvertInput">
         <structure name = "linearConvert">
             <scalar name = "deviceHigh">2047</scalar>
@@ -47,7 +30,7 @@
         </structure>
         <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">aiRaw</scalar>
-            <scalar name = "request" >value,alarm</scalar>
+            <scalar name = "request" >record[process=true]field(value,alarm)</scalar>
         </structure>
     </structure>
 </record>
