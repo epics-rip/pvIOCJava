@@ -210,23 +210,33 @@ public class JavaIOC {
     }
 
     static void parseStructures(String fileName,Requester iocRequester) {
-        System.out.printf("\nparsing PV file %s\n",fileName);
-        try {
-            install.installStructures(fileName,iocRequester);
-        }  catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
+    	long startTime = 0;
+    	long endTime = 0;
+    	startTime = System.nanoTime();
+    	try {
+    		install.installStructures(fileName,iocRequester);
+    	}  catch (IllegalStateException e) {
+    		System.out.println("IllegalStateException: " + e);
+    	}
+    	endTime = System.nanoTime();
+    	double diff = (double)(endTime - startTime)/1e9;
+    	System.out.printf("\ninstalled structures %s time %f seconds\n",fileName,diff);
     }
-    
+
     static void parseRecords(String fileName,Requester iocRequester) {
-        System.out.println("Starting local channel Access");
-        org.epics.ca.LocalFactory.start();
-        System.out.printf("\nparsing PV file %s\n",fileName);
-        try {
-            install.installRecords(fileName,iocRequester);
-        }  catch (IllegalStateException e) {
-            System.out.println("IllegalStateException: " + e);
-        }
+    	System.out.println("Starting local channel Access");
+    	org.epics.ca.LocalFactory.start();
+    	long startTime = 0;
+    	long endTime = 0;
+    	startTime = System.nanoTime();
+    	try {
+    		install.installRecords(fileName,iocRequester);
+    	}  catch (IllegalStateException e) {
+    		System.out.println("IllegalStateException: " + e);
+    	}
+    	endTime = System.nanoTime();
+    	double diff = (double)(endTime - startTime)/1e9;
+    	System.out.printf("\ninstalled records %s time %f seconds\n",fileName,diff);
     }
      
     private static class Listener implements Requester {
