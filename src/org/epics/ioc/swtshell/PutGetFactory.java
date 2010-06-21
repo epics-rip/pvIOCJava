@@ -62,7 +62,7 @@ public class PutGetFactory {
         private boolean isDisposed = false;
 
         private static String windowName = "putGet";
-        private static final String defaultRequest = "record[process=true]putField(argument)getField(result)";
+        private static final String defaultRequest = "record[process=true]putField(arguments)getField(result)";
         private Shell shell = null;
         private Button connectButton;
         private Button createPutRequestButton = null;
