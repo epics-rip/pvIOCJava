@@ -84,6 +84,7 @@ import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVRecord;
+import org.epics.pvData.pv.PVRecordClient;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
@@ -241,9 +242,10 @@ public class ServerFactory {
     /**
      * Channel process variable implementation. 
      */
-    private static class ChannelProcessVariable extends ProcessVariable implements RecordProcessRequester,PVCopyMonitorRequester
+    private static class ChannelProcessVariable extends ProcessVariable implements RecordProcessRequester,PVCopyMonitorRequester,PVRecordClient
     {
         private static final String[] YES_NO_LABELS = new String[] { "false", "true" };
+        private boolean isDestroyed = false;
         private ReentrantLock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
         private boolean done = false;
@@ -374,7 +376,6 @@ public class ServerFactory {
             pvCopy.updateCopyFromBitSet(pvCopyStructure, copyBitSet, true);
             valuePVField = pvCopyStructure.getSubField("value");
             initializeChannelDBRType();
-            
             option = getOption("getProcess");
             if(option!=null) getProcess = Boolean.valueOf(option);
             option = getOption("putProcess");
@@ -386,13 +387,16 @@ public class ServerFactory {
                     throw new CAStatusException(CAStatus.DEFUNCT, "Could not become processor ");
                 }
             	canProcess = true;
-            }   
+            }
+            pvRecord.registerClient(this);
         }
         /* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#destroy()
          */
         @Override
         public void destroy() {
+        	if(isDestroyed) return;
+        	isDestroyed = true;
             super.destroy();
             if(canProcess) {
             	recordProcess.releaseProcessToken(processToken);
@@ -400,6 +404,13 @@ public class ServerFactory {
             }
         }
         /* (non-Javadoc)
+         * @see org.epics.pvData.pv.PVRecordClient#detach(org.epics.pvData.pv.PVRecord)
+         */
+        @Override
+		public void detach(PVRecord pvRecord) {
+			destroy();
+		}
+		/* (non-Javadoc)
          * @see gov.aps.jca.cas.ProcessVariable#getType()
          */
         @Override
@@ -437,6 +448,7 @@ public class ServerFactory {
          * @see gov.aps.jca.cas.ProcessVariable#read(gov.aps.jca.dbr.DBR, gov.aps.jca.cas.ProcessVariableReadCallback)
          */
         public CAStatus read(DBR dbr, ProcessVariableReadCallback asyncReadCallback) throws CAException {
+        	if(isDestroyed) return CAStatus.CHANDESTROY;
             this.dbr = dbr;
         	if(getProcess) {
                 boolean ok = true;
@@ -477,6 +489,7 @@ public class ServerFactory {
          * @see gov.aps.jca.cas.ProcessVariable#write(gov.aps.jca.dbr.DBR, gov.aps.jca.cas.ProcessVariableWriteCallback)
          */
         public CAStatus write(DBR dbr, ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
+        	if(isDestroyed) return CAStatus.CHANDESTROY;
             if(putProcess) {
                 boolean ok = true;
                 synchronized(this) {
@@ -605,6 +618,7 @@ public class ServerFactory {
          */
         @Override
         public void interestRegister() {
+        	if(isDestroyed) return;
         	PVCopyMonitor pvCopyMonitor = null;
             synchronized(this) {
                 if(this.pvCopyMonitor!=null) {
@@ -946,8 +960,11 @@ public class ServerFactory {
             if (dbr instanceof LABELS)
                 ((LABELS)dbr).setLabels(enumLabels);
             if (dbr instanceof GR) {
-                final GR gr = (GR)dbr;
-                PVStructure pvDisplay = pvCopyStructure.getStructureField("display");
+            	final GR gr = (GR)dbr;
+            	PVStructure pvDisplay = null;
+            	if(pvCopyStructure.getSubField("display")!=null) {
+            		pvDisplay = pvCopyStructure.getStructureField("display");
+            	}
                 if(pvDisplay!=null) {
                     PVString unitsField = pvDisplay.getStringField("units");
                     gr.setUnits(unitsField.get());
@@ -972,16 +989,19 @@ public class ServerFactory {
                 }
             }
             if (dbr instanceof CTRL) {
-                PVStructure pvControl = pvCopyStructure.getStructureField("control");
-                if(pvControl!=null) {
-                    final CTRL ctrl = (CTRL)dbr;
-                    // all done via double as super-set type
-                    PVDouble lowField = pvControl.getDoubleField("limit.low");
-                    ctrl.setLowerCtrlLimit(lowField.get());
+            	PVStructure pvControl = null;
+            	if(pvCopyStructure.getSubField("control")!=null) {
+            		pvControl = pvCopyStructure.getStructureField("control");
+            	}
+            	if(pvControl!=null) {
+            		final CTRL ctrl = (CTRL)dbr;
+            		// all done via double as super-set type
+            		PVDouble lowField = pvControl.getDoubleField("limit.low");
+            		ctrl.setLowerCtrlLimit(lowField.get());
 
-                    PVDouble highField = pvControl.getDoubleField("limit.high");
-                    ctrl.setUpperCtrlLimit(highField.get());
-                }
+            		PVDouble highField = pvControl.getDoubleField("limit.high");
+            		ctrl.setUpperCtrlLimit(highField.get());
+            	}
             }
         }
     }
