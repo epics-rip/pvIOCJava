@@ -82,6 +82,10 @@ public class StructureArrayFactory {
         private Button putElementButton = null;
         private Text putOffsetText = null;
         
+        private Button setLengthButton = null;
+        private Text lengthText = null;
+        private Text capacityText = null;
+        
         private Text consoleText = null;
         private String subField = "value";
 
@@ -166,6 +170,34 @@ public class StructureArrayFactory {
             gridData.widthHint = 100;
             putOffsetText.setLayoutData(gridData);
             putOffsetText.setText("0");
+            
+            Composite setLengthComposite = new Composite(shell,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
+            setLengthComposite.setLayout(gridLayout);
+            setLengthButton = new Button(setLengthComposite,SWT.PUSH);
+            setLengthButton.setText("setLength");
+            setLengthButton.addSelectionListener(this);
+            Composite lengthComposite = new Composite(setLengthComposite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 2;
+            lengthComposite.setLayout(gridLayout);
+            new Label(lengthComposite,SWT.NONE).setText("length");
+            lengthText = new Text(lengthComposite,SWT.BORDER);
+            gridData = new GridData(); 
+            gridData.widthHint = 100;
+            lengthText.setLayoutData(gridData);
+            lengthText.setText("0");
+            Composite capacityComposite = new Composite(setLengthComposite,SWT.BORDER);
+            gridLayout = new GridLayout();
+            gridLayout.numColumns = 3;
+            capacityComposite.setLayout(gridLayout);
+            new Label(capacityComposite,SWT.NONE).setText("capacity");
+            capacityText = new Text(capacityComposite,SWT.BORDER);
+            gridData = new GridData(); 
+            gridData.widthHint = 100;
+            capacityText.setLayoutData(gridData);
+            capacityText.setText("-1");
             
             Composite consoleComposite = new Composite(shell,SWT.BORDER);
             gridLayout = new GridLayout();
@@ -254,6 +286,11 @@ public class StructureArrayFactory {
                 stateMachine.setState(State.active);
                 int offset = Integer.parseInt(getOffsetText.getText());
                 channelClient.put(offset);
+            } else if(object==setLengthButton) {
+            	stateMachine.setState(State.active);
+                int length = Integer.parseInt(lengthText.getText());
+                int capacity = Integer.parseInt(capacityText.getText());
+                channelClient.setLength(length,capacity);
             }
         }
         
@@ -270,6 +307,7 @@ public class StructureArrayFactory {
                     subFieldText.setEnabled(true);
                     getButton.setEnabled(false);
                     putButton.setEnabled(false);
+                    setLengthButton.setEnabled(false);
                     return;
                 case connecting:
                     connectButton.setText("disconnect");
@@ -277,6 +315,7 @@ public class StructureArrayFactory {
                     subFieldText.setEnabled(true);
                     getButton.setEnabled(false);
                     putButton.setEnabled(false);
+                    setLengthButton.setEnabled(false);
                     return;
                 case readyForCreateArray:
                     connectButton.setText("disconnect");
@@ -284,6 +323,7 @@ public class StructureArrayFactory {
                     subFieldText.setEnabled(true);
                     getButton.setEnabled(false);
                     putButton.setEnabled(false);
+                    setLengthButton.setEnabled(false);
                     return;
                 case creatingArray:
                     connectButton.setText("disconnect");
@@ -291,6 +331,7 @@ public class StructureArrayFactory {
                     subFieldText.setEnabled(false);
                     getButton.setEnabled(false);
                     putButton.setEnabled(false);
+                    setLengthButton.setEnabled(false);
                     return;
                 case ready:
                     connectButton.setText("disconnect");
@@ -298,6 +339,7 @@ public class StructureArrayFactory {
                     subFieldText.setEnabled(false);
                     getButton.setEnabled(true);
                     putButton.setEnabled(true);
+                    setLengthButton.setEnabled(true);
                     return;
                 case active:
                 	connectButton.setText("disconnect");
@@ -313,7 +355,7 @@ public class StructureArrayFactory {
         }
         
         private enum RunCommand {
-            channelConnected,timeout,destroy,channelArrayConnect,getDone,putDone
+            channelConnected,timeout,destroy,channelArrayConnect,getDone,putDone,setLengthDone
         }
         
         
@@ -378,6 +420,10 @@ public class StructureArrayFactory {
             
             void put(int offset) {
             	channelArray.putArray(false, offset, pvArray.getLength());
+            }
+            
+            void setLength(int length,int capacity) {
+            	channelArray.setLength(false, length, capacity);
             }
             /* (non-Javadoc)
              * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
@@ -473,8 +519,19 @@ public class StructureArrayFactory {
                 runCommand = RunCommand.putDone;
                 shell.getDisplay().asyncExec(this);
             }
-            
             /* (non-Javadoc)
+             * @see org.epics.ca.client.ChannelArrayRequester#setLengthDone(org.epics.pvData.pv.Status)
+             */
+            @Override
+			public void setLengthDone(Status status) {
+            	if (!status.isOK()) {
+                	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
+                	if (!status.isSuccess()) return;
+                }
+                runCommand = RunCommand.setLengthDone;
+                shell.getDisplay().asyncExec(this);
+			}
+			/* (non-Javadoc)
              * @see java.lang.Runnable#run()
              */
             @Override
@@ -498,6 +555,10 @@ public class StructureArrayFactory {
                     return;
                 case putDone:
                     message("putDone",MessageType.info);
+                    stateMachine.setState(State.ready);
+                    return;
+                case setLengthDone:
+                	message("setLengthDone",MessageType.info);
                     stateMachine.setState(State.ready);
                     return;
                 }
