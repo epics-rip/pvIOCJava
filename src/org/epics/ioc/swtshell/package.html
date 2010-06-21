@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2010.04.30</h1>
+2010.06.10</h1>
 
 <p>CONTENTS</p>
 
@@ -336,7 +336,9 @@ support a channelRPC request.</p>
 button. It has a text entry for subField. The get button issues a array get
 request. The offset and count can be specified. The result is written into
 the value field of the put row. The put button issues a put array request.
-The offset can be specified. The value field provides the array values.</p>
+The offset can be specified. The value field provides the array values. The
+setLength button is used to set the length and/or capacity of the array. A
+value of -1 means leave as is.</p>
 
 <h3 id="structureA">structureArray</h3>
 
@@ -358,7 +360,9 @@ consoleText window. You must issue a get before using put.</p>
 <p>The put row acts on the data received from a put. You change elements by
 giving a value to index and clicking putElement. A tree structured window
 just like for put appears. This is changing the local data. When you click
-put the data is written to the actual record.</p>
+put the data is written to the actual record. The setLength button is used to
+set the length and/or capacity of the array. A value of -1 means leave as
+is.</p>
 
 <h3 id="monitor">monitor</h3>
 

@@ -6,5 +6,6 @@
 <record recordName = "${IOCNAME}structureListRPC" extends = "structureList" />
 <record recordName = "${IOCNAME}iocShowRPC" extends = "iocShow" />
 <record recordName = "${IOCNAME}recordShowRPC" extends = "recordShow" />
+<record recordName = "${IOCNAME}recordRemoveRPC" extends = "recordRemove" />
 <record recordName = "${IOCNAME}supportStateSetRPC" extends = "supportStateSet" />
 </database>

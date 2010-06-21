@@ -76,6 +76,21 @@
    </structure>   
 </structure>
 
+<structure structureName = "recordRemoveFactory">
+  <scalar name = "supportFactory" scalarType = "string">
+     org.epics.ioc.support.rpc.RecordRemoveFactory</scalar>
+</structure>
+
+<structure structureName = "recordRemove">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.recordRemoveFactory</auxInfo>
+   <structure name = "arguments" >
+       <scalar name = "recordName" scalarType = "string"/>
+   </structure>
+   <structure name = "result" >
+      <scalar name = "status" scalarType = "string" />
+   </structure>   
+</structure>
+
 <structure structureName = "supportStateSetFactory">
   <scalar name = "supportFactory" scalarType = "string">
      org.epics.ioc.support.rpc.SupportStateSetFactory</scalar>
