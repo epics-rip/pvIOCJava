@@ -76,7 +76,6 @@ public class ExampleChannelRPCFactory {
 			for(int index=0; index<size; index++) {
 				pvFields[index] = pvDataCreate.createPVStructure(pvTop, Integer.toString(index), pvElement);
 			}
-			pvTop.updateInternal();
 			long end =System.currentTimeMillis();
 			double diff = end-start;
 			diff /= 1000.0;
