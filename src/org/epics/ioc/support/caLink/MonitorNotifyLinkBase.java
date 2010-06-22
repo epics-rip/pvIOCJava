@@ -16,15 +16,11 @@ import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.monitor.MonitorRequester;
-import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
+import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /**
  * Implementation for a channel access monitor link.
@@ -45,8 +41,6 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     private static Executor executor = ExecutorFactory.create("caNotifyLinkMonitor", ThreadPriority.low);
     private ExecutorNode executorNode = executor.createNode(this);
     private ProcessToken processToken = null;
-    private PVStructure pvOption = null;
-    private PVString pvAlgorithm = null;
     
     private Monitor monitor = null;
 
@@ -57,13 +51,8 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
-        pvOption = pvDataCreate.createPVStructure(null, "pvOption", new Field[0]);
-        pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvOption, "algorithm", ScalarType.pvString);
-        pvAlgorithm.put("onPut");
-        pvOption.appendPVField(pvAlgorithm);
-        PVInt pvQueueSize = (PVInt)pvDataCreate.createPVScalar(pvOption, "queueSize", ScalarType.pvInt);
-        pvQueueSize.put(0);
-        pvOption.appendPVField(pvQueueSize);
+        String request = "record[queueSize=2]field(timeStamp[algorithm=onChange,causeMonitor=true])";
+        pvRequest = PVCopyFactory.createRequest(request,this);
         processToken = recordProcess.requestProcessToken(this);
     	if(processToken==null) {
     		pvStructure.message("can not process",MessageType.warning);
@@ -149,7 +138,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
 	 */
 	@Override
 	public void canNotProcess(String reason) {
-		recordProcessComplete();
+		super.message("can not process " + reason, MessageType.warning);
 	}
 	/* (non-Javadoc)
 	 * @see org.epics.ioc.support.RecordProcessRequester#lostRightToProcess()
