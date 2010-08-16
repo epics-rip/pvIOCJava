@@ -14,8 +14,8 @@ import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDoubleArray;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
@@ -35,7 +35,7 @@ public class BaseFloat64ArrayInput extends AbstractPortDriverSupport
         super(supportName,pvStructure);
     }
 
-    private PVArray valuePVArray = null;
+    private PVScalarArray valuePVArray = null;
     private Float64Array float64Array = null;
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
@@ -44,8 +44,8 @@ public class BaseFloat64ArrayInput extends AbstractPortDriverSupport
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalarArray) {
-            valuePVArray = (PVArray)valuePVField;
-            if(valuePVArray.getArray().getElementType().isNumeric()) return;   
+            valuePVArray = (PVScalarArray)valuePVField;
+            if(valuePVArray.getScalarArray().getElementType().isNumeric()) return;   
         }
         super.uninitialize();
         pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -96,7 +96,7 @@ public class BaseFloat64ArrayInput extends AbstractPortDriverSupport
             return;
         }
         PVDoubleArray pvDoubleArray = float64Array.getPVDoubleArray();
-        convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
+        convert.copyScalarArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
         float64Array.endRead(user);
     }
 }

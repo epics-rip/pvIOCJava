@@ -334,7 +334,7 @@ public class ChannelListFactory {
                     pvDatabase = pvPutStructure.getStringField("database");
                     pvRegularExpression = pvPutStructure.getStringField("regularExpression");
                     pvStatus = pvGetStructure.getStringField("status");
-                    PVArray pvArray = pvGetStructure.getArrayField("names", ScalarType.pvString);
+                    PVArray pvArray = pvGetStructure.getScalarArrayField("names", ScalarType.pvString);
                     if(pvArray!=null) pvRecordNames = (PVStringArray)pvArray;
                     if(pvDatabase!=null && pvRegularExpression!=null && pvStatus!=null && pvArray!=null) {
                         pvDatabase.put("master");

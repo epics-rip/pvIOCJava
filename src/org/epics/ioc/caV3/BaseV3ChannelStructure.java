@@ -59,7 +59,6 @@ import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVDouble;
@@ -67,6 +66,7 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVLong;
 import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
@@ -101,7 +101,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     private PVLong pvSeconds = null;
     private PVInt pvNanoSeconds = null;
     private PVScalar pvScalarValue = null;
-    private PVArray pvArrayValue = null;
+    private PVScalarArray pvArrayValue = null;
     // Following not null if nativeDBRType.isENUM(
     private Enumerated pvEnumerated = null;
     
@@ -247,7 +247,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         } else if(elementCount<2) {
             valueField = fieldCreate.createScalar("value", scalarType);
         } else {
-            valueField = fieldCreate.createArray("value", scalarType);
+            valueField = fieldCreate.createScalarArray("value", scalarType);
         }
         Field[] fields = new Field[propertyNames.length + 1];
         fields[0] = valueField;
@@ -288,7 +288,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                 pvAlarmMessage = pvAlarm.getStringField("message");
                 PVStructure pvSeverity = pvAlarm.getStructureField("severity");
                 pvAlarmIndex = pvSeverity.getIntField("index");
-                PVStringArray pvAlarmChoices = (PVStringArray)pvSeverity.getArrayField("choices", ScalarType.pvString);
+                PVStringArray pvAlarmChoices = (PVStringArray)pvSeverity.getScalarArrayField("choices", ScalarType.pvString);
                 StringArrayData stringArrayData = new StringArrayData();
                 pvAlarmChoices.get(0, pvAlarmChoices.getLength(), stringArrayData);
                 alarmChoices = stringArrayData.data;
@@ -311,7 +311,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         if(elementCount<2) {
             pvScalarValue = (PVScalar)pvValue;
         } else {
-            pvArrayValue = (PVArray)pvValue;
+            pvArrayValue = (PVScalarArray)pvValue;
         }
         requestDBRType = null;
         switch(dbrProperty) {

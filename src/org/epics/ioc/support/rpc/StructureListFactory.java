@@ -60,7 +60,7 @@ public class StructureListFactory {
             if(pvRegularExpression ==null) return;
             pvStatus = pvStructure.getStringField("result.status");
             if(pvStatus==null) return;
-            PVArray pvArray = pvStructure.getArrayField("result.names",ScalarType.pvString);
+            PVArray pvArray = pvStructure.getScalarArrayField("result.names",ScalarType.pvString);
             if(pvArray==null) return;
             pvNames = (PVStringArray)pvArray;
             super.initialize(recordSupport);

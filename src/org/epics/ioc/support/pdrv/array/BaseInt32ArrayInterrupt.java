@@ -16,8 +16,8 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVIntArray;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
@@ -38,7 +38,7 @@ implements Int32ArrayInterruptListener
         super(supportName,pvStructure);
     }
 
-    private PVArray valuePVArray = null;
+    private PVScalarArray valuePVArray = null;
     private Int32Array int32Array = null;
     private PVIntArray pvIntArray = null;
     /* (non-Javadoc)
@@ -48,8 +48,8 @@ implements Int32ArrayInterruptListener
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalarArray) {
-            valuePVArray = (PVArray)valuePVField;
-            if(valuePVArray.getArray().getElementType().isNumeric()) return;   
+            valuePVArray = (PVScalarArray)valuePVField;
+            if(valuePVArray.getScalarArray().getElementType().isNumeric()) return;   
         }
         super.uninitialize();
         pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -98,7 +98,7 @@ implements Int32ArrayInterruptListener
     		try {
     			Status status = int32Array.startRead(user);
     			if(status==Status.success) {
-    				convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
+    				convert.copyScalarArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
     				int32Array.endRead(user);
     			} else {
     				alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
@@ -120,7 +120,7 @@ implements Int32ArrayInterruptListener
     public void becomeProcessor() {
     	Status status = int32Array.startRead(user);
     	if(status==Status.success) {
-    		convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
+    		convert.copyScalarArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
     		int32Array.endRead(user);
     	}
     	recordProcess.process(processToken,false, null);
@@ -134,7 +134,7 @@ implements Int32ArrayInterruptListener
     	try {
     		Status status = int32Array.startRead(user);
     		if(status==Status.success) {
-    			convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
+    			convert.copyScalarArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
     			int32Array.endRead(user);
     		} else {
     			alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);

@@ -9,11 +9,12 @@ import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.PVStructureArray;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -27,13 +28,15 @@ abstract class AbstractIOLink extends AbstractLink {
     // The following is for this field
     protected PVField valuePVField = null;
     protected PVScalar valuePVScalar = null;
-    protected PVArray valuePVArray = null;
+    protected PVScalarArray valuePVArray = null;
     protected PVStructure valuePVStructure = null;
+    protected PVStructureArray valuePVStructureArray = null;
     // The following are all for other record.
     protected PVField linkValuePVField = null;
     protected PVScalar linkValuePVScalar = null;
-    protected PVArray linkValuePVArray = null;
+    protected PVScalarArray linkValuePVArray = null;
     protected PVStructure linkValuePVStructure = null;
+    protected PVStructureArray linkValuePVStructureArray = null;
     /**
      * Constructor.
      * @param supportName The support name.
@@ -69,9 +72,11 @@ abstract class AbstractIOLink extends AbstractLink {
         case scalar:
             valuePVScalar = (PVScalar)valuePVField; break;
         case scalarArray:
-            valuePVArray = (PVArray)valuePVField; break;
+            valuePVArray = (PVScalarArray)valuePVField; break;
         case structure:
             valuePVStructure = (PVStructure)valuePVField; break;
+        case structureArray:
+        	valuePVStructureArray = (PVStructureArray)valuePVField; break;
         }
     }
     /* (non-Javadoc)
@@ -110,8 +115,8 @@ abstract class AbstractIOLink extends AbstractLink {
             }
             break;
         case scalarArray:
-            linkValuePVArray = (PVArray)linkValuePVField;
-            if(!convert.isCopyArrayCompatible(valuePVArray.getArray(),linkValuePVArray.getArray())) {
+            linkValuePVArray = (PVScalarArray)linkValuePVField;
+            if(!convert.isCopyScalarArrayCompatible(valuePVArray.getScalarArray(),linkValuePVArray.getScalarArray())) {
                 super.message(
                         "pvname type and value type are not copy compatible", MessageType.error);
                 super.stop();
@@ -127,6 +132,17 @@ abstract class AbstractIOLink extends AbstractLink {
                 return;
             }
             break;
+        case structureArray:
+        	linkValuePVStructureArray = (PVStructureArray)linkValuePVField;
+            if(!convert.isCopyStructureArrayCompatible(valuePVStructureArray.getStructureArray(),linkValuePVStructureArray.getStructureArray())) {
+                super.message(
+                        "pvname type and value type are not copy compatible", MessageType.error);
+                super.stop();
+                return;
+            }
+            break;
         }
+        
+        	
     }
 }

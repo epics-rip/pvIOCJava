@@ -14,15 +14,15 @@ import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.property.AlarmSeverity;
-import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
@@ -75,7 +75,7 @@ public class BaseSerialInput extends AbstractPortDriverSupport
         }
         Field field = valuePVField.getField();
         if(field.getType()==Type.scalarArray) {
-            Array array = (Array)field;
+            ScalarArray array = (ScalarArray)field;
             ScalarType elementType = array.getElementType();
             if(!elementType.isNumeric()) {
                 pvStructure.message("value field is not a supported type", MessageType.fatalError);
@@ -127,7 +127,7 @@ public class BaseSerialInput extends AbstractPortDriverSupport
             if(pvResponse!=null) {
                 pvResponse.put(stringValue);
             } else if(valueIsArray) {
-                convert.fromByteArray((PVArray)valuePVField, 0, nbytes, byteArray, 0);
+                convert.fromByteArray((PVScalarArray)valuePVField, 0, nbytes, byteArray, 0);
             } else {
                 convert.fromString((PVScalar)valuePVField, stringValue);
             }

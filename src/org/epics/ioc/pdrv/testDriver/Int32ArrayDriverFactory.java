@@ -17,7 +17,6 @@ import org.epics.ioc.pdrv.interfaces.AbstractInt32Array;
 import org.epics.pvData.factory.BasePVIntArray;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.IntArrayData;
 import org.epics.pvData.pv.MessageType;
@@ -26,6 +25,7 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVIntArray;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Structure;
 
@@ -144,7 +144,7 @@ public class Int32ArrayDriverFactory {
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                Array array = fieldCreate.createArray("drvPrivate", ScalarType.pvInt);
+                ScalarArray array = fieldCreate.createScalarArray("drvPrivate", ScalarType.pvInt);
                 PVIntArray pvIntArray = new PVIntArrayImpl(parent,array,device);
                 new Int32ArrayImpl(pvIntArray,device);
             }
@@ -233,7 +233,7 @@ public class Int32ArrayDriverFactory {
             private class PVIntArrayImpl extends BasePVIntArray{
                 private Device device;
                 
-                private PVIntArrayImpl(PVStructure parent,Array array,Device device) {
+                private PVIntArrayImpl(PVStructure parent,ScalarArray array,Device device) {
                     super(parent,array);
                     this.device = device;
                 }

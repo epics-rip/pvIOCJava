@@ -30,11 +30,13 @@ import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.Type;
 
 /**
  * Shell for processing a channel.
@@ -408,7 +410,7 @@ public class ArrayFactory {
             
             void put(int offset,String value) {
                 try {
-                    int len = convert.fromString(pvArray,value);
+                    int len = convert.fromString((PVScalarArray)pvArray,value);
                     pvArray.setLength(len);
                 } catch (Exception e) {
                     message("exception " + e.getMessage(),MessageType.error);
@@ -484,7 +486,7 @@ public class ArrayFactory {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
-                if(pvArray.getArray().getElementType()==ScalarType.pvStructure) {
+                if(pvArray.getField().getType()==Type.structureArray) {
                 	message("The elementType is structure. Use structureArray to access.",MessageType.error);
                 	return;
                 }

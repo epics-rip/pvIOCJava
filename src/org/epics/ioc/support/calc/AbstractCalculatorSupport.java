@@ -9,10 +9,10 @@ import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportState;
-import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -102,7 +102,7 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
                     return;
                 }
                 if(argType.type==Type.scalarArray) {
-                    Array array = (Array)pvField.getField();
+                    ScalarArray array = (ScalarArray)pvField.getField();
                     if(array.getElementType()!=argType.elementType) {
                         pvStructure.message("field " + argType.name + " has illegal element type", MessageType.error);
                         return;

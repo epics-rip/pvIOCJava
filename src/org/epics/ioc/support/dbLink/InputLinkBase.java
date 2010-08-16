@@ -171,7 +171,7 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
                 convert.copyScalar(linkValuePVScalar, valuePVScalar);
                 break;
             case scalarArray:
-                convert.copyArray(linkValuePVArray, 0, valuePVArray, 0,linkValuePVArray.getLength() );
+                convert.copyScalarArray(linkValuePVArray, 0, valuePVArray, 0,linkValuePVArray.getLength() );
                 break;
             case structure:
                 convert.copyStructure(linkValuePVStructure,valuePVStructure );

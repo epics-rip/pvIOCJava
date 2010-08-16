@@ -409,12 +409,12 @@ V3Channel,ConnectionListener
             fields[0] = fieldCreate.createScalar("value", valueScalarType);
             break;
         case scalarArray:
-            fields[0] = fieldCreate.createArray("value", valueScalarType);
+            fields[0] = fieldCreate.createScalarArray("value", valueScalarType);
             break;
         case structure:
             Field[] enumFields = new Field[2];
             enumFields[0] = fieldCreate.createScalar("index", ScalarType.pvInt);;
-            enumFields[1] = fieldCreate.createArray("choices",ScalarType.pvString);
+            enumFields[1] = fieldCreate.createScalarArray("choices",ScalarType.pvString);
             fields[0] = fieldCreate.createStructure("value", enumFields);
         }
         PVStructure pvStructure = masterPVDatabase.findStructure("org.epics.pvData.timeStamp");

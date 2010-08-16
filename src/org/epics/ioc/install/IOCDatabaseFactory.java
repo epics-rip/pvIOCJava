@@ -79,7 +79,7 @@ public class IOCDatabaseFactory {
     
     private static class IOCDatabaseImpl implements IOCDatabase {
         private PVDatabase pvDatabase;
-        private TreeMap<String,LocateSupport> recordSupportMap = new TreeMap<String,LocateSupport>();
+        private TreeMap<String,LocateSupport> locateSupportMap = new TreeMap<String,LocateSupport>();
 
         private IOCDatabaseImpl(PVDatabase pvDatabase) {
             this.pvDatabase = pvDatabase;
@@ -95,12 +95,12 @@ public class IOCDatabaseFactory {
          * @see org.epics.ioc.support.SupportDatabase#getRecordSupport(org.epics.pvData.pv.PVRecord)
          */
         public synchronized LocateSupport getLocateSupport(PVRecord pvRecord) {
-            LocateSupport recordSupport = recordSupportMap.get(pvRecord.getRecordName());
-            if(recordSupport==null) {
-                recordSupport = new LocateSupportImpl(pvRecord);
-                recordSupportMap.put(pvRecord.getRecordName(), recordSupport);
+            LocateSupport locateSupport = locateSupportMap.get(pvRecord.getRecordName());
+            if(locateSupport==null) {
+                locateSupport = new LocateSupportImpl(pvRecord);
+                locateSupportMap.put(pvRecord.getRecordName(), locateSupport);
             }
-            return recordSupport;
+            return locateSupport;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.SupportDatabase#mergeIntoMaster()
@@ -111,17 +111,17 @@ public class IOCDatabaseFactory {
                 return;
             }
             Set<String> keys;
-            keys = recordSupportMap.keySet();
+            keys = locateSupportMap.keySet();
             for(String key: keys) {
-                LocateSupport recordSupport = recordSupportMap.get(key);
+                LocateSupport recordSupport = locateSupportMap.get(key);
                 masterIOCDatabase.merge(key, recordSupport);
             }
-            recordSupportMap.clear();
+            locateSupportMap.clear();
             IOCDatabaseFactory.beingInstalledIOCDatabase = null;
         }
         
         private synchronized void merge(String recordSupportName, LocateSupport recordSupport) {
-            this.recordSupportMap.put(recordSupportName, recordSupport);
+            this.locateSupportMap.put(recordSupportName, recordSupport);
         }
     }
     

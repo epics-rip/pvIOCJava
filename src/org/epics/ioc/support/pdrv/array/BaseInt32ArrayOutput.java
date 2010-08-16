@@ -14,8 +14,8 @@ import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVIntArray;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
@@ -35,7 +35,7 @@ public class BaseInt32ArrayOutput extends AbstractPortDriverSupport
         super(supportName,pvStructure);
     }
 
-    private PVArray valuePVArray = null;
+    private PVScalarArray valuePVArray = null;
     private Int32Array int32Array = null;
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
@@ -44,8 +44,8 @@ public class BaseInt32ArrayOutput extends AbstractPortDriverSupport
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalarArray) {
-            valuePVArray = (PVArray)valuePVField;
-            if(valuePVArray.getArray().getElementType().isNumeric()) return;   
+            valuePVArray = (PVScalarArray)valuePVField;
+            if(valuePVArray.getScalarArray().getElementType().isNumeric()) return;   
         }
         super.uninitialize();
         pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -71,7 +71,7 @@ public class BaseInt32ArrayOutput extends AbstractPortDriverSupport
             return;
         }
         int32Array = (Int32Array)iface;PVIntArray pvIntArray = int32Array.getPVIntArray();
-        convert.copyArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
+        convert.copyScalarArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#stop()
@@ -91,7 +91,7 @@ public class BaseInt32ArrayOutput extends AbstractPortDriverSupport
         Status status = int32Array.startWrite(user);
         if(status!=Status.success) return;
         PVIntArray pvIntArray = int32Array.getPVIntArray();
-        convert.copyArray(valuePVArray, 0, pvIntArray, 0, valuePVArray.getLength());
+        convert.copyScalarArray(valuePVArray, 0, pvIntArray, 0, valuePVArray.getLength());
         int32Array.endWrite(user);
     }
 }

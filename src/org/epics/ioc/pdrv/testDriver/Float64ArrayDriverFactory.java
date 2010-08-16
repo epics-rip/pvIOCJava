@@ -17,7 +17,6 @@ import org.epics.ioc.pdrv.interfaces.AbstractFloat64Array;
 import org.epics.pvData.factory.BasePVDoubleArray;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.DoubleArrayData;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
@@ -26,6 +25,7 @@ import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Structure;
 
@@ -143,7 +143,7 @@ public class Float64ArrayDriverFactory {
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                Array array = fieldCreate.createArray("drvPrivate", ScalarType.pvDouble);
+                ScalarArray array = fieldCreate.createScalarArray("drvPrivate", ScalarType.pvDouble);
                 PVDoubleArray pvDoubleArray = new PVDoubleArrayImpl(parent,array,device);
                 new Float64ArrayImpl(pvDoubleArray,device);
             }
@@ -231,7 +231,7 @@ public class Float64ArrayDriverFactory {
             private class PVDoubleArrayImpl extends BasePVDoubleArray{
                 private Device device;
                 
-                private PVDoubleArrayImpl(PVStructure parent,Array array,Device device) {
+                private PVDoubleArrayImpl(PVStructure parent,ScalarArray array,Device device) {
                     super(parent,array);
                     this.device = device;
                 }

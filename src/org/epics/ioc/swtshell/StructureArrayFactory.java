@@ -36,6 +36,7 @@ import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.StructureArrayData;
+import org.epics.pvData.pv.Type;
 
 /**
  * Shell for processing a channel.
@@ -485,7 +486,7 @@ public class StructureArrayFactory {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
-                if(pvArray.getArray().getElementType()!=ScalarType.pvStructure) {
+                if(pvArray.getField().getType()!=Type.structureArray) {
                 	message("The elementType is not structure. Use array to access.",MessageType.error);
                 	return;
                 }

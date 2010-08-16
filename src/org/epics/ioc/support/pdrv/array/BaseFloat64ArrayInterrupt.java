@@ -16,8 +16,8 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDoubleArray;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
@@ -37,7 +37,7 @@ implements Float64ArrayInterruptListener
     public BaseFloat64ArrayInterrupt(PVStructure pvStructure,String supportName) {
         super(supportName,pvStructure);
     }
-    private PVArray valuePVArray = null;
+    private PVScalarArray valuePVArray = null;
     private Float64Array float64Array = null;
     private PVDoubleArray pvDoubleArray = null;
     /* (non-Javadoc)
@@ -47,8 +47,8 @@ implements Float64ArrayInterruptListener
         super.initialize(recordSupport);
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalarArray) {
-            valuePVArray = (PVArray)valuePVField;
-            if(valuePVArray.getArray().getElementType().isNumeric()) return;   
+            valuePVArray = (PVScalarArray)valuePVField;
+            if(valuePVArray.getScalarArray().getElementType().isNumeric()) return;   
         }
         super.uninitialize();
         pvStructure.message("value field is not an array with numeric elements", MessageType.fatalError);
@@ -96,7 +96,7 @@ implements Float64ArrayInterruptListener
             try {
                 Status status = float64Array.startRead(user);
                 if(status==Status.success) {
-                    convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
+                    convert.copyScalarArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
                     float64Array.endRead(user);
                 } else {
                     alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
@@ -118,7 +118,7 @@ implements Float64ArrayInterruptListener
 	public void becomeProcessor() {
 		Status status = float64Array.startRead(user);
         if(status==Status.success) {
-            convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
+            convert.copyScalarArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
             float64Array.endRead(user);
         }
         recordProcess.process(processToken,false, null);
@@ -132,7 +132,7 @@ implements Float64ArrayInterruptListener
         try {
             Status status = float64Array.startRead(user);
             if(status==Status.success) {
-                convert.copyArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
+                convert.copyScalarArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
                 float64Array.endRead(user);
             } else {
                 alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);

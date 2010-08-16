@@ -6,20 +6,11 @@
 <include href = "records.xml" />
 <include removePath = "${JAVAIOC}/xml" />
 
-<record recordName = "structureScalarTest">
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <scalar name = "value" scalarType = "structure" extends = "test.testStructure">
-        <scalar name = "value">100.0</scalar>
-        <structure name = "location">
-           <scalar name = "x">1.0</scalar>
-            <scalar name = "y">2.0</scalar>>
-        </structure>
-    </scalar>
-</record>
+
 
 <record recordName = "structureArrayTest">
     <structure name = "timeStamp" extends = "timeStamp" />
-    <array name = "value" scalarType = "structure" extends = "test.testStructure" capacity = "2">
+    <structureArray name = "value" scalarType = "structure" extends = "test.testStructure" capacity = "2">
        <structure>
           <scalar name = "value">100.0</scalar>
           <structure name = "location">
@@ -35,7 +26,7 @@
           </structure>
        </structure>
        
-    </array>
+    </structureArray>
 </record>
 
 </database>

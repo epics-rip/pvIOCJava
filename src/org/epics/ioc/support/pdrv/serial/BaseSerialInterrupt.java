@@ -13,13 +13,13 @@ import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.ioc.pdrv.interfaces.SerialInterruptListener;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
-import org.epics.pvData.pv.Array;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVScalar;
+import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
@@ -61,7 +61,7 @@ implements SerialInterruptListener
         }
         Field field = valuePVField.getField();
         if(field.getType()==Type.scalarArray) {
-            Array array = (Array)field;
+            ScalarArray array = (ScalarArray)field;
             ScalarType elementType = array.getElementType();
             if(!elementType.isNumeric()) {
                 pvStructure.message("value field is not a supported type", MessageType.fatalError);
@@ -148,7 +148,7 @@ implements SerialInterruptListener
     
     private void putData(byte[] data, int nbytes) {
         if(valueIsArray) {
-            convert.fromByteArray((PVArray)valuePVField, 0, nbytes, data, 0);
+            convert.fromByteArray((PVScalarArray)valuePVField, 0, nbytes, data, 0);
         } else {
             for(int i=0; i<nbytes; i++) charArray[i] = (char)data[i];
             String string = String.copyValueOf(charArray, 0, nbytes);
