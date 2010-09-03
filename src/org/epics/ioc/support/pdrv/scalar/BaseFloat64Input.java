@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.scalar;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64;
@@ -19,7 +19,6 @@ import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
@@ -32,11 +31,11 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
 {
     /**
      * Constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseFloat64Input(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseFloat64Input(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
 
     private Float64 float64 = null;
@@ -46,10 +45,11 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
     private PVDouble pvHighLimit = null;
     private PVString pvUnits = null;
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         PVField pvDisplay = pvProperty.findProperty(valuePVField,"display");
         if(pvDisplay!=null) {
@@ -86,6 +86,7 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -113,6 +114,7 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#stop()
      */
+    @Override
     public void stop() {
         super.stop();
         float64 = null;
@@ -120,6 +122,7 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
+    @Override
     public void queueCallback() {
         if((deviceTrace.getMask()&Trace.FLOW)!=0) {
             deviceTrace.print(Trace.FLOW,
@@ -142,6 +145,7 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#endProcess()
      */
+    @Override
     public void endProcess() {
         if(status==Status.success) {
             convert.fromDouble((PVScalar)valuePVField, value);

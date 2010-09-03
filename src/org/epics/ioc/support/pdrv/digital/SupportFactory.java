@@ -5,12 +5,12 @@
  */
 package org.epics.ioc.support.pdrv.digital;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.Support;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 
 /**
@@ -21,29 +21,29 @@ import org.epics.pvData.pv.ScalarType;
 public class SupportFactory {
     /**
      * Create support for portDriver.
-     * @param pvStructure The field for which to create support.
+     * @param pvRecordStructure The field for which to create support.
      * @return A LinkSupport interface or null failure.
      */
-    public static Support create(PVStructure pvStructure) {
-        PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        PVAuxInfo pvAuxInfo = pvRecordStructure.getPVStructure().getPVAuxInfo();
         PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
-            pvStructure.message("no pvAuxInfo with name support. Why??", MessageType.error);
+            pvRecordStructure.message("no pvAuxInfo with name support. Why??", MessageType.error);
             return null;
         }
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvStructure.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
+            pvRecordStructure.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
             return null;
         }
         String supportName = ((PVString)pvScalar).get();
         
         if(supportName.equals(pdrvUInt32DigitalInputSupportName))
-            return new BaseUInt32DigitalInput(pvStructure,pdrvUInt32DigitalInputSupportName);
+            return new BaseUInt32DigitalInput(pvRecordStructure,pdrvUInt32DigitalInputSupportName);
         if(supportName.equals(pdrvUInt32DigitalInterruptSupportName))
-            return new BaseUInt32DigitalInterrupt(pvStructure,pdrvUInt32DigitalInterruptSupportName);
+            return new BaseUInt32DigitalInterrupt(pvRecordStructure,pdrvUInt32DigitalInterruptSupportName);
         if(supportName.equals(pdrvUInt32DigitalOutputSupportName))
-            return new BaseUInt32DigitalOutput(pvStructure,pdrvUInt32DigitalOutputSupportName);
-        pvStructure.message("no support for " + supportName, MessageType.fatalError);
+            return new BaseUInt32DigitalOutput(pvRecordStructure,pdrvUInt32DigitalOutputSupportName);
+        pvRecordStructure.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
     

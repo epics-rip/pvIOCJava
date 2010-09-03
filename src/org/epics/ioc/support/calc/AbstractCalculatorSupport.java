@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.support.calc;
 
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportState;
@@ -20,20 +20,20 @@ import org.epics.pvData.pv.Type;
  *
  */
 public abstract class AbstractCalculatorSupport extends AbstractSupport {
-    private String supportName = null;
-    private PVStructure pvStructure = null;
+    private final String supportName;
+    private final PVRecordStructure pvRecordStructure;
     
     
 
     /**
      * Constructor.
      * @param supportName The supportName.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      */
-    protected AbstractCalculatorSupport(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
+    protected AbstractCalculatorSupport(String supportName,PVRecordStructure pvRecordStructure) {
+        super(supportName,pvRecordStructure);
         this.supportName = supportName;
-        this.pvStructure = pvStructure;
+        this.pvRecordStructure = pvRecordStructure;
     }
     
     /**
@@ -57,11 +57,11 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
      */
     abstract protected void setValuePVField(PVField pvValue);
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.AbstractSupport#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
+    public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-        PVStructure pvParent = pvStructure.getParent();
+        PVStructure pvParent = pvRecordStructure.getPVStructure().getParent();
         PVField valuePVField = pvParent.getSubField("value");
         // if not found try parent of parent
         if(valuePVField==null) {
@@ -69,11 +69,11 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
             if(pvTemp!=null) valuePVField = pvTemp.getSubField("value");
         }
         if(valuePVField==null) {
-            pvStructure.message("value field not found", MessageType.error);
+            pvRecordStructure.message("value field not found", MessageType.error);
             return;
         }
         if(getValueType()!=valuePVField.getField().getType()) {
-            pvStructure.message("value field has illegal type", MessageType.error);
+            pvRecordStructure.message("value field has illegal type", MessageType.error);
             return;
         }
         setValuePVField(valuePVField);
@@ -81,9 +81,9 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
         if(pvField==null) {
             setArgPVFields(null);;
         } else {
-            Support support = recordSupport.getSupport(pvField);
+        	Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
             if(!(support instanceof CalcArgs)) {
-                pvStructure.message("calcArgArraySupport not found", MessageType.error);
+                pvRecordStructure.message("calcArgArraySupport not found", MessageType.error);
                 return;
             }
             CalcArgs calcArgArraySupport = (CalcArgs)support;
@@ -94,17 +94,17 @@ public abstract class AbstractCalculatorSupport extends AbstractSupport {
                 ArgType argType = argTypes[i];
                 pvField = calcArgArraySupport.getPVField(argType.name);
                 if(pvField==null) {
-                    pvStructure.message("field " + argType.name + " not found", MessageType.error);
+                    pvRecordStructure.message("field " + argType.name + " not found", MessageType.error);
                     return;
                 }
                 if(pvField.getField().getType()!=argType.type) {
-                    pvStructure.message("field " + argType.name + " has illegal type", MessageType.error);
+                    pvRecordStructure.message("field " + argType.name + " has illegal type", MessageType.error);
                     return;
                 }
                 if(argType.type==Type.scalarArray) {
                     ScalarArray array = (ScalarArray)pvField.getField();
                     if(array.getElementType()!=argType.elementType) {
-                        pvStructure.message("field " + argType.name + " has illegal element type", MessageType.error);
+                        pvRecordStructure.message("field " + argType.name + " has illegal element type", MessageType.error);
                         return;
                     }
                 }

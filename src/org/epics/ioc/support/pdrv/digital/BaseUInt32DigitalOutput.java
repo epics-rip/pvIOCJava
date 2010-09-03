@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.digital;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Interface;
@@ -20,7 +20,6 @@ import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVStringArray;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
@@ -33,11 +32,11 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
 {
     /**
      * Constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseUInt32DigitalOutput(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseUInt32DigitalOutput(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
     private ScalarType valueScalarType = null;
     private PVBoolean valuePVBoolean = null;
@@ -49,10 +48,11 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
     private int shift;
     private Enumerated enumerated = null;
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         pvMask = pvStructure.getIntField("mask");
         if(pvMask==null) {
@@ -82,6 +82,7 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#uninitialize()
      */
+    @Override
     public void uninitialize() {
         super.uninitialize();
         valuePVBoolean = null;
@@ -90,6 +91,7 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -125,6 +127,7 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#stop()
      */
+    @Override
     public void stop() {
         super.stop();
         uint32Digital = null;
@@ -132,6 +135,7 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#endProcess()
      */
+    @Override
     public void endProcess() {
         if(valuePVBoolean!=null) {
             value = valuePVBoolean.get() ? 1 : 0;
@@ -147,6 +151,7 @@ public class BaseUInt32DigitalOutput extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
+    @Override
     public void queueCallback() {
         if((deviceTrace.getMask()&Trace.SUPPORT)!=0) {
             deviceTrace.print(Trace.SUPPORT, "pv %s queueCallback value = %d", fullName,value);

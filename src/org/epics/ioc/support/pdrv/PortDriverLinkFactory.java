@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.pdrv;
 
+import org.epics.ioc.database.PVRecordField;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
@@ -39,25 +40,31 @@ import org.epics.pvData.pv.PVStructure;
  *
  */
 public class PortDriverLinkFactory {
-    public static Support create(PVStructure pvStructure) {
-        return new PortDriverLinkImpl(PortDriverLink,pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new PortDriverLinkImpl(PortDriverLink,pvRecordStructure);
     }
     
     private static final String PortDriverLink = "org.epics.ioc.portDriverLink";
     
+    /**
+     * @author mrk
+     *
+     */
     private static class PortDriverLinkImpl extends AbstractSupport
     implements PortDriverLink,QueueRequestCallback,ProcessContinueRequester
     {
         /**
          * Constructor for derived support.
          * @param supportName The support name.
-         * @param dbStructure The link interface.
+         * @param pvRecordStructure The link interface.
          */
-        private PortDriverLinkImpl(String supportName,PVStructure pvStructure) {
-            super(supportName,pvStructure);
+        private PortDriverLinkImpl(String supportName,PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
         }  
 
         private static final String emptyString = "";
+        private final PVRecordStructure pvRecordStructure;
         private RecordProcess recordProcess = null;
         private PVString pvPortName = null;
         private PVString pvDeviceName = null;
@@ -77,13 +84,17 @@ public class PortDriverLinkFactory {
         
         private SupportProcessRequester supportProcessRequester = null;
         
-        public void initialize(LocateSupport recordSupport) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
+         */
+        @Override
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,super.getSupportName())) return;
-            recordProcess = recordSupport.getRecordProcess();
-            PVStructure pvStructure = (PVStructure)super.getPVField();
-            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+            recordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
+            PVStructure pvStructure = pvRecordStructure.getPVStructure();
+            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordStructure);
             if(alarmSupport==null) {
-                super.getPVField().message("no alarm field", MessageType.error);
+                pvRecordStructure.message("no alarm field", MessageType.error);
                 return;
             }
             pvPortName = pvStructure.getStringField("portName");
@@ -96,18 +107,18 @@ public class PortDriverLinkFactory {
             if(pvField!=null) {
                 pvDrvParams = pvStructure.getStructureField("drvParams");
             }
-            PVField[] pvFields = pvStructure.getPVFields();
-            int n = pvFields.length;
+            PVRecordField[] pvRecordFields = pvRecordStructure.getPVRecordFields();
+            int n = pvRecordFields.length;
             int numberSupport = 0;
             for(int i=0; i< n; i++) {
-                pvField = pvFields[i];
+                pvField = pvRecordFields[i].getPVField();
                 String fieldName = pvField.getField().getFieldName();
                 // alarm is a special case
                 if(fieldName.equals("alarm")) continue;
-                Support support = recordSupport.getSupport(pvFields[i]);
+                Support support = pvRecordFields[i].getSupport();
                 if(support==null) continue;
                 if(!(support instanceof PortDriverSupport)) {
-                    pvFields[i].message("support is not PortDriverSupport", MessageType.error);
+                    pvRecordFields[i].message("support is not PortDriverSupport", MessageType.error);
                     return;
                 }
                 numberSupport++;
@@ -115,14 +126,14 @@ public class PortDriverLinkFactory {
             portDriverSupports = new PortDriverSupport[numberSupport];
             int indSupport = 0;
             for(int i=0; i< n; i++) {
-                pvField = pvFields[i];
+                pvField = pvRecordFields[i].getPVField();
                 String fieldName = pvField.getField().getFieldName();
                 if(fieldName.equals("alarm")) continue;
-                Support support = recordSupport.getSupport(pvField);
+                Support support = pvRecordFields[i].getSupport();
                 if(support==null) continue;
                 if(!(support instanceof PortDriverSupport)) continue;
                 portDriverSupports[indSupport] = (PortDriverSupport)support;
-                support.initialize(recordSupport);
+                support.initialize();
                 if(support.getSupportState()!=SupportState.readyForStart) {
                     for(int j=0; j<indSupport-1; j++) {
                         portDriverSupports[j].uninitialize();
@@ -132,7 +143,7 @@ public class PortDriverLinkFactory {
                 indSupport++;
             }
             if(alarmSupport!=null) {
-                alarmSupport.initialize(recordSupport);
+                alarmSupport.initialize();
                 if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
                     for(PortDriverSupport portDriverSupport : portDriverSupports) {
                         portDriverSupport.uninitialize();
@@ -142,7 +153,10 @@ public class PortDriverLinkFactory {
             }
             setSupportState(SupportState.readyForStart);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#uninitialize()
+         */
+        @Override
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) stop();
             alarmSupport.uninitialize();
@@ -158,10 +172,13 @@ public class PortDriverLinkFactory {
             alarmSupport = null;
             setSupportState(SupportState.readyForInitialize);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#start(org.epics.ioc.install.AfterStart)
+         */
+        @Override
         public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,super.getSupportName())) return;
-            PVStructure pvStructure = (PVStructure)super.getPVField();
+            PVStructure pvStructure = (PVStructure)super.getPVRecordField().getPVField();
             
             user = Factory.createUser(this);
             port = user.connectPort(pvPortName.get());
@@ -197,7 +214,10 @@ public class PortDriverLinkFactory {
             }
             setSupportState(SupportState.ready);
         }
-        
+        /* (non-Javadoc)
+         * @see org.epics.ioc.support.AbstractSupport#stop()
+         */
+        @Override
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
             alarmSupport.stop();
@@ -218,9 +238,10 @@ public class PortDriverLinkFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             alarmSupport.beginProcess();
-            String fullName = super.getPVField().getFullName();
+            String fullName = super.getPVRecordField().getFullName();
             for(PortDriverSupport portDriverSupport : portDriverSupports) {
                 portDriverSupport.beginProcess();
             }
@@ -239,12 +260,14 @@ public class PortDriverLinkFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.pdrv.PortDriverLink#getUser()
          */
+        @Override
         public User getUser() {
             return user;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.pdrv.PortDriverLink#expandByteBuffer(int)
          */
+        @Override
         public byte[] expandByteBuffer(int size) {
             if(byteBuffer!=null && size<=byteBuffer.length) return byteBuffer;
             byte[] old = byteBuffer;
@@ -257,23 +280,24 @@ public class PortDriverLinkFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.pdrv.PortDriverLink#getAlarmSupport()
          */
+        @Override
         public AlarmSupport getAlarmSupport() {
             return alarmSupport;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.support.pdrv.PortDriverLink#getByteBuffer()
          */
+        @Override
         public byte[] getByteBuffer() {
             if(byteBuffer==null) byteBuffer = new byte[80];
             return byteBuffer;
         }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
          */
+        @Override
         public void callback(Status status, User user) {
-            String fullName = super.getPVField().getFullName();
+            String fullName = super.getPVRecordField().getFullName();
             if(status==Status.success) {
                 if((deviceTrace.getMask()&Trace.FLOW)!=0) {
                     deviceTrace.print(Trace.FLOW,
@@ -298,15 +322,15 @@ public class PortDriverLinkFactory {
                 recordProcess.processContinue(this);
             }
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.support.ProcessContinueRequester#processContinue()
          */
+        @Override
         public void processContinue() {
             for(PortDriverSupport portDriverSupport : portDriverSupports) {
                 portDriverSupport.endProcess();
             }
-            String fullName = super.getPVField().getFullName();
+            String fullName = super.getPVRecordField().getFullName();
             if((deviceTrace.getMask()&Trace.FLOW)!=0) {
                 deviceTrace.print(Trace.FLOW,
                     "pv %s processContinue calling supportProcessDone",fullName);

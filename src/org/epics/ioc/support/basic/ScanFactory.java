@@ -5,6 +5,10 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.database.PVListener;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordField;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
@@ -26,12 +30,8 @@ import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVListener;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
 
 /**
  * Support for scan field.
@@ -45,13 +45,13 @@ public class ScanFactory {
     private static EventScanner eventScanner = ScannerFactory.getEventScanner();
     /**
      * Create support for the scan field.
-     * @param pvStructure The interface to the scan field.
+     * @param pvRecordStructure The interface to the scan field.
      * @return The support or null if the scan field is improperly defined.
      */
-    public static Support create(PVStructure pvStructure) {
-        ScanField  scanField = ScanFieldFactory.create(pvStructure.getPVRecordField().getPVRecord());
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        ScanField  scanField = ScanFieldFactory.create(pvRecordStructure.getPVRecord());
         if(scanField==null) return null;
-        return new ScanImpl(pvStructure,scanField);
+        return new ScanImpl(pvRecordStructure,scanField);
     }
     
     private static class ScanImpl extends AbstractSupport implements PVListener, AfterStartRequester
@@ -77,10 +77,10 @@ public class ScanFactory {
         private AfterStart afterStart = null;
        
         
-        private ScanImpl(PVStructure pvScan,ScanField scanField) {
+        private ScanImpl(PVRecordStructure pvScan,ScanField scanField) {
             super(supportName,pvScan);
             this.scanField = scanField;
-            pvRecord = pvScan.getPVRecordField().getPVRecord();
+            pvRecord = pvScan.getPVRecord();
             pvScanTypeIndex = scanField.getScanTypeIndexPV();
             pvRate = scanField.getRatePV();
             pvEventName = scanField.getEventNamePV();
@@ -90,19 +90,24 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.pvData.pv.PVListener#beginGroupPut(org.epics.pvData.pv.PVRecord)
          */
+        @Override
         public void beginGroupPut(PVRecord pvRecord) {}
-
         /* (non-Javadoc)
-         * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVField)
+         * @see org.epics.ioc.database.PVListener#dataPut(org.epics.ioc.database.PVRecordStructure, org.epics.ioc.database.PVRecordField)
          */
-        public void dataPut(PVStructure requested, PVField pvField) {}
+        @Override
+        public void dataPut(PVRecordStructure requested, PVRecordField pvRecordField) {}
 
         /* (non-Javadoc)
          * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
          */
+        @Override
         public void endGroupPut(PVRecord pvRecord) {}
-
-        public void dataPut(PVField pvField) {
+        /* (non-Javadoc)
+         * @see org.epics.ioc.database.PVListener#dataPut(org.epics.ioc.database.PVRecordField)
+         */
+        @Override
+        public void dataPut(PVRecordField pvField) {
             if(!isStarted || !isActive) return;
             if(pvField==pvEventName) {
                 if(scanType==ScanType.periodic) return;
@@ -112,16 +117,19 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.pvData.pv.PVListener#unlisten(org.epics.pvData.pv.PVRecord)
          */
+        @Override
         public void unlisten(PVRecord pvRecord) {}
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#getName()
          */
+        @Override
         public String getRequesterName() {
             return supportName;
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#start()
          */
+        @Override
         public void start(AfterStart afterStart) {
             setSupportState(SupportState.ready);
             isStarted = true;
@@ -136,6 +144,7 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#stop()
          */
+        @Override
         public void stop() {
             removeListeners();
             isStarted = false;
@@ -149,6 +158,7 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.RecordProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             super.message("process is being called. Why?", MessageType.error);
             supportProcessRequester.supportProcessDone(RequestResult.failure);
@@ -156,6 +166,7 @@ public class ScanFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.AfterStartRequester#callback(org.epics.ioc.install.AfterStartNode)
          */
+        @Override
         public void callback(AfterStartNode node) {
             if(isStarted && !isActive) {
                 isActive = true;
@@ -167,9 +178,9 @@ public class ScanFactory {
 
         private void addListeners() {
             pvRecord.registerListener(this);
-            pvScanTypeIndex.getPVRecordField().addListener(this);
-            pvRate.getPVRecordField().addListener(this);
-            pvEventName.getPVRecordField().addListener(this);
+            pvRecord.findPVRecordField(pvScanTypeIndex).addListener(this);
+            pvRecord.findPVRecordField(pvRate).addListener(this);
+            pvRecord.findPVRecordField(pvEventName).addListener(this);
         }
         
         private void removeListeners() {

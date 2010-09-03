@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.Support;
-import org.epics.pvData.pv.PVStructure;
 
 
 /**
@@ -20,11 +20,11 @@ public class GenericFactory {
     /**
      * Create support for a structure that can have fields with support.
      * The support for each field that has support is called.
-     * @param pvStructure The structure.
+     * @param pvRecordStructure The structure.
      * @return An interface to the support.
      */
-    public static Support create(PVStructure pvStructure) {
-        return new GenericBase(supportName,pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new GenericBase(supportName,pvRecordStructure);
     }
     
     private static final String supportName = "org.epics.ioc.generic";

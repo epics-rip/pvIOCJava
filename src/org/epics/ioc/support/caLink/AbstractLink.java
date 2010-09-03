@@ -11,11 +11,12 @@ import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelProvider;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.Channel.ConnectionState;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.SupportState;
@@ -26,7 +27,6 @@ import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
@@ -43,17 +43,21 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
      */
     protected static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     /**
+     * The PVRecordField this link supports.
+     */
+    protected final PVRecordField pvRecordField;
+    /**
      * The pvStructure that this link supports.
      */
-    protected PVStructure pvStructure;
+    protected final PVStructure pvStructure;
     /**
      * The pvRecord that this link supports.
      */
-    protected PVRecord pvRecord;
+    protected final PVRecord pvRecord;
     /**
      * The channelRequesterName.
      */
-    protected String channelRequesterName;
+    protected final String channelRequesterName;
     /**
      * The recordProcess for this record.
      */
@@ -88,12 +92,13 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
      * @param pvField The field which is supported.
      */
     protected AbstractLink(
-        String supportName,PVField pvField)
+        String supportName,PVRecordField pvRecordField)
     {
-        super(supportName,pvField);
-        this.pvStructure = pvField.getParent();
-        pvRecord = pvStructure.getPVRecordField().getPVRecord();
-        channelRequesterName = pvField.getFullName();
+        super(supportName,pvRecordField);
+        this.pvRecordField = pvRecordField;
+        this.pvStructure = pvRecordField.getPVField().getParent();
+        pvRecord = pvRecordField.getPVRecord();
+        channelRequesterName = pvRecordField.getFullName();
     }
     /**
      * Must be implemented by derived class and is called by this class.
@@ -101,17 +106,18 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
      */
     abstract void connectionChange(boolean isConnected);
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.AbstractSupport#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
+    @Override
+    public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,null)) return;
-        recordProcess = recordSupport.getRecordProcess();
+        recordProcess = pvRecord.getRecordProcess();
         PVField pvAlarm = pvStructure.getSubField("alarm");
         if(pvAlarm==null) {
             pvStructure.message("alarm not found", MessageType.error);
             return;
         }
-        alarmSupport = AlarmSupportFactory.getAlarmSupport(pvAlarm,recordSupport);
+        alarmSupport = AlarmSupportFactory.getAlarmSupport(pvRecord.findPVRecordField(pvAlarm));
         if(alarmSupport==null) {
             pvStructure.message("alarm does not have alarmSupport", MessageType.error);
             return;
@@ -120,11 +126,12 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         if(providerPV==null) return;
         pvnamePV = pvStructure.getStringField("pvname");
         if(pvnamePV==null) return;
-        super.initialize(recordSupport);
+        super.initialize();
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         String providerName = providerPV.get();
@@ -168,10 +175,10 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
             message("pvname " + pvnamePV.get() +  " not created",MessageType.error);
     	}
     }
-
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#stop()
      */
+    @Override
     public void stop() {
         if(channel!=null) channel.destroy();
         channel = null;
@@ -180,6 +187,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#message(java.lang.String, org.epics.pvData.pv.MessageType)
      */
+    @Override
     public void message(String message,MessageType messageType) {
         pvRecord.lock();
         try {
@@ -189,21 +197,9 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         }
     }
     /* (non-Javadoc)
-     * @see org.epics.ca.client.ChannelRequester#destroy(org.epics.ca.client.Channel)
-     */
-    public void destroy(Channel c) {
-        pvRecord.lock();
-        try {
-            if(super.getSupportState()!=SupportState.ready) return;
-        } finally {
-            pvRecord.unlock();
-        }
-        recordProcess.stop();
-        recordProcess.start(null);
-    }
-    /* (non-Javadoc)
      * @see org.epics.ca.client.ChannelRequester#channelStateChange(org.epics.ca.client.Channel, org.epics.ca.client.Channel.ConnectionState)
      */
+    @Override
     public void channelStateChange(Channel c, ConnectionState connectionState) {
         this.channel = c;
         connectionChange(connectionState == ConnectionState.CONNECTED);

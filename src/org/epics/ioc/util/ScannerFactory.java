@@ -11,12 +11,11 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
 import org.epics.pvData.misc.ThreadCreateFactory;
@@ -27,7 +26,6 @@ import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 
 
@@ -38,7 +36,6 @@ import org.epics.pvData.pv.PVStructure;
  *
  */
 public class ScannerFactory {
-    private static IOCDatabase supportDatabase = IOCDatabaseFactory.get(PVDatabaseFactory.getMaster());
     private static PeriodicScanner periodicScanner = new PeriodicScannerImpl();
     private static EventScanner eventScanner = new EventScannerImpl();
 
@@ -83,8 +80,9 @@ public class ScannerFactory {
         	processToken = recordProcess.requestProcessToken(this);
         	if(processToken==null) return;
         	pvRecord = recordProcess.getRecord();
-        	pvStructure = pvRecord.getPVStructure();
-        	PVField pvField = pvRecord.getPVStructure().getSubField("scan.maxConsecutiveActive");
+        	PVRecordStructure pvRecordStructure = pvRecord.getPVRecordStructure();
+        	pvStructure = pvRecordStructure.getPVStructure();
+        	PVField pvField = pvStructure.getSubField("scan.maxConsecutiveActive");
         	if(pvField!=null && (pvField instanceof PVInt)) {
         		pvMaxConsecutiveActive = (PVInt)pvField;
         	}
@@ -423,8 +421,7 @@ public class ScannerFactory {
             } finally {
                 lock.unlock();
             }
-            RecordProcess recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-            processRecord = new ProcessRecord(processPeriodic.getName(),recordProcess);
+            processRecord = new ProcessRecord(processPeriodic.getName(),pvRecord.getRecordProcess());
             if(!processRecord.canProcess()) {
                 return false;
             }
@@ -890,8 +887,7 @@ public class ScannerFactory {
                     processEvent = new ProcessEvent(threadName,priority);
                     announce.addProcessEvent(processEvent);
                 }
-                RecordProcess recordProcess = supportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                ProcessRecord processRecord = new ProcessRecord(processEvent.getName(),recordProcess);
+                ProcessRecord processRecord = new ProcessRecord(processEvent.getName(),pvRecord.getRecordProcess());
                 if(!processRecord.canProcess()) {
                     return false;
                 }     

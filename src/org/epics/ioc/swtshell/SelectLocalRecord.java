@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.swtshell;
 
-import org.epics.pvData.pv.PVRecord;
+import org.epics.ioc.database.PVRecord;
 
 /**
  * Shell to select the name of a local JavaIOC record.

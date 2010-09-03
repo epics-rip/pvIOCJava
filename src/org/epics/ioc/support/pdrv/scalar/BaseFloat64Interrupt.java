@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.scalar;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64;
 import org.epics.ioc.pdrv.interfaces.Float64InterruptListener;
@@ -18,7 +18,6 @@ import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
@@ -32,11 +31,11 @@ implements Float64InterruptListener
 {
     /**
      * The constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseFloat64Interrupt(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseFloat64Interrupt(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
 
     private Float64 float64 = null;
@@ -45,10 +44,11 @@ implements Float64InterruptListener
     private PVDouble pvHighLimit = null;
     private PVString pvUnits = null;
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         PVField pvDisplay = pvProperty.findProperty(valuePVField,"display");
         if(pvDisplay!=null) {
@@ -85,6 +85,7 @@ implements Float64InterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -113,6 +114,7 @@ implements Float64InterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#stop()
      */
+    @Override
     public void stop() {
         super.stop();
         float64.removeInterruptUser(user, this);
@@ -121,6 +123,7 @@ implements Float64InterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64InterruptListener#interrupt(double)
      */
+    @Override
     public void interrupt(double value) {
     	this.value = value;
     	if(isProcessor) {

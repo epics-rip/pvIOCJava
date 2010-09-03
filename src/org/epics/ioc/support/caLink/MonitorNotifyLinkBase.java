@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.support.caLink;
 
+import org.epics.ca.client.CreateRequestFactory;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcessRequester;
@@ -17,10 +19,8 @@ import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.monitor.MonitorRequester;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
-import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /**
  * Implementation for a channel access monitor link.
@@ -33,10 +33,10 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvField The field being supported.
+     * @param pvRecordField The field being supported.
      */
-    public MonitorNotifyLinkBase(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public MonitorNotifyLinkBase(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
     private static Executor executor = ExecutorFactory.create("caNotifyLinkMonitor", ThreadPriority.low);
     private ExecutorNode executorNode = executor.createNode(this);
@@ -52,7 +52,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
         super.start(afterStart);
         if(super.getSupportState()!=SupportState.ready) return;
         String request = "record[queueSize=2]field(timeStamp[algorithm=onChange,causeMonitor=true])";
-        pvRequest = PVCopyFactory.createRequest(request,this);
+        pvRequest = CreateRequestFactory.createRequest(request,this);
         processToken = recordProcess.requestProcessToken(this);
     	if(processToken==null) {
     		pvStructure.message("can not process",MessageType.warning);

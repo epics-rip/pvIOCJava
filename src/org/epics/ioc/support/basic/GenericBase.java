@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.database.PVRecordField;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -25,7 +26,7 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class GenericBase extends AbstractSupport implements SupportProcessRequester{
-    private PVStructure pvStructure;
+    private PVRecordStructure pvRecordStructure = null;
     private String processRequesterName = null;
     private PVBoolean[] pvWaits = null;
     private Support[] supports = null;
@@ -38,12 +39,13 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /**
      * Constructor for GenericBase
      * @param supportName The name of the support.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      */
-    public GenericBase(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
-        this.pvStructure = pvStructure;
-        processRequesterName = pvStructure.getFullName();
+    public GenericBase(String supportName,PVRecordStructure pvRecordStructure) {
+        super(supportName,pvRecordStructure);
+        this.pvRecordStructure = pvRecordStructure;
+      
+        processRequesterName = pvRecordStructure.getFullName();
     }
     /**
      * Get the supports for the fields in this structure.
@@ -55,54 +57,57 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.process.SupportProcessRequester#getProcessRequesterName()
      */
+    @Override
     public String getRequesterName() {
         return processRequesterName;
     }
-    /* (non-Javadoc)
-     * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordSupport)
-     */
-    public void initialize(LocateSupport recordSupport) {
+    @Override
+    public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,super.getSupportName())) return;
-        processRequesterName = pvStructure.getFullName();
-        PVField[] pvFields = pvStructure.getPVFields();
-        int n = pvFields.length;
+        if(pvRecordStructure==null) {
+        	super.getPVRecordField().message("generic support attached to a non-structure field", MessageType.fatalError);
+        	return;
+        }
+        PVRecordField[] pvRecordFields = pvRecordStructure.getPVRecordFields();
+        int n = pvRecordFields.length;
         int numberSupport = 0;
         for(int i=0; i< n; i++) {
-            PVField pvField = pvFields[i];
-            String fieldName = pvField.getField().getFieldName();
+            PVRecordField pvRecordField = pvRecordFields[i];
+            String fieldName = pvRecordField.getPVField().getField().getFieldName();
             if(fieldName.equals("scan")) continue;
             if(fieldName.equals("timeStamp")) continue;
             // alarm is a special case
             if(fieldName.equals("alarm")) {
-                alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+                alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordField);
                 if(alarmSupport==null) {
-                    super.getPVField().message("illegal alarm field", MessageType.error);
+                    super.getPVRecordField().message("illegal alarm field", MessageType.error);
                     return;
                 }
                 continue;
             }
-            if(recordSupport.getSupport(pvFields[i])!=null) numberSupport++;
+            if(pvRecordField.getSupport()!=null) numberSupport++;
         }
         pvWaits = new PVBoolean[numberSupport];
         supports = new Support[numberSupport];
         int indSupport = 0;
         for(int i=0; i< n; i++) {
-            PVField pvField = pvFields[i];
-            String fieldName = pvField.getField().getFieldName();
+            PVRecordField pvRecordField = pvRecordFields[i];
+            String fieldName = pvRecordField.getPVField().getField().getFieldName();
             if(fieldName.equals("scan")) continue;
             if(fieldName.equals("timeStamp")) continue;
             if(fieldName.equals("alarm")) continue;
-            Support support = recordSupport.getSupport(pvField);
+            Support support = pvRecordField.getSupport();
             if(support==null) continue;
             pvWaits[indSupport] = null;
             supports[indSupport] = support;
+            PVField pvField = pvRecordField.getPVField();
             if(pvField.getField().getType()==Type.structure) {
                 PVStructure pvStruct = (PVStructure)pvField;
                 if(pvStruct.getSubField("wait")!=null) {
                     pvWaits[indSupport] = pvStruct.getBooleanField("wait");
                 }
             }
-            support.initialize(recordSupport);
+            support.initialize();
             if(support.getSupportState()!=SupportState.readyForStart) {
                 for(int j=0; j<indSupport-1; j++) {
                     supports[j].uninitialize();
@@ -112,7 +117,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
             indSupport++;
         }
         if(alarmSupport!=null) {
-            alarmSupport.initialize(recordSupport);
+            alarmSupport.initialize();
             if(alarmSupport.getSupportState()!=SupportState.readyForStart) {
                 for(Support support : supports) support.uninitialize();
                 return;
@@ -123,6 +128,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,super.getSupportName())) return;
         if(alarmSupport!=null) {
@@ -145,6 +151,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#stop()
      */
+    @Override
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
         if(alarmSupport!=null) alarmSupport.stop();
@@ -154,6 +161,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#uninitialize()
      */
+    @Override
     public void uninitialize() {
         if(super.getSupportState()==SupportState.ready) stop();
         if(alarmSupport!=null) alarmSupport.uninitialize();
@@ -163,6 +171,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
      */
+    @Override
     public void process(SupportProcessRequester supportProcessRequester) {
         if(supportProcessRequester==null) {
             throw new IllegalStateException("no processRequestListener");
@@ -184,6 +193,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     /* (non-Javadoc)
      * @see org.epics.ioc.process.SupportProcessRequester#supportProcessDone(org.epics.ioc.util.RequestResult)
      */
+    @Override
     public void supportProcessDone(RequestResult requestResult) {
         if(requestResult!=RequestResult.success) {
             if(finalResult!=RequestResult.zombie) {

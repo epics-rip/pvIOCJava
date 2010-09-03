@@ -5,9 +5,9 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.database.PVRecord;
 import org.epics.ioc.install.AfterStart;
 import org.epics.pvData.property.TimeStamp;
-import org.epics.pvData.pv.PVRecord;
 
 /**
  * Record processing support.

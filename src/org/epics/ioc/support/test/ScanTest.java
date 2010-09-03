@@ -7,20 +7,20 @@ package org.epics.ioc.support.test;
 
 import junit.framework.TestCase;
 
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.ScannerFactory;
-import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.ioc.xml.XMLToPVDatabaseFactory;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Structure;
-import org.epics.pvData.xml.XMLToPVDatabaseFactory;
 
 
 /**
@@ -40,7 +40,6 @@ public class ScanTest extends TestCase {
         Requester iocRequester = new RequesterForTesting("scanTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
-        org.epics.ca.LocalFactory.start();
         boolean ok = install.installRecords("src/org/epics/ioc/support/test/scanPV.xml", iocRequester);
         if(!ok) {
             System.out.printf("\nrecords\n");
@@ -71,27 +70,27 @@ public class ScanTest extends TestCase {
         PVRecord pvRecord = null;
         pvRecord = masterPVDatabase.findRecord("counterPush");
         assertNotNull(pvRecord);
-        PVStructure pvStructure = pvRecord.getPVStructure();
+        PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         Structure structure = pvStructure.getStructure();
         PVField[] pvData = pvStructure.getPVFields();        
         int index = structure.getFieldIndex("value");
         PVField counterPushValue = pvData[index];
         pvRecord = masterPVDatabase.findRecord("doubleReceive09");
         assertNotNull(pvRecord);
-        pvStructure = pvRecord.getPVStructure();
+        pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         structure = pvStructure.getStructure();
         pvData = pvStructure.getPVFields();        
         index = structure.getFieldIndex("value");
         PVField doubleReceive09Value = pvData[index];
         pvRecord = masterPVDatabase.findRecord("counterEvent0");
         assertNotNull(pvRecord);
-        pvStructure = pvRecord.getPVStructure();
+        pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         structure = pvStructure.getStructure();
         pvData = pvStructure.getPVFields();       
         index = structure.getFieldIndex("value");
         PVField counterEvent0Value = pvData[index];
         pvRecord = masterPVDatabase.findRecord("counterEvent1");
-        pvStructure = pvRecord.getPVStructure();
+        pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         assertNotNull(pvRecord);
         structure = pvStructure.getStructure();
         pvData = pvStructure.getPVFields();           
@@ -125,14 +124,14 @@ public class ScanTest extends TestCase {
         System.out.println();
         pvRecord = masterPVDatabase.findRecord("counter");
         assertNotNull(pvRecord);
-        pvStructure = pvRecord.getPVStructure();
+        pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         structure = pvStructure.getStructure();
         pvData = pvStructure.getPVFields();            
         index = structure.getFieldIndex("value");
         PVField counterValue = pvData[index];
         pvRecord = masterPVDatabase.findRecord("double02");
         assertNotNull(pvRecord);
-        pvStructure = pvRecord.getPVStructure();
+        pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         structure = pvStructure.getStructure();
         pvData = pvStructure.getPVFields();
         index = structure.getFieldIndex("value");

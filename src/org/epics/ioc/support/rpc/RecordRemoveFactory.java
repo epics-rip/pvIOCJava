@@ -5,22 +5,20 @@
  */
 package org.epics.ioc.support.rpc;
 
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 
@@ -31,22 +29,22 @@ import org.epics.pvData.pv.PVStructure;
  */
 public class RecordRemoveFactory {
     /**
-     * Create support for an array of calcArg structures.
-     * @param pvStructure The processControlStructure
+     * Create support for removing a record..
+     * @param pvRecordStructure The field supported.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(PVStructure pvStructure) {
-        return new RecordRemoveImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new RecordRemoveImpl(pvRecordStructure);
     }
     
     private static final String supportName = "org.epics.ioc.rpc.recordRemove";
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     
     
     private static class RecordRemoveImpl extends AbstractSupport implements Runnable,ProcessContinueRequester
     {
     	private static final Executor executor = ExecutorFactory.create("recordShowFactory",ThreadPriority.low);
+    	private final PVRecordStructure pvRecordStructure;
     	private ExecutorNode executorNode = executor.createNode(this);
     	private RecordProcess thisRecordProcess = null;
         private SupportProcessRequester supportProcessRequester = null;
@@ -54,21 +52,22 @@ public class RecordRemoveFactory {
         
         private PVString pvStatus = null;
         
-        private RecordRemoveImpl(PVStructure pvStructure) {
-            super(RecordRemoveFactory.supportName,pvStructure); 
+        private RecordRemoveImpl(PVRecordStructure pvRecordStructure) {
+            super(RecordRemoveFactory.supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
         @Override
-        public void initialize(LocateSupport recordSupport) {
-        	thisRecordProcess = recordSupport.getRecordProcess();
-            PVStructure pvStructure = (PVStructure)super.getPVField();
+        public void initialize() {
+        	thisRecordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
+            PVStructure pvStructure = pvRecordStructure.getPVStructure();
             pvRecordName = pvStructure.getStringField("arguments.recordName");
             if(pvRecordName==null) return;
             pvStatus = pvStructure.getStringField("result.status");
             if(pvStatus==null) return;
-            super.initialize(recordSupport);
+            super.initialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -87,7 +86,7 @@ public class RecordRemoveFactory {
             if(pvRecord==null) {
                 pvStatus.put("record not found");
             } else {
-                RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                RecordProcess recordProcess = pvRecord.getRecordProcess();
                 if(recordProcess==null) {
                     pvStatus.put("recordProcess not found");
                 } else {

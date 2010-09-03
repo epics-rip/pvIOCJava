@@ -12,13 +12,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.swtshell.SwtshellFactory;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 /**
@@ -224,8 +224,6 @@ public class JavaIOC {
     }
 
     static void parseRecords(String fileName,Requester iocRequester) {
-    	System.out.println("Starting local channel Access");
-    	org.epics.ca.LocalFactory.start();
     	long startTime = 0;
     	long endTime = 0;
     	startTime = System.nanoTime();

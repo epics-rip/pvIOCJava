@@ -5,9 +5,10 @@
  */
 package org.epics.ioc.support.rpc;
 
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.Support;
@@ -17,14 +18,11 @@ import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScannerFactory;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 
@@ -36,35 +34,36 @@ import org.epics.pvData.pv.PVStructure;
 public class IocShowFactory {
     /**
      * Create support for an array of calcArg structures.
-     * @param pvStructure The processControlStructure
+     * @param pvRecordStructure The processControlStructure
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(PVStructure pvStructure) {
-        return new IocShowImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new IocShowImpl(pvRecordStructure);
     }
     
     private static final String supportName = "org.epics.ioc.rpc.iocShow";
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     private static final String newLine = String.format("%n");
     private static final Runtime runTime = Runtime.getRuntime();
     
     private static class IocShowImpl extends AbstractSupport
     {
+    	private final PVRecordStructure pvRecordStructure;
         private Enumerated command = null;
         private PVString pvResult = null;
         private StringBuilder stringBuilder = new StringBuilder();
         private StringBuilder subStringBuilder = new StringBuilder();
         
-        private IocShowImpl(PVStructure pvStructure) {
-            super(IocShowFactory.supportName,pvStructure); 
+        private IocShowImpl(PVRecordStructure pvRecordStructure) {
+            super(IocShowFactory.supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
         @Override
-        public void initialize(LocateSupport recordSupport) {
-            PVStructure pvStructure = (PVStructure)super.getPVField();
+        public void initialize() {
+            PVStructure pvStructure = pvRecordStructure.getPVStructure();
             PVStructure pvTemp = pvStructure.getStructureField("arguments.command");
             if(pvTemp==null) return;
             command = EnumeratedFactory.getEnumerated(pvTemp);
@@ -74,7 +73,7 @@ public class IocShowFactory {
             }
             pvResult = pvStructure.getStringField("result.value");
             if(pvResult==null) return;
-            super.initialize(recordSupport);
+            super.initialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -100,15 +99,15 @@ public class IocShowFactory {
             PVRecord[] pvRecords = masterPVDatabase.getRecords();
             for(PVRecord pvRecord : pvRecords) {
                 subStringBuilder.setLength(0);
-                RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                RecordProcess recordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
                 boolean isActive = recordProcess.isActive();
                 boolean isEnabled = recordProcess.isEnabled();
                 SupportState supportState = recordProcess.getSupportState();
                 String alarmSeverity = null;
-                PVField pvField = pvRecord.getPVStructure().getSubField("alarm.severity.choice");
+                PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.severity.choice");
                 if(pvField!=null) alarmSeverity = pvField.toString();
                 String alarmMessage = null;
-                pvField = pvRecord.getPVStructure().getSubField("alarm.message");
+                pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.message");
                 if(pvField!=null) alarmMessage = pvField.toString();
                 if(isActive) subStringBuilder.append(" isActive");
                 if(!isEnabled) subStringBuilder.append(" disabled");

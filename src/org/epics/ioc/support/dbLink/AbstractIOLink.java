@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.dbLink;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -40,16 +40,17 @@ abstract class AbstractIOLink extends AbstractLink {
     /**
      * Constructor.
      * @param supportName The support name.
-     * @param pvField The field being supported.
+     * @param pvRecordField The field being supported.
      */
-    public AbstractIOLink(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public AbstractIOLink(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.dbLink.AbstractLink#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         pvProcess = super.pvDatabaseLink.getBooleanField("process");
         if(pvProcess==null) {
@@ -92,7 +93,7 @@ abstract class AbstractIOLink extends AbstractLink {
         } else {
             name = name.substring(ind+1);
         }
-        linkValuePVField = super.linkPVRecord.getPVStructure().getSubField(name);
+        linkValuePVField = super.linkPVRecord.getPVRecordStructure().getPVStructure().getSubField(name);
         if(linkValuePVField==null) {
             super.message("pvname field not found", MessageType.error);
             super.uninitialize();

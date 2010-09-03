@@ -22,13 +22,13 @@ import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutRequester;
 import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.CreateRequestFactory;
 import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Status;
-import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /*
  * A shell for channelGet.
@@ -172,7 +172,7 @@ public class PutFactory {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreatePut) {
                     stateMachine.setState(State.creatingPut);
-                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    PVStructure pvStructure = CreateRequestFactory.createRequest(requestText.getText(),requester);
                     if(pvStructure==null) return;
                     channelClient.createPut(pvStructure);
                 } else {

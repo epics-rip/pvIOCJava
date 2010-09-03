@@ -7,6 +7,7 @@ package org.epics.ioc.support.caLink;
 
 import org.epics.ca.client.ChannelGet;
 import org.epics.ca.client.ChannelGetRequester;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -29,10 +30,10 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvField The field being supported.
+     * @param pvRecordField The field being supported.
      */
-    public InputLinkBase(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public InputLinkBase(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
       
     private boolean isReady = false;
@@ -95,7 +96,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!isReady) {
             alarmSupport.setAlarm(
-                    pvStructure.getFullFieldName() + " not connected",
+                    pvRecordField.getFullFieldName() + " not connected",
                     AlarmSeverity.major);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
@@ -127,7 +128,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         for(int i=0; i< linkPVFields.length; i++) {
             if(i==indexAlarmLinkField) {
                 alarmSupport.setAlarm(pvAlarmMessage.get(),
-                    AlarmSeverity.getSeverity(pvAlarmSeverityIndex.get()));
+                    AlarmSeverity.getSeverity(pvAlarmSeverity.get()));
             } else if(allSet){
                 convert.copy(linkPVFields[i],pvFields[i]);
             } else {

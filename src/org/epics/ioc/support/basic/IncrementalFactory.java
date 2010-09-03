@@ -5,7 +5,7 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -40,10 +40,11 @@ import org.epics.pvData.pv.Type;
 public class IncrementalFactory {
     /**
      * Create the support for the record or structure.
-     * @param pvField The field for which to create support. It must have type boolean.
+     * @param pvRecordField The field for which to create support. It must have type boolean.
      * @return The support instance.
      */
-    public static Support create(PVField pvField) {
+    public static Support create(PVRecordField pvRecordField) {
+    	PVField pvField = pvRecordField.getPVField();
         if(pvField.getField().getType()!=Type.scalar) {
             pvField.message("type is not boolean", MessageType.error);
         }
@@ -51,7 +52,7 @@ public class IncrementalFactory {
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvBoolean) {
             pvField.message("type is not boolean", MessageType.error);
         }
-        return new IncrementalImpl((PVBoolean)pvField);
+        return new IncrementalImpl(pvRecordField);
     }
     
     private static Convert convert = ConvertFactory.getConvert();
@@ -69,14 +70,15 @@ public class IncrementalFactory {
         private boolean incremental = true;
         private double rateOfChange = 0.0;
         
-        private IncrementalImpl(PVBoolean pvBoolean) {
-            super(supportName,pvBoolean);
-            pvIncremental = pvBoolean;
+        private IncrementalImpl(PVRecordField pvRecordField) {
+            super(supportName,pvRecordField);
+            pvIncremental = (PVBoolean)pvRecordField.getPVField();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
-        public void initialize(LocateSupport recordSupport) {
+        @Override
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure parent = pvIncremental.getParent();
             PVField pvField = parent.getSubField("value");
@@ -103,6 +105,7 @@ public class IncrementalFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#uninitialize()
          */
+        @Override
         public void uninitialize() {
             pvValue = null;
             setSupportState(SupportState.readyForInitialize);
@@ -110,6 +113,7 @@ public class IncrementalFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             value = convert.toDouble(pvValue);
             desiredValue = convert.toDouble(pvDesiredValue);

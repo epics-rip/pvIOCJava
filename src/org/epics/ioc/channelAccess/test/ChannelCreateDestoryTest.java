@@ -16,7 +16,6 @@ package org.epics.ioc.channelAccess.test;
 
 import junit.framework.TestCase;
 
-import org.epics.ca.LocalFactory;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelProvider;
@@ -33,10 +32,6 @@ import org.epics.pvData.pv.Status;
  * @version $Id$
  */
 public class ChannelCreateDestoryTest extends TestCase {
-
-	static {
-		LocalFactory.start();
-	}
 	
 	private static class ChannelRequesterImpl implements ChannelRequester {
 		

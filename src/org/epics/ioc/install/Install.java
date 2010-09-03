@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.install;
 
-import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVRecord;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 

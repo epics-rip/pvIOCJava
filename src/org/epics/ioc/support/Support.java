@@ -5,9 +5,8 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Requester;
 
 /**
@@ -30,14 +29,13 @@ public interface Support extends Requester{
      * Get the field which this support supports.
      * @return The field.
      */
-    PVField getPVField();
+    PVRecordField getPVRecordField();
     /**
      * Initialize.
      * Perform initialization related to record instance but
      * do not connect to I/O or other records.
-     * @param locateSupport The locateSupport for this record.
      */
-    void initialize(LocateSupport locateSupport);
+    void initialize();
     /**
      * Invoked when it is safe to link to I/O and/or other records.
      * @param afterStart interface for being called after all support has started.

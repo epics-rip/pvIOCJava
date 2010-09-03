@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.scalar;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Int32;
@@ -16,7 +16,6 @@ import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVScalar;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 /**
  * Implement Int32Input
@@ -27,21 +26,22 @@ public class BaseInt32Input extends AbstractPortDriverSupport
 {
     /**
      * Constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseInt32Input(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseInt32Input(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
 
     private Int32 int32 = null;
     private int value;
     private Status status = Status.success;
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalar) return;
         super.uninitialize();
@@ -51,6 +51,7 @@ public class BaseInt32Input extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -65,6 +66,7 @@ public class BaseInt32Input extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#stop()
      */
+    @Override
     public void stop() {
         super.stop();
         int32 = null;
@@ -72,6 +74,7 @@ public class BaseInt32Input extends AbstractPortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#queueCallback()
      */
+    @Override
     public void queueCallback() {
         deviceTrace.print(Trace.FLOW,
                 "%s:%s queueCallback calling read ",fullName,supportName);

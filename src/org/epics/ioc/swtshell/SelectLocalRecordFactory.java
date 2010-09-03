@@ -15,9 +15,9 @@ import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
-import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVRecord;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
 import org.epics.pvData.pv.Requester;
 /**
  * Factory which implements SelectLocalRecord.

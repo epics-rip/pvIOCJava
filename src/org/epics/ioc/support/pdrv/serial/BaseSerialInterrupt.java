@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.serial;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.pdrv.interfaces.Serial;
@@ -18,7 +18,6 @@ import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVScalarArray;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
@@ -33,11 +32,11 @@ implements SerialInterruptListener
 {
     /**
      * The constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseSerialInterrupt(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseSerialInterrupt(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
     
     private boolean valueIsArray = false;
@@ -49,10 +48,11 @@ implements SerialInterruptListener
     private byte[] data = null;
     private int nbytes = 0;
     /* (non-Javadoc)
-     * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#initialize()
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         pvSize = pvStructure.getIntField("size");
         if(pvSize==null) {
@@ -74,6 +74,7 @@ implements SerialInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -91,6 +92,7 @@ implements SerialInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.support.AbstractPDRVLinkSupport#stop()
      */
+    @Override
     public void stop() {
         super.stop();
         octet.removeInterruptUser(user, this);
@@ -99,6 +101,7 @@ implements SerialInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.SerialInterruptListener#interrupt(byte[], int)
      */
+    @Override
     public void interrupt(byte[] data, int nbytes) {
     	this.data = data;
     	this.nbytes = nbytes;

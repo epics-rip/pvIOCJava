@@ -6,8 +6,8 @@
 package org.epics.ioc.support.pdrv;
 
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
@@ -36,11 +36,11 @@ import org.epics.pvData.pv.PVStructure;
 public class PortDeviceControlFactory {
     /**
      * Create the record support for creating a port driver.
-     * @param pvStructure The structure for a port record.
+     * @param pvRecordStructure The structure for a port record.
      * @return The record support.
      */
-    public static Support create(PVStructure pvStructure) {
-        return new PortDeviceControl(supportName,pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new PortDeviceControl(supportName,pvRecordStructure);
     }
     
     private static final String supportName = "org.epics.ioc.portDeviceControl";
@@ -49,9 +49,10 @@ public class PortDeviceControlFactory {
     implements ProcessCallbackRequester,ProcessContinueRequester
     {
         private static final String emptyMessage = "";
-        private User user = Factory.createUser(null);
+        private final User user = Factory.createUser(null);
+        private final PVRecordStructure pvRecordStructure;
+        private final PVStructure pvStructure;
         private RecordProcess recordProcess = null;
-        private PVStructure pvStructure = null;
         private PVString pvMessage = null;
         
         private PVBoolean pvProcessAtStart = null;
@@ -93,18 +94,18 @@ public class PortDeviceControlFactory {
         private boolean justConnected = false;
         private String message = emptyMessage;
         
-        private PortDeviceControl(String supportName,PVStructure pvStructure) {
-            super(supportName,pvStructure);
-            this.pvStructure = pvStructure;
+        private PortDeviceControl(String supportName,PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
+            pvStructure = pvRecordStructure.getPVStructure();
         }
-        
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
         @Override
-        public void initialize(LocateSupport recordSupport) {
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            recordProcess = recordSupport.getRecordProcess();
+            recordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
             pvProcessAtStart = pvStructure.getBooleanField("processAtStart");
             if(pvProcessAtStart==null) return;
             pvMessage = pvStructure.getStringField("message");
@@ -127,7 +128,7 @@ public class PortDeviceControlFactory {
             if(pvTraceIOTruncateSize==null) return;
             pvReport = pvStructure.getBooleanField("report");
             pvReportDetails = pvStructure.getIntField("reportDetails");
-            super.initialize(recordSupport);
+            super.initialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#start()

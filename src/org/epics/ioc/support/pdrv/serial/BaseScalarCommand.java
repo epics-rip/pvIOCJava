@@ -5,14 +5,13 @@
  */
 package org.epics.ioc.support.pdrv.serial;
 
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -23,11 +22,11 @@ public class BaseScalarCommand extends AbstractPortDriverSupport
 {
     /**
      * Constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseScalarCommand(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseScalarCommand(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
     
     private PVString pvPrefix = null;
@@ -35,10 +34,11 @@ public class BaseScalarCommand extends AbstractPortDriverSupport
     private PVString pvCommandString = null;
     private StringBuilder builder = new StringBuilder();
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()!=Type.scalar) {
             pvStructure.message("value field is not a supported type", MessageType.fatalError);
@@ -58,10 +58,10 @@ public class BaseScalarCommand extends AbstractPortDriverSupport
             return;
         }
     }      
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverSupport#beginProcess()
      */
+    @Override
     public void beginProcess() {
         if((deviceTrace.getMask()&Trace.FLOW)!=0) {
             deviceTrace.print(Trace.FLOW,"pv %s beginProcess",fullName);

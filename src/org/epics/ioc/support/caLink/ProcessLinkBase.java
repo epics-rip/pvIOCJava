@@ -7,13 +7,13 @@ package org.epics.ioc.support.caLink;
 
 import org.epics.ca.client.ChannelProcess;
 import org.epics.ca.client.ChannelProcessRequester;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Status;
 /**
  * Implementation for a channel access output link.
@@ -26,10 +26,10 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvField The field being supported.
+     * @param pvRecordField The field being supported.
      */
-    public ProcessLinkBase(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public ProcessLinkBase(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
     
     private volatile boolean isReady = false;
@@ -99,7 +99,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!isReady) {
             if(alarmSupport!=null) alarmSupport.setAlarm(
-                    pvStructure.getFullFieldName() + " not connected",
+                    pvRecordField.getFullFieldName() + " not connected",
                     AlarmSeverity.major);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;

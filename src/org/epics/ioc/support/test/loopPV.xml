@@ -17,7 +17,7 @@
         <structure name = "1" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >other02</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
     </structure>
 </record>
@@ -25,7 +25,6 @@
     <scalar name = "value"  scalarType = "double"/>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">root</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
 </record>
 <record recordName = "other02" extends = "generic" >
@@ -41,7 +40,6 @@
     <scalar name = "value"  scalarType = "double"/>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">root</scalar>
-        <scalar name = "process">false</scalar>
     </structure>
 </record>
 

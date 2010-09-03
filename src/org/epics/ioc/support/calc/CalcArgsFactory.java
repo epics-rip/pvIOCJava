@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.calc;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -25,11 +25,11 @@ import org.epics.pvData.pv.Type;
 public class CalcArgsFactory {
     /**
      * Create support for structure which has  calcArg structure fields.
-     * @param pvStructure The structure which mist have calcArg structure fields.
+     * @param pvRecordStructure The structure which mist have calcArg structure fields.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(PVStructure pvStructure) {
-        return new CalcArgsImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new CalcArgsImpl(pvRecordStructure);
     }
     
     
@@ -37,8 +37,8 @@ public class CalcArgsFactory {
     implements CalcArgs,SupportProcessRequester
     {
         private static final String supportName = "org.epics.ioc.calcArgArray";
-        private String processRequesterName = null;
-        private PVStructure pvStructure;
+        private final String processRequesterName;
+        private final PVRecordStructure pvRecordStructure;
         private PVField[] valuePVFields;
         private String[] argNames;
         private Support[] supports = null;
@@ -48,10 +48,10 @@ public class CalcArgsFactory {
         private int numberWait;
         private RequestResult finalResult;
        
-        private CalcArgsImpl(PVStructure pvStructure) {
-            super(supportName,pvStructure);
-            this.pvStructure = pvStructure;
-            processRequesterName = pvStructure.getFullName();
+        private CalcArgsImpl(PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
+            processRequesterName = pvRecordStructure.getFullName();
         }
         
         /* (non-Javadoc)
@@ -72,15 +72,17 @@ public class CalcArgsFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.SupportProcessRequester#getProcessRequesterName()
          */
+        @Override
         public String getRequesterName() {
             return processRequesterName;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
-        public void initialize(LocateSupport recordSupport) {
+        @Override
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            PVField[] pvFields = pvStructure.getPVFields();
+            PVField[] pvFields = pvRecordStructure.getPVStructure().getPVFields();
             int length = pvFields.length;
             valuePVFields = new PVField[length];
             argNames = new String[length];
@@ -99,11 +101,11 @@ public class CalcArgsFactory {
                     return;
                 }
                 argNames[i] = valuePVFields[i].getParent().getField().getFieldName();
-                Support support = recordSupport.getSupport(pvField);
+                Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
                 supports[i] = support;
                 if(support==null) continue;
                 numSupports++;
-                support.initialize(recordSupport);
+                support.initialize();
                 if(support.getSupportState()!=SupportState.readyForStart) {
                     for(int j=0; j<i; j++) {
                         if(supports[j]!=null) supports[j].uninitialize();
@@ -114,8 +116,9 @@ public class CalcArgsFactory {
             setSupportState(SupportState.readyForStart);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#start()
+         * @see org.epics.ioc.support.AbstractSupport#start(org.epics.ioc.install.AfterStart)
          */
+        @Override
         public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             for(Support support: supports) {
@@ -126,6 +129,7 @@ public class CalcArgsFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
          */
+        @Override
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
             for(Support support: supports) {
@@ -136,6 +140,7 @@ public class CalcArgsFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#uninitialize()
          */
+        @Override
         public void uninitialize() {
             if(super.getSupportState()==SupportState.ready) {
                 stop();
@@ -149,6 +154,7 @@ public class CalcArgsFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             if(supportProcessRequester==null) {
                 throw new IllegalStateException("no processRequestListener");

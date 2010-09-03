@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.util;
 
+import org.epics.ioc.database.PVRecord;
 import org.epics.pvData.misc.ThreadPriority;
-import org.epics.pvData.pv.PVRecord;
 
 /**
  * Event Scanner.

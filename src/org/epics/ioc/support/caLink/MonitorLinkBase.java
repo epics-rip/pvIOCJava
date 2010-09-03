@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.caLink;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -39,10 +39,10 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvField The field being supported.
+     * @param pvRecordField The field being supported.
      */
-    public MonitorLinkBase(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public MonitorLinkBase(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
     
     private static Executor executor = ExecutorFactory.create("caLinkMonitor", ThreadPriority.low);
@@ -58,11 +58,11 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     private boolean isReady = false;
     private Monitor monitor = null;   
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.ca.AbstractLinkSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.caLink.AbstractIOLink#initialize()
      */
     @Override
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    public void initialize() {
+        super.initialize();
         if(super.getSupportState()!=SupportState.readyForStart) return;
         reportOverrunAccess = pvStructure.getBooleanField("reportOverrun");
         if(reportOverrunAccess==null)  {
@@ -262,9 +262,9 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	for(int i=0; i< linkPVFields.length; i++) {
     		if(i==indexAlarmLinkField) {
     			super.pvAlarmMessage = monitorStructure.getStringField("alarm.message");
-    			super.pvAlarmSeverityIndex = monitorStructure.getIntField("alarm.severity.index");
+    			super.pvAlarmSeverity = monitorStructure.getIntField("alarm.severity");
     			alarmSupport.setAlarm(pvAlarmMessage.get(),
-    					AlarmSeverity.getSeverity(pvAlarmSeverityIndex.get()));
+    					AlarmSeverity.getSeverity(pvAlarmSeverity.get()));
     		} else {
     			copyChanged(linkPVFields[i],pvFields[i],changeBitSet,allSet);
     		}

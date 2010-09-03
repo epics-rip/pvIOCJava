@@ -5,10 +5,10 @@
  */
 package org.epics.ioc.support.caLink;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.support.Support;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVAuxInfo;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.ScalarType;
@@ -21,33 +21,33 @@ import org.epics.pvData.pv.ScalarType;
 public class LinkFactory {
     /**
      * Create link support for Channel Access links.
-     * @param pvField The field for which to create support.
+     * @param pvRecordField The field for which to create support.
      * @return A Support interface or null if the support is not found.
      */
-    public static Support create(PVField pvField) {
-        PVAuxInfo pvAuxInfo = pvField.getPVAuxInfo();
+    public static Support create(PVRecordField pvRecordField) {
+        PVAuxInfo pvAuxInfo = pvRecordField.getPVField().getPVAuxInfo();
         PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
-            pvField.message("no pvAuxInfo with name support. Why??", MessageType.error);
+            pvRecordField.message("no pvAuxInfo with name support. Why??", MessageType.error);
             return null;
         }
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvField.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
+            pvRecordField.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
             return null;
         }
         String supportName = ((PVString)pvScalar).get();
         if(supportName.equals(caProcessLinkName + "Factory")) {
-            return new ProcessLinkBase(caProcessLinkName,pvField);
+            return new ProcessLinkBase(caProcessLinkName,pvRecordField);
         } else if(supportName.equals(caInputLinkName + "Factory")) {
-            return new InputLinkBase(caInputLinkName,pvField);
+            return new InputLinkBase(caInputLinkName,pvRecordField);
         } else if(supportName.equals(caOutputLinkName + "Factory")) {
-            return new OutputLinkBase(caOutputLinkName,pvField);
+            return new OutputLinkBase(caOutputLinkName,pvRecordField);
         } else if(supportName.equals(caMonitorLinkName + "Factory")) {
-            return new MonitorLinkBase(caMonitorLinkName,pvField);
+            return new MonitorLinkBase(caMonitorLinkName,pvRecordField);
         } else if(supportName.equals(caMonitorNotifyLinkName + "Factory")) {
-            return new MonitorNotifyLinkBase(caMonitorNotifyLinkName,pvField);
+            return new MonitorNotifyLinkBase(caMonitorNotifyLinkName,pvRecordField);
         }
-        pvField.message("no support for " + supportName, MessageType.fatalError);
+        pvRecordField.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
     private static final String caProcessLinkName = "org.epics.ioc.caProcessLink";

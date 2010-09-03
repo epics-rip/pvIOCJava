@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -31,10 +31,11 @@ import org.epics.pvData.pv.Type;
 public class LinearConvertFactory {
     /**
      * Factory creation method.
-     * @param pvStructure The field to support.
+     * @param pvRecordStructure The field to support.
      * @return The Support interface.
      */
-    public static Support create(PVStructure pvStructure) {
+    public static Support create(PVRecordStructure pvRecordStructure) {
+    	PVStructure pvStructure = pvRecordStructure.getPVStructure();
         PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
         PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
@@ -51,10 +52,10 @@ public class LinearConvertFactory {
             return null;
         }
         if(supportName.equals(linearConvertInput)) {
-            return new LinearConvertInput(pvStructure);
+            return new LinearConvertInput(pvRecordStructure);
         }
         if(supportName.equals(linearConvertOutput)) {
-            return new LinearConvertOutput(pvStructure);
+            return new LinearConvertOutput(pvRecordStructure);
         }
         pvStructure.message("no support for " + supportName,MessageType.error);
         return null;
@@ -81,16 +82,15 @@ public class LinearConvertFactory {
         protected double intercept;
         
         
-        protected LinearConvertBase(String supportName,PVStructure pvStructure) {
-            super(supportName,pvStructure);
-            this.pvStructure = pvStructure;
+        protected LinearConvertBase(String supportName,PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            pvStructure = pvRecordStructure.getPVStructure();
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
         @Override
-        public void initialize(LocateSupport recordSupport) {
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,linearConvertInput)) return;
             PVStructure pvParent = pvStructure.getParent();
             pvRawValue = getInt(pvParent,"value");
@@ -193,8 +193,8 @@ public class LinearConvertFactory {
     
     private static  class LinearConvertInput extends LinearConvertBase {
         
-        private LinearConvertInput(PVStructure pvStructure) {
-            super(linearConvertInput,pvStructure);
+        private LinearConvertInput(PVRecordStructure pvRecordStructure) {
+            super(linearConvertInput,pvRecordStructure);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -210,8 +210,8 @@ public class LinearConvertFactory {
     
     private static  class LinearConvertOutput extends LinearConvertBase {
         
-        private LinearConvertOutput(PVStructure pvStructure) {
-            super(linearConvertOutput,pvStructure);
+        private LinearConvertOutput(PVRecordStructure pvRecordStructure) {
+            super(linearConvertOutput,pvRecordStructure);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)

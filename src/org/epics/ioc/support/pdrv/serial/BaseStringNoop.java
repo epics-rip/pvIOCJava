@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.serial;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
-import org.epics.pvData.pv.PVStructure;
 
 /**
  * Implement StringNoop.
@@ -18,10 +18,10 @@ public class BaseStringNoop extends AbstractPortDriverSupport
 {
     /**
      * Constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseStringNoop(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseStringNoop(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
 }

@@ -7,15 +7,15 @@ package org.epics.ioc.install;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.epics.ioc.support.ChannelProcessorProviderFactory;
-import org.epics.pvData.factory.PVDatabaseFactory;
-import org.epics.pvData.factory.PVReplaceFactory;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVReplaceFactory;
+import org.epics.ioc.pvAccess.ChannelServerFactory;
+import org.epics.ioc.xml.XMLToPVDatabaseFactory;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.xml.XMLToPVDatabaseFactory;
 
 /**
  * Factory that implements Install
@@ -28,17 +28,22 @@ public class InstallFactory {
      * @return The instance.
      */
     public static Install get() {
-        return install;
+        return InstallImpl.getInstall();
     }
-    static {
-        ChannelProcessorProviderFactory.register();
-    }
-    private static final InstallImpl install = new InstallImpl();
-
+   
     private static class InstallImpl implements Install {
         private static final PVDatabase master = PVDatabaseFactory.getMaster();
+        private static InstallImpl singleImplementation = null;
         private static MessageType maxError;
         private static AtomicBoolean isInUse = new AtomicBoolean(false);
+        private static synchronized InstallImpl getInstall() {
+        	 if (singleImplementation==null) {
+                 singleImplementation = new InstallImpl();
+                 // Make ChannelServer register itself.
+                 ChannelServerFactory.getChannelServer();
+             }
+             return singleImplementation;
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.install.Install#installRecords(org.epics.pvData.pv.PVDatabase, org.epics.pvData.pv.Requester)
          */
@@ -200,8 +205,7 @@ public class InstallFactory {
                 return false;
             }
             PVReplaceFactory.replace(pvDatabaseAdd);
-            IOCDatabase iocDatabaseAdd = IOCDatabaseFactory.create(pvDatabaseAdd);
-            SupportCreation supportCreation = SupportCreationFactory.create(iocDatabaseAdd, requester);
+            SupportCreation supportCreation = SupportCreationFactory.create(pvDatabaseAdd, requester);
             boolean gotSupport = supportCreation.createSupport();
             if(!gotSupport) {
                 requester.message("Did not find all support.",MessageType.fatalError);
@@ -219,7 +223,6 @@ public class InstallFactory {
                 return false;
             }
             afterStart.callRequesters(false);
-            iocDatabaseAdd.mergeIntoMaster();
             pvDatabaseAdd.mergeIntoMaster();
             afterStart.callRequesters(true);
             afterStart = null;

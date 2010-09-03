@@ -4,22 +4,18 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.support.alarm;
-import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
+
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Type;
 
 /**
  * Support for an intAlarm link.
@@ -29,157 +25,137 @@ import org.epics.pvData.pv.Type;
 public class IntAlarmFactory {
     /**
      * Create support for an intAlarm structure.
-     * @param pvStructure The structure.
+     * @param pvRecordStructure The structure.
      * @return An interface to the support.
      */
-    public static Support create(PVStructure pvStructure) {
-        return new IntAlarmImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new IntAlarmImpl(pvRecordStructure);
     }
     
     private static class IntAlarmImpl extends AbstractSupport
     {
         private static final String supportName = "org.epics.ioc.intAlarm";
+        private PVRecordStructure pvRecordStructure;
         private PVStructure pvStructure;
-        
         private AlarmSupport alarmSupport;
+        private PVInt pvValue;
         
-        private PVInt pvOutOfRange;
         private PVBoolean pvActive;
         private PVInt pvHystersis;
+        private PVInt pvLowAlarmLimit;
+        private PVInt pvLowAlarmSeverity;
+        private PVInt pvLowWarningLimit;
+        private PVInt pvLowWarningSeverity;
+        private PVInt pvHighWarningLimit;
+        private PVInt pvHighWarningSeverity;
+        private PVInt pvHighAlarmLimit;
+        private PVInt pvHighAlarmSeverity;
         
-        private PVStructure pvAlarmIntervalArray = null;
-        private PVInt[] pvAlarmIntervalValue = null;
-        private PVInt[] pvAlarmIntervalSeverity = null;
-        private PVString[] pvAlarmIntervalMessage = null;
-        
-        private PVInt pvValue;
         private int lastAlarmIntervalValue;
-        private int lastAlarmSeverityIndex;
-       
-        private IntAlarmImpl(PVStructure pvStructure) {
-            super(supportName,pvStructure);
-            this.pvStructure = pvStructure;
+        private int lastAlarmSeverity = 0;
+        private String lastAlarmMessage = null;
+        
+        private IntAlarmImpl(PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
+            pvStructure = pvRecordStructure.getPVStructure();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
-        public void initialize(LocateSupport recordSupport) {
+        @Override
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             SupportState supportState = SupportState.readyForStart;
             pvValue = pvStructure.getParent().getIntField("value");
             if(pvValue==null) return;
-            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
             pvActive = pvStructure.getBooleanField("active");
             if(pvActive==null) return;
-            pvAlarmIntervalArray = pvStructure.getStructureField("interval");
-            if(pvAlarmIntervalArray==null) return;  
-            PVStructure pvStruct = pvStructure.getStructureField("outOfRange");
-            if(pvStruct==null) return;
-            Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvStruct);
-            if(enumerated==null) return;
-            pvOutOfRange = enumerated.getIndex();
+            pvLowAlarmSeverity = pvStructure.getIntField("lowAlarmSeverity");
+            if(pvLowAlarmSeverity==null) return;
+            pvLowAlarmLimit = pvStructure.getIntField("lowAlarmLimit");
+            if(pvLowAlarmLimit==null) return;
+            pvLowWarningSeverity = pvStructure.getIntField("lowWarningSeverity");
+            if(pvLowWarningSeverity==null) return;
+            pvLowWarningLimit = pvStructure.getIntField("lowWarningLimit");
+            if(pvLowWarningLimit==null) return;
+            
+            pvHighWarningSeverity = pvStructure.getIntField("highWarningSeverity");
+            if(pvHighWarningSeverity==null) return;
+            pvHighWarningLimit = pvStructure.getIntField("highWarningLimit");
+            if(pvHighWarningLimit==null) return;
+            pvHighAlarmSeverity = pvStructure.getIntField("highAlarmSeverity");
+            if(pvHighAlarmSeverity==null) return;
+            pvHighAlarmLimit = pvStructure.getIntField("highAlarmLimit");
+            if(pvHighAlarmLimit==null) return;                       
             pvHystersis = pvStructure.getIntField("hystersis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#start()
-         */
-        public void start(AfterStart afterStart) {
-            if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-            SupportState supportState = SupportState.ready;
-            PVField[] pvFields = pvAlarmIntervalArray.getPVFields();
-            int size = pvFields.length;
-            if(size<=0) {
-                super.message("invalid interval", MessageType.error);
-                return;
-            }
-            pvAlarmIntervalValue = new PVInt[size];
-            pvAlarmIntervalSeverity = new PVInt[size];
-            pvAlarmIntervalMessage = new PVString[size];
-            for(int i=0; i<size; i++) {
-                PVField pvField = pvFields[i];
-                if(pvField.getField().getType()!=Type.structure) {
-                    super.message("invalid interval. not a structure", MessageType.error);
-                    return;
-                }
-                PVStructure pvStructure = (PVStructure)pvField;
-                PVInt pvValue = pvStructure.getIntField("value");
-                if(pvValue==null) return;
-                pvAlarmIntervalValue[i] = pvValue;
-                PVStructure pvStruct = pvStructure.getStructureField("severity");
-                if(pvStruct==null) return;
-                
-                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvStruct);
-                if(enumerated==null) {
-                    super.message("invalid interval severity field is not alarmSeverity", MessageType.error);
-                    return;
-                }
-                pvAlarmIntervalSeverity[i] = enumerated.getIndex();
-                PVString pvMessage = pvStructure.getStringField("message");
-                if(pvMessage==null) return;
-                pvAlarmIntervalMessage[i] = pvMessage;
-            }
-            lastAlarmSeverityIndex = 0;
-            setSupportState(supportState);
-        }
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#stop()
-         */
-        public void stop() {
-            if(super.getSupportState()!=SupportState.ready) return;
-            pvAlarmIntervalValue = null;
-            pvAlarmIntervalSeverity = null;
-            setSupportState(SupportState.readyForStart);
-        }
-        /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             if(pvActive.get()) checkAlarm();
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                
 
         private void checkAlarm() {
-            boolean active = pvActive.get();
+        	boolean active = pvActive.get();
             if(!active) return;
             int  val = pvValue.get();
-            int len = pvAlarmIntervalValue.length;
-            int intervalValue = 0;
-            for(int i=0; i<len; i++) {
-                intervalValue = pvAlarmIntervalValue[i].get();
-                if(val<=intervalValue) {
-                    int sevIndex = pvAlarmIntervalSeverity[i].get();
-                    raiseAlarm(intervalValue,val,sevIndex,pvAlarmIntervalMessage[i].get());
-                    return;
-                }
+            int severity = pvHighAlarmSeverity.get();
+            int level = pvHighAlarmLimit.get();
+            if(severity>0 && (val>=level)) {
+            	raiseAlarm(level,val,severity,"highAlarm");
+            	return;
             }
-            int outOfRange = pvOutOfRange.get();
-            // intervalValue is pvAlarmIntervalValue[length-1].get();
-            raiseAlarm(intervalValue,val,outOfRange,"out of range");
+            severity = pvLowAlarmSeverity.get();
+            level = pvLowAlarmLimit.get();
+            if(severity>0 && (val<=level)) {
+            	raiseAlarm(level,val,severity,"lowAlarm");
+            	return;
+            }
+            severity = pvHighWarningSeverity.get();
+            level = pvHighWarningLimit.get();
+            if(severity>0 && (val>=level)) {
+            	raiseAlarm(level,val,severity,"highWarning");
+            	return;
+            }
+            severity = pvLowWarningSeverity.get();
+            level = pvLowWarningLimit.get();
+            if(severity>0 && (val<=level)) {
+            	raiseAlarm(level,val,severity,"lowWarning");
+            	return;
+            }
+            raiseAlarm(0,val,0,"");
         }
         
-        private void raiseAlarm(int intervalValue,int val,int severityIndex,String message) {
-            AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severityIndex);
-            if(severityIndex<lastAlarmSeverityIndex) {
+        private void raiseAlarm(int intervalValue,int val,int severity,String message) {
+        	AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(severity);
+            if(severity<lastAlarmSeverity) {
                 int diff = lastAlarmIntervalValue - val;
                 if(diff<0) diff = -diff;
                 if(diff<pvHystersis.get()) {
-                    alarmSeverity = AlarmSeverity.getSeverity(lastAlarmSeverityIndex);
+                    alarmSeverity = AlarmSeverity.getSeverity(lastAlarmSeverity);
                     intervalValue = lastAlarmIntervalValue;
+                    message = lastAlarmMessage;
                 }
             }
             if(alarmSeverity==AlarmSeverity.none) {
-                lastAlarmSeverityIndex = severityIndex;
+                lastAlarmSeverity = severity;
                 return;
             }
             alarmSupport.setAlarm(message, alarmSeverity);
             lastAlarmIntervalValue = intervalValue;
-            lastAlarmSeverityIndex = severityIndex;
+            lastAlarmSeverity = severity;
+            lastAlarmMessage = message;
         }
     }
 }

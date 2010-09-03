@@ -23,8 +23,9 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
 import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
@@ -33,18 +34,17 @@ import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScannerFactory;
-import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.TimeFunction;
 import org.epics.pvData.misc.TimeFunctionFactory;
 import org.epics.pvData.misc.TimeFunctionRequester;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
+import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 
@@ -61,7 +61,7 @@ import org.epics.pvData.pv.Requester;
  */
 public class IntrospectDatabaseFactory {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
+    private static final Convert convert = ConvertFactory.getConvert();
     private static final String newLine = String.format("%n");
     private static final Runtime runTime = Runtime.getRuntime();
     
@@ -255,8 +255,8 @@ public class IntrospectDatabaseFactory {
                 return;
             }
             if(object==showStateButton) {
-                RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
-                PVStructure pvStructure = pvRecord.getPVStructure();
+                RecordProcess recordProcess = pvRecord.getRecordProcess();
+                PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
                 PVBoolean pvBoolean = pvStructure.getBooleanField("scan.singleProcessRequester");
                 boolean singleProcessRequester = (pvBoolean==null) ? false : pvBoolean.get();
                 String processRequesterName = recordProcess.getRecordProcessRequesterName();
@@ -296,7 +296,7 @@ public class IntrospectDatabaseFactory {
                 return;
             }
             if(object==releaseProcessorButton) {
-                RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                RecordProcess recordProcess = pvRecord.getRecordProcess();
                 if(recordProcess==null) {
                     message("recordProcess is null", MessageType.error);
                     return;
@@ -313,12 +313,12 @@ public class IntrospectDatabaseFactory {
             if(object==showBadRecordsButton) {
                 PVRecord[] pvRecords = masterPVDatabase.getRecords();
                 for(PVRecord pvRecord : pvRecords) {
-                    RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                    RecordProcess recordProcess = pvRecord.getRecordProcess();
                     boolean isActive = recordProcess.isActive();
                     boolean isEnabled = recordProcess.isEnabled();
                     SupportState supportState = recordProcess.getSupportState();
                     String alarmSeverity = null;
-                    PVStructure pvStructure = pvRecord.getPVStructure();
+                    PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
                     PVField pvField = pvStructure.getSubField("alarm.severity.choice");
                     if(pvField!=null) alarmSeverity = pvField.toString();
                     String alarmMessage = null;
@@ -407,7 +407,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                recordProcess = pvRecord.getRecordProcess();
                 boolean initialState = recordProcess.isEnabled();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
@@ -467,7 +467,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                recordProcess = pvRecord.getRecordProcess();
                 boolean initialState = recordProcess.isTrace();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
@@ -530,7 +530,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private void set() {
-                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                recordProcess = pvRecord.getRecordProcess();
                 shell = new Shell(getParent(),getStyle());
                 shell.setText("setEnable");
                 GridLayout gridLayout = new GridLayout();
@@ -598,7 +598,7 @@ public class IntrospectDatabaseFactory {
                 choiceAll.addSelectionListener(this);
                 PVStructure[] pvdStructures = masterPVDatabase.getStructures();
                 for(PVStructure pvdStructure : pvdStructures) {
-                    String name = pvdStructure.getFullName();
+                    String name = convert.getFullFieldName(pvdStructure);
                     MenuItem choiceItem = new MenuItem(menuStructure,SWT.PUSH);
                     choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
@@ -645,7 +645,7 @@ public class IntrospectDatabaseFactory {
             }
 
             private String doIt() {
-                recordProcess = masterSupportDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                recordProcess = pvRecord.getRecordProcess();
                 processToken = recordProcess.requestProcessToken(processIt);
                 if(processToken==null) return "could not process the record";
                 TimeFunction timeFunction = TimeFunctionFactory.create(processIt);

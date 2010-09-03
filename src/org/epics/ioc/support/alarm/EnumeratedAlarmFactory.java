@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.alarm;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -15,13 +15,14 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.pv.IntArrayData;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVBoolean;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVIntArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Type;
+import org.epics.pvData.pv.ScalarType;
 
 /**
  * Support for alarms for an enumerated value.
@@ -31,39 +32,39 @@ import org.epics.pvData.pv.Type;
 public class EnumeratedAlarmFactory {
     /**
      * Create support for a digitalAlarm structure.
-     * @param pvStructure The structure.
+     * @param pvRecordStructure The structure.
      * @return An interface to the support.
      */
-    public static Support create(PVStructure pvStructure) {
-        return new EnumeratedAlarmImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new EnumeratedAlarmImpl(pvRecordStructure);
     }
     
     private static class EnumeratedAlarmImpl extends AbstractSupport
     {
         private static final String supportName = "org.epics.ioc.enumeratedAlarm";
+        private final IntArrayData stateSeverityData = new IntArrayData();
+        private PVRecordStructure pvRecordStructure;
         private PVStructure pvStructure;
         private boolean noop;
         private AlarmSupport alarmSupport;
         
         private PVBoolean pvActive;
-        
-        private PVInt[] pvSeverityIndex = null;
-        private PVString[] pvMessage;
-        private PVInt pvChangeStateAlarm;
-        private PVString pvChangeStateMessage;
-        
+        private PVIntArray pvStateSeverity = null;
+        private PVInt pvChangeStateSeverity = null;
         private PVInt pvValue;
         
         private int prevValue = 0;
        
-        private EnumeratedAlarmImpl(PVStructure pvStructure) {
-            super(supportName,pvStructure);
-            this.pvStructure = pvStructure;
+        private EnumeratedAlarmImpl(PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
+            pvStructure = pvRecordStructure.getPVStructure();
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.process.Support#initialize()
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
-        public void initialize(LocateSupport recordSupport) {
+        @Override
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure pvStruct = pvStructure.getParent().getStructureField("value");
             if(pvStruct==null) return;
@@ -73,56 +74,28 @@ public class EnumeratedAlarmFactory {
                 return;
             }
             pvValue = enumerated.getIndex();
-            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
             pvActive = pvStructure.getBooleanField("active");
             if(pvActive==null) return;
-            pvStruct = pvStructure.getStructureField("stateAlarm");
-            if(pvStruct==null) return;
-            if(!stateAlarmFieldsInit(pvStruct.getPVFields())) return;
-            pvStruct = pvStructure.getStructureField("changeStateAlarm");
-            if(pvStruct==null) return;
-            PVStructure pvStruct1 = pvStruct.getStructureField("severity");
-            enumerated = AlarmSeverity.getAlarmSeverity(pvStruct1);
-            if(enumerated==null) return;
-            pvChangeStateAlarm = enumerated.getIndex();
-            pvChangeStateMessage = pvStruct.getStringField("message");
-            if(pvChangeStateMessage==null) return;
+            PVArray pvArray = pvStructure.getScalarArrayField("stateSeverity",ScalarType.pvInt);
+            if(pvArray==null) return;
+            pvStateSeverity = (PVIntArray)pvArray;
+            if(enumerated.getChoices().getLength()!=pvArray.getLength()) {
+            	super.message("value.length != stateSeverity.length", MessageType.error);
+            	return;
+            }
+            pvChangeStateSeverity = pvStructure.getIntField("changeStateSeverity");
+            if(pvChangeStateSeverity==null) return;
             setSupportState(SupportState.readyForStart);
-        }
-        
-        private boolean stateAlarmFieldsInit(PVField[] pvStateAlarmFields) {
-            int length = pvStateAlarmFields.length;
-            if(length==0) {
-                noop = true;
-                setSupportState(SupportState.readyForStart);
-                return false;
-            }
-            pvSeverityIndex = new PVInt[length];
-            pvMessage = new PVString[length];
-            for(int i=0; i< length; i++) {
-                PVField pvField = pvStateAlarmFields[i];
-                if(pvField.getField().getType()!=Type.structure) {
-                    super.message("stateAlarm has an element that is not a structure",MessageType.error);
-                    return false;
-                }
-                PVStructure pvStructure = (PVStructure)pvField;
-                PVField pvSevr = pvStructure.getSubField("severity");
-                if(pvSevr==null) return false;
-                Enumerated enumerated = AlarmSeverity.getAlarmSeverity(pvSevr);
-                if(enumerated==null) return false;
-                pvSeverityIndex[i] = enumerated.getIndex();
-                pvMessage[i] = pvStructure.getStringField("message");
-                if(pvMessage[i]==null) return false;
-            }
-            return true;
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */
+        @Override
         public void start(AfterStart afterStart) {
             if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
             if(noop) {
@@ -135,6 +108,7 @@ public class EnumeratedAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
          */
+        @Override
         public void stop() {
             if(super.getSupportState()!=SupportState.ready) return;
             setSupportState(SupportState.readyForStart);
@@ -142,6 +116,7 @@ public class EnumeratedAlarmFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#uninitialize()
          */
+        @Override
         public void uninitialize() {
             if(super.getSupportState()!=SupportState.ready) return;
             if(noop) {
@@ -149,41 +124,32 @@ public class EnumeratedAlarmFactory {
                 return;
             }
             pvActive = null;
-            pvSeverityIndex = null;
-            pvChangeStateAlarm = null;
+            pvStateSeverity = null;
+            pvChangeStateSeverity = null;
             pvValue = null;
             setSupportState(SupportState.readyForInitialize);
         }       
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             if(noop || !pvActive.get()) {
                 supportProcessRequester.supportProcessDone(RequestResult.success);
                 return;
             }
-            int index;
-            String message = pvStructure.getFullFieldName();
             int  value = pvValue.get();
-            if(value<pvSeverityIndex.length) {
-                PVInt pvInt = pvSeverityIndex[value];
-                int alarmValue = pvInt.get();
-                if(alarmValue>0) {
-                    alarmSupport.setAlarm(
-                            pvMessage[value].get(),
-                            AlarmSeverity.getSeverity(alarmValue));
-                }
-            } else {
-                alarmSupport.setAlarm(
-                        message + "alarmSupport: value out of bounds",
-                        AlarmSeverity.major);
+            pvStateSeverity.get(0, pvStateSeverity.getLength(),stateSeverityData);
+            int[] severities = stateSeverityData.data;
+            int severity = severities[value];
+            if(severity>0) {
+            	alarmSupport.setAlarm("stateAlarm",AlarmSeverity.getSeverity(severity));
             }
+            
             if(prevValue!=value) {
                 prevValue = value;
-                index = pvChangeStateAlarm.get();
-                alarmSupport.setAlarm(
-                        pvChangeStateMessage.get(),
-                        AlarmSeverity.getSeverity(index));
+                int index = pvChangeStateSeverity.get();
+                alarmSupport.setAlarm("changeStateAlarm",AlarmSeverity.getSeverity(index));
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                

@@ -17,52 +17,52 @@
         <structure name = "0" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive00</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "1" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive01</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "2" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive02</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "3" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive03</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "4" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive04</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "5" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive05</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "6" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive06</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "7" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive07</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "8" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive08</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
         <structure name = "9" extends = "caOutputLink">
             <scalar name = "wait" scalarType = "boolean">false</scalar>
             <scalar name = "pvname" >doubleReceive09</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
     </structure>
 </record>

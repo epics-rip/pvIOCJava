@@ -47,9 +47,7 @@ public class GUIDataFactory {
     public static GUIData create(Shell parent) {
         return new GUIDataImpl(parent);
     }
-    
     private static final Convert convert = ConvertFactory.getConvert();
-    
     private static class GUIDataImpl extends Dialog implements GUIData, SelectionListener {
     	private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         private Shell parent;
@@ -162,7 +160,7 @@ public class GUIDataFactory {
             gridData = new GridData(GridData.FILL_BOTH);
             tree.setLayoutData(gridData);
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-            treeItem.setText(pvStructure.getFullFieldName());
+            treeItem.setText(convert.getFullFieldName(pvStructure));
             createStructureTreeItem(treeItem,pvStructure);
             shell.open();
             Display display = shell.getDisplay();

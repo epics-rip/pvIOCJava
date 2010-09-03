@@ -5,8 +5,9 @@
  */
 package org.epics.ioc.support.caLink;
 
+import org.epics.ca.client.CreateRequestFactory;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.SupportState;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.pv.Convert;
@@ -15,7 +16,6 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pvCopy.PVCopyFactory;
 
 
 /**
@@ -29,7 +29,7 @@ abstract class AbstractIOLink extends AbstractLink {
      */
     protected static final Convert convert = ConvertFactory.getConvert();
     /**
-     * request is a string that can be passed to PVCopyFactory.createRequest.
+     * request is a string that can be passed to CreateRequestFactory.createRequest.
      */
     protected PVString requestPVString = null;
     /**
@@ -50,19 +50,22 @@ abstract class AbstractIOLink extends AbstractLink {
     /**
      * If alarm is a request the interface for the alarm severity index.
      */
-    protected PVInt pvAlarmSeverityIndex = null;
+    protected PVInt pvAlarmSeverity = null;
    
     /**
      * Constructor.
      * @param supportName The support name.
      * @param pvField The field which is supported.
      */
-    public AbstractIOLink(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public AbstractIOLink(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
-    
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    /* (non-Javadoc)
+     * @see org.epics.ioc.support.AbstractSupport#initialize()
+     */
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         requestPVString = pvStructure.getStringField("request");
         if(requestPVString==null) {
@@ -74,12 +77,13 @@ abstract class AbstractIOLink extends AbstractLink {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         if(pvRequest==null) {
         	String request = requestPVString.get();
             if(request==null || request.length()==0) {
-                pvRequest = PVCopyFactory.createRequest("field(value)",this);
+                pvRequest = CreateRequestFactory.createRequest("field(value)",this);
             } else {
             	int index = request.indexOf("field(");
             	if(index<0) {
@@ -90,7 +94,7 @@ abstract class AbstractIOLink extends AbstractLink {
             			request = request + "field(value)";
             		}
             	}
-                pvRequest = PVCopyFactory.createRequest(request,this);
+                pvRequest = CreateRequestFactory.createRequest(request,this);
             }
         }
         if(pvRequest==null) return;
@@ -126,8 +130,8 @@ abstract class AbstractIOLink extends AbstractLink {
             if(fieldName.equals("alarm") && alarmSupport!=null) {
                 PVStructure pvStructure = (PVStructure)pvLinkField;
                 pvAlarmMessage = pvStructure.getStringField("message");
-                pvAlarmSeverityIndex = pvStructure.getIntField("severity.index");
-                if(pvAlarmMessage==null || pvAlarmSeverityIndex==null) return false;
+                pvAlarmSeverity = pvStructure.getIntField("severity");
+                if(pvAlarmMessage==null || pvAlarmSeverity==null) return false;
                 indexAlarmLinkField = i;
             } else {
                 if(!convert.isCopyCompatible(pvLinkField.getField(), pvField.getField())) {
@@ -148,7 +152,7 @@ abstract class AbstractIOLink extends AbstractLink {
      */
     public void uninitialize() {
         requestPVString = null;
-        pvAlarmSeverityIndex = null;
+        pvAlarmSeverity = null;
         pvAlarmMessage = null;
         indexAlarmLinkField = -1;
         linkPVFields = null;

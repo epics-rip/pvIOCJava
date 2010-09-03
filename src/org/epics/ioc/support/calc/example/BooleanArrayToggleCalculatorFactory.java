@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support.calc.example;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.calc.AbstractCalculatorSupport;
@@ -13,7 +14,6 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.BooleanArrayData;
 import org.epics.pvData.pv.PVBooleanArray;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -23,16 +23,16 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class BooleanArrayToggleCalculatorFactory {
-    public static Support create(PVStructure pvStructure) {
-        return new BooleanArrayToggleCalculator(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new BooleanArrayToggleCalculator(pvRecordStructure);
     }
 
     private static String supportName = "booleanArrayToggleCalculator";
 
     private static class BooleanArrayToggleCalculator extends AbstractCalculatorSupport
     {
-        private BooleanArrayToggleCalculator(PVStructure pvStructure) {
-            super(supportName,pvStructure);
+        private BooleanArrayToggleCalculator(PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
         }
 
 

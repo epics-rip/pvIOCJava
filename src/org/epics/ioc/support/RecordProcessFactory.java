@@ -9,11 +9,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.epics.ioc.database.PVListener;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordField;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanField;
 import org.epics.ioc.util.ScanFieldFactory;
@@ -23,8 +26,6 @@ import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVListener;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Structure;
 
@@ -42,8 +43,8 @@ public class RecordProcessFactory {
      * @param pvRecord The record instance.
      * @return The interface for the newly created RecordProcess.
      */
-    static public RecordProcess createRecordProcess(LocateSupport locateSupport,PVRecord pvRecord) {
-        return new RecordProcessImpl(locateSupport,pvRecord);
+    static public RecordProcess createRecordProcess(PVRecord pvRecord) {
+        return new RecordProcessImpl(pvRecord);
     }
     
     static private class Token implements ProcessToken 
@@ -55,17 +56,16 @@ public class RecordProcessFactory {
     	}
     }
     
-    static private class RecordProcessImpl
-    implements RecordProcess,SupportProcessRequester,PVListener
+    static private class RecordProcessImpl implements RecordProcess,SupportProcessRequester,PVListener
     {
 		private boolean trace = false;
         private PVRecord pvRecord;
-        private LocateSupport locateSupport;
         private boolean enabled = true;
         private Support fieldSupport = null;
         private ScanField  scanField = null;
         private PVBoolean pvProcessAfterStart = null;
         private Support scanSupport = null;
+        private PVRecordField pvRecordFieldSingleProcessRequester = null;
         private PVBoolean pvSingleProcessRequester = null;
         private boolean singleProcessRequester = false;
         
@@ -86,10 +86,9 @@ public class RecordProcessFactory {
         
         private TimeStamp timeStamp = null;
         
-        private RecordProcessImpl(LocateSupport locateSupport,PVRecord pvRecord) {
-            this.locateSupport = locateSupport;
+        private RecordProcessImpl(PVRecord pvRecord) {
             this.pvRecord = pvRecord;
-            locateSupport.setRecordProcess(this);
+            pvRecord.setRecordProcess(this);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcess#isEnabled()
@@ -168,14 +167,16 @@ public class RecordProcessFactory {
             pvRecord.lock();
             try {
                 if(trace) traceMessage(" initialize");
-                PVStructure pvStructure = pvRecord.getPVStructure();
-                fieldSupport = locateSupport.getSupport(pvRecord.getPVStructure());
+                PVRecordStructure pvRecordStructure = pvRecord.getPVRecordStructure();
+                PVStructure pvStructure = pvRecordStructure.getPVStructure();
+                fieldSupport = pvRecordStructure.getSupport();
                 if(fieldSupport==null) {
                     throw new IllegalStateException(
                         pvRecord.getRecordName() + " has no support");
                 }
                 PVField[] pvFields = pvStructure.getPVFields();
-                Structure structure = (Structure)pvRecord.getPVStructure().getField();
+                PVRecordField[] pvRecordFields = pvRecordStructure.getPVRecordFields();
+                Structure structure = pvStructure.getStructure();
                 int index;
                 index = structure.getFieldIndex("timeStamp");
                 if(index>=0) {
@@ -183,15 +184,16 @@ public class RecordProcessFactory {
                 }
                 index = structure.getFieldIndex("scan");
                 if(index>=0) {
-                    scanSupport = locateSupport.getSupport(pvFields[index]);
+                    scanSupport = pvRecordFields[index].getSupport();
                     scanField = ScanFieldFactory.create(pvRecord);
                     if(scanField!=null) {
                     	pvSingleProcessRequester = scanField.getSingleProcessRequesterPV();
+                    	pvRecordFieldSingleProcessRequester = pvRecord.findPVRecordField(pvSingleProcessRequester);
                         pvProcessAfterStart = scanField.getProcessAfterStartPV();
                     }
                 }
                 
-                fieldSupport.initialize(locateSupport);
+                fieldSupport.initialize();
             } finally {
                 pvRecord.unlock();
             }
@@ -209,7 +211,7 @@ public class RecordProcessFactory {
         		if(pvSingleProcessRequester!=null) {
                 	singleProcessRequester = pvSingleProcessRequester.get();
                 	pvRecord.registerListener(this);
-                	pvSingleProcessRequester.getPVRecordField().addListener(this);
+                	pvRecordFieldSingleProcessRequester.addListener(this);
                 }
         		if(!singleProcessRequester && pvProcessAfterStart!=null) {
         			if(pvProcessAfterStart.get()) {
@@ -561,11 +563,11 @@ public class RecordProcessFactory {
         @Override
 		public void beginGroupPut(PVRecord pvRecord) {}
 		/* (non-Javadoc)
-		 * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVField)
+		 * @see org.epics.ioc.database.PVListener#dataPut(org.epics.ioc.database.PVRecordField)
 		 */
 		@Override
-		public void dataPut(PVField pvField) {
-			if(pvField!=pvSingleProcessRequester) {
+		public void dataPut(PVRecordField pvRecordField) {
+			if(pvRecordField!=pvRecordFieldSingleProcessRequester) {
 				throw new IllegalStateException("logic error");
 			}
 			pvRecord.lock();
@@ -593,10 +595,10 @@ public class RecordProcessFactory {
 			}
 		}
 		/* (non-Javadoc)
-		 * @see org.epics.pvData.pv.PVListener#dataPut(org.epics.pvData.pv.PVStructure, org.epics.pvData.pv.PVField)
+		 * @see org.epics.ioc.database.PVListener#dataPut(org.epics.ioc.database.PVRecordStructure, org.epics.ioc.database.PVRecordField)
 		 */
 		@Override
-		public void dataPut(PVStructure requested, PVField pvField) {}
+		public void dataPut(PVRecordStructure requested,PVRecordField pvRecordField) {}
 		/* (non-Javadoc)
 		 * @see org.epics.pvData.pv.PVListener#endGroupPut(org.epics.pvData.pv.PVRecord)
 		 */
@@ -697,7 +699,7 @@ public class RecordProcessFactory {
 			afterStartNode = node;
 			processToken = recordProcess.requestProcessToken(this);
 			if(processToken==null) {
-				recordProcess.getRecord().getPVStructure().message(
+				recordProcess.getRecord().getPVRecordStructure().message(
 			        "processAfterStart but requestProcessToken failed",
 			        MessageType.warning);
 				return;

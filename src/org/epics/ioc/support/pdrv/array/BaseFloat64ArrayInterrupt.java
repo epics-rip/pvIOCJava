@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.array;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Float64Array;
@@ -18,7 +18,6 @@ import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVScalarArray;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -31,20 +30,21 @@ implements Float64ArrayInterruptListener
 {
     /**
      * The constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseFloat64ArrayInterrupt(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseFloat64ArrayInterrupt(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
     private PVScalarArray valuePVArray = null;
     private Float64Array float64Array = null;
     private PVDoubleArray pvDoubleArray = null;
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalarArray) {
             valuePVArray = (PVScalarArray)valuePVField;
@@ -57,6 +57,7 @@ implements Float64ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#uninitialize()
      */
+    @Override
     public void uninitialize() {
         super.uninitialize();
         valuePVArray = null;
@@ -64,6 +65,7 @@ implements Float64ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -79,6 +81,7 @@ implements Float64ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#stop()
      */
+    @Override
     public void stop() {
         super.stop();
         float64Array.removeInterruptUser(user, this);
@@ -87,6 +90,7 @@ implements Float64ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Float64ArrayInterruptListener#interrupt(org.epics.ioc.pdrv.interfaces.Float64Array)
      */
+    @Override
     public void interrupt(Float64Array float64Array) {
         pvDoubleArray = float64Array.getPVDoubleArray();
         if(isProcessor) {

@@ -5,9 +5,10 @@
  */
 package org.epics.ioc.support.rpc;
 
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
@@ -15,7 +16,6 @@ import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
@@ -23,10 +23,8 @@ import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
@@ -39,25 +37,24 @@ import org.epics.pvData.pv.StringArrayData;
  */
 public class SupportStateSetFactory {
     /**
-     * Create support for an array of calcArg structures.
-     * @param pvStructure The processControlStructure
+     * Create support for showing the support state of a record.
+     * @param pvRecordStructure The supported field.
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(PVStructure pvStructure) {
-        return new SupportStateSetImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new SupportStateSetImpl(pvRecordStructure);
     }
     
     private static final String supportName = "org.epics.rpc.supportStateSet";
     private static final String emptyString = "";
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final IOCDatabase supportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
-    
     
     private static class SupportStateSetImpl extends AbstractSupport
     implements Runnable,ProcessContinueRequester
     {
-        private Executor executor = ExecutorFactory.create(SupportStateSetFactory.supportName, ThreadPriority.lowest);
-        private ExecutorNode executorNode = null;
+        private final Executor executor = ExecutorFactory.create(SupportStateSetFactory.supportName, ThreadPriority.lowest);
+        private final PVRecordStructure pvRecordStructure;
+        private final ExecutorNode executorNode;
         private RecordProcess recordProcess = null;
         
         private PVString pvMessage = null;
@@ -82,18 +79,18 @@ public class SupportStateSetFactory {
         private SupportState supportState = null;
         
         
-        private SupportStateSetImpl(PVStructure pvStructure) {
-            super(SupportStateSetFactory.supportName,pvStructure);
+        private SupportStateSetImpl(PVRecordStructure pvRecordStructure) {
+            super(SupportStateSetFactory.supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
             executorNode = executor.createNode(this); 
-            
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
         @Override
-        public void initialize(LocateSupport recordSupport) {
-            PVStructure pvSupportStateSet = (PVStructure)super.getPVField();
-            recordProcess = recordSupport.getRecordProcess();
+        public void initialize() {
+            PVStructure pvSupportStateSet = pvRecordStructure.getPVStructure();
+            recordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
             pvRecordName = pvSupportStateSet.getStringField("arguments.recordName");
             if(pvRecordName==null) return;
             PVStructure pvStructure = pvSupportStateSet.getStructureField("arguments.supportStateCommand");
@@ -108,7 +105,7 @@ public class SupportStateSetFactory {
             supportStateEnumerated = SupportState.getSupportState(pvStructure);
             if(supportStateEnumerated==null) return;
             supportStatePVInt = supportStateEnumerated.getIndex();
-            super.initialize(recordSupport);
+            super.initialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)
@@ -141,7 +138,7 @@ public class SupportStateSetFactory {
                     recordProcess.processContinue(this);
                     return;
                 }
-                targetRecordProcess = supportDatabase.getLocateSupport(targetPVRecord).getRecordProcess();
+                targetRecordProcess = targetPVRecord.getRecordProcess();
                 if(targetRecordProcess==null) {
                     requestResult = RequestResult.failure;
                     message = "recordProcess for " + "recordName " + recordName + " not found";

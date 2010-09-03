@@ -5,8 +5,8 @@
  */
 package org.epics.ioc.support.pdrv.array;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Status;
 import org.epics.ioc.pdrv.Trace;
 import org.epics.ioc.pdrv.interfaces.Int32Array;
@@ -18,7 +18,6 @@ import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVIntArray;
 import org.epics.pvData.pv.PVScalarArray;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -31,21 +30,22 @@ implements Int32ArrayInterruptListener
 {
     /**
      * The constructor.
-     * @param pvStructure The structure being supported.
+     * @param pvRecordStructure The structure being supported.
      * @param supportName The name of the support.
      */
-    public BaseInt32ArrayInterrupt(PVStructure pvStructure,String supportName) {
-        super(supportName,pvStructure);
+    public BaseInt32ArrayInterrupt(PVRecordStructure pvRecordStructure,String supportName) {
+        super(supportName,pvRecordStructure);
     }
 
     private PVScalarArray valuePVArray = null;
     private Int32Array int32Array = null;
     private PVIntArray pvIntArray = null;
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         if(valuePVField.getField().getType()==Type.scalarArray) {
             valuePVArray = (PVScalarArray)valuePVField;
@@ -58,6 +58,7 @@ implements Int32ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#uninitialize()
      */
+    @Override
     public void uninitialize() {
         super.uninitialize();
         valuePVArray = null;
@@ -65,6 +66,7 @@ implements Int32ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         super.start(afterStart);
         if(!super.checkSupportState(SupportState.ready,supportName)) return;
@@ -80,6 +82,7 @@ implements Int32ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#stop()
      */
+    @Override
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
         super.stop();
@@ -89,6 +92,7 @@ implements Int32ArrayInterruptListener
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.interfaces.Int32ArrayInterruptListener#interrupt(org.epics.ioc.pdrv.interfaces.Int32Array)
      */
+    @Override
     public void interrupt(Int32Array int32Array) {
     	pvIntArray = int32Array.getPVIntArray();
     	if(isProcessor) {

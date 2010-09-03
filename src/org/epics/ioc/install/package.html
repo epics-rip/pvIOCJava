@@ -16,7 +16,7 @@ CONTENTS
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Install">Install Factory</a> 
+  <li><a href="#Install">Install Factory</a>
     <ul>
       <li><a href="#Definition">Definitions</a></li>
       <li><a href="#installStr">installStructures</a></li>
@@ -25,24 +25,16 @@ CONTENTS
       Instances</a></li>
     </ul>
   </li>
-  <li><a href="#IOCDatabas">IOCDatabase</a> 
+  <li><a href="#Support">Support Creation</a>
     <ul>
       <li><a href="#Definition1">Definitions</a></li>
-      <li><a href="#IOCDatabas1">IOCDatabaseFactory</a></li>
-      <li><a href="#IOCDatabas2">IOCDatabase</a></li>
-      <li><a href="#LocateSupp">LocateSupport</a></li>
-    </ul>
-  </li>
-  <li><a href="#Support">Support Creation</a> 
-    <ul>
-      <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#Factory">Factory</a></li>
       <li><a href="#SupportCre">SupportCreation</a></li>
     </ul>
   </li>
-  <li><a href="#After">After Start</a> 
+  <li><a href="#After">After Start</a>
     <ul>
-      <li><a href="#Definition3">Definitions</a></li>
+      <li><a href="#Definition2">Definitions</a></li>
       <li><a href="#AfterStart">AfterStartNode</a></li>
       <li><a href="#AfterStart1">AfterStartRequester</a></li>
       <li><a href="#NewAfterSt">NewAfterStartRequester</a></li>
@@ -88,8 +80,6 @@ at a time is allowed.</p>
     <dd>The interface for installing structures and records.</dd>
   <dt>InstallFactory</dt>
     <dd>The factory which implements a single instance of Install.</dd>
-  <dt>IOCDatabase</dt>
-    <dd>The database that provides access to support code.</dd>
   <dt>SupportCreation</dt>
     <dd>Support to create, initialize, and start records.</dd>
   <dt>AfterStart</dt>
@@ -190,85 +180,13 @@ performed</p>
 installed.</p>
 <hr />
 
-<h2 style="text-align: center;" id="IOCDatabas">IOCDatabase</h2>
-<hr />
-
-<p>An IOCDatabase provides access to the RecordProcess that is attached to
-every record instance and to the support that is optionally attached to
-fields of a record.</p>
-
-<h3 id="Definition1">Definitions</h3>
-<pre>public class IOCDatabaseFactory {
-    public static synchronized IOCDatabase create(PVDatabase pvDatabase);
-    public static synchronized IOCDatabase get(PVDatabase pvDatabase);
-    public static LocateSupport getLocateSupport(PVRecord pvRecord);
-}
-
-public interface IOCDatabase {
-    PVDatabase getPVDatabase();
-    void mergeIntoMaster();
-    LocateSupport getLocateSupport(PVRecord pvRecord);
-}
-
-public interface LocateSupport {
-    RecordProcess getRecordProcess();
-    void setRecordProcess(RecordProcess recordProcess);
-    Support getSupport(PVField pvField);
-    void setSupport(PVField pvField,Support support);
-}</pre>
-
-<h3 id="IOCDatabas1">IOCDatabaseFactory</h3>
-
-<p>Given a PVDatabase this is used to create and located an IOCDatabase.</p>
-<dl>
-  <dt>create</dt>
-    <dd>Create a new IOCDatabase for the pbDatabase. The pvDatabase must be
-      either master or beingInstalled or null is returned.</dd>
-  <dt>get</dt>
-    <dd>Get the IOCDatabase for the PVDatabase. It returns null if it does
-      not exist.</dd>
-  <dt>getLocateSupport</dt>
-    <dd>Get the LocateSupport for the specified record. The pvRecord must be
-      in either master or beingInstalled or else null is returned.</dd>
-</dl>
-
-<h3 id="IOCDatabas2">IOCDatabase</h3>
-
-<p>This is the interface for an IOCDatabase.</p>
-<dl>
-  <dt>getPVDatabase</dt>
-    <dd>Get the PVDatabase for this IOCDatabase.</dd>
-  <dt>mergeIntoMaster</dt>
-    <dd>Merge the IOCDatabase into the master IOCDatabase. This is called by
-      InstallFactory.</dd>
-  <dt>getLocateSupport</dt>
-    <dd>Get the LocateSupport for the record. </dd>
-</dl>
-
-<h3 id="LocateSupp">LocateSupport</h3>
-
-<p>A LocateSupport exists for each record.</p>
-<dl>
-  <dt>getRecordProcess</dt>
-    <dd>Get the RecordProcess for the record.</dd>
-  <dt>setRecordProcess</dt>
-    <dd>Set the RecordProcess for the record. This is called by
-      SupportCreation.</dd>
-  <dt>getSupport</dt>
-    <dd>Get the support for the field. If no support then null is
-    returned.</dd>
-  <dt>setSupport</dt>
-    <dd>Set the support for the field. This is called by SupportCreation.</dd>
-</dl>
-<hr />
-
 <h2 style="text-align: center;" id="Support">Support Creation</h2>
 <hr />
 
 <p>A SupportCreation is used to create, initialize, and start record
 instances. After it is done it is no longer accessable.</p>
 
-<h3 id="Definition2">Definitions</h3>
+<h3 id="Definition1">Definitions</h3>
 <pre>public class SupportCreationFactory {
     static public SupportCreation create(
          IOCDatabase supportDatabase,Requester requester);
@@ -327,7 +245,7 @@ Access. The NewAfterStartRequester is called each time a new AfterStart is
 created, i.e. every time a new set of records are being installed. The server
 can then call afterStart.requestCallback just like support code.</p>
 
-<h3 id="Definition3">Definitions</h3>
+<h3 id="Definition2">Definitions</h3>
 <pre>public interface AfterStartNode {}
 
 public interface AfterStartRequester {

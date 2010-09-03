@@ -5,12 +5,12 @@
  */
 package org.epics.ioc.support.pdrv.scalar;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.Support;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVAuxInfo;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 
 /**
@@ -21,40 +21,40 @@ import org.epics.pvData.pv.ScalarType;
 public class SupportFactory {
     /**
      * Create support for portDriver.
-     * @param pvStructure The field for which to create support.
+     * @param pvRecordStructure The field for which to create support.
      * @return A LinkSupport interface or null failure.
      */
-    public static Support create(PVStructure pvStructure) {
-        PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        PVAuxInfo pvAuxInfo = pvRecordStructure.getPVStructure().getPVAuxInfo();
         PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
-            pvStructure.message("no pvAuxInfo with name supportFactory. Why??", MessageType.error);
+            pvRecordStructure.message("no pvAuxInfo with name supportFactory. Why??", MessageType.error);
             return null;
         }
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvStructure.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
+            pvRecordStructure.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
             return null;
         }
         String supportName = ((PVString)pvScalar).get();
         
         if(supportName.equals(pdrvInt32InputSupportName))
-            return new BaseInt32Input(pvStructure,pdrvInt32InputSupportName);
+            return new BaseInt32Input(pvRecordStructure,pdrvInt32InputSupportName);
         if(supportName.equals(pdrvInt32InterruptSupportName))
-            return new BaseInt32Interrupt(pvStructure,pdrvInt32InterruptSupportName);
+            return new BaseInt32Interrupt(pvRecordStructure,pdrvInt32InterruptSupportName);
         if(supportName.equals(pdrvInt32AverageSupportName))
-            return new BaseInt32Average(pvStructure,pdrvInt32AverageSupportName);
+            return new BaseInt32Average(pvRecordStructure,pdrvInt32AverageSupportName);
         if(supportName.equals(pdrvInt32OutputSupportName))
-            return new BaseInt32Output(pvStructure,pdrvInt32OutputSupportName);
+            return new BaseInt32Output(pvRecordStructure,pdrvInt32OutputSupportName);
         
         if(supportName.equals(pdrvFloat64InputSupportName))
-            return new BaseFloat64Input(pvStructure,pdrvFloat64InputSupportName);
+            return new BaseFloat64Input(pvRecordStructure,pdrvFloat64InputSupportName);
         if(supportName.equals(pdrvFloat64InterruptSupportName))
-            return new BaseFloat64Interrupt(pvStructure,pdrvFloat64InterruptSupportName);
+            return new BaseFloat64Interrupt(pvRecordStructure,pdrvFloat64InterruptSupportName);
         if(supportName.equals(pdrvFloat64AverageSupportName))
-            return new BaseFloat64Average(pvStructure,pdrvFloat64AverageSupportName);
+            return new BaseFloat64Average(pvRecordStructure,pdrvFloat64AverageSupportName);
         if(supportName.equals(pdrvFloat64OutputSupportName))
-            return new BaseFloat64Output(pvStructure,pdrvFloat64OutputSupportName);
-        pvStructure.message("no support for " + supportName, MessageType.fatalError);
+            return new BaseFloat64Output(pvRecordStructure,pdrvFloat64OutputSupportName);
+        pvRecordStructure.message("no support for " + supportName, MessageType.fatalError);
         return null;
     }
    

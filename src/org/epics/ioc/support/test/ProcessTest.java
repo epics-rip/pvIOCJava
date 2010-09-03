@@ -11,12 +11,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.TestCase;
 
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
 import org.epics.ioc.install.AfterStartRequester;
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.install.NewAfterStartRequester;
@@ -24,15 +25,12 @@ import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.factory.PVDatabaseFactory;
+import org.epics.ioc.xml.XMLToPVDatabaseFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDatabase;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.xml.XMLToPVDatabaseFactory;
 
 
 /**
@@ -42,7 +40,6 @@ import org.epics.pvData.xml.XMLToPVDatabaseFactory;
  */
 public class ProcessTest extends TestCase {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final IOCDatabase masterSupportDatabase = IOCDatabaseFactory.get(masterPVDatabase);
     private static final Install install = InstallFactory.get();
     private static MessageType maxMessageType = MessageType.info;
     /**
@@ -53,17 +50,9 @@ public class ProcessTest extends TestCase {
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
         new NewAfterStartRequesterImpl(0);
-        org.epics.ca.LocalFactory.start();
         boolean ok = install.installRecords("src/org/epics/ioc/support/test/processTestPV.xml", iocRequester);
+        assertTrue(ok);
         PVRecord[] pvRecords;
-        if(!ok) {
-            System.out.printf("\nrecords\n");
-            pvRecords = masterPVDatabase.getRecords();
-            for(PVRecord pvRecord: pvRecords) {
-                System.out.print(pvRecord.toString());
-            }
-            return;
-        }
         try {
             Thread.sleep(1000);
             System.out.println();
@@ -75,12 +64,12 @@ public class ProcessTest extends TestCase {
         masterPVDatabase.addRequester(pvDatabaseRequester);
         TestProcess testProcess = new TestProcess(pvRecord);
         for(PVRecord record: pvRecords) {
-            RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(record).getRecordProcess();
+            RecordProcess recordProcess = record.getRecordProcess();
             recordProcess.setTrace(true);
         }
         testProcess.test(); 
         for(PVRecord record: pvRecords) {
-            RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(record).getRecordProcess();
+            RecordProcess recordProcess = record.getRecordProcess();
             recordProcess.setTrace(false);
         } 
         System.out.println("starting performance test"); 
@@ -99,7 +88,7 @@ public class ProcessTest extends TestCase {
         testProcess = new TestProcess(pvRecord);
         pvRecords = masterPVDatabase.getRecords();
         for(PVRecord record: pvRecords) {
-            RecordProcess recordProcess = masterSupportDatabase.getLocateSupport(record).getRecordProcess();
+            RecordProcess recordProcess = record.getRecordProcess();
             recordProcess.setTrace(true);
         }
         System.out.printf("%n%n");
@@ -161,21 +150,14 @@ public class ProcessTest extends TestCase {
         private boolean allDone = false;
         private TimeStamp timeStamp = TimeStampFactory.create(0, 0);
         
-        private TestProcess(PVRecord record) {
-            recordProcess = masterSupportDatabase.getLocateSupport(record).getRecordProcess();
+        private TestProcess(PVRecord pvRecord) {
+            recordProcess = pvRecord.getRecordProcess();
             assertNotNull(recordProcess);
         }
-        
-        /* (non-Javadoc)
-         * @see org.epics.ioc.process.SupportProcessRequester#getProcessRequestorName()
-         */
-        public String getSupportProcessRequestorName() {
-            return "testProcess";
-        }
-
         /* (non-Javadoc)
          * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
          */
+        @Override
         public void message(String message, MessageType messageType) {
             System.out.println(message + " messageType " + messageType.toString());
         }

@@ -5,8 +5,7 @@
  */
 package org.epics.ioc.support.basic;
 
-import org.epics.ioc.install.IOCDatabaseFactory;
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.pvData.factory.BasePVByte;
@@ -16,12 +15,10 @@ import org.epics.pvData.factory.BasePVInt;
 import org.epics.pvData.factory.BasePVLong;
 import org.epics.pvData.factory.BasePVShort;
 import org.epics.pvData.factory.ConvertFactory;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVByte;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVFloat;
@@ -39,24 +36,23 @@ import org.epics.pvData.pv.Type;
  * @author mrk
  *
  */
-public class ControlLimitFactory {
-    private static PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    
+public class ControlLimitFactory { 
     /**
      * replace the pvField implementation with an implementation that enforces control limits.
-     * @param pvField
+     * @param pvRecordField
      */
-    public static void replacePVField(PVField pvField) {
+    public static void replacePVField(PVRecordField pvRecordField) {
+    	PVField pvField = pvRecordField.getPVField();
         if(pvField.getField().getType()!=Type.scalar) {
-            pvField.message("replacePVField field is not scalar", MessageType.error);
+            pvRecordField.message("replacePVField field is not scalar", MessageType.error);
             return;
         }
         Scalar scalar = (Scalar)pvField.getField();
         if(!scalar.getScalarType().isNumeric()) {
-            pvField.message("replacePVField field is not a numeric scalar", MessageType.error);
+            pvRecordField.message("replacePVField field is not a numeric scalar", MessageType.error);
             return;
         }
-        PVStructure pvParent = pvField.getParent();
+        PVStructure pvParent = pvRecordField.getParent().getPVStructure();
         PVField pvLow = pvParent.getSubField("control.limit.low");
         PVField pvHigh = pvParent.getSubField("control.limit.high");
         if(pvLow==null || pvHigh==null) {
@@ -71,21 +67,23 @@ public class ControlLimitFactory {
             pvLow.message("is not a scalar", MessageType.error);
             return;
         }
-        new ControlLimitImpl((PVScalar)pvField,(PVScalar)pvLow,(PVScalar)pvHigh);
+        new ControlLimitImpl(pvRecordField,(PVScalar)pvLow,(PVScalar)pvHigh);
     }
 
     private static class ControlLimitImpl {
         
         private static Convert convert = ConvertFactory.getConvert();
-        private PVField valuePVField = null;
+        private PVRecordField pvRecordField;
+        private PVScalar valuePVField = null;
         private AlarmSupport alarmSupport = null;
         /** Constructor.
          * @param valuePVField The PVField interface for the value field.
          * @param lowPVField The PVField interface for the low limit.
          * @param highPVField The PVField interface for the high limit.
          */
-        public ControlLimitImpl(PVScalar valuePVField, PVScalar lowPVField, PVScalar highPVField) {
-            this.valuePVField = valuePVField;
+        public ControlLimitImpl(PVRecordField pvRecordField, PVScalar lowPVField, PVScalar highPVField) {
+        	this.pvRecordField = pvRecordField;
+            valuePVField = (PVScalar)pvRecordField.getPVField();
             PVStructure parentPVField = valuePVField.getParent();
             PVScalar newPVField = null;
             Scalar valueField = valuePVField.getScalar();
@@ -119,8 +117,7 @@ public class ControlLimitFactory {
         
         private void raiseAlarm(boolean isHigh) {
             if(alarmSupport==null) {
-                LocateSupport recordSupport = IOCDatabaseFactory.get(masterPVDatabase).getLocateSupport(valuePVField.getPVRecordField().getPVRecord());
-                alarmSupport = AlarmSupportFactory.findAlarmSupport(valuePVField,recordSupport);
+                alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordField);
                 if(alarmSupport==null) {
                     valuePVField.message("ControlLimit: no alarmSupport", MessageType.warning);
                 }
@@ -149,12 +146,14 @@ public class ControlLimitFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVByte#get()
              */
+            @Override
             public byte get() {
                 return value;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVByte#put(byte)
              */
+            @Override
             public void put(byte value) {
                 byte lowValue = convert.toByte(lowPVField);
                 byte highValue = convert.toByte(highPVField);
@@ -197,12 +196,14 @@ public class ControlLimitFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVShort#get()
              */
+            @Override
             public short get() {
                 return value;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVShort#put(short)
              */
+            @Override
             public void put(short value) {
                 short lowValue = convert.toShort(lowPVField);
                 short highValue = convert.toShort(highPVField);
@@ -244,12 +245,14 @@ public class ControlLimitFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVInt#get()
              */
+            @Override
             public int get() {
                 return value;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVInt#put(int)
              */
+            @Override
             public void put(int value) {
                 int lowValue = convert.toInt(lowPVField);
                 int highValue = convert.toInt(highPVField);
@@ -291,12 +294,14 @@ public class ControlLimitFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVLong#get()
              */
+            @Override
             public long get() {
                 return value;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVLong#put(long)
              */
+            @Override
             public void put(long value) {
                 long lowValue = convert.toLong(lowPVField);
                 long highValue = convert.toLong(highPVField);
@@ -338,12 +343,14 @@ public class ControlLimitFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVFloat#get()
              */
+            @Override
             public float get() {
                 return value;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVFloat#put(float)
              */
+            @Override
             public void put(float value) {
                 float lowValue = convert.toFloat(lowPVField);
                 float highValue = convert.toFloat(highPVField);
@@ -385,12 +392,14 @@ public class ControlLimitFactory {
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVDouble#get()
              */
+            @Override
             public double get() {
                 return value;
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.pv.PVDouble#put(double)
              */
+            @Override
             public void put(double value) {
                 double lowValue = convert.toDouble(lowPVField);
                 double highValue = convert.toDouble(highPVField);

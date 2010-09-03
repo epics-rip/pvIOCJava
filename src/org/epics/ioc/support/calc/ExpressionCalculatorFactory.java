@@ -13,7 +13,7 @@ package org.epics.ioc.support.calc;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -52,8 +52,8 @@ import org.epics.pvData.pv.Type;
  */
 public abstract class ExpressionCalculatorFactory  {
 
-    public static Support create(PVStructure pvStructure) {
-        return new ExpressionCalculator(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new ExpressionCalculator(pvRecordStructure);
     }
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static Convert convert = ConvertFactory.getConvert();
@@ -62,36 +62,39 @@ public abstract class ExpressionCalculatorFactory  {
     
     private static class ExpressionCalculator extends AbstractSupport {
         
-        private ExpressionCalculator(PVStructure pvStructure) {
-            super(supportName,pvStructure);
-            this.pvStructure = pvStructure;
+        private ExpressionCalculator(PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
+            pvStructure = pvRecordStructure.getPVStructure();
         }
         
         private static final String supportName = "org.epics.ioc.expressionCalculator";
         
-        private PVStructure pvStructure = null;
+        private final PVRecordStructure pvRecordStructure;
+        private final PVStructure pvStructure;
         private AlarmSupport alarmSupport = null;
         private PVScalar pvValue = null;
         private CalcArgs calcArgsSupport = null;
         
         private Expression expression = null;
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
-        public void initialize(LocateSupport recordSupport) {
+        @Override
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+            alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
                 return;
             }
-            PVStructure pvParent = pvStructure.getParent();
+            PVStructure pvParent = pvRecordStructure.getPVStructure().getParent();
             PVField pvValue = pvParent.getSubField("value");
             if(pvValue==null) { // try parent of parent. ;
                 if(pvParent.getParent()!=null) pvValue = pvParent.getParent().getSubField("value");
             }
             if(pvValue==null) {
-                pvStructure.message("value field not found", MessageType.error);
+                pvRecordStructure.message("value field not found", MessageType.error);
                 return;
             }
             if(pvValue.getField().getType()!=Type.scalar) {
@@ -101,25 +104,26 @@ public abstract class ExpressionCalculatorFactory  {
             this.pvValue = (PVScalar)pvValue;
             PVField pvField = pvParent.getSubField("calcArgs");
             if(pvField==null) {
-                pvStructure.message("calcArgs field not found", MessageType.error);
+                pvRecordStructure.message("calcArgs field not found", MessageType.error);
                 return;
             }
-            Support support = recordSupport.getSupport(pvField);
+            Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
             if(!(support instanceof CalcArgs)) {
-                pvStructure.message("calcArgsSupport not found", MessageType.error);
+                pvRecordStructure.message("calcArgsSupport not found", MessageType.error);
                 return;
             }
             calcArgsSupport = (CalcArgs)support;
-            PVString pvExpression = pvStructure.getStringField("expression");
+            PVString pvExpression = pvRecordStructure.getPVStructure().getStringField("expression");
             if(pvExpression==null) return;
             Parse parse = new Parse(pvExpression);
             expression = parse.parse();
             if(expression==null) return;
-            super.initialize(recordSupport);
+            super.initialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#uninitialize()
          */
+        @Override
         public void uninitialize() {
             expression = null;
             alarmSupport = null;
@@ -129,6 +133,7 @@ public abstract class ExpressionCalculatorFactory  {
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.support.SupportProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             try {
                 if(expression.operator!=null) {
@@ -1139,7 +1144,7 @@ public abstract class ExpressionCalculatorFactory  {
                         pvField = calcArgsSupport.getPVField(name);
                     }
                     if(pvField==null) {
-                        pvStructure.message("variable " + name + " not found", MessageType.error);
+                        pvRecordStructure.message("variable " + name + " not found", MessageType.error);
                         return false;
                     }
                     if(pvField.getField().getType()!=Type.scalar) {
@@ -1645,7 +1650,7 @@ public abstract class ExpressionCalculatorFactory  {
                 ScalarType argType = argScalar.getScalarType();
                 if(!argType.isNumeric()) {
                     parent.message(
-                            "For operator + "  + argPV.getFullFieldName() + " is not numeric",
+                            "For operator + "  + convert.getFullFieldName(argPV) + " is not numeric",
                             MessageType.fatalError);
                     return false;
                 }
@@ -1701,7 +1706,7 @@ public abstract class ExpressionCalculatorFactory  {
                
                 if(!argType.isInteger()) {
                     parent.message(
-                            "For operator ~ "  + argPV.getFullFieldName() + " is not integer",
+                            "For operator ~ "  + convert.getFullFieldName(argPV) + " is not integer",
                             MessageType.fatalError);
                     return false;
                 }
@@ -1749,7 +1754,7 @@ public abstract class ExpressionCalculatorFactory  {
             public boolean createPVResult(String fieldName) {
                 if(pvField.getScalar().getScalarType()!=ScalarType.pvBoolean) {
                     parent.message(
-                            "For operator ! " + argPV.getFullFieldName() + " is not boolean",
+                            "For operator ! " + convert.getFullFieldName(argPV) + " is not boolean",
                             MessageType.fatalError);
                     return false;
                 }
@@ -1778,7 +1783,6 @@ public abstract class ExpressionCalculatorFactory  {
             protected Scalar arg1Field;
             protected ScalarType arg1Type;
             protected PVScalar resultPV;
-            protected Scalar resultField;
             protected ScalarType resultType;
 
 
@@ -1800,8 +1804,8 @@ public abstract class ExpressionCalculatorFactory  {
                 if(!convert.isCopyScalarCompatible(arg0Field,arg1Field)) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName()
-                            + " not compatible with " +arg1PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV)
+                            + " not compatible with " +convert.getFullFieldName(arg1PV),
                             MessageType.fatalError);
                     return false;
                 }
@@ -2174,8 +2178,8 @@ public abstract class ExpressionCalculatorFactory  {
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName()
-                            + " not compatible with " +arg1PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV)
+                            + " not compatible with " +convert.getFullFieldName(arg1PV),
                             MessageType.fatalError);
                     return false;
                 }
@@ -2322,8 +2326,8 @@ public abstract class ExpressionCalculatorFactory  {
                 if(!convert.isCopyScalarCompatible(arg0PV.getScalar(),arg1PV.getScalar())) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName()
-                            + " not compatible with " +arg1PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV)
+                            + " not compatible with " +convert.getFullFieldName(arg1PV),
                             MessageType.fatalError);
                     return false;
                 }
@@ -2385,7 +2389,7 @@ public abstract class ExpressionCalculatorFactory  {
                 default:
                     parent.message(
                             "unsupported operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV),
                             MessageType.fatalError);
                     return;
                 }
@@ -2441,7 +2445,7 @@ public abstract class ExpressionCalculatorFactory  {
                 default:
                     parent.message(
                             "unsupported operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV),
                             MessageType.fatalError);
                     return;
                 }
@@ -2497,7 +2501,7 @@ public abstract class ExpressionCalculatorFactory  {
                 default:
                     parent.message(
                             "unsupported operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV),
                             MessageType.fatalError);
                     return;
                 }
@@ -2553,7 +2557,7 @@ public abstract class ExpressionCalculatorFactory  {
                 default:
                     parent.message(
                             "unsupported operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV),
                             MessageType.fatalError);
                     return;
                 }
@@ -2621,7 +2625,7 @@ public abstract class ExpressionCalculatorFactory  {
                 default:
                     parent.message(
                             "unsupported operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV),
                             MessageType.fatalError);
                     return;
                 }
@@ -2677,7 +2681,7 @@ public abstract class ExpressionCalculatorFactory  {
                 default:
                     parent.message(
                             "unsupported operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV),
                             MessageType.fatalError);
                     return;
                 }
@@ -2710,8 +2714,8 @@ public abstract class ExpressionCalculatorFactory  {
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + arg0PV.getFullFieldName()
-                            + " not compatible with " +arg1PV.getFullFieldName(),
+                            + convert.getFullFieldName(arg0PV)
+                            + " not compatible with " +convert.getFullFieldName(arg1PV),
                             MessageType.fatalError);
                     return false;
                 }
@@ -2874,7 +2878,7 @@ public abstract class ExpressionCalculatorFactory  {
                 if(scalarType!=ScalarType.pvBoolean) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + pvScalar.getFullFieldName()
+                            + convert.getFullFieldName(pvScalar)
                             + " is not boolean",
                             MessageType.fatalError);
                     return false;
@@ -2886,7 +2890,7 @@ public abstract class ExpressionCalculatorFactory  {
                 if(scalarType!=ScalarType.pvBoolean) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + pvScalar.getFullFieldName()
+                            + convert.getFullFieldName(pvScalar)
                             + " is not boolean",
                             MessageType.fatalError);
                     return false;
@@ -3002,8 +3006,8 @@ public abstract class ExpressionCalculatorFactory  {
                 if(!convert.isCopyScalarCompatible(argPVs[0].getScalar(),argPVs[1].getScalar())) {
                     parent.message(
                             "For operator " + operationSemantics.operation.name()
-                            + argPVs[0].getFullFieldName()
-                            + " not compatible with " +argPVs[1].getFullFieldName(),
+                            + convert.getFullFieldName(argPVs[0])
+                            + " not compatible with " +convert.getFullFieldName(argPVs[1]),
                             MessageType.fatalError);
                     return false;
                 }

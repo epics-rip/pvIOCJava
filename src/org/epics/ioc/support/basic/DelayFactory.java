@@ -6,8 +6,8 @@
 package org.epics.ioc.support.basic;
 
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.RecordProcess;
@@ -30,8 +30,8 @@ import org.epics.pvData.pv.PVStructure;
  */
 public class DelayFactory {
     
-    public static Support create(PVStructure pvStructure) {
-        return new DelayImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new DelayImpl(pvRecordStructure);
     }
     
     private static Timer timer = TimerFactory.create("delaySupportTimer",ThreadPriority.middle);
@@ -48,9 +48,9 @@ public class DelayFactory {
         private double delay = 0;
         private SupportProcessRequester supportProcessRequester = null;
 
-        private DelayImpl(PVStructure pvStructure) {
-            super(supportName,pvStructure);
-            this.pvStructure = pvStructure;
+        private DelayImpl(PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
+            pvStructure = pvRecordStructure.getPVStructure();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordProcess)
@@ -60,9 +60,9 @@ public class DelayFactory {
          * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
          */
         @Override
-        public void initialize(LocateSupport recordSupport) {
+        public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            this.recordProcess = recordSupport.getRecordProcess();
+            this.recordProcess = super.getPVRecordField().getPVRecord().getRecordProcess();
             minAccess = pvStructure.getDoubleField("min");
             if(minAccess==null) return;
             maxAccess = pvStructure.getDoubleField("max");

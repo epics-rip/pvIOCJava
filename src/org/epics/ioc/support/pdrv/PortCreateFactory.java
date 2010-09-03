@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.pvData.misc.Enumerated;
@@ -30,16 +31,17 @@ import org.epics.pvData.pv.Structure;
 public class PortCreateFactory {
     /**
      * Create the record support for creating a port driver.
-     * @param pvStructure The structure for a port record.
+     * @param pvRecordStructure The structure for a port record.
      * @return The record support.
      */
-    public static Support create(PVStructure pvStructure) {
-        return portCreate(portCreate,pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return portCreate(portCreate,pvRecordStructure);
     }
     
     private static final String portCreate = "org.epics.ioc.portCreate";
     
-    private static Support portCreate(String supportName,PVStructure pvStructure) {
+    private static Support portCreate(String supportName,PVRecordStructure pvRecordStructure) {
+    	PVStructure pvStructure = pvRecordStructure.getPVStructure();
         PVString pvString = pvStructure.getStringField("factoryName");
         if(pvString==null) return null;
         String factoryName = pvString.get();
@@ -96,13 +98,13 @@ public class PortCreateFactory {
             throw new IllegalStateException(
                 " create InvocationTargetException " + e.getMessage());
         }
-        return new PortCreate(pvStructure,supportName);
+        return new PortCreate(pvRecordStructure,supportName);
     }
     
     private static class PortCreate extends AbstractSupport {
         
-        private PortCreate(PVStructure pvStructure,String supportName) {
-            super(supportName,pvStructure);
+        private PortCreate(PVRecordStructure pvRecordStructure,String supportName) {
+            super(supportName,pvRecordStructure);
                 
         }
         // nothing to do

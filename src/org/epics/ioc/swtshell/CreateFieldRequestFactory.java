@@ -20,10 +20,12 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.GetFieldRequester;
+import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
+import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDataCreate;
@@ -51,6 +53,7 @@ public class CreateFieldRequestFactory {
     }
     
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+    private static final Convert convert = ConvertFactory.getConvert();
     private static Executor executor = SwtshellFactory.getExecutor();
     
     private static class CreateFieldRequestImpl extends Dialog
@@ -204,7 +207,7 @@ public class CreateFieldRequestFactory {
         		if(nextSet>=next) continue;
         		if(nextSet==offset) {
         			if(request.length()>1 && (request.charAt(request.length()-1) != '{')) request += ",";
-        			request += pvField.getFullFieldName();
+        			request += convert.getFullFieldName(pvField);
         		} else if(pvField.getField().getType()==Type.structure) {
         			if(request.length()>1 && (request.charAt(request.length()-1) != '{')) request += ",";
         			request += pvField.getField().getFieldName();

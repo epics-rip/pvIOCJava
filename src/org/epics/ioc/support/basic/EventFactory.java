@@ -5,6 +5,8 @@
  */
 package org.epics.ioc.support.basic;
 
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
@@ -16,7 +18,6 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScannerFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.ScalarType;
@@ -32,10 +33,11 @@ import org.epics.pvData.pv.Type;
 public class EventFactory {
     /**
      * Create the support for the field.
-     * @param pvField The field which must have type string.
+     * @param pvRecordField The field which must have type string.
      * @return The support instance.
      */
-    public static Support create(PVField pvField) {
+    public static Support create(PVRecordField pvRecordField) {
+    	PVField pvField = pvRecordField.getPVField();
         if(pvField.getField().getType()!=Type.scalar) {
             pvField.message("illegal field type. Must be strinng", MessageType.error);
             return null;
@@ -45,7 +47,7 @@ public class EventFactory {
             pvField.message("illegal field type. Must be strinng", MessageType.error);
             return null;
         }
-        return new EventImpl((PVString)pvField);
+        return new EventImpl(pvRecordField);
     }
     
     
@@ -57,20 +59,21 @@ public class EventFactory {
         private static final String supportName = "org.epics.ioc.event";
         private static final EventScanner eventScanner = ScannerFactory.getEventScanner();
         private SupportState supportState = SupportState.readyForInitialize;
-        private PVString pvEventName = null;
-        private PVRecord pvRecord = null;
+        private final PVString pvEventName;
+        private final PVRecord pvRecord;
         private EventAnnounce eventAnnounce = null;
         private String eventName = null;
         
-        private EventImpl(PVString pvField) {
-            super(supportName,pvField);
-            this.pvEventName = pvField;
-            pvRecord = pvField.getPVRecordField().getPVRecord();
+        private EventImpl(PVRecordField pvRecordField) {
+            super(supportName,pvRecordField);
+            this.pvEventName = (PVString)pvRecordField.getPVField();
+            pvRecord = pvRecordField.getPVRecord();
         }
         
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#start()
          */
+        @Override
         public void start(AfterStart afterStart) {
             supportState = SupportState.ready;
             eventName = pvEventName.get();
@@ -82,6 +85,7 @@ public class EventFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#stop()
          */
+        @Override
         public void stop() {
             if(eventName!=null) {
                 eventScanner.removeEventAnnouncer(eventAnnounce, pvRecord.getRecordName());
@@ -94,14 +98,15 @@ public class EventFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#uninitialize()
          */
+        @Override
         public void uninitialize() {
             supportState = SupportState.readyForInitialize;
-            pvEventName = null;
             setSupportState(SupportState.readyForInitialize);
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.Support#process(org.epics.ioc.process.RecordProcessRequester)
          */
+        @Override
         public void process(SupportProcessRequester supportProcessRequester) {
             if(supportState!=SupportState.ready) {
                 super.message(

@@ -20,7 +20,7 @@
         </structure>
         <structure name = "1" extends = "caOutputLink">
             <scalar name = "pvname" >double02</scalar>
-            <scalar name = "process" >true</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
         </structure>
     </structure>
 </record>
@@ -33,7 +33,6 @@
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">counter</scalar>
-        <scalar name = "process">false</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
 </record>

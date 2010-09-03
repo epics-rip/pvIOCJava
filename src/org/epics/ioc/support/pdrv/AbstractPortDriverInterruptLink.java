@@ -6,8 +6,9 @@
 package org.epics.ioc.support.pdrv;
 
 
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Factory;
 import org.epics.ioc.pdrv.Port;
@@ -31,7 +32,6 @@ import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 
@@ -48,24 +48,26 @@ implements RecordProcessRequester,QueueRequestCallback
     /**
      * Constructor for derived PortDriverInterruptLink Support.
      * @param supportName The support name.
-     * @param dbStructure The link interface.
+     * @param pvRecordStructure The link interface.
      */
-    protected AbstractPortDriverInterruptLink(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
+    protected AbstractPortDriverInterruptLink(String supportName,PVRecordStructure pvRecordStructure) {
+        super(supportName,pvRecordStructure);
         this.supportName = supportName;
-        this.pvStructure = pvStructure;
-        fullName = pvStructure.getFullName();
-        pvRecord = pvStructure.getPVRecordField().getPVRecord();
+        this.pvRecordStructure = pvRecordStructure;
+        pvStructure = pvRecordStructure.getPVStructure();
+        fullName = pvRecordStructure.getFullName();
+        pvRecord = pvRecordStructure.getPVRecord();
         recordName = pvRecord.getRecordName();
     }  
     
     protected static Convert convert = ConvertFactory.getConvert();
     protected static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
-    protected String supportName;
-    protected PVStructure pvStructure;
-    protected String fullName = null;
-    protected PVRecord pvRecord = null;
-    protected String recordName = null;
+    protected final String supportName;
+    protected final PVRecordStructure pvRecordStructure;
+    protected final PVStructure pvStructure;
+    protected final String fullName;
+    protected final PVRecord pvRecord;
+    protected final String recordName;
     
     protected RecordProcess recordProcess = null;
     protected ProcessToken processToken = null;
@@ -85,22 +87,23 @@ implements RecordProcessRequester,QueueRequestCallback
     protected SupportProcessRequester supportProcessRequester = null;
     
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.AbstractSupport#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
+    @Override
+    public void initialize() {
         if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-        recordProcess = recordSupport.getRecordProcess();
-        PVStructure pvParent = pvStructure.getParent();
+        recordProcess = pvRecord.getRecordProcess();
+        PVStructure pvParent = pvRecordStructure.getPVStructure().getParent();
         while(pvParent!=null) {
             valuePVField = pvParent.getSubField("value");
             if(valuePVField!=null) break;
             pvParent = pvParent.getParent();
         }
         if(valuePVField==null) {
-            pvStructure.message("value field not found", MessageType.error);
+            pvRecordStructure.message("value field not found", MessageType.error);
             return;
         }
-        alarmSupport = AlarmSupportFactory.findAlarmSupport(pvStructure,recordSupport);
+        alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordStructure);
         pvPortName = pvStructure.getStringField("portName");
         if(pvPortName==null) return;
         pvDeviceName = pvStructure.getStringField("deviceName");
@@ -112,10 +115,10 @@ implements RecordProcessRequester,QueueRequestCallback
         }
         setSupportState(SupportState.readyForStart);
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#uninitialize()
      */
+    @Override
     public void uninitialize() {
         if(super.getSupportState()==SupportState.ready) {
             stop();
@@ -129,10 +132,10 @@ implements RecordProcessRequester,QueueRequestCallback
         recordProcess = null;
         setSupportState(SupportState.readyForInitialize);
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         user = Factory.createUser(this);
@@ -157,10 +160,10 @@ implements RecordProcessRequester,QueueRequestCallback
         }
         setSupportState(SupportState.ready);
     }
-    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#stop()
      */
+    @Override
     public void stop() {
         if(super.getSupportState()!=SupportState.ready) return;
         if(isProcessor) recordProcess.releaseProcessToken(processToken);
@@ -176,6 +179,7 @@ implements RecordProcessRequester,QueueRequestCallback
     /* (non-Javadoc)
      * @see org.epics.ioc.pdrv.QueueRequestCallback#callback(org.epics.ioc.pdrv.Status, org.epics.ioc.pdrv.User)
      */
+    @Override
     public void callback(Status status, User user) {
         if((deviceTrace.getMask()&Trace.ERROR)!=0) {
             deviceTrace.print(Trace.ERROR,
@@ -186,9 +190,11 @@ implements RecordProcessRequester,QueueRequestCallback
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessComplete()
      */
+    @Override
     public void recordProcessComplete() {}
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#recordProcessResult(org.epics.ioc.util.RequestResult)
      */
+    @Override
     public void recordProcessResult(RequestResult requestResult) {}
 }

@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support<br />
 package: org.epics.ioc.support<br />
-2010.02.22</h1>
+2010.09.01</h1>
 CONTENTS 
 
 <div class="toc">
@@ -60,10 +60,8 @@ CONTENTS
     <ul>
       <li><a href="#AbstractSu1">AbstractSupport</a></li>
       <li><a href="#Definition2">Definitions</a></li>
-      <li><a href="#Factory">Factory</a></li>
     </ul>
   </li>
-  <li><a href="#ChannelPro">ChannelProcessorProviderFactory</a></li>
 </ul>
 </div>
 <hr />
@@ -903,7 +901,7 @@ and any other support code that is involved with record processing:</p>
         String getSupportName();
         SupportState getSupportState();
         PVField getPVField();
-        void initialize(LocateSupport locateSupport);
+        void initialize();
         void start(AfterStart afterStart);
         void stop();
         void uninitialize();
@@ -977,8 +975,7 @@ method:</p>
 
 <h3 id="Definition2">Definitions</h3>
 <pre>    public abstract class AbstractSupport implements Support {
-        protected String supportName;
-        protected AbstractSupport(String name,PVField pvField);
+        protected AbstractSupport(String name,PVRecordField pvRecordField);
         // methods from Requester
         public String getRequesterName();
         public void message(String message, MessageType messageType);
@@ -986,7 +983,7 @@ method:</p>
         public SupportState getSupportState();
         public PVField getPVField();
         // following normally overridden
-        public void initialize(LocateSupport locateSupport);
+        public void initialize();
         public void start(AfterStart afterStart);
         public void stop();
         public void uninitialize();
@@ -1034,32 +1031,5 @@ methods it needs.</p>
     <dd>Checks that the state is the expected state and generates an error
       message if it isn't.</dd>
 </dl>
-
-<h3 id="Factory">Factory</h3>
-
-<p>SupportCreationFactory has the method:</p>
-<dl>
-  <dt>createSupportCreation</dt>
-    <dd>Create a SupportCreation for the supportDatabase.</dd>
-  <dt>createSupport</dt>
-    <dd>Create the support for the field.</dd>
-</dl>
-<hr />
-
-<h2 style="text-align: center"
-id="ChannelPro">ChannelProcessorProviderFactory</h2>
-<hr />
-
-<p>This implements ChannelProcessorProvider. It is the only support required
-from the javaIOC for channel access V4.</p>
-<pre>class ChannelProcessorProviderFactory {
-     public void register();
-     public boolean registerAlternateProvider(ChannelProcessorProvider channelProcessorProvider);
-}</pre>
-
-<p>register is called by ioc.install.Install. Alternate
-ChannelProcessorProviders can also be registered. The alternate providers are
-called to see if they can process a record before a RecordProcess is created
-to process the record.</p>
 </body>
 </html>

@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support.dbLink;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
@@ -15,7 +16,6 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVField;
 
 /**
  * Implementation for a channel access input link.
@@ -33,10 +33,10 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvField The pvField being supported.
+     * @param pvRecordField The field being supported.
      */
-    public OutputLinkBase(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public OutputLinkBase(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.dbLink.AbstractIOLink#start()

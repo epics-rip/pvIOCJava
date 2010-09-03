@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelRequester;
+import org.epics.ca.client.CreateRequestFactory;
 import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.Executor;
@@ -37,7 +38,6 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Structure;
-import org.epics.pvData.pvCopy.PVCopyFactory;
 
 /**
  * A shell for monitoring a channel.
@@ -205,7 +205,7 @@ public class MonitorFactory {
             } else if(object==createMonitorButton) {
                 if(state==State.readyForCreateMonitor) {
                     stateMachine.setState(State.creatingMonitor);
-                    PVStructure pvStructure = PVCopyFactory.createRequest(requestText.getText(),requester);
+                    PVStructure pvStructure = CreateRequestFactory.createRequest(requestText.getText(),requester);
                     if(pvStructure==null) return;
                     channelClient.createMonitor(pvStructure);
                 } else {

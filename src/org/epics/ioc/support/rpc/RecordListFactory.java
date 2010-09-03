@@ -5,14 +5,14 @@
  */
 package org.epics.ioc.support.rpc;
 
-import org.epics.ioc.install.LocateSupport;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.pv.PVArray;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
@@ -26,11 +26,11 @@ import org.epics.pvData.pv.ScalarType;
 public class RecordListFactory {
     /**
      * Create support for an array of calcArg structures.
-     * @param pvStructure The processControlStructure
+     * @param pvRecordStructure The processControlStructure
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
-    public static Support create(PVStructure pvStructure) {
-        return new RecordListImpl(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new RecordListImpl(pvRecordStructure);
     }
     
     private static final String supportName = "org.epics.ioc.rpc.recordList";
@@ -39,21 +39,22 @@ public class RecordListFactory {
     private static class RecordListImpl extends AbstractSupport
     {
        
-        
+        private final PVRecordStructure pvRecordStructure;
         private PVString pvDatabaseName = null;
         private PVString pvRegularExpression = null;
         private PVString pvStatus = null;
         private PVStringArray pvNames = null;
         
-        private RecordListImpl(PVStructure pvStructure) {
-            super(RecordListFactory.supportName,pvStructure); 
+        private RecordListImpl(PVRecordStructure pvRecordStructure) {
+            super(RecordListFactory.supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
         }
         /* (non-Javadoc)
-         * @see org.epics.ioc.support.AbstractSupport#initialize(org.epics.ioc.support.RecordSupport)
+         * @see org.epics.ioc.support.AbstractSupport#initialize()
          */
         @Override
-        public void initialize(LocateSupport recordSupport) {
-            PVStructure pvStructure = (PVStructure)super.getPVField();
+        public void initialize() {
+            PVStructure pvStructure = pvRecordStructure.getPVStructure();
             pvDatabaseName = pvStructure.getStringField("arguments.database");
             if(pvDatabaseName ==null) return;
             pvRegularExpression = pvStructure.getStringField("arguments.regularExpression");
@@ -63,7 +64,7 @@ public class RecordListFactory {
             PVArray pvArray = pvStructure.getScalarArrayField("result.names",ScalarType.pvString);
             if(pvArray==null) return;
             pvNames = (PVStringArray)pvArray;
-            super.initialize(recordSupport);
+            super.initialize();
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.AbstractSupport#process(org.epics.ioc.process.SupportProcessRequester)

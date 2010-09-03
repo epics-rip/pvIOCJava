@@ -7,6 +7,7 @@ package org.epics.ioc.support.caLink;
 
 import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutRequester;
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -30,10 +31,10 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvField The field being supported.
+     * @param pvRecordField The field being supported.
      */
-    public OutputLinkBase(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public OutputLinkBase(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
     
     private SupportProcessRequester supportProcessRequester = null;
@@ -95,7 +96,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!isReady) {
             alarmSupport.setAlarm(
-                    pvStructure.getFullFieldName() + " not connected",
+                    pvRecordField.getFullFieldName() + " not connected",
                     AlarmSeverity.major);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
@@ -138,7 +139,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
     public void processContinue() {
         if(requestResult!=RequestResult.success) {
             alarmSupport.setAlarm(
-                    pvStructure.getFullFieldName() + ": put request failed",
+                    pvRecordField.getFullFieldName() + ": put request failed",
                     AlarmSeverity.major);
         }
         supportProcessRequester.supportProcessDone(requestResult);

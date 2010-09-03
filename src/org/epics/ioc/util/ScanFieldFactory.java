@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.util;
 
+import org.epics.ioc.database.PVRecord;
 import org.epics.pvData.misc.Enumerated;
 import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.ThreadPriority;
@@ -13,7 +14,6 @@ import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 
@@ -38,7 +38,7 @@ public class ScanFieldFactory {
      * a valid pvType field.
      */
     public static ScanField create(PVRecord pvRecord) {
-        PVStructure pvScan = pvRecord.getPVStructure().getStructureField("scan");
+        PVStructure pvScan = pvRecord.getPVRecordStructure().getPVStructure().getStructureField("scan");
         if(pvScan==null) {
             pvRecord.message("scan not found or is not a structure", MessageType.fatalError);
             return null;

@@ -5,11 +5,10 @@
  */
 package org.epics.ioc.support;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVField;
 
 /**
  * Abstract base class for support code.
@@ -20,9 +19,8 @@ import org.epics.pvData.pv.PVField;
  */
 public abstract class AbstractSupport implements Support {
     private String supportName;
-    private PVField pvField;
+    private PVRecordField pvRecordField;
     private SupportState supportState = SupportState.readyForInitialize;
-    protected LocateSupport locateSupport = null;
     
     /**
      * Constructor.
@@ -31,62 +29,70 @@ public abstract class AbstractSupport implements Support {
      * @param dbField The DBdata which is supported.
      * This can be a record or any field in a record.
      */
-    protected AbstractSupport(String name,PVField pvField) {
+    protected AbstractSupport(String name,PVRecordField pvRecordField) {
         this.supportName = name;
-        this.pvField = pvField;
+        this.pvRecordField = pvRecordField;
     } 
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#getSupportName()
      */
+    @Override
     public String getSupportName() {
         return supportName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#getRequesterName()
      */
+    @Override
     public String getRequesterName() {
         return supportName;
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.util.Requester#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
+    @Override
     public void message(String message, MessageType messageType) {
-        pvField.message(message, messageType);
+        pvRecordField.message(message, messageType);
     }    
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#getSupportState()
      */
+    @Override
     public SupportState getSupportState() {
         return supportState;
     }
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.Support#getPVField()
+     * @see org.epics.ioc.support.Support#getPVRecordField()
      */
-    public PVField getPVField() {
-        return pvField;
+    @Override
+     public PVRecordField getPVRecordField() {
+        return pvRecordField;
     } 
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#initialize(org.epics.ioc.support.RecordProcess)
      */
-    public void initialize(LocateSupport locateSupport) {
-        this.locateSupport = locateSupport;
+    @Override
+    public void initialize() {
         setSupportState(SupportState.readyForStart);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         setSupportState(SupportState.ready);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#stop()
      */
+    @Override
     public void stop() {
         setSupportState(SupportState.readyForStart);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#uninitialize()
      */
+    @Override
     public void uninitialize() {
         if(supportState==SupportState.ready) stop();
         setSupportState(SupportState.readyForInitialize);
@@ -94,6 +100,7 @@ public abstract class AbstractSupport implements Support {
     /* (non-Javadoc)
      * @see org.epics.ioc.support.Support#process(org.epics.ioc.process.SupportProcessRequester)
      */
+    @Override
     public void process(SupportProcessRequester supportProcessRequester) {
         supportProcessRequester.supportProcessDone(RequestResult.success);
     } 
@@ -117,7 +124,7 @@ public abstract class AbstractSupport implements Support {
     protected boolean checkSupportState(SupportState expectedState,String message) {
         if(expectedState==supportState) return true;
         if(message==null) message = "";
-        pvField.message(
+        pvRecordField.message(
              message
              + " expected supportState " + expectedState.toString()
              + String.format("%n")

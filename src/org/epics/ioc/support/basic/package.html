@@ -10,34 +10,30 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: basic support<br />
 package: org.epics.ioc.support.basic<br />
-2009.04.29</h1>
-CONTENTS 
+2009.09.01</h1>
+CONTENTS
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#Generic">Generic Support</a></li>
   <li><a href="#Noop">Noop Support</a></li>
-  <li><a href="#ScanSuppor">ScanSupport</a></li>
-  <li><a href="#ProcessCon">ProcessControl Support</a></li>
+  <li><a href="#ScanFactor">ScanFactory</a></li>
   <li><a href="#Control">Control Limit</a></li>
-  <li><a href="#Linear">Linear Conversion</a> 
+  <li><a href="#Linear">Linear Conversion</a>
     <ul>
       <li><a href="#linearConv">linearConversion</a></li>
       <li><a href="#LinearConv">LinearConvertInputFactory</a></li>
       <li><a href="#LinearConv1">LinearConvertOutputFactory</a></li>
     </ul>
   </li>
-  <li><a href="#Digital">Digital Support</a> 
-    <ul>
-      <li><a href="#Java">Java Definitions</a></li>
-    </ul>
-  </li>
   <li><a href="#Incrementa">Incremental Support</a></li>
   <li><a href="#Event">Event Support</a></li>
-  <li><a href="#DelaySuppo">DelaySupport Support</a></li>
+  <li><a href="#DelaySuppo">DelaySupport</a></li>
 </ul>
 </div>
+
+<p> </p>
 <hr />
 
 <h2 style="text-align: center" id="Overview">Overview</h2>
@@ -56,11 +52,6 @@ services.</p>
       successfully.</dd>
   <dt>ScanFactory</dt>
     <dd>Complete support for the scan field which is defined in comon.xml</dd>
-  <dt>ProcessControlFactory</dt>
-    <dd>This is support for the processControl recordType. This record
-      controls the process state of the support for another record or for a
-      field in another record. It also can set trace and enable on or off for
-      the other record.</dd>
   <dt>Support for linear conversions.</dt>
     <dd><dl>
         <dt>LinearConvertInputFactory</dt>
@@ -71,9 +62,6 @@ services.</p>
     </dd>
   <dt>ControlLimit</dt>
     <dd>Enforce control limits.</dd>
-  <dt>DigitalFactory</dt>
-    <dd>Support for a record or structure that has fields appropriate for
-      Digital I/O.</dd>
   <dt>IncrementalFactory</dt>
     <dd>Support for incremental outputs.</dd>
   <dt>EventFactory</dt>
@@ -87,7 +75,7 @@ services.</p>
 <h2 style="text-align: center" id="Generic">Generic Support</h2>
 <hr />
 <pre>    public class GenericFactory {
-        public static Support create(PVStructure pvStructure);
+        public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
 Generic Support is used for many record/structure definitions . It is often
 used because it just looks for fields that have associated support and calls
@@ -120,8 +108,8 @@ of support.</p>
 <h2 style="text-align: center" id="Noop">Noop Support</h2>
 <hr />
 <pre>    public class NoopFactory {
-        public static Support create(PVField pvField);
-        public static Support create(PVStructure pvStructure);
+        public static Support create(PVRecordField pvRecordField);
+        public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
 
 <p>This can be used for record types that just hold data. It can also be used
@@ -130,142 +118,17 @@ synchronous. All Support methods are implemented by just extending
 AbstractSupport without overriding any methods.</p>
 <hr />
 
-<h2 style="text-align: center" id="ScanSuppor">ScanSupport</h2>
+<h2 style="text-align: center" id="ScanFactor">ScanFactory</h2>
 <hr />
 
 <p>Support is provided for the scan field. This support is called by
 recordProcess. The support handles all the fields in structure scan:</p>
 
-<p>At initialization and whenever the scan, priority, rate, or eventName
-fields are modified, the support interacts with the appropriate scanners to
-add or remove the record from the scanner. If processSelf is set true, the
-support implements ScanSupport.</p>
-
-<p>IMPORTANT: RecordProcess provides the same methods as ScanSupport. Support
-code must call the RecordProcess methods rather than calling the ScanSupport
-methods.</p>
-
 <p>The following definitions are provided:</p>
-<pre>    public interface ScanSupport extends Support {
-        boolean canProcessSelf();
-        boolean processSelfRequest(RecordProcessRequester recordProcessRequester);
-        void processSelfSetActive(RecordProcessRequester recordProcessRequester);
-        void processSelfProcess(RecordProcessRequester recordProcessRequester,
-            boolean leaveActive);
-        void processSelfSetInactive(RecordProcessRequester recordProcessRequester);
-    }
-    public class ScanFactory {
-        public static Support create(PVtructure pvStructure);
+<pre>    public class ScanFactory {
+        public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
-
-<p><span style="font-family: courier;">ScanSupport</span>, which MUST only be
-called by recordProcess, extends <span
-style="font-family: courier;">Support</span> with the methods:</p>
-<dl>
-  <dt style="font-family: courier;">canScanSelf</dt>
-    <dd>Can the record scan itself? This is true if scan.scanSelf is true. In
-      this case scanSupport itself owns and processes the record.</dd>
-  <dt style="font-family: courier;">processSelfRequest</dt>
-    <dd>Request to process the record. This returns true if scanSupport is
-      the record processor and the record is not active.</dd>
-  <dt style="font-family: courier;">processSelfSetActive</dt>
-    <dd>If processSelfRequest returns true this can be called to set the
-      record active. This is called when user code wants to modify data in
-      the record before calling processSelfProcess.</dd>
-  <dt style="font-family: courier;">processSelfProcess</dt>
-    <dd>If processSelfRequest returns true this can be called to process the
-      record.</dd>
-  <dt style="font-family: courier;">processSelfSetInactive</dt>
-    <dd>If the call to processSelfProcess said to leave the record active,
-      this is called to set the record inactive. This is done if the caller
-      wants to read data from the record after processing.</dd>
-</dl>
 <hr />
-
-<h2 style="text-align: center" id="ProcessCon">ProcessControl Support</h2>
-<hr />
-
-<p>This is support for the processControl recordType. It provides the
-following features:</p>
-<dl>
-  <dt>trace</dt>
-    <dd>Trace can be turned on or off for a record instance.</dd>
-  <dt>enable</dt>
-    <dd>Processing of a record instance can be enabled or disabled.</dd>
-  <dt>Support State</dt>
-    <dd>The process state of the support for a record or a field within a
-      record can be set. This involves calling one of the following methods:
-      initialize, start, stop, uninitialize.</dd>
-  <dt>Support</dt>
-    <dd>The support for a field can be changed. In order to make this change,
-      the record instance must be in the readyForInitialize state. It is not
-      possible to change the support for the record itself. </dd>
-  <dt>Structure</dt>
-    <dd>If a field is a structure, then the structure itself can be changed.
-      In order to make this change, the record instance must be in the
-      readyForInitialize state. It is not possible to change the structure
-      for the record itself.</dd>
-  <dt>Reporting</dt>
-    <dd>All problems are reported via field message. Other fields show the
-      current values for trace, enable, record support state, field support
-      state, name of the field support, and the name of the structure for a
-      field.</dd>
-</dl>
-
-<p>ProcessControl only performs actions when it is processed.</p>
-
-<p>processControl.html describes the fields contained in a processControl
-record. It has the definitions:</p>
-<pre>&lt;structure name = "processControlFactory"&gt;
-  &lt;scalar name = "supportFactory" type = "string"&gt;
-     org.epics.ioc.support.basic.ProcessControlFactory&lt;/scalar&gt;
-&lt;/structure&gt;
-
-
-&lt;structure name = "supportStateCommand"&gt;
-  &lt;auxInfo name = "pvReplaceFactory" type = "string"&gt;enumeratedFactory&lt;/auxInfo&gt;
-  &lt;scalar name = "index" type = "int" /&gt;
-  &lt;scalar name = "choice" type = "string" /&gt;
-  &lt;array name = "choices" type = "string"&gt;
-    idle ,initialize,start,stop,uninitialize&lt;/array&gt;
-&lt;/structure&gt;
-
-&lt;structure name = "processControl" &gt;
-  &lt;auxInfo name = "supportFactory" type = "string"&gt;processControlFactory&lt;/auxInfo&gt;
-  &lt;scalar name = "message" type = "string" /&gt;
-  &lt;scalar name = "recordName" type = "string" /&gt;
-  &lt;scalar name = "trace" type = "boolean" /&gt;
-  &lt;scalar name = "enable" type = "boolean" /&gt;
-  &lt;structure name = "supportState" type = "supportState" /&gt;
-  &lt;structure name = "supportStateCommand" type = "supportStateCommand" /&gt;
-&lt;/structure&gt;</pre>
-
-<p>Structure supportStateCommand is an enumerated structure with the
-following choices</p>
-<dl>
-  <dt style="font-family: courier;">idle</dt>
-    <dd>A do nothing commamnd. After the processControl support executes one
-      of the other commands, it sets the choice to idle.</dd>
-  <dt style="font-family: courier;">initialize</dt>
-    <dd>Call the initialize method of the support.</dd>
-  <dt style="font-family: courier;">start</dt>
-    <dd>Call the start method of the support.</dd>
-  <dt style="font-family: courier;">stop</dt>
-    <dd>Call the stop method of the support.</dd>
-  <dt style="font-family: courier;">uninitialize</dt>
-    <dd>Call the uninitialize method of the support.</dd>
-</dl>
-
-<p>structure processControl has fields trace, enable, recordName,
-supportState, and supportStateCommand.</p>
-<dl>
-  <dt style="font-family: courier;">recordName</dt>
-    <dd>This record to control.</dd>
-  <dt style="font-family: courier;">trace,enable</dt>
-    <dd>Set true or false.</dd>
-  <dt style="font-family: courier;">supportState,supportStateCommand</dt>
-    <dd>Show and set the support state for recordName.</dd>
-</dl>
 <hr />
 
 <h2 style="text-align: center" id="Control">Control Limit</h2>
@@ -362,23 +225,6 @@ output is a structure containing the following fields:</p>
 </dl>
 <hr />
 
-<h2 style="text-align: center" id="Digital">Digital Support</h2>
-<hr />
-
-<p>This is support for a record or structure that supports digital I/O. </p>
-
-<h3 id="Java">Java Definitions</h3>
-<pre>    public class DigitalFactory {
-        public static Support create(PVStructure pvStructure);
-    }</pre>
-
-<p>The pvField must be an array of digitalState structures. The enumerated
-value field must be in the parent of the parent of pvField. The register
-value must be in the parent of pvField. During initialization it sets the
-array of choices for the value field. It uses the name fields in the states
-array to create the choices.</p>
-<hr />
-
 <h2 style="text-align: center" id="Incrementa">Incremental Support</h2>
 <hr />
 
@@ -451,9 +297,8 @@ support announces an event. All event scanned records with the event name
 associated with the value field are processed. Each time process is called,
 the event support checks to see if the event name has changed.</p>
 <hr />
-<hr />
 
-<h2 style="text-align: center;" id="DelaySuppo">DelaySupport Support</h2>
+<h2 style="text-align: center;" id="DelaySuppo">DelaySupport</h2>
 <hr />
 
 <p>This is link support that simulates asynchronous support. It uses a

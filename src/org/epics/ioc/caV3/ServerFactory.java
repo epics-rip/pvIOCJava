@@ -51,15 +51,20 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
-import org.epics.ioc.install.IOCDatabase;
-import org.epics.ioc.install.IOCDatabaseFactory;
+import org.epics.ioc.database.PVDatabase;
+import org.epics.ioc.database.PVDatabaseFactory;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordClient;
+import org.epics.ioc.pvCopy.PVCopy;
+import org.epics.ioc.pvCopy.PVCopyFactory;
+import org.epics.ioc.pvCopy.PVCopyMonitor;
+import org.epics.ioc.pvCopy.PVCopyMonitorRequester;
 import org.epics.ioc.support.ProcessToken;
 import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
-import org.epics.pvData.factory.PVDatabaseFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.RunnableReady;
 import org.epics.pvData.misc.ThreadCreate;
@@ -78,12 +83,9 @@ import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVBooleanArray;
 import org.epics.pvData.pv.PVDataCreate;
-import org.epics.pvData.pv.PVDatabase;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVRecord;
-import org.epics.pvData.pv.PVRecordClient;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVString;
@@ -94,10 +96,6 @@ import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.StringArrayData;
 import org.epics.pvData.pv.Type;
-import org.epics.pvData.pvCopy.PVCopy;
-import org.epics.pvData.pvCopy.PVCopyFactory;
-import org.epics.pvData.pvCopy.PVCopyMonitor;
-import org.epics.pvData.pvCopy.PVCopyMonitorRequester;
 
 import com.cosylab.epics.caj.cas.handlers.AbstractCASResponseHandler;
 
@@ -112,7 +110,6 @@ public class ServerFactory {
     private static final Convert convert = ConvertFactory.getConvert();
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final IOCDatabase iocDatabase = IOCDatabaseFactory.create(masterPVDatabase);
     private static final ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static final Pattern periodPattern = Pattern.compile("[.]");
     private static final Pattern leftBracePattern = Pattern.compile("[{]");
@@ -217,7 +214,7 @@ public class ServerFactory {
                 }
             }
             if(fieldName==null || fieldName.length()<=0 || fieldName.equals("VAL")) fieldName = "value";
-            PVField pvField = pvRecord.getPVStructure().getSubField(fieldName);
+            PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField(fieldName);
             if(pvField==null) {
                 throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + fieldName);
             }
@@ -337,7 +334,7 @@ public class ServerFactory {
             	PVStructure pvStruct = pvDataCreate.createPVStructure(pvRequest, "value", new Field[0]);
             	PVStructure pvLeaf = pvDataCreate.createPVStructure(pvStruct, "leaf", new Field[0]);
             	pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"source", ScalarType.pvString);
-                pvString.put(valuePV.getFullFieldName());
+                pvString.put(convert.getFullFieldName(valuePV));
                 pvLeaf.appendPVField(pvString);
                 pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"shareData", ScalarType.pvString);
                 pvString.put("true");
@@ -347,27 +344,27 @@ public class ServerFactory {
             	
             } else {
             	pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"value", ScalarType.pvString);
-                pvString.put(valuePV.getFullFieldName());
+                pvString.put(convert.getFullFieldName(valuePV));
                 pvRequest.appendPVField(pvString);
             }
             if(pvAlarm!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"alarm", ScalarType.pvString);
-                pvString.put(pvAlarm.getFullFieldName());
+                pvString.put(convert.getFullFieldName(pvAlarm));
                 pvRequest.appendPVField(pvString);
             }
             if(pvTimeStamp!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"timeStamp", ScalarType.pvString);
-                pvString.put(pvTimeStamp.getFullFieldName());
+                pvString.put(convert.getFullFieldName(pvTimeStamp));
                 pvRequest.appendPVField(pvString);
             }
             if(pvDisplay!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"display", ScalarType.pvString);
-                pvString.put(pvDisplay.getFullFieldName());
+                pvString.put(convert.getFullFieldName(pvDisplay));
                 pvRequest.appendPVField(pvString);
             }
             if(pvControl!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"control", ScalarType.pvString);
-                pvString.put(pvControl.getFullFieldName());
+                pvString.put(convert.getFullFieldName(pvControl));
                 pvRequest.appendPVField(pvString);
             }
             pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
@@ -382,7 +379,7 @@ public class ServerFactory {
             option = getOption("putProcess");
             if(option!=null) putProcess = Boolean.valueOf(option);
             if(getProcess||putProcess) {
-                recordProcess = iocDatabase.getLocateSupport(pvRecord).getRecordProcess();
+                recordProcess = pvRecord.getRecordProcess();
                 processToken = recordProcess.requestProcessToken(this);
             	if(processToken==null) {
                     throw new CAStatusException(CAStatus.DEFUNCT, "Could not become processor ");
@@ -843,7 +840,7 @@ public class ServerFactory {
         }
 
         private void getAlarmField(DBR dbr,PVStructure pvAlarm) {
-            PVInt pvSeverity = pvAlarm.getIntField("severity.index");
+            PVInt pvSeverity = pvAlarm.getIntField("severity");
             STS sts = (STS)dbr; 
             AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(pvSeverity.get());
             switch (alarmSeverity)

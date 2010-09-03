@@ -6,8 +6,9 @@
 package org.epics.ioc.support.pdrv;
 
 
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.install.AfterStart;
-import org.epics.ioc.install.LocateSupport;
 import org.epics.ioc.pdrv.Device;
 import org.epics.ioc.pdrv.Port;
 import org.epics.ioc.pdrv.Trace;
@@ -23,7 +24,6 @@ import org.epics.pvData.property.PVPropertyFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 
 /**
@@ -42,25 +42,27 @@ implements PortDriverSupport
     /**
      * Constructor for derived support.
      * @param supportName The support name.
-     * @param dbStructure The link interface.
+     * @param pvRecordStructure The link interface.
      */
-    protected AbstractPortDriverSupport(String supportName,PVStructure pvStructure) {
-        super(supportName,pvStructure);
+    protected AbstractPortDriverSupport(String supportName,PVRecordStructure pvRecordStructure) {
+        super(supportName,pvRecordStructure);
         this.supportName = supportName;
-        this.pvStructure = pvStructure;
-        fullName = pvStructure.getFullName();
-        pvRecord = pvStructure.getPVRecordField().getPVRecord();
+        this.pvRecordStructure = pvRecordStructure;
+        pvStructure = pvRecordStructure.getPVStructure();
+        fullName = pvRecordStructure.getFullName();
+        pvRecord = pvRecordStructure.getPVRecord();
         recordName = pvRecord.getRecordName();
     }
    
     protected static Convert convert = ConvertFactory.getConvert();
     protected static PVProperty pvProperty = PVPropertyFactory.getPVProperty(); 
     protected static final String emptyString = "";
-    protected String supportName;
-    protected PVStructure pvStructure;
-    protected PVRecord pvRecord = null;
-    protected String recordName = null;
-    protected String fullName = null;
+    protected final String supportName;
+    protected final PVRecordStructure pvRecordStructure;
+    protected final PVStructure pvStructure;
+    protected final PVRecord pvRecord;
+    protected final String recordName;
+    protected final String fullName;
     
     protected PVField valuePVField = null;
     protected AlarmSupport alarmSupport = null;
@@ -76,10 +78,11 @@ implements PortDriverSupport
     private PortDriverSupport[] portDriverSupports = null;
     
     /* (non-Javadoc)
-     * @see org.epics.ioc.support.basic.GenericBase#initialize(org.epics.ioc.support.RecordSupport)
+     * @see org.epics.ioc.support.basic.GenericBase#initialize()
      */
-    public void initialize(LocateSupport recordSupport) {
-        super.initialize(recordSupport);
+    @Override
+    public void initialize() {
+        super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         PVStructure pvParent = pvStructure.getParent();
         while(pvParent!=null) {
@@ -107,6 +110,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.basic.GenericBase#uninitialize()
      */
+    @Override
     public void uninitialize() {
         super.uninitialize();
         alarmSupport = null;
@@ -115,6 +119,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.basic.GenericBase#start()
      */
+    @Override
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
         port = user.getPort();
@@ -137,6 +142,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#setPortDriverLink(org.epics.ioc.support.pdrv.PortDriverLink)
      */
+    @Override
     public void setPortDriverLink(PortDriverLink portDriverLink) {
         this.portDriverLink = portDriverLink;
         user = portDriverLink.getUser();
@@ -148,6 +154,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.basic.GenericBase#stop()
      */
+    @Override
     public void stop() {
         super.stop();
         device = null;
@@ -166,6 +173,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#processCallback()
      */
+    @Override
     public void beginProcess() {
         for(PortDriverSupport portDriverSupport : portDriverSupports) {
             portDriverSupport.beginProcess();
@@ -174,6 +182,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#endProcess()
      */
+    @Override
     public void endProcess() {
         for(PortDriverSupport portDriverSupport : portDriverSupports) {
             portDriverSupport.endProcess();
@@ -182,6 +191,7 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.PortDriverSupport#queueCallback()
      */
+    @Override
     public void queueCallback() {
         for(PortDriverSupport portDriverSupport : portDriverSupports) {
             portDriverSupport.queueCallback();
@@ -190,10 +200,11 @@ implements PortDriverSupport
     /* (non-Javadoc)
      * @see org.epics.ioc.support.AbstractSupport#message(java.lang.String, org.epics.ioc.util.MessageType)
      */
+    @Override
     public void message(String message,MessageType messageType) {
         pvRecord.lock();
         try {
-            pvStructure.message(message, messageType);
+            pvRecordStructure.message(message, messageType);
         } finally {
             pvRecord.unlock();
         }

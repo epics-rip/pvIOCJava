@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support.dbLink;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.support.ProcessCallbackRequester;
 import org.epics.ioc.support.ProcessContinueRequester;
@@ -39,10 +40,10 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     /**
      * The constructor.
      * @param supportName The supportName.
-     * @param pvField The pvField being supported.
+     * @param pvRecordField The field being supported.
      */
-    public InputLinkBase(String supportName,PVField pvField) {
-        super(supportName,pvField);
+    public InputLinkBase(String supportName,PVRecordField pvRecordField) {
+        super(supportName,pvRecordField);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.dbLink.AbstractIOLink#start()
@@ -66,12 +67,11 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
                     "inheritSeverity not found", MessageType.error);
             super.stop();
         }
-        PVField pvField = linkPVRecord.getPVStructure().getSubField("alarm");
+        PVField pvField = linkPVRecord.getPVRecordStructure().getPVStructure().getSubField("alarm");
         if(pvField!=null) {
-            
             AlarmSupport alarmSupport = AlarmSupportFactory.findAlarmSupport(
-                    pvField,linkRecordLocateSupport);
-            if(alarmSupport==null || alarmSupport.getPVField()!=pvField) {
+                    linkPVRecord.findPVRecordField(pvField));
+            if(alarmSupport==null || alarmSupport.getPVRecordField().getPVField()!=pvField) {
                 super.message("illegal alarm field", MessageType.error);
                 super.uninitialize();
                 return;
@@ -178,9 +178,9 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
                 break;
             }
             if(pvInheritSeverity.get() && linkAlarm!=null) {
-                int ind = linkAlarm.getAlarmSeverityIndex().get();
+            	int ind = linkAlarm.getSeverity();
                 if(ind!=0) {
-                    alarmSupport.setAlarm(linkAlarm.getAlarmMessage().get(), AlarmSeverity.getSeverity(ind));
+                    alarmSupport.setAlarm(linkAlarm.getMessage(), AlarmSeverity.getSeverity(ind));
                 }
             }
         } finally {

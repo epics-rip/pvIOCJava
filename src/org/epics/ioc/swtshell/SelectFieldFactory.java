@@ -17,10 +17,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.epics.ioc.database.PVRecord;
+import org.epics.pvData.factory.ConvertFactory;
+import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.Type;
@@ -40,7 +42,7 @@ public class SelectFieldFactory {
     public static SelectField create(Shell parent,Requester requester) {
         return new SelectFieldImpl(parent,requester);
     }
-    
+    private static final Convert convert = ConvertFactory.getConvert();
     private static class SelectFieldImpl extends Dialog implements SelectField, SelectionListener {
         private Requester requester;
         private Shell shell;
@@ -77,7 +79,7 @@ public class SelectFieldFactory {
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
             treeItem.setText(pvRecord.getRecordName());
             treeItem.setData(pvRecord);
-            createStructureTreeItem(treeItem,pvRecord.getPVStructure());
+            createStructureTreeItem(treeItem,pvRecord.getPVRecordStructure().getPVStructure());
             shell.open();
             Display display = shell.getDisplay();
             while(!shell.isDisposed()) {
@@ -107,7 +109,7 @@ public class SelectFieldFactory {
                     Object object = treeItem.getData();
                     if(object instanceof PVField) {
                         PVField pvField = (PVField) object;
-                        fieldName = pvField.getFullFieldName();
+                        fieldName = convert.getFullFieldName(pvField);
                     } else if(object==null) {
                         requester.message("property is illegal selection",MessageType.error);
                     }

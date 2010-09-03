@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support.device;
 
+import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
@@ -29,35 +30,35 @@ import org.epics.pvData.pv.Type;
 public class PowerSupplyFactory {
     /**
      * Create the support for the record or structure.
-     * @param pvField The structure or record for which to create support.
+     * @param pvRecordField The structure or record for which to create support.
      * @return The support instance.
      */
-    public static Support create(PVField pvField) {
-        PVAuxInfo pvAuxInfo = pvField.getPVAuxInfo();
+    public static Support create(PVRecordField pvRecordField) {
+        PVAuxInfo pvAuxInfo = pvRecordField.getPVField().getPVAuxInfo();
         PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
-            pvField.message("no pvAuxInfo with name support. Why??", MessageType.error);
+            pvRecordField.message("no pvAuxInfo with name support. Why??", MessageType.error);
             return null;
         }
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvField.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
+            pvRecordField.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
             return null;
         }
         String supportName = ((PVString)pvScalar).get();
        
         if(!supportName.equals(powerSupplyFactory)) {
-            pvField.message("no support for " + supportName, MessageType.fatalError);
+            pvRecordField.message("no support for " + supportName, MessageType.fatalError);
             return null;
         }
         // we want the parent of the parent
-        PVStructure pvParent = pvField.getParent();
+        PVStructure pvParent = pvRecordField.getPVField().getParent();
         if(pvParent==null) {
-            pvField.message("no parent", MessageType.fatalError);
+            pvRecordField.message("no parent", MessageType.fatalError);
             return null;
         }
         pvParent = pvParent.getParent();
         if(pvParent==null) {
-            pvField.message("no parent of the parent", MessageType.fatalError);
+            pvRecordField.message("no parent of the parent", MessageType.fatalError);
             return null;
         }
         PVDouble pvCurrent = getPVDouble(pvParent,"current.value");
@@ -67,7 +68,7 @@ public class PowerSupplyFactory {
         PVDouble pvPower = getPVDouble(pvParent,"power.value");
         if(pvPower==null) return null;
        
-        return new PowerSupplyCurrentImpl(pvField,pvCurrent,pvVoltage,pvPower);
+        return new PowerSupplyCurrentImpl(pvRecordField,pvCurrent,pvVoltage,pvPower);
     }
     
     private static PVDouble getPVDouble(PVStructure pvParent,String fieldName) {
@@ -101,8 +102,8 @@ public class PowerSupplyFactory {
         private double voltage;
         private double current;
         
-        private PowerSupplyCurrentImpl(PVField pvStructure,PVDouble currentPVField, PVDouble voltagePVField, PVDouble powerPVField) {
-            super(powerSupplyFactory,pvStructure);
+        private PowerSupplyCurrentImpl(PVRecordField pvRecordField,PVDouble currentPVField, PVDouble voltagePVField, PVDouble powerPVField) {
+            super(powerSupplyFactory,pvRecordField);
             this.powerPVField = powerPVField;
             this.currentPVField = currentPVField;
             this.voltagePVField = voltagePVField;

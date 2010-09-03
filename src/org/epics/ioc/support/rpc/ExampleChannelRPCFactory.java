@@ -7,7 +7,8 @@ package org.epics.ioc.support.rpc;
 
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelRPCRequester;
-import org.epics.ca.server.impl.local.RPCServer;
+import org.epics.ioc.database.PVRecord;
+import org.epics.ioc.pvAccess.RPCServer;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.StatusFactory;
@@ -17,10 +18,9 @@ import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVRecord;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
-import org.epics.pvData.pv.StatusCreate;
+import org.epics.pvData.pv.*;
 import org.epics.pvData.pv.Status.StatusType;
 
 /**
@@ -57,7 +57,7 @@ public class ExampleChannelRPCFactory {
 		    this.channelRPCRequester = channelRPCRequester;
 		    pvSize = pvArgument.getIntField("size");
 		    if(pvSize==null) return sizeNotFoundStatus;
-		    pvElement = pvRecord.getPVStructure().getStructureField("element");
+		    pvElement = pvRecord.getPVRecordStructure().getPVStructure().getStructureField("element");
 		    if(pvElement==null) return elementNotFoundStatus;
 			return okStatus;
 		}
@@ -67,9 +67,9 @@ public class ExampleChannelRPCFactory {
 		public void request() {
 			long start =System.currentTimeMillis();
 			int size = pvSize.get();
-			Field[] fields = new Field[size];
+			Structure[] fields = new Structure[size];
 			for(int index=0; index<size; index++) {
-				fields[index] = fieldCreate.createStructure(Integer.toString(index), new Field[0]);
+				fields[index] = fieldCreate.createStructure(Integer.toString(index), pvElement.getStructure().getFields());
 			}
 			PVStructure pvTop = pvDataCreate.createPVStructure(null, "",fields);
 			PVField[] pvFields = pvTop.getPVFields();

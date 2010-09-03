@@ -5,6 +5,7 @@
  */
 package org.epics.ioc.support.calc.example;
 
+import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.calc.AbstractCalculatorSupport;
@@ -13,7 +14,6 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.pv.DoubleArrayData;
 import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Type;
 
 
@@ -24,16 +24,16 @@ import org.epics.pvData.pv.Type;
  *
  */
 public class ArrayIncrementCalculatorFactory {
-    public static Support create(PVStructure pvStructure) {
-        return new ArrayIncrementCalculator(pvStructure);
+    public static Support create(PVRecordStructure pvRecordStructure) {
+        return new ArrayIncrementCalculator(pvRecordStructure);
     }
 
     private static String supportName = "arrayIncrementCalculator";
 
     private static class ArrayIncrementCalculator extends AbstractCalculatorSupport
     {
-        private ArrayIncrementCalculator(PVStructure pvStructure) {
-            super(supportName,pvStructure);
+        private ArrayIncrementCalculator(PVRecordStructure pvRecordStructure) {
+            super(supportName,pvRecordStructure);
         }
 
 
