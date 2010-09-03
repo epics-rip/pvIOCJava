@@ -24,7 +24,6 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -47,7 +46,6 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -70,7 +68,6 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -93,7 +90,6 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -116,7 +112,6 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -139,7 +134,6 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -173,7 +167,6 @@
     <array name = "value" scalarType = "byte">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -187,7 +180,6 @@
     <array name = "value" scalarType = "int">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -201,7 +193,6 @@
     <array name = "value" scalarType = "short">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -215,7 +206,6 @@
     <array name = "value" scalarType = "long">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -229,7 +219,6 @@
     <array name = "value" scalarType = "float">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>
@@ -243,7 +232,6 @@
     <array name = "value" scalarType = "double">0,0,0</array>
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <scalar name = "resolution">0</scalar>
         <structure name = "limit">
             <scalar name = "low">0</scalar>
             <scalar name = "high">10</scalar>

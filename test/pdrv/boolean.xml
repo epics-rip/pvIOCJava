@@ -79,10 +79,8 @@
     </structure>
     <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
-      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
-      <scalar name = "falseMessage">false alarm</scalar>
-      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "trueMessage">true alarm</scalar>
+      <scalar name = "falseSeverity">1</scalar>
+      <scalar name = "trueSeverity">2</scalar>
     </structure>
 </record>
 
@@ -100,10 +98,8 @@
     </structure>
     <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
-      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
-      <scalar name = "falseMessage">false alarm</scalar>
-      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "trueMessage">true alarm</scalar>
+      <scalar name = "falseSeverity">1</scalar>
+      <scalar name = "trueSeverity">2</scalar>
     </structure>
 </record>
 
@@ -120,11 +116,9 @@
         </structure>
     </structure>
     <structure name = "valueAlarm" extends = "booleanAlarm">
-        <scalar name = "active">true</scalar>
-        <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
-        <scalar name = "falseMessage">false alarm</scalar>
-        <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-        <scalar name = "trueMessage">true alarm</scalar>
+      <scalar name = "active">true</scalar>
+      <scalar name = "falseSeverity">1</scalar>
+      <scalar name = "trueSeverity">2</scalar>
     </structure>
 </record>
 
@@ -204,10 +198,8 @@
     </structure>
     <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
-      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
-      <scalar name = "falseMessage">false alarm</scalar>
-      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "trueMessage">true alarm</scalar>
+      <scalar name = "falseSeverity">1</scalar>
+      <scalar name = "trueSeverity">2</scalar>
     </structure>
 </record>
 
@@ -225,10 +217,8 @@
     </structure>
     <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
-      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
-      <scalar name = "falseMessage">false alarm</scalar>
-      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "trueMessage">true alarm</scalar>
+      <scalar name = "falseSeverity">1</scalar>
+      <scalar name = "trueSeverity">2</scalar>
     </structure>
 </record>
 <record recordName = "asynBooleanIn3">
@@ -245,10 +235,8 @@
     </structure>
     <structure name = "valueAlarm" extends = "booleanAlarm">
       <scalar name = "active">true</scalar>
-      <structure name = "falseAlarm"><scalar name = "choice">minor</scalar></structure>
-      <scalar name = "falseMessage">false alarm</scalar>
-      <structure name = "trueAlarm"><scalar name = "choice">major</scalar></structure>
-      <scalar name = "trueMessage">true alarm</scalar>
+      <scalar name = "falseSeverity">1</scalar>
+      <scalar name = "trueSeverity">2</scalar>
     </structure>
 </record>
 

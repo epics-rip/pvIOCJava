@@ -86,7 +86,6 @@
     <structure name = "display" extends = "display" >
         <scalar name = "description">Sample Description</scalar>
         <scalar name = "format">%f</scalar>
-        <scalar name = "resolution">1</scalar>
         <scalar name = "units">volts</scalar>
     </structure>
 </record>

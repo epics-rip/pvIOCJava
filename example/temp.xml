@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+
+<record recordName = "simple" >
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+</record>
+
+
+</database>

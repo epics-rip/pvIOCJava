@@ -1,6 +1,10 @@
 <?xml version="1.0" ?>
 <database>
 
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+
+
 <record recordName = "syncDigitalPort" extends = "portCreate">
     <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.UInt32DigitalDriverFactory</scalar>
     <scalar name = "portName">syncDigitalPort</scalar>
@@ -24,7 +28,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"><scalar name = "choice">passive</scalar></structure>
         <scalar name = "rate">0.5</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >

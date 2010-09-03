@@ -33,49 +33,15 @@
 
 
 <record recordName = "enumerated">
-    <structure name = "value" extends = "enumerated"/>
+    <structure name = "value" extends = "enumerated">
+       <array name = "choices">zero,one,two,three,four</array>
+    </structure>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "digital">
-        <structure name = "alarm" extends = "alarm" />
-        <structure name = "states" >
-             <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.digitalInputFactory</auxInfo>
-             <structure name = "0" extends = "digitalState">
-                 <scalar name = "name">zero</scalar>
-                 <scalar name = "value">0</scalar>
-                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                 <scalar name = "message">ZERO ALARM</scalar>
-             </structure>
-             <structure name = "1" extends = "digitalState">
-                 <scalar name = "name">one</scalar>
-                 <scalar name = "value">1</scalar>
-                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-             </structure>
-             <structure name = "2" extends = "digitalState">
-                 <scalar name = "name">two</scalar>
-                 <scalar name = "value">2</scalar>
-                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-             </structure>
-             <structure name = "3" extends = "digitalState">
-                 <scalar name = "name">three</scalar>
-                 <scalar name = "value">3</scalar>
-                 <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                 <scalar name = "message">THREE ALARM</scalar>
-             </structure>
-             <structure name = "4" extends = "digitalState">
-                 <scalar name = "name">four</scalar>
-                 <scalar name = "value">4</scalar>
-                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                 <scalar name = "message">FOUR ALARM</scalar>
-             </structure>
-        </structure>
-    </structure>
     <structure name = "valueAlarm" extends = "enumeratedAlarm">
             <scalar name = "active">true</scalar>
-            <structure name = "changeStateAlarm">
-                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                 <scalar name = "message">Change State</scalar>
-             </structure>
+            <scalar name = "changeStateSeverity">0</scalar>
+            <array name = "stateSeverity">2,1,0,1,2</array>
     </structure>
 </record>
 
@@ -122,11 +88,5 @@
         <scalar name = "process">true</scalar>
     </structure>
 </record>
-
-
-
-<!--
--->
-
 
 </database>

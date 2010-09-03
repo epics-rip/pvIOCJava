@@ -23,8 +23,7 @@
     </structure>
     <structure name = "valueAlarm" extends = "booleanAlarm" >
        <scalar name = "active">true</scalar>
-       <scalar name = "falseMessage">checkExpression Failure</scalar>
-       <structure name ="falseAlarm"><scalar name = "choice">major</scalar></structure>
+       <scalar name ="falseSeverity">2</scalar>
     </structure>
 </record>
 </database>

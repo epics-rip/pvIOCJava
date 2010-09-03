@@ -11,82 +11,28 @@
       </structure>
     </structure>
     <structure name = "valueAlarm" extends = "intAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "0" extends = "intAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "1" extends = "intAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "2" extends = "intAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "3" extends = "intAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "4" extends = "intAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
     </structure> 
 </record>
 
 <record recordName = "enum${num}">
-    <structure name = "value" extends = "enumerated"/>
+    <structure name = "value" extends = "enumerated">
+        <array name = "choices">zero,one,two,three,four,five,six,seven</array>
+    </structure>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "input" extends = "digital">
-        <structure name = "alarm" extends = "alarm" />
-        <structure name = "states" >
-             <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.digitalInputFactory</auxInfo>
-             <structure name = "0" extends = "digitalState">
-                 <scalar name = "name">zero</scalar>
-                 <scalar name = "value">0</scalar>
-                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                 <scalar name = "message">ZERO ALARM</scalar>
-             </structure>
-             <structure name = "1" extends = "digitalState">
-                 <scalar name = "name">one</scalar>
-                 <scalar name = "value">1</scalar>
-                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-             </structure>
-             <structure name = "2" extends = "digitalState">
-                 <scalar name = "name">two</scalar>
-                 <scalar name = "value">2</scalar>
-                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-             </structure>
-             <structure name = "3" extends = "digitalState">
-                 <scalar name = "name">three</scalar>
-                 <scalar name = "value">3</scalar>
-                 <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                 <scalar name = "message">THREE ALARM</scalar>
-             </structure>
-             <structure name = "4" extends = "digitalState">
-                 <scalar name = "name">four</scalar>
-                 <scalar name = "value">4</scalar>
-                 <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                 <scalar name = "message">FOUR ALARM</scalar>
-             </structure>
-        </structure>
-    </structure>
     <structure name = "valueAlarm" extends = "enumeratedAlarm">
-            <scalar name = "active">true</scalar>
-            <structure name = "changeStateAlarm">
-                 <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                 <scalar name = "message">Change State</scalar>
-             </structure>
+        <scalar name = "active">true</scalar>
+        <array name = "stateSeverity">0,1,2,0,3,3,3,3</array>
+        <scalar name = "changeStateSeverity">1</scalar>
     </structure>
 </record>
 
@@ -103,35 +49,15 @@
         </structure>
     </structure>
     <structure name = "valueAlarm" extends = "byteAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "2" extends = "byteAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "4" extends = "byteAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "6" extends = "byteAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "8" extends = "byteAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "10" extends = "byteAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
     </structure> 
 </record>
 
@@ -148,35 +74,15 @@
         </structure>
     </structure>
     <structure name = "valueAlarm" extends = "shortAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "2" extends = "shortAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "4" extends = "shortAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "6" extends = "shortAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "8" extends = "shortAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "10" extends = "shortAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
     </structure> 
 </record>
 
@@ -194,35 +100,15 @@
         </structure>
     </structure>
     <structure name = "valueAlarm" extends = "intAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "2" extends = "intAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "4" extends = "intAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "6" extends = "intAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "8" extends = "intAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "10" extends = "intAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
     </structure> 
 </record>
 
@@ -238,35 +124,15 @@
         </structure>
     </structure>
     <structure name = "valueAlarm" extends = "longAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "2" extends = "longAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "4" extends = "longAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "6" extends = "longAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "8" extends = "longAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "10" extends = "longAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
     </structure> 
 </record>
 
@@ -284,35 +150,15 @@
         </structure>
     </structure>
     <structure name = "valueAlarm" extends = "floatAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "2" extends = "floatAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "4" extends = "floatAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "6" extends = "floatAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "8" extends = "floatAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "10" extends = "floatAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
     </structure> 
 </record>
 
@@ -330,35 +176,15 @@
         </structure>
     </structure>
     <structure name = "valueAlarm" extends = "doubleAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "2" extends = "doubleAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "4" extends = "doubleAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "6" extends = "doubleAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "8" extends = "doubleAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "10" extends = "doubleAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
     </structure> 
 </record>
 

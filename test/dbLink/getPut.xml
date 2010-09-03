@@ -41,36 +41,16 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "valueAlarm" extends = "doubleAlarm">
-          <scalar name = "active">true</scalar>
-          <structure name = "interval">
-              <structure name = "0" extends = "doubleAlarmInterval">
-                  <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">LOWLOW</scalar>
-              </structure>
-              <structure name = "1" extends = "doubleAlarmInterval">
-                  <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">LOW</scalar>
-              </structure>
-              <structure name = "2" extends = "doubleAlarmInterval">
-                  <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">none</scalar></structure>
-                  <scalar name = "message">none</scalar>
-              </structure>
-              <structure name = "3" extends = "doubleAlarmInterval">
-                  <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">minor</scalar></structure>
-                  <scalar name = "message">HIGH</scalar>
-              </structure>
-              <structure name = "4" extends = "doubleAlarmInterval">
-                  <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
-                  <scalar name = "message">HIGHHIGH</scalar>
-              </structure>
-          </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
-          <scalar name = "hystersis">0.3</scalar>
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
+        <scalar name = "hystersis">0.3</scalar>
     </structure> 
     <structure name = "delay" extends = "delay"> 
          <scalar name = "min">.1</scalar>
