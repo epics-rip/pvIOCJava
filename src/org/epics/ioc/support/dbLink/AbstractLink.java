@@ -16,8 +16,8 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.pvData.factory.ConvertFactory;
-import org.epics.pvData.property.TimeStamp;
-import org.epics.pvData.property.TimeStampFactory;
+import org.epics.pvData.property.PVTimeStamp;
+import org.epics.pvData.property.PVTimeStampFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -53,9 +53,9 @@ abstract class AbstractLink extends AbstractSupport {
      */
     protected PVRecord pvRecord;
     /**
-     * The timeStamp for pvRecord.
+     * A PVTimeStamp.
      */
-    protected TimeStamp timeStamp = null;
+    protected PVTimeStamp pvTimeStamp = PVTimeStampFactory.create();
     /**
      * The recordProcess for this record.
      */
@@ -97,7 +97,7 @@ abstract class AbstractLink extends AbstractSupport {
         pvRecord = pvRecordField.getPVRecord();
         PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("timeStamp");
         if(pvField!=null && pvField.getField().getType()==Type.structure) {
-            timeStamp = TimeStampFactory.getTimeStamp((PVStructure)pvField);
+            pvTimeStamp.attach(pvField);
         }
         super.initialize();
     }

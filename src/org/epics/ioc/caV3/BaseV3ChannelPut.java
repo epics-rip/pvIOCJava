@@ -23,8 +23,6 @@ import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutRequester;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.StatusFactory;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.pv.ByteArrayData;
 import org.epics.pvData.pv.DoubleArrayData;
 import org.epics.pvData.pv.Field;
@@ -128,8 +126,8 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
                 channelPutRequester.channelPutConnect(statusCreate.createStatus(StatusType.ERROR, "array of ENUM not supported", null),null,null,null);
                 return;
             }
-            Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
-            pvIndex = enumerated.getIndex();
+            PVStructure pvStruct = (PVStructure)pvField;
+            pvIndex = pvStruct.getIntField("index");
         }
         channelPutRequester.channelPutConnect(okStatus,this,
             v3ChannelStructure.getPVStructure(),v3ChannelStructure.getBitSet());

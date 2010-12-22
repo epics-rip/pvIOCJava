@@ -11,8 +11,9 @@ import org.epics.ioc.support.RecordProcess;
 import org.epics.ioc.support.Support;
 import org.epics.ioc.support.basic.GenericBase;
 import org.epics.pvData.property.Alarm;
-import org.epics.pvData.property.AlarmFactory;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.PVAlarm;
+import org.epics.pvData.property.PVAlarmFactory;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -111,7 +112,8 @@ public class AlarmSupportFactory {
 		private int currentIndex = 0;
 		private String beginMessage = null;
 		private String currentMessage = null;
-		private Alarm alarm = null;
+		private Alarm alarm = new Alarm();
+		private PVAlarm pvAlarm = PVAlarmFactory.create();
 
 		private AlarmSupportImpl parentAlarmSupport = null;
 
@@ -122,22 +124,13 @@ public class AlarmSupportFactory {
 		}
 
 		private boolean isAlarmSupport() {
-			if(pvRecordStructureAlarm==null) {
-				super.getPVRecordField().message("field is not a structure",MessageType.error);
-				return false;
+			if(!pvAlarm.attach(pvRecordStructureAlarm.getPVStructure())) {
+			    pvRecordStructureAlarm.message("field is not alarm",MessageType.error);
+                return false;
 			}
-			PVStructure pvAlarm = pvRecordStructureAlarm.getPVStructure();
-			pvMessage = pvAlarm.getStringField("message");
-			if (pvMessage == null) {
-				pvRecordStructureAlarm.message("field message does not exist",MessageType.error);
-				return false;
-			}
-			pvSeverity = pvAlarm.getIntField("severity");
-			if (pvSeverity == null) {
-				pvAlarm.message("field severity does not exist",MessageType.error);
-				return false;
-			}
-			alarm = AlarmFactory.getAlarm(pvAlarm);
+			PVStructure pvStruct = pvRecordStructureAlarm.getPVStructure();
+			pvSeverity = pvStruct.getIntField("severity");
+			pvMessage = pvStruct.getStringField("message");
 			return true;
 		}
 
@@ -244,15 +237,13 @@ public class AlarmSupportFactory {
 			}
 			return false;
 		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.epics.ioc.support.alarm.AlarmSupport#getAlarm()
+		/* (non-Javadoc)
+		 * @see org.epics.ioc.support.alarm.AlarmSupport#getAlarm(org.epics.pvData.property.Alarm)
 		 */
 		@Override
-		public Alarm getAlarm() {
-			return alarm;
+		public void getAlarm(Alarm alarm) {
+			alarm.setMessage(this.alarm.getMessage());
+			alarm.setSeverity(this.alarm.getSeverity());
 		}
 	}
 }

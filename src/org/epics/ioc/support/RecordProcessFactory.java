@@ -21,6 +21,8 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScanField;
 import org.epics.ioc.util.ScanFieldFactory;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.property.PVTimeStamp;
+import org.epics.pvData.property.PVTimeStampFactory;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -82,9 +84,9 @@ public class RecordProcessFactory {
         private boolean processCompleteDone = false;
         private boolean callRecordProcessComplete = false;
         private RequestResult requestResult = null;
-        
-        
-        private TimeStamp timeStamp = null;
+     
+        private TimeStamp timeStamp = TimeStampFactory.create();
+        private PVTimeStamp pvTimeStamp = PVTimeStampFactory.create();
         
         private RecordProcessImpl(PVRecord pvRecord) {
             this.pvRecord = pvRecord;
@@ -180,7 +182,7 @@ public class RecordProcessFactory {
                 int index;
                 index = structure.getFieldIndex("timeStamp");
                 if(index>=0) {
-                    timeStamp = TimeStampFactory.getTimeStamp((PVStructure)pvFields[index]);
+                    pvTimeStamp.attach(pvFields[index]);
                 }
                 index = structure.getFieldIndex("scan");
                 if(index>=0) {
@@ -370,40 +372,32 @@ public class RecordProcessFactory {
             } finally {
                 pvRecord.unlock();
             }
-        }        
+        }
+        public void process(ProcessToken processToken,boolean leaveActive) {
+            timeStamp.getCurrentTime();
+            process(processToken,leaveActive,timeStamp);
+        }
         /* (non-Javadoc)
          * @see org.epics.ioc.support.RecordProcess#process(org.epics.ioc.support.ProcessToken, boolean, org.epics.pvData.property.TimeStamp)
          */
         @Override
-		public void process(ProcessToken processToken,boolean leaveActive, TimeStamp timeStamp) {
+        public void process(ProcessToken processToken,boolean leaveActive, TimeStamp timeStamp) {
+            if(timeStamp==null) {
+                throw new IllegalArgumentException("timeStamp is null");
+            }
             if(processToken==null || activeToken!=processToken) {
-            	throw new IllegalStateException("not the active process requester");
+                throw new IllegalStateException("not the active process requester");
             }
             RecordProcessRequester recordProcessRequester;
             pvRecord.lock();
             try {
-            	recordProcessRequester = activeToken.recordProcessRequester;
-                if(this.timeStamp!=null) {
-                    if(timeStamp==null) {
-                        this.timeStamp.put(System.currentTimeMillis());
-                        if(trace) traceMessage(
-                                "process with system timeStamp "
-                                + recordProcessRequester.getRequesterName()); 
-                    } else {
-                        this.timeStamp.put(timeStamp.getSecondsPastEpoch(),timeStamp.getNanoSeconds());
-                        if(trace) traceMessage(
-                                "process with callers timeStamp "
-                                + recordProcessRequester.getRequesterName()); 
-                    }
+                recordProcessRequester = activeToken.recordProcessRequester;
+                if(pvTimeStamp.isAttached()) {
+                    pvTimeStamp.set(timeStamp);
+                    if(trace) traceMessage("process timeStamp "+ recordProcessRequester.getRequesterName()); 
                 } else {
                     if(trace) {
-                        if(timeStamp==null) {
-                            traceMessage("process no TimeStamp no Caller TimeStamp "
-                                 + recordProcessRequester.getRequesterName()); 
-                        } else {
-                            traceMessage("process no TimeStamp Caller supplied TimeStamp "
-                                    + recordProcessRequester.getRequesterName()); 
-                        }
+                        traceMessage("process no TimeStamp "+ recordProcessRequester.getRequesterName()); 
                     }
                 }
                 this.leaveActive = leaveActive;
@@ -725,7 +719,7 @@ public class RecordProcessFactory {
 		 */
 		@Override
 		public void becomeProcessor() {
-			recordProcess.process(processToken, false, null);
+			recordProcess.process(processToken, false);
 		}
 		/* (non-Javadoc)
 		 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)

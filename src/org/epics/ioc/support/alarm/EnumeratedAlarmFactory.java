@@ -12,9 +12,9 @@ import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.IntArrayData;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
@@ -68,12 +68,12 @@ public class EnumeratedAlarmFactory {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
             PVStructure pvStruct = pvStructure.getParent().getStructureField("value");
             if(pvStruct==null) return;
-            Enumerated enumerated = EnumeratedFactory.getEnumerated(pvStruct);
-            if(enumerated==null) {
+            PVEnumerated enumerated = PVEnumeratedFactory.create();
+            if(!enumerated.attach(pvStruct)) {
                 pvStruct.message(" is not an enumerated structure", MessageType.error);
                 return;
             }
-            pvValue = enumerated.getIndex();
+            pvValue = pvStruct.getIntField("index");
             alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordStructure);
             if(alarmSupport==null) {
                 super.message("no alarmSupport", MessageType.error);
@@ -84,7 +84,7 @@ public class EnumeratedAlarmFactory {
             PVArray pvArray = pvStructure.getScalarArrayField("stateSeverity",ScalarType.pvInt);
             if(pvArray==null) return;
             pvStateSeverity = (PVIntArray)pvArray;
-            if(enumerated.getChoices().getLength()!=pvArray.getLength()) {
+            if(enumerated.getChoices().length!=pvArray.getLength()) {
             	super.message("value.length != stateSeverity.length", MessageType.error);
             	return;
             }

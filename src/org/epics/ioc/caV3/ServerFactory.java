@@ -73,6 +73,8 @@ import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.property.PVProperty;
 import org.epics.pvData.property.PVPropertyFactory;
+import org.epics.pvData.property.PVTimeStamp;
+import org.epics.pvData.property.PVTimeStampFactory;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.BooleanArrayData;
@@ -115,8 +117,7 @@ public class ServerFactory {
     private static final Pattern leftBracePattern = Pattern.compile("[{]");
     private static final Pattern rightBracePattern = Pattern.compile("[}]");
     private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty();
-
-
+  
     private static class ThreadInstance implements RunnableReady {
 
         private ThreadInstance() {
@@ -282,6 +283,9 @@ public class ServerFactory {
         private int elementCount = 1;
 
         private String[] enumLabels = null;
+        //used by getTimeStamp
+        private TimeStamp timeStamp = TimeStampFactory.create();
+        private PVTimeStamp pvTimeStamp = PVTimeStampFactory.create();
 
         /**
          * Channel PV constructor.
@@ -330,11 +334,14 @@ public class ServerFactory {
             boolean shareData = Boolean.getBoolean(option);
             PVStructure pvRequest = pvDataCreate.createPVStructure(null, pvRecord.getRecordName(), new Field[0]);
             PVString pvString = null;
+            StringBuilder builder = new StringBuilder();
             if(shareData) {
             	PVStructure pvStruct = pvDataCreate.createPVStructure(pvRequest, "value", new Field[0]);
             	PVStructure pvLeaf = pvDataCreate.createPVStructure(pvStruct, "leaf", new Field[0]);
             	pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"source", ScalarType.pvString);
-                pvString.put(convert.getFullFieldName(valuePV));
+            	convert.getFullFieldName(builder, valuePV);
+            	builder.setLength(0);
+                pvString.put(builder.toString());
                 pvLeaf.appendPVField(pvString);
                 pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"shareData", ScalarType.pvString);
                 pvString.put("true");
@@ -344,27 +351,37 @@ public class ServerFactory {
             	
             } else {
             	pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"value", ScalarType.pvString);
-                pvString.put(convert.getFullFieldName(valuePV));
+            	convert.getFullFieldName(builder, valuePV);
+                builder.setLength(0);
+                pvString.put(builder.toString());
                 pvRequest.appendPVField(pvString);
             }
             if(pvAlarm!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"alarm", ScalarType.pvString);
-                pvString.put(convert.getFullFieldName(pvAlarm));
+                convert.getFullFieldName(builder, pvAlarm);
+                builder.setLength(0);
+                pvString.put(builder.toString());
                 pvRequest.appendPVField(pvString);
             }
             if(pvTimeStamp!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"timeStamp", ScalarType.pvString);
-                pvString.put(convert.getFullFieldName(pvTimeStamp));
+                convert.getFullFieldName(builder, pvTimeStamp);
+                builder.setLength(0);
+                pvString.put(builder.toString());
                 pvRequest.appendPVField(pvString);
             }
             if(pvDisplay!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"display", ScalarType.pvString);
-                pvString.put(convert.getFullFieldName(pvDisplay));
+                convert.getFullFieldName(builder, pvDisplay);
+                builder.setLength(0);
+                pvString.put(builder.toString());
                 pvRequest.appendPVField(pvString);
             }
             if(pvControl!=null) {
                 pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"control", ScalarType.pvString);
-                pvString.put(convert.getFullFieldName(pvControl));
+                convert.getFullFieldName(builder, pvControl);
+                builder.setLength(0);
+                pvString.put(builder.toString());
                 pvRequest.appendPVField(pvString);
             }
             pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
@@ -564,7 +581,7 @@ public class ServerFactory {
         public void becomeProcessor()
         {
         	if(getProcessActive) {
-        		recordProcess.process(processToken, true, null);
+        		recordProcess.process(processToken, true);
         	} else if(putProcessActive) {
         		pvRecord.lock();
         		try {
@@ -574,7 +591,7 @@ public class ServerFactory {
         		} finally {
         			pvRecord.unlock();
         		}
-        		recordProcess.process(processToken, false, null);
+        		recordProcess.process(processToken, false);
         	}
         }
 		/* (non-Javadoc)
@@ -774,7 +791,7 @@ public class ServerFactory {
                 } else if (dbrType == DBRType.FLOAT) {
                     ((FLOAT) dbr).getFloatValue()[0] = convert.toFloat((PVScalar)pvField);
                 } else if (dbrType == DBRType.STRING) {
-                    ((STRING) dbr).getStringValue()[0] = convert.getString((PVScalar)pvField);
+                    ((STRING) dbr).getStringValue()[0] = convert.toString((PVScalar)pvField);
                 } else if (dbrType == DBRType.ENUM) {
                     short[] value = ((ENUM) dbr).getEnumValue();
                     if(type==Type.scalar) {
@@ -831,10 +848,11 @@ public class ServerFactory {
                 }
             }
         }
-
+        
+        
         private void getTimeStampField(DBR dbr,PVStructure field) {
-            TimeStamp timeStamp = TimeStampFactory.getTimeStamp(field);
-
+            pvTimeStamp.attach(field);
+            pvTimeStamp.get(timeStamp);
             final long TS_EPOCH_SEC_PAST_1970=7305*86400;
             ((TIME)dbr).setTimeStamp(new gov.aps.jca.dbr.TimeStamp(timeStamp.getSecondsPastEpoch()-TS_EPOCH_SEC_PAST_1970, timeStamp.getNanoSeconds()));
         }

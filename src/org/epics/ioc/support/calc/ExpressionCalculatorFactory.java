@@ -1649,9 +1649,11 @@ public abstract class ExpressionCalculatorFactory  {
                 Scalar argScalar = argPV.getScalar();
                 ScalarType argType = argScalar.getScalarType();
                 if(!argType.isNumeric()) {
-                    parent.message(
-                            "For operator + "  + convert.getFullFieldName(argPV) + " is not numeric",
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator + ");
+                    convert.getFullFieldName(builder, argPV);
+                    builder.append(" is not numeric");
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 resultType = argScalar.getScalarType();
@@ -1705,9 +1707,11 @@ public abstract class ExpressionCalculatorFactory  {
                 ScalarType argType = argScalar.getScalarType();
                
                 if(!argType.isInteger()) {
-                    parent.message(
-                            "For operator ~ "  + convert.getFullFieldName(argPV) + " is not integer",
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ~ ");
+                    convert.getFullFieldName(builder, argPV);
+                    builder.append(" is not integer");
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 resultType = argScalar.getScalarType();
@@ -1753,9 +1757,11 @@ public abstract class ExpressionCalculatorFactory  {
              */
             public boolean createPVResult(String fieldName) {
                 if(pvField.getScalar().getScalarType()!=ScalarType.pvBoolean) {
-                    parent.message(
-                            "For operator ! " + convert.getFullFieldName(argPV) + " is not boolean",
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ! ");
+                    convert.getFullFieldName(builder, argPV);
+                    builder.append(" is not boolean");
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 argPV = (PVBoolean)pvField;
@@ -1802,11 +1808,14 @@ public abstract class ExpressionCalculatorFactory  {
                 arg1Field = arg1PV.getScalar();
                 arg1Type = arg1Field.getScalarType();
                 if(!convert.isCopyScalarCompatible(arg0Field,arg1Field)) {
-                    parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV)
-                            + " not compatible with " +convert.getFullFieldName(arg1PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    builder.append(" is not compatible with ");
+                    convert.getFullFieldName(builder, arg1PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 int ind0 = arg0Type.ordinal();
@@ -2148,7 +2157,7 @@ public abstract class ExpressionCalculatorFactory  {
              */
             public void compute() {
                 operatorExpression.computeArguments();
-                String value = convert.getString(arg0PV) + convert.getString(arg1PV);
+                String value = convert.toString(arg0PV) + convert.toString(arg1PV);
                 resultPV.put(value);
             }
         }
@@ -2176,11 +2185,14 @@ public abstract class ExpressionCalculatorFactory  {
                 Scalar arg1Field = arg1PV.getScalar();
                 ScalarType arg1Type = arg1Field.getScalarType();
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
-                    parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV)
-                            + " not compatible with " +convert.getFullFieldName(arg1PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    builder.append(" is not compatible with ");
+                    convert.getFullFieldName(builder, arg1PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 resultType = arg0Type;
@@ -2324,11 +2336,14 @@ public abstract class ExpressionCalculatorFactory  {
                 arg1PV = expressionArgument.pvResult;
                 ScalarType arg1Type = arg1PV.getScalar().getScalarType();
                 if(!convert.isCopyScalarCompatible(arg0PV.getScalar(),arg1PV.getScalar())) {
-                    parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV)
-                            + " not compatible with " +convert.getFullFieldName(arg1PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    builder.append(" is not compatible with ");
+                    convert.getFullFieldName(builder, arg1PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 int ind0 = arg0Type.ordinal();
@@ -2387,10 +2402,12 @@ public abstract class ExpressionCalculatorFactory  {
                     break;
                 }
                 default:
-                    parent.message(
-                            "unsupported operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("unsupported operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return;
                 }
                 resultPV.put(result);
@@ -2443,10 +2460,12 @@ public abstract class ExpressionCalculatorFactory  {
                     break;
                 }
                 default:
-                    parent.message(
-                            "unsupported operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("unsupported operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return;
                 }
                 resultPV.put(result);
@@ -2499,10 +2518,12 @@ public abstract class ExpressionCalculatorFactory  {
                     break;
                 }
                 default:
-                    parent.message(
-                            "unsupported operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("unsupported operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return;
                 }
                 resultPV.put(result);
@@ -2555,10 +2576,12 @@ public abstract class ExpressionCalculatorFactory  {
                     break;
                 }
                 default:
-                    parent.message(
-                            "unsupported operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("unsupported operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return;
                 }
                 resultPV.put(result);
@@ -2618,15 +2641,17 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 case pvString: {
                     PVString arg0 = (PVString)arg0PV;
-                    String arg1 = convert.getString(arg1PV,0);
+                    String arg1 = convert.toString(arg1PV);
                     result = (arg0.get().equals(arg1)) ? true : false;
                     break;
                 }
                 default:
-                    parent.message(
-                            "unsupported operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("unsupported operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return;
                 }
                 resultPV.put(result);
@@ -2679,10 +2704,12 @@ public abstract class ExpressionCalculatorFactory  {
                     break;
                 }
                 default:
-                    parent.message(
-                            "unsupported operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("unsupported operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return;
                 }
                 resultPV.put(result);
@@ -2712,11 +2739,14 @@ public abstract class ExpressionCalculatorFactory  {
                 Scalar arg1Field = arg1PV.getScalar();
                 ScalarType arg1Type = arg1Field.getScalarType();
                 if(!arg0Type.isInteger() || !arg1Type.isInteger()) {
-                    parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(arg0PV)
-                            + " not compatible with " +convert.getFullFieldName(arg1PV),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, arg0PV);
+                    builder.append(" not compatible with ");
+                    convert.getFullFieldName(builder, arg1PV);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 resultType = arg0Type;
@@ -2876,11 +2906,13 @@ public abstract class ExpressionCalculatorFactory  {
                 PVScalar pvScalar = expressionArgument.pvResult;
                 ScalarType scalarType = pvScalar.getScalar().getScalarType();
                 if(scalarType!=ScalarType.pvBoolean) {
-                    parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(pvScalar)
-                            + " is not boolean",
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, pvScalar);
+                    builder.append(" is not boolean");
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 arg0PV = (PVBoolean)pvScalar;
@@ -2888,11 +2920,13 @@ public abstract class ExpressionCalculatorFactory  {
                 pvScalar = expressionArgument.pvResult;
                 scalarType = pvScalar.getScalar().getScalarType();
                 if(scalarType!=ScalarType.pvBoolean) {
-                    parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(pvScalar)
-                            + " is not boolean",
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, pvScalar);
+                    builder.append(" is not boolean");
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 arg1PV = (PVBoolean)pvScalar;
@@ -3004,11 +3038,14 @@ public abstract class ExpressionCalculatorFactory  {
                 argPVs[1] = expressionArgument.pvResult;
                 argOperators[1] = expressionArgument.operator;
                 if(!convert.isCopyScalarCompatible(argPVs[0].getScalar(),argPVs[1].getScalar())) {
-                    parent.message(
-                            "For operator " + operationSemantics.operation.name()
-                            + convert.getFullFieldName(argPVs[0])
-                            + " not compatible with " +convert.getFullFieldName(argPVs[1]),
-                            MessageType.fatalError);
+                    StringBuilder builder = new StringBuilder();
+                    builder.append("For operator ");
+                    builder.append(operationSemantics.operation.name());
+                    builder.append(" ");
+                    convert.getFullFieldName(builder, argPVs[0]);
+                    builder.append("  not compatible with ");
+                    convert.getFullFieldName(builder, argPVs[1]);
+                    parent.message(builder.toString(),MessageType.fatalError);
                     return false;
                 }
                 int ind0 = argPVs[0].getScalar().getScalarType().ordinal();

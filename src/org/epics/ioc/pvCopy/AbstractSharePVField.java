@@ -31,13 +31,12 @@ public abstract class AbstractSharePVField extends AbstractPVField {
         this.pvRecord = pvRecord;
         this.pvShare = pvShare;
     }
-    
     /* (non-Javadoc)
-     * @see org.epics.pvData.factory.AbstractPVField#toString(int)
+     * @see org.epics.pvData.factory.AbstractPVField#toString(java.lang.StringBuilder, int)
      */
-    public String toString(int indentLevel) {
-        return convert.getString(this, indentLevel)
-        + super.toString(indentLevel);
+    @Override
+    public void toString(StringBuilder buf, int indentLevel) {
+        convert.getString(buf, this, indentLevel);
     }
     /**
      * Lock the shared record.

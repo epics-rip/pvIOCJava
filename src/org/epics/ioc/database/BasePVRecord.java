@@ -292,7 +292,8 @@ public class BasePVRecord implements PVRecord {
     	builder.append("record ");
     	builder.append(recordName);
     	builder.append(" ");
-    	return builder.toString() + pvRecordStructure.getPVStructure().toString(indentLevel);
+    	pvRecordStructure.getPVStructure().toString(builder,indentLevel);
+    	return builder.toString();
     } 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()

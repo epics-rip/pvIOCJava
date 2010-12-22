@@ -109,7 +109,9 @@ public class SelectFieldFactory {
                     Object object = treeItem.getData();
                     if(object instanceof PVField) {
                         PVField pvField = (PVField) object;
-                        fieldName = convert.getFullFieldName(pvField);
+                        StringBuilder builder = new StringBuilder();
+                        convert.getFullFieldName(builder,pvField);
+                        fieldName = builder.toString();
                     } else if(object==null) {
                         requester.message("property is illegal selection",MessageType.error);
                     }

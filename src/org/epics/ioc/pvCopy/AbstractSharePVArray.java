@@ -11,7 +11,6 @@ import org.epics.ioc.database.PVRecord;
 import org.epics.pvData.pv.DeserializableControl;
 import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.ScalarArray;
 import org.epics.pvData.pv.SerializableControl;
 
 
@@ -33,16 +32,6 @@ public abstract class AbstractSharePVArray extends AbstractSharePVField implemen
         super(pvRecord,parent,pvShare);
         this.pvShare = pvShare;
     }        
-    
-   
-    /* (non-Javadoc)
-     * @see org.epics.pvData.pv.PVArray#getScalarArray()
-     */
-    @Override
-	public ScalarArray getScalarArray() {
-		return (ScalarArray)super.getField();
-	}
-
 	/* (non-Javadoc)
      * @see org.epics.pvData.pv.Serializable#serialize(java.nio.ByteBuffer, org.epics.pvData.pv.SerializableControl)
      */
@@ -84,13 +73,6 @@ public abstract class AbstractSharePVArray extends AbstractSharePVField implemen
     @Override
     public void setCapacityMutable(boolean isMutable) {
         pvShare.setCapacityMutable(isMutable);
-    }
-    /* (non-Javadoc)
-     * @see org.epics.pvData.factory.AbstractPVField#toString(int)
-     */
-    public String toString(int indentLevel) {
-        return convert.getString(this, indentLevel)
-        + super.toString(indentLevel);
     }
     /* (non-Javadoc)
      * @see org.epics.pvData.factory.AbstractPVArray#setCapacity(int)

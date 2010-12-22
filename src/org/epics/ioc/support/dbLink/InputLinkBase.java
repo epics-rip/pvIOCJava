@@ -18,6 +18,10 @@ import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.Alarm;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.PVAlarm;
+import org.epics.pvData.property.PVAlarmFactory;
+import org.epics.pvData.property.TimeStamp;
+import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
@@ -36,7 +40,9 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     private RequestResult requestResult = RequestResult.success;
     private String alarmMessage = null;
     private PVBoolean pvInheritSeverity = null;
-    private Alarm linkAlarm = null;
+    private Alarm alarm = new Alarm();
+    private PVAlarm pvAlarm = PVAlarmFactory.create();
+    private TimeStamp timeStamp = TimeStampFactory.create();
     /**
      * The constructor.
      * @param supportName The supportName.
@@ -76,7 +82,7 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
                 super.uninitialize();
                 return;
             }
-            linkAlarm = alarmSupport.getAlarm();
+            pvAlarm.attach(pvField);
         }
     }
     /* (non-Javadoc)
@@ -141,7 +147,12 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
      */
     @Override
     public void becomeProcessor() {
-    	linkRecordProcess.process(processToken,false, super.timeStamp);
+        if(pvTimeStamp.isAttached()) {
+            pvTimeStamp.get(timeStamp);
+            linkRecordProcess.process(processToken,false,timeStamp);
+        } else {
+            linkRecordProcess.process(processToken,false);
+        }
     }
     /* (non-Javadoc)
 	 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
@@ -177,10 +188,10 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
                 convert.copyStructure(linkValuePVStructure,valuePVStructure );
                 break;
             }
-            if(pvInheritSeverity.get() && linkAlarm!=null) {
-            	int ind = linkAlarm.getSeverity();
-                if(ind!=0) {
-                    alarmSupport.setAlarm(linkAlarm.getMessage(), AlarmSeverity.getSeverity(ind));
+            if(pvInheritSeverity.get() && pvAlarm.isAttached()) {
+                pvAlarm.get(alarm);
+                if(alarm.getSeverity()!=AlarmSeverity.none) {
+                    alarmSupport.setAlarm(alarm.getMessage(),alarm.getSeverity());
                 }
             }
         } finally {

@@ -58,11 +58,7 @@ public class SWTMessageFactory {
             boolean syncExec = false;
             synchronized(messageQueue) {
                 if(messageQueue.isEmpty()) syncExec = true;
-                if(messageQueue.isFull()) {
-                    messageQueue.replaceLast(message, messageType);
-                } else {
-                    messageQueue.put(message, messageType);
-                }
+                messageQueue.put(message, messageType,true);
             }
             if(consoleText.isDisposed()) return;
             if(display.isDisposed()) return;

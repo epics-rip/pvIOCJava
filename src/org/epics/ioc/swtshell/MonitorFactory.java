@@ -514,6 +514,7 @@ public class MonitorFactory {
                     shell.getDisplay().asyncExec( new Runnable() {
                         public void run() {
                             while(true) {
+                                if(monitor==null) return;
                                 MonitorElement monitorElement = monitor.poll();
                                 if(monitorElement==null) break;
                                 PVStructure pvStructure = monitorElement.getPVStructure();

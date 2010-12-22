@@ -6,9 +6,9 @@
 package org.epics.ioc.util;
 
 import org.epics.ioc.database.PVRecord;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVDouble;
@@ -48,25 +48,23 @@ public class ScanFieldFactory {
             pvScan.message("priority not found or is not a structure", MessageType.fatalError);
             return null;
         }
-        Enumerated enumerated = EnumeratedFactory.getEnumerated(priority);
-        if(enumerated==null) {
+        PVEnumerated enumerated = PVEnumeratedFactory.create();
+        if(!enumerated.attach(priority)) {
             priority.message("priority is not enumerated", MessageType.fatalError);
             return null;
         }
-        PVInt pvPriority = enumerated.getIndex();
+        PVInt pvPriority = priority.getIntField("index");
         
         PVStructure type = pvScan.getStructureField("type");
         if(type==null) {
             pvScan.message("type not found or is not a structure", MessageType.fatalError);
             return null;
         }
-        enumerated = EnumeratedFactory.getEnumerated(type);
-        if(enumerated==null) {
+        if(!enumerated.attach(type)) {
             type.message("type is not enumerated", MessageType.fatalError);
             return null;
         }
-        PVInt pvType = enumerated.getIndex();
-        
+        PVInt pvType = type.getIntField("index");
         PVDouble pvRate = pvScan.getDoubleField("rate");
         if(pvRate==null) {
             pvScan.message("rate field not found or is not a double", MessageType.fatalError);

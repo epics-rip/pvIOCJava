@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <database>
-<import name = "org.epics.pvData.*" />
+<import name = "org.epics.ioc.*" />
 <record recordName = "powerWithoutDeadband">
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />

@@ -119,6 +119,18 @@ public interface RecordProcess {
      * @param processToken The token returned by requestProcessToken.
      * @param leaveActive Leave the record active when process is done.
      * The requester must call setInactive.
+     * The time will be the current time.
+     */
+    void process(ProcessToken processToken,boolean leaveActive);
+    /**
+     * Process the record instance.
+     * Unless the record was activated by setActive,
+     * the record is prepared for processing just like for setActive.
+     * All results of record processing are reported
+     * via the RecordProcessRequester methods.
+     * @param processToken The token returned by requestProcessToken.
+     * @param leaveActive Leave the record active when process is done.
+     * The requester must call setInactive.
      * @param timeStamp The initial timeStamp for record processing.
      * If null the initial timeStamp will be the current time.
      */

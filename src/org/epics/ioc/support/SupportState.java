@@ -5,12 +5,13 @@
  */
 package org.epics.ioc.support;
 
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStringArray;
-import org.epics.pvData.pv.StringArrayData;
+import org.epics.pvData.pv.PVStructure;
+import org.epics.pvData.pv.ScalarType;
 
 
 
@@ -63,24 +64,23 @@ public enum SupportState {
      * @return The Enumerated interface only if dbField has an Enumerated interface and defines
      * the supportState choices.
      */
-    public static Enumerated getSupportState(PVField pvField) {
-        Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
-        if(enumerated==null) return null;
-        PVStringArray pvChoices = enumerated.getChoices();
-        int len = pvChoices.getLength();
+    public static PVEnumerated getSupportState(PVField pvField) {
+        PVEnumerated enumerated = PVEnumeratedFactory.create();
+        if(!enumerated.attach(pvField)) return null;
+        String[] choices = enumerated.getChoices();
+        int len = choices.length;
         if(len!=supportStateChoices.length) {
-            pvField.message("not an supportState structure", MessageType.error);
+            pvField.message("not a supportState structure", MessageType.error);
             return null;
         }
-        StringArrayData data = new StringArrayData();
-        pvChoices.get(0, len, data);
-        String[] choices = data.data;
         for (int i=0; i<len; i++) {
             if(!choices[i].equals(supportStateChoices[i])) {
                 pvField.message("not an supportState structure", MessageType.error);
                 return null;
             }
         }
+        PVStructure pvStruct = (PVStructure)pvField;
+        PVStringArray pvChoices = (PVStringArray)pvStruct.getScalarArrayField("choices",ScalarType.pvString);
         pvChoices.setImmutable();
         return enumerated;
     }

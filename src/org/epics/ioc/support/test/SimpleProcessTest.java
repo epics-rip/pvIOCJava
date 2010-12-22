@@ -116,7 +116,7 @@ public class SimpleProcessTest extends TestCase {
         private Lock lock = new ReentrantLock();
         private Condition waitDone = lock.newCondition();
         private boolean allDone = false;
-        private TimeStamp timeStamp = TimeStampFactory.create(0, 0);
+        private TimeStamp timeStamp = TimeStampFactory.create();
         private long startTime = 0;
         
         private TestProcess(PVRecord pvRecord) {

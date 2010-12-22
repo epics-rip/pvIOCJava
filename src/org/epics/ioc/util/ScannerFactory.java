@@ -194,7 +194,7 @@ public class ScannerFactory {
         private String name;
         private ProcessRecord[] processRecords = new ProcessRecord[0];
         
-        private TimeStamp timeStamp = TimeStampFactory.create(0, 0);
+        private TimeStamp timeStamp = TimeStampFactory.create();
         
         private volatile boolean isActive = false;
         private volatile boolean listModify = false;

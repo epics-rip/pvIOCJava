@@ -500,7 +500,9 @@ System.out.println("pvCopyStructure " + pvCopyStructure);
         while(++index < size) {
             if(bitSet.get(index)) {
                 PVField pvField = pvStructure.getSubField(index);
-               System.out.println("   " + convert.getFullFieldName(pvField));
+                StringBuilder builder = new StringBuilder();
+                convert.getFullFieldName(builder,pvField);
+               System.out.println("   " + builder.toString());
             }
         }
     }
@@ -513,7 +515,13 @@ System.out.println("pvCopyStructure " + pvCopyStructure);
             PVField pvCopyField = pvStructure.getSubField(offset);
             PVRecordField pvRecordField = pvCopy.getRecordPVField(offset);
             if(!pvCopyField.equals(pvRecordField.getPVField())) {
-                System.out.println("    " + convert.getFullFieldName(pvCopyField) + " NE " + convert.getFullFieldName(pvRecordField.getPVField()));
+                StringBuilder builder = new StringBuilder();
+                builder.append("    ");
+                convert.getFullFieldName(builder,pvCopyField);
+                builder.append(" NE ");
+                convert.getFullFieldName(builder,pvRecordField.getPVField());
+                builder.append(" NE ");
+                System.out.println(builder.toString());
             }
         }
     }

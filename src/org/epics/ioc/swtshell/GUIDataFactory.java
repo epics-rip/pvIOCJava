@@ -160,7 +160,9 @@ public class GUIDataFactory {
             gridData = new GridData(GridData.FILL_BOTH);
             tree.setLayoutData(gridData);
             TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-            treeItem.setText(convert.getFullFieldName(pvStructure));
+            StringBuilder builder = new StringBuilder();
+            convert.getFullFieldName(builder,pvStructure);
+            treeItem.setText(builder.toString());
             createStructureTreeItem(treeItem,pvStructure);
             shell.open();
             Display display = shell.getDisplay();
@@ -202,11 +204,18 @@ public class GUIDataFactory {
                     	boolean ok = false;
                     	if(type==Type.scalar) {
                     		ok = true;
-                    		textMessage(text,pvField.toString());
+                    		textMessage(text,convert.toString((PVScalar)pvField));
                     	} else if(type==Type.scalarArray) {
                     		ok = true;
-                    		String values = pvField.toString();
-                    		textMessage(text,values);
+                    		PVScalarArray pvScalarArray = (PVScalarArray)pvField;
+                    		String[] values = new String[pvScalarArray.getLength()];
+                    		convert.toStringArray(pvScalarArray, 0, values.length, values, 0);
+                    		StringBuilder stringBuilder = new StringBuilder();
+                    		for(int i=0; i<values.length; i++ ) {
+                    		    if(i>0) stringBuilder.append(",");
+                    		    stringBuilder.append(values[i]);
+                    		}
+                    		textMessage(text,stringBuilder.toString());
                     	} else if(type==Type.structureArray) {
                     		ok = true;
                     		PVStructureArray pvStructureArray = (PVStructureArray)pvField;
@@ -287,14 +296,12 @@ public class GUIDataFactory {
         }
         
         private static class GetStructureArrayIndex extends Dialog implements SelectionListener{
-        	private PVStructureArray pvStructureArray;
         	private Shell shell;
             private Text text;
             private int index=0;
         	
         	private GetStructureArrayIndex(Shell parent,PVStructureArray pvStructureArray) {
         		super(parent,SWT.DIALOG_TRIM|SWT.NONE);
-        		this.pvStructureArray = pvStructureArray;
         	}
 
         	private int getIndex() {
@@ -368,7 +375,29 @@ public class GUIDataFactory {
                 gridData.minimumWidth = 100;
                 text.setLayoutData(gridData);
                 text.addSelectionListener(this);
-                textMessage(text,pvField.toString());
+                Field field = pvField.getField();
+                Type type = field.getType();
+                boolean ok = false;
+                if(type==Type.scalar) {
+                    ok = true;
+                    textMessage(text,convert.toString((PVScalar)pvField));
+                } else if(type==Type.scalarArray) {
+                    ok = true;
+                    PVScalarArray pvScalarArray = (PVScalarArray)pvField;
+                    String[] values = new String[pvScalarArray.getLength()];
+                    convert.toStringArray(pvScalarArray, 0, values.length, values, 0);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for(int i=0; i<values.length; i++ ) {
+                        if(i>0) stringBuilder.append(",");
+                        stringBuilder.append(values[i]);
+                    }
+                    textMessage(text,stringBuilder.toString());
+                }
+                if(!ok) {
+                    textMessage(text,"cant handle type");
+                    pvField = null;
+                    type = null;
+                }
                 shell.pack();
                 shell.open();
                 Display display = shell.getDisplay();

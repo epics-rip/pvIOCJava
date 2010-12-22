@@ -672,7 +672,7 @@ public class ChannelServerFactory  {
              */
             @Override
             public void becomeProcessor() {
-            	recordProcess.process(processToken, false, null);
+            	recordProcess.process(processToken, false);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
@@ -798,7 +798,7 @@ public class ChannelServerFactory  {
              */
             @Override
             public void becomeProcessor() {
-            	recordProcess.process(processToken,true,null);
+            	recordProcess.process(processToken,true);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
@@ -949,7 +949,7 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-                recordProcess.process(processToken,false,null);
+                recordProcess.process(processToken,false);
             	return;
             }
             /* (non-Javadoc)
@@ -1129,7 +1129,7 @@ public class ChannelServerFactory  {
             	} finally {
             		pvRecord.unlock();
             	}
-            	recordProcess.process(processToken,true,null);
+            	recordProcess.process(processToken,true);
             }
             /* (non-Javadoc)
              * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)

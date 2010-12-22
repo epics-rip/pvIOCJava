@@ -18,6 +18,7 @@ import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
@@ -136,7 +137,7 @@ public class BaseSerialOutput extends AbstractPortDriverSupport
             if(pvSend!=null) {
                 string = pvSend.get();
             } else {
-                string = convert.getString(valuePVField);
+                string = convert.toString((PVScalar)valuePVField);
             }
             if(string==null) string = "";
             nbytes = string.length();

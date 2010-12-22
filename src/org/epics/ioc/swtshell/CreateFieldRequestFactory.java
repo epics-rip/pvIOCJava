@@ -207,7 +207,9 @@ public class CreateFieldRequestFactory {
         		if(nextSet>=next) continue;
         		if(nextSet==offset) {
         			if(request.length()>1 && (request.charAt(request.length()-1) != '{')) request += ",";
-        			request += convert.getFullFieldName(pvField);
+        			StringBuilder builder = new StringBuilder();
+        			convert.getFullFieldName(builder,pvField);
+        			request += builder.toString();
         		} else if(pvField.getField().getType()==Type.structure) {
         			if(request.length()>1 && (request.charAt(request.length()-1) != '{')) request += ",";
         			request += pvField.getField().getFieldName();

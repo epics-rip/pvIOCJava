@@ -53,9 +53,9 @@ import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
@@ -100,7 +100,8 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     private PVScalar pvScalarValue = null;
     private PVScalarArray pvArrayValue = null;
     // Following not null if nativeDBRType.isENUM(
-    private Enumerated pvEnumerated = null;
+    private PVEnumerated pvEnumerated = null;
+    private PVInt pvEnumeratedIndex = null;
     
     private boolean firstGetPVStructure = true;
     
@@ -263,7 +264,12 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         pvStructure = pvDataCreate.createPVStructure(null,"", fields);
         if(nativeDBRType.isENUM()) {
             PVStructure pvStruct = (PVStructure)pvStructure.getPVFields()[0];
-            pvEnumerated = EnumeratedFactory.getEnumerated(pvStruct);
+            pvEnumeratedIndex = pvStruct.getIntField("index");
+            pvEnumerated = PVEnumeratedFactory.create();
+            if(pvEnumeratedIndex==null ||!pvEnumerated.attach(pvStruct)) {
+                v3Channel.message("field is not an enumerated structure ", MessageType.error);
+                return null;
+            }
         }
         for(PVField pvField : pvStructure.getPVFields()) {
             if(pvField.getField().getFieldName().equals("alarm")) {
@@ -446,7 +452,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         bitSet.clear();
         DBRType requestDBRType = fromDBR.getType();
         if(nativeDBRType.isENUM()) {
-            int index = pvEnumerated.getIndex().get();
+            int index = pvEnumerated.getIndex();
             if(requestDBRType==DBRType.ENUM) {
                 DBR_Enum dbr = (DBR_Enum)fromDBR;
                 index = dbr.getEnumValue()[0];
@@ -464,7 +470,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
             } else if(requestDBRType==DBRType.CTRL_ENUM) {
                 DBR_CTRL_Enum dbr = (DBR_CTRL_Enum)fromDBR;
                 String[] labels = dbr.getLabels();
-                pvEnumerated.getChoices().put(0, labels.length, labels, 0);
+                pvEnumerated.setChoices(labels);
                 index = dbr.getEnumValue()[0];
                 status = dbr.getStatus();
                 severity = dbr.getSeverity();
@@ -480,11 +486,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                         " unsupported DBRType " + requestDBRType.getName());
                 return;
             }
-            if(index!=pvEnumerated.getIndex().get()) {
-                PVInt pvInt = pvEnumerated.getIndex();
-                pvInt.put(index);
-            }
-            
+            if(index!=pvEnumerated.getIndex())pvEnumerated.setIndex(index);
         } else {
             if(requestDBRType==DBRType.DOUBLE) {
                 DBR_Double dbr = (DBR_Double)fromDBR;
@@ -949,7 +951,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
             if(pvTimeStamp!=null) bitSet.set(pvTimeStamp.getFieldOffset());
             if(pvScalarValue!=null) bitSet.set(pvScalarValue.getFieldOffset());
             if(pvArrayValue!=null) bitSet.set(pvArrayValue.getFieldOffset());
-            if(pvEnumerated!=null) bitSet.set(pvEnumerated.getIndex().getFieldOffset());
+            if(pvEnumerated!=null) bitSet.set(pvEnumeratedIndex.getFieldOffset());
         }
     }
 }

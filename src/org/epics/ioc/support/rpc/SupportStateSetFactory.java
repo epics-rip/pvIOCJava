@@ -16,19 +16,18 @@ import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.StringArrayData;
+import org.epics.pvData.pv.ScalarType;
 
 /**
  * Support for an array of calcArg structures.
@@ -64,10 +63,8 @@ public class SupportStateSetFactory {
         private String recordName = null;
         private String recordNamePrevious = emptyString;
          
-        private Enumerated supportStateEnumerated = null;
-        private PVInt supportStatePVInt = null;
-        private Enumerated supportStateCommandEnumerated = null;
-        private PVInt supportStateCommandPVInt = null;
+        private PVEnumerated supportStateEnumerated = null;
+        private PVEnumerated supportStateCommandEnumerated = PVEnumeratedFactory.create();
         
         private PVRecord targetPVRecord = null;
         private RecordProcess targetRecordProcess = null;
@@ -95,16 +92,13 @@ public class SupportStateSetFactory {
             if(pvRecordName==null) return;
             PVStructure pvStructure = pvSupportStateSet.getStructureField("arguments.supportStateCommand");
             if(pvStructure==null) return;
-            supportStateCommandEnumerated = SupportStateCommand.getSupportStateCommand(pvStructure);
-            if(supportStateCommandEnumerated==null) return;
-            supportStateCommandPVInt = supportStateCommandEnumerated.getIndex();
+            if(!SupportStateCommand.checkSupportStateCommand(supportStateCommandEnumerated,pvStructure)) return;
             pvMessage = pvSupportStateSet.getStringField("result.message");
             if(pvMessage==null) return;
             pvStructure = pvSupportStateSet.getStructureField("result.supportState");
             if(pvStructure==null) return;
             supportStateEnumerated = SupportState.getSupportState(pvStructure);
             if(supportStateEnumerated==null) return;
-            supportStatePVInt = supportStateEnumerated.getIndex();
             super.initialize();
         }
         /* (non-Javadoc)
@@ -122,8 +116,7 @@ public class SupportStateSetFactory {
             requestResult = RequestResult.success;
             this.supportProcessRequester = supportProcessRequester;
             supportState = null;
-            supportStateCommand = SupportStateCommand.getSupportStateCommand(
-                    supportStateCommandPVInt.get());
+            supportStateCommand = SupportStateCommand.getSupportStateCommand(supportStateEnumerated.getIndex());
             executor.execute(executorNode);
         }
         /* (non-Javadoc)
@@ -216,12 +209,12 @@ public class SupportStateSetFactory {
             pvMessage.put(message);
             if(supportState!=null) {
                 int index = supportState.ordinal();
-                if(index!=supportStatePVInt.get()) {
-                    supportStatePVInt.put(index);
+                if(index!=supportStateEnumerated.getIndex()) {
+                    supportStateEnumerated.setIndex(index);
                 }
             }
-            if(supportStateCommandPVInt.get()!=0) {
-                supportStateCommandPVInt.put(0);
+            if(supportStateCommandEnumerated.getIndex()!=0) {
+                supportStateCommandEnumerated.setIndex(0);
             }
             supportProcessRequester.supportProcessDone(requestResult);
         }
@@ -263,29 +256,28 @@ public class SupportStateSetFactory {
              * @return The Enumerated interface only if pvField has an Enumerated interface and defines
              * the supportStateCommand choices.
              */
-            public static Enumerated getSupportStateCommand(PVField pvField) {
-                Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
-                if(enumerated==null) {
+            public static boolean checkSupportStateCommand(PVEnumerated enumerated,PVField pvField) {
+                if(!enumerated.attach(pvField)) {
                     pvField.message("not an enumerated structure", MessageType.error);
-                    return null;
+                    return false;
                 }
-                PVStringArray pvChoices = enumerated.getChoices();
-                int len = pvChoices.getLength();
+                String[] choices = enumerated.getChoices();
+                int len = choices.length;
                 if(len!=supportStateCommandChoices.length) {
                     pvField.message("not an supportStateCommand structure", MessageType.error);
-                    return null;
+                    return false;
                 }
-                StringArrayData data = new StringArrayData();
-                pvChoices.get(0, len, data);
-                String[] choices = data.data;
+                
                 for (int i=0; i<len; i++) {
                     if(!choices[i].equals(supportStateCommandChoices[i])) {
                         pvField.message("not an supportStateCommand structure", MessageType.error);
-                        return null;
+                        return false;
                     }
                 }
-                pvChoices.setImmutable();
-                return enumerated;
+                PVStructure pvStruct = (PVStructure)pvField;
+                PVArray pvArray = pvStruct.getScalarArrayField("choices", ScalarType.pvString);
+                pvArray.setImmutable();
+                return true;
             }
         }
 

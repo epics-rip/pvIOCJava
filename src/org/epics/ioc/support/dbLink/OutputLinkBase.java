@@ -15,6 +15,8 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.TimeStamp;
+import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
 
 /**
@@ -30,6 +32,7 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult = RequestResult.success;
     private String alarmMessage = null;
+    private TimeStamp timeStamp = TimeStampFactory.create();
     /**
      * The constructor.
      * @param supportName The supportName.
@@ -117,7 +120,12 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     @Override
     public void becomeProcessor() {
     	 putData();
-    	linkRecordProcess.process(processToken,false, super.timeStamp);
+    	 if(pvTimeStamp.isAttached()) {
+             pvTimeStamp.get(timeStamp);
+             linkRecordProcess.process(processToken,false,timeStamp);
+         } else {
+             linkRecordProcess.process(processToken,false);
+         }
     }
     /* (non-Javadoc)
 	 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)

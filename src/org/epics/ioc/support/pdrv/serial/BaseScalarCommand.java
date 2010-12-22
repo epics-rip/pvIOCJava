@@ -69,7 +69,7 @@ public class BaseScalarCommand extends AbstractPortDriverSupport
         String prefix = pvPrefix.get();
         builder.setLength(0);
         if(prefix!=null) builder.append(prefix + " ");
-        builder.append(convert.getString(pvValueScalar));
+        builder.append(convert.toString(pvValueScalar));
         pvCommandString.put(builder.toString());
         super.beginProcess();
     }

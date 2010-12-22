@@ -37,8 +37,7 @@ public interface AlarmSupport extends Support{
      */
     boolean setAlarm(String message, AlarmSeverity severity);
     /**
-     * Get the Alarm interface, which is defined in org.epics.pvData.property.
-     * @return The interface.
+     * Get the current alarm value
      */
-    Alarm getAlarm();
+    void getAlarm(Alarm alarm);
 }

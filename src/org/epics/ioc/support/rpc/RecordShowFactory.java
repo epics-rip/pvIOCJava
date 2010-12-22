@@ -21,8 +21,6 @@ import org.epics.ioc.support.Support;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ExecutorNode;
@@ -30,6 +28,8 @@ import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.TimeFunction;
 import org.epics.pvData.misc.TimeFunctionFactory;
 import org.epics.pvData.misc.TimeFunctionRequester;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -67,7 +67,7 @@ public class RecordShowFactory {
         private PVString pvRecordName = null;
         private PVRecord pvRecord = null;
         private RecordProcess recordProcess = null;
-        private Enumerated command = null;
+        private PVEnumerated command = PVEnumeratedFactory.create();
         private PVString pvResult = null;
         private StringBuilder stringBuilder = new StringBuilder();
         
@@ -86,8 +86,7 @@ public class RecordShowFactory {
             if(pvRecordName==null) return;
             PVStructure pvTemp = pvStructure.getStructureField("arguments.command");
             if(pvTemp==null) return;
-            command = EnumeratedFactory.getEnumerated(pvTemp);
-            if(command==null) {
+            if(!command.attach(pvTemp)) {
                 super.message("arguments.command is not enumerated", MessageType.error);
                 return;
             }
@@ -222,7 +221,7 @@ public class RecordShowFactory {
             }
             
             private class ProcessIt implements TimeFunctionRequester, RecordProcessRequester {
-                private TimeStamp timeStamp = TimeStampFactory.create(0,0);
+                private TimeStamp timeStamp = TimeStampFactory.create();
                 private ReentrantLock lock = new ReentrantLock();
                 private Condition waitProcessDone = lock.newCondition();
                 private boolean processDone = false;

@@ -18,11 +18,12 @@ import org.epics.ioc.util.EventScanner;
 import org.epics.ioc.util.PeriodicScanner;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.util.ScannerFactory;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.ThreadCreateFactory;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 
@@ -49,7 +50,7 @@ public class IocShowFactory {
     private static class IocShowImpl extends AbstractSupport
     {
     	private final PVRecordStructure pvRecordStructure;
-        private Enumerated command = null;
+        private PVEnumerated command = PVEnumeratedFactory.create();
         private PVString pvResult = null;
         private StringBuilder stringBuilder = new StringBuilder();
         private StringBuilder subStringBuilder = new StringBuilder();
@@ -66,8 +67,7 @@ public class IocShowFactory {
             PVStructure pvStructure = pvRecordStructure.getPVStructure();
             PVStructure pvTemp = pvStructure.getStructureField("arguments.command");
             if(pvTemp==null) return;
-            command = EnumeratedFactory.getEnumerated(pvTemp);
-            if(command==null) {
+            if(!command.attach(pvTemp)) {
                 super.message("arguments.command is not enumerated", MessageType.error);
                 return;
             }
@@ -103,18 +103,25 @@ public class IocShowFactory {
                 boolean isActive = recordProcess.isActive();
                 boolean isEnabled = recordProcess.isEnabled();
                 SupportState supportState = recordProcess.getSupportState();
-                String alarmSeverity = null;
-                PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.severity.choice");
-                if(pvField!=null) alarmSeverity = pvField.toString();
-                String alarmMessage = null;
+                int alarmSeverity = 0;
+                PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.severity");
+                if(pvField!=null) {
+                    PVInt pvint = pvRecord.getPVRecordStructure().getPVStructure().getIntField("alarm.severity");
+                    if(pvint!=null) alarmSeverity = pvint.get(); 
+                }
+                String alarmMessage = "";
                 pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.message");
-                if(pvField!=null) alarmMessage = pvField.toString();
+                if(pvField!=null) {
+                    PVString pvString = pvRecord.getPVRecordStructure().getPVStructure().getStringField("alarm.message");
+                    if(pvString!=null) alarmMessage = pvString.get();
+                }
                 if(isActive) subStringBuilder.append(" isActive");
                 if(!isEnabled) subStringBuilder.append(" disabled");
                 if(supportState!=SupportState.ready) subStringBuilder.append(" supportState " + supportState.name());
-                if(alarmSeverity!=null && !alarmSeverity.equals("none")) subStringBuilder.append(" alarmSeverity " + alarmSeverity);
-                if(alarmMessage!=null && !alarmMessage.equals("null") && alarmMessage.length()>0)
+                if(alarmSeverity>0) subStringBuilder.append(" alarmSeverity " + alarmSeverity);
+                if(alarmMessage!=null && alarmMessage.length()>0) {
                     subStringBuilder.append(" alarmMessage " + alarmMessage);
+                }
                 if(subStringBuilder.length()>2) {
                     stringBuilder.append(pvRecord.getRecordName());
                     stringBuilder.append(subStringBuilder.toString());

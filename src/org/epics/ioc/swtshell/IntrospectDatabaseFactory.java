@@ -45,6 +45,8 @@ import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
+import org.epics.pvData.pv.PVInt;
+import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 
@@ -317,19 +319,25 @@ public class IntrospectDatabaseFactory {
                     boolean isActive = recordProcess.isActive();
                     boolean isEnabled = recordProcess.isEnabled();
                     SupportState supportState = recordProcess.getSupportState();
-                    String alarmSeverity = null;
+                    int alarmSeverity = 0;
                     PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
-                    PVField pvField = pvStructure.getSubField("alarm.severity.choice");
-                    if(pvField!=null) alarmSeverity = pvField.toString();
-                    String alarmMessage = null;
+                    PVField pvField = pvStructure.getSubField("alarm.severity");
+                    if(pvField!=null) {
+                        PVInt pvInt = pvStructure.getIntField("alarm.severity");
+                        if(pvInt!=null) alarmSeverity = pvInt.get();
+                    }
+                    String alarmMessage = "";
                     pvField = pvStructure.getSubField("alarm.message");
-                    if(pvField!=null) alarmMessage = pvField.toString();
+                    if(pvField!=null) {
+                         PVString pvString = pvStructure.getStringField("alarm.message");
+                         if(pvString!=null) alarmMessage = pvString.get();
+                    }
                     String status = "";
                     if(isActive) status += " isActive";
                     if(!isEnabled) status += " disabled";
                     if(supportState!=SupportState.ready) status += " supportState " + supportState.name();
-                    if(alarmSeverity!=null && !alarmSeverity.equals("none")) status += " alarmSeverity " + alarmSeverity;
-                    if(alarmMessage!=null && !alarmMessage.equals("null") && alarmMessage.length()>0)
+                    if(alarmSeverity>0) status += " alarmSeverity " + alarmSeverity;
+                    if(alarmMessage!=null && alarmMessage.length()>0)
                         status += " alarmMessage " + alarmMessage;
                     if(status!="") {
                         status = pvRecord.getRecordName() + " " + status + newLine;
@@ -597,8 +605,11 @@ public class IntrospectDatabaseFactory {
                 choiceAll.setText("all");
                 choiceAll.addSelectionListener(this);
                 PVStructure[] pvdStructures = masterPVDatabase.getStructures();
+                StringBuilder builder = new StringBuilder();
                 for(PVStructure pvdStructure : pvdStructures) {
-                    String name = convert.getFullFieldName(pvdStructure);
+                    convert.getFullFieldName(builder,pvdStructure);
+                    String name = builder.toString();
+                    builder.setLength(0);
                     MenuItem choiceItem = new MenuItem(menuStructure,SWT.PUSH);
                     choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
@@ -656,7 +667,7 @@ public class IntrospectDatabaseFactory {
             }
             
             private class ProcessIt implements TimeFunctionRequester, RecordProcessRequester {
-                private TimeStamp timeStamp = TimeStampFactory.create(0,0);
+                private TimeStamp timeStamp = TimeStampFactory.create();
                 private ReentrantLock lock = new ReentrantLock();
                 private Condition waitProcessDone = lock.newCondition();
                 private volatile boolean processDone = false;

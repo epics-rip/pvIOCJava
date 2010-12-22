@@ -495,11 +495,7 @@ public class PVDatabaseFactory {
             boolean execute = false;
             synchronized(messageQueue) {
                 if(messageQueue.isEmpty()) execute = true;
-                if(messageQueue.isFull()) {
-                    messageQueue.replaceLast(message, messageType);
-                } else {
-                    messageQueue.put(message, messageType);
-                }
+                messageQueue.put(message, messageType,true);
             }
             if(execute) {
                 executor.execute(executorNode);

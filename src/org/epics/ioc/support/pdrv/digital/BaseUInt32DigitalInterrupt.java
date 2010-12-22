@@ -13,13 +13,12 @@ import org.epics.ioc.pdrv.interfaces.UInt32Digital;
 import org.epics.ioc.pdrv.interfaces.UInt32DigitalInterruptListener;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVInt;
 import org.epics.pvData.pv.PVScalar;
-import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
@@ -47,7 +46,7 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
     private PVInt pvMask = null;
     private int mask;
     private int shift = 0;
-    private Enumerated enumerated = null;
+    private PVEnumerated enumerated = PVEnumeratedFactory.create();;
     /* (non-Javadoc)
      * @see org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink#initialize()
      */
@@ -71,11 +70,7 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
                 return;
             }
         }
-        enumerated = EnumeratedFactory.getEnumerated(valuePVField);
-        if(enumerated!=null) {
-            pvIndex = enumerated.getIndex();
-            return;
-        }
+        if(enumerated.attach(valuePVField)) return;
         pvStructure.message("value field is not a valid type", MessageType.fatalError);
         super.uninitialize();
         return;
@@ -103,11 +98,10 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
             return;
         }
         uint32Digital = (UInt32Digital)iface;
-        if(enumerated!=null) {
+        if(enumerated.isAttached()) {
             String[] choices = uint32Digital.getChoices(user);
             if(choices!=null) {
-                PVStringArray pvStringArray = enumerated.getChoices();
-                pvStringArray.put(0, choices.length, choices, 0);
+                enumerated.setChoices(choices);
             }
         }
         if(valueScalarType!=null) {
@@ -163,7 +157,7 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
     @Override
     public void becomeProcessor() {
     	putData(value);
-    	recordProcess.process(processToken,false, null);
+    	recordProcess.process(processToken,false);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
@@ -195,6 +189,9 @@ public class BaseUInt32DigitalInterrupt extends AbstractPortDriverInterruptLink 
     		valuePVBoolean.put((value==0) ? false : true);
     	} else if(pvIndex!=null)  {
     		pvIndex.put(value);
+    	}else if(enumerated.isAttached()) {
+            int oldValue = enumerated.getIndex();
+            if(oldValue!=value) enumerated.setIndex(value);
     	} else {
     		pvStructure.message(" logic error", MessageType.fatalError);
     	}

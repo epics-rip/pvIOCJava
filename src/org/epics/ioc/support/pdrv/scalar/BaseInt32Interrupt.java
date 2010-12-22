@@ -105,7 +105,7 @@ implements Int32InterruptListener
     @Override
     public void becomeProcessor() {
     	putData(value);
-    	recordProcess.process(processToken,false, null);
+    	recordProcess.process(processToken,false);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)

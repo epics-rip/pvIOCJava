@@ -125,7 +125,7 @@ implements Float64ArrayInterruptListener
             convert.copyScalarArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
             float64Array.endRead(user);
         }
-        recordProcess.process(processToken,false, null);
+        recordProcess.process(processToken,false);
 	}
 	/* (non-Javadoc)
 	 * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)

@@ -12,9 +12,9 @@ import java.lang.reflect.Modifier;
 import org.epics.ioc.database.PVRecordStructure;
 import org.epics.ioc.support.AbstractSupport;
 import org.epics.ioc.support.Support;
-import org.epics.pvData.misc.Enumerated;
-import org.epics.pvData.misc.EnumeratedFactory;
 import org.epics.pvData.misc.ThreadPriority;
+import org.epics.pvData.property.PVEnumerated;
+import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
@@ -119,8 +119,8 @@ public class PortCreateFactory {
             return null;
         }
         PVField pvField = pvFields[index];
-        Enumerated enumerated = EnumeratedFactory.getEnumerated(pvField);
-        if(enumerated==null) {
+        PVEnumerated enumerated = PVEnumeratedFactory.create();
+        if(!enumerated.attach(pvField)) {
             pvField.message(fieldName + " is not an enumerated structure", MessageType.error);
             return null;
         }

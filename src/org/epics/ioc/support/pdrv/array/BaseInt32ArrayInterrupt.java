@@ -127,7 +127,7 @@ implements Int32ArrayInterruptListener
     		convert.copyScalarArray(pvIntArray, 0, valuePVArray, 0, pvIntArray.getLength());
     		int32Array.endRead(user);
     	}
-    	recordProcess.process(processToken,false, null);
+    	recordProcess.process(processToken,false);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.support.RecordProcessRequester#canNotProcess(java.lang.String)
