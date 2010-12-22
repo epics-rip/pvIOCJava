@@ -1,14 +1,23 @@
 <?xml version="1.0" ?>
 <database>
-<structure structureName = "test.point">
+<import name = "org.epics.ioc.*" />
+<package name = "org.epics.ioc.test" />
+<import name = "org.epics.ioc.test.*" />
+<structure structureName = "point">
   <scalar name = "x" scalarType = "double" />
   <scalar name = "y" scalarType = "double" />
 </structure>
 
-<structure structureName = "test.testStructure">
+<structure structureName = "testStructure">
     <scalar name = "value" scalarType = "double">10.0</scalar>
-    <structure name = "location" extends = "test.point" />
+    <structure name = "location" extends = "point" />
 </structure>
+
+<structure structureName = "testStructureRecord" extends = "generic" >
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structureArray name = "value" extends = "testStructure" />
+</structure>
+
 <!--
 -->
 </database>

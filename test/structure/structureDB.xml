@@ -1,15 +1,15 @@
 <?xml version="1.0" ?>
 <database>
 <import name = "org.epics.ioc.*" />
+<import name = "org.epics.ioc.test.*" />
 <include addPath = "${JAVAIOC}/xml" />
 <include href = "records.xml" />
 <include removePath = "${JAVAIOC}/xml" />
 
 
-
 <record recordName = "structureArrayTest">
     <structure name = "timeStamp" extends = "timeStamp" />
-    <structureArray name = "value" scalarType = "structure" extends = "test.testStructure" capacity = "2">
+    <structureArray name = "value" extends = "testStructure" capacity = "2">
        <structure>
           <scalar name = "value">100.0</scalar>
           <structure name = "location">
@@ -26,6 +26,8 @@
        </structure>
        
     </structureArray>
+</record>
+<record recordName = "structureArrayTestExtend" extends = "testStructureRecord" >
 </record>
 
 </database>
