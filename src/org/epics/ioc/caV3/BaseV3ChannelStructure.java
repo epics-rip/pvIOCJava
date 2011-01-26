@@ -152,7 +152,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                 String fieldList = pvString.get();
                 String[] fields = commaPattern.split(fieldList);
                 for(int i=0; i<fields.length; i++) {
-                	String val = fields[i];
+                	String val = fields[i].trim();
                 	if(val.equals("value.index")) {
                         valueIsIndex = true;
                     } else if(val.equals("value.choice")) {
