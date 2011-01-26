@@ -174,7 +174,7 @@ public class ChannelServerFactory  {
 		public Query query(PVField query, QueryRequester queryRequester) {
 			return null;
 		}
-        /* (non-Javadoc)
+		/* (non-Javadoc)
          * @see org.epics.ca.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.client.ChannelRequester, short)
          */
         @Override
@@ -1253,7 +1253,13 @@ public class ChannelServerFactory  {
             @SuppressWarnings("unchecked")
 			private boolean init() {
             	PVString pvFactory = pvRecord.getPVRecordStructure().getPVStructure().getStringField("factoryRPC");
-            	if(pvFactory==null) return false;
+            	if(pvFactory==null) 
+        		{
+                	String message = " factoryRPC subField not found";
+                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
+                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                    return false;
+        		}
             	String factoryName = pvFactory.get();
             	Class supportClass;
                 server = null;
