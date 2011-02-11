@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.ca.client.AccessRights;
 import org.epics.ca.client.Channel;
+import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelArray;
 import org.epics.ca.client.ChannelArrayRequester;
@@ -32,7 +33,6 @@ import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.GetFieldRequester;
 import org.epics.ca.client.Query;
 import org.epics.ca.client.QueryRequester;
-import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.ioc.database.PVDatabase;
 import org.epics.ioc.database.PVDatabaseFactory;
 import org.epics.ioc.database.PVRecord;
@@ -62,9 +62,9 @@ import org.epics.pvData.pv.PVStructureArray;
 import org.epics.pvData.pv.Scalar;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.Status.StatusType;
 import org.epics.pvData.pv.StatusCreate;
 import org.epics.pvData.pv.Type;
-import org.epics.pvData.pv.Status.StatusType;
 
 /**
  * Factory and implementation of local channel access, i.e. channel access that
@@ -173,6 +173,15 @@ public class ChannelServerFactory  {
 		@Override
 		public Query query(PVField query, QueryRequester queryRequester) {
 			return null;
+		}
+		
+        @Override
+		public Channel createChannel(String channelName,
+				ChannelRequester channelRequester, short priority,
+				String address) {
+        	if (address != null)
+        		throw new IllegalArgumentException("address not allowed for local implementation");
+        	return createChannel(channelName, channelRequester, priority);
 		}
 		/* (non-Javadoc)
          * @see org.epics.ca.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.client.ChannelRequester, short)

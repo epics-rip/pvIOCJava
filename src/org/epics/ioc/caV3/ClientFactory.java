@@ -164,6 +164,17 @@ public class ClientFactory  {
             return locateFind.create(channelRequester);
         }
         /* (non-Javadoc)
+         * @see org.epics.ca.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.client.ChannelRequester, short, java.lang.String)
+         */
+        @Override
+		public Channel createChannel(String channelName,
+				ChannelRequester channelRequester, short priority,
+				String address) {
+        	if (address != null)
+        		throw new IllegalArgumentException("address not allowed for caV3 implementation");
+			return createChannel(channelName, channelRequester, priority);
+		}
+		/* (non-Javadoc)
          * @see org.epics.ioc.channelAccess.ChannelProvider#getProviderName()
          */
         public String getProviderName() {
