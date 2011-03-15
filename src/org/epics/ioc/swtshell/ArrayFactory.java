@@ -552,7 +552,11 @@ public class ArrayFactory {
                     stateMachine.setState(State.ready);
                     return;
                 case getDone:
-                    valueText.setText(pvArray.toString());
+                    String value = pvArray.toString();
+                    int indStart = value.lastIndexOf('[');
+                    int indEnd = value.lastIndexOf(']');
+                    if(indEnd>indStart) value = value.substring(indStart+1,indEnd);
+                    valueText.setText(value);
                     stateMachine.setState(State.ready);
                     return;
                 case putDone:
