@@ -1413,7 +1413,7 @@ public class ChannelServerFactory  {
                 	channelArrayRequester.getArrayDone(requestDestroyedStatus);
                 	return;
                 }
-                if(count<=0) count = pvArray.getLength();
+                if(count<=0) count = pvArray.getLength() - offset;
                 pvRecord.lock();
                 try {
                     int len = convert.copyScalarArray(pvArray, offset, pvCopy, 0, count);
