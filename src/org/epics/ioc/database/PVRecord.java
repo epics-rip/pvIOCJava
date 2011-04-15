@@ -17,7 +17,7 @@ import org.epics.pvData.pv.Requester;
  * @author mrk
  *
  */
-public interface PVRecord {
+public interface PVRecord extends Requester{
 	/**
 	 * Get the recordProcess for this record.
 	 * @return The interface.

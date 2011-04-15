@@ -35,7 +35,6 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
 		this.parent = parent;
 		this.pvRecord = pvRecord;
 		if(pvField.getField().getType()==Type.structure) isStructure = true;
-		pvField.setRequester(this);
 		pvField.setPostHandler(this);
 	}
 	/* (non-Javadoc)
@@ -55,15 +54,16 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
 		}
 		this.support = support;
 	}
+	
 	@Override
-	public String getRequesterName() {
-		return getFullName();
-	}
-	@Override
-	public void message(String message, MessageType messageType) {
-		pvRecord.message(getFullName() + " " + message, messageType);
-	}
-	@Override
+    public String getRequesterName() {
+        return pvRecord.getRecordName();
+    }
+    @Override
+    public void message(String message, MessageType messageType) {
+        pvRecord.message(getFullName() + " " + message, messageType);
+    }
+    @Override
 	public PVRecordStructure getParent() {
 		return parent;
 	}
@@ -85,7 +85,6 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
 	public void replacePVField(PVField newField) {
 		pvField.replacePVField(newField);
 		pvField = newField;
-		pvField.setRequester(this);
 		pvField.setPostHandler(this);
 		if(pvField.getField().getType()==Type.structure) {
 			PVStructure pvStructure = (PVStructure)pvField;

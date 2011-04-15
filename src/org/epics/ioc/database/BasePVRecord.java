@@ -52,6 +52,7 @@ public class BasePVRecord implements PVRecord {
     	}
     	this.recordName = recordName;
     	pvRecordStructure = new BasePVRecordStructure(pvStructure,null,this);
+    	pvStructure.setRequester(this);
     }
     /* (non-Javadoc)
      * @see org.epics.ioc.database.PVRecord#getRecordProcess()
@@ -108,6 +109,10 @@ public class BasePVRecord implements PVRecord {
      * @see org.epics.pvData.pv.PVRecord#getRecordName()
      */
     public String getRecordName() {
+        return recordName;
+    }
+    @Override
+    public String getRequesterName() {
         return recordName;
     }
     /* (non-Javadoc)
