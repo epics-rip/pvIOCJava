@@ -531,14 +531,13 @@ public class RecordProcessFactory {
         public void setTimeStamp(TimeStamp timeStamp) {
             checkForIllegalRequest();
             if(trace) traceMessage("setTimeStamp");
-            if(this.timeStamp!=null) this.timeStamp.put(timeStamp.getSecondsPastEpoch(),timeStamp.getNanoSeconds());
+            this.timeStamp.put(timeStamp.getSecondsPastEpoch(),timeStamp.getNanoSeconds());
         }
         /* (non-Javadoc)
          * @see org.epics.ioc.process.RecordProcessSupport#getTimeStamp(org.epics.ioc.util.TimeStamp)
          */
         public void getTimeStamp(TimeStamp timeStamp) {
             checkForIllegalRequest();
-            if(this.timeStamp==null) return;
             timeStamp.put(this.timeStamp.getSecondsPastEpoch(), this.timeStamp.getNanoSeconds());
         }
         /* (non-Javadoc)
@@ -606,17 +605,15 @@ public class RecordProcessFactory {
 			// don't think I have to do anything
 		}
                 
-        private void traceMessage(String message) {
-            String time = "";
-            if(timeStamp!=null) {
-                long milliPastEpoch = System.currentTimeMillis();
-                Date date = new Date(milliPastEpoch);
-                time = String.format("%tF %tT.%tL ", date,date,date);
-            }
-            message(
-                    time + " " + message + " thread " + Thread.currentThread().getName(),
-                    MessageType.info);
-        }
+		private void traceMessage(String message) {
+		    String time = "";
+		    long milliPastEpoch = System.currentTimeMillis();
+		    Date date = new Date(milliPastEpoch);
+		    time = String.format("%tF %tT.%tL ", date,date,date);
+		    message(
+		            time + " " + message + " thread " + Thread.currentThread().getName(),
+		            MessageType.info);
+		}
         // called by process and processContinue with record locked.
         private void completeProcessing() {
             processCompleteDone = true;
@@ -690,7 +687,6 @@ public class RecordProcessFactory {
 		 */
 		@Override
 		public void callback(AfterStartNode node) {
-			afterStartNode = node;
 			processToken = recordProcess.requestProcessToken(this);
 			if(processToken==null) {
 				recordProcess.getRecord().getPVRecordStructure().message(

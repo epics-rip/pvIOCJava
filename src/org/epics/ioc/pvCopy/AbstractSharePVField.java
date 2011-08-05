@@ -51,7 +51,12 @@ public abstract class AbstractSharePVField extends AbstractPVField {
      */
     @Override
     public void setImmutable() {
-        pvShare.setImmutable();
+        lockShare();
+        try {
+            pvShare.setImmutable();
+        } finally {
+            unlockShare();
+        }
         super.setImmutable();
     }
     /* (non-Javadoc)

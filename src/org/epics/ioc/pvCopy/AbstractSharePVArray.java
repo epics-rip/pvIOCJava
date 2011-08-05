@@ -44,7 +44,12 @@ public abstract class AbstractSharePVArray extends AbstractSharePVField implemen
      */
     @Override
     public void setLength(int len) {
-        pvShare.setLength(len);
+        lockShare();
+        try {
+            pvShare.setLength(len);
+        } finally {
+            unlockShare();
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.pvData.factory.AbstractPVArray#getCapacity()
@@ -72,7 +77,12 @@ public abstract class AbstractSharePVArray extends AbstractSharePVField implemen
      */
     @Override
     public void setCapacityMutable(boolean isMutable) {
-        pvShare.setCapacityMutable(isMutable);
+        lockShare();
+        try {
+            pvShare.setCapacityMutable(isMutable);
+        } finally {
+            unlockShare();
+        }
     }
     /* (non-Javadoc)
      * @see org.epics.pvData.factory.AbstractPVArray#setCapacity(int)
@@ -92,7 +102,7 @@ public abstract class AbstractSharePVArray extends AbstractSharePVField implemen
 	public boolean equals(Object obj) {
 	    lockShare();
         try {
-	    return pvShare.equals(obj);
+	        return pvShare.equals(obj);
         } finally {
             unlockShare();
         }
