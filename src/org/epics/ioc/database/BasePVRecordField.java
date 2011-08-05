@@ -118,6 +118,7 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
 	@Override
 	public boolean addListener(PVListener pvListener) {
 		if(!pvRecord.isRegisteredListener(pvListener)) return false;
+		if(pvListenerList.contains(pvListener)) return false;
 		LinkedListNode<PVListener> listNode = linkedListCreate.createNode(pvListener);
 		pvListenerList.addTail(listNode);
 		return true;
@@ -142,20 +143,11 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
       */
      @Override
      public void postPut() {
-    	 if(pvField.getNextFieldOffset()==0) return; // setOffsets has never been called.
-    	 callListener();
     	 if(parent!=null) {
     		 BasePVRecordField pvf = (BasePVRecordField)parent;
     		 pvf.postParent(this);
     	 }
-    	 if(isStructure) {
-    		 PVRecordStructure recordStructure = (PVRecordStructure)this;
-    		 PVRecordField[] pvRecordFields = recordStructure.getPVRecordFields();
-    		 for(int i=0; i<pvRecordFields.length; i++) {
-    			 BasePVRecordField pv = (BasePVRecordField)pvRecordFields[i];
-    			 postSubField(pv);
-    		 }
-    	 }
+    	 postSubField();
      }
       
      private void postParent(PVRecordField subField) {
@@ -171,15 +163,15 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
     	 }
      }
      
-     private void postSubField(BasePVRecordField pvRecordField) {
-         pvRecordField.callListener();
-         if(pvRecordField.pvField.getField().getType()==Type.structure) {
-        	 PVRecordStructure pvrs = (PVRecordStructure)this;
-        	 PVRecordField[] pvrfs = pvrs.getPVRecordFields();
-        	 for(int i=0;i<pvrfs.length; i++) {
-        		 BasePVRecordField pv = (BasePVRecordField)pvrfs[i];
-        		 postSubField(pv);
-        	 }
+     private void postSubField() {
+         callListener();
+         if(isStructure) {
+             PVRecordStructure recordStructure = (PVRecordStructure)this;
+             PVRecordField[] pvRecordFields = recordStructure.getPVRecordFields();
+             for(int i=0; i<pvRecordFields.length; i++) {
+                 BasePVRecordField pv = (BasePVRecordField)pvRecordFields[i];
+                 pv.postSubField();
+             }
          }
      }
      

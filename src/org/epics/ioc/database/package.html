@@ -408,8 +408,6 @@ Creation</h2>
 <p>Interface and factory for creating PVrecords and PVStructures.</p>
 <pre>    interface PVRecordCreate {
         PVRecord createPVRecord(String recordName,PVStructure pvStructure);
-        PVStructure createPVStructure(PVStructure parent,
-            String fieldName,PVDatabase pvDatabase,String structureName);
     }
 
     class PVRecordCreateFactory{
@@ -420,10 +418,6 @@ Creation</h2>
 <dl>
   <dt>createPVRecord</dt>
     <dd>Create a PVRecord with pvStructure as the top level structure.</dd>
-  <dt>createPVStructure</dt>
-    <dd>Create a PVStructure. The structure with this name is found in
-      pvDatabase. Each subfield and any auxInfo is cloned and added to the
-      newly created structure.</dd>
 </dl>
 
 <h3 id="PVReplaceF">PVReplaceFactory</h3>

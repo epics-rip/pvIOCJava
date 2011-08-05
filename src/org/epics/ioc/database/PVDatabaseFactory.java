@@ -439,8 +439,11 @@ public class PVDatabaseFactory {
          * @see org.epics.pvData.pv.PVDatabase#addRequester(org.epics.pvData.pv.Requester)
          */
         public void addRequester(Requester requester) {
-            LinkedListNode<Requester> listNode = linkedListCreate.createNode(requester);
             synchronized(messageRequesterList){
+                if(messageRequesterList.contains(requester)) {
+                    requester.message("already on requesterList", MessageType.warning);
+                }
+                LinkedListNode<Requester> listNode = linkedListCreate.createNode(requester);
                 messageRequesterList.addTail(listNode);
                 messageRequesterArray.setNodes(messageRequesterList);
             }
