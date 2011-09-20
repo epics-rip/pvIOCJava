@@ -679,7 +679,7 @@ public class RecordProcessFactory {
     	ProcessAfterStart(RecordProcess recordProcess,AfterStart afterStart) {
     		this.recordProcess = recordProcess;
     		this.afterStart = afterStart;
-    		AfterStartNode afterStartNode = AfterStartFactory.allocNode(this);
+    		afterStartNode = AfterStartFactory.allocNode(this);
     		afterStart.requestCallback(afterStartNode, true, ThreadPriority.middle);
     	}
 		/* (non-Javadoc)
