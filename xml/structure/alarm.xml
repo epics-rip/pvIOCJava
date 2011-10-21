@@ -9,6 +9,7 @@
 <structure structureName = "alarm">
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.alarmSupportFactory</auxInfo>
   <scalar name = "severity" scalarType = "int" />
+  <scalar name = "status" scalarType = "int" />
   <scalar name = "message" scalarType = "string" />
 </structure>
 

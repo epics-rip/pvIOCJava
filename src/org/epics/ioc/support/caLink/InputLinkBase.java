@@ -14,6 +14,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
@@ -97,7 +98,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         if(!isReady) {
             alarmSupport.setAlarm(
                     pvRecordField.getFullFieldName() + " not connected",
-                    AlarmSeverity.major);
+                    AlarmSeverity.MAJOR,AlarmStatus.DB);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
@@ -128,7 +129,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         for(int i=0; i< linkPVFields.length; i++) {
             if(i==indexAlarmLinkField) {
                 alarmSupport.setAlarm(pvAlarmMessage.get(),
-                    AlarmSeverity.getSeverity(pvAlarmSeverity.get()));
+                    AlarmSeverity.getSeverity(pvAlarmSeverity.get()),AlarmStatus.DB);
             } else if(allSet){
                 convert.copy(linkPVFields[i],pvFields[i]);
             } else {

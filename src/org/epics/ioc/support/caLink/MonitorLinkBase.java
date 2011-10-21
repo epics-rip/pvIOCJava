@@ -21,6 +21,7 @@ import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.monitor.MonitorElement;
 import org.epics.pvData.monitor.MonitorRequester;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
@@ -107,13 +108,13 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     @Override
     public void process(SupportProcessRequester supportProcessRequester) {
         if(!isReady) {
-            alarmSupport.setAlarm("Support not connected",AlarmSeverity.invalid);
+            alarmSupport.setAlarm("Support not connected",AlarmSeverity.INVALID,AlarmStatus.DB);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
         if(process) {
         	if(monitorElement==null) {
-                alarmSupport.setAlarm("process request not by MonitorLink support",AlarmSeverity.minor);
+                alarmSupport.setAlarm("process request not by MonitorLink support",AlarmSeverity.MINOR,AlarmStatus.DB);
         	} else {
         		getData();
         	}
@@ -243,7 +244,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
 
     private void getData() {
     	if(!isReady) {
-    		alarmSupport.setAlarm("connection lost", AlarmSeverity.invalid);
+    		alarmSupport.setAlarm("connection lost", AlarmSeverity.INVALID,AlarmStatus.DB);
     		return;
     	}
     	PVStructure monitorStructure = monitorElement.getPVStructure();
@@ -264,7 +265,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     			super.pvAlarmMessage = monitorStructure.getStringField("alarm.message");
     			super.pvAlarmSeverity = monitorStructure.getIntField("alarm.severity");
     			alarmSupport.setAlarm(pvAlarmMessage.get(),
-    					AlarmSeverity.getSeverity(pvAlarmSeverity.get()));
+    					AlarmSeverity.getSeverity(pvAlarmSeverity.get()),AlarmStatus.DB);
     		} else {
     			copyChanged(linkPVFields[i],pvFields[i],changeBitSet,allSet);
     		}
@@ -272,7 +273,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	if(overrun || overrunBitSet.nextSetBit(0)>=0) {
     		alarmSupport.setAlarm(
     				"overrun",
-    				AlarmSeverity.none);
+    				AlarmSeverity.NONE,AlarmStatus.DB);
     	}
     	overrun = false;
     	monitor.release(monitorElement);

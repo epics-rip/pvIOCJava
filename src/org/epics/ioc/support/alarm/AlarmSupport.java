@@ -8,6 +8,7 @@ package org.epics.ioc.support.alarm;
 import org.epics.ioc.support.Support;
 import org.epics.pvData.property.Alarm;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 
 
 /**
@@ -33,9 +34,10 @@ public interface AlarmSupport extends Support{
      * the current priority. 
      * @param message The message.
      * @param severity The severity for the message.
+     * @param status The status for the message.
      * @return (false,true) if the request (was not, was) successful.
      */
-    boolean setAlarm(String message, AlarmSeverity severity);
+    boolean setAlarm(String message, AlarmSeverity severity,AlarmStatus status);
     /**
      * Get the current alarm value
      */

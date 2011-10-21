@@ -95,8 +95,9 @@ public class PrintModifiedFactory {
                 convert.newLine(builder, indentLevel);
                 pvTimeStamp.get(timeStamp);
                 long milliPastEpoch = timeStamp.getMilliSeconds();
+                int userTag = timeStamp.getUserTag();
                 Date date = new Date(milliPastEpoch);
-                builder.append(String.format("timeStamp %tF %tT.%tL", date,date,date));
+                builder.append(String.format("timeStamp %tF %tT.%tL userTag %d", date,date,date,userTag));
                 if(overrunBitSet.get(offset)) {
                     builder.append(" overrun");
                 }
@@ -121,6 +122,9 @@ public class PrintModifiedFactory {
                     builder.append("severity ");
                     AlarmSeverity severity = alarm.getSeverity();
                     builder.append(severity.toString());
+                    builder.append(" status ");
+                    AlarmStatus status = alarm.getStatus();
+                    builder.append(status.toString());
                     if(overrunBitSet.get(pvFields[0].getFieldOffset())) {
                         builder.append(" overrun");
                     }

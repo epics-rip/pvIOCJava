@@ -13,6 +13,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVField;
@@ -152,18 +153,18 @@ public class BooleanAlarmFactory {
                 index = pvChangeStateSeverity.get();
                 if(index>0) alarmSupport.setAlarm(
                     "changeStateAlarm",
-                    AlarmSeverity.getSeverity(index));
+                    AlarmSeverity.getSeverity(index),AlarmStatus.RECORD);
             }
             if(value) {
                 index = pvTrueSeverity.get();
                 if(index>0) alarmSupport.setAlarm(
                     "stateAlarm",
-                    AlarmSeverity.getSeverity(index));
+                    AlarmSeverity.getSeverity(index),AlarmStatus.RECORD);
             } else {
                 index = pvFalseSeverity.get();
                 if(index>0) alarmSupport.setAlarm(
                     "stateAlarm",
-                    AlarmSeverity.getSeverity(index));
+                    AlarmSeverity.getSeverity(index),AlarmStatus.RECORD);
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                

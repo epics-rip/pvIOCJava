@@ -12,6 +12,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
 import org.epics.pvData.pv.PVInt;
@@ -149,11 +150,11 @@ public class LongAlarmFactory {
                     message = lastAlarmMessage;
                 }
             }
-            if(alarmSeverity==AlarmSeverity.none) {
+            if(alarmSeverity==AlarmSeverity.NONE) {
                 lastAlarmSeverity = severity;
                 return;
             }
-            alarmSupport.setAlarm(message, alarmSeverity);
+            alarmSupport.setAlarm(message, alarmSeverity,AlarmStatus.RECORD);
             lastAlarmIntervalValue = intervalValue;
             lastAlarmSeverity = severity;
         }

@@ -14,6 +14,7 @@ import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
@@ -134,7 +135,7 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
                 deviceTrace.print(Trace.ERROR,
                     "pv %s support %s float64.read failed", fullName,supportName);
             }
-            alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
+            alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.INVALID,AlarmStatus.DRIVER);
             return;
         }
         value = user.getDouble();
@@ -150,7 +151,7 @@ public class BaseFloat64Input extends AbstractPortDriverSupport
         if(status==Status.success) {
             convert.fromDouble((PVScalar)valuePVField, value);
         } else {
-            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
+            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.INVALID,AlarmStatus.DRIVER);
         }
     }        
 }

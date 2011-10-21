@@ -11,20 +11,20 @@
 <h1 style="text-align: center">EPICS JavaIOC: caV3<br />
 Channel Access Version 3<br />
 package: org.epics.ioc.caV3<br />
-2009.11.17</h1>
+2011.09.27</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Server">Server</a>
+  <li><a href="#Server">Server</a> 
     <ul>
       <li><a href="#Syntax">Syntax</a></li>
       <li><a href="#Options">Get and Put Options</a></li>
       <li><a href="#monitor">monitor options</a></li>
     </ul>
   </li>
-  <li><a href="#Client">Client</a>
+  <li><a href="#Client">Client</a> 
     <ul>
       <li><a href="#Overview1">Overview</a></li>
       <li><a href="#Naming">Naming conventions.</a></li>
@@ -53,8 +53,8 @@ The javaIOC overview provides instructions for using XMLToDatabase to start
 everything.</p>
 
 <p>Both the client and server use the JCA/CAJ support provided by <a
-href="http://jca.cosylab.com">cosylab</a>. In addition the server uses the
-CAS support that comes with the latest versions of JCA/CAJ.</p>
+href="http://jca.cosylab.com">cosylab</a>. In addition the server uses the CAS
+support that comes with the latest versions of JCA/CAJ.</p>
 <hr />
 
 <h2 style="text-align: center" id="Server">Server</h2>
@@ -86,34 +86,32 @@ DBR_ENUM with choices = {"false","true"}.</p>
 </dl>
 
 <p>The following examples use the channel access utility shell commands that
-come with EPICS base. The database is the example/exampleDB.xml that comes
-with the javaIOC. </p>
+come with EPICS base. The database is the example/exampleDB.xml that comes with
+the javaIOC. </p>
 <pre>    caput double 6</pre>
 
 <p>This writes the value 6 to the value field of a record named double.</p>
-<pre>    caput double.{putProcess=true} 5</pre>
+<pre>    caput double.{process=true} 5</pre>
 
 <p>This writes the value 5 to record double and also requests that the record
 be processed. The value is written before the record is processed.</p>
-<pre>     caget -d 20 double.{getProcess=true}</pre>
+<pre>     caget -d 20 double.{process=true}</pre>
 
 <p>This gets the value field of record double. The record is processed.</p>
-<pre>    caput powerSupplyArray.supply.1.power{putProcess=true} 2</pre>
+<pre>    caput powerSupplyArray.supply.1.power{process=true} 2</pre>
 
-<p>This writes the value 2 to the power.value field of the second supply of
-the powerSupplyArray record.</p>
+<p>This writes the value 2 to the power.value field of the second supply of the
+powerSupplyArray record.</p>
 
 <h3 id="Options">Get and Put Options</h3>
 
 <p>The currently supported options are:</p>
-<pre>    getProcess=true
-    putProcess=true
+<pre>    process=true
     shareData=true</pre>
 
-<p>getProcess processes the record and then retrives data. putProcess first
-puts data into the record and then processes the record. In order for either
-to work, the record must not already have a recordProcessor assigned to
-it.</p>
+<p>For get the record is processed before the get and for put the record is
+processed after the put. In order for either to work, the record must not
+already have a recordProcessor assigned to it.</p>
 
 <h3 id="monitor">monitor options</h3>
 
@@ -125,48 +123,46 @@ it.</p>
 
 <h3 id="Overview1">Overview</h3>
 
-<p>The client code implements a ChannelProvider that communicates with
-Channel Access version 3 IOCs. It allows access to all the V3 data types. The
-provider name is "caV3". </p>
+<p>The client code implements a ChannelProvider that communicates with Channel
+Access version 3 IOCs. It allows access to all the V3 data types. The provider
+name is "caV3". </p>
 
 <p>The channelName is of the form recordName.fieldName, where fieldName is
 optional. See naming conventions below for details.</p>
 
-<p>The client code implements the standard ChannelProvider interface as
-defined by cajV4. This means that it also implements interface Channel.
-However only the features that make sense for caV3 are implemented. </p>
+<p>The client code implements the standard ChannelProvider interface as defined
+by cajV4. This means that it also implements interface Channel. However only
+the features that make sense for caV3 are implemented. </p>
 
-<p> For Channel the implementation of the following methods is:</p>
+<p>For Channel the implementation of the following methods is:</p>
 <dl>
   <dt><span style="font-family: courier;">getField</span></dt>
-    <dd>Returns a Structure. The structure has a field named "value", which
-      is related to the fieldName of the channel. The type of the value field
+    <dd>Returns a Structure. The structure has a field named "value", which is
+      related to the fieldName of the channel. The type of the value field
       depends on the caV3 native type. If the type is DBR_ENUM then the value
-      field will be an enumerated structure. For the other DBR types the
-      value field will be either a scalar or an array depending of the DBR
-      type. The scalarType of the field will match the DBR type. For all
-      types the Structure will have fields timeStamp and alarm, which are the
-      standard timeStamp and alarm structures. If the native DBR Type is
-      numeric then the Structure will also have structure fields for control
-      and display.</dd>
+      field will be an enumerated structure. For the other DBR types the value
+      field will be either a scalar or an array depending of the DBR type. The
+      scalarType of the field will match the DBR type. For all types the
+      Structure will have fields timeStamp and alarm, which are the standard
+      timeStamp and alarm structures. If the native DBR Type is numeric then
+      the Structure will also have structure fields for control and
+    display.</dd>
   <dt><span style="font-family: courier;">getChannelProcess</span></dt>
     <dd>Not supported.</dd>
   <dt><span style="font-family: courier;">createChannelArray</span></dt>
     <dd>Not supported.</dd>
   <dt><span style="font-family: courier;">createChannelGet</span></dt>
-    <dd>Supported. Also support for alarm, timeStamp, display, and
-    control.</dd>
+    <dd>Supported. Also support for alarm, timeStamp, display, and control.</dd>
   <dt><span style="font-family: courier;">createChannelPut</span></dt>
     <dd>Supported but no support for properties.</dd>
   <dt><span style="font-family: courier;">createChannelPutGet</span></dt>
     <dd>Not supported.</dd>
   <dt><span style="font-family: courier;">createMonitor</span></dt>
-    <dd>Supported. Also support for alarm and timeStamp. Note that a single
-      get request is made after connection so that enum choices and control
-      and display information can be obtained. For a numeric value field
-      support for display and control is implemented. Note that the display
-      and control information will not change. This matches the caV3
-      semantics.</dd>
+    <dd>Supported. Also support for alarm and timeStamp. Note that a single get
+      request is made after connection so that enum choices and control and
+      display information can be obtained. For a numeric value field support
+      for display and control is implemented. Note that the display and control
+      information will not change. This matches the caV3 semantics.</dd>
 </dl>
 
 <p></p>
@@ -189,12 +185,11 @@ However only the features that make sense for caV3 are implemented. </p>
 createMonitor must define a request that makes sense for a v3 record. For all
 three the request should include the definition for a value field, which is
 associated with the fieldName of the pvName. For all it is OK to attach to a
-record which has a VAL field that is a DBR_ENUM. In this case the value can
-be retrieved as an enumerated structure or just the index or string value can
-be retrieved.</p>
+record which has a VAL field that is a DBR_ENUM. In this case the value can be
+retrieved as an enumerated structure or just the index or string value can be
+retrieved.</p>
 
-<p>The following request structure will get the value, alarm, and
-timeStamp:</p>
+<p>The following request structure will get the value, alarm, and timeStamp:</p>
 <pre>&lt;structure name = "request"&gt;
     &lt;scalar name = "fieldList" scalarType = "string"&gt;
        value,alarm,timeStamp
@@ -215,12 +210,11 @@ timeStamp:</p>
 
 <h3 id="Data">Data Types Supported</h3>
 
-<p>The V3 data types are supported via a corresponding javaIOC data type. A
-V3 <span style="font-family: Courier New,Courier,monospace;">char</span> is a
-javaIOC <span
-style="font-family: Courier New,Courier,monospace;">byte</span>. The types
-<span style="font-family: Courier New,Courier,monospace;">short, int, float,
-and doubl</span>e are common to both. A V3 <span
+<p>The V3 data types are supported via a corresponding javaIOC data type. A V3
+<span style="font-family: Courier New,Courier,monospace;">char</span> is a
+javaIOC <span style="font-family: Courier New,Courier,monospace;">byte</span>.
+The types <span style="font-family: Courier New,Courier,monospace;">short, int,
+float, and doubl</span>e are common to both. A V3 <span
 style="font-family: Courier New,Courier,monospace;">string</span> becomes a
 javaIOC <span
 style="font-family: Courier New,Courier,monospace;">String</span>. Arrays of
@@ -235,11 +229,11 @@ timeStamp, display, and control).</p>
 <p>The implementation consists of the following classes.</p>
 <dl>
   <dt>ClientFactory</dt>
-    <dd>This implements ChannelProvider. It creates instances of
-      BaseV3Channel when a client calls createChannel. It creates a JCA
-      Context that is used for all channels. It also listens for JCA Context
-      Exceptions and Messages. In spawns a thread that issues a JCA poll
-      request at regular intervals.</dd>
+    <dd>This implements ChannelProvider. It creates instances of BaseV3Channel
+      when a client calls createChannel. It creates a JCA Context that is used
+      for all channels. It also listens for JCA Context Exceptions and
+      Messages. In spawns a thread that issues a JCA poll request at regular
+      intervals.</dd>
   <dt>BaseV3Channel</dt>
     <dd>This implements the Channel interface. It creates a JCA Channel and
       handles the JCA connection events. It does NOT implement

@@ -15,6 +15,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.property.TimeStamp;
 import org.epics.pvData.property.TimeStampFactory;
 import org.epics.pvData.pv.MessageType;
@@ -85,7 +86,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester,RecordProcessReques
      */
     public void processContinue() {
         if(alarmMessage!=null) {
-            alarmSupport.setAlarm(alarmMessage, AlarmSeverity.minor);
+            alarmSupport.setAlarm(alarmMessage, AlarmSeverity.MINOR,AlarmStatus.DB);
         }
         supportProcessRequester.supportProcessDone(requestResult);
     }

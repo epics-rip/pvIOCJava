@@ -435,7 +435,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     @Override
     public void toStructure(DBR fromDBR) {
         if(fromDBR==null) {
-            setAlarm(AlarmSeverity.invalid,"fromDBR is null");
+            setAlarm(AlarmSeverity.INVALID,"fromDBR is null");
             return;
         }
         gov.aps.jca.dbr.Status status = null;
@@ -482,7 +482,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                     this.requestDBRType = DBRType.ENUM;
                 }
             } else {
-                setAlarm(AlarmSeverity.invalid,
+                setAlarm(AlarmSeverity.INVALID,
                         " unsupported DBRType " + requestDBRType.getName());
                 return;
             }
@@ -889,7 +889,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                     this.requestDBRType = DBRType.STRING;
                 }
             } else {
-                setAlarm(AlarmSeverity.invalid,
+                setAlarm(AlarmSeverity.INVALID,
                         " unsupported DBRType " + requestDBRType.getName());
                 return;
             }

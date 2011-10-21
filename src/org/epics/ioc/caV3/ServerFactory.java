@@ -51,6 +51,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
+import org.epics.ca.client.CreateRequestFactory;
 import org.epics.ioc.database.PVDatabase;
 import org.epics.ioc.database.PVDatabaseFactory;
 import org.epics.ioc.database.PVRecord;
@@ -102,15 +103,14 @@ import org.epics.pvData.pv.Type;
 import com.cosylab.epics.caj.cas.handlers.AbstractCASResponseHandler;
 
 public class ServerFactory {
-    /**
+	/**
      * This starts the Channel Access Server.
      */
     public static void start() {
         new ThreadInstance();
     }
-
+    
     private static final Convert convert = ConvertFactory.getConvert();
-    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static final Pattern periodPattern = Pattern.compile("[.]");
@@ -267,8 +267,7 @@ public class ServerFactory {
         private PVRecord pvRecord = null;
         private RecordProcess recordProcess = null;
         private DBR dbr = null;
-        private boolean getProcess = false;
-        private boolean putProcess = false;
+        private boolean process = false;
         private boolean canProcess = false;
         private boolean processActive = false;
         private boolean getProcessActive = false;
@@ -301,89 +300,46 @@ public class ServerFactory {
             this.pvRecord = pvRecord;
             this.options = options;
             this.eventCallback = eventCallback;
-            PVStructure pvTimeStamp = null;
-            PVStructure pvAlarm = null;
-            PVStructure pvDisplay = null;
-            PVStructure pvControl = null;
-            int nfields = 1; // valueField is 1st
+            String option = getOption("shareData");
+            boolean shareData = Boolean.getBoolean(option);
+            option = getOption("process");
+            if(option!=null) process = Boolean.valueOf(option);
+            String request = "";
+            if(shareData||process) {
+            	request = "record[";
+            	if(process) request += "process=true";
+            	if(process&&shareData) request += ",";
+            	if(shareData) request += "shareData=true";
+            	request += "]";
+            }
+            request += "field(value";
             PVField pvTemp= pvProperty.findProperty(valuePV, "alarm");
             if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "alarm");
             if(pvTemp!=null) {
-                nfields++;
-                pvAlarm = (PVStructure)pvTemp;
+                request+= ",alarm";
             }
             pvTemp= pvProperty.findProperty(valuePV, "timeStamp");
             if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "timeStamp");
             if(pvTemp!=null) {
-                nfields++;
-                pvTimeStamp = (PVStructure)pvTemp;
+                request += ",timeStamp";
             }
             pvTemp= pvProperty.findProperty(valuePV, "display");
             if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "display");
             if(pvTemp!=null) {
-                nfields++;
-                pvDisplay = (PVStructure)pvTemp;
+                request += ",display";
             }
             pvTemp= pvProperty.findProperty(valuePV, "control");
             if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "control");
             if(pvTemp!=null) {
-                nfields++;
-                pvControl = (PVStructure)pvTemp;
+                request += ",control";
             }
-            String option = getOption("shareData");
-            boolean shareData = Boolean.getBoolean(option);
-            PVStructure pvRequest = pvDataCreate.createPVStructure(null, pvRecord.getRecordName(), new Field[0]);
-            PVString pvString = null;
-            StringBuilder builder = new StringBuilder();
-            if(shareData) {
-            	PVStructure pvStruct = pvDataCreate.createPVStructure(pvRequest, "value", new Field[0]);
-            	PVStructure pvLeaf = pvDataCreate.createPVStructure(pvStruct, "leaf", new Field[0]);
-            	pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"source", ScalarType.pvString);
-            	convert.getFullFieldName(builder, valuePV);
-            	builder.setLength(0);
-                pvString.put(builder.toString());
-                pvLeaf.appendPVField(pvString);
-                pvString = (PVString)pvDataCreate.createPVScalar(pvLeaf,"shareData", ScalarType.pvString);
-                pvString.put("true");
-                pvLeaf.appendPVField(pvString);
-                pvStruct.appendPVField(pvLeaf);
-                pvRequest.appendPVField(pvStruct);
-            	
-            } else {
-            	pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"value", ScalarType.pvString);
-            	convert.getFullFieldName(builder, valuePV);
-                builder.setLength(0);
-                pvString.put(builder.toString());
-                pvRequest.appendPVField(pvString);
+            pvTemp= pvProperty.findProperty(valuePV, "valueAlarm");
+            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "valueAlarm");
+            if(pvTemp!=null) {
+                request += ",valueAlarm";
             }
-            if(pvAlarm!=null) {
-                pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"alarm", ScalarType.pvString);
-                convert.getFullFieldName(builder, pvAlarm);
-                builder.setLength(0);
-                pvString.put(builder.toString());
-                pvRequest.appendPVField(pvString);
-            }
-            if(pvTimeStamp!=null) {
-                pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"timeStamp", ScalarType.pvString);
-                convert.getFullFieldName(builder, pvTimeStamp);
-                builder.setLength(0);
-                pvString.put(builder.toString());
-                pvRequest.appendPVField(pvString);
-            }
-            if(pvDisplay!=null) {
-                pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"display", ScalarType.pvString);
-                convert.getFullFieldName(builder, pvDisplay);
-                builder.setLength(0);
-                pvString.put(builder.toString());
-                pvRequest.appendPVField(pvString);
-            }
-            if(pvControl!=null) {
-                pvString = (PVString)pvDataCreate.createPVScalar(pvRequest,"control", ScalarType.pvString);
-                convert.getFullFieldName(builder, pvControl);
-                builder.setLength(0);
-                pvString.put(builder.toString());
-                pvRequest.appendPVField(pvString);
-            }
+            request += ")";
+            PVStructure pvRequest = CreateRequestFactory.createRequest(request,this);
             pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
             pvCopyStructure = pvCopy.createPVStructure();
             copyBitSet = new BitSet(pvCopyStructure.getNumberFields());
@@ -391,11 +347,8 @@ public class ServerFactory {
             pvCopy.updateCopyFromBitSet(pvCopyStructure, copyBitSet, true);
             valuePVField = pvCopyStructure.getSubField("value");
             initializeChannelDBRType();
-            option = getOption("getProcess");
-            if(option!=null) getProcess = Boolean.valueOf(option);
-            option = getOption("putProcess");
-            if(option!=null) putProcess = Boolean.valueOf(option);
-            if(getProcess||putProcess) {
+            
+            if(process) {
                 recordProcess = pvRecord.getRecordProcess();
                 processToken = recordProcess.requestProcessToken(this);
             	if(processToken==null) {
@@ -465,7 +418,7 @@ public class ServerFactory {
         public CAStatus read(DBR dbr, ProcessVariableReadCallback asyncReadCallback) throws CAException {
         	if(isDestroyed) return CAStatus.CHANDESTROY;
             this.dbr = dbr;
-        	if(getProcess) {
+        	if(process) {
                 boolean ok = true;
                 synchronized(this) {
                     if(processActive) {
@@ -505,7 +458,7 @@ public class ServerFactory {
          */
         public CAStatus write(DBR dbr, ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
         	if(isDestroyed) return CAStatus.CHANDESTROY;
-            if(putProcess) {
+            if(process) {
                 boolean ok = true;
                 synchronized(this) {
                     if(processActive) {
@@ -863,16 +816,16 @@ public class ServerFactory {
             AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(pvSeverity.get());
             switch (alarmSeverity)
             {
-            case none:
+            case NONE:
                 sts.setSeverity(Severity.NO_ALARM);
                 sts.setStatus(Status.NO_ALARM);
                 break;
-            case minor:
+            case MINOR:
                 sts.setSeverity(Severity.MINOR_ALARM);
                 // for now only SOFT_ALARM
                 sts.setStatus(Status.SOFT_ALARM);
                 break;
-            case major:
+            case MAJOR:
                 sts.setSeverity(Severity.MAJOR_ALARM);
                 // for now only SOFT_ALARM
                 sts.setStatus(Status.SOFT_ALARM);
@@ -1003,6 +956,20 @@ public class ServerFactory {
                     PVDouble highField = pvDisplay.getDoubleField("limit.high");
                     gr.setUpperDispLimit(highField.get());
                 }
+                PVStructure pvValueAlarm = null;
+            	if(pvCopyStructure.getSubField("valueAlarm")!=null) {
+            		pvValueAlarm = pvCopyStructure.getStructureField("valueAlarm");
+            	}
+                if(pvValueAlarm!=null) {
+                	double lowAlarmLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("lowAlarmLimit"));
+                	double lowWarningLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("lowWarningLimit"));
+                	double highWarningLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("highWarningLimit"));
+                	double highAlarmLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("highAlarmLimit"));
+                    gr.setLowerAlarmLimit(lowAlarmLimit);
+                    gr.setLowerWarningLimit(lowWarningLimit);
+                    gr.setUpperWarningLimit(highWarningLimit);
+                    gr.setUpperAlarmLimit(highAlarmLimit);
+                }
             }
             if (dbr instanceof CTRL) {
             	PVStructure pvControl = null;
@@ -1017,8 +984,23 @@ public class ServerFactory {
 
             		PVDouble highField = pvControl.getDoubleField("limit.high");
             		ctrl.setUpperCtrlLimit(highField.get());
+            		PVStructure pvValueAlarm = null;
+                	if(pvCopyStructure.getSubField("valueAlarm")!=null) {
+                		pvValueAlarm = pvCopyStructure.getStructureField("valueAlarm");
+                	}
+            		if(pvValueAlarm!=null) {
+                    	double lowAlarmLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("lowAlarmLimit"));
+                    	double lowWarningLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("lowWarningLimit"));
+                    	double highWarningLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("highWarningLimit"));
+                    	double highAlarmLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("highAlarmLimit"));
+                        ctrl.setLowerAlarmLimit(lowAlarmLimit);
+                        ctrl.setLowerWarningLimit(lowWarningLimit);
+                        ctrl.setUpperWarningLimit(highWarningLimit);
+                        ctrl.setUpperAlarmLimit(highAlarmLimit);
+                    }
             	}
             }
         }
     }
+    
 }

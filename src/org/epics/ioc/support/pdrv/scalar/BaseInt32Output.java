@@ -14,6 +14,7 @@ import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.Type;
@@ -102,7 +103,7 @@ public class BaseInt32Output extends AbstractPortDriverSupport
     @Override
     public void endProcess() {
         if(status!=Status.success) {
-            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
+            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.INVALID,AlarmStatus.DRIVER);
         }
     }        
 }

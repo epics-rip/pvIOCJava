@@ -14,6 +14,7 @@ import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
@@ -158,7 +159,7 @@ public class BaseSerialOutput extends AbstractPortDriverSupport
     public void endProcess() {
         super.endProcess();
         if(status!=Status.success) {
-            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
+            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.INVALID,AlarmStatus.DRIVER);
         }
     }        
     /* (non-Javadoc)

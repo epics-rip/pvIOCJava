@@ -10,13 +10,13 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: alarm support<br />
 package: org.epics.ioc.alarm.support<br />
-2010.01.08</h1>
+2011.10.20</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
   <li><a href="#Overview">Overview</a></li>
-  <li><a href="#definition">XML definitions For alarms</a>
+  <li><a href="#definition">XML definitions For alarms</a> 
     <ul>
       <li><a href="#Numeric">Numeric Scalar</a></li>
       <li><a href="#Boolean">Boolean</a></li>
@@ -24,7 +24,7 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#Alarm">Alarm Support</a></li>
-  <li><a href="#Value">Value Alarms</a>
+  <li><a href="#Value">Value Alarms</a> 
     <ul>
       <li><a href="#Boolean1">Boolean Alarms</a></li>
       <li><a href="#Numeric1">Numeric Alarms</a></li>
@@ -48,16 +48,20 @@ describe the support. </p>
 <p>An alarm is defind as follows:</p>
 <pre>&lt;structure structureName = "alarm"&gt;
   &lt;scalar name = "severity" scalarType = "int" /&gt;
+  &lt;scalar name = "status" scalarType = "int" /&gt;
   &lt;scalar name = "message" scalarType = "string" /&gt;
 &lt;/structure&gt;</pre>
 
 <p>Thus an alarm is defined by a structure that has two fields:</p>
 <dl>
   <dt>severity</dt>
-    <dd>An integer that represents a severity index..
-      org.epics.pvData.property has definitions for AlarmSeverity, Alarm, and
-      AlarmFactory that implements a enum where the severity is the index.
-    </dd>
+    <dd>An integer that represents a severity index. org.epics.pvData.property
+      has definitions for AlarmSeverity, Alarm, and AlarmFactory that
+      implements a enum where the severity is the index. </dd>
+  <dt>status</dt>
+    <dd>An integer that represents a status index. org.epics.pvData.property
+      has definitions for AlarmStatus, Alarm, and AlarmFactory that implements
+      a enum where the status is the index. </dd>
   <dt>message</dt>
     <dd>A string field named message.</dd>
 </dl>
@@ -89,13 +93,13 @@ describe the support. </p>
 <hr />
 
 <p>Support for raising alarms is provided for all the primitive types and for
-an enumerated structure. Each can be defined for any field of a record that
-has the corresponding type and has the field name "value". A record instance
-can have multiple fields with associated alarm support. Since a structure can
-have only one field named value, the top level of a structure can only have a
-single alarm support but each substructure can also have alarm support. Three
-basic types of support are provided: numeric, boolean, and enumerated. Each
-is discussed in a separate section below.</p>
+an enumerated structure. Each can be defined for any field of a record that has
+the corresponding type and has the field name "value". A record instance can
+have multiple fields with associated alarm support. Since a structure can have
+only one field named value, the top level of a structure can only have a single
+alarm support but each substructure can also have alarm support. Three basic
+types of support are provided: numeric, boolean, and enumerated. Each is
+discussed in a separate section below.</p>
 
 <h3 id="Numeric">Numeric Scalar</h3>
 
@@ -118,8 +122,8 @@ the other types is similar.</p>
   &lt;scalar name = "hystersis" scalarType = "double" /&gt;
 &lt;/structure&gt;</pre>
 
-<p>The doubleAlarm structure must appear in a structure at the same level as
-a double scalar field named value. There must be an alarm field at the same
+<p>The doubleAlarm structure must appear in a structure at the same level as a
+double scalar field named value. There must be an alarm field at the same
 level.:q</p>
 
 <p></p>
@@ -148,16 +152,15 @@ level.:q</p>
 &lt;/record&gt;</pre>
 
 <p>This example reproduces the semantics of alarm support for an EPICS V3 ai
-record but the details are different. The above xml definition is for a
-record instance but it could also apply to a substructure of a record if
-record is replaced by structure in the above example. What is important is
-that the structure has fields named value and alarm and that a structure
-field that extends doubleAlarm is defined.</p>
+record but the details are different. The above xml definition is for a record
+instance but it could also apply to a substructure of a record if record is
+replaced by structure in the above example. What is important is that the
+structure has fields named value and alarm and that a structure field that
+extends doubleAlarm is defined.</p>
 
 <h3 id="Boolean">Boolean</h3>
 
-<p>A example of attaching alarm support to a boolean record or structure
-is:</p>
+<p>A example of attaching alarm support to a boolean record or structure is:</p>
 <pre>&lt;record recordName = "booleanExample"&gt;
     &lt;scalar name = "value" scalarType = "boolean"/&gt;
     &lt;structure name = "alarm" extends = "alarm" /&gt;
@@ -214,17 +217,17 @@ enumerated field named value. It has the fields:</p>
 <h2 style="text-align: center" id="Alarm">Alarm Support</h2>
 <hr />
 
-<p>AlarmSupport is support for a field named which must have type structure
-and the structure must be an alarm structure. Within the structure hierarchy
-of a record multiple alarm fields can exist. Some support, e.g. generic,
-calls the support for the alarm field defined in the top level structure
-(defined in common.xml). If multiple alarm fields reside in a record then the
-top level alarm field, which is what the outside world normally accesses has
-a severity at least as great as any of the lower level alarms.</p>
+<p>AlarmSupport is support for a field named which must have type structure and
+the structure must be an alarm structure. Within the structure hierarchy of a
+record multiple alarm fields can exist. Some support, e.g. generic, calls the
+support for the alarm field defined in the top level structure (defined in
+common.xml). If multiple alarm fields reside in a record then the top level
+alarm field, which is what the outside world normally accesses has a severity
+at least as great as any of the lower level alarms.</p>
 <pre>interface AlarmSupport extends Support{
     void beginProcess();
     void endProcess();
-    boolean setAlarm(String message, AlarmSeverity severity);
+    boolean setAlarm(String message, AlarmSeverity severity,AlarmStatus status);
     Alarm getAlarm();
 }
 
@@ -248,11 +251,11 @@ class AlarmSupportFactory {
       it makes sure that the severity is noAlarm. If the severity and/or
       message was changed during record processing it calls postPut.</dd>
   <dt style="font-family: courier;">setAlarm</dt>
-    <dd>While a record is processing code, normally another support module,
-      can call setAlarm. This method changes the new message and severity
+    <dd>While a record is processing code, normally another support module, can
+      call setAlarm. This method changes the new message, severity, and status
       only if the severity passed to setAlarm is greater than the current new
       severity or if this is the first call since the record started
-      processing.</dd>
+    processing.</dd>
   <dt style="font-family: courier;">getAlarm</dt>
     <dd>Get the Alarm interface. This interface is defined in
       org.epics.pvData.property.</dd>
@@ -318,11 +321,11 @@ fields:</p>
         public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
 
-<p>The above factories provide alarm support for the associated type of
-field, e.g. FloatAlarmFactory provides alarm support for a field of type
-float. The support for each type except that float and double also support
-hystersis: If value goes into alarm this is the amount it must come out of
-alarm before the alarm severity is modified. This prevents alarm .</p>
+<p>The above factories provide alarm support for the associated type of field,
+e.g. FloatAlarmFactory provides alarm support for a field of type float. The
+support for each type except that float and double also support hystersis: If
+value goes into alarm this is the amount it must come out of alarm before the
+alarm severity is modified. This prevents alarm .</p>
 
 <h3 id="Enumerated1">Enumerated Alarms</h3>
 <pre>    public class EnumeratedAlarmFactory {
@@ -338,9 +341,9 @@ alarm before the alarm severity is modified. This prevents alarm .</p>
       checked.</dd>
   <dt style="font-family: courier;">stateSeverity</dt>
     <dd>An array of stateSeverity alarmSeverity menu definitions. When the
-      process method is called the value field is the index for this array.
-      The corresponding alarmSeverity menu is found and it determines the
-      alarm severity.</dd>
+      process method is called the value field is the index for this array. The
+      corresponding alarmSeverity menu is found and it determines the alarm
+      severity.</dd>
   <dt style="font-family: courier;">changeStateAlarm</dt>
     <dd>An alarmSeverity menu. This specifies the severity if the value field
       changes.</dd>

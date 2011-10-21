@@ -16,6 +16,7 @@ import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.Type;
@@ -85,14 +86,14 @@ implements Int32InterruptListener
         if(!super.checkSupportState(SupportState.ready,supportName)) {
             super.alarmSupport.setAlarm(
                     fullName + " not ready",
-                    AlarmSeverity.major);
+                    AlarmSeverity.MAJOR,AlarmStatus.DRIVER);
             supportProcessRequester.supportProcessDone(RequestResult.failure);
             return;
         }
         if(numValues==0) {
             super.alarmSupport.setAlarm(
                     fullName + " no new values",
-                    AlarmSeverity.major);
+                    AlarmSeverity.MAJOR,AlarmStatus.DRIVER);
         } else {
             double average = ((double)sum)/numValues;
             convert.fromDouble((PVScalar)valuePVField, average);

@@ -12,6 +12,7 @@ import org.epics.ioc.support.Support;
 import org.epics.ioc.support.basic.GenericBase;
 import org.epics.pvData.property.Alarm;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.property.PVAlarm;
 import org.epics.pvData.property.PVAlarmFactory;
 import org.epics.pvData.pv.Field;
@@ -104,12 +105,15 @@ public class AlarmSupportFactory {
 		private RecordProcess recordProcess = null;
 
 		private PVInt pvSeverity = null;
+		private PVInt pvStatus = null;
 		private PVString pvMessage = null;
 
 		private boolean gotAlarm;
 		private boolean active = false;
-		private int beginIndex = 0;
-		private int currentIndex = 0;
+		private int beginSeverity = 0;
+		private int currentSeverity = 0;
+		private int beginStatus = 0;
+		private int currentStatus = 0;
 		private String beginMessage = null;
 		private String currentMessage = null;
 		private Alarm alarm = new Alarm();
@@ -130,6 +134,7 @@ public class AlarmSupportFactory {
 			}
 			PVStructure pvStruct = pvRecordStructureAlarm.getPVStructure();
 			pvSeverity = pvStruct.getIntField("severity");
+			pvStatus = pvStruct.getIntField("status");
 			pvMessage = pvStruct.getStringField("message");
 			return true;
 		}
@@ -173,10 +178,12 @@ public class AlarmSupportFactory {
 				return;
 			gotAlarm = false;
 			active = true;
-			beginIndex = pvSeverity.get();
+			beginSeverity = pvSeverity.get();
+			beginStatus = pvStatus.get();
 			beginMessage = pvMessage.get();
 			currentMessage = beginMessage;
-			currentIndex = 0;
+			currentSeverity = 0;
+			currentStatus = 0;
 			currentMessage = null;
 		}
 
@@ -198,8 +205,9 @@ public class AlarmSupportFactory {
 					messageChange = true;
 				}
 			}
-			if (currentIndex != beginIndex || messageChange) {
-				pvSeverity.put(currentIndex);
+			if (currentSeverity != beginSeverity || currentStatus != beginStatus || messageChange) {
+				pvSeverity.put(currentSeverity);
+				pvStatus.put(currentStatus);
 				pvMessage.put(currentMessage);
 			}
 		}
@@ -211,14 +219,15 @@ public class AlarmSupportFactory {
 		 * org.epics.ioc.support.AlarmSupport#setStatusSeverity(java.lang.String
 		 * , org.epics.ioc.util.AlarmSeverity)
 		 */
-		public boolean setAlarm(String message, AlarmSeverity severity) {
-			int newIndex = severity.ordinal();
+		public boolean setAlarm(String message, AlarmSeverity severity,AlarmStatus status) {
+			int newSeverity = severity.ordinal();
+			int newStatus = status.ordinal();
 			if (!active) {
 				if (recordProcess.isActive()) {
 					beginProcess();
 				} else { // record is not being processed
-					if (newIndex > 0) { // raise alarm
-						pvSeverity.put(newIndex);
+					if (newSeverity > 0) { // raise alarm
+						pvSeverity.put(newSeverity);
 						pvMessage.put(message);
 						return true;
 					} else { // no alarm just return false
@@ -226,12 +235,13 @@ public class AlarmSupportFactory {
 					}
 				}
 			}
-			if (!gotAlarm || newIndex > currentIndex) {
-				currentIndex = newIndex;
+			if (!gotAlarm || newSeverity > currentSeverity) {
+				currentSeverity = newSeverity;
 				currentMessage = message;
+				currentStatus = newStatus;
 				gotAlarm = true;
 				if (parentAlarmSupport != null) {
-					parentAlarmSupport.setAlarm(message, severity);
+					parentAlarmSupport.setAlarm(message, severity,status);
 				}
 				return true;
 			}
@@ -244,6 +254,7 @@ public class AlarmSupportFactory {
 		public void getAlarm(Alarm alarm) {
 			alarm.setMessage(this.alarm.getMessage());
 			alarm.setSeverity(this.alarm.getSeverity());
+			alarm.setStatus(this.alarm.getStatus());
 		}
 	}
 }

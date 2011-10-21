@@ -13,6 +13,7 @@ import org.epics.ioc.support.ProcessContinueRequester;
 import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.Status;
 /**
@@ -100,7 +101,7 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
         if(!isReady) {
             if(alarmSupport!=null) alarmSupport.setAlarm(
                     pvRecordField.getFullFieldName() + " not connected",
-                    AlarmSeverity.major);
+                    AlarmSeverity.MAJOR,AlarmStatus.DB);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }

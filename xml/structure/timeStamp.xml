@@ -8,6 +8,7 @@
 <structure structureName = "timeStamp">
   <scalar name = "secondsPastEpoch" scalarType = "long" />
   <scalar name = "nanoSeconds" scalarType = "int" />
+  <scalar name = "userTag" scalarType = "int" />
 </structure>
 
 </database>

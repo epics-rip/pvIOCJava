@@ -14,6 +14,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
@@ -97,7 +98,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         if(!isReady) {
             alarmSupport.setAlarm(
                     pvRecordField.getFullFieldName() + " not connected",
-                    AlarmSeverity.major);
+                    AlarmSeverity.MAJOR,AlarmStatus.DB);
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
@@ -140,7 +141,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
         if(requestResult!=RequestResult.success) {
             alarmSupport.setAlarm(
                     pvRecordField.getFullFieldName() + ": put request failed",
-                    AlarmSeverity.major);
+                    AlarmSeverity.MAJOR,AlarmStatus.DB);
         }
         supportProcessRequester.supportProcessDone(requestResult);
     }        

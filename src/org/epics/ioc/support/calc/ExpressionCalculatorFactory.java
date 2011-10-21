@@ -24,6 +24,7 @@ import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -142,7 +143,7 @@ public abstract class ExpressionCalculatorFactory  {
                 PVScalar pvResult = expression.pvResult;
                 if(pvResult!=pvValue) convert.copyScalar(pvResult, pvValue);
             } catch (ArithmeticException e) {
-                alarmSupport.setAlarm(e.getMessage(), AlarmSeverity.invalid);
+                alarmSupport.setAlarm(e.getMessage(), AlarmSeverity.INVALID,AlarmStatus.RECORD);
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }

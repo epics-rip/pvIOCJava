@@ -16,6 +16,7 @@ import org.epics.pvData.factory.BasePVLong;
 import org.epics.pvData.factory.BasePVShort;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVByte;
@@ -129,7 +130,7 @@ public class ControlLimitFactory {
                 message = "ControlLimit: attempt to exceed low limit";
             }
             if(alarmSupport!=null) {
-                alarmSupport.setAlarm(message, AlarmSeverity.minor);
+                alarmSupport.setAlarm(message, AlarmSeverity.MINOR,AlarmStatus.RECORD);
             } else {
                 valuePVField.message(message, MessageType.warning);
             }

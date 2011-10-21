@@ -13,6 +13,7 @@ import org.epics.ioc.support.SupportProcessRequester;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.property.PVEnumerated;
 import org.epics.pvData.property.PVEnumeratedFactory;
 import org.epics.pvData.pv.IntArrayData;
@@ -143,13 +144,13 @@ public class EnumeratedAlarmFactory {
             int[] severities = stateSeverityData.data;
             int severity = severities[value];
             if(severity>0) {
-            	alarmSupport.setAlarm("stateAlarm",AlarmSeverity.getSeverity(severity));
+            	alarmSupport.setAlarm("stateAlarm",AlarmSeverity.getSeverity(severity),AlarmStatus.RECORD);
             }
             
             if(prevValue!=value) {
                 prevValue = value;
                 int index = pvChangeStateSeverity.get();
-                alarmSupport.setAlarm("changeStateAlarm",AlarmSeverity.getSeverity(index));
+                alarmSupport.setAlarm("changeStateAlarm",AlarmSeverity.getSeverity(index),AlarmStatus.RECORD);
             }
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }                

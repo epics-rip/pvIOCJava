@@ -28,6 +28,7 @@ import org.epics.ioc.support.alarm.AlarmSupport;
 import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
@@ -312,7 +313,7 @@ public class PortDriverLinkFactory {
                         "pv %s support %s callback error %s",
                         fullName,super.getSupportName(),user.getMessage());
                 }
-                alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
+                alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.INVALID,AlarmStatus.DRIVER);
             }
             if(port.canBlock()) {
                 if((deviceTrace.getMask()&Trace.FLOW)!=0) {
@@ -337,7 +338,7 @@ public class PortDriverLinkFactory {
             }
             String message = user.getMessage();
             if(message!=null && message!=emptyString) {
-                alarmSupport.setAlarm(message, AlarmSeverity.minor);
+                alarmSupport.setAlarm(message, AlarmSeverity.MINOR,AlarmStatus.DRIVER);
             }
             alarmSupport.endProcess();
             supportProcessRequester.supportProcessDone(RequestResult.success);

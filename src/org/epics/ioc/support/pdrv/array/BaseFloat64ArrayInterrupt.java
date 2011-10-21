@@ -15,6 +15,7 @@ import org.epics.ioc.pdrv.interfaces.Interface;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverInterruptLink;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVScalarArray;
@@ -103,7 +104,7 @@ implements Float64ArrayInterruptListener
                     convert.copyScalarArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
                     float64Array.endRead(user);
                 } else {
-                    alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
+                    alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.INVALID,AlarmStatus.DRIVER);
                 } 
             } finally {
                 pvRecord.unlock();
@@ -139,7 +140,7 @@ implements Float64ArrayInterruptListener
                 convert.copyScalarArray(pvDoubleArray, 0, valuePVArray, 0, pvDoubleArray.getLength());
                 float64Array.endRead(user);
             } else {
-                alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.invalid);
+                alarmSupport.setAlarm(user.getMessage(),AlarmSeverity.INVALID,AlarmStatus.DRIVER);
             } 
         } finally {
             pvRecord.unlock();

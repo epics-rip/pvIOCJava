@@ -14,6 +14,7 @@ import org.epics.ioc.pdrv.interfaces.Serial;
 import org.epics.ioc.support.SupportState;
 import org.epics.ioc.support.pdrv.AbstractPortDriverSupport;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVInt;
 
@@ -89,7 +90,7 @@ public class BaseSerialDiscard extends AbstractPortDriverSupport
             deviceTrace.print(Trace.FLOW,"pv %s endProcess ",fullName);
         }
         if(status!=Status.success) {
-            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.invalid);
+            alarmSupport.setAlarm(user.getMessage(), AlarmSeverity.INVALID,AlarmStatus.DRIVER);
         }
     }        
     /* (non-Javadoc)

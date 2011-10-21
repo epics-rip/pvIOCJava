@@ -18,6 +18,7 @@ import org.epics.ioc.support.alarm.AlarmSupportFactory;
 import org.epics.ioc.util.RequestResult;
 import org.epics.pvData.property.Alarm;
 import org.epics.pvData.property.AlarmSeverity;
+import org.epics.pvData.property.AlarmStatus;
 import org.epics.pvData.property.PVAlarm;
 import org.epics.pvData.property.PVAlarmFactory;
 import org.epics.pvData.property.TimeStamp;
@@ -124,7 +125,7 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
     public void processContinue() {
         getData();
         if(alarmMessage!=null) {
-            alarmSupport.setAlarm(alarmMessage, AlarmSeverity.minor);
+            alarmSupport.setAlarm(alarmMessage, AlarmSeverity.MINOR,AlarmStatus.DB);
         }
         supportProcessRequester.supportProcessDone(requestResult);
     }
@@ -190,8 +191,8 @@ implements ProcessCallbackRequester, ProcessContinueRequester, RecordProcessRequ
             }
             if(pvInheritSeverity.get() && pvAlarm.isAttached()) {
                 pvAlarm.get(alarm);
-                if(alarm.getSeverity()!=AlarmSeverity.none) {
-                    alarmSupport.setAlarm(alarm.getMessage(),alarm.getSeverity());
+                if(alarm.getSeverity()!=AlarmSeverity.NONE) {
+                    alarmSupport.setAlarm(alarm.getMessage(),alarm.getSeverity(),AlarmStatus.DB);
                 }
             }
         } finally {
