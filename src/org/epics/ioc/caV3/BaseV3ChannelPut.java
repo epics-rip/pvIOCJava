@@ -18,6 +18,7 @@ import gov.aps.jca.event.PutEvent;
 import gov.aps.jca.event.PutListener;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutRequester;
@@ -70,10 +71,12 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     private V3Channel v3Channel = null;
     private gov.aps.jca.Channel jcaChannel = null;
     private int elementCount = 1;
-    private ChannelPutRequester channelPutRequester = null;
+    private final ChannelPutRequester channelPutRequester;
     private V3ChannelStructure v3ChannelStructure = null;
 
-    private boolean isDestroyed = false;
+    private final ReentrantLock lock = new ReentrantLock();
+
+    private volatile boolean isDestroyed = false;
     private PVField pvField = null;
     private PVInt pvIndex = null; // only if nativeDBRType.isENUM()
     private ByteArrayData byteArrayData = new ByteArrayData();
@@ -171,7 +174,12 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             getDone(statusCreate.createStatus(StatusType.ERROR, caStatus.toString(), null));
             return;
         }
-        v3ChannelStructure.toStructure(fromDBR);
+        lock();
+        try {
+        	v3ChannelStructure.toStructure(fromDBR);
+        } finally {
+        	unlock();
+        }
         getDone(okStatus);
     }
     private void getDone(Status success) {
@@ -183,12 +191,13 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
     @Override
     public void put(boolean lastRequest) {
         if(isDestroyed) {
-            putDone(channelDestroyedStatus);
+    		putDone(channelDestroyedStatus);
             return;
         }
         if(jcaChannel.getConnectionState()!=Channel.ConnectionState.CONNECTED) {
-            putDone(channelNotConnectedStatus);
-        }
+    		putDone(channelNotConnectedStatus);
+        	return;
+        };
         DBRType nativeDBRType = v3ChannelStructure.getNativeDBRType();
         isActive.set(true);
         try {
@@ -311,7 +320,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
      */
     public void connectionChanged(ConnectionEvent arg0) {
         if(!arg0.isConnected()) {
-            putDone(disconnectedWhileActiveStatus);
+    		putDone(disconnectedWhileActiveStatus);
         }
     }
     
@@ -319,4 +328,14 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         if(!isActive.getAndSet(false)) return;
         channelPutRequester.putDone(success);
     }
+
+    @Override
+	public void lock() {
+		lock.lock();
+	}
+
+	@Override
+	public void unlock() {
+		lock.unlock();
+	}
 }

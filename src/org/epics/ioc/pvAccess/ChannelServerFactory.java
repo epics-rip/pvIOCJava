@@ -731,6 +731,12 @@ public class ChannelServerFactory  {
                 channelProcessRequester.message(message, messageType);
             }
             
+			@Override
+			public void lock() {
+			}
+			@Override
+			public void unlock() {
+			}
         }
         
         private class ChannelGetImpl implements ChannelGet,RecordProcessRequester
@@ -870,6 +876,14 @@ public class ChannelServerFactory  {
                     firstTime = false;
                 } 
             }
+			@Override
+			public void lock() {
+				pvRecord.lock();
+			}
+			@Override
+			public void unlock() {
+				pvRecord.unlock();
+			}
         }
         
         private class ChannelPutImpl implements ChannelPut,RecordProcessRequester
@@ -901,14 +915,14 @@ public class ChannelServerFactory  {
             }
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
             private final ChannelImpl channelImpl;
-            private ChannelPutRequester channelPutRequester = null;
+            private final ChannelPutRequester channelPutRequester;
             private final PVStructure pvStructure;
             private final PVCopy pvCopy;
             private final BitSet bitSet;
             private final RecordProcess recordProcess;
             private final ProcessToken processToken;
             private Status status = null;
-            private boolean lastRequest = false;
+            private volatile boolean lastRequest = false;
             
            
             
@@ -1039,6 +1053,14 @@ public class ChannelServerFactory  {
                 bitSet.set(0);
                 pvCopy.updateCopyFromBitSet(pvStructure, bitSet, false);
              }
+			@Override
+			public void lock() {
+				pvRecord.lock();
+			}
+			@Override
+			public void unlock() {
+				pvRecord.unlock();
+			}
         }
         
         private class ChannelPutGetImpl implements ChannelPutGet,RecordProcessRequester
@@ -1246,6 +1268,14 @@ public class ChannelServerFactory  {
                 putBitSet.clear();
                 putBitSet.set(0);
             }
+			@Override
+			public void lock() {
+				pvRecord.lock();
+			}
+			@Override
+			public void unlock() {
+				pvRecord.unlock();
+			}
         }
         
         private class ChannelRPCImpl implements ChannelRPC
@@ -1369,6 +1399,14 @@ public class ChannelServerFactory  {
 				server.request();
 				if(lastRequest) destroy();
 			}
+			@Override
+			public void lock() {
+				pvRecord.lock();
+			}
+			@Override
+			public void unlock() {
+				pvRecord.unlock();
+			}
         }
         
         private static class ChannelScalarArrayImpl implements ChannelArray {
@@ -1470,6 +1508,14 @@ public class ChannelServerFactory  {
                 channelArrayRequester.setLengthDone(okStatus);
                 if(lastRequest) destroy();
 			}
+			@Override
+			public void lock() {
+				pvRecord.lock();
+			}
+			@Override
+			public void unlock() {
+				pvRecord.unlock();
+			}
         }
         
         private static class ChannelStructureArrayImpl implements ChannelArray {
@@ -1569,6 +1615,14 @@ public class ChannelServerFactory  {
                 }
                 channelArrayRequester.setLengthDone(okStatus);
                 if(lastRequest) destroy();
+			}
+			@Override
+			public void lock() {
+				pvRecord.lock();
+			}
+			@Override
+			public void unlock() {
+				pvRecord.unlock();
 			}
         }
     }

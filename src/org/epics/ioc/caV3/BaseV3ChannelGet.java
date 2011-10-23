@@ -14,6 +14,7 @@ import gov.aps.jca.event.GetEvent;
 import gov.aps.jca.event.GetListener;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ca.client.ChannelGet;
 import org.epics.ca.client.ChannelGetRequester;
@@ -43,11 +44,14 @@ implements ChannelGet,GetListener,ConnectionListener
     private static Status disconnectedWhileActiveStatus = statusCreate.createStatus(StatusType.ERROR, "disconnected while active", null);
     private static Status createChannelStructureStatus = statusCreate.createStatus(StatusType.ERROR, "createChannelStructure failed", null);
     
+    private final ChannelGetRequester channelGetRequester;
+
     private V3Channel v3Channel = null;
-    private ChannelGetRequester channelGetRequester = null;
     private V3ChannelStructure v3ChannelStructure = null;
     
-    private boolean isDestroyed = false;
+    private volatile boolean isDestroyed = false;
+    
+    private final ReentrantLock lock = new ReentrantLock();
     
     private AtomicBoolean isActive = new AtomicBoolean(false);
     /**
@@ -125,7 +129,12 @@ implements ChannelGet,GetListener,ConnectionListener
             getDone(statusCreate.createStatus(StatusType.ERROR, caStatus.toString(), null));
             return;
         }
-        v3ChannelStructure.toStructure(fromDBR);
+        lock();
+        try {
+        	v3ChannelStructure.toStructure(fromDBR);
+        } finally {
+        	unlock();
+        }
         getDone(okStatus);
     }
     /* (non-Javadoc)
@@ -133,7 +142,7 @@ implements ChannelGet,GetListener,ConnectionListener
      */
     public void connectionChanged(ConnectionEvent arg0) {
         if(!arg0.isConnected()) {
-            getDone(disconnectedWhileActiveStatus);
+    		getDone(disconnectedWhileActiveStatus);
         }
     }
     
@@ -141,4 +150,14 @@ implements ChannelGet,GetListener,ConnectionListener
         if(!isActive.getAndSet(false)) return;
         channelGetRequester.getDone(success);
     }
+    
+	@Override
+	public void lock() {
+		lock.lock();
+	}
+
+	@Override
+	public void unlock() {
+		lock.unlock();
+	}
 }
