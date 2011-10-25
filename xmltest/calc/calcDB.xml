@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "records.xml" />
+<include removePath = "${JAVAIOC}/xml" />
+<include addPath = "xmltest/calc" />
+<include href = "basicMath.xml" />
+<include href = "string.xml" />
+<include href = "ltgt.xml" />
+<include href = "bitwise.xml" />
+<include href = "math.xml" />
+<include href = "shift.xml" />
+<include href = "unary.xml" />
+<include href = "constants.xml" />
+<include href = "examples.xml" />
+<!--
+-->
+</database>

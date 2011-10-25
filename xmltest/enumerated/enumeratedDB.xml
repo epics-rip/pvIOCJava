@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "records.xml" />
+<include removePath = "${JAVAIOC}/xml" />
+<include addPath = "${JAVAIOC}/xmltest/enumerated" />
+<include href = "enumerated.xml" />
+<!--
+-->
+<include removePath = "${JAVAIOC}/xmltest/enumerated" />
+</database>

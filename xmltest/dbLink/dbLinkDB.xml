@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "records.xml" />
+<include removePath = "${JAVAIOC}/xml" />
+<include addPath = "xmltest/dbLink" />
+<include href = "getPut.xml" />
+<include removePath = "xmltest/dbLink" />
+</database>
+

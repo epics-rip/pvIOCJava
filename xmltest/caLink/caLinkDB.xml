@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvData.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "records.xml" />
+<include removePath = "${JAVAIOC}/xml" />
+<include addPath = "xmltest/caLink" />
+<!--
+<include href = "caV3.xml" />
+-->
+<include href = "getPut.xml" />
+<include href = "monitor.xml" />
+<include removePath = "xmltest/caLink" />
+</database>
+
