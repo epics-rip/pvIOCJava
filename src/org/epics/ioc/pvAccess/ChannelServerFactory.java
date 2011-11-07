@@ -509,7 +509,7 @@ public class ChannelServerFactory  {
         	if (pvRequest == null)
         		throw new IllegalArgumentException("null pvRequest");
         	if(isDestroyed.get()) {
-        		channelRPCRequester.channelRPCConnect(channelDestroyedStatus, null, null,null);
+        		channelRPCRequester.channelRPCConnect(channelDestroyedStatus, null);
         		return null;
         	}
         	ChannelRPCImpl channelRPCImpl = new ChannelRPCImpl(this,pvRecord,channelRPCRequester,pvRequest);
@@ -1296,7 +1296,7 @@ public class ChannelServerFactory  {
         		{
                 	String message = " factoryRPC subField not found";
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                     return false;
         		}
             	String factoryName = pvFactory.get();
@@ -1308,7 +1308,7 @@ public class ChannelServerFactory  {
                 }catch (ClassNotFoundException e) {
                 	String message = " factory " + e.getLocalizedMessage() + " class not found";
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                     return false;
                 }
                
@@ -1317,13 +1317,13 @@ public class ChannelServerFactory  {
                 } catch (NoSuchMethodException e) {
                 	String message = " create " + e.getLocalizedMessage() + " no factory method";
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                     return false;
                 }
                 if(!Modifier.isStatic(method.getModifiers())) {
                 	String message = " create is not a static method ";
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                     return false;
                 }
                 try {
@@ -1331,45 +1331,35 @@ public class ChannelServerFactory  {
                 } catch(IllegalAccessException e) {
                 	String message = "create invoke IllegalAccessException  ";
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                     return false;
                 } catch(IllegalArgumentException e) {
                 	String message = "create invoke IllegalArgumentException " + e.getLocalizedMessage();
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                     return false;
                 } catch(InvocationTargetException e) {
                 	String message = " create invoke InvocationTargetException " + e.getLocalizedMessage();
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                     return false;
                 }
                 if(server==null) {
                 	String message = " create server failed ";
                 	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status, null);
                 	return false;
                 }
-                PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
-                pvStructure = pvCopy.createPVStructure();
-                PVStructure pvArgument = pvStructure.getStructureField("arguments");
-                if(pvArgument==null) {
-                	String message = "arguments not defined in record";
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
-                	return false;
-                }
-                BitSet bitSet = new BitSet(pvStructure.getNumberFields());
-                pvCopy.initCopy(pvStructure, bitSet, true);
-                Status status =server.initialize(channelImpl, pvRecord, channelRPCRequester, pvArgument,bitSet, pvRequest);
+               
+                Status status =server.initialize(channelImpl, pvRecord, channelRPCRequester, pvRequest);
                 if(!status.isOK()) {
-                	channelRPCRequester.channelRPCConnect(status, null, null,null);
+                	channelRPCRequester.channelRPCConnect(status,null);
                 	return false;
                 }
                 synchronized(channelRPCList) {
                 	channelRPCList.add(this);
                 }
-                channelRPCRequester.channelRPCConnect(status, this, pvArgument,bitSet);
+                channelRPCRequester.channelRPCConnect(status, this);
             	return true;
             }
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
@@ -1379,7 +1369,6 @@ public class ChannelServerFactory  {
             private PVStructure pvRequest;
             
             private RPCServer server = null;
-            private PVStructure pvStructure;
 			/* (non-Javadoc)
 			 * @see org.epics.pvData.misc.Destroyable#destroy()
 			 */
@@ -1392,13 +1381,14 @@ public class ChannelServerFactory  {
                 }
 			}
 			/* (non-Javadoc)
-			 * @see org.epics.ca.client.ChannelRPC#request(boolean)
+			 * @see org.epics.ca.client.ChannelRPC#request(org.epics.pvData.pv.PVStructure, boolean)
 			 */
 			@Override
-			public void request(boolean lastRequest) {
-				server.request();
+			public void request(PVStructure pvArgument, boolean lastRequest) {
+				server.request(pvArgument);
 				if(lastRequest) destroy();
 			}
+
 			@Override
 			public void lock() {
 				pvRecord.lock();

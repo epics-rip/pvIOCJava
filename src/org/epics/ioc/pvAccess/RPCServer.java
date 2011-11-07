@@ -29,15 +29,14 @@ public interface RPCServer {
      * @param channel The channel that is requesting the service.
      * @param pvRecord The record that is being serviced.
      * @param channelRPCRequester The client that is requesting the service.
-     * @param pvArgument The structure for the argument data that will be passed from the client.
-     * @param bitSet The bitSet that shows which fields in pvArgument have changed value.
      * @param pvRequest The client's request structure.
      * @return The status.
      * The server does NOT call channelRPCRequester.channelRPCConnect.
      */
-    Status initialize(Channel channel,PVRecord pvRecord,ChannelRPCRequester channelRPCRequester,PVStructure pvArgument,BitSet bitSet,PVStructure pvRequest);
+    Status initialize(Channel channel,PVRecord pvRecord,ChannelRPCRequester channelRPCRequester,PVStructure pvRequest);
     /**
      * A new request. The pvRecord contains the clients request data. The server MUST call channelRPCRequester.requestDone.
+     * @param pvArgument the argument passed byn the client.
      */
-    void request();
+    void request(PVStructure pvArgument);
 }

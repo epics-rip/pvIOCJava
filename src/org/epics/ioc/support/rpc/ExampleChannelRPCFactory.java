@@ -40,23 +40,18 @@ public class ExampleChannelRPCFactory {
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
-    private static final Status sizeNotFoundStatus = statusCreate.createStatus(StatusType.ERROR, "pvArguments did not have size", null);
     private static final Status elementNotFoundStatus = statusCreate.createStatus(StatusType.ERROR, "pvrecord did not have element substructure", null);
     
     private static class RPCServerImpl implements RPCServer
     {
     	private ChannelRPCRequester channelRPCRequester;
-    	private PVInt pvSize;
     	private PVStructure pvElement;
 		
 		@Override
 		public Status initialize(Channel channel, PVRecord pvRecord,
-				ChannelRPCRequester channelRPCRequester,
-				PVStructure pvArgument,BitSet bitSet, PVStructure pvRequest)
+				ChannelRPCRequester channelRPCRequester,PVStructure pvRequest)
 		{
 		    this.channelRPCRequester = channelRPCRequester;
-		    pvSize = pvArgument.getIntField("size");
-		    if(pvSize==null) return sizeNotFoundStatus;
 		    pvElement = pvRecord.getPVRecordStructure().getPVStructure().getStructureField("element");
 		    if(pvElement==null) return elementNotFoundStatus;
 			return okStatus;
@@ -64,9 +59,11 @@ public class ExampleChannelRPCFactory {
 		@Override
 		public void destroy() {}
 		@Override
-		public void request() {
+		public void request(PVStructure pvArgument) {
+System.out.println("argument");
+System.out.println(pvArgument.toString());
 			long start =System.currentTimeMillis();
-			int size = pvSize.get();
+			int size = 2;
 			Structure[] fields = new Structure[size];
 			for(int index=0; index<size; index++) {
 				fields[index] = fieldCreate.createStructure(Integer.toString(index), pvElement.getStructure().getFields());
@@ -82,5 +79,6 @@ public class ExampleChannelRPCFactory {
             System.out.println("ExampleChannelRPVFactory " + diff + " seconds to create PVStructure"); 
 			channelRPCRequester.requestDone(okStatus, pvTop);
 		}
+		
     }
 }

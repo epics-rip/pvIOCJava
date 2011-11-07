@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<database>
+
+<structure structureName = "nameValuePair_t">
+  <scalar name = "name" scalarType = "string" />
+  <scalar name = "value" scalarType = "string" />
+</structure>
+
+</database>

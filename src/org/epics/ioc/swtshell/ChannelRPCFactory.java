@@ -19,16 +19,18 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.ca.client.Channel;
+import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.ca.client.ChannelRPC;
 import org.epics.ca.client.ChannelRPCRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.CreateRequestFactory;
-import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.MessageType;
+import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.factory.*;
 
 
 /**
@@ -56,17 +58,19 @@ public class ChannelRPCFactory {
             readyForCreateChannelRPC,creatingChannelRPC,
             ready,channelRPCActive
         };
+        private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         private StateMachine stateMachine = new StateMachine();
         private ChannelClient channelClient = new ChannelClient();
+        private CreatePVStructure createPVStructure = null;
+        PVStructure pvRequest = null;
+        private PVStructure pvArgument = pvDataCreate.createPVStructure(null,"argument", new Field[0]);
         private Requester requester = null;
         private boolean isDisposed = false;
         
         private static final String windowName = "channelRPC";
-        private static final String defaultRequest = "record[]field(arguments)";
         private Shell shell;
         private Button connectButton;
-        private Button createRequestButton;
-        private Text requestText = null;
+        private Button createArgumentButton;
         private Button createChannelRPCButton;
         private Button channelRPCButton;
         private Text consoleText = null; 
@@ -84,19 +88,9 @@ public class ChannelRPCFactory {
             connectButton.setText("disconnect");
             connectButton.addSelectionListener(this);
             
-            Composite requestComposite = new Composite(composite,SWT.BORDER);
-            gridLayout = new GridLayout();
-            gridLayout.numColumns = 2;
-            requestComposite.setLayout(gridLayout);
-            createRequestButton = new Button(requestComposite,SWT.PUSH);
-            createRequestButton.setText("createRequest");
-            createRequestButton.addSelectionListener(this);
-            requestText = new Text(requestComposite,SWT.BORDER);
-            GridData gridData = new GridData(); 
-            gridData.widthHint = 400;
-            requestText.setLayoutData(gridData);
-            requestText.setText(defaultRequest);
-            requestText.addSelectionListener(this);
+            createArgumentButton = new Button(composite,SWT.PUSH);
+            createArgumentButton.setText("createArgument");
+            createArgumentButton.addSelectionListener(this);
 
             createChannelRPCButton = new Button(composite,SWT.PUSH);
             createChannelRPCButton.setText("destroyChannelRPC");
@@ -110,7 +104,7 @@ public class ChannelRPCFactory {
             gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             consoleComposite.setLayout(gridLayout);
-            gridData = new GridData(GridData.FILL_BOTH);
+            GridData gridData = new GridData(GridData.FILL_BOTH);
             consoleComposite.setLayoutData(gridData);
             Button clearItem = new Button(consoleComposite,SWT.PUSH);
             clearItem.setText("&Clear");
@@ -130,7 +124,9 @@ public class ChannelRPCFactory {
             gridData.widthHint = 200;
             consoleText.setLayoutData(gridData);
             requester = SWTMessageFactory.create(windowName,display,consoleText);
+            pvRequest = CreateRequestFactory.createRequest("", requester);
             shell.pack();
+            createPVStructure = CreatePVStructureFactory.create(shell);
             stateMachine.setState(State.readyForConnect);
             shell.open();
             shell.addDisposeListener(this);
@@ -167,27 +163,28 @@ public class ChannelRPCFactory {
                     channelClient.disconnect();
                     stateMachine.setState(State.readyForConnect);
                 }
-            } else if(object==createRequestButton) {
-                channelClient.createRequest(shell);
+            } else if(object==createArgumentButton) {
+                pvArgument = createPVStructure.create();
+System.out.println(pvArgument);
             } else if(object==createChannelRPCButton) {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreateChannelRPC) {
                     stateMachine.setState(State.creatingChannelRPC);
-                    PVStructure pvStructure = CreateRequestFactory.createRequest(requestText.getText(),requester);
-                    if(pvStructure==null) return;
-                    channelClient.createChannelRPC(pvStructure);
+                    channelClient.createChannelRPC();
                 } else {
                     channelClient.destroyChannelRPC();
                     stateMachine.setState(State.readyForCreateChannelRPC);
                 }
             } else if(object==channelRPCButton) {
-            	GUIData guiData = GUIDataFactory.create(shell);
-                guiData.get(channelClient.getPVStructure(), channelClient.getBitSet());
-               stateMachine.setState(State.channelRPCActive);
-               channelClient.get();
+            	if(pvArgument!=null) {
+            		GUIData guiData = GUIDataFactory.create(shell);
+            		BitSet bitSet = new BitSet(pvArgument.getNumberFields());
+            		guiData.get(pvArgument,bitSet);
+            	}
+            	stateMachine.setState(State.channelRPCActive);
+            	channelClient.get();
             }
         }
-        
         private class StateMachine {
             private State state = null;
             
@@ -198,42 +195,36 @@ public class ChannelRPCFactory {
                 case readyForConnect:
                     connectButton.setText("connect");
                     createChannelRPCButton.setText("createChannelRPC");
-                    createRequestButton.setEnabled(false);
                     createChannelRPCButton.setEnabled(false);
                     channelRPCButton.setEnabled(false);
                     return;
                 case connecting:
                     connectButton.setText("disconnect");
                     createChannelRPCButton.setText("createChannelRPC");
-                    createRequestButton.setEnabled(false);
                     createChannelRPCButton.setEnabled(false);
                     channelRPCButton.setEnabled(false);
                     return;
                 case readyForCreateChannelRPC:
                     connectButton.setText("disconnect");
                     createChannelRPCButton.setText("createChannelRPC");
-                    createRequestButton.setEnabled(true);
                     createChannelRPCButton.setEnabled(true);
                     channelRPCButton.setEnabled(false);
                     return;
                 case creatingChannelRPC:
                     connectButton.setText("disconnect");
                     createChannelRPCButton.setText("destroyChannelRPC");
-                    createRequestButton.setEnabled(false);
                     createChannelRPCButton.setEnabled(true);
                     channelRPCButton.setEnabled(false);
                     return;
                 case ready:
                     connectButton.setText("disconnect");
                     createChannelRPCButton.setText("destroyChannelRPC");
-                    createRequestButton.setEnabled(false);
                     createChannelRPCButton.setEnabled(true);
                     channelRPCButton.setEnabled(true);
                     return;
                 case channelRPCActive:
                     connectButton.setText("disconnect");
                     createChannelRPCButton.setText("destroyChannelRPC");
-                    createRequestButton.setEnabled(false);
                     createChannelRPCButton.setEnabled(true);
                     channelRPCButton.setEnabled(false);
                     return;
@@ -248,14 +239,14 @@ public class ChannelRPCFactory {
         }
         
         private class ChannelClient implements
-        ChannelRequester,ConnectChannelRequester,CreateFieldRequestRequester,Runnable,ChannelRPCRequester
+        ChannelRequester,ConnectChannelRequester,Runnable,ChannelRPCRequester
         {
             private Channel channel = null;
             private ConnectChannel connectChannel = null;
             private ChannelRPC channelRPC = null;
             private RunCommand runCommand;
             private PrintModified printModified = null;
-            private PVStructure pvArgument = null;
+            private PVStructure pvResult = null;
             private BitSet bitSet = null;
 
             void connect(Shell shell) {
@@ -265,12 +256,8 @@ public class ChannelRPCFactory {
                 connectChannel = ConnectChannelFactory.create(shell, this,this);
                 connectChannel.connect();
             }
-            void createRequest(Shell shell) {
-                CreateFieldRequest createRequest = CreateFieldRequestFactory.create(shell, channel, this);
-                createRequest.create();
-            }
-            void createChannelRPC(PVStructure pvRequest) {
-                channelRPC = channel.createChannelRPC(this, pvRequest);
+            void createChannelRPC() {            	
+            	channelRPC = channel.createChannelRPC(this, pvRequest);
                 return;
             }
             void destroyChannelRPC() {
@@ -290,7 +277,7 @@ public class ChannelRPCFactory {
             
             void get() {
                 runCommand = RunCommand.channelRPCConnect;
-                channelRPC.request(false);
+                channelRPC.request(pvArgument,false);
             }
             
             PVStructure getPVStructure() {
@@ -352,39 +339,26 @@ public class ChannelRPCFactory {
                 shell.getDisplay().asyncExec(this);
             }
             @Override
-			public String getDefault() {
-				return "arguments";
-			}
-			/* (non-Javadoc)
-			 * @see org.epics.ioc.swtshell.CreateFieldRequestRequester#request(java.lang.String)
-			 */
-			@Override
-			public void request(String request) {
-				requestText.selectAll();
-                requestText.clearSelection();
-                requestText.setText("record[]field(" + request + ")");
-                runCommand = RunCommand.channelrequestDone;
-                shell.getDisplay().asyncExec(this);
-            }
-            @Override
-			public void channelRPCConnect(Status status, ChannelRPC channelRPC,PVStructure pvArgument,BitSet bitSet) {
+			public void channelRPCConnect(Status status, ChannelRPC channelRPC) {
                 if (!status.isOK()) {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
                 }
                 this.channelRPC = channelRPC;
-                this.pvArgument = pvArgument;
-                this.bitSet = bitSet;
                 runCommand = RunCommand.channelRPCConnect;
                 shell.getDisplay().asyncExec(this);
             }
 
-            @Override
+			/* (non-Javadoc)
+			 * @see org.epics.ca.client.ChannelRPCRequester#requestDone(org.epics.pvData.pv.Status, org.epics.pvData.pv.PVStructure)
+			 */
+			@Override
 			public void requestDone(Status status, PVStructure pvResponse) {
-            	BitSet changeBitSet = new BitSet(pvResponse.getNumberFields());
+				pvResult = pvResponse;
+				bitSet = new BitSet(pvResponse.getNumberFields());
+				bitSet.set(0);
             	BitSet overrunBitSet = new BitSet(pvResponse.getNumberFields());
-            	changeBitSet.set(0);
-            	printModified = PrintModifiedFactory.create("rpcResult", pvResponse, changeBitSet, overrunBitSet, consoleText);
+            	printModified = PrintModifiedFactory.create("rpcResult", pvResponse, bitSet, overrunBitSet, consoleText);
                 if (!status.isOK()) {
                 	message(status.toString(), status.isSuccess() ? MessageType.warning : MessageType.error);
                 	if (!status.isSuccess()) return;
