@@ -24,7 +24,6 @@ import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.PVDataCreate;
-import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Structure;
 
@@ -33,16 +32,16 @@ import org.epics.pvData.pv.Structure;
  * @author mrk
  *
  */
-public class CreatePVStructureFactory {
+public class CreateStructureFactory {
     /**
      * Create a CDGet and return the interface.
      * @param parent The parent shell.
      * @return The CDGet interface.
      */
-    public static CreatePVStructure create(Shell parent) {
-        return new CreatePVStructureImpl(parent);
+    public static CreateStructure create(Shell parent) {
+        return new CreateStructureImpl(parent);
     }
-    private static class CreatePVStructureImpl extends Dialog implements CreatePVStructure, SelectionListener {
+    private static class CreateStructureImpl extends Dialog implements CreateStructure, SelectionListener {
     	private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     	private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         private Shell parent = null;
@@ -60,7 +59,7 @@ public class CreatePVStructureFactory {
          * Constructor.
          * @param parent The parent shell.
          */
-        public CreatePVStructureImpl(Shell parent) {
+        public CreateStructureImpl(Shell parent) {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
             this.parent = parent;
         }
@@ -69,9 +68,9 @@ public class CreatePVStructureFactory {
          * @see org.epics.ioc.swtshell.CreatePVStructure#get(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
          */
         @Override
-        public PVStructure create() {
+        public Structure create(String fieldName) {
             shell = new Shell(parent);
-            shell.setText("createPVStructure");
+            shell.setText("createStructure");
             GridLayout gridLayout = new GridLayout();
             gridLayout.numColumns = 1;
             shell.setLayout(gridLayout);
@@ -122,7 +121,7 @@ public class CreatePVStructureFactory {
             gridData.heightHint = 400;
             gridData.widthHint = 400;
             consoleText.setLayoutData(gridData);
-            structure = fieldCreate.createStructure("argument", new Field[0]);
+            structure = fieldCreate.createStructure(fieldName, new Field[0]);
             consoleText.setText(structure.toString());
             shell.open();
             Display display = shell.getDisplay();
@@ -132,7 +131,7 @@ public class CreatePVStructureFactory {
                 }
             }
             shell.dispose();
-            return pvDataCreate.createPVStructure(null, structure);
+            return structure;
         }
         /* (non-Javadoc)
          * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
@@ -174,15 +173,18 @@ public class CreatePVStructureFactory {
             	case 1:
             		field = fieldCreate.createScalarArray(fieldName,ScalarType.values()[scalarType]);
             		break;
-            	case 2:
-            		consoleText.selectAll();
-                    consoleText.clearSelection();
-                    consoleText.setText("structure not supported");
-            	case 3:
-            		consoleText.selectAll();
-                    consoleText.clearSelection();
-                    consoleText.setText("structureArray not supported");
-                    return;
+            	case 2: {
+            		CreateStructure createStructure = CreateStructureFactory.create(shell);
+            		Structure struct = createStructure.create(fieldName);
+            		field = fieldCreate.createStructure(fieldName, struct.getFields());
+            		break;
+            	}
+                case 3: {
+                	CreateStructure createStructure = CreateStructureFactory.create(shell);
+            		Structure struct = createStructure.create("");
+            		field = fieldCreate.createStructureArray(fieldName, struct);
+                    break;
+                }
                 default :
                 	consoleText.selectAll();
                     consoleText.clearSelection();

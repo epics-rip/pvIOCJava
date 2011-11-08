@@ -12,7 +12,6 @@ import org.epics.ioc.database.PVDatabase;
 import org.epics.ioc.database.PVDatabaseFactory;
 import org.epics.ioc.database.PVRecord;
 import org.epics.ioc.database.PVReplaceFactory;
-import org.epics.ioc.monitor.MonitorFactory;
 import org.epics.ioc.xml.XMLToPVDatabaseFactory;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.monitor.Monitor;

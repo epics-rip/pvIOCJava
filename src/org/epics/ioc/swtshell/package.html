@@ -10,7 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: swtshell<br />
 package: org.epics.ioc.swtshell<br />
-2010.06.10</h1>
+2011.11.08</h1>
 
 <p>CONTENTS</p>
 
@@ -54,12 +54,12 @@ package: org.epics.ioc.swtshell<br />
 <h2 style="text-align: center" id="Overview">Overview</h2>
 <hr />
 
-<p>This package provides a GUI shell implemented via the SWT toolkit that
-comes with eclipse. The default JavaIOC package overview document gives brief
-instructions for starting the swtshell. If you want to communicate with
-another javaIOC then the option "-server server/beforeStartCAV4.txt" must be
-given when the javaIOC is started. If you want to communicate with a V3 EPICS
-IOC then the option "-server server/beforeStartCAV3.txt" must be given. </p>
+<p>This package provides a GUI shell implemented via the SWT toolkit that comes
+with eclipse. The default JavaIOC package overview document gives brief
+instructions for starting the swtshell. If you want to communicate with another
+javaIOC then the option "-server server/beforeStartCAV4.txt" must be given when
+the javaIOC is started. If you want to communicate with a V3 EPICS IOC then the
+option "-server server/beforeStartCAV3.txt" must be given. </p>
 
 <p>The following window appears when swtshell is started:</p>
 
@@ -71,23 +71,22 @@ IOC then the option "-server server/beforeStartCAV3.txt" must be given. </p>
 <ul>
   <li>channelList:<br />
     This obtains a list of the channels in a javaIOC. </li>
-  <li>process,get,put,putGet,channelRPC, monitor, array, and
-    structureArray:<br />
-    Each of these brings up another window which provides the ability to
-    access data via channel access. The next section describes these
-  windows:</li>
+  <li>process,get,put,putGet,channelRPC, monitor, array, and structureArray:<br
+    />
+    Each of these brings up another window which provides the ability to access
+    data via channel access. The next section describes these windows:</li>
   <li>iocConsole<br />
     This provide a window which shows all messages sent to any record of the
     local javaIOC. This is shown in a later section.</li>
   <li>loadDatabase and introspectDatabase<br />
-    Each of these buttons starts another window for interacting with the
-    local javaIOC. They are described below.</li>
+    Each of these buttons starts another window for interacting with the local
+    javaIOC. They are described below.</li>
   <li>portDriver<br />
     Starts a window for interacting with a portDriver port and device.</li>
   <li>v3iocshell<br />
     The v3iocshell buttom starts a V3 epics ioc that is part of the same
-    process as the javaIOC. In the future this will be used to communicate
-    with asynDriver port drivers. For now this button is not documented. </li>
+    process as the javaIOC. In the future this will be used to communicate with
+    asynDriver port drivers. For now this button is not documented. </li>
 </ul>
 
 <p><span style="font-weight:bold;">NOTE</span>: After text is typed into any
@@ -116,8 +115,8 @@ Channel Access, which can be either V3 or V4 channelAccess</p>
 <h3 id="Getting">Getting a list of the channels in a javaIOC.</h3>
 
 <p>This obtains a list of a subset, selected by a regular expression, of the
-records in a javaIOC. A name can be selected and dropped into a connect
-window descibed in the next sub-section.</p>
+records in a javaIOC. A name can be selected and dropped into a connect window
+descibed in the next sub-section.</p>
 
 <p>When channelList is selected from the main swtshell window the following
 window appears.</p>
@@ -126,16 +125,16 @@ window appears.</p>
 <p><img src="./channelList.gif" alt="channelList" /></p>
 </center>
 
-<p>The provider is normally CAV4 but could also be selected as local, i.e.
-the javaIOC that is in the same process as swtshell. The icname must be
-specified. A regular expression selects the set of records to list. The above
-example selects all records with names ending in "RPC". The default regular
-expression ".*" selects all records. When the enter key is pressed in the
+<p>The provider is normally CAV4 but could also be selected as local, i.e. the
+javaIOC that is in the same process as swtshell. The icname must be specified.
+A regular expression selects the set of records to list. The above example
+selects all records with names ending in "RPC". The default regular expression
+".*" selects all records. When the enter key is pressed in the
 regularExpression, the list of channels is read via channel access.</p>
 
-<p>The implementation issues a channel access putGet request to get the
-channel list It requres that the javaIOC have an RPC record ( RPC records are
-descibed below) that provides the record list. The record must be named
+<p>The implementation issues a channel access putGet request to get the channel
+list It requres that the javaIOC have an RPC record ( RPC records are descibed
+below) that provides the record list. The record must be named
 "${IOCNAME}recordListRPC" where IOCNAME is the name of the javaIOC.</p>
 
 <h3 id="Connecting">Connecting to a Channel</h3>
@@ -148,24 +147,24 @@ appears:</p>
 <p><img src="./connectChannel.gif" alt="connectChannel" /></p>
 </center>
 
-<p>If selectLocalRecord is clicked then a list of all the records in the
-local javaIOC is presented. When a record is selected a request is made to
-create a channel connected to the record and control returned to the window
-that has the connect button.</p>
+<p>If selectLocalRecord is clicked then a list of all the records in the local
+javaIOC is presented. When a record is selected a request is made to create a
+channel connected to the record and control returned to the window that has the
+connect button.</p>
 
 <p>For a remote record a pvname can be entered. Note that the record name can
 be obtained from the channelList described in the previous sub-section. When
-return is clicked a request is made to create a channel to the selected
-record and control returned to the window that has the connect button.</p>
+return is clicked a request is made to create a channel to the selected record
+and control returned to the window that has the connect button.</p>
 
 <h3 id="Creating">Creating a Request</h3>
 
 <p>The get, put, putGet and monotor windows all have a createRequest button,
-which can activated after connecting to a channel. createRequest allows you
-to select an arbitarary set of fields from the PVRecord to which the channel
-is connected. All also show a text window with the curent request string
-displayed. This text window can be modified or the createRequest button can
-be clicked to use introspection to select a set of fields.</p>
+which can activated after connecting to a channel. createRequest allows you to
+select an arbitarary set of fields from the PVRecord to which the channel is
+connected. All also show a text window with the curent request string
+displayed. This text window can be modified or the createRequest button can be
+clicked to use introspection to select a set of fields.</p>
 
 <p>When the createRequest button is pressed the following window appears:</p>
 
@@ -184,8 +183,8 @@ The details depend on the record structure.</p>
 </center>
 
 <p>This window allows the user to select an arbitrary set of fields from the
-PVRecord to which the channel is attached. When the arrow for a structure
-field is clicked the fields for that structure appear. A field is selected by
+PVRecord to which the channel is attached. When the arrow for a structure field
+is clicked the fields for that structure appear. A field is selected by
 clicking the button next to the field name. If a structure field is selected
 the entire structure is selected.</p>
 
@@ -208,9 +207,9 @@ server.</p>
 
 <h3 id="get">get</h3>
 
-<p>Clicking the get button of the swtshell window creates the following
-window. The following shows the window after connecting to a channel and
-clicking createGet.:</p>
+<p>Clicking the get button of the swtshell window creates the following window.
+The following shows the window after connecting to a channel and clicking
+createGet.:</p>
 
 <center>
 <p><img src="./get.gif" alt="get" /></p>
@@ -223,7 +222,7 @@ clicking createGet.:</p>
       button becomes disconnect.</dd>
   <dt>createRequest</dt>
     <dd>This was described above. Note that the test window can also be
-      edited.</dd>
+    edited.</dd>
   <dt>crateGet</dt>
     <dd>Create and destroy a channelGet request.</dd>
   <dt>get</dt>
@@ -242,14 +241,14 @@ clicking createGet.:</p>
 
 <p>Except for put the top row is just like get.</p>
 
-<p>When the put button is clicked then what happens depends of how many
-fields where selected from the PVRecord. If only a single scalar or array
-field was selected, then a text entry box apppears. When a value is entered
-and the return key is pressed then this value is sent via channel access.</p>
+<p>When the put button is clicked then what happens depends of how many fields
+where selected from the PVRecord. If only a single scalar or array field was
+selected, then a text entry box apppears. When a value is entered and the
+return key is pressed then this value is sent via channel access.</p>
 
 <p>If more than a single scalar or array field was selected then when put is
-clicked a window appears that allows the user to provide values to each
-scalar or array field of the selected fields. This window is:</p>
+clicked a window appears that allows the user to provide values to each scalar
+or array field of the selected fields. This window is:</p>
 
 <center>
 <p><img src="./getValue.gif" alt="getValue" /></p>
@@ -258,8 +257,8 @@ scalar or array field of the selected fields. This window is:</p>
 <p>This display allows the user to give values to any of the scalar or array
 fields.</p>
 
-<p>If a primitive or array of primitives is selected then when edit is
-clicked the following happens: </p>
+<p>If a primitive or array of primitives is selected then when edit is clicked
+the following happens: </p>
 <ul>
   <li>The text entry window shows the current value.</li>
   <li>After text is entered and the enter key presssed the data is put in the
@@ -271,16 +270,16 @@ server and written to the PVRecord.</p>
 
 <h3 id="putGet">putGet</h3>
 
-<p>The following window appears when the putGet button is pushed. It is
-similar to get and put except that both a putRequest and a getRequest must be
+<p>The following window appears when the putGet button is pushed. It is similar
+to get and put except that both a putRequest and a getRequest must be
 specified.</p>
 
 <center>
 <p><img src="./putGet.gif" alt="putGet" /></p>
 </center>
 
-<p>A typical use of putGet is to issue a remote procedure call. An RPC
-record, by convention, has the following:</p>
+<p>A typical use of putGet is to issue a remote procedure call. An RPC record,
+by convention, has the following:</p>
 <ol>
   <li>A top level feld named arguments.</li>
   <li>A top level field named result.</li>
@@ -317,12 +316,25 @@ the following window.</p>
 <h3 id="channelRPC">channelRPC</h3>
 
 <p>The following window appears when the channelRPC button is pushed. A
-channelRPC returns a new PVStructure for each request. The record must
-support a channelRPC request.</p>
+channelRPC returns a new PVStructure for each request. The record must support
+a channelRPC request.</p>
 
 <center>
 <p><img src="./channelRPC.gif" alt="channelRPC" /></p>
 </center>
+
+<p>When the createArgument button is clicked the following window appears:</p>
+
+<center>
+<p><img src="./createStructure.gif" alt="createStructure" /></p>
+</center>
+
+<p>You enter a fieldName and select a type. If the type is scalar or
+scalarArray then you must also select a scalarType. When you click add the new
+field will appear in the console window. If you select type structure or
+structureArray then when you select add a new structureArray window will
+appear. You follow the same procedure to create a sub structure.When you click
+done the createStructure window disappears. </p>
 
 <h3 id="array">array</h3>
 
@@ -334,17 +346,17 @@ support a channelRPC request.</p>
 
 <p>This window has a connect/disconnect button and a createArray/destroyArray
 button. It has a text entry for subField. The get button issues a array get
-request. The offset and count can be specified. The result is written into
-the value field of the put row. The put button issues a put array request.
-The offset can be specified. The value field provides the array values. The
+request. The offset and count can be specified. The result is written into the
+value field of the put row. The put button issues a put array request. The
+offset can be specified. The value field provides the array values. The
 setLength button is used to set the length and/or capacity of the array. A
 value of -1 means leave as is.</p>
 
 <h3 id="structureA">structureArray</h3>
 
-<p>This is used to get and modify elements of a PVStructureArray. You must
-get before issuing a put. The puts will modify the data obtained via the get
-and then put the data back.</p>
+<p>This is used to get and modify elements of a PVStructureArray. You must get
+before issuing a put. The puts will modify the data obtained via the get and
+then put the data back.</p>
 
 <p>The following window appears when the structureArray button is pushed:</p>
 
@@ -358,11 +370,10 @@ request. The offset and count can be specified. The result is written to the
 consoleText window. You must issue a get before using put.</p>
 
 <p>The put row acts on the data received from a put. You change elements by
-giving a value to index and clicking putElement. A tree structured window
-just like for put appears. This is changing the local data. When you click
-put the data is written to the actual record. The setLength button is used to
-set the length and/or capacity of the array. A value of -1 means leave as
-is.</p>
+giving a value to index and clicking putElement. A tree structured window just
+like for put appears. This is changing the local data. When you click put the
+data is written to the actual record. The setLength button is used to set the
+length and/or capacity of the array. A value of -1 means leave as is.</p>
 
 <h3 id="monitor">monitor</h3>
 
@@ -380,10 +391,10 @@ queueSize can be set.</p>
   <dt>serverInfo</dt>
     <dd>The status of the connection is shown </dd>
   <dt>simulateDelay</dt>
-    <dd>This is for testing channel access. If a non-zero value is specified
-      a delay occurs after each monitor is received.</dd>
-  <dt>When start is clicked monitoring is started. It changes to a stop
-  button while monitoring is active.</dt>
+    <dd>This is for testing channel access. If a non-zero value is specified a
+      delay occurs after each monitor is received.</dd>
+  <dt>When start is clicked monitoring is started. It changes to a stop button
+  while monitoring is active.</dt>
 </dl>
 <hr />
 
@@ -402,15 +413,14 @@ queueSize can be set.</p>
 the following controls:</p>
 <dl>
   <dt>find</dt>
-    <dd>This brings up a file selection box that allows the selection of a
-      DBD or DB file.</dd>
+    <dd>This brings up a file selection box that allows the selection of a DBD
+      or DB file.</dd>
   <dt>show</dt>
     <dd>Lists the selected file.</dd>
   <dt>loadDB</dt>
-    <dd>Adds definitions from the selected file to the JavaIOC file.
-      Structure, create, and support definitions are added only if the file
-      loads without error. It is an error if the definition already
-    exists.</dd>
+    <dd>Adds definitions from the selected file to the JavaIOC file. Structure,
+      create, and support definitions are added only if the file loads without
+      error. It is an error if the definition already exists.</dd>
     <dd>Record instances are loaded, initialized, and started. If all of the
       new record instances are stated, then the records are added to ther
       master database. If any record fails to start, all the records are
@@ -435,9 +445,8 @@ master database.</p>
 
 <p>The next three row allows the user to select and interact with a local
 record. The select button is used to select a local record. The text window
-after select shows the currently selected record and can also be used to
-enter a record name. The remaining buttons apply to the selected button. They
-are:</p>
+after select shows the currently selected record and can also be used to enter
+a record name. The remaining buttons apply to the selected button. They are:</p>
 <dl>
   <dt>dump</dt>
     <dd>shows the contents of the record.</dd>
@@ -450,8 +459,8 @@ are:</p>
   <dt>timeProcess</dt>
     <dd>Show how many times selected record can be processed per second.</dd>
   <dt>setSupportState</dt>
-    <dd>Allows the use to issue a support state method, i.e. initialize,
-      start, stop, or uninitialize.</dd>
+    <dd>Allows the use to issue a support state method, i.e. initialize, start,
+      stop, or uninitialize.</dd>
   <dt>releaseProcessor</dt>
     <dd>Allows the use to force the release of the current record processor.
       This is a dangorous operation!!</dd>
@@ -477,8 +486,8 @@ are:</p>
 <p><img src="./portDriver.gif" alt="portDriver" /></p>
 </center>
 
-<p>The first row has buttons to select a port and a device. The other rows
-are for setting trace options and for connect and enable commands.</p>
+<p>The first row has buttons to select a port and a device. The other rows are
+for setting trace options and for connect and enable commands.</p>
 <hr />
 
 <h2 style="text-align: center" id="iocConsole">iocConsole</h2>
@@ -490,10 +499,10 @@ are for setting trace options and for connect and enable commands.</p>
 <p><img src="./iocConsole.gif" alt="iocConsole" /></p>
 </center>
 
-<p>When this is started, it calls iocdb.addRequester where iocdb is the
-master IOCDB. Whenever any code sends a message to the iocdb, the message is
-displayed on the iocConsole window. Note that iocdb puts the messages on a
-queue and has a separate thead that send the messages to the requesters.</p>
+<p>When this is started, it calls iocdb.addRequester where iocdb is the master
+IOCDB. Whenever any code sends a message to the iocdb, the message is displayed
+on the iocConsole window. Note that iocdb puts the messages on a queue and has
+a separate thead that send the messages to the requesters.</p>
 
 <p></p>
 </body>

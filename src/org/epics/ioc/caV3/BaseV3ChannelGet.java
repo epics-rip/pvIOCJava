@@ -22,8 +22,8 @@ import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
-import org.epics.pvData.pv.StatusCreate;
 import org.epics.pvData.pv.Status.StatusType;
+import org.epics.pvData.pv.StatusCreate;
 
 
 

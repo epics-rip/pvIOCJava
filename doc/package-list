@@ -1,10 +1,9 @@
 org.epics.ioc
 org.epics.ioc.caV3
-org.epics.ioc.channelAccess.test
+org.epics.ioc.channelAccess
 org.epics.ioc.database
 org.epics.ioc.install
 org.epics.ioc.monitor
-org.epics.ioc.monitor.test
 org.epics.ioc.pdrv
 org.epics.ioc.pdrv.interfaces
 org.epics.ioc.pdrv.serial
@@ -13,7 +12,6 @@ org.epics.ioc.pdrv.vxi11
 org.epics.ioc.pdrv.vxi11.rpc
 org.epics.ioc.pvAccess
 org.epics.ioc.pvCopy
-org.epics.ioc.pvCopy.test
 org.epics.ioc.support
 org.epics.ioc.support.alarm
 org.epics.ioc.support.basic
@@ -28,7 +26,6 @@ org.epics.ioc.support.pdrv.digital
 org.epics.ioc.support.pdrv.scalar
 org.epics.ioc.support.pdrv.serial
 org.epics.ioc.support.rpc
-org.epics.ioc.support.test
 org.epics.ioc.swtshell
 org.epics.ioc.util
 org.epics.ioc.v3a

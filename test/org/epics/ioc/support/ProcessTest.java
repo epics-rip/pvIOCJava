@@ -21,9 +21,6 @@ import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.ioc.install.NewAfterStartRequester;
-import org.epics.ioc.support.ProcessToken;
-import org.epics.ioc.support.RecordProcess;
-import org.epics.ioc.support.RecordProcessRequester;
 import org.epics.ioc.util.RequestResult;
 import org.epics.ioc.xml.XMLToPVDatabaseFactory;
 import org.epics.pvData.misc.ThreadPriority;
@@ -74,7 +71,7 @@ public class ProcessTest extends TestCase {
         } 
         System.out.println("starting performance test"); 
         testProcess.testPerform();
-        ok = install.installRecords("src/org/epics/ioc/support/test/loopPV.xml", iocRequester);
+        ok = install.installRecords("test/org/epics/ioc/support/loopPV.xml", iocRequester);
         if(!ok) return;
         
 //        System.out.printf("\nrecords\n");

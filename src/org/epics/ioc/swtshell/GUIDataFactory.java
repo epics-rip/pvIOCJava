@@ -312,7 +312,7 @@ public class GUIDataFactory {
                 shell.setLayout(gridLayout);
                 text = new Text(shell,SWT.BORDER);
                 GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-                gridData.minimumWidth = 100;
+                gridData.minimumWidth = 200;
                 text.setLayoutData(gridData);
                 text.addSelectionListener(this);
                 textMessage(text,String.valueOf(index));

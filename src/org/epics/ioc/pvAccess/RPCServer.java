@@ -8,7 +8,6 @@ package org.epics.ioc.pvAccess;
 import org.epics.ca.client.Channel;
 import org.epics.ca.client.ChannelRPCRequester;
 import org.epics.ioc.database.PVRecord;
-import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Status;
 

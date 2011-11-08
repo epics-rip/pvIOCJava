@@ -10,12 +10,12 @@
 <body>
 <h1 style="text-align: center">EPICS JavaIOC: support.rpc<br />
 package: org.epics.ioc.support.rpc<br />
-2010.04.01</h1>
+2011.11.08</h1>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#Overview">Overview</a>
+  <li><a href="#Overview">Overview</a> 
     <ul>
       <li><a href="#putProcess">putProcessGet RPC</a></li>
       <li><a href="#channelRPC">channelRPC</a></li>
@@ -65,48 +65,41 @@ provide a brief description of the arguments and result for each support.</p>
 
 <h3 id="channelRPC">channelRPC</h3>
 
-<p>A ChannelRPC allows a different PVStructure to be created and returned to
-the client for each request.</p>
+<p>A ChannelRPC allows a different PVStructure to be passed to the server and
+returned to the client for each request.</p>
 <hr />
 
 <h2 style="text-align: center" id="ExampleCha">ExampleChannelRPC</h2>
 <hr />
 
-<p>This is an example of how to implement support for a record that supports
-a ChannelRPC request. See the package description for org.epics.ca.client for
+<p>This is an example of how to implement support for a record that supports a
+ChannelRPC request. See the package description for org.epics.ca.client for
 details about ChannelRPC.</p>
 
 <p>The example uses the record instance that is in
 test/channelRPC/channelRPCDB.xml :</p>
 <pre>&lt;record recordName = "exampleChannelRPC"&gt;
-    &lt;scalar name = "factoryName" scalarType = "string"&gt;
-      org.epics.ioc.support.rpc.ExampleChannelRPCFactory
-    &lt;/scalar&gt;
-    &lt;structure name = "arguments"&gt;
-        &lt;scalar name = "size" scalarType = "int"&gt;2&lt;/scalar&gt;
-    &lt;/structure&gt;
+    &lt;scalar name = "factoryRPC" scalarType = "string"&gt;org.epics.ioc.support.rpc.ExampleChannelRPCFactory&lt;/scalar&gt;
     &lt;structure name = "element"&gt;
         &lt;scalar name = "value" scalarType = "double"/&gt;
         &lt;structure name = "alarm" extends = "alarm"/&gt;
         &lt;structure name = "timeStamp" extends = "timeStamp"/&gt;
     &lt;/structure&gt;
 &lt;/record&gt;
-&lt;/database&gt;
-</pre>
+&lt;/database&gt;</pre>
 
 <p>Note that factoryName field. It must give the name of the factory that
-creates an objec that implements interface RPCServer. The example create a
+creates an object that implements interface RPCServer. The example create a
 PVStructure that has size subfields each of which is a clone of element. Look
 at the source code for details.</p>
-<pre>
-</pre>
+<pre></pre>
 <hr />
 
 <h2 style="text-align: center" id="RecordList">RecordList</h2>
 <hr />
 
-<p>This returns a list of the names of a set of records specified by a
-regular expression. The arguments are:</p>
+<p>This returns a list of the names of a set of records specified by a regular
+expression. The arguments are:</p>
 <dl>
   <dt>database</dt>
     <dd>A scalar string that specifies the name of the database, e. g.
@@ -121,8 +114,7 @@ regular expression. The arguments are:</p>
   <dt>status</dt>
     <dd>A scalar string that is used to report errors.</dd>
   <dt>names</dt>
-    <dd>An array wih element type of string. It contains the record
-    names.</dd>
+    <dd>An array wih element type of string. It contains the record names.</dd>
 </dl>
 <hr />
 
@@ -153,15 +145,15 @@ regular expression. The arguments are:</p>
 <h2 style="text-align: center" id="IocShow">IocShow</h2>
 <hr />
 
-<p>This provides some useful commands for getting information about a
-JavaIOC. The arguments are:</p>
+<p>This provides some useful commands for getting information about a JavaIOC.
+The arguments are:</p>
 <dl>
   <dt>command</dt>
     <dd>This is an enumerated structure that has the following choices: 
       <dl>
         <dt>showBadRecords</dt>
-          <dd>This gets a list of all records than have something unusual
-            about them.</dd>
+          <dd>This gets a list of all records than have something unusual about
+            them.</dd>
         <dt>showThreads</dt>
           <dd>This provides a list of the names of all the threads created by
             ThreadCreate.</dd>
@@ -196,18 +188,17 @@ The arguments are:</p>
         <dt>setTraceOff</dt>
           <dd>Set trace off for the record.</dd>
         <dt>timeProcess</dt>
-          <dd>Time how many times per second the record can be processed.
-            This will only succeed if the record does not already have a
-            record process requester.</dd>
+          <dd>Time how many times per second the record can be processed. This
+            will only succeed if the record does not already have a record
+            process requester.</dd>
         <dt>setEnableOn</dt>
           <dd>Enable the record.</dd>
         <dt>setEnableOff</dt>
-          <dd>Disable the record. This prevents the record from
-          processing.</dd>
+          <dd>Disable the record. This prevents the record from processing.</dd>
         <dt>releaseProcessor</dt>
-          <dd>Release the current record processor. This should only be used
-            as a last attempt to fee a record with a record process requester
-            that crashed.</dd>
+          <dd>Release the current record processor. This should only be used as
+            a last attempt to fee a record with a record process requester that
+            crashed.</dd>
       </dl>
     </dd>
 </dl>
@@ -236,8 +227,8 @@ are:</p>
         <dt>start</dt>
           <dd>Start the record. It must be in the readyForStart state.</dd>
         <dt>stop</dt>
-          <dd>Stop the record and put it in the readyForStart state. It must
-            be in the ready state. </dd>
+          <dd>Stop the record and put it in the readyForStart state. It must be
+            in the ready state. </dd>
         <dt>uninitialize</dt>
           <dd>Uninitialize the record and put it in the readyForeInitialize
             state. It must be in the ready or readyForStart state. </dd>

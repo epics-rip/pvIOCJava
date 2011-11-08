@@ -49,9 +49,9 @@ import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.Status.StatusType;
 import org.epics.pvData.pv.StatusCreate;
 import org.epics.pvData.pv.Type;
-import org.epics.pvData.pv.Status.StatusType;
 
 /**
  * Base class that implements V3Channel.

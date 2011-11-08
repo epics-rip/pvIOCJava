@@ -6,11 +6,11 @@
 package org.epics.ioc.support.caLink;
 
 import org.epics.ca.client.Channel;
+import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.ca.client.ChannelAccess;
 import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelProvider;
 import org.epics.ca.client.ChannelRequester;
-import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.ioc.database.PVRecord;
 import org.epics.ioc.database.PVRecordField;
 import org.epics.ioc.install.AfterStart;

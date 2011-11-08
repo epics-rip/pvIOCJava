@@ -24,13 +24,15 @@ import org.epics.ca.client.ChannelRPC;
 import org.epics.ca.client.ChannelRPCRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.CreateRequestFactory;
+import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.misc.BitSet;
+import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
-import org.epics.pvData.pv.*;
-import org.epics.pvData.factory.*;
+import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.Structure;
 
 
 /**
@@ -61,7 +63,7 @@ public class ChannelRPCFactory {
         private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         private StateMachine stateMachine = new StateMachine();
         private ChannelClient channelClient = new ChannelClient();
-        private CreatePVStructure createPVStructure = null;
+        private CreateStructure createStructure = null;
         PVStructure pvRequest = null;
         private PVStructure pvArgument = pvDataCreate.createPVStructure(null,"argument", new Field[0]);
         private Requester requester = null;
@@ -126,7 +128,7 @@ public class ChannelRPCFactory {
             requester = SWTMessageFactory.create(windowName,display,consoleText);
             pvRequest = CreateRequestFactory.createRequest("", requester);
             shell.pack();
-            createPVStructure = CreatePVStructureFactory.create(shell);
+            createStructure = CreateStructureFactory.create(shell);
             stateMachine.setState(State.readyForConnect);
             shell.open();
             shell.addDisposeListener(this);
@@ -164,7 +166,8 @@ public class ChannelRPCFactory {
                     stateMachine.setState(State.readyForConnect);
                 }
             } else if(object==createArgumentButton) {
-                pvArgument = createPVStructure.create();
+            	Structure structure = createStructure.create("argument");
+            	pvArgument = pvDataCreate.createPVStructure(null, structure);
 System.out.println(pvArgument);
             } else if(object==createChannelRPCButton) {
                 State state = stateMachine.getState();

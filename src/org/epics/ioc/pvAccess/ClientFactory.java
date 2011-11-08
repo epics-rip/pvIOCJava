@@ -23,9 +23,9 @@ import org.epics.ioc.install.AfterStartRequester;
 import org.epics.ioc.install.NewAfterStartRequester;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.Timer;
-import org.epics.pvData.misc.TimerFactory;
 import org.epics.pvData.misc.Timer.TimerCallback;
 import org.epics.pvData.misc.Timer.TimerNode;
+import org.epics.pvData.misc.TimerFactory;
 
 public class ClientFactory {
     static private boolean isRegistered = false;

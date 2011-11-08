@@ -48,9 +48,9 @@ import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.ShortArrayData;
 import org.epics.pvData.pv.Status;
+import org.epics.pvData.pv.Status.StatusType;
 import org.epics.pvData.pv.StatusCreate;
 import org.epics.pvData.pv.StringArrayData;
-import org.epics.pvData.pv.Status.StatusType;
 
 /**
  * Base class that implements ChannelPut for communicating with a V3 IOC.

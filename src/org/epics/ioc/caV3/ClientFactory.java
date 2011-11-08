@@ -33,9 +33,9 @@ import org.epics.pvData.misc.ThreadCreateFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.ThreadReady;
 import org.epics.pvData.misc.Timer;
-import org.epics.pvData.misc.TimerFactory;
 import org.epics.pvData.misc.Timer.TimerCallback;
 import org.epics.pvData.misc.Timer.TimerNode;
+import org.epics.pvData.misc.TimerFactory;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Status;
 

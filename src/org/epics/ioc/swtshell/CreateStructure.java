@@ -4,16 +4,16 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.swtshell;
-import org.epics.pvData.pv.*;
+import org.epics.pvData.pv.Structure;
 
 /**
  * Create a PVStructure
  * @author mrk
  *
  */
-public interface CreatePVStructure {
+public interface CreateStructure {
     /**
      * Create the request
      */
-    PVStructure create();
+    Structure create(String fieldName);
 }

@@ -17,10 +17,10 @@ package org.epics.ioc.channelAccess;
 import junit.framework.TestCase;
 
 import org.epics.ca.client.Channel;
+import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.ca.client.ChannelAccessFactory;
 import org.epics.ca.client.ChannelProvider;
 import org.epics.ca.client.ChannelRequester;
-import org.epics.ca.client.Channel.ConnectionState;
 import org.epics.ioc.install.Install;
 import org.epics.ioc.install.InstallFactory;
 import org.epics.pvData.pv.MessageType;
