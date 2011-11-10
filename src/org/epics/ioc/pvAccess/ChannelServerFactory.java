@@ -31,8 +31,6 @@ import org.epics.ca.client.ChannelRPC;
 import org.epics.ca.client.ChannelRPCRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.GetFieldRequester;
-import org.epics.ca.client.Query;
-import org.epics.ca.client.QueryRequester;
 import org.epics.ioc.database.PVDatabase;
 import org.epics.ioc.database.PVDatabaseFactory;
 import org.epics.ioc.database.PVRecord;
@@ -167,14 +165,6 @@ public class ChannelServerFactory  {
             channelFindRequester.channelFindResult(okStatus, channelFind, wasFound);
             return channelFind;
         }
-		/* (non-Javadoc)
-		 * @see org.epics.ca.client.ChannelProvider#query(org.epics.pvData.pv.PVField, org.epics.ca.client.QueryRequester)
-		 */
-		@Override
-		public Query query(PVField query, QueryRequester queryRequester) {
-			return null;
-		}
-		
         @Override
 		public Channel createChannel(String channelName,
 				ChannelRequester channelRequester, short priority,

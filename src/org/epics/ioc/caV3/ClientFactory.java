@@ -20,8 +20,6 @@ import org.epics.ca.client.ChannelFind;
 import org.epics.ca.client.ChannelFindRequester;
 import org.epics.ca.client.ChannelProvider;
 import org.epics.ca.client.ChannelRequester;
-import org.epics.ca.client.Query;
-import org.epics.ca.client.QueryRequester;
 import org.epics.ioc.install.AfterStart;
 import org.epics.ioc.install.AfterStartFactory;
 import org.epics.ioc.install.AfterStartNode;
@@ -36,7 +34,6 @@ import org.epics.pvData.misc.Timer;
 import org.epics.pvData.misc.Timer.TimerCallback;
 import org.epics.pvData.misc.Timer.TimerNode;
 import org.epics.pvData.misc.TimerFactory;
-import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.Status;
 
 
@@ -146,13 +143,6 @@ public class ClientFactory  {
             locateFind.find(channelFindRequester);
             return locateFind;
         }
-        /* (non-Javadoc)
-		 * @see org.epics.ca.client.ChannelProvider#channelFind(org.epics.pvData.pv.PVField, org.epics.ca.client.QueryRequester)
-		 */
-		@Override
-		public Query query(PVField query, QueryRequester queryRequester) {
-			return null;
-		}
         /* (non-Javadoc)
          * @see org.epics.ca.client.ChannelProvider#createChannel(java.lang.String, org.epics.ca.client.ChannelRequester, short)
          */
