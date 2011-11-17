@@ -42,7 +42,7 @@ public class ProcessTest extends TestCase {
     /**
      * test PVAccess.
      */
-    public static void testProcess() {
+    public static void DISABLED_testProcess() {
         Requester iocRequester = new RequesterForTesting("accessTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
