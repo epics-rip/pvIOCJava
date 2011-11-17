@@ -39,7 +39,9 @@ public class ProcessTest extends TestCase {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final Install install = InstallFactory.get();
     private static MessageType maxMessageType = MessageType.info;
-    /**
+ 
+   public static void testProcessDummy() { }
+   /**
      * test PVAccess.
      */
     public static void DISABLED_testProcess() {
