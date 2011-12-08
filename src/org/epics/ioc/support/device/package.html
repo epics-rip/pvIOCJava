@@ -10,42 +10,7 @@
 <body>
 <h1 style="text-align: center">EPICS javaIOC: support<br />
 package: org.epics.ioc.support.device<br />
-2010.04.30</h1>
-CONTENTS 
-
-<div class="toc">
-<ul>
-  <li><a href="#Overview">Overview</a></li>
-  <li><a href="#Power">Power Supply Support</a></li>
-</ul>
-</div>
-<hr />
-
-<h2 style="text-align: center" id="Overview">Overview</h2>
-<hr />
-This package will have support for device abstractions. For now it only has a
-power supply example. 
-<hr />
-
-<h2 style="text-align: center" id="Power">Power Supply Support</h2>
-<hr />
-<pre>    public class PowerSupplyFactory {
-        public static Support create(PVStructure pvStructure);
-    }</pre>
-
-<p>This is an example of support for a power supply. Given a voltage and
-power it computes the current. It supports fields for reading the voltage and
-for writing the current. The complete set of fields it suppports are:</p>
-<dl>
-  <dt style="font-family: courier;">voltage</dt>
-    <dd>This is required. It must be a structure containing a scalar double
-      field named value and an alarm field.</dd>
-  <dt style="font-family: courier;">current</dt>
-    <dd>This is required. It must be a structure containing a scalar double
-      field named value and an alarm field.</dd>
-  <dt style="font-family: courier;">power</dt>
-    <dd>This is required. It must be a a structure containing a scalar double
-      field named value and an alarm field.</dd>
-</dl>
+2011.12.08</h1>
+<p>See documentation/pvIOCJava.html for the overview.</p>
 </body>
 </html>

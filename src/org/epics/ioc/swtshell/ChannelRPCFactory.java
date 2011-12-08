@@ -72,6 +72,7 @@ public class ChannelRPCFactory {
         private static final String windowName = "channelRPC";
         private Shell shell;
         private Button connectButton;
+        private Text argumentNameText = null;
         private Button createArgumentButton;
         private Button createChannelRPCButton;
         private Button channelRPCButton;
@@ -94,6 +95,9 @@ public class ChannelRPCFactory {
             createArgumentButton.setText("createArgument");
             createArgumentButton.addSelectionListener(this);
 
+            argumentNameText = new Text(composite,SWT.BORDER);
+            argumentNameText.setText("argument");
+            
             createChannelRPCButton = new Button(composite,SWT.PUSH);
             createChannelRPCButton.setText("destroyChannelRPC");
             createChannelRPCButton.addSelectionListener(this);
@@ -166,9 +170,8 @@ public class ChannelRPCFactory {
                     stateMachine.setState(State.readyForConnect);
                 }
             } else if(object==createArgumentButton) {
-            	Structure structure = createStructure.create("argument");
+            	Structure structure = createStructure.create(argumentNameText.getText());
             	pvArgument = pvDataCreate.createPVStructure(null, structure);
-System.out.println(pvArgument);
             } else if(object==createChannelRPCButton) {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreateChannelRPC) {
