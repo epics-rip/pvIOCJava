@@ -25,11 +25,11 @@
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
 
 <h2 class="nocount" id="L50">EPICS v4 Working Group, Working Draft,
-14-Dec-2011</h2>
+19-Dec-2011</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
-      href="http://epics-pvdata.sourceforge.net/pvIOCJava_20111214.html">pvIOCJava_20111214.html</a></dd>
+      href="http://epics-pvdata.sourceforge.net/pvIOCJava_20111219.html">pvIOCJava_20111219.html</a></dd>
   <dt>Latest version:</dt>
     <dd><a
       href="http://epics-pvdata.sourceforge.net/pvIOCJava.html">pvIOCJava.html</a></dd>
@@ -41,6 +41,19 @@
 
 <h2 class="nocount" id="L72">Abstract</h2>
 
+<p>A pvIOC is a network accessable smart real time database. Each record
+contains a top level pvData structure. Each field of the structure can
+optionally have support attached to it. One of the methods of Support is named
+process. Support is what makes the database a "smart" database. A record can be
+processed, which results in calls to the attached support. A pvAccess server is
+provided so that the records can be accesed via the network.</p>
+
+<p>pvAccess is an implementation of Channel Access, i. e. network support for
+transmitting Process Variable Data, that fully supports pvData.</p>
+
+<p>pvData (Process Variable Data) defines and implements an efficent way to
+store, access, and transmit memory resident structured data</p>
+
 <p>This document describes the Java implementation of EPICS v4 pvIOC.</p>
 
 <p>For more information about the EPICS, please refer to the home page of the
@@ -49,25 +62,25 @@ Control System.</a></p>
 
 <h2 class="nocount" id="L80">Status of this Document</h2>
 
-<p>This is the 14-Dec-2011 version of the Java implementation of pvIOC. It is a
+<p>This is the 19-Dec-2011 version of the Java implementation of pvIOC. It is a
 complete implementation of pvIOC as currently defined. </p>
 CONTENTS 
 
 <div class="toc">
 <ul>
-  <li><a href="#L50">EPICS v4 Working Group, Working Draft, 14-Dec-2011</a></li>
+  <li><a href="#L50">EPICS v4 Working Group, Working Draft, 19-Dec-2011</a></li>
   <li><a href="#L72">Abstract</a></li>
   <li><a href="#L80">Status of this Document</a></li>
   <li><a href="#L86">Preface</a></li>
-  <li><a href="#L139">Part I: JavaIOC - Brief Description</a>
+  <li><a href="#L139">Part I: JavaIOC - Brief Description</a> 
     <ul>
-      <li><a href="#L149">Overview Of Part I</a>
+      <li><a href="#L149">Overview Of Part I</a> 
         <ul>
           <li><a href="#L159">Getting Started</a></li>
           <li><a href="#L344">Status and Remaining Tasks</a></li>
         </ul>
       </li>
-      <li><a href="#L389">Package Summary</a>
+      <li><a href="#L389">Package Summary</a> 
         <ul>
           <li><a href="#L395">default - javaIOC/src</a></li>
           <li><a href="#L401">org.epics.ioc</a></li>
@@ -99,9 +112,9 @@ CONTENTS
       <li><a href="#L515">Database Syntax For javaIOC</a></li>
       <li><a href="#L527">Channel Access</a></li>
       <li><a href="#L562">Record Processing</a></li>
-      <li><a href="#L667">Database Examples</a>
+      <li><a href="#L667">Database Examples</a> 
         <ul>
-          <li><a href="#L711">Record Instance Examples</a>
+          <li><a href="#L711">Record Instance Examples</a> 
             <ul>
               <li><a href="#L713">doubleInput</a></li>
               <li><a href="#L719">doubleOutput</a></li>
@@ -116,10 +129,10 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L759">Part II: javaIOC Data Model</a>
+  <li><a href="#L759">Part II: javaIOC Data Model</a> 
     <ul>
       <li><a href="#L767">Summary</a></li>
-      <li><a href="#L791">javaIOC Data Model</a>
+      <li><a href="#L791">javaIOC Data Model</a> 
         <ul>
           <li><a href="#L795">Basic Concept</a></li>
         </ul>
@@ -127,23 +140,23 @@ CONTENTS
       <li><a href="#L883">Definitions for Standard Properties</a></li>
     </ul>
   </li>
-  <li><a href="#L893">Part III: javaIOC - Database Definition</a>
+  <li><a href="#L893">Part III: javaIOC - Database Definition</a> 
     <ul>
       <li><a href="#L901">Overview Of Part III</a></li>
-      <li><a href="#L1011">javaIOC/xml/structures.xml</a>
+      <li><a href="#L1011">javaIOC/xml/structures.xml</a> 
         <ul>
           <li><a href="#L1013">structures.xml</a></li>
           <li><a href="#L1019">records.xml</a></li>
         </ul>
       </li>
-      <li><a href="#L1031">xml/structure/alarm.xml</a>
+      <li><a href="#L1031">xml/structure/alarm.xml</a> 
         <ul>
           <li><a href="#L1043">numeric alarms</a></li>
           <li><a href="#L1047">boolean alarms</a></li>
           <li><a href="#L1072">enumerated alarms</a></li>
         </ul>
       </li>
-      <li><a href="#L1094">xml/structure/analog.xml</a>
+      <li><a href="#L1094">xml/structure/analog.xml</a> 
         <ul>
           <li><a href="#L1098">linearConvert</a></li>
           <li><a href="#L1133">linearConvertInput</a></li>
@@ -152,7 +165,7 @@ CONTENTS
         </ul>
       </li>
       <li><a href="#L1208">xml/structure/calc.xml</a></li>
-      <li><a href="#L1212">xml/structure/caLink.xml</a>
+      <li><a href="#L1212">xml/structure/caLink.xml</a> 
         <ul>
           <li><a href="#L1216">caProcessLink</a></li>
           <li><a href="#L1236">caMonitorLink</a></li>
@@ -161,7 +174,7 @@ CONTENTS
           <li><a href="#L1351">caOutputLink</a></li>
         </ul>
       </li>
-      <li><a href="#L1376">xml/structure/dbLink.xml</a>
+      <li><a href="#L1376">xml/structure/dbLink.xml</a> 
         <ul>
           <li><a href="#L1378">dbProcessLink</a></li>
           <li><a href="#L1393">caInputLink</a></li>
@@ -173,12 +186,12 @@ CONTENTS
       <li><a href="#L1526">xml/structure/delay.xml</a></li>
       <li><a href="#L1530">xml/structure/event.xml</a></li>
       <li><a href="#L1534">xml/structure/generic.xml</a></li>
-      <li><a href="#L1538">xml/structure/portDriver</a>
+      <li><a href="#L1538">xml/structure/portDriver</a> 
         <ul>
           <li><a href="#L1542">portDriver.xml</a></li>
         </ul>
       </li>
-      <li><a href="#L1559">xml/structure/rpc.xml</a>
+      <li><a href="#L1559">xml/structure/rpc.xml</a> 
         <ul>
           <li><a href="#L1563">recordList</a></li>
           <li><a href="#L1567">structureList</a></li>
@@ -190,11 +203,11 @@ CONTENTS
     </ul>
   </li>
   <li><a href="#L1608">Part IV: JavaIOC - Package Descriptions</a></li>
-  <li><a href="#L1618">Package org.epics.ioc</a>
+  <li><a href="#L1618">Package org.epics.ioc</a> 
     <ul>
       <li><a href="#L1622">Overview</a></li>
       <li><a href="#L1696">Starting the JavaIOC with eclipse</a></li>
-      <li><a href="#L1702">Starting the JavaIOC without eclipse</a>
+      <li><a href="#L1702">Starting the JavaIOC without eclipse</a> 
         <ul>
           <li><a href="#L1706">source</a></li>
           <li><a href="#L1712">example</a></li>
@@ -202,10 +215,10 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L1724">Package org.epics.ioc.swtshell</a>
+  <li><a href="#L1724">Package org.epics.ioc.swtshell</a> 
     <ul>
       <li><a href="#L1728">Overview</a></li>
-      <li><a href="#L1781">Channel Access</a>
+      <li><a href="#L1781">Channel Access</a> 
         <ul>
           <li><a href="#L1801">Getting a list of the channels in a
           javaIOC.</a></li>
@@ -221,10 +234,10 @@ CONTENTS
           <li><a href="#L2016">monitor</a></li>
         </ul>
       </li>
-      <li><a href="#L2041">Local JavaIOC</a>
+      <li><a href="#L2041">Local JavaIOC</a> 
         <ul>
           <li><a href="#L2043">loadDatabase</a></li>
-          <li><a href="#L2072">introspectDatabase</a>
+          <li><a href="#L2072">introspectDatabase</a> 
             <ul>
               <li><a href="#L2080">Database Definitions</a></li>
               <li><a href="#L2084">Local Record Instance</a></li>
@@ -237,10 +250,10 @@ CONTENTS
       <li><a href="#L2149">iocConsole</a></li>
     </ul>
   </li>
-  <li><a href="#L2161">Package org.epics.ioc.xml</a>
+  <li><a href="#L2161">Package org.epics.ioc.xml</a> 
     <ul>
       <li><a href="#L2165">Overview</a></li>
-      <li><a href="#L2169">Database XML Syntax</a>
+      <li><a href="#L2169">Database XML Syntax</a> 
         <ul>
           <li><a href="#L2171">database</a></li>
           <li><a href="#L2177">auxInfo</a></li>
@@ -255,7 +268,7 @@ CONTENTS
           <li><a href="#L2553">string</a></li>
           <li><a href="#L2559">structure scalar</a></li>
           <li><a href="#L2569">structure</a></li>
-          <li><a href="#L2587">array</a>
+          <li><a href="#L2587">array</a> 
             <ul>
               <li><a href="#L2631">structureArray</a></li>
             </ul>
@@ -266,18 +279,18 @@ CONTENTS
           <li><a href="#L2715">Example Include and Macro Substitution</a></li>
         </ul>
       </li>
-      <li><a href="#L2725">Database XML Code</a>
+      <li><a href="#L2725">Database XML Code</a> 
         <ul>
           <li><a href="#L2746">Warning About XML element syntax</a></li>
           <li><a href="#L2780">Java Definitions</a></li>
-          <li><a href="#L2784">XML To PVDatabase</a>
+          <li><a href="#L2784">XML To PVDatabase</a> 
             <ul>
               <li><a href="#L2788">XMLToPVDatabaseFactory</a></li>
               <li><a href="#L2835">XMLToPVDatabaseListener</a></li>
             </ul>
           </li>
           <li><a href="#L2912">Include and Substitution</a></li>
-          <li><a href="#L2918">IncludeSubstituteXMLListener</a>
+          <li><a href="#L2918">IncludeSubstituteXMLListener</a> 
             <ul>
               <li><a href="#L2947">IncludeSubstituteDetailsXMLListener</a></li>
               <li><a href="#L3000">IncludeSubstituteXMLReader</a></li>
@@ -288,10 +301,10 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L3010">Package org.epics.ioc.util</a>
+  <li><a href="#L3010">Package org.epics.ioc.util</a> 
     <ul>
       <li><a href="#L3014">Overview</a></li>
-      <li><a href="#L3029">Scan Field Support</a>
+      <li><a href="#L3029">Scan Field Support</a> 
         <ul>
           <li><a href="#L3031">Definitions</a></li>
           <li><a href="#L3035">ScanField</a></li>
@@ -299,7 +312,7 @@ CONTENTS
           <li><a href="#L3067">ScanFieldFactory</a></li>
         </ul>
       </li>
-      <li><a href="#L3077">Periodic and Event Scanners</a>
+      <li><a href="#L3077">Periodic and Event Scanners</a> 
         <ul>
           <li><a href="#L3079">Definitions</a></li>
           <li><a href="#L3083">EventAnnounce</a></li>
@@ -309,10 +322,10 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L3143">Package org.epics.rpc</a>
+  <li><a href="#L3143">Package org.epics.rpc</a> 
     <ul>
       <li><a href="#L3147">Overview</a></li>
-      <li><a href="#L3178">Install Factory</a>
+      <li><a href="#L3178">Install Factory</a> 
         <ul>
           <li><a href="#L3182">Definitions</a></li>
           <li><a href="#L3186">installStructures</a></li>
@@ -320,14 +333,14 @@ CONTENTS
           <li><a href="#L3210">Initialize, and Start Record Instances</a></li>
         </ul>
       </li>
-      <li><a href="#L3251">Support Creation</a>
+      <li><a href="#L3251">Support Creation</a> 
         <ul>
           <li><a href="#L3255">Definitions</a></li>
           <li><a href="#L3259">Factory</a></li>
           <li><a href="#L3263">SupportCreation</a></li>
         </ul>
       </li>
-      <li><a href="#L3281">After Start</a>
+      <li><a href="#L3281">After Start</a> 
         <ul>
           <li><a href="#L3295">Definitions</a></li>
           <li><a href="#L3299">AfterStartNode</a></li>
@@ -340,7 +353,7 @@ CONTENTS
       <li><a href="#L3357">Introduction</a></li>
       <li><a href="#L3439">Client</a></li>
       <li><a href="#L3527">Server</a></li>
-      <li><a href="#L3594">Examples</a>
+      <li><a href="#L3594">Examples</a> 
         <ul>
           <li><a href="#L3598">Running the examples</a></li>
           <li><a href="#L3638">The service record</a></li>
@@ -348,10 +361,10 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L3665">Package org.epics.ioc.install</a>
+  <li><a href="#L3665">Package org.epics.ioc.install</a> 
     <ul>
       <li><a href="#L3669">Overview</a></li>
-      <li><a href="#L3700">Install Factory</a>
+      <li><a href="#L3700">Install Factory</a> 
         <ul>
           <li><a href="#L3704">Definitions</a></li>
           <li><a href="#L3708">installStructures</a></li>
@@ -359,14 +372,14 @@ CONTENTS
           <li><a href="#L3732">Initialize, and Start Record Instances</a></li>
         </ul>
       </li>
-      <li><a href="#L3773">Support Creation</a>
+      <li><a href="#L3773">Support Creation</a> 
         <ul>
           <li><a href="#L3777">Definitions</a></li>
           <li><a href="#L3781">Factory</a></li>
           <li><a href="#L3785">SupportCreation</a></li>
         </ul>
       </li>
-      <li><a href="#L3803">After Start</a>
+      <li><a href="#L3803">After Start</a> 
         <ul>
           <li><a href="#L3817">Definitions</a></li>
           <li><a href="#L3821">AfterStartNode</a></li>
@@ -378,49 +391,49 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L3881">Package org.epics.ioc.database</a>
+  <li><a href="#L3881">Package org.epics.ioc.database</a> 
     <ul>
       <li><a href="#L3885">Overview</a></li>
-      <li><a href="#L3921">RecordField Interfaces</a>
+      <li><a href="#L3921">RecordField Interfaces</a> 
         <ul>
           <li><a href="#L3925">PVRecordField</a></li>
           <li><a href="#L3992">PVRecordStructure</a></li>
         </ul>
       </li>
-      <li><a href="#L4011">Record Interfaces</a>
+      <li><a href="#L4011">Record Interfaces</a> 
         <ul>
           <li><a href="#L4013">PVListener</a></li>
           <li><a href="#L4047">PVRecordClient</a></li>
-          <li><a href="#L4053">PVRecord</a>
+          <li><a href="#L4053">PVRecord</a> 
             <ul>
               <li><a href="#L4167">Record Locking</a></li>
             </ul>
           </li>
         </ul>
       </li>
-      <li><a href="#L4175">PVRecord Definition and Creation</a>
+      <li><a href="#L4175">PVRecord Definition and Creation</a> 
         <ul>
           <li><a href="#L4177">PVDatabase</a></li>
           <li><a href="#L4286">PVRecordCreate</a></li>
           <li><a href="#L4300">PVReplaceFactory</a></li>
         </ul>
       </li>
-      <li><a href="#L4324">PVDatabase</a>
+      <li><a href="#L4324">PVDatabase</a> 
         <ul>
           <li><a href="#L4441">PVDatabaseFactory</a></li>
         </ul>
       </li>
     </ul>
   </li>
-  <li><a href="#L4465">Package org.epics.ioc.support</a>
+  <li><a href="#L4465">Package org.epics.ioc.support</a> 
     <ul>
-      <li><a href="#L4469">Overview</a>
+      <li><a href="#L4469">Overview</a> 
         <ul>
           <li><a href="#L4473">RecordProcess</a></li>
           <li><a href="#L4508">Support</a></li>
         </ul>
       </li>
-      <li><a href="#L4614">Record Processing Theory of Operation</a>
+      <li><a href="#L4614">Record Processing Theory of Operation</a> 
         <ul>
           <li><a href="#L4620">Definitions</a></li>
           <li><a href="#L4673">Requester Examples</a></li>
@@ -431,7 +444,7 @@ CONTENTS
           <li><a href="#L5084">Support Overview</a></li>
         </ul>
       </li>
-      <li><a href="#L5123">Record Process</a>
+      <li><a href="#L5123">Record Process</a> 
         <ul>
           <li><a href="#L5125">Definitions</a></li>
           <li><a href="#L5146">RecordProcess - General Purpose Methods</a></li>
@@ -446,22 +459,22 @@ CONTENTS
           <li><a href="#L5373">RecordProcessFactory</a></li>
         </ul>
       </li>
-      <li><a href="#L5379">Support</a>
+      <li><a href="#L5379">Support</a> 
         <ul>
           <li><a href="#L5383">Support State</a></li>
           <li><a href="#L5414">Support</a></li>
           <li><a href="#L5493">Record Support</a></li>
         </ul>
       </li>
-      <li><a href="#L5499">AbstractSupport</a>
+      <li><a href="#L5499">AbstractSupport</a> 
         <ul>
           <li><a href="#L5501">AbstractSupport</a></li>
           <li><a href="#L5503">Definitions</a></li>
         </ul>
       </li>
-      <li><a href="#L5570">Package org.epics.ioc.support.rpc</a>
+      <li><a href="#L5570">Package org.epics.ioc.support.rpc</a> 
         <ul>
-          <li><a href="#L5572">Overview</a>
+          <li><a href="#L5572">Overview</a> 
             <ul>
               <li><a href="#L5587">putProcessGet RPC</a></li>
               <li><a href="#L5606">channelRPC</a></li>
@@ -475,14 +488,14 @@ CONTENTS
           <li><a href="#L5771">SupportStateSet</a></li>
         </ul>
       </li>
-      <li><a href="#L5815">Package org.epics.ioc.support.basic</a>
+      <li><a href="#L5815">Package org.epics.ioc.support.basic</a> 
         <ul>
           <li><a href="#L5817">Overview</a></li>
           <li><a href="#L5873">Generic Support</a></li>
           <li><a href="#L5897">Noop Support</a></li>
           <li><a href="#L5903">ScanFactory</a></li>
           <li><a href="#L5911">Control Limit</a></li>
-          <li><a href="#L5917">Linear Conversion</a>
+          <li><a href="#L5917">Linear Conversion</a> 
             <ul>
               <li><a href="#L5921">linearConversion</a></li>
               <li><a href="#L5956">LinearConvertInputFactory</a></li>
@@ -494,10 +507,10 @@ CONTENTS
           <li><a href="#L6047">DelaySupport</a></li>
         </ul>
       </li>
-      <li><a href="#L6077">Package org.epics.ioc.support.calc</a>
+      <li><a href="#L6077">Package org.epics.ioc.support.calc</a> 
         <ul>
           <li><a href="#L6079">Overview</a></li>
-          <li><a href="#L6102">Basic Calculation Support</a>
+          <li><a href="#L6102">Basic Calculation Support</a> 
             <ul>
               <li><a href="#L6104">Database Definitions for
               Calculations</a></li>
@@ -505,7 +518,7 @@ CONTENTS
               <li><a href="#L6211">calcArgs</a></li>
             </ul>
           </li>
-          <li><a href="#L6226">ExpressionCalculator</a>
+          <li><a href="#L6226">ExpressionCalculator</a> 
             <ul>
               <li><a href="#L6230">Simple Examples</a></li>
               <li><a href="#L6248">Expression Syntax</a></li>
@@ -522,10 +535,10 @@ CONTENTS
           org.epics.ioc.support.calc.example</a></li>
         </ul>
       </li>
-      <li><a href="#L6481">Package org.epics.ioc.support.alarm</a>
+      <li><a href="#L6481">Package org.epics.ioc.support.alarm</a> 
         <ul>
           <li><a href="#L6483">Overview</a></li>
-          <li><a href="#L6559">XML definitions For alarms</a>
+          <li><a href="#L6559">XML definitions For alarms</a> 
             <ul>
               <li><a href="#L6563">Numeric Scalar</a></li>
               <li><a href="#L6581">Boolean</a></li>
@@ -533,7 +546,7 @@ CONTENTS
             </ul>
           </li>
           <li><a href="#L6617">Alarm Support</a></li>
-          <li><a href="#L6664">Value Alarms</a>
+          <li><a href="#L6664">Value Alarms</a> 
             <ul>
               <li><a href="#L6668">Boolean Alarms</a></li>
               <li><a href="#L6695">Numeric Alarms</a></li>
@@ -542,20 +555,20 @@ CONTENTS
           </li>
         </ul>
       </li>
-      <li><a href="#L6725">Package org.epics.ioc.support.caLink</a>
+      <li><a href="#L6725">Package org.epics.ioc.support.caLink</a> 
         <ul>
           <li><a href="#L6727">Overview</a></li>
           <li><a href="#L6757">Data Types Supported</a></li>
           <li><a href="#L6786">Support Structure Definition</a></li>
         </ul>
       </li>
-      <li><a href="#L6796">Package org.epics.ioc.support.dbLink</a>
+      <li><a href="#L6796">Package org.epics.ioc.support.dbLink</a> 
         <ul>
           <li><a href="#L6798">Overview</a></li>
           <li><a href="#L6818">Data Types Supported</a></li>
         </ul>
       </li>
-      <li><a href="#L6849">Package org.epics.ioc.support.device</a>
+      <li><a href="#L6849">Package org.epics.ioc.support.device</a> 
         <ul>
           <li><a href="#L6851">Overview</a></li>
           <li><a href="#L6855">Power Supply Support</a></li>
@@ -563,13 +576,13 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L6879">Package org.epics.ioc.pdrv</a>
+  <li><a href="#L6879">Package org.epics.ioc.pdrv</a> 
     <ul>
       <li><a href="#L6883">Preface</a></li>
       <li><a href="#L6937">Purpose</a></li>
       <li><a href="#L6993">Status</a></li>
       <li><a href="#L7028">Acknowledgments</a></li>
-      <li><a href="#L7037">Overview of portDriver</a>
+      <li><a href="#L7037">Overview of portDriver</a> 
         <ul>
           <li><a href="#L7039">Definitions</a></li>
           <li><a href="#L7162">portDriver Interfaces</a></li>
@@ -582,13 +595,13 @@ CONTENTS
           <li><a href="#L7293">Requesting access to a port</a></li>
         </ul>
       </li>
-      <li><a href="#L7308">PortDriver Record Types</a>
+      <li><a href="#L7308">PortDriver Record Types</a> 
         <ul>
           <li><a href="#L7310">portCreate record</a></li>
           <li><a href="#L7344">portDeviceControl record</a></li>
         </ul>
       </li>
-      <li><a href="#L7389">portDriver Factory</a>
+      <li><a href="#L7389">portDriver Factory</a> 
         <ul>
           <li><a href="#L7395">createUser</a></li>
           <li><a href="#L7409">createPort</a></li>
@@ -596,7 +609,7 @@ CONTENTS
           <li><a href="#L7454">getPort</a></li>
         </ul>
       </li>
-      <li><a href="#L7468">User</a>
+      <li><a href="#L7468">User</a> 
         <ul>
           <li><a href="#L7474">Status</a></li>
           <li><a href="#L7503">REASON</a></li>
@@ -616,7 +629,7 @@ CONTENTS
         </ul>
       </li>
       <li><a href="#L7651">Connect Exception</a></li>
-      <li><a href="#L7681">Port</a>
+      <li><a href="#L7681">Port</a> 
         <ul>
           <li><a href="#L7689">User Locate Device</a></li>
           <li><a href="#L7695">User Connection Methods</a></li>
@@ -626,7 +639,7 @@ CONTENTS
           <li><a href="#L7818">LockPortNotify</a></li>
         </ul>
       </li>
-      <li><a href="#L7854">Device</a>
+      <li><a href="#L7854">Device</a> 
         <ul>
           <li><a href="#L7860">User findInterface</a></li>
           <li><a href="#L7879">User Connection Methods</a></li>
@@ -636,7 +649,7 @@ CONTENTS
           <li><a href="#L7974">Driver Methods</a></li>
         </ul>
       </li>
-      <li><a href="#L8003">Trace</a>
+      <li><a href="#L8003">Trace</a> 
         <ul>
           <li><a href="#L8013">Trace Mask Options</a></li>
           <li><a href="#L8056">TraceIO Options</a></li>
@@ -645,17 +658,17 @@ CONTENTS
           <li><a href="#L8134">Generating Trace Messages</a></li>
         </ul>
       </li>
-      <li><a href="#L8161">Driver</a>
+      <li><a href="#L8161">Driver</a> 
         <ul>
           <li><a href="#L8163">PortDriver</a></li>
           <li><a href="#L8192">DeviceDriver</a></li>
         </ul>
       </li>
       <li><a href="#L8216">Appendix: Java Definitions</a></li>
-      <li><a href="#L8228">Package org.epics.ioc.support.interfaces</a>
+      <li><a href="#L8228">Package org.epics.ioc.support.interfaces</a> 
         <ul>
           <li><a href="#L8230">Overview</a></li>
-          <li><a href="#L8309">miscellaneous</a>
+          <li><a href="#L8309">miscellaneous</a> 
             <ul>
               <li><a href="#L8311">Interface</a></li>
               <li><a href="#L8332">Option</a></li>
@@ -663,14 +676,14 @@ CONTENTS
               <li><a href="#L8377">AbstractInterface</a></li>
             </ul>
           </li>
-          <li><a href="#L8426">serial</a>
+          <li><a href="#L8426">serial</a> 
             <ul>
               <li><a href="#L8430">SerialInterruptListener</a></li>
               <li><a href="#L8444">Serial</a></li>
               <li><a href="#L8513">AbstractSerial</a></li>
             </ul>
           </li>
-          <li><a href="#L8560">uint32Digital</a>
+          <li><a href="#L8560">uint32Digital</a> 
             <ul>
               <li><a href="#L8562">DigitalInterruptReason</a></li>
               <li><a href="#L8586">UInt32DigitalInterruptListener</a></li>
@@ -678,35 +691,35 @@ CONTENTS
               <li><a href="#L8654">AbstractUInt32Digital</a></li>
             </ul>
           </li>
-          <li><a href="#L8706">int32</a>
+          <li><a href="#L8706">int32</a> 
             <ul>
               <li><a href="#L8712">Int32InterruptListener</a></li>
               <li><a href="#L8726">Int32</a></li>
               <li><a href="#L8767">AbstractInt32</a></li>
             </ul>
           </li>
-          <li><a href="#L8812">int32Array</a>
+          <li><a href="#L8812">int32Array</a> 
             <ul>
               <li><a href="#L8818">Int32ArrayInterruptListener</a></li>
               <li><a href="#L8832">Int32Array</a></li>
               <li><a href="#L8881">AbstractInt32Array</a></li>
             </ul>
           </li>
-          <li><a href="#L8930">float64</a>
+          <li><a href="#L8930">float64</a> 
             <ul>
               <li><a href="#L8936">Float64InterruptListener</a></li>
               <li><a href="#L8950">Float64</a></li>
               <li><a href="#L8994">AbstractFloat64</a></li>
             </ul>
           </li>
-          <li><a href="#L9028">float64Array</a>
+          <li><a href="#L9028">float64Array</a> 
             <ul>
               <li><a href="#L9034">Float64ArrayInterruptListener</a></li>
               <li><a href="#L9048">Float64Array</a></li>
               <li><a href="#L9092">AbstractFloat64Array</a></li>
             </ul>
           </li>
-          <li><a href="#L9146">GPIB Interfaces</a>
+          <li><a href="#L9146">GPIB Interfaces</a> 
             <ul>
               <li><a href="#L9150">GpibController</a></li>
               <li><a href="#L9246">GpibDevice</a></li>
@@ -714,21 +727,21 @@ CONTENTS
           </li>
         </ul>
       </li>
-      <li><a href="#L9302">Package org.epics.ioc.pdrv.serial</a>
+      <li><a href="#L9302">Package org.epics.ioc.pdrv.serial</a> 
         <ul>
           <li><a href="#L9304">Overview</a></li>
           <li><a href="#L9310">Configuration</a></li>
           <li><a href="#L9324">Implementation</a></li>
         </ul>
       </li>
-      <li><a href="#L9337">Package org.epics.ioc.pdrv.vxi11</a>
+      <li><a href="#L9337">Package org.epics.ioc.pdrv.vxi11</a> 
         <ul>
           <li><a href="#L9339">Overview</a></li>
           <li><a href="#L9410">Configuration</a></li>
           <li><a href="#L9426">Implementation</a></li>
         </ul>
       </li>
-      <li><a href="#L9445">Package org.epics.ioc.support.pdrv</a>
+      <li><a href="#L9445">Package org.epics.ioc.support.pdrv</a> 
         <ul>
           <li><a href="#L9447">Overview</a></li>
           <li><a href="#L9486">portDriverLink</a></li>
@@ -736,7 +749,7 @@ CONTENTS
           <li><a href="#L9504">Support for PortDriverLink</a></li>
           <li><a href="#L9510">Port Creation</a></li>
           <li><a href="#L9524">Port and Device Control</a></li>
-          <li><a href="#L9538">Package org.epics.ioc.support.pdrv.scalar</a>
+          <li><a href="#L9538">Package org.epics.ioc.support.pdrv.scalar</a> 
             <ul>
               <li><a href="#L9540">Overview</a></li>
               <li><a href="#L9544">Int32</a></li>
@@ -744,7 +757,7 @@ CONTENTS
               <li><a href="#L9564">Java Definitions</a></li>
             </ul>
           </li>
-          <li><a href="#L9572">Package org.epics.ioc.support.pdrv.array</a>
+          <li><a href="#L9572">Package org.epics.ioc.support.pdrv.array</a> 
             <ul>
               <li><a href="#L9574">Overview</a></li>
               <li><a href="#L9578">Int32Array</a></li>
@@ -752,14 +765,14 @@ CONTENTS
               <li><a href="#L9598">Java Definitions</a></li>
             </ul>
           </li>
-          <li><a href="#L9606">Package org.epics.ioc.support.pdrv.digital</a>
+          <li><a href="#L9606">Package org.epics.ioc.support.pdrv.digital</a> 
             <ul>
               <li><a href="#L9608">Overview</a></li>
               <li><a href="#L9612">UInt32Digital</a></li>
               <li><a href="#L9628">Java Definitions</a></li>
             </ul>
           </li>
-          <li><a href="#L9636">Package org.epics.ioc.support.pdrv.serial</a>
+          <li><a href="#L9636">Package org.epics.ioc.support.pdrv.serial</a> 
             <ul>
               <li><a href="#L9638">Overview</a></li>
               <li><a href="#L9719">UInt32Digital</a></li>
@@ -770,20 +783,20 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L9735">Package org.epics.ioc.pvAccess</a>
+  <li><a href="#L9735">Package org.epics.ioc.pvAccess</a> 
     <ul>
       <li><a href="#L9739">pvAccess Server</a></li>
       <li><a href="#L9743">pvAccess client</a></li>
     </ul>
   </li>
-  <li><a href="#L9749">Package org.epics.ioc.pvCopy</a>
+  <li><a href="#L9749">Package org.epics.ioc.pvCopy</a> 
     <ul>
       <li><a href="#L9753">Overview</a></li>
-      <li><a href="#L9823">Request String</a>
+      <li><a href="#L9823">Request String</a> 
         <ul>
           <li><a href="#L9831">Simple Requests</a></li>
           <li><a href="#L9849">Full Request Syntax</a></li>
-          <li><a href="#L9893">Examples</a>
+          <li><a href="#L9893">Examples</a> 
             <ul>
               <li><a href="#L9899">Simple example</a></li>
               <li><a href="#L9923">Power Supply Example</a></li>
@@ -791,12 +804,12 @@ CONTENTS
           </li>
         </ul>
       </li>
-      <li><a href="#L9933">pvRequest</a>
+      <li><a href="#L9933">pvRequest</a> 
         <ul>
           <li><a href="#L9935">PVStructure pvRequest</a></li>
-          <li><a href="#L10016">Examples</a>
+          <li><a href="#L10016">Examples</a> 
             <ul>
-              <li><a href="#L10020">Simple example</a>
+              <li><a href="#L10020">Simple example</a> 
                 <ul>
                   <li><a href="#L10022">The quickest Way</a></li>
                   <li><a href="#L10032">Using the field notation</a></li>
@@ -809,7 +822,7 @@ CONTENTS
       </li>
       <li><a href="#L10068">PVCopy</a></li>
       <li><a href="#L10143">PVCopyMonitor</a></li>
-      <li><a href="#L10185">PVCopyFactory</a>
+      <li><a href="#L10185">PVCopyFactory</a> 
         <ul>
           <li><a href="#L10187">Java Definition</a></li>
         </ul>
@@ -817,10 +830,10 @@ CONTENTS
       <li><a href="#L10233">PVShare</a></li>
     </ul>
   </li>
-  <li><a href="#L10241">Package org.epics.ioc.monitor</a>
+  <li><a href="#L10241">Package org.epics.ioc.monitor</a> 
     <ul>
       <li><a href="#L10245">Overview</a></li>
-      <li><a href="#L10274">Implementing New Monitor Algorithms</a>
+      <li><a href="#L10274">Implementing New Monitor Algorithms</a> 
         <ul>
           <li><a href="#L10290">MonitorFactory</a></li>
           <li><a href="#L10330">MonitorAlgorithm</a></li>
@@ -828,17 +841,17 @@ CONTENTS
       </li>
     </ul>
   </li>
-  <li><a href="#L10359">Package org.epics.ioc.caV3</a>
+  <li><a href="#L10359">Package org.epics.ioc.caV3</a> 
     <ul>
       <li><a href="#L10363">Overview</a></li>
-      <li><a href="#L10378">Server</a>
+      <li><a href="#L10378">Server</a> 
         <ul>
           <li><a href="#L10380">Syntax</a></li>
           <li><a href="#L10427">Get and Put Options</a></li>
           <li><a href="#L10435">monitor options</a></li>
         </ul>
       </li>
-      <li><a href="#L10439">Client</a>
+      <li><a href="#L10439">Client</a> 
         <ul>
           <li><a href="#L10441">Overview</a></li>
           <li><a href="#L10496">Naming conventions.</a></li>
@@ -865,7 +878,7 @@ single eclipse project named javaIOC. This project is the what remains of the
 IOC portion of the original javaIOC. The name JavaIOC is still used in many
 places in this project.</p>
 
-<p>A JavaIOC is a network accessable smart real time database. A database has
+<p>A javaIOC is a network accessable smart real time database. A database has
 memory resident records which can link to hardware or to other records. A
 record consists of a structured set of fields. A record can be processed, i.e.
 asked to do something. Each field has an object which implements interface
