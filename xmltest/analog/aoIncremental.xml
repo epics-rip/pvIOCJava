@@ -7,10 +7,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">10.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0.0</scalar>
+        <scalar name = "limitHigh">10.0</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
@@ -23,10 +21,8 @@
         <scalar name = "rateOfChange">.2</scalar>
         <scalar name = "incremental">true</scalar>
         <structure name = "control" extends = "control" >
-            <structure name = "limit">
-                <scalar name = "low">0.0</scalar>
-                <scalar name = "high">8.0</scalar>
-            </structure>
+            <scalar name = "limitLow">0</scalar>
+            <scalar name = "limitHigh">8</scalar>
         </structure>
     </structure>
     <structure name = "output" extends = "linearConvertOutput">

@@ -108,16 +108,16 @@ System.out.println("start");
               + " Note that PVRecord.power does NOT have an alarm field.%n");
         request = "field(alarm,timeStamp,power{power.value,power.alarm},"
                 + "current{current.value,current.alarm},voltage{voltage.value,voltage.alarm})";
-//System.out.println("request " + request);
-//        pvRequest = CreateRequestFactory.createRequest(request,requester);
-//System.out.println("pvRequest ");
-//System.out.println(pvRequest);
-//        assertTrue(pvRequest!=null);
-//        pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
-//        pvCopyStructure = pvCopy.createPVStructure();
-//        bitSet = new BitSet(pvCopyStructure.getNumberFields());
-//        pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//        System.out.println(pvCopyStructure.toString());
+System.out.println("request " + request);
+        pvRequest = CreateRequestFactory.createRequest(request,requester);
+System.out.println("pvRequest ");
+System.out.println(pvRequest);
+        assertTrue(pvRequest!=null);
+        pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+        pvCopyStructure = pvCopy.createPVStructure();
+        bitSet = new BitSet(pvCopyStructure.getNumberFields());
+        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        System.out.println(pvCopyStructure.toString());
         
         System.out.printf(
         "%npowerSupply from powerSupplyArray%n");

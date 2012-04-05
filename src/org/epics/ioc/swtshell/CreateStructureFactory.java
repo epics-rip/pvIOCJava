@@ -110,6 +110,10 @@ public class CreateStructureFactory {
             scalarTypeList.add("short");
             scalarTypeList.add("int");
             scalarTypeList.add("long");
+            scalarTypeList.add("ubyte");
+            scalarTypeList.add("ushort");
+            scalarTypeList.add("uint");
+            scalarTypeList.add("ulong");
             scalarTypeList.add("float");
             scalarTypeList.add("double");
             scalarTypeList.add("string");

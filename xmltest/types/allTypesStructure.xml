@@ -14,10 +14,6 @@
   <scalar name = "float" scalarType = "float">1.0</scalar>
   <scalar name = "double" scalarType = "double">2.0</scalar>
   <scalar name = "string" scalarType = "string">test string</scalar>
-  <structure name = "doubleLimit" extends = "doubleLimit">
-      <scalar name = "low">1.0</scalar>
-      <scalar name = "high">10.0</scalar>
-  </structure>
   <array name = "booleanArray" scalarType = "boolean">
       [false,true,false]
   </array>

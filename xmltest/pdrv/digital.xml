@@ -34,10 +34,8 @@
     </structure>
     <structure name = "display" extends = "display" >
         <scalar name = "units">counts</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">15.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">15</scalar>
     </structure>
     <structure name = "link" extends = "caOutputLink">
          <scalar name = "pvname">syncDigitalOut</scalar>

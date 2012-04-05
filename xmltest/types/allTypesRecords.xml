@@ -17,10 +17,6 @@
         This is a string
         ]]>
     </scalar>
-    <structure name ="doubleLimit" extends = "doubleLimit">
-        <scalar name = "low">0.0</scalar>
-        <scalar name = "high">10.0</scalar>
-    </structure>
     <array name ="booleanArray" scalarType = "boolean" length = "3">
         <![CDATA[
         [false,true]
@@ -48,10 +44,6 @@
         [string1,string 2,string 3,string 4]
     </array>
     <structure name = "structureArray" >
-        <structure name = "0" extends = "doubleLimit">
-             <scalar name = "low">0.0</scalar>
-             <scalar name = "high">10.0</scalar>
-        </structure>
         <structure name = "1" extends = "linearConvert">
              <scalar name = "engUnitsLow">0.0</scalar>
              <scalar name = "engUnitsHigh">100.0</scalar>
@@ -75,10 +67,6 @@
               string 1  ,string 2  ,string 3
           </array>
         </structure>
-        <structure name = "1" extends = "doubleLimit">
-             <scalar name = "low">0.0</scalar>
-             <scalar name = "high">10.0</scalar>
-        </structure>
       </structure>
       <structure name = "1">
         <structure name = "0" extends = "generic">
@@ -88,10 +76,6 @@
           <array name = "b" offset = "3" scalarType = "string" capacity = "5" length = "5">
               string 4  ,string 5  ,string 6
           </array>
-        </structure>
-        <structure name = "1" extends = "doubleLimit">
-             <scalar name = "low">0.0</scalar>
-             <scalar name = "high">10.0</scalar>
         </structure>
       </structure>
       
@@ -107,10 +91,6 @@
       <scalar name ="string" scalarType = "string">
         This is a string
       </scalar>
-      <structure name ="doubleLimit" extends = "doubleLimit">
-          <scalar name = "low">0.0</scalar>
-          <scalar name = "high">10.0</scalar>
-      </structure>
       <array name ="booleanArray" scalarType = "boolean" length = "3">
         <![CDATA[
          false,
@@ -171,10 +151,6 @@
          ]]>
       </array>
       <structure name = "structureArray" >
-          <structure name = "0" extends = "doubleLimit">
-               <scalar name = "low">0.0</scalar>
-               <scalar name = "high">10.0</scalar>
-          </structure>
           <structure name = "1" extends = "linearConvert">
                <scalar name = "engUnitsLow">0.0</scalar>
                <scalar name = "engUnitsHigh">100.0</scalar>

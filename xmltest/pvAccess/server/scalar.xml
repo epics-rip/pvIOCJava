@@ -43,10 +43,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">10</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">10</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "byteAlarm">
         <scalar name = "active">true</scalar>
@@ -68,10 +66,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">10</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">10</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "shortAlarm">
         <scalar name = "active">true</scalar>
@@ -94,10 +90,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">10</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">10</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "intAlarm">
         <scalar name = "active">true</scalar>
@@ -118,10 +112,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">10</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">10</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "longAlarm">
         <scalar name = "active">true</scalar>
@@ -144,10 +136,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">10</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">10</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "floatAlarm">
         <scalar name = "active">true</scalar>
@@ -170,10 +160,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">10</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">10</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "doubleAlarm">
         <scalar name = "active">true</scalar>

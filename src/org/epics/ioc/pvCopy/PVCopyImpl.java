@@ -246,11 +246,11 @@ class PVCopyImpl {
                 recordNode.nfields = pvRecordStructure.getPVStructure().getNumberFields();
                 return;
             }
-System.out.println("pvRequest");
-System.out.println(pvRequest);
+//System.out.println("pvRequest");
+//System.out.println(pvRequest);
             structure = createStructure(pvRecordStructure.getPVStructure(),pvRequest,"");
-System.out.println("structure");
-System.out.println(structure);
+//System.out.println("structure");
+//System.out.println(structure);
             cacheInitStructure = createPVStructure();
             StructureNode structureNode = new StructureNode();
             createStructureNodes(pvRecord,structureNode,pvRequest,cacheInitStructure);

@@ -59,7 +59,7 @@ public class ExampleChannelRPCFactory {
 		@Override
 		public void request(PVStructure pvArgument) {
 System.out.println("argument");
-System.out.println(pvArgument.toString());
+System.out.println(pvArgument);
 			long start =System.currentTimeMillis();
 			int size = 2;
 			Structure[] fields = new Structure[size];

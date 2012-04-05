@@ -11,10 +11,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
@@ -50,10 +48,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">floatCounter</scalar>
@@ -77,10 +73,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
@@ -115,10 +109,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">doubleCounter</scalar>
@@ -142,10 +134,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
@@ -180,10 +170,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">11</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">byteCounter</scalar>
@@ -207,10 +195,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
@@ -245,10 +231,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
      <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">11</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">shortCounter</scalar>
@@ -272,10 +256,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
@@ -310,10 +292,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">11</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">intCounter</scalar>
@@ -337,10 +317,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">11.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
         <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
@@ -375,10 +353,8 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">increment</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0</scalar>
-            <scalar name = "high">11</scalar>
-        </structure>
+        <scalar name = "limitLow">0</scalar>
+        <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "input" extends = "caInputLink">
         <scalar name = "pvname">longCounter</scalar>
