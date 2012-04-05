@@ -5,7 +5,6 @@
 <package name = "org.epics.ioc" />
 <include href = "enumerated.xml" />
 <include href = "timeStamp.xml" />
-<include href = "limit.xml" />
 <include href = "display.xml" />
 <include href = "deadband.xml" />
 <include href = "channelAccess.xml" />

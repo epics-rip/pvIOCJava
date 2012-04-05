@@ -143,7 +143,7 @@ public class Float64ArrayDriverFactory {
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                ScalarArray array = fieldCreate.createScalarArray("drvPrivate", ScalarType.pvDouble);
+                ScalarArray array = fieldCreate.createScalarArray( ScalarType.pvDouble);
                 PVDoubleArray pvDoubleArray = new PVDoubleArrayImpl(parent,array,device);
                 new Float64ArrayImpl(pvDoubleArray,device);
             }

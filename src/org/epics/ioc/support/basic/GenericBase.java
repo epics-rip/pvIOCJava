@@ -73,7 +73,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
         int numberSupport = 0;
         for(int i=0; i< n; i++) {
             PVRecordField pvRecordField = pvRecordFields[i];
-            String fieldName = pvRecordField.getPVField().getField().getFieldName();
+            String fieldName = pvRecordField.getPVField().getFieldName();
             if(fieldName.equals("scan")) continue;
             if(fieldName.equals("timeStamp")) continue;
             // alarm is a special case
@@ -92,7 +92,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
         int indSupport = 0;
         for(int i=0; i< n; i++) {
             PVRecordField pvRecordField = pvRecordFields[i];
-            String fieldName = pvRecordField.getPVField().getField().getFieldName();
+            String fieldName = pvRecordField.getPVField().getFieldName();
             if(fieldName.equals("scan")) continue;
             if(fieldName.equals("timeStamp")) continue;
             if(fieldName.equals("alarm")) continue;

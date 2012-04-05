@@ -40,10 +40,11 @@ public interface Install {
      * Install a PVStructure into the master database.
      * It is installed only if the master database does not already have a structure named structureName.
      * @param pvStructure The structure to install.
+     * @param strucrureName The name of the structure.
      * @param requester The requester.
      * @return false,true) if the new structure (was not, was) merged into master.
      */
-    boolean installStructure(PVStructure pvStructure,Requester requester);
+    boolean installStructure(PVStructure pvStructure,String structurename,Requester requester);
     /**
      * Install records into the master PVDatabase.
      * A PVDatabase named beingInstalled is created.

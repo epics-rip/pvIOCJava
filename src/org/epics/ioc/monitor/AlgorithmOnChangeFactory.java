@@ -77,7 +77,7 @@ public class AlgorithmOnChangeFactory {
             this.pvFromRecord = pvFromRecord;
             this.causeMonitor = causeMonitor;
             if(causeMonitor) {
-            	pvCopy = pvDataCreate.createPVField(null, "", pvFromRecord);
+            	pvCopy = pvDataCreate.createPVField(null, pvFromRecord);
             } else {
             	pvCopy = null;
             }

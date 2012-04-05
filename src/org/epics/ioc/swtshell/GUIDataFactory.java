@@ -285,7 +285,7 @@ public class GUIDataFactory {
             for(PVField pvField : pvFields) {
                 Field field = pvField.getField();
                 TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                treeItem.setText(field.getFieldName());
+                treeItem.setText(pvField.getFieldName());
                 Type type = field.getType();
                 if(type==Type.structure) {
                     createStructureTreeItem(treeItem,(PVStructure)pvField);

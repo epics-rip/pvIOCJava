@@ -106,7 +106,7 @@ abstract class AbstractIOLink extends AbstractLink {
         pvFields = new PVField[linkPVFields.length];
         for(int i=0; i<linkPVFields.length; i++) {
             PVField pvLinkField = linkPVFields[i];
-            String fieldName = pvLinkField.getField().getFieldName();
+            String fieldName = pvLinkField.getFieldName();
             PVField pvField = null;
             PVStructure pvParent = super.pvStructure;
             while(pvParent!=null) {

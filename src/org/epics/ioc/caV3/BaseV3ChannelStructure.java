@@ -4,6 +4,8 @@
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.ioc.caV3;
+import java.util.HashMap;
+import java.util.Map;
 
 
 import gov.aps.jca.dbr.DBR;
@@ -42,6 +44,7 @@ import gov.aps.jca.dbr.DBR_TIME_Float;
 import gov.aps.jca.dbr.DBR_TIME_Int;
 import gov.aps.jca.dbr.DBR_TIME_Short;
 import gov.aps.jca.dbr.DBR_TIME_String;
+import gov.aps.jca.dbr.Status;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,29 +52,13 @@ import java.util.regex.Pattern;
 
 import org.epics.ioc.database.PVDatabase;
 import org.epics.ioc.database.PVDatabaseFactory;
-import org.epics.pvData.factory.ConvertFactory;
-import org.epics.pvData.factory.FieldFactory;
-import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.factory.*;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.property.AlarmSeverity;
 import org.epics.pvData.property.PVEnumerated;
 import org.epics.pvData.property.PVEnumeratedFactory;
-import org.epics.pvData.pv.Convert;
-import org.epics.pvData.pv.Field;
-import org.epics.pvData.pv.FieldCreate;
-import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVDataCreate;
-import org.epics.pvData.pv.PVDouble;
-import org.epics.pvData.pv.PVField;
-import org.epics.pvData.pv.PVInt;
-import org.epics.pvData.pv.PVLong;
-import org.epics.pvData.pv.PVScalar;
-import org.epics.pvData.pv.PVScalarArray;
-import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Scalar;
-import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.pv.Type;
+import org.epics.pvData.pv.*;
+import org.epics.pvData.property.*;
 
 /**
  * @author mrk
@@ -79,11 +66,10 @@ import org.epics.pvData.pv.Type;
  */
 public class BaseV3ChannelStructure implements V3ChannelStructure {
     private static final Convert convert = ConvertFactory.getConvert();
-    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static final StandardPVField standardPVField = StandardPVFieldFactory.getStandardPVField();
     private static enum DBRProperty {none,status,time,graphic,control};
     private static final Pattern commaPattern = Pattern.compile("[,]");
+    private static Map<gov.aps.jca.dbr.Status, AlarmStatus> statusMap = new HashMap<Status, AlarmStatus>();
     
     private V3Channel v3Channel;
     
@@ -94,6 +80,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     private PVStructure pvAlarm = null;
     private PVString pvAlarmMessage = null;
     private PVInt pvAlarmSeverity = null;
+    private PVInt pvAlarmStatus = null;
     private PVStructure pvTimeStamp = null;
     private PVLong pvSeconds = null;
     private PVInt pvNanoSeconds = null;
@@ -105,6 +92,31 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     
     private boolean firstGetPVStructure = true;
     
+    static {
+        statusMap.put(Status.NO_ALARM, AlarmStatus.NONE);
+        statusMap.put(Status.READ_ALARM, AlarmStatus.DRIVER);
+        statusMap.put(Status.WRITE_ALARM, AlarmStatus.DRIVER);
+        statusMap.put(Status.HIHI_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.HIGH_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.LOLO_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.LOW_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.STATE_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.COS_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.COMM_ALARM, AlarmStatus.DRIVER);
+        statusMap.put(Status.TIMEOUT_ALARM, AlarmStatus.DRIVER);
+        statusMap.put(Status.HW_LIMIT_ALARM, AlarmStatus.DEVICE);
+        statusMap.put(Status.CALC_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.SCAN_ALARM, AlarmStatus.DB);
+        statusMap.put(Status.LINK_ALARM, AlarmStatus.DB);
+        statusMap.put(Status.SOFT_ALARM, AlarmStatus.CONF);
+        statusMap.put(Status.BAD_SUB_ALARM, AlarmStatus.CONF);
+        statusMap.put(Status.UDF_ALARM, AlarmStatus.UNDEFINED);
+        statusMap.put(Status.DISABLE_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.SIMM_ALARM, AlarmStatus.RECORD);
+        statusMap.put(Status.READ_ACCESS_ALARM, AlarmStatus.DRIVER);
+        statusMap.put(Status.WRITE_ACCESS_ALARM, AlarmStatus.DRIVER);
+    }
+
     /**
      * The Constructor
      * @param v3Channel The v3Channel.
@@ -123,12 +135,15 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         int elementCount = jcaChannel.getElementCount();
         nativeDBRType = jcaChannel.getFieldType();
         PVField[] pvFields = null;
+        String[] fieldNames = null;
         PVField pvf = pvRequest.getSubField("field");
         if(pvf!=null && pvf.getField().getType()==Type.structure) {
             PVStructure pvStruct = pvRequest.getStructureField("field");
             pvFields = pvStruct.getPVFields();
+            fieldNames = pvStruct.getStructure().getFieldNames();
         } else {
         	pvFields = pvRequest.getPVFields();
+        	fieldNames = pvRequest.getStructure().getFieldNames();
         } 
         boolean valueIsIndex = false;
         boolean valueIsChoice = false;
@@ -147,7 +162,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
             Scalar scalar = (Scalar)field;
             if(scalar.getScalarType()!=ScalarType.pvString) return null;
             PVString pvString = (PVString)pvField;
-            String fieldName = field.getFieldName();
+            String fieldName = fieldNames[indField];
             if(fieldName.equals("fieldList")) {
                 String fieldList = pvString.get();
                 String[] fields = commaPattern.split(fieldList);
@@ -194,7 +209,6 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         }
         String[] propertyNames = new String[propertyList.size()];
         for(int i=0; i<propertyNames.length; i++) propertyNames[i] = propertyList.get(i);
-        propertyList = null;
         DBRProperty dbrProperty = DBRProperty.none;
         if(propertyNames.length>0) {
             for(String propertyName : propertyNames) {
@@ -233,35 +247,19 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         } else if(nativeDBRType.isENUM()) {
             type = Type.structure;
         }
-        Field valueField = null;
-        if(type==Type.structure) {
-            PVStructure pvEnumerated = masterPVDatabase.findStructure("org.epics.ioc.enumerated");
-            if(pvEnumerated==null) {
-                v3Channel.message("could not find structure enumerated ", MessageType.error);
-                return null;
-            }
-            Field[] valueFields = pvEnumerated.getStructure().getFields();
-            valueField = fieldCreate.createStructure("value", valueFields);
-        } else if(elementCount<2) {
-            valueField = fieldCreate.createScalar("value", scalarType);
-        } else {
-            valueField = fieldCreate.createScalarArray("value", scalarType);
+        
+        String properties = propertyList.toString();
+        
+        switch(type) {
+        case scalar:
+            pvStructure = standardPVField.scalar(null,"value", scalarType, properties);
+            break;
+        case scalarArray:
+            pvStructure = standardPVField.scalarArray(null,"value", scalarType, properties);
+            break;
+        case structure:
+            pvStructure = standardPVField.enumerated(null,"value",null, properties);
         }
-        Field[] fields = new Field[propertyNames.length + 1];
-        fields[0] = valueField;
-        int index = 1;
-        for(String propertyName : propertyNames) {
-            PVStructure pvStructure = masterPVDatabase.findStructure(propertyName);
-            if(pvStructure==null) pvStructure = masterPVDatabase.findStructure("org.epics.ioc." + propertyName);
-            if(pvStructure==null) pvStructure = masterPVDatabase.findStructure("org.epics.pvData." + propertyName);
-            if(pvStructure==null) {
-                v3Channel.message("could not find structure for " + propertyName, MessageType.error);
-                return null;
-            }
-            Field[] propertyFields = pvStructure.getStructure().getFields();
-            fields[index++] = fieldCreate.createStructure(propertyName, propertyFields);
-        }
-        pvStructure = pvDataCreate.createPVStructure(null,"", fields);
         if(nativeDBRType.isENUM()) {
             PVStructure pvStruct = (PVStructure)pvStructure.getPVFields()[0];
             pvEnumeratedIndex = pvStruct.getIntField("index");
@@ -271,29 +269,19 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                 return null;
             }
         }
-        for(PVField pvField : pvStructure.getPVFields()) {
-            if(pvField.getField().getFieldName().equals("alarm")) {
-                PVStructure pvTemp = masterPVDatabase.findStructure("org.epics.ioc.alarm");
-                PVStructure pvReplace = pvDataCreate.createPVStructure(pvField.getParent(), pvField.getField().getFieldName(),pvTemp);
-                pvField.replacePVField(pvReplace);
-                pvAlarm = pvReplace;
-                PVField[] pvAlarmFields = pvAlarm.getPVFields();
-                for(PVField alarmField : pvAlarmFields) {
-                    String name = alarmField.getField().getFieldName();
-                    if(name.equals("severity" ) || name.equals("message")) continue;
-                    pvAlarm.removePVField(name);
-                }
-                
+        if(pvStructure.getSubField("alarm")!=null) {
+            pvAlarm = pvStructure.getStructureField("alarm");
+            if(pvAlarm!=null) {
                 pvAlarmMessage = pvAlarm.getStringField("message");
                 pvAlarmSeverity = pvAlarm.getIntField("severity");
+                pvAlarmStatus = pvAlarm.getIntField("status");
             }
-            if(pvField.getField().getFieldName().equals("timeStamp")) {
-                pvTimeStamp = (PVStructure)pvField;
+        }
+        if(pvStructure.getSubField("timeStamp")!=null) {
+            pvTimeStamp = pvStructure.getStructureField("timeStamp");
+            if(pvTimeStamp!=null) {
                 pvSeconds = pvTimeStamp.getLongField("secondsPastEpoch");
                 pvNanoSeconds = pvTimeStamp.getIntField("nanoSeconds");
-                if(pvSeconds==null || pvNanoSeconds==null) {
-                    throw new RuntimeException("bad timeStamp structure");
-                }
             }
         }
         bitSet = new BitSet(pvStructure.getNumberFields());
@@ -412,21 +400,22 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     public DBRType getRequestDBRType() {
         return requestDBRType;
     }
-    private void setAlarm(AlarmSeverity alarmSeverity,String message) {
+    private void setAlarm(AlarmStatus alarmStatus,AlarmSeverity alarmSeverity,String message) {
         int severity = alarmSeverity.ordinal();
+        int status = alarmStatus.ordinal();
         if(pvAlarm!=null) {
             String oldMessage = pvAlarmMessage.get();
             if(oldMessage!=message || (message!=null &&(!message.equals(oldMessage)))) {
                 pvAlarmMessage.put(message);
             }
-            if(pvAlarmSeverity.get()!=severity) {
-                pvAlarmSeverity.put(severity);
-            }
+            pvAlarmSeverity.put(severity);
+            pvAlarmStatus.put(status);
         } else {
             System.err.println(
-                    pvStructure.getField().getFieldName()
+                    v3Channel.getChannelName()
                     + " v3Ca error " + message
-                    + " severity " + alarmSeverity.toString());
+                    + " severity " + alarmSeverity.toString()
+                    + " status " + alarmStatus.toString());
         }
     }
     /* (non-Javadoc)
@@ -435,10 +424,10 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     @Override
     public void toStructure(DBR fromDBR) {
         if(fromDBR==null) {
-            setAlarm(AlarmSeverity.INVALID,"fromDBR is null");
+            setAlarm(AlarmStatus.UNDEFINED,AlarmSeverity.INVALID,"fromDBR is null");
             return;
         }
-        gov.aps.jca.dbr.Status status = null;
+        Status status = null;
         gov.aps.jca.dbr.TimeStamp timeStamp = null;
         gov.aps.jca.dbr.Severity severity = null;
         gov.aps.jca.Channel jcaChannel = v3Channel.getJCAChannel();
@@ -482,7 +471,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                     this.requestDBRType = DBRType.ENUM;
                 }
             } else {
-                setAlarm(AlarmSeverity.INVALID,
+                setAlarm(AlarmStatus.UNDEFINED,AlarmSeverity.INVALID,
                         " unsupported DBRType " + requestDBRType.getName());
                 return;
             }
@@ -889,7 +878,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                     this.requestDBRType = DBRType.STRING;
                 }
             } else {
-                setAlarm(AlarmSeverity.INVALID,
+                setAlarm(AlarmStatus.UNDEFINED,AlarmSeverity.INVALID,
                         " unsupported DBRType " + requestDBRType.getName());
                 return;
             }
@@ -905,7 +894,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
             int index = severity.getValue();
             AlarmSeverity alarmSeverity = AlarmSeverity.getSeverity(index);
             String message = status.getName();
-            setAlarm(alarmSeverity,message);
+            setAlarm(statusMap.get(status),alarmSeverity,message);
         }
         if(displayLow<displayHigh) {
             pvStructure = this.pvStructure.getStructureField("display");

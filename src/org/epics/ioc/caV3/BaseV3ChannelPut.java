@@ -22,17 +22,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.epics.ca.client.ChannelPut;
 import org.epics.ca.client.ChannelPutRequester;
-import org.epics.pvData.factory.PVDataFactory;
 import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.pv.ByteArrayData;
 import org.epics.pvData.pv.DoubleArrayData;
-import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.FloatArrayData;
 import org.epics.pvData.pv.IntArrayData;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVByte;
 import org.epics.pvData.pv.PVByteArray;
-import org.epics.pvData.pv.PVDataCreate;
 import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVDoubleArray;
 import org.epics.pvData.pv.PVField;
@@ -45,7 +42,6 @@ import org.epics.pvData.pv.PVShortArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStringArray;
 import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.ShortArrayData;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Status.StatusType;
@@ -60,7 +56,6 @@ import org.epics.pvData.pv.StringArrayData;
 public class BaseV3ChannelPut
 implements ChannelPut,GetListener,PutListener,ConnectionListener
 {
-    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
     private static Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
@@ -108,10 +103,6 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
         if(v3ChannelStructure.createPVStructure(pvRequest,true)==null) {
             channelPutRequester.channelPutConnect(createChannelStructureStatus,null,null,null);
         }
-        PVStructure pvStructure = pvDataCreate.createPVStructure(null, "", new Field[0]);
-        PVString pvString = (PVString)pvDataCreate.createPVScalar(pvStructure, "value", ScalarType.pvString);
-        pvString.put("value");
-        pvStructure.appendPVField(pvString);
         DBRType nativeDBRType = v3ChannelStructure.getNativeDBRType();
         jcaChannel = v3Channel.getJCAChannel();
         try {
@@ -121,7 +112,7 @@ implements ChannelPut,GetListener,PutListener,ConnectionListener
             jcaChannel = null;
             return;
         }
-        pvStructure = v3ChannelStructure.getPVStructure();
+        PVStructure pvStructure = v3ChannelStructure.getPVStructure();
         pvField = pvStructure.getSubField("value");
         elementCount = jcaChannel.getElementCount();
         if(nativeDBRType.isENUM()) {

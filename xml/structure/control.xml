@@ -2,7 +2,8 @@
 <database>
 
 <structure structureName = "control">
-    <structure name = "limit" extends = "doubleLimit" />
+    <scalar name = "limitLow" scalarType = "double" />
+    <scalar name = "limitHigh" scalarType = "double" />
     <scalar name = "minStep" scalarType = "double" />
 </structure>
 

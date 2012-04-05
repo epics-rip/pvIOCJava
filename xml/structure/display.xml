@@ -9,7 +9,8 @@
     <scalar name = "description" scalarType = "string" />
     <scalar name = "format" scalarType = "string" />
     <scalar name = "units" scalarType = "string" />
-    <structure name = "limit" extends = "doubleLimit" />
+    <scalar name = "limitLow" scalarType = "double" />
+    <scalar name = "limitHigh" scalarType = "double" />
 </structure>
 
 </database>

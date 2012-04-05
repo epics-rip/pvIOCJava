@@ -144,7 +144,7 @@ public class Int32ArrayDriverFactory {
             private void init(Device device) {
                 this.device = device;
                 trace = device.getTrace();
-                ScalarArray array = fieldCreate.createScalarArray("drvPrivate", ScalarType.pvInt);
+                ScalarArray array = fieldCreate.createScalarArray( ScalarType.pvInt);
                 PVIntArray pvIntArray = new PVIntArrayImpl(parent,array,device);
                 new Int32ArrayImpl(pvIntArray,device);
             }

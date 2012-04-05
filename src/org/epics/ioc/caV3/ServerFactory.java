@@ -718,13 +718,14 @@ public class ServerFactory {
 
         private void getData(DBR dbr, PVStructure pvStructure) {
             PVField[] pvFields = pvStructure.getPVFields();
+            String[] fieldNames = pvStructure.getStructure().getFieldNames();
             for(int i=0; i<pvFields.length; i++) {
                 PVField pvField = pvFields[i];
-                if(pvField.getField().getFieldName().equals("value")) {
+                if(fieldNames[i].equals("value")) {
                     getValueField(dbr,pvField);
-                } else if(pvField.getField().getFieldName().equals("timeStamp")) {
+                } else if(fieldNames[i].equals("timeStamp")) {
                     getTimeStampField(dbr,(PVStructure)pvField);
-                } else if(pvField.getField().getFieldName().equals("alarm")) {
+                } else if(fieldNames[i].equals("alarm")) {
                     getAlarmField(dbr,(PVStructure)pvField);
                 }
             }
@@ -949,9 +950,9 @@ public class ServerFactory {
                     }
 
                     // all done via super-set double
-                    PVDouble lowField = pvDisplay.getDoubleField("limit.low");
+                    PVDouble lowField = pvDisplay.getDoubleField("limitLow");
                     gr.setLowerDispLimit(lowField.get());
-                    PVDouble highField = pvDisplay.getDoubleField("limit.high");
+                    PVDouble highField = pvDisplay.getDoubleField("limitHigh");
                     gr.setUpperDispLimit(highField.get());
                 }
                 PVStructure pvValueAlarm = null;
@@ -977,10 +978,10 @@ public class ServerFactory {
             	if(pvControl!=null) {
             		final CTRL ctrl = (CTRL)dbr;
             		// all done via double as super-set type
-            		PVDouble lowField = pvControl.getDoubleField("limit.low");
+            		PVDouble lowField = pvControl.getDoubleField("limitLow");
             		ctrl.setLowerCtrlLimit(lowField.get());
 
-            		PVDouble highField = pvControl.getDoubleField("limit.high");
+            		PVDouble highField = pvControl.getDoubleField("limitHigh");
             		ctrl.setUpperCtrlLimit(highField.get());
             		PVStructure pvValueAlarm = null;
                 	if(pvCopyStructure.getSubField("valueAlarm")!=null) {

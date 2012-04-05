@@ -100,7 +100,7 @@ public class CalcArgsFactory {
                     pvField.message("CalcArgs requires this to have a value field", MessageType.error);
                     return;
                 }
-                argNames[i] = valuePVFields[i].getParent().getField().getFieldName();
+                argNames[i] = valuePVFields[i].getParent().getFieldName();
                 Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
                 supports[i] = support;
                 if(support==null) continue;

@@ -63,12 +63,11 @@ public class CreateStructureFactory {
             super(parent,SWT.DIALOG_TRIM|SWT.NONE);
             this.parent = parent;
         }
-        
         /* (non-Javadoc)
-         * @see org.epics.ioc.swtshell.CreatePVStructure#get(org.epics.pvData.pv.PVStructure, org.epics.pvData.misc.BitSet)
+         * @see org.epics.ioc.swtshell.CreateStructure#create()
          */
         @Override
-        public Structure create(String fieldName) {
+        public Structure create() {
             shell = new Shell(parent);
             shell.setText("createStructure");
             GridLayout gridLayout = new GridLayout();
@@ -121,7 +120,7 @@ public class CreateStructureFactory {
             gridData.heightHint = 400;
             gridData.widthHint = 400;
             consoleText.setLayoutData(gridData);
-            structure = fieldCreate.createStructure(fieldName, new Field[0]);
+            structure = fieldCreate.createStructure(new String[0], new Field[0]);
             consoleText.setText(structure.toString());
             shell.open();
             Display display = shell.getDisplay();
@@ -168,21 +167,21 @@ public class CreateStructureFactory {
             	}
             	switch(type) {
             	case 0:
-            		field = fieldCreate.createScalar(fieldName, ScalarType.values()[scalarType]);
+            		field = fieldCreate.createScalar(ScalarType.values()[scalarType]);
             	    break;
             	case 1:
-            		field = fieldCreate.createScalarArray(fieldName,ScalarType.values()[scalarType]);
+            		field = fieldCreate.createScalarArray(ScalarType.values()[scalarType]);
             		break;
             	case 2: {
             		CreateStructure createStructure = CreateStructureFactory.create(shell);
-            		Structure struct = createStructure.create(fieldName);
-            		field = fieldCreate.createStructure(fieldName, struct.getFields());
+            		Structure struct = createStructure.create();
+            		field = fieldCreate.createStructure(struct.getFieldNames(), struct.getFields());
             		break;
             	}
                 case 3: {
                 	CreateStructure createStructure = CreateStructureFactory.create(shell);
-            		Structure struct = createStructure.create("");
-            		field = fieldCreate.createStructureArray(fieldName, struct);
+            		Structure struct = createStructure.create();
+            		field = fieldCreate.createStructureArray(struct);
                     break;
                 }
                 default :
@@ -192,10 +191,16 @@ public class CreateStructureFactory {
                     return;
             	}
             	Field[] oldFields = structure.getFields();
+            	String[] oldFieldNames = structure.getFieldNames();
             	Field[] newFields = new Field[oldFields.length + 1];
-            	for(int i=0; i< oldFields.length; i++) newFields[i] = oldFields[i];
+            	String[] newFieldNames = new String[oldFields.length + 1];
+            	for(int i=0; i< oldFields.length; i++) {   
+            	    newFields[i] = oldFields[i];
+            	    newFieldNames[i] = oldFieldNames[i];
+            	}
             	newFields[oldFields.length] = field;
-            	structure = fieldCreate.createStructure(structure.getFieldName(), newFields);
+            	newFieldNames[oldFields.length] = fieldName;
+            	structure = fieldCreate.createStructure(newFieldNames, newFields);
             	consoleText.selectAll();
                 consoleText.clearSelection();
                 consoleText.setText(structure.toString());

@@ -25,18 +25,20 @@ import org.epics.ca.client.ChannelArrayRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.factory.FieldFactory;
 import org.epics.pvData.pv.Convert;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVArray;
 import org.epics.pvData.pv.PVDataCreate;
+import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.PVScalarArray;
 import org.epics.pvData.pv.PVString;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.Requester;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Status;
-import org.epics.pvData.pv.Type;
+import org.epics.pvData.pv.*;
 
 /**
  * Shell for processing a channel.
@@ -56,6 +58,7 @@ public class ArrayFactory {
 
     private static final Convert convert = ConvertFactory.getConvert();
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     
     private static class ArrayImpl implements DisposeListener,SelectionListener
     {
@@ -382,10 +385,14 @@ public class ArrayFactory {
             
             
             void createArray() {
-            	PVStructure pvRequest = pvDataCreate.createPVStructure(null, "", new Field[0]);
-            	PVString pvFieldName = (PVString)pvDataCreate.createPVScalar(pvRequest, "field", ScalarType.pvString);
+                Field[] fields = new Field[1];
+                String[] fieldNames = new String[1];
+                fields[0] = fieldCreate.createScalar(ScalarType.pvString);
+                fieldNames[0] = "field";
+                Structure structure = fieldCreate.createStructure(fieldNames, fields);
+            	PVStructure pvRequest = pvDataCreate.createPVStructure(null,structure);
+            	PVString pvFieldName = pvRequest.getStringField("field");
             	pvFieldName.put(subField);
-            	pvRequest.appendPVField(pvFieldName);
                 channelArray = channel.createChannelArray(this, pvRequest);
             }
             

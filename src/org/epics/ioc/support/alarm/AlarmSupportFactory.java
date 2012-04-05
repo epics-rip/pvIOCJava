@@ -86,7 +86,7 @@ public class AlarmSupportFactory {
 				Field field = pvField.getField();
 				Type type = field.getType();
 				if (type == Type.structure) {
-					if (field.getFieldName().equals("alarm")) {
+					if (pvField.getFieldName().equals("alarm")) {
 						Support support = pvRecordFields[i].getSupport();
 						if (support != null
 								&& (support instanceof AlarmSupportImpl)) {

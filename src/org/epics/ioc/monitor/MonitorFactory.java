@@ -13,7 +13,7 @@ import org.epics.ioc.pvCopy.PVCopyMonitor;
 import org.epics.ioc.pvCopy.PVCopyMonitorRequester;
 import org.epics.pvData.factory.ConvertFactory;
 import org.epics.pvData.factory.PVDataFactory;
-import org.epics.pvData.factory.StatusFactory;
+import org.epics.pvData.factory.*;
 import org.epics.pvData.misc.BitSet;
 import org.epics.pvData.misc.BitSetUtil;
 import org.epics.pvData.misc.BitSetUtilFactory;
@@ -29,7 +29,7 @@ import org.epics.pvData.monitor.MonitorElement;
 import org.epics.pvData.monitor.MonitorQueue;
 import org.epics.pvData.monitor.MonitorQueueFactory;
 import org.epics.pvData.monitor.MonitorRequester;
-import org.epics.pvData.pv.Convert;
+import org.epics.pvData.pv.*;
 import org.epics.pvData.pv.Field;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVBoolean;
@@ -82,7 +82,8 @@ public class MonitorFactory {
 	private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
     private static final Status failedToCreateMonitorStatus = statusCreate.createStatus(StatusType.FATAL, "failed to create monitor", null);
-	private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
 	private static final LinkedList<MonitorAlgorithmCreate> monitorAlgorithmCreateList = monitorAlgorithmCreateListCreate.create();
 	private static final BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
 	private static final Convert convert = ConvertFactory.getConvert();
@@ -94,13 +95,18 @@ public class MonitorFactory {
 	static {
 		AlgorithmOnChangeFactory.register();
 		AlgorithmDeadbandFactory.register();
-		pvTimeStampRequest = pvDataCreate.createPVStructure(null, "", new Field[0]);
-		PVString pvAlgorithm = (PVString)pvDataCreate.createPVScalar(pvTimeStampRequest, "algorithm", ScalarType.pvString);
+		String[] fieldNames = new String[2];
+		Field[] fields = new Field[2];
+		fieldNames[0] = "algorithm";
+		fieldNames[1] = "causeMonitor";
+		fields[0] = fieldCreate.createScalar(ScalarType.pvString);
+		fields[1] = fieldCreate.createScalar(ScalarType.pvBoolean);
+		Structure structure = fieldCreate.createStructure(fieldNames, fields);
+		pvTimeStampRequest = pvDataCreate.createPVStructure(null,structure);
+		PVString pvAlgorithm = pvTimeStampRequest.getStringField(fieldNames[0]);
+		PVBoolean pvCauseMonitor = pvTimeStampRequest.getBooleanField(fieldNames[1]);
 		pvAlgorithm.put("onChange");
-		pvTimeStampRequest.appendPVField(pvAlgorithm);
-		PVBoolean pvCauseMonitor = (PVBoolean)pvDataCreate.createPVScalar(pvTimeStampRequest, "causeMonitor", ScalarType.pvBoolean);
 		pvCauseMonitor.put(false);
-		pvTimeStampRequest.appendPVField(pvCauseMonitor);
 		LinkedListNode<MonitorAlgorithmCreate> node = monitorAlgorithmCreateList.getHead();
 		while(node!=null) {
 			MonitorAlgorithmCreate algorithmCreate = node.getObject();
@@ -340,7 +346,7 @@ public class MonitorFactory {
 					if(pvRecordField==null) return false;
 					String name = copyFullFieldName;
 					if(name.length()!=0) name += ".";
-					name += pvRecordField.getPVField().getField().getFieldName();
+					name += pvRecordField.getPVField().getFieldName();
 					PVField pvCopyField = monitorElement.getPVStructure().getSubField(name);
 					boolean result = initMonitorField(
 							pvLeaf,pvCopyField,pvRecordField,monitorElement);
@@ -349,7 +355,7 @@ public class MonitorFactory {
 				}
 				String name = copyFullFieldName;
 				if(name.length()!=0) name += ".";
-				name += pvStruct.getField().getFieldName();
+				name += pvStruct.getFieldName();
 				// Note that next call is recursive
 				boolean result = initField(pvStruct,name,monitorElement);
 				if(!result) return false;

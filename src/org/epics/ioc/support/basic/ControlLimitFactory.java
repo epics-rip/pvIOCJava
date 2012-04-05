@@ -54,8 +54,8 @@ public class ControlLimitFactory {
             return;
         }
         PVStructure pvParent = pvRecordField.getParent().getPVStructure();
-        PVField pvLow = pvParent.getSubField("control.limit.low");
-        PVField pvHigh = pvParent.getSubField("control.limit.high");
+        PVField pvLow = pvParent.getSubField("control.limitLow");
+        PVField pvHigh = pvParent.getSubField("control.limitHigh");
         if(pvLow==null || pvHigh==null) {
             pvParent.message("replacePVField missing or invalid control structure", MessageType.error);
             return;

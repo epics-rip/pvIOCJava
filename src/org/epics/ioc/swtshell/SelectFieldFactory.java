@@ -125,7 +125,7 @@ public class SelectFieldFactory {
             for(PVField pvField : pvFields) {
                 Field field = pvField.getField();
                 TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                treeItem.setText(field.getFieldName());
+                treeItem.setText(pvField.getFieldName());
                 treeItem.setData(pvField);
                 Type type = field.getType();
                 if(type==Type.structure) {

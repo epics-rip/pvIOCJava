@@ -63,14 +63,13 @@ System.out.println(pvArgument.toString());
 			long start =System.currentTimeMillis();
 			int size = 2;
 			Structure[] fields = new Structure[size];
+			String[] fieldNames = new String[size];
 			for(int index=0; index<size; index++) {
-				fields[index] = fieldCreate.createStructure(Integer.toString(index), pvElement.getStructure().getFields());
+			    fieldNames[index] = Integer.toString(index);
+				fields[index] = fieldCreate.createStructure(pvElement.getStructure().getFieldNames(), pvElement.getStructure().getFields());
 			}
-			PVStructure pvTop = pvDataCreate.createPVStructure(null, "",fields);
-			PVField[] pvFields = pvTop.getPVFields();
-			for(int index=0; index<size; index++) {
-				pvFields[index] = pvDataCreate.createPVStructure(pvTop, Integer.toString(index), pvElement);
-			}
+			Structure top = fieldCreate.createStructure(fieldNames, fields);
+			PVStructure pvTop = pvDataCreate.createPVStructure(null,top);
 			long end =System.currentTimeMillis();
 			double diff = end-start;
 			diff /= 1000.0;

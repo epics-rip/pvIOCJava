@@ -33,24 +33,22 @@ import org.epics.ca.client.ChannelRPC;
 import org.epics.ca.client.ChannelRPCRequester;
 import org.epics.ca.client.ChannelRequester;
 import org.epics.ca.client.GetFieldRequester;
-import org.epics.ioc.database.PVDatabase;
-import org.epics.ioc.database.PVDatabaseFactory;
-import org.epics.pvData.factory.FieldFactory;
+import org.epics.pvData.factory.StandardFieldFactory;
 import org.epics.pvData.factory.StatusFactory;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorFactory;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.monitor.Monitor;
 import org.epics.pvData.monitor.MonitorRequester;
-import org.epics.pvData.pv.Field;
-import org.epics.pvData.pv.FieldCreate;
 import org.epics.pvData.pv.MessageType;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
+import org.epics.pvData.pv.StandardField;
 import org.epics.pvData.pv.Status;
 import org.epics.pvData.pv.Status.StatusType;
 import org.epics.pvData.pv.StatusCreate;
+import org.epics.pvData.pv.Structure;
 import org.epics.pvData.pv.Type;
 
 /**
@@ -62,8 +60,7 @@ public class BaseV3Channel implements
 ChannelFind,org.epics.ca.client.Channel,
 V3Channel,ConnectionListener
 {
-    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
+    private static final StandardField standardField = StandardFieldFactory.getStandardField();
     private static Executor executor = ExecutorFactory.create("caV3", ThreadPriority.low);
     
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
@@ -402,56 +399,21 @@ V3Channel,ConnectionListener
                 valueType = Type.scalar;
             }
         }
-        int numFields = extraProperties ? 5 : 3 ;
-        Field[] fields = new Field[numFields];
+        String properties = "timeStamp,alarm";
+        if(extraProperties) properties += ",display,control";
+        Structure structure =  null;
         switch(valueType) {
         case scalar:
-            fields[0] = fieldCreate.createScalar("value", valueScalarType);
+            structure = standardField.scalar(valueScalarType,properties);
             break;
         case scalarArray:
-            fields[0] = fieldCreate.createScalarArray("value", valueScalarType);
+            structure = standardField.scalarArray(valueScalarType,properties);
             break;
         case structure:
-            Field[] enumFields = new Field[2];
-            enumFields[0] = fieldCreate.createScalar("index", ScalarType.pvInt);;
-            enumFields[1] = fieldCreate.createScalarArray("choices",ScalarType.pvString);
-            fields[0] = fieldCreate.createStructure("value", enumFields);
+            structure = standardField.enumerated(properties);
         }
-        PVStructure pvStructure = masterPVDatabase.findStructure("org.epics.pvData.timeStamp");
-        if(pvStructure==null) {
-            requester.getDone(
-                statusCreate.createStatus(StatusType.ERROR, "structure org.epics.pvData.timeStamp not found", null),
-                null);
-            return;
-        }
-        fields[1] = fieldCreate.createStructure("timeStamp", pvStructure.getStructure().getFields());
-        pvStructure = masterPVDatabase.findStructure("org.epics.pvData.alarm");
-        if(pvStructure==null) {
-            requester.getDone(
-                statusCreate.createStatus(StatusType.ERROR, "structure org.epics.pvData.alarm not found", null),
-                null);
-            return;
-        }
-        fields[2] = fieldCreate.createStructure("alarm", pvStructure.getStructure().getFields());
-        if(extraProperties) {
-            pvStructure = masterPVDatabase.findStructure("org.epics.pvData.display");
-            if(pvStructure==null) {
-                requester.getDone(
-                    statusCreate.createStatus(StatusType.ERROR, "structure org.epics.pvData.display not found", null),
-                    null);
-                return;
-            }
-            fields[3] = fieldCreate.createStructure("display", pvStructure.getStructure().getFields());
-            pvStructure = masterPVDatabase.findStructure("org.epics.pvData.control");
-            if(pvStructure==null) {
-                requester.getDone(
-                    statusCreate.createStatus(StatusType.ERROR, "structure org.epics.pvData.control not found", null),
-                    null);
-                return;
-            }
-            fields[4] = fieldCreate.createStructure("control", pvStructure.getStructure().getFields());
-        }
-        requester.getDone(okStatus, fieldCreate.createStructure(null, fields));
+       
+        requester.getDone(okStatus,structure);
     }
     /* (non-Javadoc)
      * @see org.epics.ca.client.Channel#getProvider()

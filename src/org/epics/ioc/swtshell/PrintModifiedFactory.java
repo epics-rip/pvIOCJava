@@ -93,8 +93,8 @@ public class PrintModifiedFactory {
         private void printStructure(PVStructure pvStructure,int indentLevel,boolean printAll) {
             int offset = pvStructure.getFieldOffset();
             if(changeBitSet.get(offset)) printAll = true;
-            String fieldName = pvStructure.getField().getFieldName();
-            if(fieldName.equals("timeStamp")&&pvTimeStamp.attach(pvStructure)) {
+            String fieldName = pvStructure.getFieldName();
+            if(fieldName!=null && fieldName.equals("timeStamp") && pvTimeStamp.attach(pvStructure)) {
                 convert.newLine(builder, indentLevel);
                 pvTimeStamp.get(timeStamp);
                 long milliPastEpoch = timeStamp.getMilliSeconds();
@@ -117,7 +117,7 @@ public class PrintModifiedFactory {
                 }
                 builder.append(fieldName);
             }
-            if(pvStructure.getField().getFieldName().equals("alarm") && pvAlarm.attach(pvStructure)) {
+            if(fieldName!=null && pvStructure.getFieldName().equals("alarm") && pvAlarm.attach(pvStructure)) {
                 pvAlarm.get(alarm);
                 PVField[] pvFields = pvStructure.getPVFields();
                 if(printAll || changeBitSet.get(pvFields[0].getFieldOffset())) {
@@ -158,7 +158,7 @@ public class PrintModifiedFactory {
                 if(!printAll && !changeBitSet.get(offset)) continue;
                 convert.newLine(builder, indentLevel+1);
                 pvField.toString(builder, indentLevel+1);
-                if(pvField.getField().getFieldName().equals("index") && pvEnumerated.attach(pvField.getParent())) {
+                if(pvField.getFieldName().equals("index") && pvEnumerated.attach(pvField.getParent())) {
                     builder.append(" choice ");
                     builder.append(pvEnumerated.getChoice());
                 }

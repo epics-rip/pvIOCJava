@@ -100,7 +100,8 @@ public class InstallFactory {
         /* (non-Javadoc)
          * @see org.epics.ioc.install.Install#installStructure(org.epics.pvData.pv.PVStructure, java.lang.String, org.epics.pvData.pv.Requester)
          */
-        public boolean installStructure(PVStructure pvStructure,Requester requester) {
+        @Override
+        public boolean installStructure(PVStructure pvStructure,String structureName,Requester requester) {
             boolean gotIt = isInUse.compareAndSet(false,true);
             if(!gotIt) {
                 requester.message("InstallFactory is already active",
@@ -109,12 +110,12 @@ public class InstallFactory {
             }
             try {
                 maxError = MessageType.info;
-                if(master.findStructure(pvStructure.getField().getFieldName())!=null) {
+                if(master.findStructure(pvStructure.getFieldName())!=null) {
                     requester.message("structure already in master",
                             MessageType.fatalError);
                     return false;
                 }
-                master.addStructure(pvStructure);
+                master.addStructure(pvStructure,structureName);
                 return true;
             } finally {
                 isInUse.set(false);

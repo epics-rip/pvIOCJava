@@ -113,7 +113,7 @@ public class PortDriverLinkFactory {
             int numberSupport = 0;
             for(int i=0; i< n; i++) {
                 pvField = pvRecordFields[i].getPVField();
-                String fieldName = pvField.getField().getFieldName();
+                String fieldName = pvField.getFieldName();
                 // alarm is a special case
                 if(fieldName.equals("alarm")) continue;
                 Support support = pvRecordFields[i].getSupport();
@@ -128,7 +128,7 @@ public class PortDriverLinkFactory {
             int indSupport = 0;
             for(int i=0; i< n; i++) {
                 pvField = pvRecordFields[i].getPVField();
-                String fieldName = pvField.getField().getFieldName();
+                String fieldName = pvField.getFieldName();
                 if(fieldName.equals("alarm")) continue;
                 Support support = pvRecordFields[i].getSupport();
                 if(support==null) continue;

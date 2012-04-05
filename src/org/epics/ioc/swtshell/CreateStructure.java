@@ -15,5 +15,5 @@ public interface CreateStructure {
     /**
      * Create the request
      */
-    Structure create(String fieldName);
+    Structure create();
 }

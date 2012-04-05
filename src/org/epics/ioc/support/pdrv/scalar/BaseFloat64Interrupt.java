@@ -18,6 +18,7 @@ import org.epics.pvData.pv.PVDouble;
 import org.epics.pvData.pv.PVField;
 import org.epics.pvData.pv.PVScalar;
 import org.epics.pvData.pv.PVString;
+import org.epics.pvData.pv.PVStructure;
 import org.epics.pvData.pv.ScalarType;
 import org.epics.pvData.pv.Type;
 
@@ -50,32 +51,12 @@ implements Float64InterruptListener
     public void initialize() {
         super.initialize();
         if(!super.checkSupportState(SupportState.readyForStart,supportName)) return;
-        PVField pvDisplay = pvProperty.findProperty(valuePVField,"display");
-        if(pvDisplay!=null) {
-            PVField pvTemp = pvProperty.findProperty(pvDisplay,"units");
-            if(pvTemp!=null && pvTemp.getField().getType()==Type.scalar) {
-                PVScalar pvScalar = (PVScalar)pvTemp;
-                if(pvScalar.getScalar().getScalarType()==ScalarType.pvString) {
-                    pvUnits = (PVString)pvTemp;
-                }
-            }
-            pvTemp = pvProperty.findProperty(pvDisplay,"limit");
-            if(pvTemp!=null) {
-                PVField pvTemp1 = pvProperty.findProperty(pvTemp,"low");
-                if(pvTemp1!=null && pvTemp1.getField().getType()==Type.scalar) {
-                    PVScalar pvScalar = (PVScalar)pvTemp1;
-                    if(pvScalar.getScalar().getScalarType()==ScalarType.pvDouble) {
-                        pvLowLimit = (PVDouble)pvTemp1;
-                    }
-                }
-                pvTemp1 = pvProperty.findProperty(pvTemp,"high");
-                if(pvTemp1!=null && pvTemp1.getField().getType()==Type.scalar) {
-                    PVScalar pvScalar = (PVScalar)pvTemp1;
-                    if(pvScalar.getScalar().getScalarType()==ScalarType.pvDouble) {
-                        pvHighLimit = (PVDouble)pvTemp1;
-                    }
-                }
-            }
+        PVField pvField = pvProperty.findProperty(valuePVField,"display");
+        if(pvField!=null) {
+            PVStructure pvDisplay = (PVStructure)pvField; 
+            pvUnits = pvDisplay.getStringField("units");
+            pvLowLimit = pvDisplay.getDoubleField("limitLow");
+            pvHighLimit = pvDisplay.getDoubleField("limitHigh");
         }
         if(valuePVField.getField().getType()==Type.scalar) return;
         super.uninitialize();

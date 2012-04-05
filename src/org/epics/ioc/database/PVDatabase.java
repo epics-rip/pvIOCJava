@@ -70,15 +70,16 @@ public interface PVDatabase extends Requester{
     /**
      * Add a new structure instance.
      * @param structure The structure instance.
+     * @param structureName The structure name.
      * @return true if the structure was added.
      */
-    boolean addStructure(PVStructure structure);
+    boolean addStructure(PVStructure structure,String structureName);
     /**
-     * Remove a structure instance.
-     * @param structure The structure instance.
+     * Remmove a structure by name.
+     * @param structureName The name of the structure.
      * @return true if the structure was removed and false otherwise.
      */
-    boolean removeStructure(PVStructure structure);
+    boolean removeStructure(String structureName);
     /**
      * Get an array of the structure names.
      * @return The array of names.

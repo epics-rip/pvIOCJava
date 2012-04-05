@@ -564,7 +564,7 @@ public class ChannelServerFactory  {
                 return null;
             }
             PVScalarArray pvArray = (PVScalarArray)pvField;
-            PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(null, "", pvArray.getScalarArray().getElementType());
+            PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(null,  pvArray.getScalarArray().getElementType());
             return new ChannelScalarArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
         }
         /* (non-Javadoc)

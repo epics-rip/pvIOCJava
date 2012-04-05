@@ -71,16 +71,12 @@
         <scalar name = "description">Sample Description</scalar>
         <scalar name = "format">%f</scalar>
         <scalar name = "units">volts</scalar>
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">10.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0.0</scalar>
+        <scalar name = "limitHigh">10.0</scalar>
     </structure>
     <structure name = "control" extends = "control" >
-        <structure name = "limit">
-            <scalar name = "low">0.0</scalar>
-            <scalar name = "high">10.0</scalar>
-        </structure>
+        <scalar name = "limitLow">0.0</scalar>
+        <scalar name = "limitHigh">10.0</scalar>
         <scalar name = "minStep">.1</scalar>
     </structure>
     <structure name = "valueAlarm" extends = "doubleAlarm">

@@ -27,23 +27,13 @@ import org.epics.ca.client.ChannelProvider;
 import org.epics.ca.client.ChannelPutGet;
 import org.epics.ca.client.ChannelPutGetRequester;
 import org.epics.ca.client.ChannelRequester;
-import org.epics.pvData.factory.PVDataFactory;
+import org.epics.pvData.factory.*;
 import org.epics.pvData.misc.Executor;
 import org.epics.pvData.misc.ExecutorNode;
 import org.epics.pvData.misc.ThreadPriority;
 import org.epics.pvData.misc.Timer;
 import org.epics.pvData.misc.TimerFactory;
-import org.epics.pvData.pv.Field;
-import org.epics.pvData.pv.MessageType;
-import org.epics.pvData.pv.PVArray;
-import org.epics.pvData.pv.PVDataCreate;
-import org.epics.pvData.pv.PVString;
-import org.epics.pvData.pv.PVStringArray;
-import org.epics.pvData.pv.PVStructure;
-import org.epics.pvData.pv.Requester;
-import org.epics.pvData.pv.ScalarType;
-import org.epics.pvData.pv.Status;
-import org.epics.pvData.pv.StringArrayData;
+import org.epics.pvData.pv.*;
 
 
 /**
@@ -57,6 +47,7 @@ public class ChannelListFactory {
         channelListImpl.start();
     }
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     private static final Executor executor = SwtshellFactory.getExecutor();
     private static final Timer timer = TimerFactory.create("channelListFactory", ThreadPriority.lowest);
@@ -284,15 +275,15 @@ public class ChannelListFactory {
                 return result;
             }
             
-            private void createPutGet() {
-                PVStructure pvPutRequest = pvDataCreate.createPVStructure(null, "request", new Field[0]);
-                PVString pvString = (PVString)pvDataCreate.createPVScalar(pvPutRequest, "fieldList", ScalarType.pvString);
+            private void createPutGet() { 
+                Field[] fields = new Field[1];
+                String[] fieldNames = new String[1];
+                fields[0] = fieldCreate.createScalar(ScalarType.pvString);
+                fieldNames[0] = "fieldList";
+                Structure structure = fieldCreate.createStructure(fieldNames, fields);
+                PVStructure pvPutRequest = pvDataCreate.createPVStructure(null,structure);
+                PVString pvString = pvPutRequest.getStringField("fieldList");
                 pvString.put("arguments.database,arguments.regularExpression");
-                pvPutRequest.appendPVField(pvString);
-                PVStructure pvGetRequest = pvDataCreate.createPVStructure(null, "result", new Field[0]);
-                pvString = (PVString)pvDataCreate.createPVScalar(pvPutRequest, "fieldList", ScalarType.pvString);
-                pvString.put("result.status,result.names");
-                pvGetRequest.appendPVField(pvString);
                 channelPutGet = channel.createChannelPutGet(this, pvPutRequest);
             }
             

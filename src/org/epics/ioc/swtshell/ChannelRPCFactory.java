@@ -64,8 +64,8 @@ public class ChannelRPCFactory {
         private StateMachine stateMachine = new StateMachine();
         private ChannelClient channelClient = new ChannelClient();
         private CreateStructure createStructure = null;
-        PVStructure pvRequest = null;
-        private PVStructure pvArgument = pvDataCreate.createPVStructure(null,"argument", new Field[0]);
+        private PVStructure pvRequest = null;
+        private PVStructure pvArgument = null;
         private Requester requester = null;
         private boolean isDisposed = false;
         
@@ -170,7 +170,7 @@ public class ChannelRPCFactory {
                     stateMachine.setState(State.readyForConnect);
                 }
             } else if(object==createArgumentButton) {
-            	Structure structure = createStructure.create(argumentNameText.getText());
+            	Structure structure = createStructure.create();
             	pvArgument = pvDataCreate.createPVStructure(null, structure);
             } else if(object==createChannelRPCButton) {
                 State state = stateMachine.getState();

@@ -64,7 +64,7 @@ public class PVReplaceFactory {
                 pvField.message("PVReplaceFactory: factory " + factoryName + " not found", MessageType.error);
                 break;
             }
-            String fieldName = pvField.getField().getFieldName();
+            String fieldName = pvField.getFieldName();
             PVStructure pvParent = pvField.getParent();
             if(replace(pvRecord,pvField,factory)) {
             	pvField = pvParent.getSubField(fieldName);

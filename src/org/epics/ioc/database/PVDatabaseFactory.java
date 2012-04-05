@@ -79,8 +79,6 @@ public class PVDatabaseFactory {
     static {
         pvDataCreate = PVDataFactory.getPVDataCreate();
         master = new Database("master");
-        PVStructure pvStructure = pvDataCreate.createPVStructure(null,"null", new Field[0]);
-        master.addStructure(pvStructure);
     }
     
     private static class Database implements PVDatabase,Runnable {
@@ -137,12 +135,13 @@ public class PVDatabaseFactory {
             return true;
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.pv.PVDatabase#addStructure(org.epics.pvData.pv.PVStructure)
+         * @see org.epics.ioc.database.PVDatabase#addStructure(org.epics.pvData.pv.PVStructure, java.lang.String)
          */
-        public boolean addStructure(PVStructure pvStructure) {
+        @Override
+        public boolean addStructure(PVStructure pvStructure, String structureName) {
             rwLock.writeLock().lock();
             try {
-                String key = pvStructure.getField().getFieldName();
+                String key = structureName;
                 if(structureMap.containsKey(key)) return false;
                 if(this!=master && master.findStructure(key)!=null) return false;
                 structureMap.put(key,pvStructure);
@@ -367,13 +366,13 @@ public class PVDatabaseFactory {
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.pvData.pv.PVDatabase#removeStructure(org.epics.pvData.pv.PVStructure)
+         * @see org.epics.ioc.database.PVDatabase#removeStructure(java.lang.String)
          */
-        public boolean removeStructure(PVStructure structure) {
+        @Override
+        public boolean removeStructure(String structureName) {
             rwLock.writeLock().lock();
             try {
-                String key = structure.getStructure().getFieldName();
-                if(structureMap.remove(key)!=null) return true;
+                if(structureMap.remove(structureName)!=null) return true;
                 return false;
             } finally {
                 rwLock.writeLock().unlock();
@@ -395,9 +394,7 @@ public class PVDatabaseFactory {
             try {
                 Set<String> keys = structureMap.keySet();
                 for(String key: keys) {
-                    PVStructure pvStructure = structureMap.get(key);
-                    String name = pvStructure.getStructure().getFieldName();
-                    if(pattern.matcher(name).matches()) {
+                    if(pattern.matcher(key).matches()) {
                         list.add(name);
                     }
                 }
@@ -425,8 +422,7 @@ public class PVDatabaseFactory {
                 Set<String> keys = structureMap.keySet();
                 for(String key: keys) {
                     PVStructure pvStructure = structureMap.get(key);
-                    String name = pvStructure.getStructure().getFieldName();
-                    if(pattern.matcher(name).matches()) {
+                    if(pattern.matcher(key).matches()) {
                         result.append(" " + pvStructure.toString());
                     }
                 }

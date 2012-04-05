@@ -212,7 +212,7 @@ public class CreateFieldRequestFactory {
         			request += builder.toString();
         		} else if(pvField.getField().getType()==Type.structure) {
         			if(request.length()>1 && (request.charAt(request.length()-1) != '{')) request += ",";
-        			request += pvField.getField().getFieldName();
+        			request += pvField.getFieldName();
         			request += "{";
         			PVStructure pvStruct = (PVStructure)pvField;
         			request = createRequest(request,bitSet,pvStruct.getPVFields());
@@ -304,9 +304,8 @@ public class CreateFieldRequestFactory {
                 PVStructure pvStructure = (PVStructure)pv;
                 PVField[] pvFields = pvStructure.getPVFields();
                 for(PVField pvField : pvFields) {
-                    Field field = pvField.getField();
                     TreeItem treeItem = new TreeItem(tree,SWT.NONE);
-                    treeItem.setText(field.getFieldName());
+                    treeItem.setText(pvField.getFieldName());
                     initTreeItem(treeItem,pvField);
                 }
             }

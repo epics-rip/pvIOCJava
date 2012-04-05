@@ -187,17 +187,13 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
      private void createNames(){
     	 StringBuilder builder = new StringBuilder();
     	 PVField pvField = getPVField();
-    	 builder.append(pvField.getField().getFieldName());
-    	 pvField = pvField.getParent();
     	 while(pvField!=null) {
-    		 String fieldName = pvField.getField().getFieldName();
-    		 if(fieldName==null || fieldName.length()<1) break;
+    	     String fieldName = pvField.getFieldName();
     		 builder.insert(0, '.');
     		 builder.insert(0, fieldName);
     		 pvField = pvField.getParent();
     	 }
     	 fullFieldName = builder.toString();
-    	 if(fullFieldName.length()>0) builder.insert(0, '.');
     	 builder.insert(0, pvRecord.getRecordName());
     	 fullName = builder.toString();
      }
