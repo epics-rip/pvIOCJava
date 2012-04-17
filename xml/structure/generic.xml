@@ -2,14 +2,14 @@
 <database>
 <structure structureName = "genericFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.basic.GenericFactory</scalar>
+     org.epics.pvioc.support.basic.GenericFactory</scalar>
 </structure>
 <structure structureName = "noopFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.basic.NoopFactory</scalar>
+     org.epics.pvioc.support.basic.NoopFactory</scalar>
 </structure>
 
 <structure structureName = "generic">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.genericFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
 </structure>
 </database>

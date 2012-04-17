@@ -27,7 +27,7 @@
     </structure>
     <structure name = "current" extends = "generic">
         <scalar name = "value" scalarType = "double">
-            <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.powerSupplyFactory</auxInfo>
+            <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.powerSupplyFactory</auxInfo>
         </scalar>
         <structure name = "alarm" extends = "alarm" />
         <structure name = "output" extends = "linearConvertOutput">

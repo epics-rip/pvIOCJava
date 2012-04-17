@@ -2,7 +2,7 @@
 <database>
 <structure structureName = "scanFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.basic.ScanFactory</scalar>
+     org.epics.pvioc.support.basic.ScanFactory</scalar>
 </structure>
 
 <structure structureName = "scanPriority" extends = "enumerated" >
@@ -16,7 +16,7 @@
 </structure>
 
 <structure structureName = "scan" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.scanFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.scanFactory</auxInfo>
   <structure name = "priority" extends = "scanPriority" />
   <structure name = "type" extends = "scanType" />
   <scalar name = "rate" scalarType = "double">1.0</scalar>

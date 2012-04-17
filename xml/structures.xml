@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <database>
-<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvioc.*" />
 <include addPath = "${JAVAIOC}/xml/structure" />
-<package name = "org.epics.ioc" />
+<package name = "org.epics.pvioc" />
 <include href = "enumerated.xml" />
 <include href = "timeStamp.xml" />
 <include href = "display.xml" />

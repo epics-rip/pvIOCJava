@@ -2,7 +2,7 @@
 <database>
 
 <record recordName = "syncInt32Port" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Int32DriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.testDriver.Int32DriverFactory</scalar>
     <scalar name = "portName">syncInt32Port</scalar>
     <structure name = "driverParameters" extends = "int32Driver" >
         <scalar name = "delay">0.0</scalar>
@@ -93,7 +93,7 @@
 </record>
 
 <record recordName = "asynInt32Port" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Int32DriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.testDriver.Int32DriverFactory</scalar>
     <scalar name = "portName">asynInt32Port</scalar>
     <structure name = "driverParameters" extends = "int32Driver" >
         <scalar name = "delay">0.1</scalar>

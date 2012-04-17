@@ -2,6 +2,6 @@
 <database>
 <structure structureName = "eventFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.basic.EventFactory</scalar>
+     org.epics.pvioc.support.basic.EventFactory</scalar>
 </structure>
 </database>

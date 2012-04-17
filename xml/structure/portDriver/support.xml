@@ -3,11 +3,11 @@
 
 <structure structureName = "portDriverLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.pdrv.PortDriverLinkFactory</scalar>
+     org.epics.pvioc.support.pdrv.PortDriverLinkFactory</scalar>
 </structure>
 
 <structure structureName = "portDriverLink">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.portDriverLinkFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.portDriverLinkFactory</auxInfo>
   <scalar name = "portName" scalarType = "string" />
   <scalar name = "deviceName" scalarType = "string" />
   <!-- timeout only used for asynchronous ports -->

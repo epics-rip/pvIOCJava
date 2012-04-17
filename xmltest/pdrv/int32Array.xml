@@ -2,7 +2,7 @@
 <database>
 
 <record recordName = "syncInt32ArrayPort" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Int32ArrayDriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.testDriver.Int32ArrayDriverFactory</scalar>
     <scalar name = "portName">syncInt32ArrayPort</scalar>
     <structure name = "driverParameters" extends = "int32ArrayDriver" >
         <scalar name = "delay">0.0</scalar>
@@ -31,7 +31,7 @@
     </array>
     <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
-          <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.arrayIncrementCalculatorFactory</auxInfo>
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.arrayIncrementCalculatorFactory</auxInfo>
       </structure>
     </structure>
     <structure name = "link" extends = "caOutputLink">
@@ -77,7 +77,7 @@
 </record>
 
 <record recordName = "asynInt32ArrayPort" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Int32ArrayDriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.testDriver.Int32ArrayDriverFactory</scalar>
     <scalar name = "portName">asynInt32ArrayPort</scalar>
     <structure name = "driverParameters" extends = "int32ArrayDriver" >
         <scalar name = "delay">0.1</scalar>
@@ -106,7 +106,7 @@
     </array>
     <structure name = "input" extends = "calculation" >
       <structure name = "calculator">
-          <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.arrayIncrementCalculatorFactory</auxInfo>
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.arrayIncrementCalculatorFactory</auxInfo>
       </structure>
     </structure>
     <structure name = "link" extends = "caOutputLink">

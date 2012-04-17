@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.pvioc.*" />
+<import name = "org.epics.pvdata.*" />
+<record recordName = "counter">
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">0.5</scalar>
+    </structure>
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "display" extends = "display"/>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">value+100.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "supportSequence" extends = "generic" >
+        <structure name = "0" extends = "caProcessLink">
+            <scalar name = "pvname" >double01</scalar>
+        </structure>
+        <structure name = "1" extends = "caOutputLink">
+            <scalar name = "pvname" >double02</scalar>
+            <scalar name = "request" >record[process=true]</scalar>
+        </structure>
+    </structure>
+</record>
+<record recordName = "double01">
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <scalar name = "value" scalarType = "double" />
+    <structure name = "display" extends = "display" />
+    <structure name = "input" extends = "caInputLink">
+        <scalar name = "pvname">counter</scalar>
+        <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
+    </structure>
+</record>
+<record recordName = "double02">
+  <structure name = "alarm" extends = "alarm" />
+  <structure name = "timeStamp" extends = "timeStamp" />
+  <scalar name = "value" scalarType = "double" />
+</record>
+</database>

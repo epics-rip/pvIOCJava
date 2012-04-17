@@ -3,11 +3,11 @@
 
 <structure structureName = "alarmSupportFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.AlarmSupportFactory</scalar>
+     org.epics.pvioc.support.alarm.AlarmSupportFactory</scalar>
 </structure>
 
 <structure structureName = "alarm">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.alarmSupportFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.alarmSupportFactory</auxInfo>
   <scalar name = "severity" scalarType = "int" />
   <scalar name = "status" scalarType = "int" />
   <scalar name = "message" scalarType = "string" />
@@ -16,46 +16,46 @@
 
 <structure structureName = "booleanAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.BooleanAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.BooleanAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "byteAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.ByteAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.ByteAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "shortAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.ShortAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.ShortAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "intAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.IntAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.IntAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "longAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.LongAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.LongAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "floatAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.FloatAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.FloatAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "doubleAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.DoubleAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.DoubleAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "enumeratedAlarmFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.alarm.EnumeratedAlarmFactory</scalar>
+     org.epics.pvioc.support.alarm.EnumeratedAlarmFactory</scalar>
 </structure>
 
 <structure structureName = "byteAlarm" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.byteAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.byteAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <scalar name = "lowAlarmLimit" scalarType = "byte" />
   <scalar name = "lowWarningLimit" scalarType = "byte" />
@@ -69,7 +69,7 @@
 </structure>
 
 <structure structureName = "shortAlarm" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.shortAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.shortAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <scalar name = "lowAlarmLimit" scalarType = "short" />
   <scalar name = "lowWarningLimit" scalarType = "short" />
@@ -83,7 +83,7 @@
 </structure>
 
 <structure structureName = "intAlarm" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.intAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.intAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <scalar name = "lowAlarmLimit" scalarType = "int" />
   <scalar name = "lowWarningLimit" scalarType = "int" />
@@ -97,7 +97,7 @@
 </structure>
 
 <structure structureName = "longAlarm">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.longAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.longAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <scalar name = "lowAlarmLimit" scalarType = "long" />
   <scalar name = "lowWarningLimit" scalarType = "long" />
@@ -111,7 +111,7 @@
 </structure>
 
 <structure structureName = "floatAlarm">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.floatAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.floatAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <scalar name = "lowAlarmLimit" scalarType = "float" />
   <scalar name = "lowWarningLimit" scalarType = "float" />
@@ -125,7 +125,7 @@
 </structure>
 
 <structure structureName = "doubleAlarm" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.doubleAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.doubleAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <scalar name = "lowAlarmLimit" scalarType = "double" />
   <scalar name = "lowWarningLimit" scalarType = "double" />
@@ -139,7 +139,7 @@
 </structure>
 
 <structure structureName = "booleanAlarm">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.booleanAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.booleanAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <scalar name = "falseSeverity" scalarType = "int" />
   <scalar name = "trueSeverity" scalarType = "int" />
@@ -147,7 +147,7 @@
 </structure>
 
 <structure structureName = "enumeratedAlarm">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.enumeratedAlarmFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.enumeratedAlarmFactory</auxInfo>
   <scalar name = "active" scalarType = "boolean" />
   <array name = "stateSeverity" scalarType = "int" />
   <scalar name = "changeStateSeverity" scalarType = "int" />

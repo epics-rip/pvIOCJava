@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <database>
-<import name = "org.epics.ioc.*" />
-<import name = "org.epics.pvData.*" />
+<import name = "org.epics.pvioc.*" />
+<import name = "org.epics.pvdata.*" />
 
 <record recordName = "simple" >
     <structure name = "alarm" extends = "alarm" />

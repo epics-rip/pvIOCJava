@@ -3,11 +3,11 @@
 
 <structure structureName = "recordListFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.rpc.RecordListFactory</scalar>
+     org.epics.pvioc.support.rpc.RecordListFactory</scalar>
 </structure>
 
 <structure structureName = "recordList" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.recordListFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.recordListFactory</auxInfo>
   <structure name = "arguments" >
       <scalar name = "database" scalarType = "string">master</scalar>
       <scalar name = "regularExpression" scalarType = "string" >.*</scalar>
@@ -20,11 +20,11 @@
 
 <structure structureName = "structureListFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.rpc.StructureListFactory</scalar>
+     org.epics.pvioc.support.rpc.StructureListFactory</scalar>
 </structure>
 
 <structure structureName = "structureList" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.structureListFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.structureListFactory</auxInfo>
   <structure name = "arguments" >
       <scalar name = "database" scalarType = "string">master</scalar>
       <scalar name = "regularExpression" scalarType = "string" >.*</scalar>
@@ -37,7 +37,7 @@
 
 <structure structureName = "iocShowFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.rpc.IocShowFactory</scalar>
+     org.epics.pvioc.support.rpc.IocShowFactory</scalar>
 </structure>
 
 <structure structureName = "iocShowCommand" extends = "enumerated" >
@@ -46,7 +46,7 @@
 </structure>
 
 <structure structureName = "iocShow">
-   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.iocShowFactory</auxInfo>
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.iocShowFactory</auxInfo>
    <structure name = "arguments" >
        <structure name = "command" extends = "iocShowCommand" />
    </structure>
@@ -57,7 +57,7 @@
 
 <structure structureName = "recordShowFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.rpc.RecordShowFactory</scalar>
+     org.epics.pvioc.support.rpc.RecordShowFactory</scalar>
 </structure>
 
 <structure structureName = "recordShowCommand" extends = "enumerated" >
@@ -66,7 +66,7 @@
 </structure>
 
 <structure structureName = "recordShow">
-   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.recordShowFactory</auxInfo>
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.recordShowFactory</auxInfo>
    <structure name = "arguments" >
        <scalar name = "recordName" scalarType = "string"/>
        <structure name = "command" extends = "recordShowCommand" />
@@ -78,11 +78,11 @@
 
 <structure structureName = "recordRemoveFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.rpc.RecordRemoveFactory</scalar>
+     org.epics.pvioc.support.rpc.RecordRemoveFactory</scalar>
 </structure>
 
 <structure structureName = "recordRemove">
-   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.recordRemoveFactory</auxInfo>
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.recordRemoveFactory</auxInfo>
    <structure name = "arguments" >
        <scalar name = "recordName" scalarType = "string"/>
    </structure>
@@ -93,7 +93,7 @@
 
 <structure structureName = "supportStateSetFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.rpc.SupportStateSetFactory</scalar>
+     org.epics.pvioc.support.rpc.SupportStateSetFactory</scalar>
 </structure>
 
 
@@ -104,7 +104,7 @@
 </structure>
 
 <structure structureName = "supportStateSet" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.supportStateSetFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.supportStateSetFactory</auxInfo>
   <structure name = "arguments" >
       <scalar name = "recordName" scalarType = "string" />
       <structure name = "supportStateCommand" extends = "supportStateCommand" />

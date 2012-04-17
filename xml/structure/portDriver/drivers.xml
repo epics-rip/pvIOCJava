@@ -3,16 +3,16 @@
 
 <structure structureName = "portCreateFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.pdrv.PortCreateFactory</scalar>
+     org.epics.pvioc.support.pdrv.PortCreateFactory</scalar>
 </structure>
 
 <structure structureName = "portDeviceControlFactory">
   <scalar name = "supportFactory" scalarType = "string">
-     org.epics.ioc.support.pdrv.PortDeviceControlFactory</scalar>
+     org.epics.pvioc.support.pdrv.PortDeviceControlFactory</scalar>
 </structure>
 
 <structure structureName = "portCreate">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.portCreateFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.portCreateFactory</auxInfo>
   <scalar name = "factoryName" scalarType = "string" />
   <scalar name = "portName" scalarType = "string" />
   <scalar name = "autoConnect" scalarType = "boolean">true</scalar>
@@ -20,7 +20,7 @@
 </structure>
 
 <structure structureName = "portDeviceControl">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.portDeviceControlFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.portDeviceControlFactory</auxInfo>
   <scalar name = "message" scalarType = "string" />
   <scalar name = "portName" scalarType = "string" />
   <scalar name = "deviceName" scalarType = "string" />

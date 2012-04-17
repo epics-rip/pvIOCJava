@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <database>
-<import name = "org.epics.ioc.*" />
-<import name = "org.epics.ioc.test.*" />
+<import name = "org.epics.pvioc.*" />
+<import name = "org.epics.pvioc.test.*" />
 <include addPath = "${JAVAIOC}/xml" />
 <include href = "records.xml" />
 <include removePath = "${JAVAIOC}/xml" />

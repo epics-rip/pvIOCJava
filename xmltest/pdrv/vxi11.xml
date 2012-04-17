@@ -2,7 +2,7 @@
 <database>
 
 <record recordName = "serialPort" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.vxi11.DriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.vxi11.DriverFactory</scalar>
     <scalar name = "portName">serialPort</scalar>
 
     <structure name = "driverParameters" extends = "vxi11Driver" >

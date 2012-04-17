@@ -12,7 +12,7 @@
     </structure>
     <structure name = "input" extends = "calculation" >
       <structure name = "calculator" extends = "generic">
-          <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.booleanArrayToggleCalculatorFactory</auxInfo>
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.booleanArrayToggleCalculatorFactory</auxInfo>
       </structure>
     </structure>
     <structure name = "link" extends = "generic" >

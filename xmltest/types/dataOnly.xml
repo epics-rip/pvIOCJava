@@ -17,7 +17,7 @@
 
 <record recordName = "byte" >
     <scalar name = "value" scalarType = "byte">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         1
     </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
@@ -35,7 +35,7 @@
 
 <record recordName = "short" >
     <scalar name = "value" scalarType = "short">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         1
     </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
@@ -53,7 +53,7 @@
 
 <record recordName = "int" >
     <scalar name = "value" scalarType = "int">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         1
     </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
@@ -71,7 +71,7 @@
 
 <record recordName = "long" >
     <scalar name = "value" scalarType = "long">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         1
     </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
@@ -89,7 +89,7 @@
 
 <record recordName = "float" >
     <scalar name = "value" scalarType = "float">
-    <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
+    <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         1
     </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
@@ -107,7 +107,7 @@
 
 <record recordName = "double" >
     <scalar name = "value" scalarType = "double">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
+        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         1
     </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />

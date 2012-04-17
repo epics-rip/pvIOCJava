@@ -3,29 +3,29 @@
 
 <structure structureName = "dbProcessLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.dbLink.LinkFactory</scalar>
+    org.epics.pvioc.support.dbLink.LinkFactory</scalar>
 </structure>
 
 <structure structureName = "dbInputLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.dbLink.LinkFactory</scalar>
+    org.epics.pvioc.support.dbLink.LinkFactory</scalar>
 </structure>
 <structure structureName = "dbOutputLinkFactory">
   <scalar name = "supportFactory" scalarType = "string">
-    org.epics.ioc.support.dbLink.LinkFactory</scalar>
+    org.epics.pvioc.support.dbLink.LinkFactory</scalar>
 </structure>
 
 <structure structureName = "dbProcessLink" extends = "generic">
   <structure name = "alarm" extends = "alarm" />
   <scalar name = "pvname" scalarType = "string">
-      <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.dbProcessLinkFactory</auxInfo>
+      <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.dbProcessLinkFactory</auxInfo>
   </scalar>
 </structure>
 
 <structure structureName = "dbInputLink" extends = "generic" >
   <structure name = "alarm" extends = "alarm" />
   <scalar name = "pvname" scalarType = "string">
-      <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.dbInputLinkFactory</auxInfo>
+      <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.dbInputLinkFactory</auxInfo>
   </scalar>
   <scalar name = "process" scalarType = "boolean" />
   <scalar name = "inheritSeverity" scalarType = "boolean" />
@@ -34,7 +34,7 @@
 <structure structureName = "dbOutputLink" extends = "generic">
   <structure name = "alarm" extends = "alarm" />
   <scalar name = "pvname" scalarType = "string">
-      <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.dbOutputLinkFactory</auxInfo>
+      <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.dbOutputLinkFactory</auxInfo>
   </scalar>
   <scalar name = "process" scalarType = "boolean" />
 </structure>

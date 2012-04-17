@@ -17,7 +17,7 @@
     </array>
     <structure name = "input" extends = "calculation" >
         <structure name = "calculator" >
-            <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.arrayIncrementCalculatorFactory</auxInfo>
+            <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.arrayIncrementCalculatorFactory</auxInfo>
         </structure>
     </structure>
 </record>

@@ -2,7 +2,7 @@
 <database>
 
 <record recordName = "syncFloat64Port" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Float64DriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.testDriver.Float64DriverFactory</scalar>
     <scalar name = "portName">syncFloat64Port</scalar>
     <structure name = "driverParameters" extends = "float64Driver" >
         <scalar name = "delay">0.0</scalar>
@@ -91,7 +91,7 @@
 </record>
 
 <record recordName = "asynFloat64Port" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.testDriver.Float64DriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.testDriver.Float64DriverFactory</scalar>
     <scalar name = "portName">asynFloat64Port</scalar>
     <structure name = "driverParameters" extends = "float64Driver" >
         <scalar name = "delay">0.1</scalar>

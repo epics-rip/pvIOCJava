@@ -27,47 +27,47 @@
     <target name="DatabaseExampleTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.pvAccess.example.DatabaseExampleTest"/>
+            <test name="org.epics.pvioc.pvAccess.example.DatabaseExampleTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="DBDTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbDefinition.example.DBDTest"/>
+            <test name="org.epics.pvioc.dbDefinition.example.DBDTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="DBTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.DBTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.DBTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="XMLToDBDTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbDefinition.example.XMLToDBDTest"/>
+            <test name="org.epics.pvioc.dbDefinition.example.XMLToDBDTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="XMLToDataBaseTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.XMLToDataBaseTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.XMLToDataBaseTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="XMLToDB">
-        <java classname="org.epics.ioc.dbDefinition.XMLToDB" failonerror="true" fork="yes">
+        <java classname="org.epics.pvioc.dbDefinition.XMLToDB" failonerror="true" fork="yes">
             <arg value="/home/mrk/workspace/javaIOC/src/org/epics/ioc/dbAccess/example/dbd.xml"/>
             <arg value="/home/mrk/workspace/javaIOC/src/org/epics/ioc/dbAccess/example/testDb.xml"/>
             <classpath refid="project.classpath"/>
         </java>
     </target>
     <target name="XMLToDB (1)">
-        <java classname="org.epics.ioc.XMLToDB" failonerror="true" fork="yes">
+        <java classname="org.epics.pvioc.XMLToDB" failonerror="true" fork="yes">
             <arg value="/home/mrk/workspace/javaIOC/src/org/epics/ioc/dbAccess/example/dbdAccess.xml"/>
             <arg value="/home/mrk/workspace/javaIOC/src/org/epics/ioc/dbAccess/example/accessDb.xml"/>
             <classpath refid="project.classpath"/>
@@ -76,42 +76,42 @@
     <target name="DBAccessTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.DBAccessTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.DBAccessTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="AccessTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.AccessTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.AccessTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="ParentTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.ParentTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.ParentTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="ListenerTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.ListenerTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.ListenerTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="ReplaceTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.ReplaceTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.ReplaceTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>
     <target name="DefaultTest">
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="plain"/>
-            <test name="org.epics.ioc.dbAccess.example.DefaultTest"/>
+            <test name="org.epics.pvioc.dbAccess.example.DefaultTest"/>
             <classpath refid="project.classpath"/>
         </junit>
     </target>

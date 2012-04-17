@@ -3,17 +3,17 @@
 
 <structure structureName = "linearConvertInputFactory">
  <scalar name = "supportFactory" scalarType = "string">
-   org.epics.ioc.support.basic.LinearConvertFactory</scalar>
+   org.epics.pvioc.support.basic.LinearConvertFactory</scalar>
 </structure>
 
 <structure structureName = "linearConvertOutputFactory">
  <scalar name = "supportFactory" scalarType = "string">
-   org.epics.ioc.support.basic.LinearConvertFactory</scalar>
+   org.epics.pvioc.support.basic.LinearConvertFactory</scalar>
 </structure>
 
 <structure structureName = "incrementalFactory">
  <scalar name = "supportFactory" scalarType = "string">
-   org.epics.ioc.support.basic.IncrementalFactory</scalar>
+   org.epics.pvioc.support.basic.IncrementalFactory</scalar>
 </structure>
 
 <structure structureName = "linearConvert" >
@@ -26,32 +26,32 @@
 </structure>
 
 <structure structureName = "linearConvertInput">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.genericFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
   <scalar name = "value" scalarType = "int" />
   <structure name = "alarm" extends = "alarm"/>
   <structure name = "input" extends = "generic" />
   <structure name = "linearConvert" extends = "linearConvert">
-    <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.linearConvertInputFactory</auxInfo>
+    <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.linearConvertInputFactory</auxInfo>
   </structure>
 </structure>
 
 <structure structureName = "linearConvertOutput">
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.genericFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
   <scalar name = "value" scalarType = "int" />
   <structure name = "alarm" extends = "alarm"/>
   <structure name = "input" extends = "generic" />
   <structure name = "linearConvert" extends = "linearConvert">
-    <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.linearConvertOutputFactory</auxInfo>
+    <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.linearConvertOutputFactory</auxInfo>
   </structure>
 </structure>
 
 <structure structureName = "incrementalDouble" >
-  <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.genericFactory</auxInfo>
+  <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
   <scalar name = "value" scalarType = "double" />
   <structure name = "alarm" extends = "alarm"/>
   <structure name = "input" extends = "generic" />
   <scalar name = "incremental" scalarType = "boolean">
-   <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.incrementalFactory</auxInfo>
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.incrementalFactory</auxInfo>
   </scalar>
   <scalar name = "rateOfChange" scalarType = "double" />
 </structure>

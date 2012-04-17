@@ -16,7 +16,7 @@
     </structure>
     <structure name = "desired" extends = "incrementalDouble" >
         <scalar name = "value">
-            <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.ioc.controlLimitFactory</auxInfo>
+            <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         </scalar>
         <scalar name = "rateOfChange">.2</scalar>
         <scalar name = "incremental">true</scalar>

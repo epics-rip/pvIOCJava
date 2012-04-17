@@ -17,7 +17,7 @@
 
 <record recordName = "event">
     <scalar name = "value" scalarType = "string" >
-        <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.eventFactory</auxInfo>
+        <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.eventFactory</auxInfo>
         eventTest
     </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />

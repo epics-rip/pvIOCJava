@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <database>
 
-<import name = "org.epics.ioc.*" />
+<import name = "org.epics.pvioc.*" />
 <structure structureName = "allTypes">
   <auxInfo name = "support" scalarType = "string">
       generic

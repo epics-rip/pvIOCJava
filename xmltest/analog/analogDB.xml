@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <database>
 <include addPath = "${JAVAIOC}/xmltest/analog" />
-<import name = "org.epics.ioc.*" />
-<import name = "org.epics.pvData.*" />
+<import name = "org.epics.pvioc.*" />
+<import name = "org.epics.pvdata.*" />
 <include addPath = "${JAVAIOC}/xml" />
 <include href = "records.xml" />
 <include removePath = "${JAVAIOC}/xml" />

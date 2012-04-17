@@ -2,7 +2,7 @@
 <database>
 
 <record recordName = "IPSerialPort" extends = "portCreate">
-    <scalar name = "factoryName">org.epics.ioc.pdrv.serial.IPSerialDriverFactory</scalar>
+    <scalar name = "factoryName">org.epics.pvioc.pdrv.serial.IPSerialDriverFactory</scalar>
     <scalar name = "portName">IPserialPort</scalar>
     <structure name = "driverParameters" extends = "IPSerialDriver" >
         <scalar name = "host">192.168.1.9</scalar>

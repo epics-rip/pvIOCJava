@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <database>
-<import name = "org.epics.ioc.*" />
-<import name = "org.epics.pvData.*" />
+<import name = "org.epics.pvioc.*" />
+<import name = "org.epics.pvdata.*" />
 <record recordName = "enumeratedCounter">
     <scalar name = "value" scalarType = "byte"/>
     <structure name = "alarm" extends = "alarm" />
@@ -40,7 +40,7 @@
     <structure name = "input" extends = "digital">
         <structure name = "alarm" extends = "alarm" />
         <structure name = "states" >
-             <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.digitalInputFactory</auxInfo>
+             <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.digitalInputFactory</auxInfo>
              <structure name = "0" extends = "digitalState">
                  <scalar name = "name">zero</scalar>
                  <scalar name = "value">0</scalar>

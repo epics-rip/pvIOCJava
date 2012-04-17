@@ -9,7 +9,7 @@
 
 <structure structureName = "controlLimitFactory">
   <scalar name = "pvReplaceFactory" scalarType = "string">
-    org.epics.ioc.support.basic.ControlLimitFactory</scalar>
+    org.epics.pvioc.support.basic.ControlLimitFactory</scalar>
 </structure>
 
 </database>

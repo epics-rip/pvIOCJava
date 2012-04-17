@@ -11,7 +11,7 @@
     </structure>
     <structure name = "input" extends = "calculation" >
       <structure name = "calculator" extends = "generic">
-          <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.arrayIncrementCalculatorFactory</auxInfo>
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.arrayIncrementCalculatorFactory</auxInfo>
       </structure>
     </structure>
     <structure name = "link" extends = "generic" >
@@ -111,7 +111,7 @@
            </structure>
        </structure>
        <structure name = "calculator" extends = "generic">
-          <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.arrayAddCalculatorFactory</auxInfo>
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.arrayAddCalculatorFactory</auxInfo>
       </structure>
     </structure>
 </record>

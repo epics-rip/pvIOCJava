@@ -8,9 +8,9 @@
        <scalar name = "value" scalarType = "double">10.0</scalar>
     </structure>
     <structure name = "current">
-       <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.genericFactory</auxInfo>
+       <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
        <scalar name = "value" scalarType = "double">
-         <auxInfo name = "supportFactory" scalarType = "string">org.epics.ioc.powerSupplyFactory</auxInfo>
+         <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.powerSupplyFactory</auxInfo>
        </scalar>
     </structure>
      <structure name = "power">

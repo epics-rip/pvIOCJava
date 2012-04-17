@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <database>
-<import name = "org.epics.ioc.*" />
-<package name = "org.epics.ioc.test" />
-<import name = "org.epics.ioc.test.*" />
+<import name = "org.epics.pvioc.*" />
+<package name = "org.epics.pvioc.test" />
+<import name = "org.epics.pvioc.test.*" />
 <structure structureName = "point">
   <scalar name = "x" scalarType = "double" />
   <scalar name = "y" scalarType = "double" />
