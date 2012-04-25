@@ -35,21 +35,21 @@
   <scalar name = "reportDetails" scalarType = "int">3</scalar>
 </structure>
 
-<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
+<include addPath = "${JAVAIOC}/src/org/epics/pvioc/pdrv/testDriver" />
 <include href = "serialDriver.xml" />
 <include href = "int32Driver.xml" />
 <include href = "float64Driver.xml" />
 <include href = "uint32DigitalDriver.xml" />
 <include href = "int32ArrayDriver.xml" />
 <include href = "float64ArrayDriver.xml" />
-<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/testDriver" />
+<include removePath = "${JAVAIOC}/src/org/epics/pvioc/pdrv/testDriver" />
 
-<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/serial" />
+<include addPath = "${JAVAIOC}/src/org/epics/pvioc/pdrv/serial" />
 <include href = "IPSerialDriver.xml" />
-<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/serial" />
+<include removePath = "${JAVAIOC}/src/org/epics/pvioc/pdrv/serial" />
 
-<include addPath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
+<include addPath = "${JAVAIOC}/src/org/epics/pvioc/pdrv/vxi11" />
 <include href = "vxi11Driver.xml" />
-<include removePath = "${JAVAIOC}/src/org/epics/ioc/pdrv/vxi11" />
+<include removePath = "${JAVAIOC}/src/org/epics/pvioc/pdrv/vxi11" />
 
 </database>
