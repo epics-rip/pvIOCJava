@@ -374,7 +374,7 @@ public class StructureArrayFactory {
                 fields[0] = fieldCreate.createScalar(ScalarType.pvString);
                 fieldNames[0] = "field";
                 Structure structure = fieldCreate.createStructure(fieldNames, fields);
-                PVStructure pvRequest = pvDataCreate.createPVStructure(null,structure);
+                PVStructure pvRequest = pvDataCreate.createPVStructure(structure);
                 PVString pvFieldName = pvRequest.getStringField("field");
                 pvFieldName.put(subField);
                 channelArray = channel.createChannelArray(this, pvRequest);
@@ -404,7 +404,7 @@ public class StructureArrayFactory {
             	PVStructure[] pvStructures = structureArrayData.data;
             	
             	if(pvStructures[offset]==null) {
-            		pvStructures[offset] = pvDataCreate.createPVStructure(null, pvArray.getStructureArray().getStructure());
+            		pvStructures[offset] = pvDataCreate.createPVStructure(pvArray.getStructureArray().getStructure());
             	}
             	return pvStructures[offset];
             }

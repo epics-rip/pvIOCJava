@@ -43,7 +43,7 @@ public class SimpleProcessTest extends TestCase {
         Requester iocRequester = new RequesterForTesting("simpleProcessTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
-        boolean ok = install.installRecords("test/org/epics/ioc/support/simpleTestPV.xml", iocRequester);
+        boolean ok = install.installRecords("test/org/epics/pvioc/support/simpleTestPV.xml", iocRequester);
         PVRecord[] pvRecords;
         if(!ok) {
             System.out.printf("\nrecords\n");
@@ -64,7 +64,7 @@ public class SimpleProcessTest extends TestCase {
         masterPVDatabase.addRequester(pvDatabaseRequester);
         TestProcess testProcess = new TestProcess(pvRecord);
         for(PVRecord record: pvRecords) {
-            RecordProcess recordProcess = pvRecord.getRecordProcess();
+            RecordProcess recordProcess = record.getRecordProcess();
             recordProcess.setTrace(true);
         }
         testProcess.test(); 

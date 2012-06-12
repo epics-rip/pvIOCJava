@@ -216,7 +216,8 @@ public class JavaIOC {
     	try {
     		install.installStructures(fileName,iocRequester);
     	}  catch (IllegalStateException e) {
-    		System.out.println("IllegalStateException: " + e);
+    	    System.out.printf("parseStructures: %s%n",e.getMessage());
+    	    e.printStackTrace();
     	}
     	endTime = System.nanoTime();
     	double diff = (double)(endTime - startTime)/1e9;
@@ -230,7 +231,8 @@ public class JavaIOC {
     	try {
     		install.installRecords(fileName,iocRequester);
     	}  catch (IllegalStateException e) {
-    		System.out.println("IllegalStateException: " + e);
+    	    System.out.printf("parseRecords: %s%n",e.getMessage());
+    	    e.printStackTrace();
     	}
     	endTime = System.nanoTime();
     	double diff = (double)(endTime - startTime)/1e9;

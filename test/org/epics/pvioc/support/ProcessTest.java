@@ -47,12 +47,12 @@ public class ProcessTest extends TestCase {
    /**
      * test PVAccess.
      */
-    public static void DISABLED_testProcess() {
+    public static void testProcess() {
         Requester iocRequester = new RequesterForTesting("accessTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
         new NewAfterStartRequesterImpl(0);
-        boolean ok = install.installRecords("test/org/epics/ioc/support/processTestPV.xml", iocRequester);
+        boolean ok = install.installRecords("test/org/epics/pvioc/support/processTestPV.xml", iocRequester);
         assertTrue(ok);
         PVRecord[] pvRecords;
         try {
@@ -76,16 +76,16 @@ public class ProcessTest extends TestCase {
         } 
         System.out.println("starting performance test"); 
         testProcess.testPerform();
-        ok = install.installRecords("test/org/epics/ioc/support/loopPV.xml", iocRequester);
+        ok = install.installRecords("test/org/epics/pvioc/support/loopPV.xml", iocRequester);
         if(!ok) return;
         
-//        System.out.printf("\nrecords\n");
-//        pvRecords = masterPVDatabase.getRecords();
-//        for(PVRecord record: pvRecords) {
-//            System.out.println(record.toString());
-//        }
+//System.out.printf("\nrecords\n");
+//pvRecords = masterPVDatabase.getRecords();
+//for(PVRecord record: pvRecords) {
+//System.out.println(record.toString());
+//}
         
-        pvRecord = masterPVDatabase.findRecord("root");
+        pvRecord = masterPVDatabase.findRecord("counter");
         assertNotNull(pvRecord);
         testProcess = new TestProcess(pvRecord);
         pvRecords = masterPVDatabase.getRecords();

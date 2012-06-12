@@ -181,7 +181,7 @@ public class CreateFieldRequestFactory {
             switch(runState) {
             case introspectDone: { // must run as swt thread
                 SelectSubSet selectSubSet = new SelectSubSet(shell);
-                PVStructure pvStructure = pvDataCreate.createPVStructure(null, channelStructure);
+                PVStructure pvStructure = pvDataCreate.createPVStructure(channelStructure);
                 BitSet bitSet = selectSubSet.getSubSet(pvStructure,channel.getChannelName());
                 String request = "";
                 request = createRequest(request,bitSet,pvStructure.getPVFields());

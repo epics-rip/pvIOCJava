@@ -129,4 +129,19 @@ public interface PVRecord extends Requester{
      * @return The number.
      */
     int getNumberClients();
+    /**
+     * Implement standard toString().
+     * @return The record as a String.
+     */
+    String toString();
+    /**
+     * Implement standard toString()
+     * @param indentLevel indentation level.
+     * @return
+     */
+    String toString(int indentLevel);
+    /**
+     * Check that PVRecordStruvture is compatible with PVStructure. 
+     */
+    boolean checkValid();
 }

@@ -232,7 +232,7 @@ public class Float64ArrayDriverFactory {
                 private Device device;
                 
                 private PVDoubleArrayImpl(PVStructure parent,ScalarArray array,Device device) {
-                    super(parent,array);
+                    super(array);
                     this.device = device;
                 }
                 /* (non-Javadoc)

@@ -19,6 +19,10 @@ import org.epics.pvioc.database.PVRecordStructure;
  * @author mrk
  *
  */
+/**
+ * @author mrk
+ *
+ */
 public interface PVCopy {
     /**
      * Get the PVRecord to which this PVCopy is attached. 
@@ -96,4 +100,16 @@ public interface PVCopy {
      * @return The PVCopyMonitor.
      */
     PVCopyMonitor createPVCopyMonitor(PVCopyMonitorRequester pvCopyMonitorRequester);
+    /**
+     * Get options for a field in a PVStructure created by pvCopy
+     * @param copyPVStructure The PVStructure.
+     * @param fieldOffset The field offset.
+     * @return The pvStructure containing the options or null if the field did not have options.
+     */
+    PVStructure getOptions(PVStructure copyPVStructure,int fieldOffset);
+    /**
+     * Dump the internal pvCopy nodes.
+     * @return The nodes.
+     */
+    String dump();
 }

@@ -71,13 +71,11 @@ public class PVDatabaseFactory {
         return beingInstalled;
     }
     
-    private static PVDataCreate pvDataCreate = null;
     private static Database master;
     private static Database beingInstalled = null;
     private static LinkedListCreate<Requester> linkedListCreate = new LinkedListCreate<Requester>();
     
     static {
-        pvDataCreate = PVDataFactory.getPVDataCreate();
         master = new Database("master");
     }
     

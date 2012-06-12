@@ -81,21 +81,25 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
 	public PVField getPVField() {
 		return pvField;
 	}
+
 	@Override
-	public void replacePVField(PVField newField) {
-		pvField.replacePVField(newField);
-		pvField = newField;
+	public void replacePVField(PVField newPVField) {
+	    String message = "";
+	    boolean ok = true;
+	    if(newPVField.getField().getType()==Type.structure) {
+	        ok = false;
+	        message += " illegal attempt to replace a structure field";
+	    }
+	    if(newPVField.getField()!=pvField.getField()) {
+	        ok = false;
+	        message += " attempt to replace a field but introspection interface not the same";
+	    }
+	    if(!ok) {
+	        throw new IllegalStateException(getFullName() + message);
+	    }
+	    parent.getPVStructure().replacePVField(pvField,newPVField);
+		pvField = newPVField;
 		pvField.setPostHandler(this);
-		if(pvField.getField().getType()==Type.structure) {
-			PVStructure pvStructure = (PVStructure)pvField;
-			PVField[] pvFields = pvStructure.getPVFields();
-			PVRecordStructure pvRecordStructure = (PVRecordStructure)this;
-			PVRecordField[] pvRecordFields = pvRecordStructure.getPVRecordFields();
-			for(int i=0; i<pvRecordFields.length; i++) {
-				PVRecordField pvrf = pvRecordFields[i];
-				pvrf.replacePVField(pvFields[i]);
-			}
-		}
 	}
 	/* (non-Javadoc)
 	 * @see org.epics.pvdata.pv.PVField#getPVRecord()
@@ -187,14 +191,21 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
      private void createNames(){
     	 StringBuilder builder = new StringBuilder();
     	 PVField pvField = getPVField();
+    	 boolean isLeaf = true;
     	 while(pvField!=null) {
     	     String fieldName = pvField.getFieldName();
-    		 builder.insert(0, '.');
+    	     PVStructure pvParent = pvField.getParent();
+    		 if(!isLeaf && pvParent!=null) {
+    		     builder.insert(0, '.');
+    		 }
+    		 isLeaf = false;
     		 builder.insert(0, fieldName);
-    		 pvField = pvField.getParent();
+    		 pvField = pvParent;
     	 }
     	 fullFieldName = builder.toString();
-    	 builder.insert(0, pvRecord.getRecordName());
+    	 String xxx = pvRecord.getRecordName();
+    	 if(fullFieldName.length()>0) xxx += ".";
+    	 builder.insert(0, xxx);
     	 fullName = builder.toString();
      }
 }

@@ -116,7 +116,7 @@ public class GUIDataFactory {
         					pvStructures[0] = structureArrayData.data[structureArrayData.offset];
         				}
         				if(pvStructures[0]==null) {
-        					pvStructures[0] = pvDataCreate.createPVStructure(null, pvStructureArray.getStructureArray().getStructure());
+        					pvStructures[0] = pvDataCreate.createPVStructure(pvStructureArray.getStructureArray().getStructure());
         				}
         				PVStructure pvStruct = pvStructures[0];
         				BitSet newBitSet = new BitSet(pvStruct.getNumberFields());
@@ -230,7 +230,7 @@ public class GUIDataFactory {
                     				pvStructures[0] = structureArrayData.data[structureArrayData.offset];
                     			}
                     			if(pvStructures[0]==null) {
-                    				pvStructures[0] = pvDataCreate.createPVStructure(null, pvStructureArray.getStructureArray().getStructure());
+                    				pvStructures[0] = pvDataCreate.createPVStructure(pvStructureArray.getStructureArray().getStructure());
                     			}
                     			PVStructure pvStruct = pvStructures[0];
                     			BitSet newBitSet = new BitSet(pvStruct.getNumberFields());

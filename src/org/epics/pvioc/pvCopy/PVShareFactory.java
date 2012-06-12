@@ -58,7 +58,7 @@ public class PVShareFactory {
      */
     public static PVScalar replace(PVRecord pvRecord,PVScalar pvNow,PVScalar pvShare) {
         PVScalar newPVField = createScalar(pvRecord,pvNow.getParent(),(PVScalar)pvShare);
-        pvNow.replacePVField(newPVField);
+        pvNow.getParent().replacePVField(pvNow,newPVField);
         return newPVField;
     }
     /**
@@ -72,13 +72,13 @@ public class PVShareFactory {
      */
     public static PVArray replace(PVRecord pvRecord,PVArray pvNow,PVArray pvShare) {
         PVArray newPVField = createArray(pvRecord,pvNow.getParent(),(PVArray)pvShare);
-        pvNow.replacePVField(newPVField);
+        pvNow.getParent().replacePVField(pvNow,newPVField);
         return newPVField;
     }
     
     public static PVStructureArray replace(PVRecord pvRecord,PVStructureArray pvNow,PVStructureArray pvShare) {
     	PVStructureArray pvStructureArray = new BaseSharePVStructureArray(pvRecord,pvNow.getParent(),pvShare);
-    	pvNow.replacePVField(pvStructureArray);
+    	pvNow.getParent().replacePVField(pvNow,pvStructureArray);
     	return pvStructureArray;
     }
     

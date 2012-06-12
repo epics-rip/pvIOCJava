@@ -31,6 +31,7 @@ public class PVReplaceFactory {
     public static void replace(PVDatabase pvDatabase) {
         for(PVRecord pvRecord: pvDatabase.getRecords()) {
             replace(pvDatabase,pvRecord,pvRecord.getPVRecordStructure());
+
         }
     }
     
@@ -64,14 +65,11 @@ public class PVReplaceFactory {
                 pvField.message("PVReplaceFactory: factory " + factoryName + " not found", MessageType.error);
                 break;
             }
-            String fieldName = pvField.getFieldName();
-            PVStructure pvParent = pvField.getParent();
+            
             if(replace(pvRecord,pvField,factory)) {
-            	pvField = pvParent.getSubField(fieldName);
-            	pvRecordField.replacePVField(pvField);
-            	pvAuxInfo = pvField.getPVAuxInfo();
-            	PVScalar pvNew = pvAuxInfo.createInfo("pvReplaceFactory", pvScalar.getScalar().getScalarType());
-            	convert.copyScalar(pvScalar, pvNew);
+System.out.printf("record %s after replace check Valid %b%n",pvRecord.getRecordName(),pvRecord.checkValid());
+System.out.println("replace");
+System.out.printf("record %s field %s%n",pvRecord.getRecordName(),pvRecordField.getFullName());
             }
             break;
         }
@@ -80,8 +78,6 @@ public class PVReplaceFactory {
             replace(pvDatabase,pvRecord,pvRecordStructure.getPVRecordFields());
         }
     }
-    
-    private static final Convert convert = ConvertFactory.getConvert();
     
     private static void replace(PVDatabase pvDatabase,PVRecord pvRecord,PVRecordField[] pvRecordFields) {
         for(PVRecordField pvRecordField : pvRecordFields) {

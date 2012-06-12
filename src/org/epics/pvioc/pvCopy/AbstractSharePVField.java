@@ -27,7 +27,7 @@ public abstract class AbstractSharePVField extends AbstractPVField {
      * @param scalar The ScalarType.
      */
     protected AbstractSharePVField(PVRecord pvRecord,PVStructure parent, PVField  pvShare) {
-        super(parent,pvShare.getField());
+        super(pvShare.getField());
         this.pvRecord = pvRecord;
         this.pvShare = pvShare;
     }

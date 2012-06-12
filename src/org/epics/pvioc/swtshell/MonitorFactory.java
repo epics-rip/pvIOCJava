@@ -207,8 +207,6 @@ public class MonitorFactory {
                     stateMachine.setState(State.creatingMonitor);
                     PVStructure pvStructure = CreateRequestFactory.createRequest(requestText.getText(),requester);
                     if(pvStructure==null) return;
-System.out.println("monitor pvRequest");
-System.out.println(pvStructure);
                     channelClient.createMonitor(pvStructure);
                 } else {
                     channelClient.destroyMonitor();

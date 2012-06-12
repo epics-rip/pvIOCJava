@@ -7,7 +7,7 @@ package org.epics.pvioc.database;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.pvdata.factory.ConvertFactory;
+import org.epics.pvdata.factory.*;
 import org.epics.pvdata.misc.LinkedList;
 import org.epics.pvdata.misc.LinkedListCreate;
 import org.epics.pvdata.misc.LinkedListNode;
@@ -16,6 +16,7 @@ import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.support.RecordProcess;
 
 
@@ -48,7 +49,7 @@ public class BasePVRecord implements PVRecord {
      */
     public BasePVRecord(String recordName,PVStructure pvStructure) {
     	if(pvStructure.getParent()!=null) {
-    		throw new IllegalStateException("pvStructure not a top level structure");
+    		throw new IllegalStateException(recordName + " pvStructure not a top level structure");
     	}
     	this.recordName = recordName;
     	pvRecordStructure = new BasePVRecordStructure(pvStructure,null,this);
@@ -60,7 +61,7 @@ public class BasePVRecord implements PVRecord {
     @Override
 	public RecordProcess getRecordProcess() {
 		if(recordProcess==null) {
-			throw new IllegalStateException("no recordProcess has been assigned to this record");
+			throw new IllegalStateException(recordName + " no recordProcess has been assigned to this record");
 		}
 		return recordProcess;
 	}
@@ -70,7 +71,7 @@ public class BasePVRecord implements PVRecord {
 	@Override
 	public void setRecordProcess(RecordProcess recordProcess) {
 		if(this.recordProcess!=null) {
-			throw new IllegalStateException("a recordProcess has already been assigned to this record");
+			throw new IllegalStateException(recordName + " a recordProcess has already been assigned to this record");
 		}
 		this.recordProcess = recordProcess;
 	}
@@ -96,7 +97,7 @@ public class BasePVRecord implements PVRecord {
     	    if(nextOffset<=desiredOffset) continue;
     	    return findPVRecordField((PVRecordStructure)pvrf,pvField);
     	}
-    	throw new IllegalStateException("pvField not in PVRecord");
+    	throw new IllegalStateException(recordName + " pvField " + pvField.getFieldName() + " not in PVRecord");
     }
 	/* (non-Javadoc)
 	 * @see org.epics.pvioc.database.PVRecord#getPVRecordStructure()
@@ -284,12 +285,13 @@ public class BasePVRecord implements PVRecord {
 	public int getNumberClients() {
 		return clientList.getLength();
 	}
-	/* (non-Javadoc)
-     * @see org.epics.pvdata.factory.BasePVStructure#toString()
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
      */
     public String toString() { return toString(0);}
+   
     /* (non-Javadoc)
-     * @see org.epics.pvdata.factory.BasePVStructure#toString(int)
+     * @see org.epics.pvioc.database.PVRecord#toString(int)
      */
     public String toString(int indentLevel) {
     	StringBuilder builder = new StringBuilder();
@@ -297,9 +299,48 @@ public class BasePVRecord implements PVRecord {
     	builder.append("record ");
     	builder.append(recordName);
     	builder.append(" ");
-    	pvRecordStructure.getPVStructure().toString(builder,indentLevel);
+    	pvRecordStructure.getPVStructure().toString(builder, indentLevel);
     	return builder.toString();
     } 
+    
+    private static boolean checkSub(PVRecordStructure recordStructure, PVStructure pvStructure)
+    {
+        boolean result = true;
+        PVRecordField[] recordFields = recordStructure.getPVRecordFields();
+        PVField[] pvFields = pvStructure.getPVFields();
+        int length = recordFields.length;
+        if(length!= pvFields.length) {
+            result = false;
+            System.err.println(recordStructure.getFullName() + " length mismatch");
+        }
+        for(int i=0; i< length; i++) {
+            PVStructure zzz = pvFields[i].getParent();
+            if(zzz!=pvStructure) {
+                result = false;
+                System.err.printf("%s pv pvField parent bad %s %s%n",recordFields[i].getFullName(),zzz,pvStructure.getFieldName());
+            }
+            PVRecordStructure yyy = recordFields[i].getParent();
+            if(yyy!=recordStructure) {
+                result = false;
+                System.err.printf("%s parent bad %s %s%n",recordFields[i].getFullName(),yyy,recordStructure);
+            }
+            PVField fromRecord = recordFields[i].getPVField();
+            if(fromRecord!=pvFields[i]) {
+                result = false;
+                System.err.printf("%s pvField do not match%n",recordFields[i].getFullName()); 
+            }
+            if(pvFields[i].getField().getType()==Type.structure) {
+                boolean xxx =checkSub((PVRecordStructure)recordFields[i],(PVStructure)pvFields[i]);
+                if(!xxx) result = false;
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public boolean checkValid() {
+        return checkSub(pvRecordStructure,pvRecordStructure.getPVStructure());
+    }
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */

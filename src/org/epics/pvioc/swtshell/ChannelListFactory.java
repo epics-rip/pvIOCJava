@@ -281,7 +281,7 @@ public class ChannelListFactory {
                 fields[0] = fieldCreate.createScalar(ScalarType.pvString);
                 fieldNames[0] = "fieldList";
                 Structure structure = fieldCreate.createStructure(fieldNames, fields);
-                PVStructure pvPutRequest = pvDataCreate.createPVStructure(null,structure);
+                PVStructure pvPutRequest = pvDataCreate.createPVStructure(structure);
                 PVString pvString = pvPutRequest.getStringField("fieldList");
                 pvString.put("arguments.database,arguments.regularExpression");
                 channelPutGet = channel.createChannelPutGet(this, pvPutRequest);

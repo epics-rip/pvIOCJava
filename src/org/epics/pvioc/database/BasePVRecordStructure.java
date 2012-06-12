@@ -26,7 +26,7 @@ public class BasePVRecordStructure extends BasePVRecordField implements PVRecord
 	    	if(pvField.getField().getType()==Type.structure) {
 	    		pvRecordFields[i]  = new BasePVRecordStructure((PVStructure)pvField,this,pvRecord);
 	    	} else {
-	    		pvRecordFields[i] = new BasePVRecordField(pvFields[i],this,pvRecord);
+	    		pvRecordFields[i] = new BasePVRecordField(pvField,this,pvRecord);
 	    	}
 	    }
 	}

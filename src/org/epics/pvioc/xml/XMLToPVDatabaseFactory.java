@@ -442,13 +442,13 @@ public class XMLToPVDatabaseFactory {
             					"type " + extendsName + " is not a known structure",
             					MessageType.error);
             		} else {
-            			pvStructure = pvDataCreate.createPVStructure(null, pvStructure);
+            			pvStructure = pvDataCreate.createPVStructure(pvStructure);
             			pvStructure.putExtendsStructureName(extendsName);
             		}
             	}
             	if(pvStructure==null) {
             	    Structure structure = fieldCreate.createStructure(new String[0], new Field[0]);
-            		pvStructure = pvDataCreate.createPVStructure(null,structure);
+            		pvStructure = pvDataCreate.createPVStructure(structure);
             	}
             }
             structureState = new StructureState();
@@ -511,11 +511,11 @@ public class XMLToPVDatabaseFactory {
                         }
                     }
                     if(pvType!=null) {
-                        pvStructure = pvDataCreate.createPVStructure(null,pvType);
+                        pvStructure = pvDataCreate.createPVStructure(pvType);
                         pvStructure.putExtendsStructureName(extendsName);
                     } else {
                         Structure structure = fieldCreate.createStructure(new String[0], new Field[0]);
-                        pvStructure = pvDataCreate.createPVStructure(null,structure);
+                        pvStructure = pvDataCreate.createPVStructure(structure);
                     }
                 }
                 if(pvListener!=null) pvListener.startStructure(pvStructure);
@@ -552,16 +552,16 @@ public class XMLToPVDatabaseFactory {
                 		pvStructure = (PVStructure)pvField;
                 	} else {// add new field
                 	    Structure structure = fieldCreate.createStructure(new String[0], new Field[0]);
-                        pvStructure = pvDataCreate.createPVStructure(pvParent,structure);
+                        pvStructure = pvDataCreate.createPVStructure(structure);
                         pvParent.appendPVField(fieldName,pvStructure);
                     }
                 } else {
-                	pvStructure = pvDataCreate.createPVStructure(pvParent,pvType);
+                	pvStructure = pvDataCreate.createPVStructure(pvType);
                 	pvStructure.putExtendsStructureName(extendsName);
                     if(pvField==null) {
                     	pvParent.appendPVField(fieldName,pvStructure);
                     } else {
-                        pvField.replacePVField(pvStructure);	
+                        pvParent.replacePVField(pvField, pvStructure);	
                     }
                 }
                 if(pvListener!=null) pvListener.newStructureField(pvStructure);
@@ -655,7 +655,7 @@ public class XMLToPVDatabaseFactory {
         			if(pvField!=null) {
         				pvScalar = (PVScalar)pvField;
         			} else {
-        				pvScalar= pvDataCreate.createPVScalar(pvParent,scalarType);
+        				pvScalar= pvDataCreate.createPVScalar(scalarType);
         				pvParent.appendPVField(fieldName,pvScalar);
         			}
         			this.pvScalar = pvScalar;
@@ -739,7 +739,7 @@ public class XMLToPVDatabaseFactory {
             if(pvField!=null) {
                 pvArray = (PVScalarArray)pvField;
             } else {
-                pvArray= pvDataCreate.createPVScalarArray(pvStructure,scalarType);
+                pvArray= pvDataCreate.createPVScalarArray(scalarType);
                 pvStructure.appendPVField(fieldName,pvArray);
             }
             this.pvArray = pvArray;
@@ -852,18 +852,13 @@ public class XMLToPVDatabaseFactory {
         		extendsName = findExtendedStructureName(extendsName);
         		pvStructure = pvDatabase.findStructure(extendsName);
         		if(pvStructure==null) {
-
-PVStructure[] pvStructures = pvDatabase.getStructures();
-for(PVStructure xxx : pvStructures) {
-    System.out.println(xxx);
-}
         			iocxmlReader.message(
         					"type " + extendsName + " not a known structure",
         					MessageType.error);
         			return;
         		}
         		StructureArray structureArray = fieldCreate.createStructureArray(pvStructure.getStructure());
-        		pvStructureArray = pvDataCreate.createPVStructureArray(pvParent, structureArray);
+        		pvStructureArray = pvDataCreate.createPVStructureArray(structureArray);
         		pvParent.appendPVField(fieldName,pvStructureArray);
         		String capacity = attributes.get("capacity");
         		if(capacity!=null) {
@@ -887,7 +882,7 @@ for(PVStructure xxx : pvStructures) {
         }
         
         private void startStructureArrayElement() {
-        	PVStructure pvStructure = pvDataCreate.createPVStructure(null, structureState.pvStructureArray.getStructureArray().getStructure());
+        	PVStructure pvStructure = pvDataCreate.createPVStructure(structureState.pvStructureArray.getStructureArray().getStructure());
         	structureState.pvStructure = pvStructure;
         	structureState.pvStructures[0] = pvStructure;
         	state = State.structureArrayElement;

@@ -18,25 +18,30 @@
     <structure name = "timeStamp" extends = "timeStamp" />
 </record>
 
-<record recordName = "counter" >
+<record recordName = "counter">
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
-    <scalar name = "value" scalarType = "int" />
+    <scalar name = "value" scalarType = "double" />
     <structure name = "input" extends = "calculation" >
-      <structure name = "calculator">
-        <scalar name ="expression">(value+1)&lt;=10 ? value+1 : 0</scalar>
-      </structure>
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "double" >0.0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "double" >10.0</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "double" >0.5</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
     </structure>
-    <structure name = "valueAlarm" extends = "intAlarm">
-      <scalar name = "active">true</scalar>
-      <scalar name = "lowAlarmLimit">2</scalar>
-      <scalar name = "lowAlarmSeverity">2</scalar>
-      <scalar name = "lowWarningLimit">4</scalar>
-      <scalar name = "lowWarningSeverity">1</scalar>
-      <scalar name = "highWarningLimit">8</scalar>
-      <scalar name = "highWarningSeverity">1</scalar>
-      <scalar name = "highAlarmLimit">10</scalar>
-      <scalar name = "highAlarmSeverity">2</scalar>
-    </structure> 
 </record>
+
 </database>

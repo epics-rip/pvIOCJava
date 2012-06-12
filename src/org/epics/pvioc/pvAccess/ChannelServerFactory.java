@@ -556,7 +556,7 @@ public class ChannelServerFactory  {
             }
             if(pvField.getField().getType()==Type.structureArray) {
             	PVStructureArray pvArray = (PVStructureArray)pvField;
-            	PVStructureArray pvCopy = pvDataCreate.createPVStructureArray(null, pvArray.getStructureArray());
+            	PVStructureArray pvCopy = pvDataCreate.createPVStructureArray(pvArray.getStructureArray());
             	return new ChannelStructureArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
             }
             if(pvField.getField().getType()!=Type.scalarArray) {
@@ -564,7 +564,7 @@ public class ChannelServerFactory  {
                 return null;
             }
             PVScalarArray pvArray = (PVScalarArray)pvField;
-            PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(null,  pvArray.getScalarArray().getElementType());
+            PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(pvArray.getScalarArray().getElementType());
             return new ChannelScalarArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
         }
         /* (non-Javadoc)
@@ -606,7 +606,7 @@ public class ChannelServerFactory  {
         }
         
         private boolean getProcess(PVStructure pvRequest) {
-        	PVField pvField = pvRequest.getSubField("record.process");
+        	PVField pvField = pvRequest.getSubField("record._options.process");
         	if(pvField==null || pvField.getField().getType()!=Type.scalar) return false;
         	Scalar scalar = (Scalar)pvField.getField();
         	if(scalar.getScalarType()==ScalarType.pvString) {

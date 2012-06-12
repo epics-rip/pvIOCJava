@@ -104,6 +104,7 @@ abstract class AbstractIOLink extends AbstractLink {
     protected boolean setLinkPVStructure(PVStructure linkPVStructure) {
         PVField[] linkPVFields = linkPVStructure.getPVFields();
         pvFields = new PVField[linkPVFields.length];
+pvRecordField.getPVRecord().checkValid();
         for(int i=0; i<linkPVFields.length; i++) {
             PVField pvLinkField = linkPVFields[i];
             String fieldName = pvLinkField.getFieldName();
@@ -124,7 +125,7 @@ abstract class AbstractIOLink extends AbstractLink {
                 }
             }
             if(pvField==null) {
-                pvStructure.message("request for field " + fieldName + " is not a parent of this field", MessageType.error);
+                pvStructure.message(pvRecordField.getFullName() + " request for field " + fieldName + " is not a parent of this field", MessageType.error);
                 return false;
             }
             if(fieldName.equals("alarm") && alarmSupport!=null) {

@@ -234,7 +234,7 @@ public class Int32ArrayDriverFactory {
                 private Device device;
                 
                 private PVIntArrayImpl(PVStructure parent,ScalarArray array,Device device) {
-                    super(parent,array);
+                    super(array);
                     this.device = device;
                 }
                 /* (non-Javadoc)

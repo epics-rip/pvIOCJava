@@ -171,7 +171,7 @@ public class ChannelRPCFactory {
                 }
             } else if(object==createArgumentButton) {
             	Structure structure = createStructure.create();
-            	pvArgument = pvDataCreate.createPVStructure(null, structure);
+            	pvArgument = pvDataCreate.createPVStructure(structure);
             } else if(object==createChannelRPCButton) {
                 State state = stateMachine.getState();
                 if(state==State.readyForCreateChannelRPC) {

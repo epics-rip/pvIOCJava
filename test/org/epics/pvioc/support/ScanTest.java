@@ -40,7 +40,7 @@ public class ScanTest extends TestCase {
         Requester iocRequester = new RequesterForTesting("scanTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
-        boolean ok = install.installRecords("test/org/epics/ioc/support/scanPV.xml", iocRequester);
+        boolean ok = install.installRecords("test/org/epics/pvioc/support/scanPV.xml", iocRequester);
         if(!ok) {
             System.out.printf("\nrecords\n");
             pvRecords = masterPVDatabase.getRecords();
@@ -107,7 +107,7 @@ public class ScanTest extends TestCase {
             } catch (InterruptedException e) {
             }
         }
-        ok = install.installRecords("test/org/epics/ioc/support/scanAddPV.xml", iocRequester);
+        ok = install.installRecords("test/org/epics/pvioc/support/scanAddPV.xml", iocRequester);
         if(!ok) return;
        
         String[] recordList = masterPVDatabase.recordList(".*");

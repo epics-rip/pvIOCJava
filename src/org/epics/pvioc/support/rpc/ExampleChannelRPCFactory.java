@@ -58,8 +58,6 @@ public class ExampleChannelRPCFactory {
 		public void destroy() {}
 		@Override
 		public void request(PVStructure pvArgument) {
-System.out.println("argument");
-System.out.println(pvArgument);
 			long start =System.currentTimeMillis();
 			int size = 2;
 			Structure[] fields = new Structure[size];
@@ -69,7 +67,7 @@ System.out.println(pvArgument);
 				fields[index] = fieldCreate.createStructure(pvElement.getStructure().getFieldNames(), pvElement.getStructure().getFields());
 			}
 			Structure top = fieldCreate.createStructure(fieldNames, fields);
-			PVStructure pvTop = pvDataCreate.createPVStructure(null,top);
+			PVStructure pvTop = pvDataCreate.createPVStructure(top);
 			long end =System.currentTimeMillis();
 			double diff = end-start;
 			diff /= 1000.0;

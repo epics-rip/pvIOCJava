@@ -90,7 +90,7 @@ public class MonitorFactory {
 		fields[0] = fieldCreate.createScalar(ScalarType.pvString);
 		fields[1] = fieldCreate.createScalar(ScalarType.pvBoolean);
 		Structure structure = fieldCreate.createStructure(fieldNames, fields);
-		pvTimeStampRequest = pvDataCreate.createPVStructure(null,structure);
+		pvTimeStampRequest = pvDataCreate.createPVStructure(structure);
 		PVString pvAlgorithm = pvTimeStampRequest.getStringField(fieldNames[0]);
 		PVBoolean pvCauseMonitor = pvTimeStampRequest.getBooleanField(fieldNames[1]);
 		pvAlgorithm.put("onChange");
@@ -248,11 +248,17 @@ public class MonitorFactory {
 
 
 		private boolean init(PVStructure pvRequest) {
+		    PVField pvField = null;
+		    PVStructure pvOptions = null;
 			//Marty onPut changeTimeStamp
 			int queueSize = 2;
-			PVField pvField = pvRequest.getSubField("record.queueSize");
+			pvField = pvRequest.getSubField("record._options");
+			if(pvField!=null) {
+			    pvOptions = (PVStructure)pvField;
+			    pvField = pvOptions.getSubField("queueSize");
+			}
 			if(pvField!=null && (pvField instanceof PVString)) {
-				PVString pvString = pvRequest.getStringField("record.queueSize");
+				PVString pvString = (PVString)pvField;
 				String value = pvString.get();
 				try {
 					queueSize = Integer.parseInt(value);
@@ -265,9 +271,10 @@ public class MonitorFactory {
 				monitorRequester.message("queueSize must be >= 1", MessageType.error);
 				return false;
 			}
-			pvField = pvRequest.getSubField("record.periodicRate");
+			pvField =  null;
+			if(pvOptions!=null) pvField = pvOptions.getSubField("periodicRate");
 			if(pvField!=null && (pvField instanceof PVString)) {
-				PVString pvString = pvRequest.getStringField("record.periodicRate");
+				PVString pvString = (PVString)pvField;
 				String value = pvString.get();
 				try {
 					periodicRate = Double.parseDouble(value);
@@ -294,7 +301,6 @@ public class MonitorFactory {
 					monitorRequester.message("illegal pvRequest", MessageType.error);
 					return false;
 				}
-				pvRequest = pvRequest.getStructureField("field");
 			}
 			pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
 			MonitorElement monitorElement = null;
@@ -308,55 +314,41 @@ public class MonitorFactory {
 			monitorElement = queueImpl.init(this,queueSize);
 			notMonitoredBitSet = (BitSet)monitorElement.getChangedBitSet().clone();
 			notMonitoredBitSet.clear();
-			boolean result = initField(pvRequest,"",monitorElement);
+			boolean result = initField(monitorElement.getPVStructure(),monitorElement.getPVStructure());
 			if(result) {
 				initTimeStamp(monitorElement);
 				initNumericFields(monitorElement.getPVStructure());
 				notMonitoredBitSet.flip(0, notMonitoredBitSet.size());
+				monitorRequester.monitorConnect(okStatus,this, pvCopy.getStructure());
 			}
 			return result;
 		}
 		
-		private boolean initField(PVStructure pvRequest,String copyFullFieldName,MonitorElement monitorElement) {
-			PVField[] pvFields = pvRequest.getPVFields();
-			for(int i=0; i<pvFields.length; i++) {
-				PVField pvField = pvFields[i];
-				if(pvField.getField().getType()!=Type.structure) continue;
-				PVStructure pvStruct = (PVStructure)pvField;
-				PVField pv = pvStruct.getSubField("leaf");
-				if(pv!=null) {
-					PVStructure pvLeaf = (PVStructure)pv;
-					if(pvLeaf.getSubField("algorithm")==null) continue;
-					PVString pvFullName = pvLeaf.getStringField("source");
-					PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
-					PVField pvf= pvStructure.getSubField(pvFullName.get());
-					PVRecordField pvRecordField = pvRecord.findPVRecordField(pvf);
-					if(pvRecordField==null) return false;
-					String name = copyFullFieldName;
-					if(name.length()!=0) name += ".";
-					name += pvRecordField.getPVField().getFieldName();
-					PVField pvCopyField = monitorElement.getPVStructure().getSubField(name);
-					boolean result = initMonitorField(
-							pvLeaf,pvCopyField,pvRecordField,monitorElement);
-					if(!result) return false;
-					continue;
-				}
-				String name = copyFullFieldName;
-				if(name.length()!=0) name += ".";
-				name += pvStruct.getFieldName();
-				// Note that next call is recursive
-				boolean result = initField(pvStruct,name,monitorElement);
-				if(!result) return false;
-			}
-			monitorRequester.monitorConnect(okStatus,this, pvCopy.getStructure());
-			return true;
+		private boolean initField(PVStructure pvCopyTop,PVStructure pvCopyField) {
+		    PVField[] pvFields = pvCopyField.getPVFields();
+		    for(int i=0; i<pvFields.length; i++) {
+		        PVField pvField = pvFields[i];
+		        int offset = pvField.getFieldOffset();
+		        PVStructure pvOptions = pvCopy.getOptions(pvCopyTop, offset);
+		        if(pvOptions!=null && pvOptions.getSubField("algorithm")!=null) {
+		            PVRecordField pvRecordField = pvCopy.getRecordPVField(offset);
+		            boolean result = initMonitorField(
+		                    pvOptions,pvCopyField,pvRecordField);
+		            if(!result) return false;
+		        }
+		        if(pvField.getField().getType()==Type.structure) {
+		            boolean result = initField(pvCopyTop,(PVStructure)pvField);
+		            if(!result) return false;
+		        }
+		    }
+		    return true;
 		}
 		
 		private boolean initMonitorField(
-				PVStructure pvMonitor,PVField pvCopyField,
-				PVRecordField pvRecordField,MonitorElement monitorElement)
+				PVStructure pvOptions,PVField pvCopyField,
+				PVRecordField pvRecordField)
 		{
-			PVString pvAlgorithm = pvMonitor.getStringField("algorithm");
+			PVString pvAlgorithm = pvOptions.getStringField("algorithm");
 			if(pvAlgorithm==null) return false;
 			String algorithm = pvAlgorithm.get();
 			if(algorithm.equals("onPut")) return true;
@@ -371,7 +363,7 @@ public class MonitorFactory {
 				monitorRequester.message("algorithm not registered", MessageType.error);
 				return false;
 			}
-			MonitorAlgorithm monitorAlgorithm = monitorAlgorithmCreate.create(pvRecord,monitorRequester,pvRecordField,pvMonitor);
+			MonitorAlgorithm monitorAlgorithm = monitorAlgorithmCreate.create(pvRecord,monitorRequester,pvRecordField,pvOptions);
 			if(monitorAlgorithm==null) return false;
 			int bitOffset = pvCopyField.getFieldOffset();
 			int numBits = pvCopyField.getNumberFields();

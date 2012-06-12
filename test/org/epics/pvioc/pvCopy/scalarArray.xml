@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.pvioc.*" />
+<record recordName = "doubleArray">
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <array name = "value" scalarType = "double" />
+</record>
+
+</database>

@@ -55,7 +55,7 @@ public class MonitorTest extends TestCase {
      // get database for testing
         Requester iocRequester = new RequesterForTesting("accessTest");
         XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/xml/structures.xml", iocRequester);
-        XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/test/org/epics/ioc/monitor/power.xml", iocRequester);
+        XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/test/org/epics/pvioc/monitor/power.xml", iocRequester);
         PVReplaceFactory.replace(master);
         timeStampTest();
         noQueueTest();
@@ -84,7 +84,7 @@ public class MonitorTest extends TestCase {
         PVStructure pvCopy = monitorElement.getPVStructure();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
+        PVDouble pvValue = pvCopy.getDoubleField("power");
         BitSet change = monitorElement.getChangedBitSet();
         BitSet overrun = monitorElement.getOverrunBitSet();
 //System.out.println("pvCopy " + pvCopy);
@@ -128,7 +128,7 @@ public class MonitorTest extends TestCase {
         PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "record[queueSize=1]field(alarm,timeStamp,power.value)";
-//System.out.println("pvRecord " + pvRecord);
+//System.out.println("pvRecord " + pvRecord.getPVRecordStructure().getPVField());
         PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
 //System.out.println("request:" + request);
 //System.out.println("pvRequest:" + pvRequest);
@@ -136,9 +136,10 @@ public class MonitorTest extends TestCase {
         MonitorElement monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         PVStructure pvCopy = monitorElement.getPVStructure();
+//System.out.println("pvCopy " + pvCopy);
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
+        PVDouble pvValue = pvCopy.getDoubleField("power");
         int valueOffset = pvValue.getFieldOffset();
         BitSet change = monitorElement.getChangedBitSet();
         BitSet overrun = monitorElement.getOverrunBitSet();
@@ -215,7 +216,7 @@ public class MonitorTest extends TestCase {
         BitSet overrun = monitorElement.getOverrunBitSet();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
+        PVDouble pvValue = pvCopy.getDoubleField("power");
         int valueOffset = pvValue.getFieldOffset();
 //System.out.println("pvCopy " + pvCopy);
 //System.out.println("change " + change);
@@ -303,7 +304,7 @@ public class MonitorTest extends TestCase {
         BitSet overrun = monitorElement.getOverrunBitSet();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
+        PVDouble pvValue = pvCopy.getDoubleField("power");
         int valueOffset = pvValue.getFieldOffset();
 //System.out.println("pvCopy " + pvCopy);
 //System.out.println("change " + change);
@@ -391,7 +392,7 @@ public class MonitorTest extends TestCase {
         BitSet overrun = monitorElement.getOverrunBitSet();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
+        PVDouble pvValue = pvCopy.getDoubleField("power");
         int valueOffset = pvValue.getFieldOffset();
 //System.out.println("pvCopy " + pvCopy);
 //System.out.println("change " + change);
@@ -477,7 +478,7 @@ public class MonitorTest extends TestCase {
         PVStructure pvCopy = monitorElement.getPVStructure();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
+        PVDouble pvValue = pvCopy.getDoubleField("power");
         int valueOffset = pvValue.getFieldOffset();
         BitSet change = monitorElement.getChangedBitSet();
         BitSet overrun = monitorElement.getOverrunBitSet();
