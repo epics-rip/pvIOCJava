@@ -104,7 +104,6 @@ abstract class AbstractIOLink extends AbstractLink {
     protected boolean setLinkPVStructure(PVStructure linkPVStructure) {
         PVField[] linkPVFields = linkPVStructure.getPVFields();
         pvFields = new PVField[linkPVFields.length];
-pvRecordField.getPVRecord().checkValid();
         for(int i=0; i<linkPVFields.length; i++) {
             PVField pvLinkField = linkPVFields[i];
             String fieldName = pvLinkField.getFieldName();
@@ -125,7 +124,7 @@ pvRecordField.getPVRecord().checkValid();
                 }
             }
             if(pvField==null) {
-                pvStructure.message(pvRecordField.getFullName() + " request for field " + fieldName + " is not a parent of this field", MessageType.error);
+                super.message(pvRecordField.getFullName() + " request for field " + fieldName + " is not a parent of this field", MessageType.error);
                 return false;
             }
             if(fieldName.equals("alarm") && alarmSupport!=null) {
@@ -136,9 +135,10 @@ pvRecordField.getPVRecord().checkValid();
                 indexAlarmLinkField = i;
             } else {
                 if(!convert.isCopyCompatible(pvLinkField.getField(), pvField.getField())) {
-                    pvStructure.message(
-                        "field " + fieldName +" is not copy compatible with link field",
-                        MessageType.error);
+                    String message = "pvLinkField " + pvLinkField;
+                    message += " pvField " + pvField;
+                    message += "field " + fieldName +" is not copy compatible with link field";
+                    super.message(message,MessageType.error);
                     return false;
                 }
             }

@@ -212,6 +212,16 @@ class PVCopyImpl {
             int diff = recordPVField.getPVField().getFieldOffset() - recordPVStructure.getPVStructure().getFieldOffset();
             return recordNode.structureOffset + diff;
         }
+        
+        private RecordNode getRecordNode(StructureNode structureNode,int structureOffset) {
+            for(Node node : structureNode.nodes) {
+                if(structureOffset>=(node.structureOffset + node.nfields)) continue;
+                if(!node.isStructure) return (RecordNode)node; 
+                StructureNode subNode = (StructureNode)node;
+                return  getRecordNode(subNode,structureOffset);
+            }
+            return null;
+        }
         /* (non-Javadoc)
          * @see org.epics.pvdata.pvCopy.PVCopy#getPVField(int)
          */
@@ -223,12 +233,14 @@ class PVCopyImpl {
                 PVField  pvField = recordNode.recordPVField.getPVField();
                 if(pvField.getField().getType()!=Type.structure) {
                     if(structureOffset==1) return recordNode.recordPVField;
+                    System.err.printf("PVCopy::PVRecordField getRecordPVField(int structureOffset) illegal structureOffset %d %s%n",structureOffset,dump());
                     throw new IllegalArgumentException("structureOffset not valid");
                 }
             } else {
                 recordNode = getRecordNode((StructureNode)headNode,structureOffset);
             }
             if(recordNode==null) {
+                System.err.printf("PVCopy::PVRecordField getRecordPVField(int structureOffset) illegal structureOffset %d %s%n",structureOffset,dump());
             	throw new IllegalArgumentException("structureOffset not valid");
             }
             int diff = structureOffset - recordNode.structureOffset;
@@ -236,7 +248,12 @@ class PVCopyImpl {
             if(diff==0) return pvRecordField;
             PVStructure pvStructure = (PVStructure)pvRecordField.getPVField();
             PVField pvField = pvStructure.getSubField(pvRecordField.getPVField().getFieldOffset() + diff);
-            return pvRecord.findPVRecordField(pvField);
+            PVRecordField xxx = pvRecord.findPVRecordField(pvField);
+            if(xxx==null) {
+                System.err.printf("PVCopy::PVRecordField getRecordPVField(int structureOffset) illegal structureOffset %d %s%n",structureOffset,dump());
+                throw new IllegalArgumentException("structureOffset not valid");
+            }
+            return xxx;
         }
         /* (non-Javadoc)
          * @see org.epics.pvdata.pvCopy.PVCopy#initCopy(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
@@ -273,6 +290,7 @@ class PVCopyImpl {
                     boolean isEqual = yyy.equals(pvField);
                     if(!isEqual) {
                         convert.copy(pvField, yyy);
+                        bitSet.set(yyy.getFieldOffset());
                     }
                 }
             } finally {
@@ -391,7 +409,8 @@ class PVCopyImpl {
             if(field.getType()!=Type.structure) {
                 throw new IllegalStateException("Logic error");
             }
-            return (Structure) field;
+            Structure structure = (Structure)field;
+            return structure;
 
         }
         
@@ -410,18 +429,17 @@ class PVCopyImpl {
             }
             if(number==0) return pvRecord.getStructure();
             if(number==1) {
-                int ind = 0;
-                if(indopt==0) ind = 1;
                 String nameFromRecord = "";
                 nameFromRecord = getFullName(pvFromRequest,nameFromRecord);
                 PVField pvRecordField = pvRecord.getSubField(nameFromRecord);
                 if(pvRecordField==null) return null;
                 Type recordFieldType = pvRecordField.getField().getType();
                 if(recordFieldType!=Type.structure && !isTop) return pvRecordField.getField();
+                if(recordFieldType==Type.structure && isTop) return pvRecordField.getField();
                 PVStructure pvSubFrom = (PVStructure)pvFromRequest.getSubField(nameFromRecord);
                 Field[] fields = new Field[1];
                 String[] fieldNames = new String[1];
-                fieldNames[0] = fromFieldNames[ind];
+                fieldNames[0] = pvRecordField.getFieldName();
                 PVField[] pvs = pvSubFrom.getPVFields();
                 length = pvs.length;
                 number = 0;
@@ -526,12 +544,18 @@ class PVCopyImpl {
                 PVRecordField pvRecordField = pvRecord.findPVRecordField(pvf);
                 if(pvRecordField==null) throw new IllegalStateException("Logic error");
                 if(xxx.getStructure().getFieldNames().length<=1) {
+                    int structureOffset = pvFromField.getFieldOffset();
+                    Type type = pvRecordField.getPVField().getField().getType();
+                    PVStructure pvParent = pvFromField.getParent();
+                    if(type!=Type.structure && pvParent==null) {
+                        structureOffset++;
+                    }
                     RecordNode recordNode = new RecordNode();
                     recordNode.options = pvOptions;
                     recordNode.isStructure = false;
                     recordNode.recordPVField = pvRecordField;
                     recordNode.nfields = pvFromField.getNumberFields();
-                    recordNode.structureOffset = pvFromField.getFieldOffset();
+                    recordNode.structureOffset = structureOffset;
                     return recordNode;
                 }
                 pvFromRequest = xxx;
@@ -770,19 +794,7 @@ class PVCopyImpl {
             }
             return null;
         }
-        
-        private RecordNode getRecordNode(StructureNode structureNode,int structureOffset) {
-            for(Node node : structureNode.nodes) {
-                if(structureOffset>=(node.structureOffset + node.nfields)) continue;
-                if(!node.isStructure) return (RecordNode)node; 
-                    StructureNode subNode = (StructureNode)node;
-                    return  getRecordNode(subNode,structureOffset);
-            }
-            return null;
-        }
-        
-        
-        
+         
         private final class CopyMonitor implements PVCopyMonitor, PVListener {
             private final PVCopyMonitorRequester pvCopyMonitorRequester;
             private BitSet changeBitSet = null;

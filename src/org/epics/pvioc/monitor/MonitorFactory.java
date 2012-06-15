@@ -21,6 +21,7 @@ import org.epics.pvdata.monitor.MonitorElement;
 import org.epics.pvdata.monitor.MonitorQueue;
 import org.epics.pvdata.monitor.MonitorQueueFactory;
 import org.epics.pvdata.monitor.MonitorRequester;
+import org.epics.pvdata.property.*;
 import org.epics.pvdata.pv.*;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.StatusCreate;
@@ -392,7 +393,18 @@ public class MonitorFactory {
 			MonitorFieldNode node = new MonitorFieldNode(monitorAlgorithm,bitOffset);
 			listNode = MonitorFieldNodeListCreate.createNode(node);
 			monitorFieldList.addTail(listNode);
-			PVField pvCopyField = monitorElement.getPVStructure().getSubField("timeStamp");
+			PVStructure pvStructure =  monitorElement.getPVStructure();
+			PVTimeStamp pvTimeStamp = PVTimeStampFactory.create();
+			PVField pvCopyField = null;
+			if(pvTimeStamp.attach(pvStructure)) {
+			    pvCopyField= pvStructure;
+			} else {
+			    pvCopyField = monitorElement.getPVStructure().getSubField("timeStamp");
+			}
+			if(pvCopyField==null) {
+			    System.err.printf("record %s MonitorFactory.initTimeStamp failed%n",pvRecordField.getFullName());
+			    return;
+			}
 			int numBits = pvCopyField.getNumberFields();
 			notMonitoredBitSet.set(bitOffset, bitOffset+numBits);
 		}

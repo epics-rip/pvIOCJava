@@ -23,7 +23,7 @@ import org.epics.pvdata.pv.ScalarType;
  *
  */
 public class PVReplaceFactory {
-    
+    private static final Convert convert = ConvertFactory.getConvert();
     /**
      * Look at every field of every record in the database and see if field implementation should be replaced.
      * @param pvDatabase The database.
@@ -56,20 +56,17 @@ public class PVReplaceFactory {
         PVScalar pvScalar = pvAuxInfo.getInfo("pvReplaceFactory");
         while(pvScalar!=null) {
             if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-                pvField.message("PVReplaceFactory: pvScalar " + pvScalar.toString() + " is not a string", MessageType.error);
+                pvField.message(pvRecordField.getFullName() + " PVReplaceFactory: pvScalar " + pvScalar.toString() + " is not a string", MessageType.error);
                 break;
             }
             String factoryName = ((PVString)pvScalar).get();
             PVStructure factory = pvDatabase.findStructure(factoryName);
             if(factory==null) {
-                pvField.message("PVReplaceFactory: factory " + factoryName + " not found", MessageType.error);
+                pvField.message(pvRecordField.getFullName() + " PVReplaceFactory: factory " + factoryName + " not found", MessageType.error);
                 break;
             }
-            
-            if(replace(pvRecord,pvField,factory)) {
-System.out.printf("record %s after replace check Valid %b%n",pvRecord.getRecordName(),pvRecord.checkValid());
-System.out.println("replace");
-System.out.printf("record %s field %s%n",pvRecord.getRecordName(),pvRecordField.getFullName());
+            if(!replace(pvRecord,pvField,factory)) {
+                pvField.message(pvRecordField.getFullName() + " PVReplaceFactory: replace failed", MessageType.error);
             }
             break;
         }

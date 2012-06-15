@@ -31,7 +31,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
@@ -44,7 +44,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
         <scalar name = "request">value,alarm</scalar>
     </structure>
@@ -55,7 +55,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">byteArray${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request">value,alarm</scalar>
@@ -71,7 +71,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
@@ -84,7 +84,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
         <scalar name = "request">value,alarm</scalar>
     </structure>
@@ -95,7 +95,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">shortArray${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request">value,alarm</scalar>
@@ -111,7 +111,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
@@ -124,7 +124,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
         <scalar name = "request">value,alarm</scalar>
     </structure>
@@ -135,7 +135,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">intArray${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request">value,alarm</scalar>
@@ -151,7 +151,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
@@ -164,7 +164,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
         <scalar name = "request">value,alarm</scalar>
     </structure>
@@ -175,7 +175,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
      <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">floatArray${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request">value,alarm</scalar>
@@ -191,7 +191,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
@@ -204,7 +204,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
         <scalar name = "request">value,alarm</scalar>
     </structure>
@@ -215,7 +215,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">doubleArray${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request">value,alarm</scalar>
@@ -231,7 +231,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
     </structure>
     <structure name = "process" extends = "caProcessLink">
@@ -244,7 +244,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
         <scalar name = "request">value,alarm</scalar>
     </structure>
@@ -255,7 +255,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">caV3</scalar>
+        <scalar name = "providerName">pvAccess</scalar>
         <scalar name = "pvname">stringArray${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request">value,alarm</scalar>

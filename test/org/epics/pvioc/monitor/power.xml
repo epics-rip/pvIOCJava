@@ -1,6 +1,13 @@
 <?xml version="1.0" ?>
 <database>
 <import name = "org.epics.pvioc.*" />
+
+<record recordName = "simple">
+    <scalar name = "value" scalarType = "byte" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+</record>
+
 <record recordName = "powerWithoutDeadband">
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />

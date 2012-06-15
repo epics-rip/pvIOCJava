@@ -390,9 +390,12 @@ public class PVDatabaseFactory {
             }
             rwLock.readLock().lock();
             try {
-                Set<String> keys = structureMap.keySet();
-                for(String key: keys) {
-                    if(pattern.matcher(key).matches()) {
+                Set<Map.Entry<String,PVStructure>> recordSet = structureMap.entrySet();
+                Iterator<Map.Entry<String,PVStructure>> iter = recordSet.iterator();
+                while(iter.hasNext()) {
+                    Map.Entry<String,PVStructure> entry = iter.next();
+                    String name = entry.getKey();
+                    if(pattern.matcher(name).matches()) {
                         list.add(name);
                     }
                 }

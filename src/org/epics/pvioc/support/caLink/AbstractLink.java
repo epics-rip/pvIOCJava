@@ -191,7 +191,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
     public void message(String message,MessageType messageType) {
         pvRecord.lock();
         try {
-            pvStructure.message(message, messageType);
+            pvStructure.message(pvRecordField.getFullName() + " " + message, messageType);
         } finally {
             pvRecord.unlock();
         }

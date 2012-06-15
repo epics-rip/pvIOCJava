@@ -133,4 +133,17 @@ abstract class AbstractLink extends AbstractSupport {
         linkRecordProcess = linkPVRecord.getRecordProcess();
         super.start(afterStart);
     }
+    /* (non-Javadoc)
+     * @see org.epics.pvioc.support.AbstractSupport#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+     */
+    @Override
+    public void message(String message,MessageType messageType) {
+        pvRecord.lock();
+        try {
+            pvDatabaseLink.message(pvRecordField.getFullName() + " " + message, messageType);
+        } finally {
+            pvRecord.unlock();
+        }
+    }
+
 }
