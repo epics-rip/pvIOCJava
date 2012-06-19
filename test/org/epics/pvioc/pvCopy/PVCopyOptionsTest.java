@@ -8,13 +8,10 @@ package org.epics.pvioc.pvCopy;
 import junit.framework.TestCase;
 
 import org.epics.pvaccess.client.CreateRequestFactory;
-import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.pv.MessageType;
-import org.epics.pvdata.pv.PVDouble;
-import org.epics.pvdata.pv.PVInt;
-import org.epics.pvdata.pv.PVLong;
+import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.Requester;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;

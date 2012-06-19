@@ -7,7 +7,7 @@ package org.epics.pvioc.database;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.epics.pvdata.factory.*;
+import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.misc.LinkedList;
 import org.epics.pvdata.misc.LinkedListCreate;
 import org.epics.pvdata.misc.LinkedListNode;

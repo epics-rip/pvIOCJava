@@ -7,24 +7,31 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.*;
+import org.epics.pvaccess.client.CreateRequestFactory;
 import org.epics.pvdata.factory.ConvertFactory;
-import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.misc.BitSetUtil;
 import org.epics.pvdata.misc.BitSetUtilFactory;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.Convert;
+import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVArray;
+import org.epics.pvdata.pv.PVDataCreate;
+import org.epics.pvdata.pv.PVDouble;
+import org.epics.pvdata.pv.PVDoubleArray;
+import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVInt;
+import org.epics.pvdata.pv.PVLong;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.database.PVRecordField;
 import org.epics.pvioc.database.PVRecordStructure;
 import org.epics.pvioc.database.PVReplaceFactory;
-import org.epics.pvioc.pvCopy.PVCopy;
-import org.epics.pvioc.pvCopy.PVCopyFactory;
-import org.epics.pvioc.pvCopy.PVCopyMonitor;
-import org.epics.pvioc.pvCopy.PVCopyMonitorRequester;
 import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
 
 
@@ -107,18 +114,35 @@ public class PVCopyTest extends TestCase {
         BitSet bitSet = null;
         pvRecord = master.findRecord("powerSupply");
         assertTrue(pvRecord!=null);
+        PVStructure pvTop = pvRecord.getPVRecordStructure().getPVStructure();
+        PVStructure pvTimeStamp = pvTop.getStructureField("timeStamp");
+        PVLong pvRecordSeconds = (PVLong)pvTop.getSubField("timeStamp.secondsPastEpoch");
+        PVInt pvRecordNanoSeconds = (PVInt)pvTop.getSubField("timeStamp.nanoSeconds");
+        PVInt pvRecordUserTag = (PVInt)pvTop.getSubField("timeStamp.userTag");
         
         request = "timeStamp[causeMonitor=true]";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
         assertTrue(pvRequest!=null);
-System.out.println("pvRequest " + pvRequest);
+//System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         assertTrue(pvCopy!=null);
-System.out.println(pvCopy.dump());
+//System.out.println(pvCopy.dump());
         pvCopyStructure = pvCopy.createPVStructure();
-System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
+//System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        int offsetRecord = pvCopy.getCopyOffset(pvRecord.findPVRecordField(pvTimeStamp));
+        int offCopy = pvCopyStructure.getSubField("timeStamp").getFieldOffset();
+        assert(offsetRecord==offCopy);
+        offsetRecord = pvCopy.getCopyOffset(pvRecord.findPVRecordField(pvRecordSeconds));
+        offCopy = pvCopyStructure.getSubField("timeStamp.secondsPastEpoch").getFieldOffset();
+        assert(offsetRecord==offCopy);
+        offsetRecord = pvCopy.getCopyOffset(pvRecord.findPVRecordField(pvRecordNanoSeconds));
+        offCopy = pvCopyStructure.getSubField("timeStamp.nanoSeconds").getFieldOffset();
+        assert(offsetRecord==offCopy);
+        offsetRecord = pvCopy.getCopyOffset(pvRecord.findPVRecordField(pvRecordUserTag));
+        offCopy = pvCopyStructure.getSubField("timeStamp.userTag").getFieldOffset();
+        assert(offsetRecord==offCopy);
     }
     
     public static void exampleTest() {

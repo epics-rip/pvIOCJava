@@ -12,7 +12,8 @@ import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.monitor.Monitor;
 import org.epics.pvdata.monitor.MonitorElement;
 import org.epics.pvdata.monitor.MonitorRequester;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVByte;
 import org.epics.pvdata.pv.PVDouble;
 import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVLong;
@@ -24,7 +25,6 @@ import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.database.PVReplaceFactory;
-import org.epics.pvioc.monitor.MonitorFactory;
 import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
 
 

@@ -7,24 +7,23 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.*;
 import org.epics.pvdata.factory.ConvertFactory;
-import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.factory.PVDataFactory;
-import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.misc.BitSetUtil;
 import org.epics.pvdata.misc.BitSetUtilFactory;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.Convert;
+import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVDataCreate;
+import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.database.PVRecordField;
 import org.epics.pvioc.database.PVRecordStructure;
 import org.epics.pvioc.database.PVReplaceFactory;
-import org.epics.pvioc.pvCopy.PVCopy;
-import org.epics.pvioc.pvCopy.PVCopyFactory;
-import org.epics.pvioc.pvCopy.PVCopyMonitor;
-import org.epics.pvioc.pvCopy.PVCopyMonitorRequester;
 import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
 
 

@@ -17,10 +17,10 @@ package org.epics.pvioc.channelAccess;
 import junit.framework.TestCase;
 
 import org.epics.pvaccess.client.Channel;
+import org.epics.pvaccess.client.Channel.ConnectionState;
 import org.epics.pvaccess.client.ChannelAccessFactory;
 import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.client.ChannelRequester;
-import org.epics.pvaccess.client.Channel.ConnectionState;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.Requester;
 import org.epics.pvdata.pv.Status;

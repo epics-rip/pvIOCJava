@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.pvaccess.client.AccessRights;
 import org.epics.pvaccess.client.Channel;
+import org.epics.pvaccess.client.Channel.ConnectionState;
 import org.epics.pvaccess.client.ChannelAccessFactory;
 import org.epics.pvaccess.client.ChannelArray;
 import org.epics.pvaccess.client.ChannelArrayRequester;
@@ -30,7 +31,6 @@ import org.epics.pvaccess.client.ChannelRPC;
 import org.epics.pvaccess.client.ChannelRPCRequester;
 import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvaccess.client.GetFieldRequester;
-import org.epics.pvaccess.client.Channel.ConnectionState;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.factory.StatusFactory;

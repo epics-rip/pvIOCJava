@@ -7,7 +7,13 @@ package org.epics.pvioc.support.pdrv.scalar;
 
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVDouble;
+import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVScalar;
+import org.epics.pvdata.pv.PVString;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVRecordStructure;
 import org.epics.pvioc.install.AfterStart;
 import org.epics.pvioc.pdrv.Status;

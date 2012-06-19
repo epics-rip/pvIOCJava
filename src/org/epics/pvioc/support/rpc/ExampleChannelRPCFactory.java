@@ -12,7 +12,6 @@ import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.factory.StatusFactory;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVDataCreate;
-import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;

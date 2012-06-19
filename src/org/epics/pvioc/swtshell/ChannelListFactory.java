@@ -20,20 +20,33 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.pvaccess.client.Channel;
+import org.epics.pvaccess.client.Channel.ConnectionState;
 import org.epics.pvaccess.client.ChannelAccess;
 import org.epics.pvaccess.client.ChannelAccessFactory;
 import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.client.ChannelPutGet;
 import org.epics.pvaccess.client.ChannelPutGetRequester;
 import org.epics.pvaccess.client.ChannelRequester;
-import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvdata.factory.*;
+import org.epics.pvdata.factory.FieldFactory;
+import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.Executor;
 import org.epics.pvdata.misc.ExecutorNode;
 import org.epics.pvdata.misc.ThreadPriority;
 import org.epics.pvdata.misc.Timer;
 import org.epics.pvdata.misc.TimerFactory;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.Field;
+import org.epics.pvdata.pv.FieldCreate;
+import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVArray;
+import org.epics.pvdata.pv.PVDataCreate;
+import org.epics.pvdata.pv.PVString;
+import org.epics.pvdata.pv.PVStringArray;
+import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.Status;
+import org.epics.pvdata.pv.StringArrayData;
+import org.epics.pvdata.pv.Structure;
 
 
 /**

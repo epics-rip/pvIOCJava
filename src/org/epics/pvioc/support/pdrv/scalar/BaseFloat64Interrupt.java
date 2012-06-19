@@ -11,7 +11,6 @@ import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVScalar;
 import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVRecordStructure;
 import org.epics.pvioc.install.AfterStart;

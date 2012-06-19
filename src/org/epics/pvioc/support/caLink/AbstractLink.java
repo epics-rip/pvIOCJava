@@ -6,11 +6,11 @@
 package org.epics.pvioc.support.caLink;
 
 import org.epics.pvaccess.client.Channel;
+import org.epics.pvaccess.client.Channel.ConnectionState;
 import org.epics.pvaccess.client.ChannelAccess;
 import org.epics.pvaccess.client.ChannelAccessFactory;
 import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.client.ChannelRequester;
-import org.epics.pvaccess.client.Channel.ConnectionState;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.ThreadPriority;
 import org.epics.pvdata.pv.MessageType;

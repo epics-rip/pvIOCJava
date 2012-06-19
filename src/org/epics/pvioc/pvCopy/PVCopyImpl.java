@@ -6,7 +6,6 @@
 package org.epics.pvioc.pvCopy;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.factory.FieldFactory;
@@ -179,7 +178,20 @@ class PVCopyImpl {
         @Override
         public int getCopyOffset(PVRecordField recordPVField) {
             if(!headNode.isStructure) {
-                return headNode.structureOffset;
+                RecordNode recordNode = (RecordNode)headNode;
+                PVRecordField xxx = recordNode.recordPVField;
+                if(xxx.getPVField().getField().getType()==Type.structure) {
+                    PVRecordStructure pvRecordStructure = (PVRecordStructure)xxx;
+                    PVStructure pvStructure = pvRecordStructure.getPVStructure();
+                    int offset = pvStructure.getFieldOffset();
+                    int nextOffset = pvStructure.getNextFieldOffset();
+                    int off = recordPVField.getPVField().getFieldOffset();
+                    if(off<offset||off>=nextOffset) return -1;
+                    return headNode.structureOffset +(off-offset);
+                } else if(xxx.getPVField().getFieldOffset()==recordPVField.getPVField().getFieldOffset()) {
+                    return headNode.structureOffset;
+                }
+                return -1;
             }
             RecordNode recordNode = getCopyOffset((StructureNode)headNode,recordPVField);
             if(recordNode!=null) {
