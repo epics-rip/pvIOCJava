@@ -49,4 +49,31 @@
     </structure>
 </record>
 
+<record recordName = "monitorCounter">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
+    <structure name = "input" extends = "calculation" >
+      <structure name = "calculator">
+        <scalar name ="expression">(value+1)&lt;=20.0 ? value+1 : 0.0</scalar>
+      </structure>
+    </structure>
+    <structure name = "valueAlarm" extends = "doubleAlarm">
+        <scalar name = "active">true</scalar>
+        <scalar name = "lowAlarmLimit">2</scalar>
+        <scalar name = "lowAlarmSeverity">2</scalar>
+        <scalar name = "lowWarningLimit">4</scalar>
+        <scalar name = "lowWarningSeverity">1</scalar>
+        <scalar name = "highWarningLimit">8</scalar>
+        <scalar name = "highWarningSeverity">1</scalar>
+        <scalar name = "highAlarmLimit">10</scalar>
+        <scalar name = "highAlarmSeverity">2</scalar>
+        <scalar name = "hystersis">0.1</scalar>
+    </structure> 
+</record>
+
 </database>

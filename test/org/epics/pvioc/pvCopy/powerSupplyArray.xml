@@ -11,6 +11,7 @@
 		        <scalar name = "value" scalarType = "double" />
 		        <structure name = "alarm" extends = "alarm" />
 		        <structure name = "display" extends = "display" />
+		        <structure name = "control" extends = "control" />
 		        <structure name = "input">
 		            <scalar name = "value" scalarType = "double" />
 		            <structure name = "linearConvert">
