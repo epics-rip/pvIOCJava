@@ -12,6 +12,22 @@
        <scalar name = "value" scalarType = "double">
          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.powerSupplyFactory</auxInfo>
        </scalar>
+       <structure name = "display" extends = "display" >
+          <scalar name = "units">current</scalar>
+          <scalar name = "limitLow">-10</scalar>
+          <scalar name = "limitHigh">10</scalar>
+       </structure>
+       <structure name = "valueAlarm" extends = "doubleAlarm">
+          <scalar name = "active">true</scalar>
+          <scalar name = "lowAlarmLimit">-8</scalar>
+          <scalar name = "lowAlarmSeverity">2</scalar>
+          <scalar name = "lowWarningLimit">-4</scalar>
+          <scalar name = "lowWarningSeverity">1</scalar>
+          <scalar name = "highWarningLimit">8</scalar>
+          <scalar name = "highWarningSeverity">1</scalar>
+          <scalar name = "highAlarmLimit">8</scalar>
+          <scalar name = "highAlarmSeverity">2</scalar>
+       </structure> 
     </structure>
      <structure name = "power">
       <scalar name = "value" scalarType = "double">10.0</scalar>

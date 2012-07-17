@@ -213,11 +213,16 @@ public class ServerFactory {
                 }
             }
             if(fieldName==null || fieldName.length()<=0 || fieldName.equals("VAL")) fieldName = "value";
+            boolean valueOnly = (fieldName.equals("value") ? true : false);
+            if(!valueOnly && fieldName.endsWith("value")) {
+                int index =fieldName.indexOf("value");
+                fieldName = fieldName.substring(0,index-1);
+            }
             PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField(fieldName);
             if(pvField==null) {
                 throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + fieldName);
             }
-            return new ChannelProcessVariable(aliasName,pvRecord,pvField,options, eventCallback);
+            return new ChannelProcessVariable(aliasName,pvRecord,pvField,fieldName,options, eventCallback);
         }
 
         /* (non-Javadoc)
@@ -290,7 +295,7 @@ public class ServerFactory {
          * @param eventCallback event callback, can be <code>null</code>.
          */
         public ChannelProcessVariable(
-                String aliasName,PVRecord pvRecord,PVField valuePV,
+                String aliasName,PVRecord pvRecord,PVField valuePV,String fieldName,
                 String options, ProcessVariableEventCallback eventCallback)
                 throws CAStatusException, IllegalArgumentException, IllegalStateException
         {
@@ -310,17 +315,10 @@ public class ServerFactory {
             	if(shareData) request += "shareData=true";
             	request += "]";
             }
-            request += "field(value";
-            PVField pvTemp= pvProperty.findProperty(valuePV, "alarm");
-            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "alarm");
-            if(pvTemp!=null) {
-                request+= ",alarm";
-            }
-            pvTemp= pvProperty.findProperty(valuePV, "timeStamp");
-            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "timeStamp");
-            if(pvTemp!=null) {
-                request += ",timeStamp";
-            }
+            boolean valueOnly = (fieldName.equals("value") ? true : false);
+            request += "field(" + fieldName;
+            if(!valueOnly) request += "{value";
+            PVField pvTemp = null;
             pvTemp= pvProperty.findProperty(valuePV, "display");
             if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "display");
             if(pvTemp!=null) {
@@ -336,6 +334,17 @@ public class ServerFactory {
             if(pvTemp!=null) {
                 request += ",valueAlarm";
             }
+            if(!valueOnly) request += '}';
+            pvTemp= pvProperty.findProperty(valuePV, "alarm");
+            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "alarm");
+            if(pvTemp!=null) {
+                request+= ",alarm";
+            }
+            pvTemp= pvProperty.findProperty(valuePV, "timeStamp");
+            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "timeStamp");
+            if(pvTemp!=null) {
+                request += ",timeStamp";
+            }
             request += ")";
             PVStructure pvRequest = CreateRequestFactory.createRequest(request,this);
             pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
@@ -344,6 +353,9 @@ public class ServerFactory {
             copyBitSet.set(0);
             pvCopy.updateCopyFromBitSet(pvCopyStructure, copyBitSet, true);
             valuePVField = pvCopyStructure.getSubField("value");
+            if(valuePVField==null) {
+                throw new CAStatusException(CAStatus.DEFUNCT, "illegal request. Could not create value field");
+            }
             initializeChannelDBRType();
             
             if(process) {
@@ -456,6 +468,7 @@ public class ServerFactory {
          */
         public CAStatus write(DBR dbr, ProcessVariableWriteCallback asyncWriteCallback) throws CAException {
         	if(isDestroyed) return CAStatus.CHANDESTROY;
+        	this.dbr = dbr;
             if(process) {
                 boolean ok = true;
                 synchronized(this) {

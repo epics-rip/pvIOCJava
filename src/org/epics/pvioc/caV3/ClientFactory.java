@@ -32,7 +32,7 @@ public class ClientFactory  {
     public static void start() {
         AfterStartDelay afterStartDelay = new AfterStartDelay();
         afterStartDelay.start();
-        org.epics.pvaccess.ClientFactory.start();
+        org.epics.caV3.ClientFactory.start();
     }
     
     // afterStartDelay ensures that no run method gets called until after 2 seconds after
