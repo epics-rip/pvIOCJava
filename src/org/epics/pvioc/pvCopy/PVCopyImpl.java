@@ -800,8 +800,10 @@ class PVCopyImpl {
         
         private void updateStructureNodeFromBitSet(PVStructure pvCopy,StructureNode structureNode,BitSet bitSet,boolean toCopy,boolean doAll) {
             int offset = structureNode.structureOffset;
-            int nextSet = bitSet.nextSetBit(offset);
-            if(nextSet==-1) return;
+            if(!doAll) {
+                int nextSet = bitSet.nextSetBit(offset);
+                if(nextSet==-1) return;
+            }
             if(offset>=pvCopy.getNextFieldOffset()) return;
             if(!doAll) doAll = bitSet.get(offset);
             Node[] nodes = structureNode.nodes;

@@ -112,9 +112,6 @@ public class ServerFactory {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final ThreadCreate threadCreate = ThreadCreateFactory.getThreadCreate();
     private static final Pattern periodPattern = Pattern.compile("[.]");
-    private static final Pattern leftBracePattern = Pattern.compile("[{]");
-    private static final Pattern rightBracePattern = Pattern.compile("[}]");
-    private static final PVProperty pvProperty = PVPropertyFactory.getPVProperty();
   
     private static class ThreadInstance implements RunnableReady {
 
@@ -195,7 +192,6 @@ public class ServerFactory {
         throws CAStatusException, IllegalArgumentException,IllegalStateException
         {
             String recordName = null;
-            String fieldName = null;
             String options = null;
             String[] names = periodPattern.split(aliasName,2);
             recordName = names[0];
@@ -204,25 +200,11 @@ public class ServerFactory {
                 throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find record " + recordName);
             }
             if(names.length==2) {
-                names = leftBracePattern.split(names[1], 2);
-                fieldName = names[0];
-                if(fieldName.length()==0) fieldName = null;
-                if(names.length==2) {
-                    names = rightBracePattern.split(names[1], 2);
-                    options = names[0];
-                }
+                options = names[1];
+            } else {
+                options = "field(value)";
             }
-            if(fieldName==null || fieldName.length()<=0 || fieldName.equals("VAL")) fieldName = "value";
-            boolean valueOnly = (fieldName.equals("value") ? true : false);
-            if(!valueOnly && fieldName.endsWith("value")) {
-                int index =fieldName.indexOf("value");
-                fieldName = fieldName.substring(0,index-1);
-            }
-            PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField(fieldName);
-            if(pvField==null) {
-                throw new CAStatusException(CAStatus.DEFUNCT, "Failed to find field " + fieldName);
-            }
-            return new ChannelProcessVariable(aliasName,pvRecord,pvField,fieldName,options, eventCallback);
+            return new ChannelProcessVariable(aliasName,pvRecord,options, eventCallback);
         }
 
         /* (non-Javadoc)
@@ -255,8 +237,8 @@ public class ServerFactory {
         private DBRType dbrType;
         private Type type;
         private ScalarType scalarType = null;
-        private String options = null;
         private PVField valuePVField = null;
+        private PVStructure valuePVStructure = null;
         private PVScalarArray valuePVArray = null;
         private PVScalar valuePVScalar = null;
         private PVInt valueIndexPV = null;
@@ -295,69 +277,45 @@ public class ServerFactory {
          * @param eventCallback event callback, can be <code>null</code>.
          */
         public ChannelProcessVariable(
-                String aliasName,PVRecord pvRecord,PVField valuePV,String fieldName,
-                String options, ProcessVariableEventCallback eventCallback)
+                String aliasName,
+                PVRecord pvRecord,
+                String options,
+                ProcessVariableEventCallback eventCallback)
                 throws CAStatusException, IllegalArgumentException, IllegalStateException
         {
             super(aliasName, eventCallback);
             this.pvRecord = pvRecord;
-            this.options = options;
             this.eventCallback = eventCallback;
-            String option = getOption("shareData");
-            boolean shareData = Boolean.getBoolean(option);
-            option = getOption("process");
-            if(option!=null) process = Boolean.valueOf(option);
-            String request = "";
-            if(shareData||process) {
-            	request = "record[";
-            	if(process) request += "process=true";
-            	if(process&&shareData) request += ",";
-            	if(shareData) request += "shareData=true";
-            	request += "]";
+            String opt = getOption(options,"process");
+            if(opt!=null) process = Boolean.valueOf(opt);
+            String request = null;
+            int ind = options.indexOf("field(");
+            if(ind>=0) {
+                request = options.substring(ind);
+            } else {
+                request = "field(" + options + ")";
             }
-            boolean valueOnly = (fieldName.equals("value") ? true : false);
-            request += "field(" + fieldName;
-            if(!valueOnly) request += "{value";
-            PVField pvTemp = null;
-            pvTemp= pvProperty.findProperty(valuePV, "display");
-            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "display");
-            if(pvTemp!=null) {
-                request += ",display";
-            }
-            pvTemp= pvProperty.findProperty(valuePV, "control");
-            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "control");
-            if(pvTemp!=null) {
-                request += ",control";
-            }
-            pvTemp= pvProperty.findProperty(valuePV, "valueAlarm");
-            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "valueAlarm");
-            if(pvTemp!=null) {
-                request += ",valueAlarm";
-            }
-            if(!valueOnly) request += '}';
-            pvTemp= pvProperty.findProperty(valuePV, "alarm");
-            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "alarm");
-            if(pvTemp!=null) {
-                request+= ",alarm";
-            }
-            pvTemp= pvProperty.findProperty(valuePV, "timeStamp");
-            if(pvTemp==null) pvTemp = pvProperty.findPropertyViaParent(valuePV, "timeStamp");
-            if(pvTemp!=null) {
-                request += ",timeStamp";
-            }
-            request += ")";
             PVStructure pvRequest = CreateRequestFactory.createRequest(request,this);
             pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
+            if(pvCopy==null) {
+                throw new CAStatusException(CAStatus.DEFUNCT, "illegal request. Could not create pvCopy");
+            }
             pvCopyStructure = pvCopy.createPVStructure();
             copyBitSet = new BitSet(pvCopyStructure.getNumberFields());
             copyBitSet.set(0);
             pvCopy.updateCopyFromBitSet(pvCopyStructure, copyBitSet, true);
-            valuePVField = pvCopyStructure.getSubField("value");
-            if(valuePVField==null) {
-                throw new CAStatusException(CAStatus.DEFUNCT, "illegal request. Could not create value field");
+            PVField[] pvFields = pvCopyStructure.getPVFields();
+            for(int i=0; i<pvFields.length; i++) {
+                PVField pvField = pvFields[i];
+                if(pvField.getFieldName().equals("alarm")) continue;
+                if(pvField.getFieldName().equals("timeStamp")) continue;
+                valuePVField = pvField;
+                break;
             }
-            initializeChannelDBRType();
-            
+            if(valuePVField==null) {
+                throw new CAStatusException(CAStatus.DEFUNCT, "illegal request. No value field");
+            }
+            initializeChannelDBRType();            
             if(process) {
                 recordProcess = pvRecord.getRecordProcess();
                 processToken = recordProcess.requestProcessToken(this);
@@ -460,7 +418,7 @@ public class ServerFactory {
                 return CAStatus.NORMAL;
             }
             pvCopy.initCopy(pvCopyStructure, copyBitSet, true);
-            getData(dbr,pvCopyStructure);
+            getData(dbr);
             return CAStatus.NORMAL;
         }
         /* (non-Javadoc)
@@ -512,7 +470,7 @@ public class ServerFactory {
         public void recordProcessComplete() {
             if(getProcessActive) {
             	pvCopy.initCopy(pvCopyStructure, copyBitSet, true);
-                getData(dbr,pvCopyStructure);
+                getData(dbr);
                 dbr = null;
                 getProcessActive = false;
                 recordProcess.setInactive(processToken);
@@ -650,6 +608,20 @@ public class ServerFactory {
          * @throws CAStatusException
          */
         private void initializeChannelDBRType() throws CAStatusException {
+            if(valuePVField.getField().getType()==Type.structure) {
+                valuePVStructure = (PVStructure)valuePVField;
+                // look for enumerated structure
+                if(valuePVStructure.getSubField("index")==null || valuePVStructure.getSubField("choices")==null) {
+                    valuePVField = valuePVStructure.getSubField("value");
+                    if(valuePVField==null) {
+                        throw new CAStatusException(CAStatus.DEFUNCT, "illegal value");
+                    }
+                } else {
+                    valuePVStructure = pvCopyStructure;
+                }
+            } else {
+                valuePVStructure = pvCopyStructure;
+            }
             Field field = valuePVField.getField();
             type = field.getType();
             if(type==Type.scalar) {
@@ -685,7 +657,7 @@ public class ServerFactory {
                     return;
                 }
             }
-            throw new RuntimeException("unsupported type");
+            throw new CAStatusException(CAStatus.DEFUNCT, "illegal value type");
         }
 
         /**
@@ -716,33 +688,63 @@ public class ServerFactory {
             }
         }
 
-        private String getOption(String option) {
-            if(options==null) return null;
-            int start = options.indexOf(option);
+        private String getOption(String request,String option) {
+            int start = request.indexOf("[" +option);
             if(start<0) return null;
-            String rest = options.substring(start + option.length());
-            if(rest==null || rest.length()<1 || rest.charAt(0)!='=') {
-                message("getOption bad option " + rest,MessageType.error);
+            request = request.substring(start+1);
+            int end = request.indexOf(']');
+            if(end<0) {
+                message("getOption bad option " + request,MessageType.error);
                 return null;
             }
-            rest = rest.substring(1);
-            return rest;
+            request = request.substring(0, end);
+            int eq = request.indexOf('=');
+            if(eq<0) {
+                message("getOption bad option " + request,MessageType.error);
+                return null;
+            }
+            request = request.substring(eq+1);
+            return request;
         }
 
-        private void getData(DBR dbr, PVStructure pvStructure) {
-            PVField[] pvFields = pvStructure.getPVFields();
-            String[] fieldNames = pvStructure.getStructure().getFieldNames();
+        private void getData(DBR dbr) {
+            PVField[] pvFields = pvCopyStructure.getPVFields();
+            String[] fieldNames = pvCopyStructure.getStructure().getFieldNames();
+            getValueField(dbr,valuePVField);
             for(int i=0; i<pvFields.length; i++) {
                 PVField pvField = pvFields[i];
-                if(fieldNames[i].equals("value")) {
-                    getValueField(dbr,pvField);
-                } else if(fieldNames[i].equals("timeStamp")) {
+                if(fieldNames[i].equals("timeStamp")) {
                     getTimeStampField(dbr,(PVStructure)pvField);
                 } else if(fieldNames[i].equals("alarm")) {
                     getAlarmField(dbr,(PVStructure)pvField);
                 }
             }
             getExtraInfo(dbr);
+        }
+        
+        private void getData(DBR dbr,PVStructure pvStructure) {
+            PVField[] pvFields = pvStructure.getPVFields();
+            String[] fieldNames = pvStructure.getStructure().getFieldNames();
+            for(int i=0; i<pvFields.length; i++) {
+                PVField pvField = pvFields[i];
+                if(fieldNames[i].equals("timeStamp")) {
+                    getTimeStampField(dbr,(PVStructure)pvField);
+                } else if(fieldNames[i].equals("alarm")) {
+                    getAlarmField(dbr,(PVStructure)pvField);
+                } else {
+                    if(pvField.getField().getType()!=Type.structure) {
+                        getValueField(dbr,pvField);
+                    } else {
+                        PVStructure xxx = (PVStructure)pvField;
+                        pvField = xxx.getSubField("value");
+                        if(pvField==null) {
+                            pvStructure.message("value field not found", MessageType.error);  
+                        } else {
+                            getValueField(dbr,pvField);
+                        }
+                    }
+                }
+            }
         }
         
         private void getValueField(DBR dbr, PVField pvField) {
@@ -764,14 +766,14 @@ public class ServerFactory {
                             PVBoolean pvBoolean = (PVBoolean)pvField;
                             value[0] = (short)((pvBoolean.get()) ? 1 : 0);
                         } else {
-                            valuePVField.message("illegal enum", MessageType.error);
+                            pvField.message("illegal enum", MessageType.error);
                         }
                     } else {
                         if (valueIndex!=-1) {
                             PVInt pvInt = (PVInt)((PVStructure)pvField).getSubField(valueIndex);
                             value[0] = (short) pvInt.get();
                         } else {
-                            valuePVField.message("illegal enum", MessageType.error);
+                            pvField.message("illegal enum", MessageType.error);
                         }
                     }
                 } else if (dbrType == DBRType.BYTE) {
@@ -805,7 +807,7 @@ public class ServerFactory {
                         boolean[] bools = data.data;
                         System.arraycopy(bools, 0, value, 0, count);
                     } else {
-                        valuePVField.message("illegal enum", MessageType.error);
+                        pvField.message("illegal enum", MessageType.error);
                     }
                 } else if (dbrType == DBRType.BYTE) {
                     byte[] value = ((BYTE) dbr).getByteValue();
@@ -813,7 +815,7 @@ public class ServerFactory {
                 }
             }
         }
-        
+
         
         private void getTimeStampField(DBR dbr,PVStructure field) {
             pvTimeStamp.attach(field);
@@ -943,8 +945,8 @@ public class ServerFactory {
             if (dbr instanceof GR) {
             	final GR gr = (GR)dbr;
             	PVStructure pvDisplay = null;
-            	if(pvCopyStructure.getSubField("display")!=null) {
-            		pvDisplay = pvCopyStructure.getStructureField("display");
+            	if(valuePVStructure.getSubField("display")!=null) {
+            		pvDisplay = valuePVStructure.getStructureField("display");
             	}
                 if(pvDisplay!=null) {
                     PVString unitsField = pvDisplay.getStringField("units");
@@ -954,10 +956,7 @@ public class ServerFactory {
                     {
                         // default;
                         short precision = (short)6;
-                        PVInt pvInt = pvDisplay.getIntField("resolution");
-                        if(pvInt!=null) {
-                            precision = (short)pvInt.get();
-                        }   
+                        // display has no precision field
                         // set precision
                         ((PRECISION)dbr).setPrecision(precision);
                     }
@@ -969,8 +968,8 @@ public class ServerFactory {
                     gr.setUpperDispLimit(highField.get());
                 }
                 PVStructure pvValueAlarm = null;
-            	if(pvCopyStructure.getSubField("valueAlarm")!=null) {
-            		pvValueAlarm = pvCopyStructure.getStructureField("valueAlarm");
+            	if(valuePVStructure.getSubField("valueAlarm")!=null) {
+            		pvValueAlarm = valuePVStructure.getStructureField("valueAlarm");
             	}
                 if(pvValueAlarm!=null) {
                 	double lowAlarmLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("lowAlarmLimit"));
@@ -985,8 +984,8 @@ public class ServerFactory {
             }
             if (dbr instanceof CTRL) {
             	PVStructure pvControl = null;
-            	if(pvCopyStructure.getSubField("control")!=null) {
-            		pvControl = pvCopyStructure.getStructureField("control");
+            	if(valuePVStructure.getSubField("control")!=null) {
+            		pvControl = valuePVStructure.getStructureField("control");
             	}
             	if(pvControl!=null) {
             		final CTRL ctrl = (CTRL)dbr;
@@ -997,8 +996,8 @@ public class ServerFactory {
             		PVDouble highField = pvControl.getDoubleField("limitHigh");
             		ctrl.setUpperCtrlLimit(highField.get());
             		PVStructure pvValueAlarm = null;
-                	if(pvCopyStructure.getSubField("valueAlarm")!=null) {
-                		pvValueAlarm = pvCopyStructure.getStructureField("valueAlarm");
+                	if(valuePVStructure.getSubField("valueAlarm")!=null) {
+                		pvValueAlarm = valuePVStructure.getStructureField("valueAlarm");
                 	}
             		if(pvValueAlarm!=null) {
                     	double lowAlarmLimit = convert.toDouble((PVScalar)pvValueAlarm.getSubField("lowAlarmLimit"));
