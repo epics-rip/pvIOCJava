@@ -6,6 +6,22 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <scalar name = "value">1000</scalar>
+    <structure name = "input" extends = "calculation" >
+       <structure name = "calcArgs">
+          <structure name = "min">
+            <scalar name = "value" scalarType = "int" >0</scalar>
+          </structure>
+          <structure name = "max">
+            <scalar name = "value" scalarType = "int" >4095</scalar>
+          </structure>
+          <structure name = "inc">
+            <scalar name = "value" scalarType = "int" >100</scalar>
+          </structure>
+       </structure>
+       <structure name = "calculator">
+         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
+       </structure>
+    </structure>
 </record>
 
 <record recordName = "voltage">
@@ -22,6 +38,7 @@
         </structure>
         <structure name = "input" extends = "caInputLink">
             <scalar name = "pvname">adcVoltageSupported</scalar>
+            <scalar name = "request">record[process=true]</scalar>
         </structure>
     </structure>  
 </record>
@@ -31,6 +48,10 @@
 <record recordName = "psLinked" >
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "scan" extends = "scan">
+        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <scalar name = "rate">1.0</scalar>
+    </structure>
     <structure name = "voltage" extends = "generic">
         <scalar name = "value" scalarType = "double" />
         <structure name = "input" extends = "caInputLink">
