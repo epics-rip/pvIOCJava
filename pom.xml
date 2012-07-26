@@ -5,7 +5,7 @@
 
     <groupId>epics</groupId>
     <artifactId>pvIOC</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>pvIOC - Java</name>
@@ -38,12 +38,6 @@
             <groupId>org.eclipse.swt.win32.win32</groupId>
             <artifactId>x86</artifactId>
             <version>3.3.0-v3346</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>caj</artifactId>
-            <version>1.1.8</version>
             <optional>true</optional>
         </dependency>
         <dependency>

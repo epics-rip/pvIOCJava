@@ -10,5 +10,7 @@
 	<classpathentry kind="lib" path="jar/JCA.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/pvAccessJava"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/pvDataJava"/>
+	<classpathentry kind="lib" path="/Applications/Eclipse/plugins/org.eclipse.swt_3.6.0.v3650b.jar"/>
+	<classpathentry kind="lib" path="/Applications/Eclipse/plugins/org.eclipse.swt.cocoa.macosx.x86_64_3.6.0.v3650b.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
