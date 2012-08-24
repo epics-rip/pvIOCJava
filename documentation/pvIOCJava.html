@@ -4,65 +4,75 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-  <title>EPICS JavaIOC: Java Input/Output Controller</title>
+  <title>EPICS pvIOCJava</title>
   <link rel="stylesheet" type="text/css"
   href="http://epics-pvdata.sourceforge.net/base.css" />
   <link rel="stylesheet" type="text/css"
   href="http://epics-pvdata.sourceforge.net/epicsv4.css" />
   <style type="text/css">
-/*<![CDATA[*/
+  /*<![CDATA[*/
      .about { margin-left: 3em; margin-right: 3em; font-size: .83em}
      table { margin-left: auto; margin-right: auto }
      .diagram { text-align: center; margin: 2.5em 0 }
-     body { margin-right: 10% }
-/*]]>*/</style>
+     span.opt { color: grey }
+     span.nterm { font-style:italic }
+     span.term { font-family:courier }
+     span.user { font-family:courier }
+     span.user:before { content:"<" }
+     span.user:after { content:">" }
+     .nonnorm { font-style:italic }
+     p.ed { color: #AA0000 }
+     span.ed { color: #AA0000 }
+     p.ed.priv { display: inline; }
+     span.ed.priv { display: inline; }
+  /*]]>*/</style>
+  <!-- Script that generates the Table of Contents -->
+  <script type="text/javascript"
+  src="http://epics-pvdata.sourceforge.net/script/tocgen.js">
+  </script>
 </head>
+
 
 <body>
 
 <div class="head">
 <h1>EPICS pvIOCJava</h1>
-<!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date.  -->
+<!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date. -->
 
-<h2 class="nocount" id="L50">EPICS v4 Working Group, Working Draft,
-03-Feb-2012</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 24-Aug-2012</h2>
 <dl>
   <dt>This version:</dt>
     <dd><a
-      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCJava/raw-file/tip/documentation/pvIOCJava_20120203.html">pvIOCJava_20120203.html</a></dd>
-        <dt>Latest version:</dt>
+      href="http://epics-pvdata.sourceforge.net/pvIOCJava_20120814.html">pvIOCJava_20111220.html</a></dd>
+  <dt>Latest version:</dt>
     <dd><a
-      href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCJava/raw-file/tip/documentation/pvIOCJava.html">pvIOCJava.html</a></dd>
-  <dt>Previous version:</dt>
-    <dd>To be added</dd>
+      href="http://epics-pvdata.sourceforge.net/pvIOCJava_20120203.html">pvIOCJava_20111220.html</a></dd>
   <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
 </dl>
-<hr />
 </div>
 
-<h2 class="nocount" id="L72">Abstract</h2>
+<h2 class="nocount">Abstract</h2>
 
-<p>pvIOCJava is the Java implementation of a pvIOC, which is one of a related
-set of products:</p>
+<p>pvIOCJava is the CPP implementation of pvIOC, which is one of a related set
+of products:</p>
 <dl>
-  <dt><a
-  href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvDataJava/raw-file/tip/documentation/pvDataJava.html">pvData</a></dt>
-    <dd>pvData (Process Variable Daata) defines and implements an efficent way
+  <dt>pvData</dt>
+    <dd>pvData (Process Variable Data) defines and implements an efficent way
       to store, access, and transmit memory resident structured data</dd>
-  <dt><a
-  href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvAccessJava/raw-file/tip/documentation/pvAccessJava.html">pvAccess</a></dt>
+  <dt>pvAccess</dt>
     <dd>pvAccess is network support for transmitting pvData.</dd>
-  <dt><a
-  href="http://epics-pvdata.hg.sourceforge.net/hgweb/epics-pvdata/pvIOCJava/raw-file/tip/documentation/pvIOCJava.html">pvIOC</a></dt>
+  <dt>pvIOC</dt>
     <dd>A pvIOC is a network accessable smart real time database. The database
       consists of memory resident records. Each record has a name that is
-      uniquie within the local area network and contains a top level pvData
+      unique within the local area network and contains a top level pvData
       structure. Each field of a record can optionally have support code
       attached to it. The support is called when a request is made to process
       the record. The support code is what makes the record "smart". A pvAccess
       server is provided so that the records can be accesed via the network.
     </dd>
+  <dt>pvService</dt>
+    <dd>A middle layer for implementing services.</dd>
 </dl>
 
 <p>Each of the products has a Java and a C++ implementation.</p>
@@ -72,773 +82,41 @@ href="http://epics-pvdata.sourceforge.net/">V4</a> implementation of <a
 href="http://www.aps.anl.gov/epics/">Experimental Physics and Industrial
 Control System.</a></p>
 
-<h2 class="nocount" id="L104">Status of this Document</h2>
+<h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 20-Dec-2011 version of the Java implementation of pvIOC. It is a
+
+<p>This is the 24-AUG-2012 version of the Java implementation of pvIOC. It is a
 complete implementation of pvIOC as currently defined. </p>
-CONTENTS 
 
-<div class="toc">
-<ol>
-  <li><a href="#L110">Preface</a></li>
-  <li><a href="#L163">Part I: JavaIOC - Brief Description</a>
-    <ol>
-      <li><a href="#L173">Overview Of Part I</a>
-        <ul>
-          <li><a href="#L183">Getting Started</a></li>
-          <li><a href="#L368">Status and Remaining Tasks</a></li>
-        </ul>
-      </li>
-      <li><a href="#L413">Package Summary</a>
-        <ul>
-          <li><a href="#L419">default - javaIOC/src</a></li>
-          <li><a href="#L425">org.epics.pvioc</a></li>
-          <li><a href="#L429">org.epics.pvioc.swtshell</a></li>
-          <li><a href="#L433">javaIOC/xml</a></li>
-          <li><a href="#L437">javaIOC/example</a></li>
-          <li><a href="#L441">javaIOC/test</a></li>
-          <li><a href="#L443">org.epics.pvioc.database </a></li>
-          <li><a href="#L447">org.epics.pvioc.support</a></li>
-          <li><a href="#L451">org.epics.pvioc.install</a></li>
-          <li><a href="#L455">org.epics.pvioc.pvCopy</a></li>
-          <li><a href="#L459">org.epics.pvioc.monitor</a></li>
-          <li><a href="#L463">org.epics.pvioc.support.basic</a></li>
-          <li><a href="#L467">org.epics.pvioc.support.alarm</a></li>
-          <li><a href="#L471">org.epics.pvioc.support.caLink</a></li>
-          <li><a href="#L475">org.epics.pvioc.support.dbLink</a></li>
-          <li><a href="#L479">org.epics.pvioc.support.calc</a></li>
-          <li><a href="#L483">org.epics.pvioc.support.rpc</a></li>
-          <li><a href="#L487">org.epics.pvioc.support.device</a></li>
-          <li><a href="#L491">org.epics.pvioc.caV3</a></li>
-          <li><a href="#L495">org.epics.pvioc.pvAccess</a></li>
-          <li><a href="#L499">org.epics.pvioc.util</a></li>
-          <li><a href="#L519">org.epics.pvioc.pdrv</a></li>
-          <li><a href="#L523">org.epics.pvioc.pdrv.interfaces</a></li>
-          <li><a href="#L527">org.epics.pvioc.pdrv.testDriver</a></li>
-          <li><a href="#L531">org.epics.pvioc.pdrv.vxi11</a></li>
-        </ul>
-      </li>
-      <li><a href="#L539">Database Syntax For javaIOC</a></li>
-      <li><a href="#L551">Channel Access</a></li>
-      <li><a href="#L586">Record Processing</a></li>
-      <li><a href="#L691">Database Examples</a>
-        <ul>
-          <li><a href="#L735">Record Instance Examples</a>
-            <ul>
-              <li><a href="#L737">doubleInput</a></li>
-              <li><a href="#L743">doubleOutput</a></li>
-              <li><a href="#L749">ai</a></li>
-              <li><a href="#L755">ao</a></li>
-              <li><a href="#L761">psSimple</a></li>
-              <li><a href="#L767">psLinked</a></li>
-              <li><a href="#L773">psEmbeded</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L783">Part II: javaIOC Data Model</a>
-    <ol>
-      <li><a href="#L791">Summary</a></li>
-      <li><a href="#L815">javaIOC Data Model</a>
-        <ol>
-          <li><a href="#L819">Basic Concept</a></li>
-        </ol>
-      </li>
-      <li><a href="#L907">Definitions for Standard Properties</a></li>
-    </ol>
-  </li>
-  <li><a href="#L917">Part III: javaIOC - Database Definition</a>
-    <ol>
-      <li><a href="#L925">Overview Of Part III</a></li>
-      <li><a href="#L1035">javaIOC/xml/structures.xml</a>
-        <ul>
-          <li><a href="#L1037">structures.xml</a></li>
-          <li><a href="#L1043">records.xml</a></li>
-        </ul>
-      </li>
-      <li><a href="#L1055">xml/structure/alarm.xml</a>
-        <ul>
-          <li><a href="#L1067">numeric alarms</a></li>
-          <li><a href="#L1071">boolean alarms</a></li>
-          <li><a href="#L1096">enumerated alarms</a></li>
-        </ul>
-      </li>
-      <li><a href="#L1118">xml/structure/analog.xml</a>
-        <ul>
-          <li><a href="#L1122">linearConvert</a></li>
-          <li><a href="#L1157">linearConvertInput</a></li>
-          <li><a href="#L1177">linearConvertOutput</a></li>
-          <li><a href="#L1197">incrementalDouble</a></li>
-        </ul>
-      </li>
-      <li><a href="#L1232">xml/structure/calc.xml</a></li>
-      <li><a href="#L1236">xml/structure/caLink.xml</a>
-        <ul>
-          <li><a href="#L1240">caProcessLink</a></li>
-          <li><a href="#L1260">caMonitorLink</a></li>
-          <li><a href="#L1315">caMonitorNotifyLink</a></li>
-          <li><a href="#L1350">caInputLink</a></li>
-          <li><a href="#L1375">caOutputLink</a></li>
-        </ul>
-      </li>
-      <li><a href="#L1400">xml/structure/dbLink.xml</a>
-        <ul>
-          <li><a href="#L1402">dbProcessLink</a></li>
-          <li><a href="#L1417">caInputLink</a></li>
-          <li><a href="#L1437">caOutputLink</a></li>
-        </ul>
-      </li>
-      <li><a href="#L1459">xml/structures/commonFields.xml</a></li>
-      <li><a href="#L1546">xml/structures/control.xml</a></li>
-      <li><a href="#L1550">xml/structure/delay.xml</a></li>
-      <li><a href="#L1554">xml/structure/event.xml</a></li>
-      <li><a href="#L1558">xml/structure/generic.xml</a></li>
-      <li><a href="#L1562">xml/structure/portDriver</a>
-        <ul>
-          <li><a href="#L1566">portDriver.xml</a></li>
-        </ul>
-      </li>
-      <li><a href="#L1583">xml/structure/rpc.xml</a>
-        <ul>
-          <li><a href="#L1587">recordList</a></li>
-          <li><a href="#L1591">structureList</a></li>
-          <li><a href="#L1595">iocShow</a></li>
-          <li><a href="#L1599">recordShow</a></li>
-          <li><a href="#L1624">supportStateSet</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L1632">Part IV: JavaIOC - Package Descriptions</a></li>
-  <li><a href="#L1642">Package org.epics.pvioc</a>
-    <ol>
-      <li><a href="#L1646">Overview</a></li>
-      <li><a href="#L1720">Starting the JavaIOC with eclipse</a></li>
-      <li><a href="#L1726">Starting the JavaIOC without eclipse</a>
-        <ul>
-          <li><a href="#L1730">source</a></li>
-          <li><a href="#L1736">example</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L1748">Package org.epics.pvioc.swtshell</a>
-    <ol>
-      <li><a href="#L1752">Overview</a></li>
-      <li><a href="#L1805">Channel Access</a>
-        <ul>
-          <li><a href="#L1825">Getting a list of the channels in a
-          javaIOC.</a></li>
-          <li><a href="#L1839">Connecting to a Channel</a></li>
-          <li><a href="#L1851">Creating a Request</a></li>
-          <li><a href="#L1873">process</a></li>
-          <li><a href="#L1883">get</a></li>
-          <li><a href="#L1919">put</a></li>
-          <li><a href="#L1950">putGet</a></li>
-          <li><a href="#L2000">channelRPC</a></li>
-          <li><a href="#L2016">array</a></li>
-          <li><a href="#L2026">structureArray</a></li>
-          <li><a href="#L2040">monitor</a></li>
-        </ul>
-      </li>
-      <li><a href="#L2065">Local JavaIOC</a>
-        <ul>
-          <li><a href="#L2067">loadDatabase</a></li>
-          <li><a href="#L2096">introspectDatabase</a>
-            <ul>
-              <li><a href="#L2104">Database Definitions</a></li>
-              <li><a href="#L2108">Local Record Instance</a></li>
-              <li><a href="#L2148">Show Information</a></li>
-            </ul>
-          </li>
-          <li><a href="#L2163">portDriver</a></li>
-        </ul>
-      </li>
-      <li><a href="#L2173">iocConsole</a></li>
-    </ol>
-  </li>
-  <li><a href="#L2185">Package org.epics.pvioc.xml</a>
-    <ol>
-      <li><a href="#L2189">Overview</a></li>
-      <li><a href="#L2193">Database XML Syntax</a>
-        <ul>
-          <li><a href="#L2195">database</a></li>
-          <li><a href="#L2201">auxInfo</a></li>
-          <li><a href="#L2236">structure and record</a></li>
-          <li><a href="#L2289">package and import</a></li>
-          <li><a href="#L2317">Field definition</a></li>
-          <li><a href="#L2399">Scalar Types</a></li>
-          <li><a href="#L2497">Enumerated Structure</a></li>
-          <li><a href="#L2533">Examples</a></li>
-          <li><a href="#L2557">Field Initialization</a></li>
-          <li><a href="#L2566">Scalar Types</a></li>
-          <li><a href="#L2577">string</a></li>
-          <li><a href="#L2583">structure scalar</a></li>
-          <li><a href="#L2593">structure</a></li>
-          <li><a href="#L2611">array</a>
-            <ul>
-              <li><a href="#L2655">structureArray</a></li>
-            </ul>
-          </li>
-          <li><a href="#L2665">Macro Substitution and Include</a></li>
-          <li><a href="#L2667">Include</a></li>
-          <li><a href="#L2694">Macro Substitution</a></li>
-          <li><a href="#L2739">Example Include and Macro Substitution</a></li>
-        </ul>
-      </li>
-      <li><a href="#L2749">Database XML Code</a>
-        <ul>
-          <li><a href="#L2770">Warning About XML element syntax</a></li>
-          <li><a href="#L2804">Java Definitions</a></li>
-          <li><a href="#L2808">XML To PVDatabase</a>
-            <ul>
-              <li><a href="#L2812">XMLToPVDatabaseFactory</a></li>
-              <li><a href="#L2859">XMLToPVDatabaseListener</a></li>
-            </ul>
-          </li>
-          <li><a href="#L2936">Include and Substitution</a></li>
-          <li><a href="#L2942">IncludeSubstituteXMLListener</a>
-            <ul>
-              <li><a href="#L2971">IncludeSubstituteDetailsXMLListener</a></li>
-              <li><a href="#L3024">IncludeSubstituteXMLReader</a></li>
-              <li><a href="#L3028">IncludeSubstituteXMLReaderFactory</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L3034">Package org.epics.pvioc.util</a>
-    <ol>
-      <li><a href="#L3038">Overview</a></li>
-      <li><a href="#L3053">Scan Field Support</a>
-        <ul>
-          <li><a href="#L3055">Definitions</a></li>
-          <li><a href="#L3059">ScanField</a></li>
-          <li><a href="#L3063">ScanType</a></li>
-          <li><a href="#L3091">ScanFieldFactory</a></li>
-        </ul>
-      </li>
-      <li><a href="#L3101">Periodic and Event Scanners</a>
-        <ul>
-          <li><a href="#L3103">Definitions</a></li>
-          <li><a href="#L3107">EventAnnounce</a></li>
-          <li><a href="#L3115">EventScanner</a></li>
-          <li><a href="#L3145">PeriodicScanner</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L3167">Package org.epics.pvioc.install</a>
-    <ol>
-      <li><a href="#L3171">Overview</a></li>
-      <li><a href="#L3202">Install Factory</a>
-        <ul>
-          <li><a href="#L3206">Definitions</a></li>
-          <li><a href="#L3210">installStructures</a></li>
-          <li><a href="#L3220">installRecords</a></li>
-          <li><a href="#L3234">Initialize, and Start Record Instances</a></li>
-        </ul>
-      </li>
-      <li><a href="#L3275">Support Creation</a>
-        <ul>
-          <li><a href="#L3279">Definitions</a></li>
-          <li><a href="#L3283">Factory</a></li>
-          <li><a href="#L3287">SupportCreation</a></li>
-        </ul>
-      </li>
-      <li><a href="#L3305">After Start</a>
-        <ul>
-          <li><a href="#L3319">Definitions</a></li>
-          <li><a href="#L3323">AfterStartNode</a></li>
-          <li><a href="#L3327">AfterStartRequester</a></li>
-          <li><a href="#L3331">NewAfterStartRequester</a></li>
-          <li><a href="#L3335">AfterStartFactory</a></li>
-          <li><a href="#L3358">AfterStart</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L3383">Package org.epics.pvioc.database</a>
-    <ol>
-      <li><a href="#L3387">Overview</a></li>
-      <li><a href="#L3423">RecordField Interfaces</a>
-        <ul>
-          <li><a href="#L3427">PVRecordField</a></li>
-          <li><a href="#L3494">PVRecordStructure</a></li>
-        </ul>
-      </li>
-      <li><a href="#L3513">Record Interfaces</a>
-        <ul>
-          <li><a href="#L3515">PVListener</a></li>
-          <li><a href="#L3549">PVRecordClient</a></li>
-          <li><a href="#L3555">PVRecord</a>
-            <ul>
-              <li><a href="#L3669">Record Locking</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><a href="#L3677">PVRecord Definition and Creation</a>
-        <ul>
-          <li><a href="#L3679">PVDatabase</a></li>
-          <li><a href="#L3788">PVRecordCreate</a></li>
-          <li><a href="#L3802">PVReplaceFactory</a></li>
-        </ul>
-      </li>
-      <li><a href="#L3826">PVDatabase</a>
-        <ul>
-          <li><a href="#L3943">PVDatabaseFactory</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L3967">Package org.epics.pvioc.support</a>
-    <ol>
-      <li><a href="#L3971">Overview</a>
-        <ul>
-          <li><a href="#L3975">RecordProcess</a></li>
-          <li><a href="#L4010">Support</a></li>
-        </ul>
-      </li>
-      <li><a href="#L4116">Record Processing Theory of Operation</a>
-        <ul>
-          <li><a href="#L4122">Definitions</a></li>
-          <li><a href="#L4175">Requester Examples</a></li>
-          <li><a href="#L4218">RecordProcess Overview</a></li>
-          <li><a href="#L4345">Local Channel Access Example</a></li>
-          <li><a href="#L4380">Link Support Example</a></li>
-          <li><a href="#L4547">Locking</a></li>
-          <li><a href="#L4586">Support Overview</a></li>
-        </ul>
-      </li>
-      <li><a href="#L4625">Record Process</a>
-        <ul>
-          <li><a href="#L4627">Definitions</a></li>
-          <li><a href="#L4648">RecordProcess - General Purpose Methods</a></li>
-          <li><a href="#L4686">RecordProcess - Record Lifetime Methods.</a></li>
-          <li><a href="#L4732">RecordProcess - Record Process Requester
-            Methods</a></li>
-          <li><a href="#L4781">RecordProcess - Support Processing
-          methods.</a></li>
-          <li><a href="#L4817">RecordProcessRequester</a></li>
-          <li><a href="#L4855">ProcessCallbackRequester</a></li>
-          <li><a href="#L4865">ProcessContinueRequester</a></li>
-          <li><a href="#L4875">RecordProcessFactory</a></li>
-        </ul>
-      </li>
-      <li><a href="#L4881">Support</a>
-        <ul>
-          <li><a href="#L4885">Support State</a></li>
-          <li><a href="#L4916">Support</a></li>
-          <li><a href="#L4995">Record Support</a></li>
-        </ul>
-      </li>
-      <li><a href="#L5001">AbstractSupport</a>
-        <ul>
-          <li><a href="#L5003">AbstractSupport</a></li>
-          <li><a href="#L5005">Definitions</a></li>
-        </ul>
-      </li>
-      <li><a href="#L5072">Package org.epics.pvioc.support.rpc</a>
-        <ul>
-          <li><a href="#L5074">Overview</a>
-            <ul>
-              <li><a href="#L5089">putProcessGet RPC</a></li>
-              <li><a href="#L5108">channelRPC</a></li>
-            </ul>
-          </li>
-          <li><a href="#L5112">ExampleChannelRPC</a></li>
-          <li><a href="#L5124">RecordList</a></li>
-          <li><a href="#L5152">StructureList</a></li>
-          <li><a href="#L5180">IocShow</a></li>
-          <li><a href="#L5219">RecordShow</a></li>
-          <li><a href="#L5273">SupportStateSet</a></li>
-        </ul>
-      </li>
-      <li><a href="#L5317">Package org.epics.pvioc.support.basic</a>
-        <ul>
-          <li><a href="#L5319">Overview</a></li>
-          <li><a href="#L5375">Generic Support</a></li>
-          <li><a href="#L5399">Noop Support</a></li>
-          <li><a href="#L5405">ScanFactory</a></li>
-          <li><a href="#L5413">Control Limit</a></li>
-          <li><a href="#L5419">Linear Conversion</a>
-            <ul>
-              <li><a href="#L5423">linearConversion</a></li>
-              <li><a href="#L5458">LinearConvertInputFactory</a></li>
-              <li><a href="#L5480">LinearConvertOutputFactory</a></li>
-            </ul>
-          </li>
-          <li><a href="#L5502">Incremental Support</a></li>
-          <li><a href="#L5535">Event Support</a></li>
-          <li><a href="#L5549">DelaySupport</a></li>
-        </ul>
-      </li>
-      <li><a href="#L5579">Package org.epics.pvioc.support.calc</a>
-        <ul>
-          <li><a href="#L5581">Overview</a></li>
-          <li><a href="#L5604">Basic Calculation Support</a>
-            <ul>
-              <li><a href="#L5606">Database Definitions for
-              Calculations</a></li>
-              <li><a href="#L5705">Performing Calculations</a></li>
-              <li><a href="#L5713">calcArgs</a></li>
-            </ul>
-          </li>
-          <li><a href="#L5728">ExpressionCalculator</a>
-            <ul>
-              <li><a href="#L5732">Simple Examples</a></li>
-              <li><a href="#L5750">Expression Syntax</a></li>
-              <li><a href="#L5762">Expression Arguments</a></li>
-              <li><a href="#L5802">Unary Operators</a></li>
-              <li><a href="#L5827">Binary Operators</a></li>
-              <li><a href="#L5947">Ternary Operator</a></li>
-              <li><a href="#L5951">Math Functions</a></li>
-              <li><a href="#L5955">Constant optimization</a></li>
-              <li><a href="#L5959">Test</a></li>
-            </ul>
-          </li>
-          <li><a href="#L5963">Package
-          org.epics.pvioc.support.calc.example</a></li>
-        </ul>
-      </li>
-      <li><a href="#L5983">Package org.epics.pvioc.support.alarm</a>
-        <ul>
-          <li><a href="#L5985">Overview</a></li>
-          <li><a href="#L6061">XML definitions For alarms</a>
-            <ul>
-              <li><a href="#L6065">Numeric Scalar</a></li>
-              <li><a href="#L6083">Boolean</a></li>
-              <li><a href="#L6091">Enumerated</a></li>
-            </ul>
-          </li>
-          <li><a href="#L6119">Alarm Support</a></li>
-          <li><a href="#L6166">Value Alarms</a>
-            <ul>
-              <li><a href="#L6170">Boolean Alarms</a></li>
-              <li><a href="#L6197">Numeric Alarms</a></li>
-              <li><a href="#L6203">Enumerated Alarms</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><a href="#L6227">Package org.epics.pvioc.support.caLink</a>
-        <ul>
-          <li><a href="#L6229">Overview</a></li>
-          <li><a href="#L6259">Data Types Supported</a></li>
-          <li><a href="#L6288">Support Structure Definition</a></li>
-        </ul>
-      </li>
-      <li><a href="#L6298">Package org.epics.pvioc.support.dbLink</a>
-        <ul>
-          <li><a href="#L6300">Overview</a></li>
-          <li><a href="#L6320">Data Types Supported</a></li>
-        </ul>
-      </li>
-      <li><a href="#L6351">Package org.epics.pvioc.support.device</a>
-        <ul>
-          <li><a href="#L6353">Overview</a></li>
-          <li><a href="#L6357">Power Supply Support</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L6381">Package org.epics.pvioc.pdrv</a>
-    <ol>
-      <li><a href="#L6385">Preface</a></li>
-      <li><a href="#L6439">Purpose</a></li>
-      <li><a href="#L6495">Status</a></li>
-      <li><a href="#L6530">Acknowledgments</a></li>
-      <li><a href="#L6539">Overview of portDriver</a>
-        <ul>
-          <li><a href="#L6541">Definitions</a></li>
-          <li><a href="#L6664">portDriver Interfaces</a></li>
-          <li><a href="#L6668">portDriver Factory</a></li>
-          <li><a href="#L6685">Connection Management</a></li>
-          <li><a href="#L6709">Protecting a Thread from Blocking</a></li>
-          <li><a href="#L6715">portThread</a></li>
-          <li><a href="#L6760">Driver Can Also Be User</a></li>
-          <li><a href="#L6764">Initialization</a></li>
-          <li><a href="#L6795">Requesting access to a port</a></li>
-        </ul>
-      </li>
-      <li><a href="#L6810">PortDriver Record Types</a>
-        <ul>
-          <li><a href="#L6812">portCreate record</a></li>
-          <li><a href="#L6846">portDeviceControl record</a></li>
-        </ul>
-      </li>
-      <li><a href="#L6891">portDriver Factory</a>
-        <ul>
-          <li><a href="#L6897">createUser</a></li>
-          <li><a href="#L6911">createPort</a></li>
-          <li><a href="#L6950">getPortNames</a></li>
-          <li><a href="#L6956">getPort</a></li>
-        </ul>
-      </li>
-      <li><a href="#L6970">User</a>
-        <ul>
-          <li><a href="#L6976">Status</a></li>
-          <li><a href="#L7005">REASON</a></li>
-          <li><a href="#L7019">duplicateUser</a></li>
-          <li><a href="#L7038">User Queue Request</a></li>
-          <li><a href="#L7077">User lock/unlock Port.</a></li>
-          <li><a href="#L7089">User connection to a port</a></li>
-          <li><a href="#L7095">getPort</a></li>
-          <li><a href="#L7101">User connection to a device</a></li>
-          <li><a href="#L7109">getDevice</a></li>
-          <li><a href="#L7115">User Messages</a></li>
-          <li><a href="#L7121">I/O Timeouts</a></li>
-          <li><a href="#L7127">Driver Private</a></li>
-          <li><a href="#L7140">User Private</a></li>
-          <li><a href="#L7146">Passing Information Between User and
-          Driver</a></li>
-        </ul>
-      </li>
-      <li><a href="#L7153">Connect Exception</a></li>
-      <li><a href="#L7183">Port</a>
-        <ul>
-          <li><a href="#L7191">User Locate Device</a></li>
-          <li><a href="#L7197">User Connection Methods</a></li>
-          <li><a href="#L7203">Informational Methods</a></li>
-          <li><a href="#L7242">Connection Methods</a></li>
-          <li><a href="#L7286">Driver Methods</a></li>
-          <li><a href="#L7320">LockPortNotify</a></li>
-        </ul>
-      </li>
-      <li><a href="#L7356">Device</a>
-        <ul>
-          <li><a href="#L7362">User findInterface</a></li>
-          <li><a href="#L7381">User Connection Methods</a></li>
-          <li><a href="#L7387">User Blocking</a></li>
-          <li><a href="#L7393">Informational Methods</a></li>
-          <li><a href="#L7427">Connection Methods</a></li>
-          <li><a href="#L7476">Driver Methods</a></li>
-        </ul>
-      </li>
-      <li><a href="#L7505">Trace</a>
-        <ul>
-          <li><a href="#L7515">Trace Mask Options</a></li>
-          <li><a href="#L7558">TraceIO Options</a></li>
-          <li><a href="#L7607">Trace File</a></li>
-          <li><a href="#L7626">Trace Option Change Listener</a></li>
-          <li><a href="#L7636">Generating Trace Messages</a></li>
-        </ul>
-      </li>
-      <li><a href="#L7663">Driver</a>
-        <ul>
-          <li><a href="#L7665">PortDriver</a></li>
-          <li><a href="#L7694">DeviceDriver</a></li>
-        </ul>
-      </li>
-      <li><a href="#L7718">Appendix: Java Definitions</a></li>
-      <li><a href="#L7730">Package org.epics.pvioc.support.interfaces</a>
-        <ul>
-          <li><a href="#L7732">Overview</a></li>
-          <li><a href="#L7811">miscellaneous</a>
-            <ul>
-              <li><a href="#L7813">Interface</a></li>
-              <li><a href="#L7834">Option</a></li>
-              <li><a href="#L7858">DriverUser</a></li>
-              <li><a href="#L7879">AbstractInterface</a></li>
-            </ul>
-          </li>
-          <li><a href="#L7928">serial</a>
-            <ul>
-              <li><a href="#L7932">SerialInterruptListener</a></li>
-              <li><a href="#L7946">Serial</a></li>
-              <li><a href="#L8015">AbstractSerial</a></li>
-            </ul>
-          </li>
-          <li><a href="#L8062">uint32Digital</a>
-            <ul>
-              <li><a href="#L8064">DigitalInterruptReason</a></li>
-              <li><a href="#L8088">UInt32DigitalInterruptListener</a></li>
-              <li><a href="#L8102">UInt32Digital</a></li>
-              <li><a href="#L8156">AbstractUInt32Digital</a></li>
-            </ul>
-          </li>
-          <li><a href="#L8208">int32</a>
-            <ul>
-              <li><a href="#L8214">Int32InterruptListener</a></li>
-              <li><a href="#L8228">Int32</a></li>
-              <li><a href="#L8269">AbstractInt32</a></li>
-            </ul>
-          </li>
-          <li><a href="#L8314">int32Array</a>
-            <ul>
-              <li><a href="#L8320">Int32ArrayInterruptListener</a></li>
-              <li><a href="#L8334">Int32Array</a></li>
-              <li><a href="#L8383">AbstractInt32Array</a></li>
-            </ul>
-          </li>
-          <li><a href="#L8432">float64</a>
-            <ul>
-              <li><a href="#L8438">Float64InterruptListener</a></li>
-              <li><a href="#L8452">Float64</a></li>
-              <li><a href="#L8496">AbstractFloat64</a></li>
-            </ul>
-          </li>
-          <li><a href="#L8530">float64Array</a>
-            <ul>
-              <li><a href="#L8536">Float64ArrayInterruptListener</a></li>
-              <li><a href="#L8550">Float64Array</a></li>
-              <li><a href="#L8594">AbstractFloat64Array</a></li>
-            </ul>
-          </li>
-          <li><a href="#L8648">GPIB Interfaces</a>
-            <ul>
-              <li><a href="#L8652">GpibController</a></li>
-              <li><a href="#L8748">GpibDevice</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><a href="#L8804">Package org.epics.pvioc.pdrv.serial</a>
-        <ul>
-          <li><a href="#L8806">Overview</a></li>
-          <li><a href="#L8812">Configuration</a></li>
-          <li><a href="#L8826">Implementation</a></li>
-        </ul>
-      </li>
-      <li><a href="#L8839">Package org.epics.pvioc.pdrv.vxi11</a>
-        <ul>
-          <li><a href="#L8841">Overview</a></li>
-          <li><a href="#L8912">Configuration</a></li>
-          <li><a href="#L8928">Implementation</a></li>
-        </ul>
-      </li>
-      <li><a href="#L8947">Package org.epics.pvioc.support.pdrv</a>
-        <ul>
-          <li><a href="#L8949">Overview</a></li>
-          <li><a href="#L8988">portDriverLink</a></li>
-          <li><a href="#L9000">portDriverSupport</a></li>
-          <li><a href="#L9006">Support for PortDriverLink</a></li>
-          <li><a href="#L9012">Port Creation</a></li>
-          <li><a href="#L9026">Port and Device Control</a></li>
-          <li><a href="#L9040">Package org.epics.pvioc.support.pdrv.scalar</a>
-            <ul>
-              <li><a href="#L9042">Overview</a></li>
-              <li><a href="#L9046">Int32</a></li>
-              <li><a href="#L9056">Float64</a></li>
-              <li><a href="#L9066">Java Definitions</a></li>
-            </ul>
-          </li>
-          <li><a href="#L9074">Package org.epics.pvioc.support.pdrv.array</a>
-            <ul>
-              <li><a href="#L9076">Overview</a></li>
-              <li><a href="#L9080">Int32Array</a></li>
-              <li><a href="#L9090">Float64Array</a></li>
-              <li><a href="#L9100">Java Definitions</a></li>
-            </ul>
-          </li>
-          <li><a href="#L9108">Package org.epics.pvioc.support.pdrv.digital</a>
-            <ul>
-              <li><a href="#L9110">Overview</a></li>
-              <li><a href="#L9114">UInt32Digital</a></li>
-              <li><a href="#L9130">Java Definitions</a></li>
-            </ul>
-          </li>
-          <li><a href="#L9138">Package org.epics.pvioc.support.pdrv.serial</a>
-            <ul>
-              <li><a href="#L9140">Overview</a></li>
-              <li><a href="#L9221">UInt32Digital</a></li>
-              <li><a href="#L9227">Java Definitions</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L9237">Package org.epics.pvioc.pvAccess</a>
-    <ol>
-      <li><a href="#L9241">pvAccess Server</a></li>
-      <li><a href="#L9245">pvAccess client</a></li>
-    </ol>
-  </li>
-  <li><a href="#L9251">Package org.epics.pvioc.pvCopy</a>
-    <ol>
-      <li><a href="#L9255">Overview</a></li>
-      <li><a href="#L9325">Request String</a>
-        <ul>
-          <li><a href="#L9333">Simple Requests</a></li>
-          <li><a href="#L9351">Full Request Syntax</a></li>
-          <li><a href="#L9395">Examples</a>
-            <ul>
-              <li><a href="#L9401">Simple example</a></li>
-              <li><a href="#L9425">Power Supply Example</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><a href="#L9435">pvRequest</a>
-        <ul>
-          <li><a href="#L9437">PVStructure pvRequest</a></li>
-          <li><a href="#L9518">Examples</a>
-            <ul>
-              <li><a href="#L9522">Simple example</a>
-                <ul>
-                  <li><a href="#L9524">The quickest Way</a></li>
-                  <li><a href="#L9534">Using the field notation</a></li>
-                </ul>
-              </li>
-              <li><a href="#L9556">Power Supply Example</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><a href="#L9570">PVCopy</a></li>
-      <li><a href="#L9645">PVCopyMonitor</a></li>
-      <li><a href="#L9687">PVCopyFactory</a>
-        <ul>
-          <li><a href="#L9689">Java Definition</a></li>
-        </ul>
-      </li>
-      <li><a href="#L9735">PVShare</a></li>
-    </ol>
-  </li>
-  <li><a href="#L9743">Package org.epics.pvioc.monitor</a>
-    <ol>
-      <li><a href="#L9747">Overview</a></li>
-      <li><a href="#L9776">Implementing New Monitor Algorithms</a>
-        <ul>
-          <li><a href="#L9792">MonitorFactory</a></li>
-          <li><a href="#L9832">MonitorAlgorithm</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-  <li><a href="#L9861">Package org.epics.pvioc.caV3</a>
-    <ol>
-      <li><a href="#L9865">Overview</a></li>
-      <li><a href="#L9880">Server</a>
-        <ul>
-          <li><a href="#L9882">Syntax</a></li>
-          <li><a href="#L9929">Get and Put Options</a></li>
-          <li><a href="#L9937">monitor options</a></li>
-        </ul>
-      </li>
-      <li><a href="#L9941">Client</a>
-        <ul>
-          <li><a href="#L9943">Overview</a></li>
-          <li><a href="#L9998">Naming conventions.</a></li>
-          <li><a href="#L10031">Data Types Supported</a></li>
-          <li><a href="#L10053">Implementation Overview</a></li>
-        </ul>
-      </li>
-    </ol>
-  </li>
-</ol>
+
+<h2 class="nocount">TODO</h2>
+
+<p>The following is a list of unresolved issues for pvIOCJava:</p>
+<dl>
+  <dt>database</dt>
+    <dd>Preinstall structures for standard fields instead of defining
+     them via xml files.</dd>
+  <dt>swtshell</dt>
+    <dd>This should be made so that it only supports a remote shell
+    <b>AND</b> become a separate product.It can then be used as a remote shell
+     for a future version of pvIOCCPP and well as pvIOVJava.
+     It could also be rewritten in another language and GIU framework.<dd>
+</dl>
+
+<div id="toc">
+<h2 class="nocount" style="page-break-before: always">Table of Contents</h2>
 </div>
 
-<h2 id="L110">Preface</h2>
+<div id="contents" class="contents">
+
+
+<div>
+<h2>Introduction</h2>
 
 <p>This product is available via an <a
 href="http://epics-pvdata.sourceforge.net/LICENSE.html">open source
 license</a></p>
+
 
 <p>This document is the project and package overviews for pvIOCJava. The
 javaDOC is available at <a href="./html/index.html">JavaDoc</a></p>
@@ -907,8 +185,7 @@ definition for generic is:</p>
 
 
 
-<h2  id="L163">Part I: JavaIOC - Brief
-Description</h2>
+<h2 >Part I: JavaIOC - Brief Description</h2>
 
 
 
@@ -916,7 +193,7 @@ Description</h2>
 are provided with each package.</p>
 
 
-<h3  id="L173">Overview Of Part I</h3>
+<h3 >Overview Of Part I</h3>
 
 
 <p><a href="http://www.anl.gov/epics">EPICS</a> is a set of Open Source
@@ -932,7 +209,7 @@ EPICS V3 ( the 3.13 and 3.14 releases of EPICS base) but extends the data types
 to support structures and arrays and allows any field to optionally have
 support.</p>
 
-<h4 id="L183">Getting Started</h4>
+<h4>Getting Started</h4>
 
 <p>JavaIOC is developed as an eclipse project. The following assumes that you
 have eclipse installed and have imported javaIOC into a project named
@@ -1077,7 +354,7 @@ javaIOC that has the example database.</p>
   <li>Example database definitions and record instances.</li>
 </ul>
 
-<h4 id="L368">Status and Remaining Tasks</h4>
+<h4>Status and Remaining Tasks</h4>
 
 <p>The javaIOC has both client and server Channel Access support for both caV3
 and pvAccess. Eclipse project pvAccess fully supports network access to pvData.
@@ -1121,119 +398,119 @@ because almost no driver support has been implemented. </p>
 <p>Thus lots of work has been done but lots of work remains.</p>
 
 
-<h3  id="L413">Package Summary</h3>
+<h3 >Package Summary</h3>
 
 
 <p>Documentation is provided via javaDOC. Each package of the javaIOC project
 has a package.html overview document. The packages that currently exists
 are:</p>
 
-<h4 id="L419">default - javaIOC/src</h4>
+<h4>default - javaIOC/src</h4>
 <ul>
   <li>This package contains the overview package.html document you are now
     reading.</li>
 </ul>
 
-<h4 id="L425">org.epics.pvioc</h4>
+<h4>org.epics.pvioc</h4>
 
 <p>This package has the javaIOC class.</p>
 
-<h4 id="L429">org.epics.pvioc.swtshell</h4>
+<h4>org.epics.pvioc.swtshell</h4>
 
 <p>This is a GUI shell for an ioc. It is implemented via the Standard Widget
 Toolkit. Getting Started explains how to invoke it. See the package overview
 for a description of swtshell.</p>
 
-<h4 id="L433">javaIOC/xml</h4>
+<h4>javaIOC/xml</h4>
 
 <p>This directory and the structures subdirectory contains the xml structure
 definitions for the javaIOC. It also loads the xml definitions from pvData.</p>
 
-<h4 id="L437">javaIOC/example</h4>
+<h4>javaIOC/example</h4>
 
 <p>This directory contains the example xml files.</p>
 
-<h4 id="L441">javaIOC/test</h4>
+<h4>javaIOC/test</h4>
 
-<h4 id="L443">org.epics.pvioc.database </h4>
+<h4>org.epics.pvioc.database </h4>
 
 <p>This package describes and implements the PVDatabase.</p>
 
-<h4 id="L447">org.epics.pvioc.support</h4>
+<h4>org.epics.pvioc.support</h4>
 
 <p>This package provides the framework for processing IOC database records. The
 subpackages of this package provide support that uses the framework. Each
 record instance must have associated support and each field of a record
 instance can optionally have support. </p>
 
-<h4 id="L451">org.epics.pvioc.install</h4>
+<h4>org.epics.pvioc.install</h4>
 
 <p>This package provides the code that installs structure and records into a
 javaIOC. It allows new structures or records to be installed into a running
 IOC.</p>
 
-<h4 id="L455">org.epics.pvioc.pvCopy</h4>
+<h4>org.epics.pvioc.pvCopy</h4>
 
 <p>This package describes and implements support for creating a PVStructure
 that contains a copy of a subset of the fields in a PVRecord. It is used by
 pvAccess.</p>
 
-<h4 id="L459">org.epics.pvioc.monitor</h4>
+<h4>org.epics.pvioc.monitor</h4>
 
 <p>This package describes and implements support for monitoring a subset of the
 fields in a PVRecord. It is a companion to pvCopy and is used by pvAccess.</p>
 
-<h4 id="L463">org.epics.pvioc.support.basic</h4>
+<h4>org.epics.pvioc.support.basic</h4>
 
 <p>This provides basic support such as noop, generic, etc.</p>
 
-<h4 id="L467">org.epics.pvioc.support.alarm</h4>
+<h4>org.epics.pvioc.support.alarm</h4>
 
 <p>This provides support for alarms.</p>
 
-<h4 id="L471">org.epics.pvioc.support.caLink</h4>
+<h4>org.epics.pvioc.support.caLink</h4>
 
 <p>This provides for channel access links, i.e. it allows records to
 get/put/monitor data in other records.</p>
 
-<h4 id="L475">org.epics.pvioc.support.dbLink</h4>
+<h4>org.epics.pvioc.support.dbLink</h4>
 
 <p>This provides for database links, i.e. it allows records to get/put/monitor
 data in other records in this javaIOC.</p>
 
-<h4 id="L479">org.epics.pvioc.support.calc</h4>
+<h4>org.epics.pvioc.support.calc</h4>
 
 <p>The provides support for calculations. A calcaulator is support that
 produces a result that is assigned to a value field. Included is support named
 expressionCalculator, which supports scalar expressions that have standard Java
 syntax.</p>
 
-<h4 id="L483">org.epics.pvioc.support.rpc</h4>
+<h4>org.epics.pvioc.support.rpc</h4>
 
 <p>This provides remote procedure call support for pvAccess channel access
 clients. It allows remore clients to list the records and structures in a
 javaIOC database,. display information about a javaIOC and about a record in a
 javaIOC. </p>
 
-<h4 id="L487">org.epics.pvioc.support.device</h4>
+<h4>org.epics.pvioc.support.device</h4>
 
 <p>This contains examples of support for "device" abstractions.</p>
 
-<h4 id="L491">org.epics.pvioc.caV3</h4>
+<h4>org.epics.pvioc.caV3</h4>
 
 <p>This package is Channel Access V3, e.g. channel access Version 3. Server
 support was implemented by Matej Sekoranja (COSYLAB). Client support is also
 implemented. Both the client and server require JCA/CAJ, which is supplied by
 COSYLAB..</p>
 
-<h4 id="L495">org.epics.pvioc.pvAccess</h4>
+<h4>org.epics.pvioc.pvAccess</h4>
 
 <p>This package connects pvAccess to the javaIOC. It implements a Channe; as
 described by pvAccess. It can be used directly by other records in the same
 javaIOC for the pvAccess faculities or can be used by remote pvAccess to access
 records in this javaIOC.</p>
 
-<h4 id="L499">org.epics.pvioc.util</h4>
+<h4>org.epics.pvioc.util</h4>
 This package provides utility code for a javaIOC: 
 <dl>
   <dt>Scan Field Support</dt>
@@ -1245,29 +522,29 @@ This package provides utility code for a javaIOC:
       at IOC initialization or for on-line add of new record instances.</dd>
 </dl>
 
-<h4 id="L519">org.epics.pvioc.pdrv</h4>
+<h4>org.epics.pvioc.pdrv</h4>
 
 <p>These packages implement portDriver, which is support for accessing and
 controlling hardware. It is modeled after the EPICS asynDriver and thus
 provides support for synchronous and asynchronous devices. Each device is
 accessed via a port. Each port provides access to one or more devices.</p>
 
-<h4 id="L523">org.epics.pvioc.pdrv.interfaces</h4>
+<h4>org.epics.pvioc.pdrv.interfaces</h4>
 
 <p>This directory defines the interfaces for portDriver.</p>
 
-<h4 id="L527">org.epics.pvioc.pdrv.testDriver</h4>
+<h4>org.epics.pvioc.pdrv.testDriver</h4>
 
 <p>This directory contains test port drivers.</p>
 
-<h4 id="L531">org.epics.pvioc.pdrv.vxi11</h4>
+<h4>org.epics.pvioc.pdrv.vxi11</h4>
 
 <p>This directory has a portDriver that implements the VXI11 protocal. Some
 testing has been done but more is required befoe it is robust.</p>
 
 
 
-<h3  id="L539">Database Syntax For javaIOC</h3>
+<h3 >Database Syntax For javaIOC</h3>
 
 
 <p>The syntax for both structure and record definitions is XML based. In
@@ -1288,7 +565,7 @@ alarm support is:</p>
 &lt;/structure&gt;</pre>
 
 
-<h3  id="L551">Channel Access</h3>
+<h3 >Channel Access</h3>
 
 
 <p>Channel Access for pvData is implemented as a separate eclipse project named
@@ -1323,7 +600,7 @@ access.</p>
 </ul>
 
 
-<h3  id="L586">Record Processing</h3>
+<h3 >Record Processing</h3>
 
 
 <p>Package org.epics.pvioc.support describes and implements code directly related
@@ -1431,7 +708,7 @@ the structure that it supports. For each field that has support it calls the
 support.</p>
 
 
-<h3  id="L691">Database Examples</h3>
+<h3 >Database Examples</h3>
 
 
 <p>javaIOC/xml the structure definitions for the javaIOC. It also includes the
@@ -1471,9 +748,9 @@ following support</p>
     <dd>javaIOC implements channel access links between records</dd>
 </dl>
 
-<h4  id="L735">Record Instance Examples</h4>
+<h4 >Record Instance Examples</h4>
 
-<h5 id="L737">doubleInput</h5>
+<h5>doubleInput</h5>
 
 <p>The following creates a record instance of type double. It is an input
 record because input is initialized to a Channel Access inputLink.</p>
@@ -1488,7 +765,7 @@ record because input is initialized to a Channel Access inputLink.</p>
     &lt;/structure&gt;   
 &lt;/record&gt;</pre>
 
-<h5 id="L743">doubleOutput</h5>
+<h5>doubleOutput</h5>
 
 <p>The following creates a record instance of type double. It is an output
 record because output is initialized to a Channel Access outputLink.</p>
@@ -1502,7 +779,7 @@ record because output is initialized to a Channel Access outputLink.</p>
     &lt;/structure&gt;   
 &lt;/record&gt;</pre>
 
-<h5 id="L749">ai</h5>
+<h5>ai</h5>
 
 <p>The following creates an instance of an aiRecord. The raw ADC value is read
 via channelAccess support and converted via linearConvertInput support.</p>
@@ -1526,7 +803,7 @@ via channelAccess support and converted via linearConvertInput support.</p>
     &lt;/structure&gt;    
 &lt;/record&gt;</pre>
 
-<h5 id="L755">ao</h5>
+<h5>ao</h5>
 
 <p>The following creates an instance of an aoRecord. The value is converted via
 linearConvertOutput support to a rawValue which is written via portDriver
@@ -1551,7 +828,7 @@ support.</p>
     &lt;/structure&gt;   
 &lt;/record&gt;</pre>
 
-<h5 id="L761">psSimple</h5>
+<h5>psSimple</h5>
 
 <p>The following creates a powerSupply instance that does no input or output.
 The power.value must be set via channel access.</p>
@@ -1575,7 +852,7 @@ The power.value must be set via channel access.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5 id="L767">psLinked</h5>
+<h5>psLinked</h5>
 
 <p>The following creates a powerSupply record that gets its voltage and writes
 its current via channel access.</p>
@@ -1603,7 +880,7 @@ its current via channel access.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5 id="L773">psEmbeded</h5>
+<h5>psEmbeded</h5>
 
 <p>The following creates a powerSupply record that gets its voltage and writes
 its current via embeded support.</p>
@@ -1649,12 +926,12 @@ its current via embeded support.</p>
 
 
 
-<h2  id="L783">Part II: javaIOC Data Model</h2>
+<h2 >Part II: javaIOC Data Model</h2>
 
 
 
 
-<h3  id="L791">Summary</h3>
+<h3 >Summary</h3>
 
 
 <p>The Data Model supports general purpose client tools. A set of structures
@@ -1723,10 +1000,10 @@ can access a structure. For example a client can ask for an entire record. An
 example is swtshell.</p>
 
 
-<h3  id="L815">javaIOC Data Model</h3>
+<h3 >javaIOC Data Model</h3>
 
 
-<h4 id="L819">Basic Concept</h4>
+<h4>Basic Concept</h4>
 
 <p>A javaIOC structure follows the javaIOC Data Model if it has a set of fields
 that have names and types that support the data model. It can have additional
@@ -1804,7 +1081,7 @@ record can have fields power, voltage, current that each support the javaIOC
 data model. </p>
 
 
-<h3  id="L907">Definitions for Standard
+<h3 >Definitions for Standard
 Properties</h3>
 
 
@@ -1813,14 +1090,13 @@ tools are defined in pvData.</p>
 
 
 
-<h2  id="L917">Part III: javaIOC - Database
-Definition</h2>
+<h2 >Part III: javaIOC - Database Definition</h2>
 
 
 
 <p>Part III describes the Database Definitions provided with the javaIOC.</p>
 
-<h3 id="L925">Overview Of Part III</h3>
+<h3>Overview Of Part III</h3>
 
 <p>The create, and support definitions implemented by javaIOC are defined. In
 addition a set of structure definitions that use the support are provided. A
@@ -1884,9 +1160,9 @@ brief summary is:</p>
 support implementations. See package org.epics.pvioc.support and sub-packages for
 details.</p>
 
-<h3 id="L1035">javaIOC/xml/structures.xml</h3>
+<h3>javaIOC/xml/structures.xml</h3>
 
-<h4 id="L1037">structures.xml</h4>
+<h4>structures.xml</h4>
 
 <p>This file includes all definitions needed for the support provided by
 javaIOC.</p>
@@ -1917,7 +1193,7 @@ javaIOC.</p>
 &lt;include removePath = "${JAVAIOC}/xml/structure" /&gt;:qa
 &lt;/database&gt;</pre>
 
-<h4 id="L1043">records.xml</h4>
+<h4>records.xml</h4>
 
 <p>This file includes RPC record definition and support provided by the
 javaIOC.</p>
@@ -1943,7 +1219,7 @@ javaIOC.</p>
 <p>These two files crate a set of RPC records for a javaIOC. The record types
 are defined in structure/rpc.xml below.</p>
 
-<h3 id="L1055">xml/structure/alarm.xml</h3>
+<h3>xml/structure/alarm.xml</h3>
 
 <p>This file contains database definitions related to alarms. Note that pvData
 also defines alarms as seen by general purpose tools.</p>
@@ -1967,13 +1243,13 @@ enumerated. </p>
 
 <p>Look at file xml/structure/alarm.xml to see the actual definitions.</p>
 
-<h4 id="L1067">numeric alarms</h4>
+<h4>numeric alarms</h4>
 
 <p>The definitions for byte, short, int, long, float, and double are all the
 same except for the data type. The algorithn is the same as the algorithm used
 by the ai and ao records from EPICS V3.</p>
 
-<h4 id="L1071">boolean alarms</h4>
+<h4>boolean alarms</h4>
 
 <p>Structure booleanAlarm has the fields:</p>
 <dl>
@@ -1988,7 +1264,7 @@ by the ai and ao records from EPICS V3.</p>
     process.</dd>
 </dl>
 
-<h4 id="L1096">enumerated alarms</h4>
+<h4>enumerated alarms</h4>
 
 <p>Enumerated alarms are for a data type that is an enumerated structure.</p>
 
@@ -2002,12 +1278,12 @@ by the ai and ao records from EPICS V3.</p>
     <dd>A severity for change of state.</dd>
 </dl>
 
-<h3 id="L1118">xml/structure/analog.xml</h3>
+<h3>xml/structure/analog.xml</h3>
 
 <p>This is the support for analog I/O. See org.epics.pvioc.support.basic for
 details</p>
 
-<h4 id="L1122">linearConvert</h4>
+<h4>linearConvert</h4>
 
 <p>Structure linearConvert is for linear conversions. The slope and intercept
 can be specified directly or can be computed from the other four fields.
@@ -2029,7 +1305,7 @@ also permitted. Structure linearConvert has the fields:</p>
     <dd>Intrercept for converting raw value to engineering units.</dd>
 </dl>
 
-<h4 id="L1157">linearConvertInput</h4>
+<h4>linearConvertInput</h4>
 
 <p>Structure linearConvertInput is for converting a raw value to an
 enginerering units value. It has the fields:</p>
@@ -2042,7 +1318,7 @@ enginerering units value. It has the fields:</p>
     <dd>A structure that inputs the raw value.</dd>
 </dl>
 
-<h4 id="L1177">linearConvertOutput</h4>
+<h4>linearConvertOutput</h4>
 
 <p>Structure linearConvertOutput is for converting a raw value to an
 enginerering units value. It has the fields:</p>
@@ -2055,7 +1331,7 @@ enginerering units value. It has the fields:</p>
     <dd>A structure that outputs the raw value.</dd>
 </dl>
 
-<h4 id="L1197">incrementalDouble</h4>
+<h4>incrementalDouble</h4>
 
 <p>This is for rate limited output. The output value incrementally reaches the
 desired value. The structure has the fields:</p>
@@ -2076,17 +1352,17 @@ desired value. The structure has the fields:</p>
       limits.</dd>
 </dl>
 
-<h3 id="L1232">xml/structure/calc.xml</h3>
+<h3>xml/structure/calc.xml</h3>
 
 <p>This is the support for calculations. See org.epics.pvioc.support.calc for
 details. Note that expressionCalculator is the default calculator.. </p>
 
-<h3 id="L1236">xml/structure/caLink.xml</h3>
+<h3>xml/structure/caLink.xml</h3>
 
 <p>This is the support for a links to other records. See
 org.epics.pvioc.support.ca for details.</p>
 
-<h4 id="L1240">caProcessLink</h4>
+<h4>caProcessLink</h4>
 
 <p>Structure caProcessLink has the fields:</p>
 <dl>
@@ -2098,7 +1374,7 @@ org.epics.pvioc.support.ca for details.</p>
     <dd>The name of the channelProvider.</dd>
 </dl>
 
-<h4 id="L1260">caMonitorLink</h4>
+<h4>caMonitorLink</h4>
 
 <p>Structure caMonitorLink has the fields:</p>
 <dl>
@@ -2127,7 +1403,7 @@ org.epics.pvioc.support.ca for details.</p>
     <dd>Specifies the fields to monitor and options.</dd>
 </dl>
 
-<h4 id="L1315">caMonitorNotifyLink</h4>
+<h4>caMonitorNotifyLink</h4>
 
 <p>Structure caMonitorNotifyLink has the fields:</p>
 <dl>
@@ -2146,7 +1422,7 @@ org.epics.pvioc.support.ca for details.</p>
     <dd>Look only for changes while record is being processed.</dd>
 </dl>
 
-<h4 id="L1350">caInputLink</h4>
+<h4>caInputLink</h4>
 
 <p>Structure caInputLink has the fields:</p>
 <dl>
@@ -2161,7 +1437,7 @@ org.epics.pvioc.support.ca for details.</p>
       than this record inherits the alarm from the linked record.</dd>
 </dl>
 
-<h4 id="L1375">caOutputLink</h4>
+<h4>caOutputLink</h4>
 
 <p>Structure caOutputLink has the fields:</p>
 <dl>
@@ -2175,9 +1451,9 @@ org.epics.pvioc.support.ca for details.</p>
     <dd>Field to put and options.</dd>
 </dl>
 
-<h3 id="L1400">xml/structure/dbLink.xml</h3>
+<h3>xml/structure/dbLink.xml</h3>
 
-<h4 id="L1402">dbProcessLink</h4>
+<h4>dbProcessLink</h4>
 
 <p>Structure dbProcessLink has the fields:</p>
 <dl>
@@ -2187,7 +1463,7 @@ org.epics.pvioc.support.ca for details.</p>
     <dd>alarm for problems with link</dd>
 </dl>
 
-<h4 id="L1417">caInputLink</h4>
+<h4>caInputLink</h4>
 
 <p>Structure caInputLink has the fields:</p>
 <dl>
@@ -2199,7 +1475,7 @@ org.epics.pvioc.support.ca for details.</p>
     <dd>fields to get and options.</dd>
 </dl>
 
-<h4 id="L1437">caOutputLink</h4>
+<h4>caOutputLink</h4>
 
 <p>Structure caOutputLink has the fields:</p>
 <dl>
@@ -2212,7 +1488,7 @@ org.epics.pvioc.support.ca for details.</p>
 </dl>
 
 
-<h3 id="L1459">xml/structures/commonFields.xml</h3>
+<h3>xml/structures/commonFields.xml</h3>
 
 <p>This file contains database definitions for fields scan and timeStamp.</p>
 
@@ -2273,32 +1549,32 @@ org.epics.pvioc.support.ca for details.</p>
     </dd>
 </dl>
 
-<h3 id="L1546">xml/structures/control.xml</h3>
+<h3>xml/structures/control.xml</h3>
 
 <p>This is a structure and support for control limits.</p>
 
-<h3 id="L1550">xml/structure/delay.xml</h3>
+<h3>xml/structure/delay.xml</h3>
 
 <p>This is the support that delays before completing. It is used for testing.
 See org.epics.pvioc.support.basic for details.</p>
 
-<h3 id="L1554">xml/structure/event.xml</h3>
+<h3>xml/structure/event.xml</h3>
 
 <p>This is the support for announcing events. See org.epics.pvioc.support.basic
 for details.</p>
 
-<h3 id="L1558">xml/structure/generic.xml</h3>
+<h3>xml/structure/generic.xml</h3>
 
 <p>Generic is the default support for many record types. It just calls the
 support for any fields that have support. See org.epics.pvioc.support.basic for
 details.</p>
 
-<h3 id="L1562">xml/structure/portDriver</h3>
+<h3>xml/structure/portDriver</h3>
 
 <p>This is the support for portDriver. See org.epics.pvioc.support.pdrv and
 org.epics.pvioc.portDriver for details.</p>
 
-<h4 id="L1566">portDriver.xml</h4>
+<h4>portDriver.xml</h4>
 
 <p>This includes portDriver related files.</p>
 <dl>
@@ -2310,26 +1586,26 @@ org.epics.pvioc.portDriver for details.</p>
   <dt>portDriver/drivers.xml</dt>
 </dl>
 
-<h3 id="L1583">xml/structure/rpc.xml</h3>
+<h3>xml/structure/rpc.xml</h3>
 
 <p>This contains for RPC records and support:</p>
 
-<h4 id="L1587">recordList</h4>
+<h4>recordList</h4>
 
 <p>This provides a list of record names selected via a regular expression. See
 swtshell for an example of how a client issues a request.</p>
 
-<h4 id="L1591">structureList</h4>
+<h4>structureList</h4>
 
 <p>This provides a list of structure names selected via a regular expression.
 See swtshell for an example of how a client issues a request.</p>
 
-<h4 id="L1595">iocShow</h4>
+<h4>iocShow</h4>
 
 <p>This provides information about tjhe javaIOC: badRecords, threads, and
 memory usage. It also provides the ability to ask java to garbage collect.</p>
 
-<h4 id="L1599">recordShow</h4>
+<h4>recordShow</h4>
 
 <p>This provides the following features:</p>
 <dl>
@@ -2347,14 +1623,13 @@ memory usage. It also provides the ability to ask java to garbage collect.</p>
       fails. </dd>
 </dl>
 
-<h4 id="L1624">supportStateSet</h4>
+<h4>supportStateSet</h4>
 
 <p>This allows a client to set the support state for a record.</p>
 
 
 
-<h2  id="L1632">Part IV: JavaIOC - Package
-Descriptions</h2>
+<h2 >Part IV: JavaIOC - Package Descriptions</h2>
 
 
 
@@ -2362,10 +1637,10 @@ Descriptions</h2>
 pvIOCJava.</p>
 
 
-<h2  id="L1642">Package org.epics.pvioc</h2>
+<h2 >Package org.epics.pvioc</h2>
 
 
-<h3 id="L1646">Overview</h3>
+<h3>Overview</h3>
 
 <p>This package has a single class called JavaIOC. It's purpose is to start a
 JavaIOC.</p>
@@ -2415,7 +1690,7 @@ pvAccessJava must also exist as eclipse projects.</p>
     Start swtshell. This will also stop processing arguments.</li>
 </ul>
 
-<h3 id="L1720">Starting the JavaIOC with eclipse</h3>
+<h3>Starting the JavaIOC with eclipse</h3>
 
 <p>Open the src tree and the select org.epics.pvioc.JavaIOC and then run as Java
 Application. If this is the first time or it is not the configuration desired
@@ -2424,13 +1699,13 @@ then stop the running JavaIOC.</p>
 <p>With the run menu select "run configurations". Then select Arguments. Then
 add the desired arguments as described above and then run. </p>
 
-<h3 id="L1726">Starting the JavaIOC without eclipse</h3>
+<h3>Starting the JavaIOC without eclipse</h3>
 
 <p>The JavaIOC can also be started without eclipse. In the same directory have
 a file named source and files that start JavaIOC. The following is an example
 that works on linux or macOS.</p>
 
-<h4 id="L1730">source</h4>
+<h4>source</h4>
 
 <p>This is a sample source file:</p>
 <pre>pwd=$PWD
@@ -2448,7 +1723,7 @@ export CLASSPATH=${CLASSPATH}:${JAVAIOC}jar/JCA.jar
 # The following MUST be changed to locate the release of swt on your system
 export CLASSPATH=${CLASSPATH}:/usr/lib/eclipse/swt.jar</pre>
 
-<h4 id="L1736">example</h4>
+<h4>example</h4>
 
 <p>The following is the contents of a file named startExample</p>
 <pre>#! /bin/bash
@@ -2465,10 +1740,10 @@ java \
 <pre>./startExample</pre>
 
 
-<h2  id="L1748">Package org.epics.pvioc.swtshell</h2>
+<h2 >Package org.epics.pvioc.swtshell</h2>
 
 
-<h3  id="L1752">Overview</h3>
+<h3 >Overview</h3>
 
 <p>This package provides a GUI shell implemented via the SWT toolkit that comes
 with eclipse. The default JavaIOC package overview document gives brief
@@ -2509,7 +1784,7 @@ given. </p>
 <p><span style="font-weight:bold;">NOTE</span>: After text is typed into any
 text input window, the enter key must be pressed.</p>
 
-<h3  id="L1805">Channel Access</h3>
+<h3 >Channel Access</h3>
 
 <p>The channelList, get, put, process,putGet,channelRPC, monitor,array, and
 structureArray buttons each start a new window. Each window provides the
@@ -2527,7 +1802,7 @@ Channel Access, which can be either V3 or V4 channelAccess</p>
 
 <p>See package org.epics.pvioc.caV3 for details about caV3.</p>
 
-<h4 id="L1825">Getting a list of the channels in a javaIOC.</h4>
+<h4>Getting a list of the channels in a javaIOC.</h4>
 
 <p>This obtains a list of a subset, selected by a regular expression, of the
 records in a javaIOC. A name can be selected and dropped into a connect window
@@ -2552,7 +1827,7 @@ list It requres that the javaIOC have an RPC record ( RPC records are descibed
 below) that provides the record list. The record must be named
 "${IOCNAME}recordListRPC" where IOCNAME is the name of the javaIOC.</p>
 
-<h4 id="L1839">Connecting to a Channel</h4>
+<h4>Connecting to a Channel</h4>
 
 <p>The process,get, put, putGet, channelRPC, monitor, and array windows all
 have a connect button. When this button is pressed the following window
@@ -2572,7 +1847,7 @@ be obtained from the channelList described in the previous sub-section. When
 return is clicked a request is made to create a channel to the selected record
 and control returned to the window that has the connect button.</p>
 
-<h4 id="L1851">Creating a Request</h4>
+<h4>Creating a Request</h4>
 
 <p>The get, put, putGet and monotor windows all have a createRequest button,
 which can activated after connecting to a channel. createRequest allows you to
@@ -2607,7 +1882,7 @@ the entire structure is selected.</p>
 request button. The rules for specifying the request via a text string are
 specified by org.epics.pvdata.pvCopy See the package overview for details.</p>
 
-<h4 id="L1873">process</h4>
+<h4>process</h4>
 
 <p>The following window appears when the process button is pushed:</p>
 
@@ -2620,7 +1895,7 @@ The createProcess button is for creating and destroying a channelProcess
 request. The process button sends a process request to the channel access
 server.</p>
 
-<h4 id="L1883">get</h4>
+<h4>get</h4>
 
 <p>Clicking the get button of the swtshell window creates the following window.
 The following shows the window after connecting to a channel and clicking
@@ -2646,7 +1921,7 @@ createGet.:</p>
     <dd>This shows the current data values.</dd>
 </dl>
 
-<h4 id="L1919">put</h4>
+<h4>put</h4>
 
 <p>The following window appears when the put button is pushed:</p>
 
@@ -2683,7 +1958,7 @@ the following happens: </p>
 <p>When done is clicked the modified fields are sent to the channel access
 server and written to the PVRecord.</p>
 
-<h4 id="L1950">putGet</h4>
+<h4>putGet</h4>
 
 <p>The following window appears when the putGet button is pushed. It is similar
 to get and put except that both a putRequest and a getRequest must be
@@ -2728,7 +2003,7 @@ the following window.</p>
 <p><img src="./putGet.gif" alt="putGet" /></p>
 </center>
 
-<h4 id="L2000">channelRPC</h4>
+<h4>channelRPC</h4>
 
 <p>The following window appears when the channelRPC button is pushed. A
 channelRPC returns a new PVStructure for each request. The record must support
@@ -2756,7 +2031,7 @@ structureArray then when you select add a new structureArray window will
 appear. You follow the same procedure to create a sub structure.When you click
 done the createStructure window disappears. </p>
 
-<h4 id="L2016">array</h4>
+<h4>array</h4>
 
 <p>The following window appears when the array button is pushed:</p>
 
@@ -2772,7 +2047,7 @@ offset can be specified. The value field provides the array values. The
 setLength button is used to set the length and/or capacity of the array. A
 value of -1 means leave as is.</p>
 
-<h4 id="L2026">structureArray</h4>
+<h4>structureArray</h4>
 
 <p>This is used to get and modify elements of a PVStructureArray. You must get
 before issuing a put. The puts will modify the data obtained via the get and
@@ -2795,7 +2070,7 @@ like for put appears. This is changing the local data. When you click put the
 data is written to the actual record. The setLength button is used to set the
 length and/or capacity of the array. A value of -1 means leave as is.</p>
 
-<h4 id="L2040">monitor</h4>
+<h4>monitor</h4>
 
 <p>The following window appears when the monitor button is pushed:</p>
 
@@ -2817,9 +2092,9 @@ queueSize can be set.</p>
   while monitoring is active.</dt>
 </dl>
 
-<h3  id="L2065">Local JavaIOC</h3>
+<h3 >Local JavaIOC</h3>
 
-<h4 id="L2067">loadDatabase</h4>
+<h4>loadDatabase</h4>
 
 <p>The following window appears when the loadDatabase button is pushed:</p>
 
@@ -2845,7 +2120,7 @@ the following controls:</p>
       uinitialized and are not added to the master database.</dd>
 </dl>
 
-<h4 id="L2096">introspectDatabase</h4>
+<h4>introspectDatabase</h4>
 
 <p>The following window appears when the introspectDatabase button is
 pushed:</p>
@@ -2854,12 +2129,12 @@ pushed:</p>
 <p><img src="./introspectDatabase.gif" alt="introspectonsole" /></p>
 </center>
 
-<h5 id="L2104">Database Definitions</h5>
+<h5>Database Definitions</h5>
 
 <p>The top menubar allows the use to see all the structure definitions in the
 master database.</p>
 
-<h5 id="L2108">Local Record Instance</h5>
+<h5>Local Record Instance</h5>
 
 <p>The next three row allows the user to select and interact with a local
 record. The select button is used to select a local record. The text window
@@ -2884,7 +2159,7 @@ a record name. The remaining buttons apply to the selected button. They are:</p>
       This is a dangorous operation!!</dd>
 </dl>
 
-<h5 id="L2148">Show Information</h5>
+<h5>Show Information</h5>
 
 <p>The third row has two buttons that show information. They are:</p>
 <dl>
@@ -2896,7 +2171,7 @@ a record name. The remaining buttons apply to the selected button. They are:</p>
       org.epics.pvioc.util.</dd>
 </dl>
 
-<h4 id="L2163">portDriver</h4>
+<h4>portDriver</h4>
 
 <p>The following window appears when the portDriver button is pushed:</p>
 
@@ -2907,7 +2182,7 @@ a record name. The remaining buttons apply to the selected button. They are:</p>
 <p>The first row has buttons to select a port and a device. The other rows are
 for setting trace options and for connect and enable commands.</p>
 
-<h3  id="L2173">iocConsole</h3>
+<h3 >iocConsole</h3>
 
 <p>The following window appears when the iocConsole button is pushed:</p>
 
@@ -2921,10 +2196,10 @@ on the iocConsole window. Note that iocdb puts the messages on a queue and has
 a separate thead that send the messages to the requesters.</p>
 
 
-<h2  id="L2185">Package org.epics.pvioc.xml</h2>
+<h2 >Package org.epics.pvioc.xml</h2>
 
 
-<h3  id="L2189">Overview</h3>
+<h3 >Overview</h3>
 
 <p>One way to create structures and records for a PVDatabase is via
 XMLToPVDatabaseFactory, which parses structure and record definitions from an
@@ -2932,9 +2207,9 @@ xml file, creates structure and record instances and adds then to a PVDatabase.
 This overview first defines the xml syntax and then interfaces and code for
 reading the xml files.</p>
 
-<h3  id="L2193">Database XML Syntax</h3>
+<h3 >Database XML Syntax</h3>
 
-<h4 style="text-align:center;" id="L2195">database</h4>
+<h4 style="text-align:center;">database</h4>
 A JavaIOC database file is an XML file with the following structure: 
 <pre> &lt;?xml version="1.0" ?&gt;
 &lt;database
@@ -2946,7 +2221,7 @@ A JavaIOC database file is an XML file with the following structure:
    &lt;!--  arbitrary set of structure and record definitions --&gt;
 &lt;/database&gt;</pre>
 
-<h4 style="text-align:center;" id="L2201">auxInfo</h4>
+<h4 style="text-align:center;">auxInfo</h4>
 
 <p>An auxInfo defines additional information for a record, structure, or field.
 It is for use by applications that require additional information for a field.
@@ -2975,7 +2250,7 @@ An arbitrary number of auxInfo can be created for any field. </p>
 <p>value must be the name of a structure that provides the name of a factory
 that will provide the PVField implementation.</p>
 
-<h4 style="text-align:center;" id="L2236">structure and record</h4>
+<h4 style="text-align:center;">structure and record</h4>
 
 <p>Structure definitions exist so that a structure field of a record can be
 initialized with the fields of a previously defined structure definition. A
@@ -3027,7 +2302,7 @@ is defined as follows:</p>
       section for details.</dd>
 </dl>
 
-<h4 style="text-align:center;" id="L2289">package and import</h4>
+<h4 style="text-align:center;">package and import</h4>
 
 <p>These two elements are both related to structures defined in the previous
 section.</p>
@@ -3065,7 +2340,7 @@ structure definitions. For example the following:</p>
 &lt;/record&gt;</pre>
 <pre></pre>
 
-<h4 style="text-align:center;" id="L2317">Field definition</h4>
+<h4 style="text-align:center;">Field definition</h4>
 
 <p>A field of a record or structure can have one of the following tag names:
 scalar, scalarArray, or structure,.</p>
@@ -3136,7 +2411,7 @@ etc.</p>
       structure.</dd>
 </dl>
 
-<h4 style="text-align:center;" id="L2399">Scalar Types</h4>
+<h4 style="text-align:center;">Scalar Types</h4>
 The scalar types are: <span style="font-family: courier">boolean</span>, <span
 style="font-family: courier">byte</span>, <span
 style="font-family: courier">short</span>, <span
@@ -3187,7 +2462,7 @@ values for hex values. For example the following is legal syntax although Java
 would complain.</p>
 <pre>    &lt;scalar name = "mask" scalarType = "byte"&gt;0xff&lt;/scalar&gt;</pre>
 
-<h4 style="text-align:center;" id="L2497">Enumerated Structure</h4>
+<h4 style="text-align:center;">Enumerated Structure</h4>
 
 <p>An enumerated structure is a structure that:</p>
 <ol>
@@ -3207,7 +2482,7 @@ syntax is allowed:</p>
 the elements of <span style="font-family: courier">choices</span>. This results
 in the index field being initialized to the correct value. </p>
 
-<h4 style="text-align:center;" id="L2533">Examples</h4>
+<h4 style="text-align:center;">Examples</h4>
 
 <p>If <span style="font-family: courier;">fieldName</span> does not exist then
 a new field can be created and appended to the end of the current structure. In
@@ -3256,7 +2531,7 @@ array of structures:</p>
   &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h4 style="text-align:center;" id="L2557">Field Initialization</h4>
+<h4 style="text-align:center;">Field Initialization</h4>
 
 <p>If multiple field instance definitions appear then the last instance
 determines how the field is initialized.</p>
@@ -3264,7 +2539,7 @@ determines how the field is initialized.</p>
 <p>The syntax for the <span style="font-family: courier">initializer</span>
 depends on the field type.</p>
 
-<h4 id="L2566">Scalar Types</h4>
+<h4>Scalar Types</h4>
 
 <p>For scalar types the initializer has the same format as the Java constants
 for the type. For example if the type for field value is double:</p>
@@ -3279,13 +2554,13 @@ example the byte value 0xff is allowed even though Java would raise an
 exception if Byte.decode was used. The sign problem does exist for long
 values.</p>
 
-<h4 id="L2577">string</h4>
+<h4>string</h4>
 
 <p>For string types the initializer is a valid Java string constant, which can
 optionally be enclosed in quotes. For example:</p>
 <pre>    &lt;scalar = "units"&gt;voltage&lt;/scalar&gt;</pre>
 
-<h4 id="L2583">structure scalar</h4>
+<h4>structure scalar</h4>
 
 <p>A structure scalar field is initialized by giving field definitions for any
 fields in the associated structure. For example assume that the following
@@ -3312,7 +2587,7 @@ structure definitions have been given:</p>
     &lt;/scalar&gt;
 &lt;/record&gt;</pre>
 
-<h4 id="L2593">structure</h4>
+<h4>structure</h4>
 
 <p>Structure fields are initialized via a recursive definition of field.</p>
 
@@ -3346,7 +2621,7 @@ defined. The syntax is:</p>
        &lt;auxInfo name = "pvReplaceFactory" scalarType = "string"&gt;someFactory&lt;/auxinfo&gt;
     &lt;/structurte&gt;</pre>
 
-<h4 id="L2611">array</h4>
+<h4>array</h4>
 The syntax for a array initializer is: 
 <pre>    &lt;array name = "fieldName" scalarType = "scalarType"
     capacity = "capacity" capacityMutable = "true/false" length = "length" offset = "offset" &gt;
@@ -3393,7 +2668,7 @@ The syntax for a array initializer is:
       &lt;/structure&gt;
     &lt;/array&gt;</pre>
 
-<h5 id="L2655">structureArray</h5>
+<h5>structureArray</h5>
 
 <p>The first time a structure array field is created an extends must also be
 provided. The extended structure is used to create the array elements. For
@@ -3430,9 +2705,9 @@ example assume that the following structures have been defined:</p>
     &lt;/array&gt;
 &lt;/record&gt;</pre>
 
-<h4 style="text-align:center;" id="L2665">Macro Substitution and Include</h4>
+<h4 style="text-align:center;">Macro Substitution and Include</h4>
 
-<h4 id="L2667">Include</h4>
+<h4>Include</h4>
 The XML file can include other files also containing Record Instance
 Definitions. Included files can also include other files. The syntax is: 
 <pre>    
@@ -3450,7 +2725,7 @@ Definitions. Included files can also include other files. The syntax is:
     <dd>Remove a path.</dd>
 </dl>
 
-<h4 id="L2694">Macro Substitution</h4>
+<h4>Macro Substitution</h4>
 
 <p>Macro substitution replaces a string of the form "${from}" with some other
 text. The syntax is:</p>
@@ -3481,7 +2756,7 @@ text. The syntax is:</p>
 then if the value is found in the system environment table that value is
 used.</p>
 
-<h4 id="L2739">Example Include and Macro Substitution</h4>
+<h4>Example Include and Macro Substitution</h4>
 
 <p>The following is a template file:</p>
 <pre>&lt;?xml version="1.0" ?&gt;
@@ -3526,7 +2801,7 @@ se&gt;</pre>
 &lt;include href = "protoAiDB.xml" /&gt;
 &lt;/database&gt;</pre>
 
-<h3  id="L2749">Database XML Code</h3>
+<h3 >Database XML Code</h3>
 
 <p>This section describes the Java support for converting files, which have XML
 definitions for PVData structures and records, to PVDatabase PVStructures and
@@ -3544,7 +2819,7 @@ PVRecords.</p>
 <p>This section first shows the Java Definitions, then it discusses XML to
 PVDatabase parsing, and last Include and Substitute.</p>
 
-<h4 id="L2770">Warning About XML element syntax</h4>
+<h4>Warning About XML element syntax</h4>
 
 <p>This is a warning for utility code that genetrates xml for PVData. The
 problem is the special XML characters:</p>
@@ -3574,7 +2849,7 @@ generates PVData xml should look at all string scalar and scalar array element
 values. If any of the special XML characters are present then use
 the&lt;![CDATA[value]]&gt; method of encoding the value.</p>
 
-<h4 id="L2804">Java Definitions</h4>
+<h4>Java Definitions</h4>
 <pre>    class XMLToPVDatabaseFactory {
         static void convert(PVDatabase pvDatabase, String fileName,Requester requester,
             boolean reportSubstitutionFailure,
@@ -3629,7 +2904,7 @@ the&lt;![CDATA[value]]&gt; method of encoding the value.</p>
         static public IncludeSubstituteXMLReader getReader();
     }</pre>
 
-<h4 id="L2808">XML To PVDatabase</h4>
+<h4>XML To PVDatabase</h4>
 
 <p>This support processes PVData XML statements. Code that wants to parse
 PVData XML statements calls one of the XMLToPVDatabaseFactory.convert methods.
@@ -3637,7 +2912,7 @@ The only difference between the two methods is that the first provides access
 to detailed information about parsing while the second only provides
 errors..</p>
 
-<h5 id="L2812">XMLToPVDatabaseFactory</h5>
+<h5>XMLToPVDatabaseFactory</h5>
 
 <p>This provides two methods both named convert. The first provides detailed
 information about parsing. It is intended for use by VDCT. The second reports
@@ -3666,7 +2941,7 @@ The arguments for the first method are:</p>
     null.</dd>
 </dl>
 
-<h5 id="L2859">XMLToPVDatabaseListener</h5>
+<h5>XMLToPVDatabaseListener</h5>
 
 <p>This provides a callback for the beginning and end of the parsing of PVData
 XML elements not related to macro substitution and include. It provides the
@@ -3699,7 +2974,7 @@ following methods:</p>
     <dd>The definition on the new auxInfo is complete</dd>
 </dl>
 
-<h4 id="L2936">Include and Substitution</h4>
+<h4>Include and Substitution</h4>
 
 <p>This support completely handles all details of Macro Substitution and
 Include. The code that calls this support sees only the results of substitution
@@ -3716,7 +2991,7 @@ understands the include, substitute, package, and import elements. Thus it
 could be used by code other than XML to PVDatabase but any such code must
 realize that it does not provide access to all of SAX2.</p>
 
-<h4 id="L2942">IncludeSubstituteXMLListener</h4>
+<h4>IncludeSubstituteXMLListener</h4>
 
 <p>This interface must be implemented by the caller. It is a simplified version
 of the SAX2 ContentHandler. The methods are:</p>
@@ -3734,7 +3009,7 @@ of the SAX2 ContentHandler. The methods are:</p>
     <dd>The end tag opf an xml element is being processed.</dd>
 </dl>
 
-<h5 id="L2971">IncludeSubstituteDetailsXMLListener</h5>
+<h5>IncludeSubstituteDetailsXMLListener</h5>
 
 <p>This interface can optionally be implemented by the caller. It provides
 details about include and substitution details. The methods are:</p>
@@ -3758,22 +3033,22 @@ details about include and substitution details. The methods are:</p>
     <dd>A substitute is being removed.</dd>
 </dl>
 
-<h5 id="L3024">IncludeSubstituteXMLReader</h5>
+<h5>IncludeSubstituteXMLReader</h5>
 
 <p>The interface implemented by IncludeSubstituteXMLReaderFactory. It provides
 two methods: parse and message. The arguments to parse have already been
 describes. The message method adds the location within the input xml files when
 this method is called.</p>
 
-<h5 id="L3028">IncludeSubstituteXMLReaderFactory</h5>
+<h5>IncludeSubstituteXMLReaderFactory</h5>
 
 <p>The factory that implements macro substitution and include.</p>
 
 
-<h2  id="L3034">Package org.epics.pvioc.util</h2>
+<h2 >Package org.epics.pvioc.util</h2>
 
 
-<h3  id="L3038">Overview</h3>
+<h3 >Overview</h3>
 
 <p>This package provides utility code for a javaIOC:</p>
 <dl>
@@ -3784,9 +3059,9 @@ this method is called.</p>
     <dd>Support for records that are periodic or event scanned.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3053">Scan Field Support</h3>
+<h3 style="text-align: center;">Scan Field Support</h3>
 
-<h4 id="L3055">Definitions</h4>
+<h4>Definitions</h4>
 <pre>    public interface ScanField {
         ThreadPriority getPriority();
         PVInt getPriorityIndexPV();
@@ -3813,12 +3088,12 @@ this method is called.</p>
         public static ScanField create(PVRecord dbRecord);
     }</pre>
 
-<h4 id="L3059">ScanField</h4>
+<h4>ScanField</h4>
 
 <p>ScanField is a convenience interface for accessing the scan field of a
 record. </p>
 
-<h4 id="L3063">ScanType</h4>
+<h4>ScanType</h4>
 
 <p>This is a Java enum which defines the scan types:</p>
 <dl>
@@ -3843,7 +3118,7 @@ record. </p>
       Otherwise it returns null.</dd>
 </dl>
 
-<h4 id="L3091">ScanFieldFactory</h4>
+<h4>ScanFieldFactory</h4>
 
 <p>This is a factory for creating a ScanField.</p>
 <dl>
@@ -3851,9 +3126,9 @@ record. </p>
     <dd>Create a ScanField.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3101">Periodic and Event Scanners</h3>
+<h3 style="text-align: center;">Periodic and Event Scanners</h3>
 
-<h4 id="L3103">Definitions</h4>
+<h4>Definitions</h4>
 <pre>    public interface EventAnnounce {
         void announce();
     }
@@ -3878,7 +3153,7 @@ record. </p>
          public static EventScanner getEventScanner();
     }</pre>
 
-<h4 id="L3107">EventAnnounce</h4>
+<h4>EventAnnounce</h4>
 
 <p>This is the interface for announcing an event. The event scanner implements
 this interface. An announcer calls eventScanner.addEventAnnouncer in order to
@@ -3887,7 +3162,7 @@ get an EventAnnounce. The announcer then just calls:</p>
 
 <p>when it wants to announce an event.</p>
 
-<h4 id="L3115">EventScanner</h4>
+<h4>EventScanner</h4>
 
 <p>This is the interface for the event scanning facility implemented by
 ScannerFactory. It implements the methods:</p>
@@ -3904,7 +3179,7 @@ ScannerFactory. It implements the methods:</p>
     <dd>report announcers and event scanned records</dd>
 </dl>
 
-<h4 id="L3145">PeriodicScanner</h4>
+<h4>PeriodicScanner</h4>
 
 <p>This is the interface for the periodic scanning facility implemented by
 ScannerFactory. It implements the methods:</p>
@@ -3918,10 +3193,10 @@ ScannerFactory. It implements the methods:</p>
 </dl>
 
 
-<h2  id="L3167">Package org.epics.pvioc.install</h2>
+<h2 >Package org.epics.pvioc.install</h2>
 
 
-<h3  id="L3171">Overview</h3>
+<h3 >Overview</h3>
 
 <p>This package provides code to install structures and records into a javaIOC.
 A javaIOC is started via JavaIOC.main. Once started structures and records can
@@ -3961,12 +3236,12 @@ ensures that only one installation at a time is allowed.</p>
       Start allows unrelated support to execute in parallel.</dd>
 </dl>
 
-<h3  id="L3202">Install Factory</h3>
+<h3 >Install Factory</h3>
 
 <p>InstallFactory is used to install structure or records into master database
 of a javaIOC. Only one set of definitions at a time can be installed.</p>
 
-<h4 id="L3206">Definitions</h4>
+<h4>Definitions</h4>
 <pre>interface Install {
     boolean installStructures(String xmlFile,Requester requester);
     boolean installStructures(PVDatabase pvDatabase,Requester requester);
@@ -3981,7 +3256,7 @@ class InstallFactory {
     public static Install get();
 }</pre>
 
-<h4 id="L3210">installStructures</h4>
+<h4>installStructures</h4>
 
 <p>Three methods are provided. The first install structure definitions from
 file. The second installs structure definitions from a PVDatabase. The last
@@ -4000,7 +3275,7 @@ installed.</p>
 <p>The last method installs a PVStructure if the structure does not already
 exist in the master.</p>
 
-<h4 id="L3220">installRecords</h4>
+<h4>installRecords</h4>
 
 <p>Three methods are provided. The first Install record definitions from file.
 The second installs records from a PVDatabase. The last installs a single
@@ -4017,7 +3292,7 @@ PVRecord.</p>
     PVRecord to it, and calls method 2.</li>
 </ol>
 
-<h4 id="L3234">Initialize, and Start Record Instances</h4>
+<h4>Initialize, and Start Record Instances</h4>
 
 <p>PVReplaceFactory.replace is called for the PCDatabase holding the new
 records.</p>
@@ -4048,12 +3323,12 @@ performed</p>
 <p>The return value is (false,true) if the new records (were not, were)
 installed.</p>
 
-<h3 style="text-align: center;" id="L3275">Support Creation</h3>
+<h3 style="text-align: center;">Support Creation</h3>
 
 <p>A SupportCreation is used to create, initialize, and start record instances.
 After it is done it is no longer accessable.</p>
 
-<h4 id="L3279">Definitions</h4>
+<h4>Definitions</h4>
 <pre>public class SupportCreationFactory {
     static public SupportCreation create(
          IOCDatabase supportDatabase,Requester requester);
@@ -4065,11 +3340,11 @@ public interface SupportCreation {
     boolean  startSupport(AfterStart afterStart);
 }</pre>
 
-<h4 id="L3283">Factory</h4>
+<h4>Factory</h4>
 
 <p>This has the single method which creates a SupportCreation.</p>
 
-<h4 id="L3287">SupportCreation</h4>
+<h4>SupportCreation</h4>
 <dl>
   <dt>createSupport</dt>
     <dd>Create the support. It first created a RecordProcess and then support
@@ -4083,7 +3358,7 @@ public interface SupportCreation {
       returns true if all records are started.</dd>
 </dl>
 
-<h3 style="text-align: center;" id="L3305">After Start</h3>
+<h3 style="text-align: center;">After Start</h3>
 
 <p>After Start is a facility that allows support code and servers like Channel
 Access to perform various functions after new records are started but before
@@ -4112,7 +3387,7 @@ Access. The NewAfterStartRequester is called each time a new AfterStart is
 created, i.e. every time a new set of records are being installed. The server
 can then call afterStart.requestCallback just like support code.</p>
 
-<h4 id="L3319">Definitions</h4>
+<h4>Definitions</h4>
 <pre>public interface AfterStartNode {}
 
 public interface AfterStartRequester {
@@ -4138,24 +3413,24 @@ public interface NewAfterStartRequester {
     void callback(AfterStart afterStart);
 }</pre>
 
-<h4 id="L3323">AfterStartNode</h4>
+<h4>AfterStartNode</h4>
 
 <p>Any code that calls afterStart.requestCallback must create an afterStartNode
 by calling AfterStartFactory.allocNode. It passes this to
 afterStart.requestCallback. A node can only be on one request list at a
 time.</p>
 
-<h4 id="L3327">AfterStartRequester</h4>
+<h4>AfterStartRequester</h4>
 
 <p>This is the interface which must be implemented by code that calls
 afterStart.requestCallback. It has a single method which is the callback.</p>
 
-<h4 id="L3331">NewAfterStartRequester</h4>
+<h4>NewAfterStartRequester</h4>
 
 <p>This is the interface which must be implemented by code that calls
 AfterStartFactory.NewAfterStartRegister.</p>
 
-<h4 id="L3335">AfterStartFactory</h4>
+<h4>AfterStartFactory</h4>
 <dl>
   <dt>create</dt>
     <dd>Create a new AfterStart. This is called by InstallFactory.</dd>
@@ -4170,7 +3445,7 @@ AfterStartFactory.NewAfterStartRegister.</p>
     <dd>Remove a NewAfterStartRequester.</dd>
 </dl>
 
-<h4 id="L3358">AfterStart</h4>
+<h4>AfterStart</h4>
 <dl>
   <dt>callRequesters</dt>
     <dd>Call requesters. This is called by InstallFactory.</dd>
@@ -4185,10 +3460,10 @@ AfterStartFactory.NewAfterStartRegister.</p>
 </dl>
 
 
-<h2  id="L3383">Package org.epics.pvioc.database</h2>
+<h2 >Package org.epics.pvioc.database</h2>
 
 
-<h3  id="L3387">Overview</h3>
+<h3 >Overview</h3>
 
 <p>This package provides everything required to create and access a PVDatabase.
 </p>
@@ -4227,12 +3502,12 @@ is a structured set of PVFields. A PVRecord can be:</p>
       message is generated.</dd>
 </dl>
 
-<h3  id="L3423">RecordField Interfaces</h3>
+<h3 >RecordField Interfaces</h3>
 
 <p>Each field of a record has an associated PVRecordField and each structure
 field a PVRecordStructure.</p>
 
-<h4 id="L3427">PVRecordField</h4>
+<h4>PVRecordField</h4>
 <pre>    interface PVRecordField extends Requester{
         Support getSupport();
         void setSupport(Support support);
@@ -4284,7 +3559,7 @@ field a PVRecordStructure.</p>
       called whenever the put method is called.</dd>
 </dl>
 
-<h4 id="L3494">PVRecordStructure</h4>
+<h4>PVRecordStructure</h4>
 
 <p>Each structure field has the following interface: Note that it extends
 PVRecordField</p>
@@ -4301,9 +3576,9 @@ PVRecordField</p>
     <dd>Get the PVStructure this field accesses.</dd>
 </dl>
 
-<h3  id="L3513">Record Interfaces</h3>
+<h3 >Record Interfaces</h3>
 
-<h4 id="L3515">PVListener</h4>
+<h4>PVListener</h4>
 
 <p>A PVlistener can attach itself to any field or fields of a record. It will
 be notified whenever a put is issued to the field, i.e. the field is modified.
@@ -4338,7 +3613,7 @@ fields can not have attached listeners.</p>
       values) is being changed.</dd>
 </dl>
 
-<h4 id="L3549">PVRecordClient</h4>
+<h4>PVRecordClient</h4>
 
 <p>Any client that accesses a PVRecord must call registerClient so that the
 client can be notified when the record is being removed from the master
@@ -4347,7 +3622,7 @@ database. The client must imnplement the following interface:</p>
         void detach(PVRecord pvRecord);
     }</pre>
 
-<h4 id="L3555">PVRecord</h4>
+<h4>PVRecord</h4>
 
 <p>A PVRecord has a top level PVStructure that provides the following
 methods:</p>
@@ -4433,7 +3708,7 @@ methods:</p>
     <dd>Get the number of registered clients.</dd>
 </dl>
 
-<h5 id="L3669">Record Locking</h5>
+<h5>Record Locking</h5>
 
 <p>Whever code access a record it must be locked. The code for accessing a
 record should use the following pattern:</p>
@@ -4447,9 +3722,9 @@ record should use the following pattern:</p>
 <p>Depending on the application, for example the JavaIOC, it may be required
 that the thread does not block between lock and unlock.</p>
 
-<h3  id="L3677">PVRecord Definition and Creation</h3>
+<h3 >PVRecord Definition and Creation</h3>
 
-<h4 id="L3679">PVDatabase</h4>
+<h4>PVDatabase</h4>
 
 <p>The interface is:</p>
 <pre>    interface PVDatabase extends Requester{
@@ -4534,7 +3809,7 @@ that the thread does not block between lock and unlock.</p>
     expression.</dd>
 </dl>
 
-<h4 id="L3788">PVRecordCreate</h4>
+<h4>PVRecordCreate</h4>
 
 <p>Interface and factory for creating PVrecords and PVStructures.</p>
 <pre>    interface PVRecordCreate {
@@ -4551,7 +3826,7 @@ that the thread does not block between lock and unlock.</p>
     <dd>Create a PVRecord with pvStructure as the top level structure.</dd>
 </dl>
 
-<h4 id="L3802">PVReplaceFactory</h4>
+<h4>PVReplaceFactory</h4>
 
 <p>Factory that looks for and calls factories that replace the default
 implementation of a field.</p>
@@ -4578,7 +3853,7 @@ implementation of a field.</p>
     </dd>
 </dl>
 
-<h3  id="L3826">PVDatabase</h3>
+<h3 >PVDatabase</h3>
 
 <p>PVDatabase is an interface for accessing a PVData database. </p>
 
@@ -4670,7 +3945,7 @@ in structure "structName". </p>
       expression.</dd>
 </dl>
 
-<h4 id="L3943">PVDatabaseFactory</h4>
+<h4>PVDatabaseFactory</h4>
 
 <p>This is a factort that creates a PVDatabase.</p>
 <pre>    class PVDatabaseFactory {
@@ -4691,10 +3966,10 @@ in structure "structName". </p>
 </dl>
 
 
-<h2  id="L3967">Package org.epics.pvioc.support</h2>
+<h2 >Package org.epics.pvioc.support</h2>
 
 
-<h3  id="L3971">Overview</h3>
+<h3 >Overview</h3>
 
 <p>This package describes how records are processed. Package install describes
 how records are initialized and started. During database creation each record
@@ -4702,7 +3977,7 @@ is assigned an instance of RecordProcess, which coordinates record processing.
 In addition each record has a Support instance and each field can optionally
 have an associated Support instance. </p>
 
-<h4 id="L3975">RecordProcess</h4>
+<h4>RecordProcess</h4>
 
 <p>The following interfaces are involved with record processing:</p>
 <dl>
@@ -4721,7 +3996,7 @@ have an associated Support instance. </p>
     <dd>Implemented by code that calls recordProcess.processContinue.</dd>
 </dl>
 
-<h4 id="L4010">Support</h4>
+<h4>Support</h4>
 
 <p>Every JavaIOC record instance has associated support code and each field of
 a record instance can optionally have associated support code. This package
@@ -4782,7 +4057,7 @@ modules. The sub-packages are:</p>
     <dd>Support for communicating with portDriver.</dd>
 </dl>
 
-<h3  id="L4116">Record Processing Theory of
+<h3 >Record Processing Theory of
 Operation</h3>
 
 <p>A JavaIOC Database is a "smart" database. Each record has associated support
@@ -4795,7 +4070,7 @@ level structure. The record support process method calls the support for any
 field of the top level structure that has associated support. Any support can
 call other support.</p>
 
-<h4 id="L4122">Definitions</h4>
+<h4>Definitions</h4>
 <dl>
   <dt>synchronous</dt>
     <dd>Code that does not block, i.e. does not perform actions like waiting
@@ -4833,7 +4108,7 @@ call other support.</p>
       code must be implemented carefully.</dd>
 </dl>
 
-<h4 id="L4175">Requester Examples</h4>
+<h4>Requester Examples</h4>
 <dl>
   <dt>Local Channel Access</dt>
     <dd>An example is a channel access server that is accessing IOC database.
@@ -4867,7 +4142,7 @@ call other support.</p>
     </dd>
 </dl>
 
-<h4 id="L4218">RecordProcess Overview</h4>
+<h4>RecordProcess Overview</h4>
 
 <p>A record is processed via a call to RecordProcess.process. It in turn calls
 the record support process method. Record support optionally calls the process
@@ -4997,7 +4272,7 @@ the record.</p>
   </li>
 </ul>
 
-<h4 id="L4345">Local Channel Access Example</h4>
+<h4>Local Channel Access Example</h4>
 
 <p>As an example assume that a channel access server does the following to a
 record:</p>
@@ -5023,7 +4298,7 @@ record:</p>
   <li>The server calls recordSupport.setInactive.</li>
 </ul>
 
-<h4 id="L4380">Link Support Example</h4>
+<h4>Link Support Example</h4>
 
 <p>As an example assume that a record type double has the following fields:</p>
 <dl>
@@ -5151,7 +4426,7 @@ following happens:</p>
   </li>
 </ul>
 
-<h4 id="L4547">Locking</h4>
+<h4>Locking</h4>
 
 <p>The locking strategy is based on the following:</p>
 <ul>
@@ -5190,7 +4465,7 @@ try {
     permissible to lock more than two records at a time.</li>
 </ul>
 
-<h4 id="L4586">Support Overview</h4>
+<h4>Support Overview</h4>
 
 <p>A support module implements the following methods:</p>
 <dl>
@@ -5216,9 +4491,9 @@ auxInfo definition that has a name of "supportFactory". In addition there must
 be a structure definition for the factory itself. Look at the xml structure
 definitions that come with the javaIOC for examples.</p>
 
-<h3 style="text-align: center;" id="L4625">Record Process</h3>
+<h3 style="text-align: center;">Record Process</h3>
 
-<h4 id="L4627">Definitions</h4>
+<h4>Definitions</h4>
 
 <p>The following are the interfaces for record processing:</p>
 <pre>    
@@ -5290,7 +4565,7 @@ falls into one of the following classes:</p>
     that implements record processing.</li>
 </ol>
 
-<h4 id="L4648">RecordProcess - General Purpose Methods</h4>
+<h4>RecordProcess - General Purpose Methods</h4>
 <dl>
   <dt style="font-family: courier;">isEnabled</dt>
     <dd>Is the record enabled?</dd>
@@ -5312,7 +4587,7 @@ falls into one of the following classes:</p>
     <dd>Get the current support state.</dd>
 </dl>
 
-<h4 id="L4686">RecordProcess - Record Lifetime Methods.</h4>
+<h4>RecordProcess - Record Lifetime Methods.</h4>
 
 <p><span style="font-family: courier;">RecordProcess</span> looks for the
 fields <span style="font-family: courier;">timeStamp</span>, <span
@@ -5343,7 +4618,7 @@ record support code must ignore these fields.</p>
       style="font-family: courier;">SupportState.readyForInitialize.</span></dd>
 </dl>
 
-<h4 id="L4732">RecordProcess - Record Process Requester Methods</h4>
+<h4>RecordProcess - Record Process Requester Methods</h4>
 
 <p>These are methods called by code that wants a record processed.</p>
 <dl>
@@ -5381,7 +4656,7 @@ record support code must ignore these fields.</p>
       the record is unlocked but before it becomes inactive.</dd>
 </dl>
 
-<h4 id="L4781">RecordProcess - Support Processing methods.</h4>
+<h4>RecordProcess - Support Processing methods.</h4>
 
 <p>Methods called by support code which may be record support or support called
 directly or indirectly by record support. Except for <span
@@ -5409,7 +4684,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       style="font-family: courier;">setTimeStamp</span></dd>
 </dl>
 
-<h4 id="L4817">RecordProcessRequester</h4>
+<h4>RecordProcessRequester</h4>
 
 <p>Methods implemented by code that requests that a record be processed.</p>
 <dl>
@@ -5434,7 +4709,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       <span style="font-family: courier;">setInactive.</span></dd>
 </dl>
 
-<h4 id="L4855">ProcessCallbackRequester</h4>
+<h4>ProcessCallbackRequester</h4>
 
 <p>The method implemented by code that calls requestProcessCallback.</p>
 <dl>
@@ -5444,7 +4719,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       use this interface. The callback is called with the record unlocked.</dd>
 </dl>
 
-<h4 id="L4865">ProcessContinueRequester</h4>
+<h4>ProcessContinueRequester</h4>
 
 <p>The method implemented by code that calls processContinue.</p>
 <dl>
@@ -5453,7 +4728,7 @@ style="font-family: courier;">processContinue</span> is running.</p>
       asynchronous support should continue processing.</dd>
 </dl>
 
-<h4 id="L4875">RecordProcessFactory</h4>
+<h4>RecordProcessFactory</h4>
 
 <p>A factory is provided to create an instance of RecordProcess for a record
 instance. It has the method:</p>
@@ -5462,13 +4737,13 @@ instance. It has the method:</p>
           RecordSupport recordSupport,PVRecord pvRecord);
 }</pre>
 
-<h3  id="L4881">Support</h3>
+<h3 >Support</h3>
 
 <p>This section describes the interfaces and abstract base class involved with
 support for fields of an IOC record. This also means support for the record
 itself.</p>
 
-<h4 id="L4885">Support State</h4>
+<h4>Support State</h4>
 
 <p>Before support is ready for processing it must be ready. In addition on-line
 add and delete is supported. Thus it is possible to dynamically redefine link
@@ -5500,7 +4775,7 @@ values:</p>
     <dd>Support is being removed and can never again process.</dd>
 </dl>
 
-<h4 id="L4916">Support</h4>
+<h4>Support</h4>
 
 <p>The following are used by support code, i.e. record support, link support,
 and any other support code that is involved with record processing:</p>
@@ -5564,7 +4839,7 @@ method:</p>
       called with either process or processContinue running.</dd>
 </dl>
 
-<h4 id="L4995">Record Support</h4>
+<h4>Record Support</h4>
 
 <p>Every record instance has an attached RecordSupport:</p>
 <pre>    public interface RecordSupport {
@@ -5574,11 +4849,11 @@ method:</p>
         void setSupport(PVField pvField,Support support);
     }</pre>
 
-<h3  id="L5001">AbstractSupport</h3>
+<h3 >AbstractSupport</h3>
 
-<h4 id="L5003">AbstractSupport</h4>
+<h4>AbstractSupport</h4>
 
-<h4 id="L5005">Definitions</h4>
+<h4>Definitions</h4>
 <pre>    public abstract class AbstractSupport implements Support {
         protected AbstractSupport(String name,PVRecordField pvRecordField);
         // methods from Requester
@@ -5637,9 +4912,9 @@ needs.</p>
       message if it isn't.</dd>
 </dl>
 
-<h3 id="L5072">Package org.epics.pvioc.support.rpc</h3>
+<h3>Package org.epics.pvioc.support.rpc</h3>
 
-<h4  id="L5074">Overview</h4>
+<h4 >Overview</h4>
 
 <p>This package provides support for remote procedure calls from a channel
 access client. Two types of RPCs are possible:</p>
@@ -5651,7 +4926,7 @@ access client. Two types of RPCs are possible:</p>
     <dd>This is used if a new PVStructure must be send for each request.</dd>
 </dl>
 
-<h5 id="L5089">putProcessGet RPC</h5>
+<h5>putProcessGet RPC</h5>
 
 <p>A RPC is implemented via a structure that has the following fields:</p>
 <dl>
@@ -5670,12 +4945,12 @@ arguments and the get retrieves the result.</p>
 required by the support provided by this package. The following sections
 provide a brief description of the arguments and result for each support.</p>
 
-<h5 id="L5108">channelRPC</h5>
+<h5>channelRPC</h5>
 
 <p>A ChannelRPC allows a different PVStructure to be passed to the server and
 returned to the client for each request.</p>
 
-<h4  id="L5112">ExampleChannelRPC</h4>
+<h4 >ExampleChannelRPC</h4>
 
 <p>This is an example of how to implement support for a record that supports a
 ChannelRPC request. See the package description for org.epics.pvaccess.client for
@@ -5699,7 +4974,7 @@ PVStructure that has size subfields each of which is a clone of element. Look
 at the source code for details.</p>
 <pre></pre>
 
-<h4  id="L5124">RecordList</h4>
+<h4 >RecordList</h4>
 
 <p>This returns a list of the names of a set of records specified by a regular
 expression. The arguments are:</p>
@@ -5720,7 +4995,7 @@ expression. The arguments are:</p>
     <dd>An array wih element type of string. It contains the record names.</dd>
 </dl>
 
-<h4  id="L5152">StructureList</h4>
+<h4 >StructureList</h4>
 
 <p>This returns a list of the names of a set of structures specified by a
 regular expression. The arguments are:</p>
@@ -5742,7 +5017,7 @@ regular expression. The arguments are:</p>
     names.</dd>
 </dl>
 
-<h4  id="L5180">IocShow</h4>
+<h4 >IocShow</h4>
 
 <p>This provides some useful commands for getting information about a JavaIOC.
 The arguments are:</p>
@@ -5770,7 +5045,7 @@ The arguments are:</p>
     <dd>A scalar string that provides the result for the request.</dd>
 </dl>
 
-<h4  id="L5219">RecordShow</h4>
+<h4 >RecordShow</h4>
 
 <p>This provides some useful commands for getting information about a record
 The arguments are:</p>
@@ -5806,7 +5081,7 @@ The arguments are:</p>
     <dd>A scalar string that provides the result for the request.</dd>
 </dl>
 
-<h4  id="L5273">SupportStateSet</h4>
+<h4 >SupportStateSet</h4>
 
 <p>This allows the support state of a record to be changed The arguments
 are:</p>
@@ -5837,9 +5112,9 @@ are:</p>
     <dd>A scalar string that provides the result for the request.</dd>
 </dl>
 
-<h3 id="L5317">Package org.epics.pvioc.support.basic</h3>
+<h3>Package org.epics.pvioc.support.basic</h3>
 
-<h4  id="L5319">Overview</h4>
+<h4 >Overview</h4>
 
 <p>This package contains a set of modules that provide basic support
 services.</p>
@@ -5873,7 +5148,7 @@ services.</p>
     successfully.</dd>
 </dl>
 
-<h4  id="L5375">Generic Support</h4>
+<h4 >Generic Support</h4>
 <pre>    public class GenericFactory {
         public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
@@ -5904,7 +5179,7 @@ but looks for support and calls it if it exists. Thus the generic support can
 be used for many different types of data and many different types of
 support.</p>
 
-<h4  id="L5399">Noop Support</h4>
+<h4 >Noop Support</h4>
 <pre>    public class NoopFactory {
         public static Support create(PVRecordField pvRecordField);
         public static Support create(PVRecordStructure pvRecordStructure);
@@ -5915,7 +5190,7 @@ to provide support for any field. The support acts as though it is synchronous.
 All Support methods are implemented by just extending AbstractSupport without
 overriding any methods.</p>
 
-<h4  id="L5405">ScanFactory</h4>
+<h4 >ScanFactory</h4>
 
 <p>Support is provided for the scan field. This support is called by
 recordProcess. The support handles all the fields in structure scan:</p>
@@ -5925,7 +5200,7 @@ recordProcess. The support handles all the fields in structure scan:</p>
         public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
 
-<h4  id="L5413">Control Limit</h4>
+<h4 >Control Limit</h4>
 
 <p>This is code to enforce control limits. It handles the following type of
 definitions:</p>
@@ -5942,12 +5217,12 @@ definitions:</p>
         &lt;/structure&gt;
     &lt;/structure&gt;</pre>
 
-<h4  id="L5419">Linear Conversion</h4>
+<h4 >Linear Conversion</h4>
 
 <p>Support is available for input and output linear conversions. The xml
 definitions for linear conversions are:</p>
 
-<h5 id="L5423">linearConversion</h5>
+<h5>linearConversion</h5>
 
 <p>The structure linearConversion defines the fields used for linear
 conversions. The fields slope and intercept are the values used to convert a
@@ -5975,7 +5250,7 @@ lineraConversion:</p>
     <dd>The intercept for the linear conversion.</dd>
 </dl>
 
-<h5 id="L5458">LinearConvertInputFactory</h5>
+<h5>LinearConvertInputFactory</h5>
 <pre>    public class LinearConvertFactory {
         public static Support create(PVStructure pvStructure);
     }</pre>
@@ -5995,7 +5270,7 @@ structure containing the following fields:</p>
       support the support is called.</dd>
 </dl>
 
-<h5 id="L5480">LinearConvertOutputFactory</h5>
+<h5>LinearConvertOutputFactory</h5>
 <pre>    public class LinearConvertFactory {
         public static Support create(PVStructure pvStructure);
     }</pre>
@@ -6015,7 +5290,7 @@ output is a structure containing the following fields:</p>
       support the support is called.</dd>
 </dl>
 
-<h4  id="L5502">Incremental Support</h4>
+<h4 >Incremental Support</h4>
 
 <p>This is support for incremental outputs.For example it supports a record
 that has the following structure:</p>
@@ -6065,7 +5340,7 @@ that has the following structure:</p>
       each time the record is processed.</dd>
 </dl>
 
-<h4  id="L5535">Event Support</h4>
+<h4 >Event Support</h4>
 <pre>    public class EventFactory {
         public static Support create(PVField pvField);
     }</pre>
@@ -6083,7 +5358,7 @@ support announces an event. All event scanned records with the event name
 associated with the value field are processed. Each time process is called, the
 event support checks to see if the event name has changed.</p>
 
-<h4 style="text-align: center;" id="L5549">DelaySupport</h4>
+<h4 style="text-align: center;">DelaySupport</h4>
 
 <p>This is link support that simulates asynchronous support. It uses a
 configStructure that has the definition:</p>
@@ -6120,9 +5395,9 @@ of min.</p>
         public static Support create(PVStructure pvStructure);
     }</pre>
 
-<h3 id="L5579">Package org.epics.pvioc.support.calc</h3>
+<h3>Package org.epics.pvioc.support.calc</h3>
 
-<h4  id="L5581">Overview</h4>
+<h4 >Overview</h4>
 
 <p>This package provides support for calculations. A calculation computes a
 result that is assigned to the value field. This package provides:</p>
@@ -6141,9 +5416,9 @@ result that is assigned to the value field. This package provides:</p>
 <p>Basic calculation support is described first and then
 ExpressionCalculator.</p>
 
-<h4  id="L5604">Basic Calculation Support</h4>
+<h4 >Basic Calculation Support</h4>
 
-<h5 id="L5606">Database Definitions for Calculations</h5>
+<h5>Database Definitions for Calculations</h5>
 
 <p>xml/structure/calx.xml defines the following:</p>
 <pre>&lt;structure name = "calcArgsFactory"&gt;
@@ -6226,7 +5501,7 @@ support for field <span style="font-family: courier">calcArgs</span>. Support
 <span style="font-family: courier">expressionCalculator</span> is the support
 described in the next section.</p>
 
-<h5 id="L5705">Performing Calculations</h5>
+<h5>Performing Calculations</h5>
 
 <p>A calculation is performed by a calculation support. The following is done.
 When the calculation support, which is generic, is called it calls the
@@ -6239,7 +5514,7 @@ additional method</p>
 <p>which is used by the calculator support to get arguments. The calculator
 support uses the calcArgArray values to compute the calculated value.</p>
 
-<h5 id="L5713">calcArgs</h5>
+<h5>calcArgs</h5>
 
 <p>This support implements support for a structure than is a sequence of
 calcArg structures, which has the fields:</p>
@@ -6254,12 +5529,12 @@ calcArg structures, which has the fields:</p>
       the user.</dd>
 </dl>
 
-<h4  id="L5728">ExpressionCalculator</h4>
+<h4 >ExpressionCalculator</h4>
 
 <p>This is support for an expression that has the form of a valid java
 expression.</p>
 
-<h5 id="L5732">Simple Examples</h5>
+<h5>Simple Examples</h5>
 
 <p>The following example is a counter, i.e. each time the record is processed
 the value field is incremented by 1.</p>
@@ -6341,7 +5616,7 @@ to max. Note that &lt; must be given as the xml escape sequence for &lt; , i.e.
        &lt;/structure&gt;    &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5 id="L5750">Expression Syntax</h5>
+<h5>Expression Syntax</h5>
 
 <p>A expression is has the form of a valid Java scalar expression. The result
 of the expression is assigned to the value field.</p>
@@ -6352,7 +5627,7 @@ following:</p>
 Is the same as: 
 <pre>   ((a + (b*c)) + Math.sin((e*f)))</pre>
 
-<h5 id="L5762">Expression Arguments</h5>
+<h5>Expression Arguments</h5>
 
 <p>An argument can be one of the following:</p>
 <dl>
@@ -6378,7 +5653,7 @@ Is the same as:
     <dd>The argument is either Math.PI or Math.E</dd>
 </dl>
 
-<h5 id="L5802">Unary Operators</h5>
+<h5>Unary Operators</h5>
 
 <p>The supported unary operators are:</p>
 <dl>
@@ -6392,7 +5667,7 @@ Is the same as:
     <dd>Boolean not. The argument must be boolean.</dd>
 </dl>
 
-<h5 id="L5827">Binary Operators</h5>
+<h5>Binary Operators</h5>
 
 <p>The supported binary operators are:</p>
 <dl>
@@ -6444,21 +5719,21 @@ Is the same as:
     <dd>Conditional or. The arguments must be boolean.</dd>
 </dl>
 
-<h5 id="L5947">Ternary Operator</h5>
+<h5>Ternary Operator</h5>
 
 <p>The ternary operator ?: is supported.</p>
 
-<h5 id="L5951">Math Functions</h5>
+<h5>Math Functions</h5>
 
 <p>All the functions defined in java.lang.Math are supported.</p>
 
-<h5 id="L5955">Constant optimization</h5>
+<h5>Constant optimization</h5>
 
 <p>If the arguments of an operator are all constants then the result is
 determioned during initialization and the operation not performed when the
 record is processed.</p>
 
-<h5 id="L5959">Test</h5>
+<h5>Test</h5>
 
 <p>test/calc contains tests for ExpressionCalculator. After the test is
 initialized use the swtshell to bring up the introspectDatabase screen. Select
@@ -6467,7 +5742,7 @@ records. The only records without checks are random, calcSimpleCounter, and
 calcCounter. These can be checked manually. For random issue get with process
 requests. For calcSimpleCounter and calcCounter just monitor the records.</p>
 
-<h4 id="L5963">Package org.epics.pvioc.support.calc.example</h4>
+<h4>Package org.epics.pvioc.support.calc.example</h4>
 
 <p>This package gives some examples of how to extend AbstractCalculatorSupport.
 It has the following examples:</p>
@@ -6483,9 +5758,9 @@ It has the following examples:</p>
       a double array. When process is called it sets value equal to a + b.</dd>
 </dl>
 
-<h3 id="L5983">Package org.epics.pvioc.support.alarm</h3>
+<h3>Package org.epics.pvioc.support.alarm</h3>
 
-<h4  id="L5985">Overview</h4>
+<h4 >Overview</h4>
 
 <p>Support is provided for the alarm field itself and raising alarms for the
 primitive types and for an enumerated structure.</p>
@@ -6537,7 +5812,7 @@ describe the support. </p>
     <dd>Alarm support for enum field..</dd>
 </dl>
 
-<h4  id="L6061">XML definitions For alarms</h4>
+<h4 >XML definitions For alarms</h4>
 
 <p>Support for raising alarms is provided for all the primitive types and for
 an enumerated structure. Each can be defined for any field of a record that has
@@ -6548,7 +5823,7 @@ alarm support but each substructure can also have alarm support. Three basic
 types of support are provided: numeric, boolean, and enumerated. Each is
 discussed in a separate section below.</p>
 
-<h5 id="L6065">Numeric Scalar</h5>
+<h5>Numeric Scalar</h5>
 
 <p>Support is provided for all the numeric scalar types: byte, short, long,
 float, and double. The following desription is for double but the support for
@@ -6605,7 +5880,7 @@ replaced by structure in the above example. What is important is that the
 structure has fields named value and alarm and that a structure field that
 extends doubleAlarm is defined.</p>
 
-<h5 id="L6083">Boolean</h5>
+<h5>Boolean</h5>
 
 <p>A example of attaching alarm support to a boolean record or structure is:</p>
 <pre>&lt;record recordName = "booleanExample"&gt;
@@ -6622,7 +5897,7 @@ extends doubleAlarm is defined.</p>
 <p>The booleanAlarm structure also has a fields named changeOfStateAlarm and
 changeOfStateMessage. It semantics should be easy to see.</p>
 
-<h5 id="L6091">Enumerated</h5>
+<h5>Enumerated</h5>
 
 <p>Before explaining the example let's first define the structure associated
 with enumerated alarm support.</p>
@@ -6660,7 +5935,7 @@ enumerated field named value. It has the fields:</p>
 
 &lt;/record&gt;</pre>
 
-<h4  id="L6119">Alarm Support</h4>
+<h4 >Alarm Support</h4>
 
 <p>AlarmSupport is support for a field named which must have type structure and
 the structure must be an alarm structure. Within the structure hierarchy of a
@@ -6716,12 +5991,12 @@ class AlarmSupportFactory {
     found.</dd>
 </dl>
 
-<h4  id="L6166">Value Alarms</h4>
+<h4 >Value Alarms</h4>
 
 <p>Support is provided for alarms for the following types of fields: boolean,
 numeric, and enumerated.</p>
 
-<h5 id="L6170">Boolean Alarms</h5>
+<h5>Boolean Alarms</h5>
 <pre>    public class BooleanAlarmFactory {
         public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
@@ -6744,7 +6019,7 @@ fields:</p>
       changes.</dd>
 </dl>
 
-<h5 id="L6197">Numeric Alarms</h5>
+<h5>Numeric Alarms</h5>
 <pre>    public class ByteAlarmFactory {
         public static Support create(PVRecordStructure pvRecordStructure);
     }
@@ -6770,7 +6045,7 @@ support for each type except that float and double also support hystersis: If
 value goes into alarm this is the amount it must come out of alarm before the
 alarm severity is modified. This prevents alarm .</p>
 
-<h5 id="L6203">Enumerated Alarms</h5>
+<h5>Enumerated Alarms</h5>
 <pre>    public class EnumeratedAlarmFactory {
         public static Support create(PVRecordStructure pvRecordStructure);
     }</pre>
@@ -6792,9 +6067,9 @@ alarm severity is modified. This prevents alarm .</p>
       changes.</dd>
 </dl>
 
-<h3 id="L6227">Package org.epics.pvioc.support.caLink</h3>
+<h3>Package org.epics.pvioc.support.caLink</h3>
 
-<h4  id="L6229">Overview</h4>
+<h4 >Overview</h4>
 
 <p>This is support for channel access links. It is implemented by making client
 calls to CAJv4. It provides an implementation of support for the following:</p>
@@ -6815,7 +6090,7 @@ calls to CAJv4. It provides an implementation of support for the following:</p>
     data.</dd>
 </dl>
 
-<h4  id="L6259">Data Types Supported</h4>
+<h4 >Data Types Supported</h4>
 
 <p>Each requires that other support code, e.g. record support knows how to call
 them.</p>
@@ -6838,7 +6113,7 @@ them.</p>
     <dd>The Type for the pvname.</dd>
 </dl>
 
-<h4  id="L6288">Support Structure Definition</h4>
+<h4 >Support Structure Definition</h4>
 
 <p>Look at the structure definitions in javaIOC/dbd/structures/caLink.xml for a
 description of how the various structures are defined.</p>
@@ -6863,9 +6138,9 @@ scalar string field. The value of the field is a comma separated list of top
 level fields in the record to which the support is attached. The example asks
 to get the value, alarm, and display from the target record.</p>
 
-<h3 id="L6298">Package org.epics.pvioc.support.dbLink</h3>
+<h3>Package org.epics.pvioc.support.dbLink</h3>
 
-<h4  id="L6300">Overview</h4>
+<h4 >Overview</h4>
 
 <p>This is support for channel access links. It is implemented by making client
 calls to org.epics.pvioc.dbLink. It provides an implementation of support for the
@@ -6882,7 +6157,7 @@ following:</p>
       requests that the other record process.</dd>
 </dl>
 
-<h4  id="L6320">Data Types Supported</h4>
+<h4 >Data Types Supported</h4>
 
 <p>Each requires that other support code, e.g. record support knows how to call
 them.</p>
@@ -6908,13 +6183,13 @@ them.</p>
 <p>Look at the structure definitions in javaIOC/dbd/structures/dbLink.xml for a
 description of how the various structures are defined.</p>
 
-<h3 id="L6351">Package org.epics.pvioc.support.device</h3>
+<h3>Package org.epics.pvioc.support.device</h3>
 
-<h4  id="L6353">Overview</h4>
+<h4 >Overview</h4>
 This package will have support for device abstractions. For now it only has a
 power supply example. 
 
-<h4  id="L6357">Power Supply Support</h4>
+<h4 >Power Supply Support</h4>
 <pre>    public class PowerSupplyFactory {
         public static Support create(PVStructure pvStructure);
     }</pre>
@@ -6935,10 +6210,10 @@ writing the current. The complete set of fields it suppports are:</p>
 </dl>
 
 
-<h2  id="L6381">Package org.epics.pvioc.pdrv</h2>
+<h2 >Package org.epics.pvioc.pdrv</h2>
 
 
-<h3  id="L6385">Preface</h3>
+<h3 >Preface</h3>
 
 <p><b>portDriver</b> is a general purpose facility for interfacing support code
 to low level drivers.</p>
@@ -6967,7 +6242,7 @@ following other packages are related to portDriver.</p>
     <dd>Support for Digital I/O.</dd>
 </dl>
 
-<h3  id="L6439">Purpose</h3>
+<h3 >Purpose</h3>
 
 <p><b>portDriver</b> is a general purpose facility for interfacing support code
 to low level drivers. Devices are accessed via a port. portDriver allows
@@ -7023,7 +6298,7 @@ However much of it is independent of the javaIOC.</p>
   <li>portDriverLinkSupport - This is discussed in other packages.</li>
 </ul>
 
-<h3  id="L6495">Status</h3>
+<h3 >Status</h3>
 
 <p>This version provides</p>
 <ul>
@@ -7062,7 +6337,7 @@ lent me some xvi11 based hardware which has been used for the tests.</p>
   <li>???</li>
 </ul>
 
-<h3  id="L6530">Acknowledgments</h3>
+<h3 >Acknowledgments</h3>
 
 <p>portDriver is modeled after asynDriver. See <a
 href="http://www.aps.anl.gov/epics/modules/soft/asyn/">asynDriver</a>. for
@@ -7071,9 +6346,9 @@ details about asynDriver.</p>
 <p>Special thanks goes to Mark Rivers and Eric Norum who both made major
 contributions to asynDriver and to Dirk Zimoch for developing STEAMS.</p>
 
-<h3  id="L6539">Overview of portDriver</h3>
+<h3 >Overview of portDriver</h3>
 
-<h4 id="L6541">Definitions</h4>
+<h4>Definitions</h4>
 
 <p>portDriver is a software layer between support code, e.g. javaIOC support,
 and drivers that communicate with devices. It supports both blocking and
@@ -7154,11 +6429,11 @@ GPIB port.</p>
 <p>portDriver uses some features of the javaIOC but it can be used by other
 code, e.g. a sequence program when one is created for the javaIOC.</p>
 
-<h4 id="L6664">portDriver Interfaces</h4>
+<h4>portDriver Interfaces</h4>
 The interfaces implemented by port drivers are described in the overview for
 package org.epics.pvioc.pdrv.interfaces. 
 
-<h4 id="L6668">portDriver Factory</h4>
+<h4>portDriver Factory</h4>
 
 <p>This implements Port, Device, User, and Trace. It has static methods to:</p>
 <ul>
@@ -7169,7 +6444,7 @@ package org.epics.pvioc.pdrv.interfaces.
     This is called by a driver to register a port.</li>
 </ul>
 
-<h4 id="L6685">Connection Management</h4>
+<h4>Connection Management</h4>
 
 <p>Port and Device keep track of the following states:</p>
 <ul>
@@ -7195,7 +6470,7 @@ previously called exceptionCallbackAdd for that port or device are called.</p>
 <p>Drivers must call exceptionConnect whenever they connect to a port or device
 and exceptionDisconnect whenever they disconnect.</p>
 
-<h4 id="L6709">Protecting a Thread from Blocking</h4>
+<h4>Protecting a Thread from Blocking</h4>
 
 <p>The report methods can be called by any thread, but the caller is blocked
 until the report finishes. lockPort, connect, disconnect and some other Port
@@ -7206,7 +6481,7 @@ details.</p>
 must only be called by QueueRequestCallback.callback or by calls between
 lockPort/unlockPort.</p>
 
-<h4 id="L6715">portThread</h4>
+<h4>portThread</h4>
 
 <p>If a driver calls Factory.createPort with canBlock true, then portDriver
 creates a thread for the port. Each portThread has its own set of queues for
@@ -7240,7 +6515,7 @@ following algorithm:</p>
 outside asynManager. This means that the queues can be modified and exceptions
 may occur.</p>
 
-<h4 id="L6760">Driver Can Also Be User</h4>
+<h4>Driver Can Also Be User</h4>
 
 <p>A driver can also be the user of another driver. For example a multi-drop
 serial driver can use a standard serial driver to perform the actual I/O. Such
@@ -7249,7 +6524,7 @@ locks the multi-drop port. The driver can than call lock/unlock for the serial
 port so that it has exclusive access to the serial port which the multi-drip
 user has access.</p>
 
-<h4 id="L6764">Initialization</h4>
+<h4>Initialization</h4>
 
 <p>During initialization, drivers register each communication port as well as
 all supported interfaces.</p>
@@ -7281,7 +6556,7 @@ calls findInterface to locate the interfaces with which it calls the driver.
 For example: 
 <pre>     Octet octet = (Octet)device.findInterface(user,"octet",true);</pre>
 
-<h4 id="L6795">Requesting access to a port</h4>
+<h4>Requesting access to a port</h4>
 
 <p>User code can request access to a port by two methods:</p>
 <ul>
@@ -7297,9 +6572,9 @@ For example:
   </li>
 </ul>
 
-<h3  id="L6810">PortDriver Record Types</h3>
+<h3 >PortDriver Record Types</h3>
 
-<h4 id="L6812">portCreate record</h4>
+<h4>portCreate record</h4>
 
 <p>A recordType and support portCreate is provided. An instance creates a port.
 The recordType has the following fields:</p>
@@ -7330,7 +6605,7 @@ The recordType has the following fields:</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h4 id="L6846">portDeviceControl record</h4>
+<h4>portDeviceControl record</h4>
 
 <p>A recordType and support portDeviceControl is provided. It allows a user to
 interact with a port or a device connected to a port. The record has the
@@ -7363,7 +6638,7 @@ following fields:</p>
       specified details. The report is placed in the message field.</dd>
 </dl>
 
-<h3  id="L6891">portDriver Factory</h3>
+<h3 >portDriver Factory</h3>
 
 <p>This is the factory for creating portDriver objects.</p>
 <pre>public class Factory {
@@ -7375,7 +6650,7 @@ following fields:</p>
     public static Port getPort(String portName);
 }</pre>
 
-<h4 id="L6897">createUser</h4>
+<h4>createUser</h4>
 <pre>    User createUser(QueueRequestCallback asynQueueRequestCallback);</pre>
 
 <p>Create a User. This is called by code that wants to access a port and/or the
@@ -7389,7 +6664,7 @@ devices connected to the port.</p>
       to call queueRequest a null is acceptable.</dd>
 </dl>
 
-<h4 id="L6911">createPort</h4>
+<h4>createPort</h4>
 <pre>    Port createPort(
             String portName,PortDriver portDriver,String driverName,
             boolean canBlock,boolean autoConnect,ThreadPriority priority);</pre>
@@ -7420,12 +6695,12 @@ interface is created and returned.</p>
     <dd>The priority for the port thread if the port can block.</dd>
 </dl>
 
-<h4 id="L6950">getPortNames</h4>
+<h4>getPortNames</h4>
 <pre>    String[] getPortNames();</pre>
 
 <p>Get an array containing the name of each port. </p>
 
-<h4 id="L6956">getPort</h4>
+<h4>getPort</h4>
 <pre>    Port getPort(String portName);</pre>
 
 <p>Get the Port for the specified portName. If the port does not exist null is
@@ -7437,7 +6712,7 @@ returned.</p>
     <dd>The name of the port.</dd>
 </dl>
 
-<h3  id="L6970">User</h3>
+<h3 >User</h3>
 
 <p>User is the interface for accessing a port and/or device. It is created by
 Factory and used by client code. </p>
@@ -7480,7 +6755,7 @@ Factory and used by client code. </p>
     String getString();
 }</pre>
 
-<h4 id="L6976">Status</h4>
+<h4>Status</h4>
 
 <p>Many methods return a status which is defined by the following:</p>
 <pre>public enum Status {
@@ -7505,7 +6780,7 @@ Factory and used by client code. </p>
       user.setMessage.</dd>
 </dl>
 
-<h4 id="L7005">REASON</h4>
+<h4>REASON</h4>
 
 <p>setReason,getReason described below have an integer argument. The following
 are some generic reasons:</p>
@@ -7517,7 +6792,7 @@ are some generic reasons:</p>
     <dd>A signal occured.</dd>
 </dl>
 
-<h4 id="L7019">duplicateUser</h4>
+<h4>duplicateUser</h4>
 
 <p>Create a new User that is connected to the same port and device. The new
 user will also have the same reason and timeout as the orginal. </p>
@@ -7532,7 +6807,7 @@ user will also have the same reason and timeout as the orginal. </p>
       be null.</dd>
 </dl>
 
-<h4 id="L7038">User Queue Request</h4>
+<h4>User Queue Request</h4>
 
 <p>Any user that wants to make asynchronous I/O requests but does not want to
 block while making the request can call queueRequest. An example is link
@@ -7583,7 +6858,7 @@ calls to the device I/O interfaces.</p>
 than nothing happens. Note that it is possible for the callback to be called
 between the time when cancel is called and when it returns.</p>
 
-<h4 id="L7077">User lock/unlock Port.</h4>
+<h4>User lock/unlock Port.</h4>
 
 <p>If a user is willing to block during asynchronous port I/O requests then it
 can just call lockPort/unlockPort. </p>
@@ -7602,7 +6877,7 @@ can just call lockPort/unlockPort. </p>
 
 <p>The other lock methods are for calling port.connect and device.connect.</p>
 
-<h4 id="L7089">User connection to a port</h4>
+<h4>User connection to a port</h4>
 <pre>    Port connectPort(String portName);
     void disconnectPort();</pre>
 
@@ -7612,12 +6887,12 @@ a device then disconnectPort calls disconnectDevice. Note that these methods
 only connects/disconnects the user to/from the port. Thus it does not effect
 the connect/disconnect state of the port itself.</p>
 
-<h4 id="L7095">getPort</h4>
+<h4>getPort</h4>
 <pre>    Port getPort();</pre>
 
 <p>Get the port to which this user is connected. This can be null.</p>
 
-<h4 id="L7101">User connection to a device</h4>
+<h4>User connection to a device</h4>
 <pre>    Device connectDevice(String deviceName);
     void disconnectDevice();</pre>
 The user must be connected to a port before connecting to a device. If the
@@ -7627,12 +6902,12 @@ device does not exist connectDevice returns null.
 that these methods only connects/disconnects the user to/from the device. Thus
 it does not effect the connect/disconnect state of the device itself.</p>
 
-<h4 id="L7109">getDevice</h4>
+<h4>getDevice</h4>
 <pre>    Device getDevice();</pre>
 
 <p>Get the device to which this user is connected. This can be null.</p>
 
-<h4 id="L7115">User Messages</h4>
+<h4>User Messages</h4>
 <pre>    void setMessage(String message);
     String getMessage();</pre>
 
@@ -7640,7 +6915,7 @@ it does not effect the connect/disconnect state of the device itself.</p>
 must also call user.setMessage to explain why the method failed. The user can
 then call getMessage to find the reason.</p>
 
-<h4 id="L7121">I/O Timeouts</h4>
+<h4>I/O Timeouts</h4>
 <pre>    void setTimeout(double timeout);
     double getTimeout();</pre>
 
@@ -7651,7 +6926,7 @@ getTimeout to get the timeout. It is the timeout for an individual I/O request.
 For example for a serial driver it could mean the time to read/write a single
 byte.</p>
 
-<h4 id="L7127">Driver Private</h4>
+<h4>Driver Private</h4>
 <pre>    void setPortDriverPvt(Object portDriverPvt);
     Object getPortDriverPvt();
     void setDeviceDriverPvt(Object deviceDriverPvt);
@@ -7673,13 +6948,13 @@ driver can call getPortDriver or getDeviceDriver to get the private data for
 the user. DriverUser.dispose should remove all provate state and data fot the
 user.</p>
 
-<h4 id="L7140">User Private</h4>
+<h4>User Private</h4>
 <pre>    void setUserPvt(Object userPvt);
     Object getUserPvt();</pre>
 
 <p>These are for private use by the user.</p>
 
-<h4 id="L7146">Passing Information Between User and Driver</h4>
+<h4>Passing Information Between User and Driver</h4>
 
 <p>The set/get methods are for passing data between a user and a driver.
 Normally it is the driver that calls a set method and the user that calls a get
@@ -7690,7 +6965,7 @@ org.epics.pvioc.portDriver.interfaces</span> make use of these methods. For
 example the octet interface use setInt to tell the user how many elements were
 transfered.</p>
 
-<h3  id="L7153">Connect Exception</h3>
+<h3 >Connect Exception</h3>
 
 <p>Both Port and Device provide a methods exceptionListenerAdd and
 exceptionListenerRemove. The listener is called whenever the connection state
@@ -7722,7 +6997,7 @@ autoConnect state.</p>
     void exception(ConnectExceptionType connectException);
 }</pre>
 
-<h3  id="L7183">Port</h3>
+<h3 >Port</h3>
 
 <p>A port manages user access to the I/O. All methods except connecy/disconnect
 can be called without locking the port.</p>
@@ -7753,13 +7028,13 @@ can be called without locking the port.</p>
     void exceptionDisconnect();
 }</pre>
 
-<h4 id="L7191">User Locate Device</h4>
+<h4>User Locate Device</h4>
 
 <p>After a user has connected to a port via a call to user.connectPort it can
 connect to a device by calling port.getDevice.</p>
 <pre>    Device getDevice(User user, int addr);</pre>
 
-<h4 id="L7197">User Connection Methods</h4>
+<h4>User Connection Methods</h4>
 
 <p>Most users do not ask the port to connect or disconnect but a specialized
 client may. For example javaIOC link support is provided for connect/disconnect
@@ -7769,7 +7044,7 @@ lockPort/unlockPort to call these methods.</p>
 <pre>    Status connect(User user);
     Status disconnect(User user);</pre>
 
-<h4 id="L7203">Informational Methods</h4>
+<h4>Informational Methods</h4>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    String report(boolean reportDevices,int details);
@@ -7799,7 +7074,7 @@ lockPort/unlockPort to call these methods.</p>
     <dd>Is it possible for the driver to block while doing I/O?</dd>
 </dl>
 
-<h4 id="L7242">Connection Methods</h4>
+<h4>Connection Methods</h4>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    void enable(boolean trueFalse);
@@ -7833,7 +7108,7 @@ lockPort/unlockPort to call these methods.</p>
     <dd>Remove the listener.</dd>
 </dl>
 
-<h4 id="L7286">Driver Methods</h4>
+<h4>Driver Methods</h4>
 
 <p>These are methods called by a driver.</p>
 <pre>    Device createDevice(DeviceDriver deviceDriver, int addr);
@@ -7857,7 +7132,7 @@ lockPort/unlockPort to call these methods.</p>
     <dd>Not normally called by drivers</dd>
 </dl>
 
-<h4 id="L7320">LockPortNotify</h4>
+<h4>LockPortNotify</h4>
 
 <p>A driver can be the user of another driver. For example a multidrop the
 serial driver can use a serial port driver to do the actual I/O and just add
@@ -7895,7 +7170,7 @@ void unregisterLockPortNotify(); </pre>
     <dd>Unregister the caller.</dd>
 </dl>
 
-<h3  id="L7356">Device</h3>
+<h3 >Device</h3>
 
 <p>A device provides methods related to a device. The complete set of
 definitions for Device are:</p>
@@ -7925,7 +7200,7 @@ definitions for Device are:</p>
     void exceptionDisconnect();
 }</pre>
 
-<h4 id="L7362">User findInterface</h4>
+<h4>User findInterface</h4>
 
 <p>This is used by a user to locate an interface for the device. If the driver
 does not implement the requested interface null is returned.</p>
@@ -7940,7 +7215,7 @@ does not implement the requested interface null is returned.</p>
     <dd>The name of the interface.</dd>
 </dl>
 
-<h4 id="L7381">User Connection Methods</h4>
+<h4>User Connection Methods</h4>
 
 <p>Most users do not handle the device connecting or disconnecting but a
 specialized client may. For example javaIOC link support is provided for
@@ -7949,14 +7224,14 @@ disconnected via a Channel Access client.</p>
 <pre>    Status connect(User user);
     Status disconnect(User user);</pre>
 
-<h4 id="L7387">User Blocking</h4>
+<h4>User Blocking</h4>
 
 <p>A user can block other users from accessing a device. This only works for
 asynchronous drivers.</p>
 <pre>Status blockOtherUsers(User user);
 void unblockOtherUsers(User user);</pre>
 
-<h4 id="L7393">Informational Methods</h4>
+<h4>Informational Methods</h4>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    String report(int details);
@@ -7979,7 +7254,7 @@ void unblockOtherUsers(User user);</pre>
     <dd>Get the port to which this device is connected.</dd>
 </dl>
 
-<h4 id="L7427">Connection Methods</h4>
+<h4>Connection Methods</h4>
 
 <p>The following can be used by any code that is interested.</p>
 <pre>    void enable(boolean trueFalse);
@@ -8016,7 +7291,7 @@ void unblockOtherUsers(User user);</pre>
     <dd>Remove the listener.</dd>
 </dl>
 
-<h4 id="L7476">Driver Methods</h4>
+<h4>Driver Methods</h4>
 
 <p>These are methods called by a driver.</p>
 <pre>    void registerInterface(Interface iface);
@@ -8036,7 +7311,7 @@ void unblockOtherUsers(User user);</pre>
     <dd>Get the trace interface for the port.</dd>
 </dl>
 
-<h3  id="L7505">Trace</h3>
+<h3 >Trace</h3>
 
 <p>Both Port and Device provide access to a Trace facility, which allows
 diagnostic messages to be generated on a port or device basis. Both support,
@@ -8079,7 +7354,7 @@ public class TraceFactory {
 <p>TraceFactory is a factory that implements Trace. It can be used independent
 of portDriver.</p>
 
-<h4 id="L7515">Trace Mask Options</h4>
+<h4>Trace Mask Options</h4>
 
 <p>The trace mask specifies when to generate messages. </p>
 <pre>    public static final int ERROR = 0x0001;
@@ -8114,7 +7389,7 @@ of portDriver.</p>
     <dd>Get the current value of the mask.</dd>
 </dl>
 
-<h4 id="L7558">TraceIO Options</h4>
+<h4>TraceIO Options</h4>
 
 <p>The traceIO mask specifies what to generate for octet data values.</p>
 <pre>    public static final int IO_NODATA = 0x0000;
@@ -8150,7 +7425,7 @@ of portDriver.</p>
     <dd>Get the current truncation size.</dd>
 </dl>
 
-<h4 id="L7607">Trace File</h4>
+<h4>Trace File</h4>
 
 <p>The destination for trace messages.</p>
 <pre>    void setFile(Writer file);
@@ -8165,7 +7440,7 @@ of portDriver.</p>
     <dd>Get the current destination for trace messages,</dd>
 </dl>
 
-<h4 id="L7626">Trace Option Change Listener</h4>
+<h4>Trace Option Change Listener</h4>
 
 <p>Code that wants to listen for option change must implement the following:</p>
 <pre>public interface TraceOptionChangeListener {
@@ -8177,7 +7452,7 @@ of portDriver.</p>
          TraceOptionChangeListener traceOptionChangeListener);
     Status optionChangeListenerRemove(User user);</pre>
 
-<h4 id="L7636">Generating Trace Messages</h4>
+<h4>Generating Trace Messages</h4>
 
 <p><span style="font-family: courier;">print</span> is called to generate
 messages and <span style="font-family: courier;">printIO</span> to generate
@@ -8198,9 +7473,9 @@ messages and also the value of octet data.</p>
       features.</dd>
 </dl>
 
-<h3  id="L7663">Driver</h3>
+<h3 >Driver</h3>
 
-<h4 id="L7665">PortDriver</h4>
+<h4>PortDriver</h4>
 
 <p>Every driver must implement the following methods:</p>
 <pre>public interface PortDriver {
@@ -8227,7 +7502,7 @@ messages and also the value of octet data.</p>
       port.exceptionDisconnect(). It it fails it should return error.</dd>
 </dl>
 
-<h4 id="L7694">DeviceDriver</h4>
+<h4>DeviceDriver</h4>
 
 <p>The driver implements the following for each device it acesses.</p>
 <pre>public interface DeviceDriver {
@@ -8248,7 +7523,7 @@ messages and also the value of octet data.</p>
       device.exceptionDisconnect(). It it fails it should return error.</dd>
 </dl>
 
-<h3  id="L7718">Appendix: Java Definitions</h3>
+<h3 >Appendix: Java Definitions</h3>
 
 <p>The following is a complete list of all the Java definitions for <span
 style="font-family: courier;">package org.epics.pvioc.portDriver. </span></p>
@@ -8429,9 +7704,9 @@ public interface PortDriver {
     Status disconnect(User user);
 }</pre>
 
-<h3 id="L7730">Package org.epics.pvioc.support.interfaces</h3>
+<h3>Package org.epics.pvioc.support.interfaces</h3>
 
-<h4  id="L7732">Overview</h4>
+<h4 >Overview</h4>
 
 <p>This package contains portDriver interfaces for communication with a port or
 device. A driver implements one or more of these interfaces and a user calls
@@ -8473,9 +7748,9 @@ interface methods to communicate with a device..</p>
     An interface for a GPIB device.</li>
 </ul>
 
-<h4  id="L7811">miscellaneous</h4>
+<h4 >miscellaneous</h4>
 
-<h5 id="L7813">Interface</h5>
+<h5>Interface</h5>
 
 <p><span style="font-family: courier;">Interface</span> is the base interface
 for all portDriver interfaces.</p>
@@ -8492,7 +7767,7 @@ for all portDriver interfaces.</p>
     <dd>Returns the Device the interface supports.</dd>
 </dl>
 
-<h5 id="L7834">Option</h5>
+<h5>Option</h5>
 
 <p><span style="font-family: courier;">Option</span> is for drivers that accept
 run time options.</p>
@@ -8511,7 +7786,7 @@ the methods:</p>
     <dd>Get the option for the specified key.</dd>
 </dl>
 
-<h5 id="L7858">DriverUser</h5>
+<h5>DriverUser</h5>
 
 <p><span style="font-family: courier;">DriverUser</span> is an interface for
 drivers that require per-user information. A user calls create when it connects
@@ -8530,7 +7805,7 @@ can keep private data for each user.</p>
     <dd>Called by a user when it disconnects from a port or device.</dd>
 </dl>
 
-<h5 id="L7879">AbstractInterface</h5>
+<h5>AbstractInterface</h5>
 
 <p>An abstract class for drivers that implement interfaces.</p>
 <pre>public abstract class AbstractInterface implements Interface {
@@ -8564,13 +7839,13 @@ can keep private data for each user.</p>
     <dd>Get the interface name.</dd>
 </dl>
 
-<h4  id="L7928">serial</h4>
+<h4 >serial</h4>
 
 <p>This is the interface for serial communication. It supports I/O of 8 bit
 bytes and also has support for control characters that terminate serial
 messages.</p>
 
-<h5 id="L7932">SerialInterruptListener</h5>
+<h5>SerialInterruptListener</h5>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface SerialInterruptListener {
@@ -8583,7 +7858,7 @@ messages.</p>
     <dd>The new message is provided when an interrupt occurs.</dd>
 </dl>
 
-<h5 id="L7946">Serial</h5>
+<h5>Serial</h5>
 
 <p>The interface methods are:</p>
 <pre>public interface Serial extends Interface {
@@ -8650,7 +7925,7 @@ messages.</p>
     method.</dd>
 </dl>
 
-<h5 id="L8015">AbstractSerial</h5>
+<h5>AbstractSerial</h5>
 <pre>public abstract class AbstractSerial
 extends AbstractInterface
 implements Serial
@@ -8694,9 +7969,9 @@ implements Serial
     <dd>Returns Status.success an auxStatus = 0.</dd>
 </dl>
 
-<h4  id="L8062">uint32Digital</h4>
+<h4 >uint32Digital</h4>
 
-<h5 id="L8064">DigitalInterruptReason</h5>
+<h5>DigitalInterruptReason</h5>
 
 <p>The reason why an interrupt Occurred.</p>
 <pre>public enum DigitalInterruptReason {
@@ -8717,7 +7992,7 @@ implements Serial
     <dd>One or more mask bits have changed.</dd>
 </dl>
 
-<h5 id="L8088">UInt32DigitalInterruptListener</h5>
+<h5>UInt32DigitalInterruptListener</h5>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface UInt32DigitalInterruptListener {
@@ -8730,7 +8005,7 @@ implements Serial
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h5 id="L8102">UInt32Digital</h5>
+<h5>UInt32Digital</h5>
 
 <p>The interface methods are:</p>
 <pre>public interface UInt32Digital extends Interface{
@@ -8775,7 +8050,7 @@ implements Serial
     <dd>An interrupt has occurred.</dd>
 </dl>
 
-<h5 id="L8156">AbstractUInt32Digital</h5>
+<h5>AbstractUInt32Digital</h5>
 <pre>public abstract class AbstractUInt32Digital
 extends AbstractInterface
 implements UInt32Digital
@@ -8826,7 +8101,7 @@ implements UInt32Digital
     <dd>Calls the registered listeners.</dd>
 </dl>
 
-<h4  id="L8208">int32</h4>
+<h4 >int32</h4>
 
 <p><span style="font-family: courier;">int32</span> is implemented by a driver
 that supports a 32 bit integer. An example is a driver for an ADC (Analog to
@@ -8834,7 +8109,7 @@ Digital Converter). Unless it is more than a 32 bit ADC it can support this
 interface by using the low order bits and sign extending the high order
 bits..</p>
 
-<h5 id="L8214">Int32InterruptListener</h5>
+<h5>Int32InterruptListener</h5>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Int32InterruptListener {
@@ -8847,7 +8122,7 @@ bits..</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h5 id="L8228">Int32</h5>
+<h5>Int32</h5>
 
 <p>The interface methods are:</p>
 <pre>public interface Int32 extends Interface {
@@ -8883,7 +8158,7 @@ bits..</p>
     <dd>An interrupt has occurred.</dd>
 </dl>
 
-<h5 id="L8269">AbstractInt32</h5>
+<h5>AbstractInt32</h5>
 
 <p>A driver implements int32 by extending the following abstract base class:</p>
 <pre>public abstract class AbstractInt32
@@ -8922,12 +8197,12 @@ implements Int32
       returns <span style="font-family: courier;">Status.error</span>.</dd>
 </dl>
 
-<h4  id="L8314">int32Array</h4>
+<h4 >int32Array</h4>
 
 <p><span style="font-family: courier;">int32Array</span> is implemented by a
 driver that supports a array of 32 bit integers.</p>
 
-<h5 id="L8320">Int32ArrayInterruptListener</h5>
+<h5>Int32ArrayInterruptListener</h5>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Int32ArrayInterruptListener{
@@ -8940,7 +8215,7 @@ driver that supports a array of 32 bit integers.</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h5 id="L8334">Int32Array</h5>
+<h5>Int32Array</h5>
 
 <p>The implementation must implement PVIntArray, which is used for all I/O. In
 addition the following methods are implemented:</p>
@@ -8987,7 +8262,7 @@ addition the following methods are implemented:</p>
     <dd>An interrupt has occurred.</dd>
 </dl>
 
-<h5 id="L8383">AbstractInt32Array</h5>
+<h5>AbstractInt32Array</h5>
 
 <p>A driver implements int32Array by extending the following abstract base
 class:</p>
@@ -9031,12 +8306,12 @@ implements Int32Array
     <dd>Returns Status.success.</dd>
 </dl>
 
-<h4  id="L8432">float64</h4>
+<h4 >float64</h4>
 
 <p><span style="font-family: courier;">float64</span> is implemented by drivers
 that support a double value.</p>
 
-<h5 id="L8438">Float64InterruptListener</h5>
+<h5>Float64InterruptListener</h5>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Float64InterruptListener {
@@ -9049,7 +8324,7 @@ that support a double value.</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h5 id="L8452">Float64</h5>
+<h5>Float64</h5>
 
 <p>The interface methods are:</p>
 <pre>public interface Float64 extends Interface {
@@ -9085,7 +8360,7 @@ that support a double value.</p>
     <dd>An interrupt has occurred.</dd>
 </dl>
 
-<h5 id="L8496">AbstractFloat64</h5>
+<h5>AbstractFloat64</h5>
 
 <p>A driver implements int32Array by extending the following abstract base
 class:</p>
@@ -9123,12 +8398,12 @@ implements Float64
       this method.</dd>
 </dl>
 
-<h4  id="L8530">float64Array</h4>
+<h4 >float64Array</h4>
 
 <p><span style="font-family: courier;">float64Array</span> is implemented by a
 driver that supports a array of doubles.</p>
 
-<h5 id="L8536">Float64ArrayInterruptListener</h5>
+<h5>Float64ArrayInterruptListener</h5>
 
 <p>The interface implemented by a user that calls addInterruptListener.</p>
 <pre>public interface Float64ArrayInterruptListener{
@@ -9141,7 +8416,7 @@ driver that supports a array of doubles.</p>
     <dd>The new value is provided when an interrupt occurs.</dd>
 </dl>
 
-<h5 id="L8550">Float64Array</h5>
+<h5>Float64Array</h5>
 
 <p>The implementation must implement PVDoubleArray, which is used for all I/O.
 In addition the following methods are implemented:</p>
@@ -9185,7 +8460,7 @@ In addition the following methods are implemented:</p>
     method.</dd>
 </dl>
 
-<h5 id="L8594">AbstractFloat64Array</h5>
+<h5>AbstractFloat64Array</h5>
 
 <p>A driver implements float64Array by extending the following abstract base
 class:</p>
@@ -9233,14 +8508,14 @@ extends AbstractPVArray implements Float64Array
     <dd>Returns Status.success.</dd>
 </dl>
 
-<h4  id="L8648">GPIB Interfaces</h4>
+<h4 >GPIB Interfaces</h4>
 
 <p>A driver that implements GPIB inplements both GpibController and GpibDevice.
 For the controller it it implement a psuedo device which is accessed via
 interface GpibController. The name for this device should be the same as the
 port name. For each actual device it implements interface GpibDevice.</p>
 
-<h5 id="L8652">GpibController</h5>
+<h5>GpibController</h5>
 
 <p><span style="font-family: courier;">gpibController</span> has the
 definition:</p>
@@ -9308,7 +8583,7 @@ public interface GpibController {
     <dd>Register a handler to be called when an SRQ is detected.</dd>
 </dl>
 
-<h5 id="L8748">GpibDevice</h5>
+<h5>GpibDevice</h5>
 
 <p><span style="font-family: courier;">gpibDevice</span> has the definition:</p>
 <pre>public interface GpibDevice {
@@ -9345,9 +8620,9 @@ public interface GpibController {
     <dd>Set the device or controller to locale control.</dd>
 </dl>
 
-<h3 id="L8804">Package org.epics.pvioc.pdrv.serial</h3>
+<h3>Package org.epics.pvioc.pdrv.serial</h3>
 
-<h4  id="L8806">Overview</h4>
+<h4 >Overview</h4>
 
 <p>Consult package org.epics.pvioc.support.pdrv.serial for an explaination of how
 to communicate with a serial device.</p>
@@ -9357,7 +8632,7 @@ support is for internet to serial servers like the MOXA boxes. Only very simple
 tests have been done. In the future more support, including local serial ports
 will be implemented. </p>
 
-<h4  id="L8812">Configuration</h4>
+<h4 >Configuration</h4>
 
 <p>A structure IPSerialDriver defines fields for configuring an Internet
 Protocol driver.</p>
@@ -9422,7 +8697,7 @@ sent.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h4  id="L8826">Implementation</h4>
+<h4 >Implementation</h4>
 
 <p>The code currently consists of just one implementation module:</p>
 <ul>
@@ -9432,9 +8707,9 @@ sent.</p>
 
 <p>In the future code will be implemented for local serial ports.</p>
 
-<h3 id="L8839">Package org.epics.pvioc.pdrv.vxi11</h3>
+<h3>Package org.epics.pvioc.pdrv.vxi11</h3>
 
-<h4  id="L8841">Overview</h4>
+<h4 >Overview</h4>
 
 <p>NOTE: The GPIBController and GPIBDevice commands hane not been tested. Only
 minimal testing has been done.</p>
@@ -9488,7 +8763,7 @@ deviceNames:</p>
     "controller".</li>
 </ul>
 
-<h4  id="L8912">Configuration</h4>
+<h4 >Configuration</h4>
 
 <p>A structure vxi11Driver defines fields for configuring a vxi11 driver.</p>
 <pre>&lt;structure name = "vxi11Driver"&gt;
@@ -9545,7 +8820,7 @@ float value.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h4  id="L8928">Implementation</h4>
+<h4 >Implementation</h4>
 
 <p>The code consists of two implementation modules:</p>
 <ul>
@@ -9560,9 +8835,9 @@ float value.</p>
 some of the code was taken from Java code that Eric Norum implemented while he
 was working at the Canadian Light Source.</p>
 
-<h3 id="L8947">Package org.epics.pvioc.support.pdrv</h3>
+<h3>Package org.epics.pvioc.support.pdrv</h3>
 
-<h4  id="L8949">Overview</h4>
+<h4 >Overview</h4>
 
 <p>This package contains the general purpose code for support that communicates
 with a portDriver. The actual support code, which extends code supplied by this
@@ -9637,7 +8912,7 @@ value "1010.000000" appears in field
 intToSerial.link.discardResponse.query.response. I do not know why this
 instrument returned this value instead of 1000.</p>
 
-<h4  id="L8988">portDriverLink</h4>
+<h4 >portDriverLink</h4>
 
 <p>The xml definition for structure portDriverLink is:</p>
 <pre>&lt;structure name = "portDriverLinkFactory"&gt;
@@ -9711,7 +8986,7 @@ implements RecordProcessRequester,QueueRequestCallback
     public void recordProcessResult(RequestResult requestResult) {}
 }</pre>
 
-<h4  id="L9000">portDriverSupport</h4>
+<h4 >portDriverSupport</h4>
 
 <p>AbstractPortDriverSupport is the base class for all non-interrupt
 PortDriverSupport code. It does most initialization required by support code
@@ -9760,7 +9035,7 @@ implements PortDriverSupport
     public void message(String message,MessageType messageType)
 }</pre>
 
-<h4  id="L9006">Support for PortDriverLink</h4>
+<h4 >Support for PortDriverLink</h4>
 
 <p>Again this package has the complete implementation of PortDriverLink. The
 Java defininition is:</p>
@@ -9768,7 +9043,7 @@ Java defininition is:</p>
     public static Support create(PVStructure pvStructure);
 }</pre>
 
-<h4  id="L9012">Port Creation</h4>
+<h4 >Port Creation</h4>
 
 <p>A portDriver instance is created via JavaIOC database records that are
 created with type "portCreate". A field named "driverParameters" is a structure
@@ -9803,7 +9078,7 @@ structure portCreate is:</p>
     public static Support create(PVStructure pvStructure);
 }</pre>
 
-<h4  id="L9026">Port and Device Control</h4>
+<h4 >Port and Device Control</h4>
 
 <p>A record instance can be created for a port and device instance. This record
 can be used to control options for the port and device. Since these options can
@@ -9845,15 +9120,15 @@ xml definition for structure portDeviceControl is:</p>
     public static Support create(PVStructure pvStructure);
 }</pre>
 
-<h4 id="L9040">Package org.epics.pvioc.support.pdrv.scalar</h4>
+<h4>Package org.epics.pvioc.support.pdrv.scalar</h4>
 
-<h5  id="L9042">Overview</h5>
+<h5 >Overview</h5>
 
 <p>This package implements portDriver support for scalars. Currently it only
 has support for Int32 and Float64. In the future support will also be provided
 for all the ScalarTypes types.</p>
 
-<h5  id="L9046">Int32</h5>
+<h5 >Int32</h5>
 
 <p>The xml definitions are:</p>
 <pre>&lt;structure name = "pdrvInt32InputFactory"&gt;
@@ -9941,7 +9216,7 @@ for all the ScalarTypes types.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5  id="L9056">Float64</h5>
+<h5 >Float64</h5>
 
 <p>The xml definitions are:</p>
 <pre>&lt;structure name = "pdrvFloat64InputFactory"&gt;
@@ -10062,7 +9337,7 @@ for all the ScalarTypes types.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5  id="L9066">Java Definitions</h5>
+<h5 >Java Definitions</h5>
 
 <p>The Java definitions are:</p>
 <pre>public class SupportFactory {
@@ -10081,15 +9356,15 @@ public class BaseFloat64Interrupt;</pre>
 <p>The factory creates all the supported types. Each base class is a complete
 implementation.</p>
 
-<h4 id="L9074">Package org.epics.pvioc.support.pdrv.array</h4>
+<h4>Package org.epics.pvioc.support.pdrv.array</h4>
 
-<h5  id="L9076">Overview</h5>
+<h5 >Overview</h5>
 
 <p>This package implements portDriver support for arrays. Currently it only has
 support for Int32 and Float64 arrays. In the future support will also be
 provided for all the ScalarArray types.</p>
 
-<h5  id="L9080">Int32Array</h5>
+<h5 >Int32Array</h5>
 
 <p>The xml definitions are:</p>
 <pre>&lt;structure name = "pdrvInt32ArrayInputFactory"&gt;
@@ -10154,7 +9429,7 @@ provided for all the ScalarArray types.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5  id="L9090">Float64Array</h5>
+<h5 >Float64Array</h5>
 
 <p>The xml definitions are:</p>
 <pre>&lt;structure name = "pdrvFloat64ArrayInputFactory"&gt;
@@ -10219,7 +9494,7 @@ provided for all the ScalarArray types.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5  id="L9100">Java Definitions</h5>
+<h5 >Java Definitions</h5>
 
 <p>The Java definitions are:</p>
 <pre>public class SupportFactory {
@@ -10236,16 +9511,16 @@ public class BaseFloat64ArrayInterrupt;</pre>
 <p>The factory creates all the supported types. Each base class is a complete
 implementation.</p>
 
-<h4 id="L9108">Package org.epics.pvioc.support.pdrv.digital</h4>
+<h4>Package org.epics.pvioc.support.pdrv.digital</h4>
 
-<h5  id="L9110">Overview</h5>
+<h5 >Overview</h5>
 
 <p>This package implements portDriver support for digital I/O. This support
 needs more work. It should have support that works for a driver that supports
 Int32. Currently there is only support for a driver that support interface
 Uint32Digital.</p>
 
-<h5  id="L9114">UInt32Digital</h5>
+<h5 >UInt32Digital</h5>
 
 <p>The xml definitions are:</p>
 <pre>&lt;structure name = "digitalInputFactory"&gt;
@@ -10515,7 +9790,7 @@ fields on the digital.states array.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5  id="L9130">Java Definitions</h5>
+<h5 >Java Definitions</h5>
 
 <p>The Java definitions are:</p>
 <pre>public class SupportFactory {
@@ -10529,9 +9804,9 @@ public class BaseUInt32DigitalInterrupt;</pre>
 <p>The factory creates all the supported types. Each base class is a complete
 implementation.</p>
 
-<h4 id="L9138">Package org.epics.pvioc.support.pdrv.serial</h4>
+<h4>Package org.epics.pvioc.support.pdrv.serial</h4>
 
-<h5  id="L9140">Overview</h5>
+<h5 >Overview</h5>
 
 <p>This package implements portDriver support for serial I/O, i. e. it
 interfaces to port drivers that implement interface Serial. It currently
@@ -10640,7 +9915,7 @@ is the normal mode of communication.</p>
     &lt;/structure&gt;
 &lt;/record&gt;</pre>
 
-<h5  id="L9221">UInt32Digital</h5>
+<h5 >UInt32Digital</h5>
 
 <p>The xml definitions are:</p>
 <pre>&lt;structure name = "pdrvSerialInputFactory"&gt;
@@ -10711,7 +9986,7 @@ is the normal mode of communication.</p>
    &lt;scalar name = "size" type = "int"&gt;80&lt;/scalar&gt;
 &lt;/structure&gt;</pre>
 
-<h5  id="L9227">Java Definitions</h5>
+<h5 >Java Definitions</h5>
 
 <p>The Java definitions are:</p>
 <pre>public class SupportFactory {
@@ -10730,22 +10005,22 @@ public class BaseSerialDiscard;</pre>
 implementation.</p>
 
 
-<h2  id="L9237">Package org.epics.pvioc.pvAccess</h2>
+<h2 >Package org.epics.pvioc.pvAccess</h2>
 
 
-<h3 id="L9241">pvAccess Server</h3>
+<h3>pvAccess Server</h3>
 
 <p>This allows a pvAccess client to access JavaIOC records.</p>
 
-<h3 id="L9245">pvAccess client</h3>
+<h3>pvAccess client</h3>
 
 <p>This allows code in the JavaIOc to access remote pvAccess servers.</p>
 
 
-<h2  id="L9251">Package org.epics.pvioc.pvCopy</h2>
+<h2 >Package org.epics.pvioc.pvCopy</h2>
 
 
-<h3  id="L9255">Overview</h3>
+<h3 >Overview</h3>
 
 <p><span style="font-weight:bold;">NOTE FOR Casual Users</span>: For users that
 just want to create pvRequest arguments for pvAccess skip to the next
@@ -10830,7 +10105,7 @@ server side of Channel Access. </p>
       the data from a shared field.</dd>
 </dl>
 
-<h3  id="L9325">Request String</h3>
+<h3 >Request String</h3>
 
 <p>Issuing the request:</p>
 <pre>    PVStructure pvRequest = CreateRequestFactory.createRequest(String request,this);</pre>
@@ -10839,7 +10114,7 @@ server side of Channel Access. </p>
 interface Channel. NOTE: The full path is
 org.epics.pvaccess.client.CreateRequestFactory. </p>
 
-<h4 id="L9333">Simple Requests</h4>
+<h4>Simple Requests</h4>
 
 <p>Before starting lets first give some examples that satisfy clients such as
 Synoptic Display, Alarm, and Archive tools. These clients only want access to
@@ -10870,7 +10145,7 @@ as part of a get or put requests. This is done via requests like the
 following:</p>
 <pre>    pvRequest = CreateRequestFactory.createRequest("record[process=true]field(value,alarm,timeStamp)",this);</pre>
 
-<h4 id="L9351">Full Request Syntax</h4>
+<h4>Full Request Syntax</h4>
 
 <p>A request is of the form:</p>
 <pre>    record[option,...]field(fieldDef,...)putField(fieldDef,...)getField(fieldDef,...)
@@ -10905,7 +10180,7 @@ generated data structure will have a structure field with subfields. Note that
 <p>If request is null or an empty string than the entire PVRecord is
 selected.</p>
 
-<h4 id="L9395">Examples</h4>
+<h4>Examples</h4>
 
 <p>The following examples are for either a simple record or for a power supply
 record. These are records that have one of the following structures:</p>
@@ -10933,7 +10208,7 @@ powerSupply
        .. other fields
     .. other fields</pre>
 
-<h5 id="L9401">Simple example</h5>
+<h5>Simple example</h5>
 
 <p>The following gets the alarm, timeStamp, and power.value.</p>
 <pre>    PVStructure pvRequest = CreateRequestFactory.createRequest("alarm,timeStamp,power.value",this);</pre>
@@ -10960,7 +10235,7 @@ value field will be given.</p>
 <p>The options are to process the record and to share the value data with the
 power.value field in the PVRecord.</p>
 
-<h5 id="L9425">Power Supply Example</h5>
+<h5>Power Supply Example</h5>
 
 <p>The following:</p>
 <pre>    PVStructure pvRequest = CreateRequestFactory.createRequest(
@@ -10983,9 +10258,9 @@ power.value field in the PVRecord.</p>
       value       // from record.voltage.value
       alarm       // from record.voltage.alarm</pre>
 
-<h3  id="L9435">pvRequest</h3>
+<h3 >pvRequest</h3>
 
-<h4 id="L9437">PVStructure pvRequest</h4>
+<h4>PVStructure pvRequest</h4>
 
 <p>pvRequest is a PVStructure that describes 1) record options and 2) field
 requests and options. It has the following structure:</p>
@@ -11105,14 +10380,14 @@ supported.</p>
 implemented by PVDataCreateFactory or by a call to
 CreateRequestFactory.createRequest.</p>
 
-<h4 id="L9518">Examples</h4>
+<h4>Examples</h4>
 
 <p>The following examples are for the simple and powerSupply records described
 in the previous section.</p>
 
-<h5 id="L9522">Simple example</h5>
+<h5>Simple example</h5>
 
-<h6 id="L9524">The quickest Way</h6>
+<h6>The quickest Way</h6>
 
 <p>The following structure defines a request for three fields: alarm,
 timeStamp, and power.value</p>
@@ -11130,7 +10405,7 @@ pvDataCreate.</p>
     pvRequest.appendPVField(pvString);
  </pre>
 
-<h6 id="L9534">Using the field notation</h6>
+<h6>Using the field notation</h6>
 
 <p>The following structure defines a request for three fields: alarm,
 timeStamp, and power.value</p>
@@ -11182,7 +10457,7 @@ value field will be given.</p>
 <p>The options are to process the record and to share the value data with the
 power.value field in the PVRecord.</p>
 
-<h5 id="L9556">Power Supply Example</h5>
+<h5>Power Supply Example</h5>
 
 <p>The following structure defines a request for alarm, timeStamp, power,
 current, and voltage. Power, current, and voltage will each be a structure with
@@ -11247,7 +10522,7 @@ form:</p>
       value       // from record.voltage.value
       alarm       // from record.voltage.alarm</pre>
 
-<h3  id="L9570">PVCopy</h3>
+<h3 >PVCopy</h3>
 
 <p>This is the interface for mapping between a PVStructure that contain a copy
 of the data for a subset of the fields in a PVRecord. Note that this interface
@@ -11313,7 +10588,7 @@ PVCopy.</p>
     <dd>Create a PVCopyMonitor. See next section.</dd>
 </dl>
 
-<h3  id="L9645">PVCopyMonitor</h3>
+<h3 >PVCopyMonitor</h3>
 
 <p>PVCopyMonitor is a PVListener for the PVRecord to which PVCopy is attached.
 It updates two bitSets when it receives PVListener.dataPut callbacks. changeBit
@@ -11360,9 +10635,9 @@ PVCopy.createPVCopyMonitor.</p>
     arguments.</dd>
 </dl>
 
-<h3  id="L9687">PVCopyFactory</h3>
+<h3 >PVCopyFactory</h3>
 
-<h4 id="L9689">Java Definition</h4>
+<h4>Java Definition</h4>
 <pre>    class PVCopyFactory {
         static PVCopy create(PVRecord pvRecord,PVStructure pvRequest,String structureName);
     }</pre>
@@ -11386,7 +10661,7 @@ PVCopy.createPVCopyMonitor.</p>
 create a pvRequest structure to pass to <span
 style="font-family: Courier">create</span>. It is described above.</p>
 
-<h3  id="L9735">PVShare</h3>
+<h3 >PVShare</h3>
 
 <p>This is a factory that replaces a scalar or scalarArray field with a version
 that shares the data from another field. When a get or put is issued the get or
@@ -11397,10 +10672,10 @@ put method of the shared PVField is called.</p>
 }</pre>
 
 
-<h2  id="L9743">Package org.epics.pvioc.monitor</h2>
+<h2 >Package org.epics.pvioc.monitor</h2>
 
 
-<h3  id="L9747">Overview</h3>
+<h3 >Overview</h3>
 
 <p>Package org.epics.pvdata.monitor defines the monitor interfaces as seen by a
 client. See that package overview for details. This package implements the
@@ -11431,7 +10706,7 @@ client.</p>
       being monitored.</dd>
 </dl>
 
-<h3  id="L9776">Implementing New Monitor
+<h3 >Implementing New Monitor
 Algorithms</h3>
 
 <p>This section discusses how to implement new monitor algorithms in addition
@@ -11445,7 +10720,7 @@ style="font-family: Courier">MonitorAlgorithmCreate</span> and <span
 style="font-family: Courier">MonitorAlgorithm</span> which are described
 below.</p>
 
-<h4 id="L9792">MonitorFactory</h4>
+<h4>MonitorFactory</h4>
 
 <p>This is a request to create a monitor.</p>
 <pre>class MonitorFactory {
@@ -11473,7 +10748,7 @@ below.</p>
     <dd>Called by code that implements a monitor algorithm.</dd>
 </dl>
 
-<h4 id="L9832">MonitorAlgorithm</h4>
+<h4>MonitorAlgorithm</h4>
 
 <p>The following are implemented by code that implements a monitor
 algorithm.</p>
@@ -11503,10 +10778,10 @@ interface MonitorAlgorithm  {
 </dl>
 
 
-<h2  id="L9861">Package org.epics.pvioc.caV3</h2>
+<h2 >Package org.epics.pvioc.caV3</h2>
 
 
-<h3  id="L9865">Overview</h3>
+<h3 >Overview</h3>
 
 <p>This package provides support for Channel Access Version 3. The server
 allows an existing Channel Access client to access a javaIOC database. The
@@ -11525,9 +10800,9 @@ everything.</p>
 href="http://jca.cosylab.com">cosylab</a>. In addition the server uses the CAS
 support that comes with the latest versions of JCA/CAJ.</p>
 
-<h3  id="L9880">Server</h3>
+<h3 >Server</h3>
 
-<h4 id="L9882">Syntax</h4>
+<h4>Syntax</h4>
 
 <p>A V3 client can access any field of a javaIOC record that is a scalar, an
 array of scalars, or an enumerated structure. A boolean field appears as a
@@ -11570,7 +10845,7 @@ be processed. The value is written before the record is processed.</p>
 <p>This writes the value 2 to the power.value field of the second supply of the
 powerSupplyArray record.</p>
 
-<h4 id="L9929">Get and Put Options</h4>
+<h4>Get and Put Options</h4>
 
 <p>The currently supported options are:</p>
 <pre>    process=true
@@ -11580,13 +10855,13 @@ powerSupplyArray record.</p>
 processed after the put. In order for either to work, the record must not
 already have a recordProcessor assigned to it.</p>
 
-<h4 id="L9937">monitor options</h4>
+<h4>monitor options</h4>
 
 <p>Currently no options are supported. </p>
 
-<h3  id="L9941">Client</h3>
+<h3 >Client</h3>
 
-<h4 id="L9943">Overview</h4>
+<h4>Overview</h4>
 
 <p>The client code implements a ChannelProvider that communicates with Channel
 Access version 3 IOCs. It allows access to all the V3 data types. The provider
@@ -11634,7 +10909,7 @@ the features that make sense for caV3 are implemented. </p>
 
 <p></p>
 
-<h4 id="L9998">Naming conventions.</h4>
+<h4>Naming conventions.</h4>
 
 <p>A PV Name (Process Variable Name) must be of the form:</p>
 <pre>    recordName.fieldName</pre>
@@ -11675,7 +10950,7 @@ retrieved.</p>
      &lt;scalar name = "alarm" scalarType = "string"&gt;alarm&lt;/scalar&gt;
 &lt;/structure&gt;</pre>
 
-<h4 id="L10031">Data Types Supported</h4>
+<h4>Data Types Supported</h4>
 
 <p>The V3 data types are supported via a corresponding javaIOC data type. A V3
 <span style="font-family: Courier New,Courier,monospace;">char</span> is a
@@ -11691,7 +10966,7 @@ javaIOC enumerated structure. V3 properties (status, severity, timeStamp,
 display limits, and control limits) become standard pvData structures (alarm,
 timeStamp, display, and control).</p>
 
-<h4 id="L10053">Implementation Overview</h4>
+<h4>Implementation Overview</h4>
 
 <p>The implementation consists of the following classes.</p>
 <dl>

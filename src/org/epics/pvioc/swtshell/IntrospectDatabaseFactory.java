@@ -1,6 +1,6 @@
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
- * EPICS JavaIOC is distributed subject to a Software License Agreement found
+ * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.pvioc.swtshell;
@@ -23,14 +23,12 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.misc.ThreadCreateFactory;
 import org.epics.pvdata.misc.TimeFunction;
 import org.epics.pvdata.misc.TimeFunctionFactory;
 import org.epics.pvdata.misc.TimeFunctionRequester;
 import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.property.TimeStampFactory;
-import org.epics.pvdata.pv.Convert;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVField;
@@ -63,7 +61,6 @@ import org.epics.pvioc.util.ScannerFactory;
  */
 public class IntrospectDatabaseFactory {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
-    private static final Convert convert = ConvertFactory.getConvert();
     private static final String newLine = String.format("%n");
     private static final Runtime runTime = Runtime.getRuntime();
     
@@ -604,12 +601,8 @@ public class IntrospectDatabaseFactory {
                 MenuItem choiceAll = new MenuItem(menuStructure,SWT.DEFAULT|SWT.PUSH);
                 choiceAll.setText("all");
                 choiceAll.addSelectionListener(this);
-                PVStructure[] pvdStructures = masterPVDatabase.getStructures();
-                StringBuilder builder = new StringBuilder();
-                for(PVStructure pvdStructure : pvdStructures) {
-                    convert.getFullFieldName(builder,pvdStructure);
-                    String name = builder.toString();
-                    builder.setLength(0);
+                String[] structureNames = masterPVDatabase.getStructureNames();
+                for(String name : structureNames) {
                     MenuItem choiceItem = new MenuItem(menuStructure,SWT.PUSH);
                     choiceItem.setText(name);
                     choiceItem.addSelectionListener(this);
@@ -629,6 +622,7 @@ public class IntrospectDatabaseFactory {
                 String name = choice.getText();
                 if(!name.equals("all")) {
                     PVStructure value = masterPVDatabase.findStructure(name);
+                    consoleText.append(name);
                     consoleText.append(value.toString());
                     return;
                 }
