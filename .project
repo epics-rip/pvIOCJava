@@ -3,6 +3,8 @@
 	<name>pvIOCJava</name>
 	<comment></comment>
 	<projects>
+		<project>pvAccessJava</project>
+		<project>pvDataJava</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -10,29 +12,8 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
-		<buildCommand>
-			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
-			<triggers>full,incremental,</triggers>
-			<arguments>
-				<dictionary>
-					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/org.eclipse.pde.ManifestBuilder.launch</value>
-				</dictionary>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
-			<triggers>full,incremental,</triggers>
-			<arguments>
-				<dictionary>
-					<key>LaunchConfigHandle</key>
-					<value>&lt;project&gt;/.externalToolBuilders/org.eclipse.pde.SchemaBuilder.launch</value>
-				</dictionary>
-			</arguments>
-		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>org.eclipse.pde.PluginNature</nature>
 	</natures>
 </projectDescription>

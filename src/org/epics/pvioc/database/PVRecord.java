@@ -137,7 +137,7 @@ public interface PVRecord extends Requester{
     /**
      * Implement standard toString()
      * @param indentLevel indentation level.
-     * @return
+     * @return The record as a string.
      */
     String toString(int indentLevel);
     /**
