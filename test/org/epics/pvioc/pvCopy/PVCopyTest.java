@@ -119,6 +119,13 @@ public class PVCopyTest extends TestCase {
         PVLong pvRecordSeconds = (PVLong)pvTop.getSubField("timeStamp.secondsPastEpoch");
         PVInt pvRecordNanoSeconds = (PVInt)pvTop.getSubField("timeStamp.nanoSeconds");
         PVInt pvRecordUserTag = (PVInt)pvTop.getSubField("timeStamp.userTag");
+System.out.printf("pvTop%n%s%n ",pvTop.toString());
+request = "";
+pvRequest = CreateRequestFactory.createRequest(request,requester);
+pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
+pvCopyStructure = pvCopy.createPVStructure();
+System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
+
         
         request = "timeStamp[causeMonitor=true]";
         pvRequest = CreateRequestFactory.createRequest(request,requester);

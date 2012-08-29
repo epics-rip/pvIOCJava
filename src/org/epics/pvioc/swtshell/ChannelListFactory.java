@@ -27,6 +27,7 @@ import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.client.ChannelPutGet;
 import org.epics.pvaccess.client.ChannelPutGetRequester;
 import org.epics.pvaccess.client.ChannelRequester;
+import org.epics.pvaccess.client.CreateRequestFactory;
 import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.Executor;
@@ -289,14 +290,7 @@ public class ChannelListFactory {
             }
             
             private void createPutGet() { 
-                Field[] fields = new Field[1];
-                String[] fieldNames = new String[1];
-                fields[0] = fieldCreate.createScalar(ScalarType.pvString);
-                fieldNames[0] = "fieldList";
-                Structure structure = fieldCreate.createStructure(fieldNames, fields);
-                PVStructure pvPutRequest = pvDataCreate.createPVStructure(structure);
-                PVString pvString = pvPutRequest.getStringField("fieldList");
-                pvString.put("arguments.database,arguments.regularExpression");
+                PVStructure pvPutRequest = CreateRequestFactory.createRequest("record[process=true]putField(arguments)getField(result)", this);
                 channelPutGet = channel.createChannelPutGet(this, pvPutRequest);
             }
             
@@ -335,10 +329,10 @@ public class ChannelListFactory {
                 }
                 this.channelPutGet = channelPutGet;
                 if(pvPutStructure!=null && pvGetStructure!=null) {
-                    pvDatabase = pvPutStructure.getStringField("database");
-                    pvRegularExpression = pvPutStructure.getStringField("regularExpression");
-                    pvStatus = pvGetStructure.getStringField("status");
-                    PVArray pvArray = pvGetStructure.getScalarArrayField("names", ScalarType.pvString);
+                    pvDatabase = pvPutStructure.getStringField("arguments.database");
+                    pvRegularExpression = pvPutStructure.getStringField("arguments.regularExpression");
+                    pvStatus = pvGetStructure.getStringField("result.status");
+                    PVArray pvArray = pvGetStructure.getScalarArrayField("result.names", ScalarType.pvString);
                     if(pvArray!=null) pvRecordNames = (PVStringArray)pvArray;
                     if(pvDatabase!=null && pvRegularExpression!=null && pvStatus!=null && pvArray!=null) {
                         pvDatabase.put("master");

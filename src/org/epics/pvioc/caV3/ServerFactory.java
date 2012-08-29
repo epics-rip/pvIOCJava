@@ -55,8 +55,6 @@ import org.epics.pvdata.misc.ThreadCreate;
 import org.epics.pvdata.misc.ThreadCreateFactory;
 import org.epics.pvdata.misc.ThreadReady;
 import org.epics.pvdata.property.AlarmSeverity;
-import org.epics.pvdata.property.PVProperty;
-import org.epics.pvdata.property.PVPropertyFactory;
 import org.epics.pvdata.property.PVTimeStamp;
 import org.epics.pvdata.property.PVTimeStampFactory;
 import org.epics.pvdata.property.TimeStamp;

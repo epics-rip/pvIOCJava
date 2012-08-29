@@ -1,12 +1,6 @@
 <?xml version="1.0" ?>
 <database>
 
-<structure structureName = "control">
-    <scalar name = "limitLow" scalarType = "double" />
-    <scalar name = "limitHigh" scalarType = "double" />
-    <scalar name = "minStep" scalarType = "double" />
-</structure>
-
 <structure structureName = "controlLimitFactory">
   <scalar name = "pvReplaceFactory" scalarType = "string">
     org.epics.pvioc.support.basic.ControlLimitFactory</scalar>

@@ -29,7 +29,8 @@ import org.epics.pvdata.misc.MessageQueueFactory;
 import org.epics.pvdata.misc.ThreadPriority;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.*;
+import org.epics.pvdata.factory.*;
 
 
 
@@ -74,6 +75,134 @@ public class PVDatabaseFactory {
     
     static {
         master = new Database("master");
+        PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
+        FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+        String prefix = "org.epics.pvioc.";
+        StandardField standardField = StandardFieldFactory.getStandardField();
+        String[] supportNames = new String[1];
+        Field[] supportFields = new Field[1];
+        supportNames[0] = "supportFactory";
+        supportFields[0] = fieldCreate.createScalar(ScalarType.pvString);
+        Structure supportStructure =fieldCreate.createStructure("supportFactory_t", supportNames, supportFields);
+        PVAuxInfo pvAuxInfo = null;
+        PVString auxValue = null;
+        PVStructure pvSupportStructure =  null;
+        PVString pvSupportName = null;
+        
+        Structure structure = standardField.timeStamp();
+        PVStructure pvStructure = pvDataCreate.createPVStructure(structure);
+        master.addStructure(pvStructure,prefix + "timeStamp");
+        
+        structure = standardField.display();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        master.addStructure(pvStructure,prefix + "display");
+
+        structure = standardField.control();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        master.addStructure(pvStructure,prefix + "control");
+
+        structure = standardField.enumerated();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        master.addStructure(pvStructure,prefix + "enumerated");
+        
+        structure = standardField.alarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.alarmSupportFactory");
+        master.addStructure(pvStructure,prefix + "alarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.AlarmSupportFactory");
+        master.addStructure(pvSupportStructure,prefix +"alarmSupportFactory");
+        
+        structure = standardField.enumeratedAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.enumeratedAlarmFactory");
+        master.addStructure(pvStructure,prefix + "enumeratedAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.EnumeratedAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"enumeratedAlarmFactory");
+        
+        structure = standardField.booleanAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.booleanAlarmFactory");
+        master.addStructure(pvStructure,prefix + "booleanAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.BooleanAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"booleanAlarmFactory");
+        
+        structure = standardField.byteAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.byteAlarmFactory");
+        master.addStructure(pvStructure,prefix + "byteAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.ByteAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"byteAlarmFactory");
+        
+        structure = standardField.shortAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.shortAlarmFactory");
+        master.addStructure(pvStructure,prefix + "shortAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.ShortAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"shortAlarmFactory");
+        
+        structure = standardField.intAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.intAlarmFactory");
+        master.addStructure(pvStructure,prefix + "intAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.IntAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"intAlarmFactory");
+        
+        structure = standardField.longAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.longAlarmFactory");
+        master.addStructure(pvStructure,prefix + "longAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.LongAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"longAlarmFactory");
+        
+        structure = standardField.floatAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.floatAlarmFactory");
+        master.addStructure(pvStructure,prefix + "floatAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.FloatAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"floatAlarmFactory");
+        
+        structure = standardField.doubleAlarm();
+        pvStructure = pvDataCreate.createPVStructure(structure);
+        pvAuxInfo = pvStructure.getPVAuxInfo();
+        auxValue = (PVString)pvAuxInfo.createInfo("supportFactory", ScalarType.pvString);
+        auxValue.put("org.epics.pvioc.doubleAlarmFactory");
+        master.addStructure(pvStructure,prefix + "doubleAlarm");
+        pvSupportStructure = pvDataCreate.createPVStructure(supportStructure);
+        pvSupportName = pvSupportStructure.getStringField("supportFactory");
+        pvSupportName.put("org.epics.pvioc.support.alarm.DoubleAlarmFactory");
+        master.addStructure(pvSupportStructure,prefix +"doubleAlarmFactory");
     }
     
     private static class Database implements PVDatabase,Runnable {

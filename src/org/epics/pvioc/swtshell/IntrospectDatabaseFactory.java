@@ -622,14 +622,21 @@ public class IntrospectDatabaseFactory {
                 String name = choice.getText();
                 if(!name.equals("all")) {
                     PVStructure value = masterPVDatabase.findStructure(name);
+                    consoleText.append(newLine);
                     consoleText.append(name);
+                    consoleText.append(newLine);
                     consoleText.append(value.toString());
                     return;
                 }
-                PVStructure[] pvdStructures = masterPVDatabase.getStructures();
-                for(PVStructure pvdStructure : pvdStructures) {
-                    consoleText.append(pvdStructure.toString());
+                PVStructure[] pvStructures = masterPVDatabase.getStructures();
+                String[] names = masterPVDatabase.getStructureNames();
+                for(int i=0; i<pvStructures.length; i++) {
+                    consoleText.append(newLine);
+                    consoleText.append(names[i]);
+                    consoleText.append(newLine);
+                    consoleText.append(pvStructures[i].toString());
                 }
+                
             }
             
         }

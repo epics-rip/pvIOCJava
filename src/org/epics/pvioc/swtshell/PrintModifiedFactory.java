@@ -94,28 +94,22 @@ public class PrintModifiedFactory {
             int offset = pvStructure.getFieldOffset();
             if(changeBitSet.get(offset)) printAll = true;
             String fieldName = pvStructure.getFieldName();
+            String id = pvStructure.getStructure().getID();
             if(fieldName!=null && fieldName.equals("timeStamp") && pvTimeStamp.attach(pvStructure)) {
                 convert.newLine(builder, indentLevel);
                 pvTimeStamp.get(timeStamp);
                 long milliPastEpoch = timeStamp.getMilliSeconds();
                 int userTag = timeStamp.getUserTag();
                 Date date = new Date(milliPastEpoch);
-                builder.append(String.format("timeStamp %tF %tT.%tL userTag %d", date,date,date,userTag));
+                builder.append(String.format("%s %tF %tT.%tL userTag %d", id,date,date,date,userTag));
                 if(overrunBitSet.get(offset)) {
                     builder.append(" overrun");
                 }
                 return;
             }
-            String extendsName = pvStructure.getExtendsStructureName();
             if(indentLevel>0) {
                 convert.newLine(builder, indentLevel);
-                if(extendsName==null || extendsName.length()<1) {
-                    builder.append("structure ");
-                } else {
-                    builder.append(extendsName);
-                    builder.append(" ");
-                }
-                builder.append(fieldName);
+                builder.append(id + " " + fieldName);
             }
             if(fieldName!=null && pvStructure.getFieldName().equals("alarm") && pvAlarm.attach(pvStructure)) {
                 pvAlarm.get(alarm);
