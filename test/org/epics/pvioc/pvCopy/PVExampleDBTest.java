@@ -8,14 +8,8 @@ package org.epics.pvioc.pvCopy;
 import junit.framework.TestCase;
 
 import org.epics.pvaccess.client.CreateRequestFactory;
-import org.epics.pvdata.factory.ConvertFactory;
-import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.BitSet;
-import org.epics.pvdata.misc.BitSetUtil;
-import org.epics.pvdata.misc.BitSetUtilFactory;
-import org.epics.pvdata.pv.Convert;
 import org.epics.pvdata.pv.MessageType;
-import org.epics.pvdata.pv.PVDataCreate;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Requester;
 import org.epics.pvioc.database.PVDatabase;
@@ -34,10 +28,7 @@ import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
  */
 public class PVExampleDBTest extends TestCase {
     private final static PVDatabase master = PVDatabaseFactory.getMaster();
-    private final static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private final static BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
     private final static Requester requester = new RequesterImpl();
-    private final static Convert convert = ConvertFactory.getConvert();
    
     
     private static class RequesterImpl implements Requester {

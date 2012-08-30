@@ -40,7 +40,6 @@ public class BaseFloat64Average extends AbstractPortDriverInterruptLink implemen
     private Float64 float64 = null;
     private int numValues = 0;
     private double sum = 0.0;
-    private double value = 0.0;
     /* (non-Javadoc)
      * @see org.epics.pvioc.support.pdrv.AbstractPortDriverInterruptLink#initialize()
      */

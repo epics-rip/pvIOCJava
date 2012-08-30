@@ -8,12 +8,7 @@ package org.epics.pvioc.pvCopy;
 import junit.framework.TestCase;
 
 import org.epics.pvdata.factory.ConvertFactory;
-import org.epics.pvdata.factory.PVDataFactory;
-import org.epics.pvdata.misc.BitSetUtil;
-import org.epics.pvdata.misc.BitSetUtilFactory;
 import org.epics.pvdata.pv.Convert;
-import org.epics.pvdata.pv.MessageType;
-import org.epics.pvdata.pv.PVDataCreate;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Requester;
@@ -36,23 +31,9 @@ import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
  */
 public class PVRecordTest extends TestCase {
     private final static PVDatabase master = PVDatabaseFactory.getMaster();
-    private final static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private final static BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
-    private final static Requester requester = new RequesterImpl();
+    
     private final static Convert convert = ConvertFactory.getConvert();
    
-    
-    private static class RequesterImpl implements Requester {
-		@Override
-		public String getRequesterName() {
-			return "pvCopyTest";
-		}
-		@Override
-		public void message(String message, MessageType messageType) {
-		    System.out.printf("message %s messageType %s%n",message,messageType.name());
-			
-		}
-    }
     
     public static void testPVRecord() {
         // get database for testing
@@ -126,7 +107,7 @@ public class PVRecordTest extends TestCase {
         PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         showNames(pvRecord.getPVRecordStructure(),0);
         System.out.println();
-        PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("input.input");
+        PVField pvField = pvStructure.getSubField("input.input");
         assertTrue(pvField!=null);
         System.out.printf("name |%s| %n",pvField.getFieldName());
 //System.out.println(pvField);

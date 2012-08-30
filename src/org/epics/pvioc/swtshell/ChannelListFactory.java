@@ -28,17 +28,13 @@ import org.epics.pvaccess.client.ChannelPutGet;
 import org.epics.pvaccess.client.ChannelPutGetRequester;
 import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvaccess.client.CreateRequestFactory;
-import org.epics.pvdata.factory.FieldFactory;
-import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.Executor;
 import org.epics.pvdata.misc.ExecutorNode;
 import org.epics.pvdata.misc.ThreadPriority;
 import org.epics.pvdata.misc.Timer;
 import org.epics.pvdata.misc.TimerFactory;
-import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVArray;
-import org.epics.pvdata.pv.PVDataCreate;
 import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStringArray;
 import org.epics.pvdata.pv.PVStructure;
@@ -58,8 +54,6 @@ public class ChannelListFactory {
         ChannelListImpl channelListImpl = new ChannelListImpl(display);
         channelListImpl.start();
     }
-    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
-    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
     private static final Executor executor = SwtshellFactory.getExecutor();
     private static final Timer timer = TimerFactory.create("channelListFactory", ThreadPriority.lowest);

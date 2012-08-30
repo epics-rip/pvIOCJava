@@ -2137,7 +2137,6 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class StringPlus implements Operator {
-            private PVStructure parent;
             private OperatorExpression operatorExpression;
 
             private PVScalar arg0PV;
@@ -2145,7 +2144,6 @@ public abstract class ExpressionCalculatorFactory  {
             private PVString resultPV;
 
             StringPlus(PVStructure parent,OperatorExpression operatorExpression) {
-                this.parent = parent;
                 this.operatorExpression = operatorExpression;
             }
             /* (non-Javadoc)

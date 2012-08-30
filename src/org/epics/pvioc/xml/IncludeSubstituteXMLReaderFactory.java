@@ -147,7 +147,6 @@ public class IncludeSubstituteXMLReaderFactory {
     private static class Handler implements ContentHandler, ErrorHandler {
         private Handler parent = null;
         private Locator locator;
-        private int nInfo = 0;
         private int nWarning = 0;
         private int nError = 0;
         private int nFatal = 0;
@@ -176,7 +175,7 @@ public class IncludeSubstituteXMLReaderFactory {
                 messageType.name(),message,showLocation()),
                 messageType);
             switch(messageType) {
-            case info:  nInfo ++; break;
+            case info:  break;
             case warning: nWarning ++; break;
             case error: nError++; break;
             case fatalError: nFatal++; break;

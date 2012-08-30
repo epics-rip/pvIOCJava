@@ -155,7 +155,6 @@ public class AfterStartFactory {
             int index = priority.ordinal();
             if(lists[index]==null) lists[index] = asrListCreate.create();
             ASRNode nodeImpl = (ASRNode)node;
-            LinkedList<ASRNode> list = lists[index];
             lists[index].addTail(nodeImpl.listNode);
         }
         /* (non-Javadoc)

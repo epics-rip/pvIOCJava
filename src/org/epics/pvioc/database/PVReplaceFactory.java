@@ -9,8 +9,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.epics.pvdata.factory.ConvertFactory;
-import org.epics.pvdata.pv.Convert;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVAuxInfo;
 import org.epics.pvdata.pv.PVField;
@@ -25,7 +23,6 @@ import org.epics.pvdata.pv.ScalarType;
  *
  */
 public class PVReplaceFactory {
-    private static final Convert convert = ConvertFactory.getConvert();
     /**
      * Look at every field of every record in the database and see if field implementation should be replaced.
      * @param pvDatabase The database.

@@ -77,26 +77,26 @@ public class VXI11Factory {
             }
             return VXI11ErrorCode.unknown;
         }
-        static String getString(int value) {
-            switch (value) {
-            case 0:   return "No error";
-            case 1:   return "Syntax error";
-            case 3:   return "Device not accessible";
-            case 4:   return "Invalid link identifier";
-            case 5:   return "Parameter error";
-            case 6:   return "Channel not established";
-            case 8:   return "Operation not supported";
-            case 9:   return "Out of resources";
-            case 11:  return "Device locked by another link";
-            case 12:  return "No lock held by this link";
-            case 15:  return "I/O timeout";
-            case 17:  return "I/O error";
-            case 21:  return "Invalid address";
-            case 23:  return "Abort";
-            case 29:  return "Channel already established";
-            }
-            return "unknown Device_error code=" + value;
-        }
+//        static String getString(int value) {
+//            switch (value) {
+//            case 0:   return "No error";
+//            case 1:   return "Syntax error";
+//            case 3:   return "Device not accessible";
+//            case 4:   return "Invalid link identifier";
+//            case 5:   return "Parameter error";
+//            case 6:   return "Channel not established";
+//            case 8:   return "Operation not supported";
+//            case 9:   return "Out of resources";
+//            case 11:  return "Device locked by another link";
+//            case 12:  return "No lock held by this link";
+//            case 15:  return "I/O timeout";
+//            case 17:  return "I/O error";
+//            case 21:  return "Invalid address";
+//            case 23:  return "Abort";
+//            case 29:  return "Channel already established";
+//            }
+//            return "unknown Device_error code=" + value;
+//        }
     }
 
     private static class Controller implements VXI11Controller, OncRpcDispatchable {

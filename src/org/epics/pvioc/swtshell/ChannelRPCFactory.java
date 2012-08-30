@@ -251,7 +251,6 @@ public class ChannelRPCFactory {
             private ChannelRPC channelRPC = null;
             private RunCommand runCommand;
             private PrintModified printModified = null;
-            private PVStructure pvResult = null;
             private BitSet bitSet = null;
 
             void connect(Shell shell) {
@@ -285,13 +284,6 @@ public class ChannelRPCFactory {
                 channelRPC.request(pvArgument,false);
             }
             
-            PVStructure getPVStructure() {
-                return pvArgument;
-            }
-            
-            BitSet getBitSet() {
-                return bitSet;
-            }
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelRequester#channelStateChange(org.epics.pvaccess.client.Channel, org.epics.pvaccess.client.Channel.ConnectionState)
              */
@@ -359,7 +351,6 @@ public class ChannelRPCFactory {
 			 */
 			@Override
 			public void requestDone(Status status, PVStructure pvResponse) {
-				pvResult = pvResponse;
 				bitSet = new BitSet(pvResponse.getNumberFields());
 				bitSet.set(0);
             	BitSet overrunBitSet = new BitSet(pvResponse.getNumberFields());

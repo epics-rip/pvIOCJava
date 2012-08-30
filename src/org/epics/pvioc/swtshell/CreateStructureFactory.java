@@ -20,10 +20,8 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.epics.pvdata.factory.FieldFactory;
-import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
-import org.epics.pvdata.pv.PVDataCreate;
 import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Structure;
 
@@ -43,7 +41,6 @@ public class CreateStructureFactory {
     }
     private static class CreateStructureImpl extends Dialog implements CreateStructure, SelectionListener {
     	private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    	private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         private Shell parent = null;
         private Shell shell = null;
         private Button doneButton = null;
