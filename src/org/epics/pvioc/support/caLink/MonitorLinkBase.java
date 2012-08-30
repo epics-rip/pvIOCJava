@@ -250,6 +250,8 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	PVStructure monitorStructure = monitorElement.getPVStructure();
     	if(super.linkPVFields==null) {
     		if(!super.setLinkPVStructure(monitorStructure)) {
+    		    monitor.release(monitorElement);
+    	        monitorElement = null;
     			monitor.destroy();
     			return;
     		}

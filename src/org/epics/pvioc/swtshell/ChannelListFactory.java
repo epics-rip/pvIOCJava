@@ -35,7 +35,6 @@ import org.epics.pvdata.misc.ExecutorNode;
 import org.epics.pvdata.misc.ThreadPriority;
 import org.epics.pvdata.misc.Timer;
 import org.epics.pvdata.misc.TimerFactory;
-import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVArray;
@@ -47,7 +46,6 @@ import org.epics.pvdata.pv.Requester;
 import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.StringArrayData;
-import org.epics.pvdata.pv.Structure;
 
 
 /**

@@ -7,6 +7,8 @@ package org.epics.pvioc.support.caLink;
 
 import org.epics.pvaccess.client.CreateRequestFactory;
 import org.epics.pvdata.factory.ConvertFactory;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
 import org.epics.pvdata.pv.Convert;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
@@ -124,20 +126,34 @@ abstract class AbstractIOLink extends AbstractLink {
                 }
             }
             if(pvField==null) {
-                super.message(pvRecordField.getFullName() + " request for field " + fieldName + " is not a parent of this field", MessageType.error);
+                String message = pvRecordField.getFullName() + " request for field " + fieldName + " is not a parent of this field";
+                if(alarmSupport!=null) {
+                    alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
+                }
+                super.message(message, MessageType.error);
                 return false;
             }
             if(fieldName.equals("alarm") && alarmSupport!=null) {
                 PVStructure pvStructure = (PVStructure)pvLinkField;
                 pvAlarmMessage = pvStructure.getStringField("message");
                 pvAlarmSeverity = pvStructure.getIntField("severity");
-                if(pvAlarmMessage==null || pvAlarmSeverity==null) return false;
+                if(pvAlarmMessage==null || pvAlarmSeverity==null) {
+                    String message = "link field does not have alarm info";
+                    if(alarmSupport!=null) {
+                        alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
+                    }
+                    super.message(message, MessageType.error);
+                    return false;
+                }
                 indexAlarmLinkField = i;
             } else {
                 if(!convert.isCopyCompatible(pvLinkField.getField(), pvField.getField())) {
                     String message = "pvLinkField " + pvLinkField;
                     message += " pvField " + pvField;
                     message += "field " + fieldName +" is not copy compatible with link field";
+                    if(alarmSupport!=null) {
+                        alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
+                    }
                     super.message(message,MessageType.error);
                     return false;
                 }

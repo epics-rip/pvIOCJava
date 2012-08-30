@@ -16,6 +16,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.epics.pvdata.factory.FieldFactory;
+import org.epics.pvdata.factory.PVDataFactory;
+import org.epics.pvdata.factory.StandardFieldFactory;
 import org.epics.pvdata.misc.Executor;
 import org.epics.pvdata.misc.ExecutorFactory;
 import org.epics.pvdata.misc.ExecutorNode;
@@ -27,10 +30,17 @@ import org.epics.pvdata.misc.MessageNode;
 import org.epics.pvdata.misc.MessageQueue;
 import org.epics.pvdata.misc.MessageQueueFactory;
 import org.epics.pvdata.misc.ThreadPriority;
+import org.epics.pvdata.pv.Field;
+import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVAuxInfo;
+import org.epics.pvdata.pv.PVDataCreate;
+import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.*;
-import org.epics.pvdata.factory.*;
+import org.epics.pvdata.pv.Requester;
+import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.StandardField;
+import org.epics.pvdata.pv.Structure;
 
 
 
