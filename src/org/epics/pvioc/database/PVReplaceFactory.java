@@ -88,7 +88,7 @@ public class PVReplaceFactory {
             return false;
         }
         String factoryName = pvString.get();
-        Class supportClass;
+        Class<?> supportClass;
         Method method = null;
         try {
             supportClass = Class.forName(factoryName);
@@ -97,7 +97,7 @@ public class PVReplaceFactory {
             + " " + e.getLocalizedMessage(),MessageType.error);
            return false;
         }
-        Class argumentClass;
+        Class<?> argumentClass;
         boolean isPVData;
         if(factoryName.startsWith("org.epics.pvdata")) {
         	try {

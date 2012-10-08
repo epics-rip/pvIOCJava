@@ -61,7 +61,7 @@ public class PortCreateFactory {
         parameters[1] = autoConnect;
         parameters[2] = scanPriority;
         parameters[3] = driverParameters;
-        Class supportClass;
+        Class<?> supportClass;
         Class[] parameterClasses = new Class[4];
         Method method = null;
         try {

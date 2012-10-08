@@ -146,7 +146,7 @@ public class JavaIOC {
             String factoryName = null;
             while((factoryName = in.readLine()) !=null) {
                 System.out.println("starting server factoryName " + factoryName);
-                Class startClass;
+                Class<?> startClass;
                 Method method = null;
                 try {
                     startClass = Class.forName(factoryName);

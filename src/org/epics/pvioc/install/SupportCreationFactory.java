@@ -170,7 +170,7 @@ public class SupportCreationFactory {
             printError(requester,pvRecordField,"support " + supportName + " does not define a factory name");
             return false;
         }
-        Class supportClass;
+        Class<?> supportClass;
         Support support = null;
         Method method = null;
         try {

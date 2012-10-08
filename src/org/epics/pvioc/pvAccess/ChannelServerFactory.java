@@ -23,6 +23,7 @@ import org.epics.pvaccess.client.ChannelGetRequester;
 import org.epics.pvaccess.client.ChannelProcess;
 import org.epics.pvaccess.client.ChannelProcessRequester;
 import org.epics.pvaccess.client.ChannelProvider;
+import org.epics.pvaccess.client.ChannelProviderFactory;
 import org.epics.pvaccess.client.ChannelPut;
 import org.epics.pvaccess.client.ChannelPutGet;
 import org.epics.pvaccess.client.ChannelPutGetRequester;
@@ -122,7 +123,24 @@ public class ChannelServerFactory  {
             if (singleImplementation==null) {
                 singleImplementation = new ChannelServerLocal();
                 channelFind = new ChannelFindLocal();
-                ChannelAccessFactory.registerChannelProvider(singleImplementation);
+                ChannelAccessFactory.registerChannelProviderFactory(
+                		new ChannelProviderFactory() {
+							
+							@Override
+							public ChannelProvider sharedInstance() {
+								return singleImplementation;
+							}
+							
+							@Override
+							public ChannelProvider newInstance() {
+								throw new RuntimeException("not supported");
+							}
+							
+							@Override
+							public String getFactoryName() {
+								return providerName;
+							}
+						});
             }
             return singleImplementation;
     }
@@ -1279,7 +1297,6 @@ public class ChannelServerFactory  {
         		this.pvRequest = pvRequest;
         	}
             
-            @SuppressWarnings("unchecked")
 			private boolean init() {
             	PVString pvFactory = pvRecord.getPVRecordStructure().getPVStructure().getStringField("factoryRPC");
             	if(pvFactory==null) 
@@ -1290,7 +1307,7 @@ public class ChannelServerFactory  {
                     return false;
         		}
             	String factoryName = pvFactory.get();
-            	Class supportClass;
+            	Class<?> supportClass;
                 server = null;
                 Method method = null;
                 try {
