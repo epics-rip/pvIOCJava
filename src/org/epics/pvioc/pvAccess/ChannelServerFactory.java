@@ -447,7 +447,7 @@ public class ChannelServerFactory  {
             }
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
             PVStructure pvStructure = pvCopy.createPVStructure();
-            return new ChannelGetImpl(this,channelGetRequester,pvStructure,pvCopy,getProcess(pvRequest));
+            return new ChannelGetImpl(this,channelGetRequester,pvStructure,pvCopy,getProcess(pvRequest,false));
         }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#createChannelPut(org.epics.pvaccess.client.ChannelPutRequester, org.epics.pvdata.pv.PVStructure)
@@ -465,7 +465,7 @@ public class ChannelServerFactory  {
             }
         	PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
             PVStructure pvStructure = pvCopy.createPVStructure();
-            return new ChannelPutImpl(this,channelPutRequester,pvStructure,pvCopy,getProcess(pvRequest));
+            return new ChannelPutImpl(this,channelPutRequester,pvStructure,pvCopy,getProcess(pvRequest,true));
         }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#createChannelPutGet(org.epics.pvaccess.client.ChannelPutGetRequester, org.epics.pvdata.pv.PVStructure, boolean, org.epics.pvdata.pv.PVStructure, boolean, boolean, org.epics.pvdata.pv.PVStructure)
@@ -483,7 +483,7 @@ public class ChannelServerFactory  {
             	channelPutGetRequester.channelPutGetConnect(channelDestroyedStatus, null, null, null);
             	return null;
             }
-            boolean process = getProcess(pvRequest);
+            boolean process = getProcess(pvRequest,true);
 
             PVField pvField = pvRequest.getSubField("putField");
             if(pvField==null || pvField.getField().getType()!=Type.structure) {
@@ -623,9 +623,9 @@ public class ChannelServerFactory  {
             return "{ name = " + pvRecord.getRecordName() + (isDestroyed.get() ? " disconnected }" : " connected }" ); 
         }
         
-        private boolean getProcess(PVStructure pvRequest) {
+        private boolean getProcess(PVStructure pvRequest,boolean processDefault) {
         	PVField pvField = pvRequest.getSubField("record._options.process");
-        	if(pvField==null || pvField.getField().getType()!=Type.scalar) return false;
+        	if(pvField==null || pvField.getField().getType()!=Type.scalar) return processDefault;
         	Scalar scalar = (Scalar)pvField.getField();
         	if(scalar.getScalarType()==ScalarType.pvString) {
         		PVString pvString = (PVString)pvField;
@@ -634,7 +634,7 @@ public class ChannelServerFactory  {
         		PVBoolean pvBoolean = (PVBoolean)pvField;
         		return pvBoolean.get();
         	}
-        	return false;
+        	return processDefault;
         }
         
         private static class ChannelProcessImpl implements ChannelProcess,RecordProcessRequester
