@@ -23,7 +23,7 @@ import org.epics.pvioc.install.InstallFactory;
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
-public class ChannelCreateDestoryTest extends TestCase {
+public class ChannelCreateDestroyTest extends TestCase {
 	
 	private static class ChannelRequesterImpl implements ChannelRequester {
 		
@@ -83,7 +83,7 @@ public class ChannelCreateDestoryTest extends TestCase {
          * @see org.epics.pvioc.util.Requester#getRequesterName()
          */
         public String getRequesterName() {
-            return ChannelCreateDestoryTest.class.getName();
+            return ChannelCreateDestroyTest.class.getName();
         }
         /* (non-Javadoc)
          * @see org.epics.pvioc.util.Requester#message(java.lang.String, org.epics.pvioc.util.MessageType)
