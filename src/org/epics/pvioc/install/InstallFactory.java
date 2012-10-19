@@ -155,6 +155,23 @@ public class InstallFactory {
                 isInUse.set(false);
             }
         }
+        /* (non-Javadoc)
+         * @see org.epics.pvioc.install.Install#cleanMaster(org.epics.pvdata.pv.Requester)
+         */
+        public boolean cleanMaster(Requester requester) {
+            boolean gotIt = isInUse.compareAndSet(false,true);
+            if(!gotIt) {
+                requester.message("InstallFactory is already active",
+                        MessageType.fatalError);
+                return false;
+            }
+            try {
+                maxError = MessageType.info;
+                return master.cleanMaster();
+            } finally {
+                isInUse.set(false);
+            }
+        }
 
        
 

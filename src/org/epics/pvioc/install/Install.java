@@ -73,5 +73,10 @@ public interface Install {
      * @return false,true) if the new record (was not, was) merged into master.
      */
     boolean installRecord(PVRecord pvRecord,Requester requester);
+    /**
+     * Remove all records and structures from the master database.
+     * @param requester The requester.
+     */
+    boolean cleanMaster(Requester requester);
     
 }
