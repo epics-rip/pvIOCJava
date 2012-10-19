@@ -155,7 +155,7 @@ public class ChannelCreateDestroyTest extends TestCase {
 		{
 			Channel channel = syncCreateChannel("valueOnly");
 			channel.destroy();
-			if ((i % 1000)==0) 
+			if ((i % 100000)==0) 
 			{
 				System.gc();
 				System.out.println(i+" : used by VM " +Runtime.getRuntime().totalMemory() + ", free:" + Runtime.getRuntime().freeMemory());
