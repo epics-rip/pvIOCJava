@@ -140,5 +140,12 @@ public class PVCopyMonitorRecordTest extends TestCase {
             
         }
     }       
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        master.cleanMaster();
+    }
 }
 

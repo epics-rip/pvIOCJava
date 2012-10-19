@@ -82,5 +82,12 @@ System.out.println(pvGetStructure);
         pvGetCopy.initCopy(pvGetStructure, getBitSet, true);
         
     }
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        master.cleanMaster();
+    }
 }
 

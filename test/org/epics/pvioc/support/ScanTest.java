@@ -32,12 +32,12 @@ public class ScanTest extends TestCase {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final Install install = InstallFactory.get();
     private static MessageType maxMessageType = MessageType.info;
+    private static final Requester iocRequester = new RequesterForTesting("scanTest");
     /**
      * test scan.
      */
     public static void testScan() {
         PVRecord[] pvRecords = null;
-        Requester iocRequester = new RequesterForTesting("scanTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
         boolean ok = install.installRecords("test/org/epics/pvioc/support/scanPV.xml", iocRequester);
@@ -176,6 +176,13 @@ public class ScanTest extends TestCase {
             System.out.println(message);
             if(messageType.ordinal()>maxMessageType.ordinal()) maxMessageType = messageType;
         }
+    }
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        install.cleanMaster(iocRequester);
     }
 
 }

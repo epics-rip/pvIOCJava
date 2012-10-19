@@ -95,11 +95,10 @@ public class ChannelCreateDestroyTest extends TestCase {
     }
 
     private static final Install install = InstallFactory.get();
-
+    private static final Requester iocRequester = new Listener(); 
     static
 	{
 		// start javaIOC
-        Requester iocRequester = new Listener();
         try {
             install.installStructures("xml/structures.xml",iocRequester);
             install.installRecords("example/exampleDB.xml",iocRequester);
@@ -122,6 +121,7 @@ public class ChannelCreateDestroyTest extends TestCase {
 	 */
 	@Override
 	protected void tearDown() throws Exception {
+            install.cleanMaster(iocRequester);
 	}
 
 	/**

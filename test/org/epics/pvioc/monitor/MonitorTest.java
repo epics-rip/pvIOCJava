@@ -689,5 +689,12 @@ public class MonitorTest extends TestCase {
 			System.out.printf("%s %s%n",messageType.toString(),message);
 		}  
     }
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        master.cleanMaster();
+    }
 }
 
