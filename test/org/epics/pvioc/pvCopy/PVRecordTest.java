@@ -122,6 +122,12 @@ public class PVRecordTest extends TestCase {
             System.err.println("pvStructure.isValid failed");
         }
     }
-    
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        master.cleanMaster();
+    }
 }
 

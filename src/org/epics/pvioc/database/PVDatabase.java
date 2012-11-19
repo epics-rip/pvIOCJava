@@ -91,6 +91,11 @@ public interface PVDatabase extends Requester{
      */
     PVStructure[] getStructures();
     /**
+     * Remove all records and structures from master IOCDB.
+     * @return true if the master was cleared, false otherwise.
+     */
+    boolean cleanMaster();
+    /**
      * Report a message.
      * If no listeners are registered the messages are sent to System.out (info) or System.err (all other message types).
      * If listeners are registered they are called.

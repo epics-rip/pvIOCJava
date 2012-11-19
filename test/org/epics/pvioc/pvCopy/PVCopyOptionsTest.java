@@ -78,5 +78,12 @@ System.out.println("options " + pvOptions);
         assertTrue(pvOptions!=null);
 System.out.println("options " + pvOptions);
     }
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        master.cleanMaster();
+    }
 }
 

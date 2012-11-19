@@ -85,6 +85,13 @@ public class PVDatabaseFactory {
     
     static {
         master = new Database("master");
+        addBasicStructures();
+    }
+    
+    /*
+     * Add the very basic structures and alarm support stuff, which are not read from XML
+     */
+    private static void addBasicStructures() {
         PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
         FieldCreate fieldCreate = FieldFactory.getFieldCreate();
         String prefix = "org.epics.pvioc.";
@@ -508,6 +515,26 @@ public class PVDatabaseFactory {
             try {
                 if(structureMap.remove(structureName)!=null) return true;
                 return false;
+            } finally {
+                rwLock.writeLock().unlock();
+            }
+        }
+        /* (non-Javadoc)
+         * @see org.epics.pvioc.database.PVDatabase#cleanMaster()
+         */
+        @Override
+        public boolean cleanMaster() {
+            if(isMaster) {
+                for (PVRecord record : recordMap.values()) {
+                    record.removeRequester(this);
+                }
+            }
+            rwLock.writeLock().lock();
+            try {
+                recordMap.clear();
+                structureMap.clear();
+                addBasicStructures();
+                return true;
             } finally {
                 rwLock.writeLock().unlock();
             }

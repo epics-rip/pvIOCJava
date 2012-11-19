@@ -23,7 +23,7 @@ import org.epics.pvioc.install.InstallFactory;
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
-public class ChannelCreateDestoryTest extends TestCase {
+public class ChannelCreateDestroyTest extends TestCase {
 	
 	private static class ChannelRequesterImpl implements ChannelRequester {
 		
@@ -83,7 +83,7 @@ public class ChannelCreateDestoryTest extends TestCase {
          * @see org.epics.pvioc.util.Requester#getRequesterName()
          */
         public String getRequesterName() {
-            return ChannelCreateDestoryTest.class.getName();
+            return ChannelCreateDestroyTest.class.getName();
         }
         /* (non-Javadoc)
          * @see org.epics.pvioc.util.Requester#message(java.lang.String, org.epics.pvioc.util.MessageType)
@@ -95,11 +95,10 @@ public class ChannelCreateDestoryTest extends TestCase {
     }
 
     private static final Install install = InstallFactory.get();
-
+    private static final Requester iocRequester = new Listener(); 
     static
 	{
 		// start javaIOC
-        Requester iocRequester = new Listener();
         try {
             install.installStructures("xml/structures.xml",iocRequester);
             install.installRecords("example/exampleDB.xml",iocRequester);
@@ -122,6 +121,7 @@ public class ChannelCreateDestoryTest extends TestCase {
 	 */
 	@Override
 	protected void tearDown() throws Exception {
+            install.cleanMaster(iocRequester);
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class ChannelCreateDestoryTest extends TestCase {
 		{
 			Channel channel = syncCreateChannel("valueOnly");
 			channel.destroy();
-			if ((i % 1000)==0) 
+			if ((i % 100000)==0) 
 			{
 				System.gc();
 				System.out.println(i+" : used by VM " +Runtime.getRuntime().totalMemory() + ", free:" + Runtime.getRuntime().freeMemory());

@@ -39,13 +39,13 @@ public class ProcessTest extends TestCase {
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
     private static final Install install = InstallFactory.get();
     private static MessageType maxMessageType = MessageType.info;
+    private static final Requester iocRequester = new RequesterForTesting("accessTest");
  
    public static void testProcessDummy() { }
    /**
      * test PVAccess.
      */
     public static void testProcess() {
-        Requester iocRequester = new RequesterForTesting("accessTest");
         XMLToPVDatabaseFactory.convert(masterPVDatabase,"${JAVAIOC}/xml/structures.xml", iocRequester,false,null,null,null);
         if(maxMessageType!=MessageType.info&&maxMessageType!=MessageType.warning) return;
         new NewAfterStartRequesterImpl(0);
@@ -284,5 +284,12 @@ public class ProcessTest extends TestCase {
             System.out.println("ProcessTest: " + messageType + " " + message);
             
         }
+    }
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        install.cleanMaster(iocRequester);
     }
 }

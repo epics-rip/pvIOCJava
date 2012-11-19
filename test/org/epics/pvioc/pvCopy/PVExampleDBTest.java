@@ -59,7 +59,8 @@ public class PVExampleDBTest extends TestCase {
         String request = "";
         PVStructure pvRequest = null;
         // definitions for PVCopy
-        pvRecord = master.findRecord("laptoprecordListRPC");
+        String iocname = System.getenv("IOCNAME");
+        pvRecord = master.findRecord(iocname + "recordListRPC");
         assertTrue(pvRecord!=null);
 System.out.println(pvRecord);
         request = "record[process=true]putField(arguments)getField(result)";
@@ -80,6 +81,13 @@ System.out.println(pvGetStructure);
         BitSet getBitSet = new BitSet(pvGetStructure.getNumberFields());
         pvGetCopy.initCopy(pvGetStructure, getBitSet, true);
         
+    }
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        master.cleanMaster();
     }
 }
 
