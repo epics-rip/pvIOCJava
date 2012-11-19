@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ "X$EPICS_BASE" = "X" ]; then
+    echo "Environment variable EPICS_BASE not set."
+    exit 1
+fi
+
+if [ "X$EPICS_HOST_ARCH" = "X" ]; then
+    EPICS_HOST_ARCH=`$EPICS_BASE/startup/EpicsHostArch`
+    if [ "X$EPICS_HOST_ARCH" = "X" ]; then
+        echo "Environment variable EPICS_HOST_ARCH not set, failed to auto-detect."
+        exit 1
+    fi
+    echo "Environment variable EPICS_HOST_ARCH not set, detected $EPICS_HOST_ARCH."
+fi
+
+# change to reflect your local environment
+if [ "X$EPICSV4_WORKSPACE" = "X" ]; then
+    EPICSV4_WORKSPACE="`pwd`/.."
+    echo "EPICSv4 workspace directory set to '$EPICSV4_WORKSPACE'."
+fi
+
+# start pvIOCJava (pure V4 support)
+cd $EPICSV4_WORKSPACE/pvIOCJava
+java -classpath $EPICSV4_WORKSPACE/pvIOCJava/bin:$EPICSV4_WORKSPACE/pvDataJava/bin:$EPICSV4_WORKSPACE/pvAccessJava/bin -DIOCNAME=local -DJAVAIOC=. org.epics.pvioc.JavaIOC -structures xml/structures.xml -server server/pvAccessServer.txt -records xmltest/types/typesDB.xml
+
