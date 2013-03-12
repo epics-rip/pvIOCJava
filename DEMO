@@ -1,0 +1,81 @@
+First run a EPICS V4 Java IOC by running ./runTestJavaIOC in another terminal (or in background).
+Make sure that pvDataJava, pvAccessJava and pvIOCJava are located in the same parent directory,
+and EPICSV4_WORKSPACE environment variable set to it.
+
+pvget, pvput and eget utilities are delivered by pvAccessCPP (caget and caput equvivalents).
+They are located in pvAccessCPP/bin/$EPICS_HOST_ARCH directory.
+
+1. Get the value of a V4 scalar PV
+----------------------------------
+> pvget double
+double                         1
+
+
+2. Put the value of a V4 scalar PV
+----------------------------------
+> pvput double 1.23
+Old : double                         1
+New : double                         1.23
+
+
+3. Get the value of a V4 array PV
+----------------------------------
+> pvget doubleArray
+doubleArray 3 0 0 0
+
+
+4. Put the value of a V4 array PV
+----------------------------------
+> pvput doubleArray 3 11 22 33
+Old : doubleArray 3 0 0 0
+New : doubleArray 3 11 22 33
+
+
+5. Get the values of all the fields of V4 record (-r is pvAccess request string)
+--------------------------------------------------------------------------------
+> pvget -r 'field()' double
+double
+structure 
+    double value 1.23
+    time_t timeStamp
+        long secondsPastEpoch 1353589062
+        int nanoSeconds 855000000
+        int userTag 0
+    alarm_t alarm
+        int severity 0
+        int status 0
+        string message 
+    display_t display
+        double limitLow 0
+        double limitHigh 10
+        string description 
+        string format 
+        string units volts
+    control_t control
+        double limitLow 1
+        double limitHigh 9
+        double minStep 0
+
+
+6. Get the values of some fields of V4 record (-r is pvAccess request string)
+--------------------------------------------------------------------------------
+> pvget -r 'field(value,timeStamp,alarm)' double
+double
+structure 
+    double value 1.23
+    time_t timeStamp
+        long secondsPastEpoch 1353589062
+        int nanoSeconds 855000000
+        int userTag 0
+    alarm_t alarm
+        int severity 0
+        int status 0
+        string message
+        
+
+6. Monitor the value of a V4 scalar PV
+--------------------------------------
+> pvget -m double
+double                         1.23
+^C
+
