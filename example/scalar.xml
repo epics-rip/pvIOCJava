@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<database>
+
+<record recordName = "scalarDouble">
+    <scalar name = "value" scalarType = "double"/>
+    <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "description">Sample Description</scalar>
+        <scalar name = "format">%f</scalar>
+        <scalar name = "units">volts</scalar>
+    </structure>
+    <structure name = "valueAlarm" extends = "doubleAlarm">
+      <scalar name = "active">true</scalar>
+      <scalar name = "lowAlarmLimit">2</scalar>
+      <scalar name = "lowAlarmSeverity">2</scalar>
+      <scalar name = "lowWarningLimit">4</scalar>
+      <scalar name = "lowWarningSeverity">1</scalar>
+      <scalar name = "highWarningLimit">8</scalar>
+      <scalar name = "highWarningSeverity">1</scalar>
+      <scalar name = "highAlarmLimit">10</scalar>
+      <scalar name = "highAlarmSeverity">2</scalar>
+      <scalar name = "hystersis">.2</scalar>
+    </structure> 
+</record>
+
+</database>

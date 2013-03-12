@@ -7,6 +7,8 @@
 <include href = "generic.xml" />
 <include href = "commonFields.xml" />
 <include href = "control.xml" />
+<include href = "databaseListener.xml" />
+<include href = "generateMessage.xml" />
 <include href = "supportState.xml" />
 <include href = "caLink.xml" />
 <include href = "dbLink.xml" />

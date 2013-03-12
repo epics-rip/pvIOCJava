@@ -90,7 +90,9 @@ public class XMLToPVDatabaseFactory {
             try {
                 iocxmlReader.parse("database",fileName,requester,reportSubstitutionFailure,listener,detailsListener);
             } catch (RuntimeException e) {
-            	iocxmlReader.message("iocxmlReader.parse" + e.getMessage(),MessageType.error);
+                String message = "iocxmlReader.parse" + e.getMessage();
+            	requester.message(message,MessageType.error);
+            	
             	e.printStackTrace();
             }
         } finally {

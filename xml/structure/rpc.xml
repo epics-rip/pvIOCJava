@@ -91,6 +91,21 @@
    </structure>   
 </structure>
 
+<structure structureName = "addRecordsFactory">
+  <scalar name = "supportFactory" scalarType = "string">
+     org.epics.pvioc.support.rpc.AddRecordsFactory</scalar>
+</structure>
+
+<structure structureName = "addRecords">
+   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.addRecordsFactory</auxInfo>
+   <structure name = "arguments" >
+       <scalar name = "fileName" scalarType = "string"/>
+   </structure>
+   <structure name = "result" >
+      <scalar name = "status" scalarType = "string" />
+   </structure>   
+</structure>
+
 <structure structureName = "supportStateSetFactory">
   <scalar name = "supportFactory" scalarType = "string">
      org.epics.pvioc.support.rpc.SupportStateSetFactory</scalar>
@@ -99,7 +114,7 @@
 
 <structure structureName = "supportStateCommand" extends = "enumerated" >
   <array name = "choices"  immutable = "true">
-    [idle,initialize,start,stop,uninitialize]
+    [initialize,start,stop,uninitialize]
     </array>
 </structure>
 

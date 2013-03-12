@@ -2,9 +2,6 @@
 <database>
 <import name = "org.epics.pvioc.*" />
 <import name = "org.epics.pvioc.test.*" />
-<include addPath = "${JAVAIOC}/xml" />
-<include href = "records.xml" />
-<include removePath = "${JAVAIOC}/xml" />
 
 
 <record recordName = "structureArrayTest">

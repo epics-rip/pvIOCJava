@@ -54,6 +54,7 @@ public class SupportStateSetFactory {
         private final Executor executor = ExecutorFactory.create(SupportStateSetFactory.supportName, ThreadPriority.lowest);
         private final PVRecordStructure pvRecordStructure;
         private final ExecutorNode executorNode;
+        
         private RecordProcess recordProcess = null;
         
         private PVString pvMessage = null;
@@ -61,10 +62,10 @@ public class SupportStateSetFactory {
         
         private PVString pvRecordName = null;
         private String recordName = null;
-        private String recordNamePrevious = emptyString;
-         
-        private PVEnumerated supportStateEnumerated = null;
-        private PVEnumerated supportStateCommandEnumerated = PVEnumeratedFactory.create();
+        
+        private PVEnumerated supportStateRequestEnumerated = PVEnumeratedFactory.create();
+        private PVEnumerated supportStateResultEnumerated = PVEnumeratedFactory.create();
+       
         
         private PVRecord targetPVRecord = null;
         private RecordProcess targetRecordProcess = null;
@@ -92,13 +93,19 @@ public class SupportStateSetFactory {
             if(pvRecordName==null) return;
             PVStructure pvStructure = pvSupportStateSet.getStructureField("arguments.supportStateCommand");
             if(pvStructure==null) return;
-            if(!SupportStateCommand.checkSupportStateCommand(supportStateCommandEnumerated,pvStructure)) return;
+            if(!SupportStateCommand.checkSupportStateCommand(pvStructure)) return;
+            supportStateRequestEnumerated.attach(pvStructure);
             pvMessage = pvSupportStateSet.getStringField("result.message");
             if(pvMessage==null) return;
             pvStructure = pvSupportStateSet.getStructureField("result.supportState");
             if(pvStructure==null) return;
-            supportStateEnumerated = SupportState.getSupportState(pvStructure);
-            if(supportStateEnumerated==null) return;
+            if(SupportState.isSupportStateStructure(pvStructure)==null) return;
+            supportStateResultEnumerated.attach(pvStructure);
+            if(!supportStateRequestEnumerated.isAttached()) {
+                pvStructure.message("result.supportState not an unumerated structure", MessageType.error);
+                return;
+            }                                   
+            if(supportStateRequestEnumerated==null) return;
             super.initialize();
         }
         /* (non-Javadoc)
@@ -110,96 +117,141 @@ public class SupportStateSetFactory {
             recordName = pvRecordName.get();
             if(recordName==null || recordName.equals("")) {
                 pvMessage.put("recordName is null");
-                supportProcessRequester.supportProcessDone(RequestResult.success);
+                supportProcessRequester.supportProcessDone(RequestResult.failure);
+                return;
+            }
+            targetPVRecord = masterPVDatabase.findRecord(recordName);
+            if(targetPVRecord==null) {
+                requestResult = RequestResult.failure;
+                message = "recordName " + recordName + " not found";
+                pvMessage.put(message);
+                supportProcessRequester.supportProcessDone(requestResult);
+                return;
+            }
+            targetRecordProcess = targetPVRecord.getRecordProcess();
+            if(targetRecordProcess==null) {
+                requestResult = RequestResult.failure;
+                message = "recordProcess for " + "recordName " + recordName + " not found";
+                pvMessage.put(message);
+                targetPVRecord = null;
+                supportProcessRequester.supportProcessDone(requestResult);
+                return;
+            }
+            if(targetRecordProcess.isEnabled()) {
+                requestResult = RequestResult.failure;
+                message = " record is enabled; Must be disabled before changing support state";
+                pvMessage.put(message);
+                targetPVRecord = null;
+                supportProcessRequester.supportProcessDone(requestResult);
                 return;
             }
             requestResult = RequestResult.success;
             this.supportProcessRequester = supportProcessRequester;
             supportState = null;
-            supportStateCommand = SupportStateCommand.getSupportStateCommand(supportStateEnumerated.getIndex());
+            supportStateCommand = SupportStateCommand.getSupportStateCommand(supportStateRequestEnumerated.getIndex());
             executor.execute(executorNode);
         }
         /* (non-Javadoc)
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            if(!recordName.equals(recordNamePrevious)) {
-                targetPVRecord = masterPVDatabase.findRecord(recordName);
-                if(targetPVRecord==null) {
-                    requestResult = RequestResult.failure;
-                    message = "recordName " + recordName + " not found";
-                    recordProcess.processContinue(this);
-                    return;
-                }
-                targetRecordProcess = targetPVRecord.getRecordProcess();
-                if(targetRecordProcess==null) {
-                    requestResult = RequestResult.failure;
-                    message = "recordProcess for " + "recordName " + recordName + " not found";
-                    targetPVRecord = null;
-                    recordProcess.processContinue(this);
-                    return;
-                }
-                recordNamePrevious = recordName;
-                supportState = targetRecordProcess.getSupportState();
-                recordProcess.processContinue(this);
-                return;
-            }
-            if(targetPVRecord==null) {
-                message = "not connected to a record";
-                recordProcess.processContinue(this);
-                return;
-            }
+            supportState = targetRecordProcess.getSupportState();
+            supportStateCommand = SupportStateCommand.getSupportStateCommand(supportStateRequestEnumerated.getIndex());
             targetPVRecord.lock();
+            supportState = targetRecordProcess.getSupportState();
             try {
-                if(supportStateCommand!=SupportStateCommand.idle) {
-                    supportState = targetRecordProcess.getSupportState();
-                    SupportState desiredState = null;
-                    switch(supportStateCommand) {
-                    case initialize:
-                        desiredState = SupportState.readyForStart;
-                        if(supportState!=SupportState.readyForInitialize) {
-                            targetRecordProcess.uninitialize();
-                        }
-                        targetRecordProcess.initialize();break;
-                    case start:
-                        desiredState = SupportState.ready;
-                        if(supportState!=SupportState.readyForStart) {
-                            if(supportState==SupportState.ready) {
-                                targetRecordProcess.stop();
-                            } else if(supportState==SupportState.readyForInitialize) {
-                                targetRecordProcess.initialize();
-                            }
-                            supportState = targetRecordProcess.getSupportState();
-                            if(supportState!=SupportState.readyForStart) {
-                                requestResult = RequestResult.failure;
-                                message = "support is not readyForStart";
-                                recordProcess.processContinue(this);
-                                return;
-                            }
-                        }
-                        targetRecordProcess.start(null); break;
-                    case stop:
-                        desiredState = SupportState.readyForStart;
-                        if(supportState!=SupportState.ready) {
-                            requestResult = RequestResult.failure;
-                            message = "support is not ready";
-                            recordProcess.processContinue(this);
-                            return;
-                        }
-                        targetRecordProcess.stop(); break;
-                    case uninitialize:
-                        desiredState = SupportState.readyForInitialize;
-                        targetRecordProcess.uninitialize(); break;
-                        default:
-                            throw new IllegalArgumentException("Logic error");
-                    }
-                    waitForState(desiredState);
-                }
                 supportState = targetRecordProcess.getSupportState();
-                recordProcess.processContinue(this);
+                switch(supportStateCommand) {
+                case initialize:
+                    switch(supportState) {
+                    case readyForInitialize:
+                        targetRecordProcess.initialize();
+                        waitForState(SupportState.readyForStart);
+                        break;
+                    case readyForStart:
+                        break;
+                    case ready:
+                        targetRecordProcess.stop();
+                        waitForState(SupportState.readyForStart);
+                        targetRecordProcess.uninitialize();
+                        waitForState(SupportState.readyForInitialize);
+                        targetRecordProcess.initialize();
+                        waitForState(SupportState.readyForStart);
+                        break;
+                    case zombie:
+                        pvMessage.put("SupportState is zombie");
+                        requestResult = RequestResult.failure;
+                        break;
+                    }
+                    break;
+                case start:
+                    switch(supportState) {
+                    case readyForInitialize:
+                        targetRecordProcess.initialize();
+                        waitForState(SupportState.readyForStart);
+                        targetRecordProcess.start(null);
+                        waitForState(SupportState.ready);
+                        break;
+                    case readyForStart:
+                        targetRecordProcess.start(null);
+                        waitForState(SupportState.ready);
+                        break;
+                    case ready:
+                        targetRecordProcess.stop();
+                        waitForState(SupportState.readyForStart);
+                        targetRecordProcess.uninitialize();
+                        waitForState(SupportState.readyForInitialize);
+                        targetRecordProcess.initialize();
+                        waitForState(SupportState.readyForStart);
+                        targetRecordProcess.start(null);
+                        waitForState(SupportState.ready);
+                        break;
+                    case zombie:
+                        pvMessage.put("SupportState is zombie");
+                        requestResult = RequestResult.failure;
+                        break;
+                    }
+                case stop:
+                    switch(supportState) {
+                    case readyForInitialize:
+                        targetRecordProcess.initialize();
+                        waitForState(SupportState.readyForStart);
+                        break;
+                    case readyForStart:
+                        break;
+                    case ready:
+                        targetRecordProcess.stop();
+                        waitForState(SupportState.readyForStart);
+                        break;
+                    case zombie:
+                        pvMessage.put("SupportState is zombie");
+                        requestResult = RequestResult.failure;
+                        break;
+                    }
+                case uninitialize:
+                    switch(supportState) {
+                    case readyForInitialize:
+                        break;
+                    case readyForStart:
+                        targetRecordProcess.uninitialize();
+                        waitForState(SupportState.readyForInitialize);
+                        break;
+                    case ready:
+                        targetRecordProcess.stop();
+                        waitForState(SupportState.readyForStart);
+                        targetRecordProcess.uninitialize();
+                        waitForState(SupportState.readyForInitialize);
+                        break;
+                    case zombie:
+                        pvMessage.put("SupportState is zombie");
+                        requestResult = RequestResult.failure;
+                        break;
+                    }
+                }
             } finally {
                 targetPVRecord.unlock();
             }
+            recordProcess.processContinue(this);
         }
 
         /* (non-Javadoc)
@@ -207,15 +259,8 @@ public class SupportStateSetFactory {
          */
         public void processContinue() {
             pvMessage.put(message);
-            if(supportState!=null) {
-                int index = supportState.ordinal();
-                if(index!=supportStateEnumerated.getIndex()) {
-                    supportStateEnumerated.setIndex(index);
-                }
-            }
-            if(supportStateCommandEnumerated.getIndex()!=0) {
-                supportStateCommandEnumerated.setIndex(0);
-            }
+            SupportState supportState = targetRecordProcess.getSupportState();
+            supportStateResultEnumerated.setIndex(supportState.ordinal());
             supportProcessRequester.supportProcessDone(requestResult);
         }
         
@@ -233,22 +278,24 @@ public class SupportStateSetFactory {
         }
 
         private enum SupportStateCommand {
-            idle, initialize, start, stop, uninitialize;
+            initialize, start, stop, uninitialize;
+            
+            private static PVEnumerated enumerated = PVEnumeratedFactory.create();
+
             
             public static SupportStateCommand getSupportStateCommand(int value) {
                 switch(value) {
-                case 0: return SupportStateCommand.idle;
-                case 1: return SupportStateCommand.initialize;
-                case 2: return SupportStateCommand.start;
-                case 3: return SupportStateCommand.stop;
-                case 4: return SupportStateCommand.uninitialize;
+                case 0: return SupportStateCommand.initialize;
+                case 1: return SupportStateCommand.start;
+                case 2: return SupportStateCommand.stop;
+                case 3: return SupportStateCommand.uninitialize;
                 }
                 throw new IllegalArgumentException("SupportStateCommand getSupportStateCommand("
                     + ((Integer)value).toString() + ") is not a valid SupportStateCommand");
             }
             
             private static final String[] supportStateCommandChoices = {
-                "idle", "initialize", "start", "stop", "uninitialize"
+                "initialize", "start", "stop", "uninitialize"
             };
             /**
              * Convenience method for code that accesses a supportStateCommand structure.
@@ -256,7 +303,7 @@ public class SupportStateSetFactory {
              * @return The Enumerated interface only if pvField has an Enumerated interface and defines
              * the supportStateCommand choices.
              */
-            public static boolean checkSupportStateCommand(PVEnumerated enumerated,PVField pvField) {
+            public static boolean checkSupportStateCommand(PVField pvField) {
                 if(!enumerated.attach(pvField)) {
                     pvField.message("not an enumerated structure", MessageType.error);
                     return false;

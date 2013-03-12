@@ -92,6 +92,9 @@ public class BasePVRecord implements PVRecord {
     		PVRecordField pvrf = pvrss[i];
     	    pvf = pvrf.getPVField();
     	    offset = pvf.getFieldOffset();
+if(offset==0) {
+System.out.println("why is offset 0");
+}
     	    if(offset==desiredOffset) return pvrf;
     	    int nextOffset = pvf.getNextFieldOffset();
     	    if(nextOffset<=desiredOffset) continue;
@@ -180,6 +183,10 @@ public class BasePVRecord implements PVRecord {
      */
     public void unlock() {
         lock.unlock();
+    }
+    @Override
+    public boolean tryLock() {
+        return lock.tryLock();
     }
     /* (non-Javadoc)
      * @see org.epics.pvdata.pv.PVRecord#beginGroupPut()

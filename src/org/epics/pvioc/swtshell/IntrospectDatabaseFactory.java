@@ -450,14 +450,9 @@ public class IntrospectDatabaseFactory {
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
             public void widgetSelected(SelectionEvent e) {
-                Object object = e.getSource();
-
-                if(object==falseButton) {
-                    recordProcess.setEnabled(false);
-                }
-                if(object==trueButton) {
-                    recordProcess.setEnabled(true);
-                }
+                boolean isTrue = trueButton.getSelection();
+                recordProcess.setEnabled(isTrue);
+                shell.dispose();
             }
             
         }
@@ -475,7 +470,7 @@ public class IntrospectDatabaseFactory {
                 recordProcess = pvRecord.getRecordProcess();
                 boolean initialState = recordProcess.isTrace();
                 shell = new Shell(getParent(),getStyle());
-                shell.setText("setEnable");
+                shell.setText("setTrace");
                 GridLayout gridLayout = new GridLayout();
                 gridLayout.numColumns = 1;
                 shell.setLayout(gridLayout);
@@ -510,14 +505,9 @@ public class IntrospectDatabaseFactory {
              * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
              */
             public void widgetSelected(SelectionEvent e) {
-                Object object = e.getSource();
-
-                if(object==falseButton) {
-                    recordProcess.setTrace(false);
-                }
-                if(object==trueButton) {
-                    recordProcess.setTrace(true);
-                }
+                boolean isTrue = trueButton.getSelection();
+                recordProcess.setTrace(isTrue);
+                shell.dispose();
             }
             
         }
@@ -590,6 +580,7 @@ public class IntrospectDatabaseFactory {
                 if(object==uninitializeButton) {
                     recordProcess.uninitialize();
                 }
+                shell.dispose();
             }
             
         }

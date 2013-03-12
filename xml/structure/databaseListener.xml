@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<database>
+<structure structureName = "databaseListenerFactory">
+  <scalar name = "supportFactory" scalarType = "string">
+     org.epics.pvioc.support.basic.DatabaseListenerFactory</scalar>
+</structure>
+</database>

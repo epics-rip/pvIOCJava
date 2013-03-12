@@ -74,6 +74,12 @@ public interface PVRecord extends Requester{
      */
     void unlock();
     /**
+     * Try to lock the record instance.
+     * This can be called before accessing the record instead of lock.
+     * @return If true then it is just like lock. If false the record must not be accessed.
+     */
+    boolean tryLock();
+    /**
      * While holding lock on this record lock another record.
      * If the other record is already locked than this record may be unlocked.
      * The caller must call the unlock method of the other record when done with it.

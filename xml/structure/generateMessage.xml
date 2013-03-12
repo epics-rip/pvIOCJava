@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<database>
+<structure structureName = "generateMessageFactory">
+  <scalar name = "supportFactory" scalarType = "string">
+     org.epics.pvioc.support.basic.GenerateMessageFactory</scalar>
+</structure>
+</database>

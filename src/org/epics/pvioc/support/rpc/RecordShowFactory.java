@@ -20,10 +20,12 @@ import org.epics.pvdata.property.PVEnumeratedFactory;
 import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.property.TimeStampFactory;
 import org.epics.pvdata.pv.MessageType;
-import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVScalar;
 import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
@@ -149,15 +151,19 @@ public class RecordShowFactory {
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
         private void showState() {
-        	PVBoolean pvBoolean= pvRecord.getPVRecordStructure().getPVStructure().getBooleanField("scan.singleProcessRequester");
-            boolean singleProcessRequester = ((pvBoolean==null) ? false : pvBoolean.get());
+            boolean singleProcessRequester = false;
+            PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("scan.singleProcessRequester");
+            if(pvField!=null && pvField.getField().getType()==Type.scalar) {
+                PVScalar pvScalar = (PVScalar)pvField;
+                if(pvScalar.getScalar().getScalarType()==ScalarType.pvBoolean) singleProcessRequester = true;
+            }
             String processRequesterName = recordProcess.getRecordProcessRequesterName();
             SupportState supportState = recordProcess.getSupportState();
             boolean isActive = recordProcess.isActive();
             boolean isEnabled = recordProcess.isEnabled();
             boolean isTrace = recordProcess.isTrace();
             String alarmSeverity = null;
-            PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.severity.choice");
+            pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.severity.choice");
             if(pvField!=null) alarmSeverity = pvField.toString();
             String alarmMessage = null;
             pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("alarm.message");

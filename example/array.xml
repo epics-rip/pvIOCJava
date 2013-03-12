@@ -1,9 +1,17 @@
 <?xml version="1.0" ?>
 <database>
 
-<record recordName = "arrayValueOnly">
+<record recordName = "arrayDouble">
     <array name = "value" scalarType = "double"/>
     <structure name = "timeStamp" extends = "timeStamp" />
+    <structure name = "alarm" extends = "alarm" />
+    <structure name = "display" extends = "display" >
+        <scalar name = "description">Sample Description</scalar>
+        <scalar name = "format">%f</scalar>
+        <scalar name = "units">volts</scalar>
+        <scalar name = "limitLow">0.0</scalar>
+        <scalar name = "limitHigh">10.0</scalar>
+    </structure>
 </record>
 
 </database>

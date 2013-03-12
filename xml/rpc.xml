@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.pvioc.*" />
+<import name = "org.epics.pvdata.*" />
+<record recordName = "${IOCNAME}recordListPGRPC" extends = "recordList" />
+<record recordName = "${IOCNAME}structureListPGRPC" extends = "structureList" />
+<record recordName = "${IOCNAME}iocShowPGRPC" extends = "iocShow" />
+<record recordName = "${IOCNAME}recordShowPGRPC" extends = "recordShow" />
+<record recordName = "${IOCNAME}recordRemovePGRPC" extends = "recordRemove" />
+<record recordName = "${IOCNAME}addRecordsPGRPC" extends = "addRecords" />
+<record recordName = "${IOCNAME}supportStateSetPGRPC" extends = "supportStateSet" />
+<record recordName = "${IOCNAME}recordDumpRPC">
+   <scalar name = "factoryRPC" scalarType = "string">org.epics.pvioc.support.rpc.RecordDumpFactory</scalar>
+</record>
+<record recordName = "${IOCNAME}recordListener">
+   <scalar name = "value" scalarType = "string" >
+        <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.databaseListenerFactory</auxInfo>
+        no messages
+   </scalar>
+   <structure name = "timeStamp" extends = "timeStamp" />
+   <structure name = "alarm" extends = "alarm" />
+</record>
+<record recordName = "${IOCNAME}generateMessage">
+   <scalar name = "value" scalarType = "string" >
+        <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.generateMessageFactory</auxInfo>
+        no messages
+   </scalar>
+   <structure name = "timeStamp" extends = "timeStamp" />
+   <structure name = "alarm" extends = "alarm" />
+</record>
+</database>

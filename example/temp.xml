@@ -3,65 +3,13 @@
 <import name = "org.epics.pvioc.*" />
 <import name = "org.epics.pvdata.*" />
 
-<record recordName = "doubleCounter">
-    <scalar name = "value"  scalarType = "double" />
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "display" extends = "display" >
-        <scalar name = "units">increment</scalar>
-        <scalar name = "limitLow">0</scalar>
-        <scalar name = "limitHigh">11</scalar>
-    </structure>
-    <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">passive</scalar></structure>
-        <scalar name = "rate">1.0</scalar>
-    </structure>
-    <structure name = "input" extends = "calculation" >
-       <structure name = "calcArgs">
-          <structure name = "min">
-            <scalar name = "value" scalarType = "double" >0.0</scalar>
-          </structure>
-          <structure name = "max">
-            <scalar name = "value" scalarType = "double" >11.0</scalar>
-          </structure>
-          <structure name = "inc">
-            <scalar name = "value" scalarType = "double" >0.2</scalar>
-          </structure>
-       </structure>
-       <structure name = "calculator">
-         <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
-       </structure>
-    </structure>
-    <structure name = "link" extends = "generic">
-        <structure name = "process" extends = "caProcessLink">
-            <scalar name = "pvname">doubleRecord</scalar>
-        </structure>
-    </structure>
-</record>
-
-<record recordName = "doubleRecord" >
-    <scalar name = "value"  scalarType = "double" />
-    <structure name = "alarm" extends = "alarm" />
-    <structure name = "timeStamp" extends = "timeStamp" />
-    <structure name = "display" extends = "display" >
-        <scalar name = "units">increment</scalar>
-        <scalar name = "limitLow">0</scalar>
-        <scalar name = "limitHigh">11</scalar>
-    </structure>
-    <structure name = "input" extends = "caInputLink">
-        <scalar name = "pvname">doubleCounter</scalar>
-    </structure>
-    <structure name = "valueAlarm" extends = "doubleAlarm">
-          <scalar name = "active">true</scalar>
-          <scalar name = "lowAlarmLimit">2</scalar>
-          <scalar name = "lowAlarmSeverity">2</scalar>
-          <scalar name = "lowWarningLimit">4</scalar>
-          <scalar name = "lowWarningSeverity">1</scalar>
-          <scalar name = "highWarningLimit">8</scalar>
-          <scalar name = "highWarningSeverity">1</scalar>
-          <scalar name = "highAlarmLimit">10</scalar>
-          <scalar name = "highAlarmSeverity">2</scalar>
-    </structure> 
+<record recordName = "${IOCNAME}recordListener">
+   <scalar name = "value" scalarType = "string" >
+        <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.databaseListenerFactory</auxInfo>
+        no messages
+   </scalar>
+   <structure name = "timeStamp" extends = "timeStamp" />
+   <structure name = "alarm" extends = "alarm" />
 </record>
 
 

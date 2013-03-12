@@ -33,6 +33,10 @@ public interface PVDatabase extends Requester{
      */
     void mergeIntoMaster();
     /**
+     * abandon the database.
+     */
+    void abandon();
+    /**
      * Find the interface for a record instance.
      * It will be returned if it resides in this IOCDB or in the master IOCDB.
      * @param recordName The instance name.

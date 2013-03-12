@@ -268,7 +268,7 @@ public class ChannelListFactory {
             
  
             void connect() {
-                String channelName = iocname + "recordListRPC";
+                String channelName = iocname + "recordListPGRPC";
                 ChannelProvider channelProvider = channelAccess.getProvider(providerName);
                 channel = channelProvider.createChannel(channelName, this, ChannelProvider.PRIORITY_DEFAULT);
             }

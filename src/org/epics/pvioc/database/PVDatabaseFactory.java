@@ -409,6 +409,22 @@ public class PVDatabaseFactory {
             }
         }
         
+        /* (non-Javadoc)
+         * @see org.epics.pvioc.database.PVDatabase#abandon()
+         */
+        @Override
+        public void abandon() {
+            if(getMaster()==this) return;
+            rwLock.writeLock().lock();
+            try {
+                structureMap.clear();
+                recordMap.clear();
+                if(name.equals("beingInstalled")) PVDatabaseFactory.beingInstalled = null;
+            } finally {
+                rwLock.writeLock().unlock();
+            }
+            
+        }
         // merge allows master to be locked once
         private void merge(
                 TreeMap<String,PVStructure> structure,
@@ -687,28 +703,25 @@ public class PVDatabaseFactory {
                     listNodes = messageRequesterArray.getNodes();
                     length = messageRequesterArray.getLength();
                 }
-                if(length<=0) {
-                    PrintStream printStream;
-                    if(messageType==MessageType.info) {
-                        printStream = System.out;
-                    } else {
-                        printStream = System.err;
-                    }
-                    if(numOverrun>0) {
-                        System.err.println(MessageType.error.toString() + " " + numOverrun + " dropped messages ");
-                    }
-                    if(message!=null) {
-                        printStream.println(messageType.toString() + " " + message);
-                    }
-
+                PrintStream printStream;
+                if(messageType==MessageType.info) {
+                    printStream = System.out;
                 } else {
-                    for(int i=0; i<length; i++) {
-                        LinkedListNode<Requester> listNode = listNodes[i];
-                        Requester requester = listNode.getObject();
-                        requester.message(message, messageType);
-                        if(numOverrun>0) {
-                            requester.message(numOverrun + " dropped messages",MessageType.error);
-                        }
+                    printStream = System.err;
+                }
+                if(numOverrun>0) {
+                    System.err.println(MessageType.error.toString() + " " + numOverrun + " dropped messages ");
+                }
+                if(message!=null) {
+                    printStream.println(messageType.toString() + " " + message);
+                }
+
+                for(int i=0; i<length; i++) {
+                    LinkedListNode<Requester> listNode = listNodes[i];
+                    Requester requester = listNode.getObject();
+                    requester.message(message, messageType);
+                    if(numOverrun>0) {
+                        requester.message(numOverrun + " dropped messages",MessageType.error);
                     }
                 }
             }

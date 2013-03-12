@@ -3,9 +3,6 @@
 <include addPath = "${JAVAIOC}/xmltest/analog" />
 <import name = "org.epics.pvioc.*" />
 <import name = "org.epics.pvdata.*" />
-<include addPath = "${JAVAIOC}/xml" />
-<include href = "records.xml" />
-<include removePath = "${JAVAIOC}/xml" />
 <include href = "ai.xml" />
 <include href = "ao.xml" />
 <include href = "aoIncremental.xml" />

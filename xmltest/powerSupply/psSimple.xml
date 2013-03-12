@@ -12,6 +12,7 @@
        <scalar name = "value" scalarType = "double">
          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.powerSupplyFactory</auxInfo>
        </scalar>
+       <structure name = "alarm" extends = "alarm" />
        <structure name = "display" extends = "display" >
           <scalar name = "units">current</scalar>
           <scalar name = "limitLow">-10</scalar>

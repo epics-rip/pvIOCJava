@@ -2,9 +2,6 @@
 <database>
 <import name = "org.epics.pvioc.*" />
 <import name = "org.epics.pvdata.*" />
-<include addPath = "${JAVAIOC}/xml" />
-<include href = "records.xml" />
-<include removePath = "${JAVAIOC}/xml" />
 <include addPath = "xmltest/calc" />
 <include href = "basicMath.xml" />
 <include href = "string.xml" />

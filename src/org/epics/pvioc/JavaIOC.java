@@ -37,8 +37,10 @@ import org.epics.pvioc.swtshell.SwtshellFactory;
  *             Dump all record instances in the master database
  *     -server serverFile
  *             JavaIOC the server specified in the serverFile
+ *     -run
+ *             Starts the JavaIOC as a standalone process.
  *     -swtshell
- *             Starts the JavaIOC running under swtshell
+ *             Starts the JavaIOC running under swtshell. THIS WILL NOT BE SUPPORTED IN THE FUTURE
  *            
  * @author mrk
  *

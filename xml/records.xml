@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<database>
-<import name = "org.epics.pvioc.*" />
-<include addPath = "${JAVAIOC}/xml/record" />
-<package name = "org.epics.pvioc" />
-<include href = "rpc.xml" />
-<include removePath = "${JAVAIOC}/xml/record" />
-</database>
-

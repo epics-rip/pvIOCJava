@@ -11,7 +11,7 @@ import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStringArray;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.*;
 
 
 
@@ -64,24 +64,32 @@ public enum SupportState {
      * @return The Enumerated interface only if dbField has an Enumerated interface and defines
      * the supportState choices.
      */
-    public static PVEnumerated getSupportState(PVField pvField) {
-        PVEnumerated enumerated = PVEnumeratedFactory.create();
-        if(!enumerated.attach(pvField)) return null;
-        String[] choices = enumerated.getChoices();
-        int len = choices.length;
-        if(len!=supportStateChoices.length) {
-            pvField.message("not a supportState structure", MessageType.error);
-            return null;
-        }
-        for (int i=0; i<len; i++) {
-            if(!choices[i].equals(supportStateChoices[i])) {
-                pvField.message("not an supportState structure", MessageType.error);
-                return null;
+    public static PVStructure isSupportStateStructure(PVField pvField) {
+        while(true) {
+            if(pvField.getField().getType()!=Type.structure) break;
+            PVStructure pvStructure = (PVStructure)pvField;
+            PVField pvf = pvStructure.getSubField("index");
+            if(pvf==null) break;
+            if(pvf.getField().getType()!=Type.scalar) break;
+            PVScalar pvs = (PVScalar)pvf;
+            if(pvs.getScalar().getScalarType()!=ScalarType.pvInt) break;
+            pvf = pvStructure.getSubField("choices");
+            if(pvf==null) break;
+            if(pvf.getField().getType()!=Type.scalarArray) break;
+            PVScalarArray pvsa = (PVScalarArray)pvf;
+            if(pvsa.getScalarArray().getElementType()!=ScalarType.pvString) break;
+            PVStringArray pvStringArray = (PVStringArray)pvsa;
+            StringArrayData data = new StringArrayData();
+            int len = pvStringArray.getLength();
+            pvStringArray.get(0,len , data);
+            String[] choices = data.data;
+            if(len!=supportStateChoices.length) break;
+            for (int i=0; i<len; i++) {
+                if(!choices[i].equals(supportStateChoices[i])) break;
             }
+            return pvStructure;
         }
-        PVStructure pvStruct = (PVStructure)pvField;
-        PVStringArray pvChoices = (PVStringArray)pvStruct.getScalarArrayField("choices",ScalarType.pvString);
-        pvChoices.setImmutable();
-        return enumerated;
+        pvField.message(pvField.getFieldName() + " is not a SupportState enumerated structure", MessageType.error);
+        return null;
     }
 }
