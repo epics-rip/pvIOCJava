@@ -20,7 +20,6 @@ import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.install.Install;
 import org.epics.pvioc.install.InstallFactory;
-import org.epics.pvioc.swtshell.SwtshellFactory;
 /**
  * The main program to start a JavaIOC.
  * The program is started with a command line of
@@ -39,8 +38,6 @@ import org.epics.pvioc.swtshell.SwtshellFactory;
  *             JavaIOC the server specified in the serverFile
  *     -run
  *             Starts the JavaIOC as a standalone process.
- *     -swtshell
- *             Starts the JavaIOC running under swtshell. THIS WILL NOT BE SUPPORTED IN THE FUTURE
  *            
  * @author mrk
  *
@@ -63,7 +60,6 @@ public class JavaIOC {
             usage();
             return;
         }
-        boolean runSWTShell = false;
         boolean runForever = false;
         Requester iocRequester = new Listener();
         int nextArg = 0;
@@ -88,8 +84,6 @@ public class JavaIOC {
                     state = State.structures;
                 } else if(arg.equals("records")){
                     state = State.records;
-                } else if(arg.equals("swtshell")) {
-                	runSWTShell = true;
                 } else if(arg.equals("run")) {
                 	runForever = true;
                 } else if(arg.equals("server")) {
@@ -108,10 +102,6 @@ public class JavaIOC {
             } else {
                 System.err.println("unknown arg: " + arg);
                 usage();
-                return;
-            }
-            if (runSWTShell) {
-                SwtshellFactory.swtshell();
                 return;
             }
             if (runForever) {

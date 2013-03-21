@@ -18,7 +18,6 @@
 <include href = "delay.xml" />
 <include href = "rpc.xml" />
 <include href = "powerSupply.xml" />
-<include href = "portDriver.xml" />
 <include removePath = "${JAVAIOC}/xml/structure" />
 <!--
 -->
