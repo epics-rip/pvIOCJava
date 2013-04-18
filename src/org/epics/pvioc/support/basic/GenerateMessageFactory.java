@@ -8,8 +8,6 @@ package org.epics.pvioc.support.basic;
 
 import java.util.Date;
 
-import org.epics.pvdata.property.PVTimeStamp;
-import org.epics.pvdata.property.PVTimeStampFactory;
 import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.property.TimeStampFactory;
 import org.epics.pvdata.pv.MessageType;

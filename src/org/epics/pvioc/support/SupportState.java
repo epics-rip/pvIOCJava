@@ -5,13 +5,15 @@
  */
 package org.epics.pvioc.support;
 
-import org.epics.pvdata.property.PVEnumerated;
-import org.epics.pvdata.property.PVEnumeratedFactory;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVScalar;
+import org.epics.pvdata.pv.PVScalarArray;
 import org.epics.pvdata.pv.PVStringArray;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.*;
+import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.StringArrayData;
+import org.epics.pvdata.pv.Type;
 
 
 
