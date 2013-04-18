@@ -167,16 +167,15 @@ System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         request = "power.value";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
-//System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         assertTrue(pvCopy!=null);
-//System.out.println(pvCopy.dump());
+//System.out.printf("pvCopy%s",pvCopy.dump());
         pvCopyStructure = pvCopy.createPVStructure();
-//System.out.println(pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//System.out.println(pvCopyStructure.toString());
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         PVRecordStructure recordPVStructure = pvRecord.getPVRecordStructure();
         PVStructure pvrs = recordPVStructure.getPVStructure();
         PVField pvrf = pvrs.getSubField("power.value");
@@ -184,33 +183,33 @@ System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         pvDouble.put(.04);
         PVRecordField recordPVField = pvRecord.findPVRecordField(pvrf);
         int offset = pvCopy.getCopyOffset(recordPVField);
-//System.out.println("offset " + offset);
+System.out.printf("offset %d%n",offset);
         assertTrue(offset==pvCopyStructure.getSubField("value").getFieldOffset());
         recordPVField = pvCopy.getRecordPVField(offset);
         assertTrue(recordPVField!=null);
         assertTrue(recordPVField.getFullFieldName().equals("power.value"));
         pvCopy.updateCopyFromBitSet(pvCopyStructure, bitSet, true);
-//System.out.println("bitSet " + bitSet.toString());
+System.out.printf("bitSet %s%n",bitSet.toString());
         pvDouble = (PVDouble)pvCopyStructure.getSubField("value");
-        pvDouble.put(0.0);
+        pvDouble.put(2.0);
         bitSet.set(0);
         pvCopy.updateRecord(pvCopyStructure, bitSet, true);
         pvDouble = (PVDouble)pvrf;
         double value = pvDouble.get();
-//System.out.println("value " + value);
-        assertTrue(value==0.0);
+System.out.printf("value %f%n",value);
+        assertTrue(value==2.0);
         
         request = "current.alarm.severity";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
-//System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         assertTrue(pvCopy!=null);
-//System.out.println(pvCopy.dump());
+//System.out.printf("pvCopy%s",pvCopy.dump());
         pvCopyStructure = pvCopy.createPVStructure();
-//System.out.println(pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         PVInt pvSeverity = pvRecord.getPVRecordStructure().getPVStructure().getIntField("current.alarm.severity");
         assertTrue(pvSeverity!=null);
         bitSet.clear();
@@ -222,7 +221,7 @@ System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         }
         pvSeverity.put(severity);
         pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
-//System.out.println(bitSet.toString());
+//System.out.printf("bitSet %s%n",bitSet.toString());
         assertTrue(bitSet.length()!=0);
         pvSeverity = pvCopyStructure.getIntField("severity");
         assertTrue(pvSeverity!=null);
@@ -230,27 +229,23 @@ System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         request = "alarm,timeStamp,power.value";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
-//System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         pvCopyStructure = pvCopy.createPVStructure();
-//System.out.println(pvCopy.dump());
-//System.out.println("pvCopyStructure" + pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//System.out.println(pvCopyStructure.toString());
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         request = "alarm,timeStamp,power.value[xxx=yyy]";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
-//System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         pvCopyStructure = pvCopy.createPVStructure();
-//System.out.println(pvCopy.dump());
-//System.out.println("pvCopyStructure");
-//System.out.println(pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         pvDouble = pvCopyStructure.getDoubleField("value");
         assertTrue(pvDouble!=null);
         PVStructure pvOptions = pvCopy.getOptions(pvCopyStructure,pvDouble.getFieldOffset());
@@ -260,85 +255,71 @@ System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         request = "xxx,yyy{zzz,vvv},alarm,timeStamp,power.value";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
-//System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         pvCopyStructure = pvCopy.createPVStructure();
-//System.out.println(pvCopy.dump());
-//System.out.println("pvCopyStructure" + pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//System.out.println(pvCopyStructure.toString());
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
 
         request = "field(alarm,timeStamp,current.value)";
-//System.out.println("request " + request);
         pvRequest = CreateRequestFactory.createRequest(request,requester);
-//System.out.println("pvRequest " + pvRequest);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//System.out.println(pvCopyStructure.toString());
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         PVDouble pvValue = pvCopyStructure.getDoubleField("value");
         assertTrue(pvValue!=null);
         
         request = "field(alarm,timeStamp,power.value,current.value,voltage.value)";
-//System.out.println("request " + request);
         pvRequest = CreateRequestFactory.createRequest(request,requester);
-//System.out.println("pvRequest " + pvRequest);
-        assertTrue(pvRequest!=null);
-        pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
-        pvCopyStructure = pvCopy.createPVStructure();
-        bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);        
-//System.out.println(pvCopyStructure.toString());
-        
-System.out.printf(
-             "%npower, current, voltage. For each value and alarm."
-              + " Note that PVRecord.power does NOT have an alarm field.%n");
-        request = "field(alarm,timeStamp,power{value,alarm},"
-                + "current{value,alarm},voltage{value,alarm})";
-//System.out.println("request " + request);
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        System.out.println("pvRequest " + pvRequest);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//System.out.println(pvCopyStructure.toString());
+        System.out.printf("pvCopyStructure%n%s",pvCopyStructure);
         
-//System.out.printf("%npowerSupply from powerSupplyArray%n");
+        request = "field(alarm,timeStamp,power{value,alarm},"
+                + "current{value,alarm},voltage{value,alarm})";
+        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
+        assertTrue(pvRequest!=null);
+        pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+        pvCopyStructure = pvCopy.createPVStructure();
+        bitSet = new BitSet(pvCopyStructure.getNumberFields());
+        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
+        
         pvRecord = master.findRecord("powerSupplyArray");
-//System.out.println(pvRecord);
         request = "field(alarm,timeStamp,supply{" 
            + "0{voltage.value,current.value,power.value},"
            + "1{voltage.value,current.value,power.value}"
            + "})";
-//System.out.println("pvRequest " + pvRequest);
         pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
-//System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//System.out.println(pvCopyStructure.toString());
+        System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
-//System.out.printf("%npowerSupply from powerSupplyArray%n");
         pvRecord = master.findRecord("powerSupplyArray");
-//System.out.println(pvRecord);
         request = "field(alarm,timeStamp,supply.0.current.value)";
-//System.out.println("pvRequest " + pvRequest);
         pvRequest = CreateRequestFactory.createRequest(request,requester);
+        System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
-        System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
         pvCopy.initCopy(pvCopyStructure, bitSet, true);
-//System.out.println(pvCopyStructure.toString());
+        System.out.printf("%npvCopyStructure%n%s%n",pvCopyStructure);
     }
     
     public static void exampleShareDataTest() {

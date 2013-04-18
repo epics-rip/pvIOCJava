@@ -446,6 +446,10 @@ public class ChannelServerFactory  {
             	return null;
             }
             PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+            if(pvCopy==null) {
+                channelGetRequester.channelGetConnect(illegalRequestStatus, null, null, null);
+                return null;
+            }
             PVStructure pvStructure = pvCopy.createPVStructure();
             return new ChannelGetImpl(this,channelGetRequester,pvStructure,pvCopy,getProcess(pvRequest,false));
         }
@@ -464,6 +468,10 @@ public class ChannelServerFactory  {
             	return null;
             }
         	PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+        	if(pvCopy==null) {
+                channelPutRequester.channelPutConnect(illegalRequestStatus, null, null, null);
+                return null;
+        	}
             PVStructure pvStructure = pvCopy.createPVStructure();
             return new ChannelPutImpl(this,channelPutRequester,pvStructure,pvCopy,getProcess(pvRequest,true));
         }
@@ -493,6 +501,10 @@ public class ChannelServerFactory  {
             	return null;
             }
         	PVCopy pvPutCopy = PVCopyFactory.create(pvRecord, pvRequest, "putField");
+        	if(pvPutCopy==null) {
+                channelPutGetRequester.channelPutGetConnect(illegalRequestStatus, null, null, null);
+                return null;
+            }
         	pvField = pvRequest.getSubField("getField");
             if(pvField==null || pvField.getField().getType()!=Type.structure) {
             	channelPutGetRequester.message("pvRequest does not have a getField request structure", MessageType.error);
@@ -501,6 +513,10 @@ public class ChannelServerFactory  {
             	return null;
             }
         	PVCopy pvGetCopy = PVCopyFactory.create(pvRecord, pvRequest, "getField");
+        	if(pvGetCopy==null) {
+                channelPutGetRequester.channelPutGetConnect(illegalRequestStatus, null, null, null);
+                return null;
+            }
         	PVStructure pvPutStructure = pvPutCopy.createPVStructure();
             PVStructure pvGetStructure = pvGetCopy.createPVStructure();
             return new ChannelPutGetImpl(this,channelPutGetRequester,pvPutStructure,pvPutCopy,pvGetStructure,pvGetCopy,process);
