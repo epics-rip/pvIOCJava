@@ -168,7 +168,7 @@ class PVCopyImpl {
             Node[] nodes =structureNode.nodes;
             for(int i=0 ; i<nodes.length; i++){
                 if(nodes[i]==null) {
-                    convert.newLine(builder, indentLevel=1);
+                    convert.newLine(builder, indentLevel+1);
                     builder.append("node[" + i + "] is null");
                     continue;
                 }

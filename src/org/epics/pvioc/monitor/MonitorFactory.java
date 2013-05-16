@@ -229,7 +229,10 @@ public class MonitorFactory {
 				while(listNode!=null) {
 					MonitorFieldNode node = listNode.getObject();
 					boolean result = node.monitorAlgorithm.causeMonitor();
-					if(result) gotMonitor = true;
+					if(result) {
+					    gotMonitor = true;
+					    break;
+					}
 					listNode = monitorFieldList.getNext(listNode);
 				}
 			}
