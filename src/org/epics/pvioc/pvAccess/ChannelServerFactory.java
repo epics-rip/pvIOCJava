@@ -88,7 +88,6 @@ public class ChannelServerFactory  {
     private static final Status notFoundStatus = statusCreate.createStatus(StatusType.ERROR, "channel not found", null);
     private static final Status capacityImmutableStatus = statusCreate.createStatus(StatusType.ERROR, "capacity is immutable", null);
     private static final Status subFieldDoesNotExistStatus = statusCreate.createStatus(StatusType.ERROR, "subField does not exist", null);
-    private static final Status subFieldNotDefinedStatus = statusCreate.createStatus(StatusType.ERROR, "subField not defined", null);
     private static final Status cannotProcessErrorStatus = statusCreate.createStatus(StatusType.ERROR, "can not process", null);
     private static final Status cannotProcessWarningStatus = statusCreate.createStatus(StatusType.WARNING, "can not process", null);
     private static final Status subFieldNotArrayStatus = statusCreate.createStatus(StatusType.ERROR, "subField is not an array", null);
@@ -234,7 +233,6 @@ public class ChannelServerFactory  {
         private LinkedList<ChannelPut> channelPutList = new LinkedList<ChannelPut>();
         private LinkedList<ChannelPutGet> channelPutGetList = new LinkedList<ChannelPutGet>();
         private LinkedList<ChannelRPC> channelRPCList = new LinkedList<ChannelRPC>();
-        private LinkedList<Monitor> monitorList = new LinkedList<Monitor>();
         private LinkedList<ChannelArray> channelArrayList = new LinkedList<ChannelArray>();
         
         
@@ -330,17 +328,6 @@ public class ChannelServerFactory  {
                     }
                 }
                 channelRPC.destroy();
-            }
-            while(true) {
-                Monitor monitor = null;
-                synchronized(monitorList) {
-                    if(monitorList.size()>0) {
-                        monitor = monitorList.get(monitorList.size()-1);
-                    } else {
-                        break;
-                    }
-                }
-                monitor.destroy();
             }
             while(true) {
                 ChannelArray channelArray = null;
@@ -572,20 +559,28 @@ public class ChannelServerFactory  {
             	channelArrayRequester.channelArrayConnect(channelDestroyedStatus, null, null);
             	return null;
             }
-            PVField pvField = pvRequest.getSubField("field");
-            if(pvField==null || pvField.getField().getType()!=Type.scalar) {
-            	channelArrayRequester.channelArrayConnect(subFieldNotDefinedStatus, null, null);
+System.out.println(pvRequest.toString());
+            PVField[] pvFields = pvRequest.getPVFields();
+            if(pvFields.length!=1) {
+                channelArrayRequester.channelArrayConnect(illegalRequestStatus, null, null);
                 return null;
             }
-            Scalar scalar = (Scalar)pvField.getField();
-            if(scalar.getScalarType()!=ScalarType.pvString) {
-            	channelArrayRequester.channelArrayConnect(subFieldNotDefinedStatus, null, null);
-                return null;
+            PVField pvField = pvFields[0];
+            String fieldName = "";
+            while(pvField!=null) {
+                String name = pvField.getFieldName();
+                if(name!=null && name.length()>0) {
+                    if(fieldName.length()>0) fieldName += '.';
+                    fieldName += name;
+                }
+                PVStructure pvs = (PVStructure)pvField;
+                pvFields = pvs.getPVFields();
+                if(pvFields.length!=1) break;
+                pvField = pvFields[0];
             }
-            PVString pvString = (PVString)pvField;
-    		pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField(pvString.get());
+            pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField(fieldName);
             if(pvField==null) {
-            	channelArrayRequester.channelArrayConnect(subFieldDoesNotExistStatus, null, null);
+                channelArrayRequester.channelArrayConnect(illegalRequestStatus, null, null);
                 return null;
             }
             if(pvField.getField().getType()==Type.structureArray) {
