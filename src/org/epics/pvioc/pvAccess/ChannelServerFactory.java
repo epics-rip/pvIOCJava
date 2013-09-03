@@ -432,7 +432,7 @@ public class ChannelServerFactory  {
             	channelGetRequester.channelGetConnect(channelDestroyedStatus, null, null, null);
             	return null;
             }
-            PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+            PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
             if(pvCopy==null) {
                 channelGetRequester.channelGetConnect(illegalRequestStatus, null, null, null);
                 return null;
@@ -454,7 +454,7 @@ public class ChannelServerFactory  {
             	channelPutRequester.channelPutConnect(channelDestroyedStatus, null, null, null);
             	return null;
             }
-        	PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+        	PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         	if(pvCopy==null) {
                 channelPutRequester.channelPutConnect(illegalRequestStatus, null, null, null);
                 return null;

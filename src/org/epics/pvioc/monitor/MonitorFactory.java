@@ -287,8 +287,8 @@ public class MonitorFactory {
 					return false;
 				}
 			}
-			if(queueSize<1) {
-				monitorRequester.message("queueSize must be >= 1", MessageType.error);
+			if(queueSize !=0 && queueSize<1) {
+				monitorRequester.message("queueSize must be 0 or >= 1", MessageType.error);
 				return false;
 			}
 			pvField =  null;
@@ -494,7 +494,10 @@ public class MonitorFactory {
 			@Override
 			public boolean dataChanged() {
 				synchronized(monitorElement) {
+System.out.println("noQueueChangedBitSet before " + noQueueChangedBitSet);
+System.out.println("changedBitSet before " + changedBitSet);
 					noQueueChangedBitSet.or(changedBitSet);
+System.out.println("noQueueChangedBitSet after " + noQueueChangedBitSet);
 					noQueueOverrunBitSet.or(overrunBitSet);
 					gotMonitor = true;
 					return wasReleased ? true : false;
