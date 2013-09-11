@@ -124,7 +124,7 @@ public class JavaIOC {
                 + " -dumpStructures"
                 + " -dumpRecords"
                 + " -server file"
-                + " -swtshell ");
+                + " -run ");
     }
     
     static void printError(String message) {
