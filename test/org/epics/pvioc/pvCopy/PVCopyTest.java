@@ -651,7 +651,7 @@ System.out.printf("value %f%n",value);
         System.out.println();
         System.out.println(message);
         int length = pvStructure.getNumberFields();
-        for(int offset=0; offset<length; offset++) {
+        for(int offset=1; offset<length; offset++) {
             PVField pvCopyField = pvStructure.getSubField(offset);
             if(pvCopyField.getField().getType()==Type.structure) continue;
             PVRecordField pvRecordField = pvCopy.getRecordPVField(offset);
