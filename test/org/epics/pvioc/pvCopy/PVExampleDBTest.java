@@ -60,7 +60,7 @@ public class PVExampleDBTest extends TestCase {
         PVStructure pvRequest = null;
         // definitions for PVCopy
         String iocname = System.getenv("IOCNAME");
-        pvRecord = master.findRecord(iocname + "recordListRPC");
+        pvRecord = master.findRecord(iocname + "recordListPGRPC");
         assertTrue(pvRecord!=null);
 System.out.println(pvRecord);
         request = "record[process=true]putField(arguments)getField(result)";

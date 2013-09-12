@@ -2,6 +2,9 @@
 <database>
 <import name = "org.epics.pvioc.*" />
 <import name = "org.epics.pvdata.*" />
+<include addPath = "${JAVAIOC}/xml" />
+<include href = "rpc.xml" />
+<include removePath = "${JAVAIOC}/xml" />
 <include addPath = "${JAVAIOC}/example" />
 <include href = "scalar.xml" />
 <include href = "array.xml" />

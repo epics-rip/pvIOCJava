@@ -180,6 +180,11 @@ class PVCopyImpl {
             if(!headNode.isStructure) {
                 RecordNode recordNode = (RecordNode)headNode;
                 if(recordNode.recordPVField.equals(recordPVField)) return headNode.structureOffset;
+                PVStructure parent = recordPVField.getPVField().getParent();
+                int offsetParent = parent.getFieldOffset();
+                int off = recordPVField.getPVField().getFieldOffset();
+                int offdiff = off -offsetParent;
+                if(offdiff<recordNode.nfields) return headNode.structureOffset + offdiff;
                 return -1;
             }
             RecordNode recordNode = getCopyOffset((StructureNode)headNode,recordPVField);
