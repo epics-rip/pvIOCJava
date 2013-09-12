@@ -25,8 +25,9 @@ public abstract class AbstractSharePVScalarArray extends AbstractSharePVArray im
 {
     /**
      * Constructor.
+     * @param pvRecord The record.
      * @param parent The parent.
-     * @param array The Introspection interface.
+     * @param pvShare The field.
      */
     protected AbstractSharePVScalarArray(PVRecord pvRecord,PVStructure parent,PVArray pvShare)
     {

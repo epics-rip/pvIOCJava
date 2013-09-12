@@ -26,8 +26,9 @@ public class BaseSharePVStructureArray extends AbstractSharePVArray implements P
 	private PVStructureArray pvShare;
     /**
      * Constructor.
+     * @param pvRecord The record.
      * @param parent The parent.
-     * @param array The Introspection interface.
+     * @param pvShare The field.
      */
     protected BaseSharePVStructureArray(PVRecord pvRecord,PVStructure parent,PVStructureArray pvShare)
     {

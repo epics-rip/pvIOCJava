@@ -26,7 +26,7 @@ public abstract class AbstractSupport implements Support {
      * Constructor.
      * This must be called by any class that extends AbstractSupport.
      * @param name The support name.
-     * @param dbField The DBdata which is supported.
+     * @param pvRecordField The record field.
      * This can be a record or any field in a record.
      */
     protected AbstractSupport(String name,PVRecordField pvRecordField) {

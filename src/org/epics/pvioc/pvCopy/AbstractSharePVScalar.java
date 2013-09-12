@@ -17,8 +17,9 @@ import org.epics.pvioc.database.PVRecord;
 public abstract class AbstractSharePVScalar extends AbstractSharePVField implements PVScalar{
     /**
      * Constructor.
+     * @param pvRecord The record.
      * @param parent The parent.
-     * @param scalar The ScalarType.
+     * @param pvShare The field.
      */
     protected AbstractSharePVScalar(PVRecord pvRecord, PVStructure parent,PVScalar  pvShare) {
         super(pvRecord,parent,pvShare);

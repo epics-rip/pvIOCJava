@@ -49,7 +49,7 @@ public class GenericBase extends AbstractSupport implements SupportProcessReques
     }
     /**
      * Get the supports for the fields in this structure.
-     * @return
+     * @return Support[]
      */
     protected Support[] getSupports() {
         return supports;
