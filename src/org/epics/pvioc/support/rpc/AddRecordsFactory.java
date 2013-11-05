@@ -63,7 +63,7 @@ public class AddRecordsFactory {
         public void initialize() {
         	thisRecordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
             PVStructure pvStructure = pvRecordStructure.getPVStructure();
-            pvFileName = pvStructure.getStringField("arguments.fileName");
+            pvFileName = pvStructure.getStringField("argument.fileName");
             if(pvFileName==null) return;
             pvStatus = pvStructure.getStringField("result.status");
             if(pvStatus==null) return;

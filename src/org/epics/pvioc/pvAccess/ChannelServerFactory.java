@@ -559,7 +559,6 @@ public class ChannelServerFactory  {
             	channelArrayRequester.channelArrayConnect(channelDestroyedStatus, null, null);
             	return null;
             }
-System.out.println(pvRequest.toString());
             PVField[] pvFields = pvRequest.getPVFields();
             if(pvFields.length!=1) {
                 channelArrayRequester.channelArrayConnect(illegalRequestStatus, null, null);

@@ -63,7 +63,7 @@ public class RecordRemoveFactory {
         public void initialize() {
         	thisRecordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
             PVStructure pvStructure = pvRecordStructure.getPVStructure();
-            pvRecordName = pvStructure.getStringField("arguments.recordName");
+            pvRecordName = pvStructure.getStringField("argument.recordName");
             if(pvRecordName==null) return;
             pvStatus = pvStructure.getStringField("result.status");
             if(pvStatus==null) return;

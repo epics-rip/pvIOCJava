@@ -89,9 +89,9 @@ public class SupportStateSetFactory {
         public void initialize() {
             PVStructure pvSupportStateSet = pvRecordStructure.getPVStructure();
             recordProcess = pvRecordStructure.getPVRecord().getRecordProcess();
-            pvRecordName = pvSupportStateSet.getStringField("arguments.recordName");
+            pvRecordName = pvSupportStateSet.getStringField("argument.recordName");
             if(pvRecordName==null) return;
-            PVStructure pvStructure = pvSupportStateSet.getStructureField("arguments.supportStateCommand");
+            PVStructure pvStructure = pvSupportStateSet.getStructureField("argument.supportStateCommand");
             if(pvStructure==null) return;
             if(!SupportStateCommand.checkSupportStateCommand(pvStructure)) return;
             supportStateRequestEnumerated.attach(pvStructure);

@@ -324,6 +324,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -344,6 +345,7 @@ public class MonitorTest extends TestCase {
         pvCopy = monitorElement.getPVStructure();
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
+        pvValue = pvCopy.getDoubleField("value");
 //System.out.println("change " + change);
 //System.out.println("overrun " + overrun);
         assertTrue(change.get(valueOffset));
@@ -354,6 +356,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -361,6 +364,7 @@ public class MonitorTest extends TestCase {
         assertTrue(change.get(valueOffset));
         change.clear(valueOffset);
         assertTrue(change.isEmpty());
+//System.out.println("pvValue " + pvValue + " pvRecordPowerValue " + pvRecordPowerValue );
         assertTrue(pvValue.get()==pvRecordPowerValue.get());
         assertTrue(overrun.get(valueOffset));
         overrun.clear(valueOffset);
@@ -412,6 +416,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -432,6 +437,7 @@ public class MonitorTest extends TestCase {
         pvRecordPowerValue.put(6.0);
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -444,6 +450,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -500,6 +507,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -520,6 +528,7 @@ public class MonitorTest extends TestCase {
         pvRecordPowerValue.put(6.0);
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -532,6 +541,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
+        pvValue = pvCopy.getDoubleField("value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);

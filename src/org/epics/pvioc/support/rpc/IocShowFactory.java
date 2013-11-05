@@ -65,10 +65,10 @@ public class IocShowFactory {
         @Override
         public void initialize() {
             PVStructure pvStructure = pvRecordStructure.getPVStructure();
-            PVStructure pvTemp = pvStructure.getStructureField("arguments.command");
+            PVStructure pvTemp = pvStructure.getStructureField("argument.command");
             if(pvTemp==null) return;
             if(!command.attach(pvTemp)) {
-                super.message("arguments.command is not enumerated", MessageType.error);
+                super.message("argument.command is not enumerated", MessageType.error);
                 return;
             }
             pvResult = pvStructure.getStringField("result.value");

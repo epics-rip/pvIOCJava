@@ -55,9 +55,9 @@ public class RecordListFactory {
         @Override
         public void initialize() {
             PVStructure pvStructure = pvRecordStructure.getPVStructure();
-            pvDatabaseName = pvStructure.getStringField("arguments.database");
+            pvDatabaseName = pvStructure.getStringField("argument.database");
             if(pvDatabaseName ==null) return;
-            pvRegularExpression = pvStructure.getStringField("arguments.regularExpression");
+            pvRegularExpression = pvStructure.getStringField("argument.regularExpression");
             if(pvRegularExpression ==null) return;
             pvStatus = pvStructure.getStringField("result.status");
             if(pvStatus==null) return;

@@ -47,6 +47,7 @@ public class PVExampleDBTest extends TestCase {
         // get database for testing
         Requester iocRequester = new RequesterForTesting("accessTest");
         XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/xml/structures.xml", iocRequester);
+        XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/xml/rpc.xml", iocRequester);
         XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/example/exampleDB.xml", iocRequester);
         PVReplaceFactory.replace(master);
         exampleTest();
@@ -63,7 +64,7 @@ public class PVExampleDBTest extends TestCase {
         pvRecord = master.findRecord(iocname + "recordListPGRPC");
         assertTrue(pvRecord!=null);
 System.out.println(pvRecord);
-        request = "record[process=true]putField(arguments)getField(result)";
+        request = "record[process=true]putField(argument)getField(result)";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
 System.out.println(pvRequest);
         assertTrue(pvRequest!=null);

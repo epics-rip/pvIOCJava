@@ -105,7 +105,6 @@ public class PVCopyMonitorRecordTest extends TestCase {
     private static class CopyMonitorRequester implements PVCopyMonitorRequester {
         private PVCopyMonitor pvCopyMonitor = null;
         private boolean dataChanged = false;
-        
 
         private CopyMonitorRequester(PVCopy pvCopy) {
             pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
@@ -130,7 +129,6 @@ public class PVCopyMonitorRecordTest extends TestCase {
         public void dataChanged() {
             dataChanged = true;
         }
-
         /* (non-Javadoc)
          * @see org.epics.pvdata.pvCopy.PVCopyMonitorRequester#unlisten()
          */

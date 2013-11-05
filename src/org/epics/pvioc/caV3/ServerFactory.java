@@ -196,7 +196,7 @@ public class ServerFactory {
             if(names.length==2) {
                 options = names[1];
             } else {
-                options = "field(value)";
+                options = "field(value,alarm,timeStamp,display,control,valueAlarm)";
             }
             return new ChannelProcessVariable(aliasName,pvRecord,options, eventCallback);
         }
@@ -717,23 +717,29 @@ public class ServerFactory {
         }
         
         private void getData(DBR dbr,PVStructure pvStructure) {
+            boolean gotValue = false;
+            PVField pvField = pvStructure.getSubField("value");
+            if(pvField!=null) {
+                gotValue = true;
+                getValueField(dbr,pvField);
+            }
             PVField[] pvFields = pvStructure.getPVFields();
             String[] fieldNames = pvStructure.getStructure().getFieldNames();
             for(int i=0; i<pvFields.length; i++) {
-                PVField pvField = pvFields[i];
+                pvField = pvFields[i];
                 if(fieldNames[i].equals("timeStamp")) {
                     getTimeStampField(dbr,(PVStructure)pvField);
                 } else if(fieldNames[i].equals("alarm")) {
                     getAlarmField(dbr,(PVStructure)pvField);
-                } else {
+                } else if(!gotValue) {
                     if(pvField.getField().getType()!=Type.structure) {
                         getValueField(dbr,pvField);
+                        gotValue = true;
                     } else {
                         PVStructure xxx = (PVStructure)pvField;
                         pvField = xxx.getSubField("value");
-                        if(pvField==null) {
-                            pvStructure.message("value field not found", MessageType.error);  
-                        } else {
+                        if(pvField!=null) {
+                            gotValue = true;
                             getValueField(dbr,pvField);
                         }
                     }
@@ -815,7 +821,9 @@ public class ServerFactory {
             pvTimeStamp.attach(field);
             pvTimeStamp.get(timeStamp);
             final long TS_EPOCH_SEC_PAST_1970=7305*86400;
-            ((TIME)dbr).setTimeStamp(new gov.aps.jca.dbr.TimeStamp(timeStamp.getSecondsPastEpoch()-TS_EPOCH_SEC_PAST_1970, timeStamp.getNanoSeconds()));
+            ((TIME)dbr).setTimeStamp(new gov.aps.jca.dbr.TimeStamp(
+                timeStamp.getSecondsPastEpoch()-TS_EPOCH_SEC_PAST_1970,
+                timeStamp.getNanoSeconds()));
         }
 
         private void getAlarmField(DBR dbr,PVStructure pvAlarm) {

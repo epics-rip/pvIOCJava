@@ -38,7 +38,7 @@
 <h1>EPICS pvIOCJava</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date. -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 21-Mar-2013</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 05-Nov-2013</h2>
 <dl>
   <dt>Latest version:</dt>
     <dd><a
@@ -46,11 +46,11 @@
     </dd>
   <dt>This version:</dt>
     <dd><a
-      href="pvIOCJava_20130321.html">pvIOCJava_20130321.html</a>
+      href="pvIOCJava_20131005.html">pvIOCJava_20131005.html</a>
     </dd>
     <dt>Previous version:</dt>
     <dd><a
-      href="pvIOCJava_20130312.html">pvIOCJava_20130312.html</a>
+      href="pvIOCJava_20130321.html">pvIOCJava_20130321.html</a>
     </dd>
   <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
@@ -67,20 +67,47 @@ set of products:<br />
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 21-Mar-2013 version of the Java implementation of pvIOC. It is a
+<p>This is the 05-Nov-2013 version of the Java implementation of pvIOC. It is a
 complete implementation of pvIOC as currently defined.</p>
-<p>This version no longer includes <b>swtshell</b>
-and <b>portDriver</b>, which have been moved to separate mercurial projects.
-<b>swtshell</b> now only works as a remote shell.
-In order to keep all the functionality of the local shell some
-additional support had to be implemented in this project.
-The main change since the last version was to implement this additional
-support. The other changes were to fix some problems encountered
-while developing the additional support.
-Similarly <b>portDriver</b> provides support and special records 
-for portDriver related functionality the local shell provided.
-</p>
-<p>This document requires more work to make it easier to understand.</p>
+<p>The primary changes for this version are:</p>
+<dl>
+   <dt>channelPutGet</dt>
+     <dd>Previously a convention was to name the put structure
+     <b>arguments</b>. The new convention is <b>argument</b>.
+     This matches the convetion for the get structure which is named
+     <b>result</b>
+     </dd>
+   <dt>shareData</dt>
+     <dd>This is no longer supported. It had severe problems with
+      race conditions.</dd>
+   <dt>monitorQueue</dt>
+      <dd>This has been changed so that only queueSize&gt;=1 is
+     supported. The implementation should now be thread safe.</dd>
+</dl>
+<p><b>TODO</b></p>
+<dl>
+   <dt>xml</dt>
+     <dd>The sax xml parser should be changed so that it no longer
+     uses the pvData methods that should be removed.
+     This includes: PVAuxInfo, PVField::replacePVField,
+     PVStructure::appendPVField,
+    PVStructure::appendPVFields,
+    PVStructure::removePVField,
+    PVStructure::getExtendsStructureName, and
+    PVStructure::putExtendsStructureName.
+    This will also require changes in the pvDatabase and install.
+     </dd>
+    <dt>union</dt>
+     <dd>Prepare some test under xmltest that use the new union pvType.
+     Also change RecordDumpFactory,
+     which currently implements channelRPC,  so that it uses channelPutGet
+    with the result being a union.
+     </dd>
+    <dt>documantation</dt>
+    <dd>
+       This document requires more work to make it easier to understand.
+    </dd>
+</dl>
 
 <div id="toc">
 <h2 class="nocount" style="page-break-before: always">Table of Contents</h2>
@@ -3868,20 +3895,20 @@ access client. Two types of RPCs are possible:</p>
 
 <p>A RPC is implemented via a structure that has the following fields:</p>
 <dl>
-  <dt>arguments</dt>
+  <dt>argument</dt>
     <dd>A structure that has a set of fields that are defined by the
-      implementation. It defines the arguments required by the RPC. </dd>
+      implementation. It defines the argument required by the RPC. </dd>
   <dt>result</dt>
     <dd>Also a structure that has a set of fields that are defined by the
       implementation. It contains the results.</dd>
 </dl>
 
 <p>The client issues a putGet with process request. The put contains the
-arguments and the get retrieves the result.</p>
+argument and the get retrieves the result.</p>
 
 <p>javaIOC/xml/structure/rpc.xml has the definitions for the structures
 required by the support provided by this package. The following sections
-provide a brief description of the arguments and result for each support.</p>
+provide a brief description of the argument and result for each support.</p>
 
 <h5>channelRPC</h5>
 
@@ -3915,7 +3942,7 @@ at the source code for details.</p>
 <h4>RecordList</h4>
 
 <p>This returns a list of the names of a set of records specified by a regular
-expression. The arguments are:</p>
+expression. The argument fields are:</p>
 <dl>
   <dt>database</dt>
     <dd>A scalar string that specifies the name of the database, e. g.
@@ -3936,7 +3963,7 @@ expression. The arguments are:</p>
 <h4>StructureList</h4>
 
 <p>This returns a list of the names of a set of structures specified by a
-regular expression. The arguments are:</p>
+regular expression. The argument fields are:</p>
 <dl>
   <dt>database</dt>
     <dd>A scalar string that specifies the name of the database, e. g.
@@ -3958,7 +3985,7 @@ regular expression. The arguments are:</p>
 <h4>IocShow</h4>
 
 <p>This provides some useful commands for getting information about a
-pvIOCJava. The arguments are:</p>
+pvIOCJava. The argument fields are:</p>
 <dl>
   <dt>command</dt>
     <dd>This is an enumerated structure that has the following choices: 
@@ -3986,7 +4013,7 @@ pvIOCJava. The arguments are:</p>
 <h4>RecordShow</h4>
 
 <p>This provides some useful commands for getting information about a record
-The arguments are:</p>
+The argument fields are:</p>
 <dl>
   <dt>command</dt>
     <dd>This is an enumerated structure that has the following choices: 
@@ -4021,7 +4048,7 @@ The arguments are:</p>
 
 <h4>SupportStateSet</h4>
 
-<p>This allows the support state of a record to be changed The arguments
+<p>This allows the support state of a record to be changed The argument fields
 are:</p>
 <dl>
   <dt>command</dt>

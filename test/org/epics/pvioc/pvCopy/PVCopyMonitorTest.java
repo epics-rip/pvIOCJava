@@ -108,8 +108,7 @@ public class PVCopyMonitorTest extends TestCase {
     private static class CopyMonitorRequester implements PVCopyMonitorRequester {
         private PVCopyMonitor pvCopyMonitor = null;
         private boolean dataChanged = false;
-        
-
+       
         private CopyMonitorRequester(PVCopy pvCopy) {
             pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
         }
@@ -139,7 +138,6 @@ public class PVCopyMonitorTest extends TestCase {
          */
         @Override
         public void unlisten() {
-            // TODO Auto-generated method stub
             
         }
     }       

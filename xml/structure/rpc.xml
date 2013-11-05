@@ -8,7 +8,7 @@
 
 <structure structureName = "recordList" >
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.recordListFactory</auxInfo>
-  <structure name = "arguments" >
+  <structure name = "argument" >
       <scalar name = "database" scalarType = "string">master</scalar>
       <scalar name = "regularExpression" scalarType = "string" >.*</scalar>
   </structure>
@@ -25,7 +25,7 @@
 
 <structure structureName = "structureList" >
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.structureListFactory</auxInfo>
-  <structure name = "arguments" >
+  <structure name = "argument" >
       <scalar name = "database" scalarType = "string">master</scalar>
       <scalar name = "regularExpression" scalarType = "string" >.*</scalar>
   </structure>
@@ -47,7 +47,7 @@
 
 <structure structureName = "iocShow">
    <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.iocShowFactory</auxInfo>
-   <structure name = "arguments" >
+   <structure name = "argument" >
        <structure name = "command" extends = "iocShowCommand" />
    </structure>
    <structure name = "result" >
@@ -67,7 +67,7 @@
 
 <structure structureName = "recordShow">
    <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.recordShowFactory</auxInfo>
-   <structure name = "arguments" >
+   <structure name = "argument" >
        <scalar name = "recordName" scalarType = "string"/>
        <structure name = "command" extends = "recordShowCommand" />
    </structure>
@@ -83,7 +83,7 @@
 
 <structure structureName = "recordRemove">
    <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.recordRemoveFactory</auxInfo>
-   <structure name = "arguments" >
+   <structure name = "argument" >
        <scalar name = "recordName" scalarType = "string"/>
    </structure>
    <structure name = "result" >
@@ -98,7 +98,7 @@
 
 <structure structureName = "addRecords">
    <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.addRecordsFactory</auxInfo>
-   <structure name = "arguments" >
+   <structure name = "argument" >
        <scalar name = "fileName" scalarType = "string"/>
    </structure>
    <structure name = "result" >
@@ -120,7 +120,7 @@
 
 <structure structureName = "supportStateSet" >
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.supportStateSetFactory</auxInfo>
-  <structure name = "arguments" >
+  <structure name = "argument" >
       <scalar name = "recordName" scalarType = "string" />
       <structure name = "supportStateCommand" extends = "supportStateCommand" />
   </structure>

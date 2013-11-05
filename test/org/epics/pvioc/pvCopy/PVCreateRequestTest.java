@@ -69,7 +69,10 @@ public class PVCreateRequestTest extends TestCase {
                 + "0{voltage.value,current.value,power.value},"
                 + "1{voltage.value,current.value,power.value}"
                 + "})";
-        System.out.println("request " + request);
+        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        assertFalse(pvRequest==null);
+        System.out.printf("request %s%n%s%n",request,pvRequest.toString());
+        request = "field(alarm,timeStamp,voltage{value},power{value},current{value,alarm})";
         pvRequest = CreateRequestFactory.createRequest(request,requester);
         assertFalse(pvRequest==null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());

@@ -14,13 +14,9 @@ import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.pv.Convert;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
-import org.epics.pvdata.pv.PVArray;
 import org.epics.pvdata.pv.PVDataCreate;
 import org.epics.pvdata.pv.PVField;
-import org.epics.pvdata.pv.PVScalar;
-import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.PVStructureArray;
 import org.epics.pvdata.pv.Structure;
 import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVListener;
@@ -100,9 +96,6 @@ class PVCopyImpl {
                 return save;
             }
             PVStructure pvStructure =  pvDataCreate.createPVStructure(structure);
-            if(headNode!=null) {
-                referenceImmutable(pvStructure,headNode);
-            }
             return pvStructure;
         }
         @Override
@@ -381,7 +374,6 @@ class PVCopyImpl {
             if(structure==null) return false;
             cacheInitStructure = createPVStructure();
             headNode = createStructureNodes(pvRecord.getPVRecordStructure(),pvRequest,cacheInitStructure);
-            referenceImmutable(cacheInitStructure,headNode);
             return true;
         }
         
@@ -664,73 +656,6 @@ class PVCopyImpl {
             return structureNode;
         }
 
-        private void referenceImmutable(PVField pvField,Node node) {
-            if(node.isStructure) {
-                StructureNode structureNode = (StructureNode)node;
-                Node[] nodes = structureNode.nodes;
-                PVStructure pvStructure = (PVStructure)pvField;
-                for(Node nextNode : nodes) {
-                    referenceImmutable(pvStructure.getSubField(nextNode.structureOffset),nextNode);
-                }
-            } else {
-                RecordNode recordNode = (RecordNode)node;
-                PVRecordField recordPVField = recordNode.recordPVField;
-                boolean shareData = false;
-                if(node.options!=null) {
-                    PVField pv = node.options.getSubField("_options");
-                    if(pv!=null) {
-                        PVStructure xxx = (PVStructure)pv;
-                        pv = xxx.getSubField("shareData");
-                        if(pv!=null) {
-                            PVString yyy = xxx.getStringField("shareData");
-                            shareData = (yyy.get().equals("true")) ? true : false;
-                        }
-                    }
-                }
-            	if(shareData) {
-                    makeShared(pvField,recordNode.recordPVField);
-                } else {
-                    referenceImmutable(pvField,recordPVField);
-                }
-            }
-        }
-        
-        private void referenceImmutable(PVField copyPVField,PVRecordField recordPVField) {
-            if(recordPVField.getPVField().getField().getType()==Type.structure) {
-                if(copyPVField.getField().getType()!=Type.structure) {
-                    throw new IllegalStateException("Logic error");
-                }
-                PVField[] copyPVFields = ((PVStructure)copyPVField).getPVFields();
-                PVRecordField[] recordPVFields = ((PVRecordStructure)recordPVField).getPVRecordFields();
-                for(int i=0; i<copyPVFields.length; i++) {
-                    referenceImmutable(copyPVFields[i],recordPVFields[i]);
-                }
-                return;
-            }
-            if(recordPVField.getPVField().isImmutable()) convert.copy(recordPVField.getPVField(), copyPVField);
-        }
-        
-        private void makeShared(PVField copyPVField,PVRecordField recordPVField) {
-        	PVField pvField = recordPVField.getPVField();
-            switch(pvField.getField().getType()) {
-            case structure: {
-                PVField[] copyPVFields = ((PVStructure)copyPVField).getPVFields();
-                PVRecordField[] recordPVFields = ((PVRecordStructure)recordPVField).getPVRecordFields();
-                for(int i=0; i<copyPVFields.length; i++) {
-                    makeShared(copyPVFields[i],recordPVFields[i]);
-                }
-                break;
-            }
-            case scalar:
-                PVShareFactory.replace(recordPVField.getPVRecord(),(PVScalar)copyPVField,(PVScalar)recordPVField.getPVField());
-                break;
-            case scalarArray:
-                PVShareFactory.replace(recordPVField.getPVRecord(),(PVArray)copyPVField,(PVArray)recordPVField.getPVField());
-            case structureArray:
-            	PVShareFactory.replace(recordPVField.getPVRecord(),(PVStructureArray)copyPVField,(PVStructureArray)recordPVField.getPVField());
-            }
-        }
-        
         private void updateStructureNodeSetBitSet(PVStructure pvCopy,StructureNode structureNode,BitSet bitSet) {
             for(int i=0; i<structureNode.nodes.length; i++) {
                 Node node = structureNode.nodes[i];
@@ -739,23 +664,7 @@ class PVCopyImpl {
                     updateStructureNodeSetBitSet((PVStructure)pvField,(StructureNode)node,bitSet); 
                 } else {
                     RecordNode recordNode = (RecordNode)node;
-                    boolean shareData = false;
-                    if(node.options!=null) {
-                        PVField pv = node.options.getSubField("_options");
-                        if(pv!=null) {
-                            PVStructure xxx = (PVStructure)pv;
-                            pv = xxx.getSubField("shareData");
-                            if(pv!=null) {
-                                PVString yyy = xxx.getStringField("shareData");
-                                shareData = (yyy.get().equals("true")) ? true : false;
-                            }
-                        }
-                    }
-                    if(shareData) {
-                    	bitSet.set(pvField.getFieldOffset());
-                    } else {
-                        updateSubFieldSetBitSet(pvField,recordNode.recordPVField,bitSet);
-                    }
+                    updateSubFieldSetBitSet(pvField,recordNode.recordPVField,bitSet);
                 }
             }
         }
@@ -939,7 +848,7 @@ class PVCopyImpl {
             			overrunBitSet.set(offset);
             	}
             	if(!isGroupPut) pvCopyMonitorRequester.dataChanged();
-            	dataChanged = true;
+                dataChanged = true;
             }
             /* (non-Javadoc)
              * @see org.epics.pvioc.database.PVListener#dataPut(org.epics.pvioc.database.PVRecordStructure, org.epics.pvioc.database.PVRecordField)
@@ -958,7 +867,8 @@ class PVCopyImpl {
             			overrunBitSet.set(offset);
             	}
             	if(!isGroupPut) pvCopyMonitorRequester.dataChanged();
-            	dataChanged = true;
+                dataChanged = true;
+
             }
             /* (non-Javadoc)
              * @see org.epics.pvdata.pv.PVListener#endGroupPut(org.epics.pvdata.pv.PVRecord)
