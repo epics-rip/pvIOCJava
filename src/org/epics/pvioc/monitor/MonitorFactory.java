@@ -1,11 +1,11 @@
 /**
  * Copyright - See the COPYRIGHT that is included with this distribution.
+ * Copyright - See the COPYRIGHT that is included with this distribution.
  * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
 package org.epics.pvioc.monitor;
 
-import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.factory.StatusFactory;
@@ -26,7 +26,6 @@ import org.epics.pvdata.monitor.MonitorQueueFactory;
 import org.epics.pvdata.monitor.MonitorRequester;
 import org.epics.pvdata.property.PVTimeStamp;
 import org.epics.pvdata.property.PVTimeStampFactory;
-import org.epics.pvdata.pv.Convert;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.MessageType;
@@ -87,11 +86,11 @@ public class MonitorFactory {
 	private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
     private static final Status failedToCreateMonitorStatus = statusCreate.createStatus(StatusType.FATAL, "failed to create monitor", null);
+    private static final Status wasDestroyedStatus = statusCreate.createStatus(StatusType.ERROR,"was destroyed",null);
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
 	private static final LinkedList<MonitorAlgorithmCreate> monitorAlgorithmCreateList = monitorAlgorithmCreateListCreate.create();
 	private static final BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
-	private static final Convert convert = ConvertFactory.getConvert();
 	private static final Timer timer = TimerFactory.create("periodicMonitor", ThreadPriority.high);
 	private static PVStructure pvTimeStampRequest;
 	private static MonitorAlgorithmCreate algorithmOnChangeCreate;
@@ -135,7 +134,7 @@ public class MonitorFactory {
 		}
 	}
 	
-	private interface QueueImpl {
+	private interface ElementQueue {
         public void init(MonitorImpl monitorImpl,int queueSize);
         public Status start();
         public void stop();
@@ -154,14 +153,13 @@ public class MonitorFactory {
 		private boolean isPeriodic = false;
 		private double periodicRate = 1.0;
 		private PVCopy pvCopy = null;
-		private QueueImpl queueImpl = null;
+		private ElementQueue queueImpl = null;
 		private PVCopyMonitor pvCopyMonitor;
 		private final LinkedList<MonitorFieldNode> monitorFieldList = MonitorFieldNodeListCreate.create();
 		
         private boolean firstMonitor = false;
-//        private BitSet changedBitSet = null;
-//        private BitSet overrunBitSet = null;
         private BitSet notMonitoredBitSet = null;
+        private boolean isDestroyed = false;
         
 		private MonitorImpl(PVRecord pvRecord,MonitorRequester monitorRequester) {
 			this.pvRecord = pvRecord;
@@ -174,6 +172,7 @@ public class MonitorFactory {
 		@Override
 		public MonitorElement poll() {
 		    synchronized(queueImpl) {
+		        if(isDestroyed) return null;
 		        return queueImpl.poll();
 		    }
 		}
@@ -183,6 +182,7 @@ public class MonitorFactory {
 		@Override
 		public void release(MonitorElement currentElement) {
 		    synchronized(queueImpl) {
+		        if(isDestroyed) return;
 		        queueImpl.release(currentElement);
 		    }
 		}
@@ -192,6 +192,7 @@ public class MonitorFactory {
 		@Override
 		public Status start() {
 		    synchronized(queueImpl) {
+		        if(isDestroyed) return wasDestroyedStatus;
 		        firstMonitor = true;
 		        return queueImpl.start();
 		    }
@@ -203,7 +204,7 @@ public class MonitorFactory {
 		public Status stop() {
 		    pvCopyMonitor.stopMonitoring();
 		    synchronized(queueImpl) {
-		        queueImpl.stop();
+		        if(!isDestroyed) queueImpl.stop();
 		        return okStatus;
 		    }
 		}
@@ -212,6 +213,11 @@ public class MonitorFactory {
 		 */
 		@Override
 		public void destroy() {
+		    synchronized(queueImpl) {
+		        if(isDestroyed) return;
+		        isDestroyed = true;
+		    }
+		    unlisten();
 			stop();
 		}
 		/* (non-Javadoc)
@@ -219,47 +225,45 @@ public class MonitorFactory {
 		 */
 		@Override
 		public void dataChanged() {
-		    if(firstMonitor) {
-		        synchronized(queueImpl) {
+		    synchronized(queueImpl) {
+		        if(isDestroyed) return;
+		        if(firstMonitor) {
 		            queueImpl.dataChanged();
 		            firstMonitor = false;
+		            monitorRequester.monitorEvent(this);
+		            return;
 		        }
-		        monitorRequester.monitorEvent(this);
-		        return;
-		    }
-		    boolean gotMonitor = false;
-		    if(!gotMonitor) {
+		        boolean gotMonitor = false;
+		        if(!gotMonitor) {
+		            LinkedListNode<MonitorFieldNode> listNode  = monitorFieldList.getHead();
+		            while(listNode!=null) {
+		                MonitorFieldNode node = listNode.getObject();
+		                boolean result = node.monitorAlgorithm.causeMonitor();
+		                if(result) {
+		                    gotMonitor = true;
+		                    break;
+		                }
+		                listNode = monitorFieldList.getNext(listNode);
+		            }
+		        }
+		        if(!gotMonitor) {
+		            int nextBit = notMonitoredBitSet.nextSetBit(0);
+		            while(nextBit>=0) {
+		                if(queueImpl.getChangedBitSet().get(nextBit)) {
+		                    gotMonitor = true;
+		                    break;
+		                }
+		                nextBit = notMonitoredBitSet.nextSetBit(nextBit+1);
+		            }
+		        }
+		        if(!gotMonitor) return;
+		        if(queueImpl.dataChanged()) monitorRequester.monitorEvent(this);
 		        LinkedListNode<MonitorFieldNode> listNode  = monitorFieldList.getHead();
 		        while(listNode!=null) {
 		            MonitorFieldNode node = listNode.getObject();
-		            boolean result = node.monitorAlgorithm.causeMonitor();
-		            if(result) {
-		                gotMonitor = true;
-		                break;
-		            }
+		            node.monitorAlgorithm.monitorIssued();
 		            listNode = monitorFieldList.getNext(listNode);
 		        }
-		    }
-		    if(!gotMonitor) {
-		        int nextBit = notMonitoredBitSet.nextSetBit(0);
-		        while(nextBit>=0) {
-		            if(queueImpl.getChangedBitSet().get(nextBit)) {
-		                gotMonitor = true;
-		                break;
-		            }
-		            nextBit = notMonitoredBitSet.nextSetBit(nextBit+1);
-		        }
-		    }
-		    if(!gotMonitor) return;
-		    synchronized(queueImpl) {
-		        if(queueImpl.dataChanged()) monitorRequester.monitorEvent(this);
-		        
-		    }
-		    LinkedListNode<MonitorFieldNode> listNode  = monitorFieldList.getHead();
-		    while(listNode!=null) {
-		        MonitorFieldNode node = listNode.getObject();
-		        node.monitorAlgorithm.monitorIssued();
-		        listNode = monitorFieldList.getNext(listNode);
 		    }
 		}	
         /* (non-Javadoc)
@@ -324,11 +328,10 @@ public class MonitorFactory {
 			}
 			pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
 			if(isPeriodic) {
-				queueImpl = new PeriodicNoQueue();
-			} else if(queueSize>1) {
-				queueImpl = new Queue();
+				queueImpl = new PeriodicSingleElementQueue();
 			} else {
-				queueImpl = new NoQueue();
+			    if(queueSize<2) queueSize = 2;
+				queueImpl = new MultipleElementQueue();
 			}
 			queueImpl.init(this,queueSize);
 			
@@ -461,72 +464,8 @@ public class MonitorFactory {
 			}
 		}
 		
-		private static class NoQueue implements QueueImpl {
-		    private MonitorImpl monitorLocal = null;
-		    private MonitorElement monitorElement = null;
-		    private BitSet changedBitSet = null;
-		    private BitSet overrunBitSet = null;
-		    private boolean gotMonitor = false;
-
-		    @Override
-		    public void init(MonitorImpl monitorImpl,int queueSize) {
-		        monitorLocal = monitorImpl;
-		        monitorElement = MonitorQueueFactory.createMonitorElement(monitorLocal.pvCopy.createPVStructure());
-		        PVStructure pvStructure = monitorElement.getPVStructure();
-		        changedBitSet = new BitSet(pvStructure.getNumberFields());
-		        overrunBitSet = new BitSet(pvStructure.getNumberFields());
-		    }
-		    @Override
-		    public Status start() {
-		        gotMonitor = true;
-		        changedBitSet.clear();
-		        overrunBitSet.clear();
-		        monitorLocal.pvCopyMonitor.startMonitoring(changedBitSet, overrunBitSet);
-		        return okStatus;
-		    }
-		    @Override
-		    public void stop() {}
-		    /* (non-Javadoc)
-		     * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#dataChanged()
-		     */
-		    public boolean dataChanged() {
-		        gotMonitor = true;
-		        return true;
-		        
-		    }
-		    /* (non-Javadoc)
-             * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#getChangedBitSet()
-             */
-            @Override
-            public BitSet getChangedBitSet() {
-                return changedBitSet;
-            }
-            /* (non-Javadoc)
-		     * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#poll()
-		     */
-		    public MonitorElement poll() {
-		        if(!gotMonitor) return null;
-		        PVStructure pvStructure = monitorElement.getPVStructure();
-		        monitorLocal.pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet, true);
-		        bitSetUtil.compress(changedBitSet, pvStructure);
-		        bitSetUtil.compress(overrunBitSet, pvStructure);
-		        BitSet ebs = monitorElement.getChangedBitSet();
-		        ebs.clear();
-		        ebs.or(changedBitSet);
-		        ebs = monitorElement.getOverrunBitSet();
-		        ebs.clear();
-		        ebs.or(overrunBitSet);
-		        changedBitSet.clear();
-		        overrunBitSet.clear();
-		        return monitorElement;
-		    }
-		    @Override
-		    public void release(MonitorElement monitorElement) {
-		        gotMonitor = false;
-		    }
-		}
 		
-		private static class Queue implements QueueImpl {
+		private static class MultipleElementQueue implements ElementQueue {
 		    private MonitorImpl monitorLocal = null;
 		    private MonitorQueue monitorQueue = null;
 		    private BitSet changedBitSet = null;
@@ -535,7 +474,7 @@ public class MonitorFactory {
 		    private boolean queueIsFull = false;
 
 		    /* (non-Javadoc)
-		     * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#init(org.epics.pvioc.monitor.MonitorFactory.MonitorImpl, int)
+		     * @see org.epics.pvioc.monitor.MonitorFactory.ElementQueue#init(org.epics.pvioc.monitor.MonitorFactory.MonitorImpl, int)
 		     */
 		    @Override
 		    public void init(MonitorImpl monitorImpl,int queueSize) {
@@ -550,29 +489,30 @@ public class MonitorFactory {
 		        overrunBitSet = new BitSet(pvStructure.getNumberFields());
 		    }
 		    /* (non-Javadoc)
-		     * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#start()
+		     * @see org.epics.pvioc.monitor.MonitorFactory.ElementQueue#start()
 		     */
 		    @Override
 		    public Status start() {
 		        monitorQueue.clear();
+		        queueIsFull = false;
 		        changedBitSet.clear();
 		        overrunBitSet.clear();
 		        monitorLocal.pvCopyMonitor.startMonitoring(changedBitSet,overrunBitSet);
 		        return okStatus;
 		    }
 		    /* (non-Javadoc)
-		     * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#stop()
+		     * @see org.epics.pvioc.monitor.MonitorFactory.ElementQueue#stop()
 		     */
 		    @Override
 		    public void stop() {}
 		    /* (non-Javadoc)
-		     * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#dataChanged()
+		     * @see org.epics.pvioc.monitor.MonitorFactory.ElementQueue#dataChanged()
 		     */
 		    public boolean dataChanged() {
 		        if(queueIsFull) {
 		            MonitorElement monitorElement = latestMonitorElement;
 		            PVStructure pvStructure = monitorElement.getPVStructure();
-	                monitorLocal.pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet, false);
+	                monitorLocal.pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet);
 	                BitSet ebs = monitorElement.getChangedBitSet();
 	                ebs.or(changedBitSet);
 	                ebs = monitorElement.getOverrunBitSet();
@@ -587,7 +527,7 @@ public class MonitorFactory {
 		            latestMonitorElement = monitorElement;
 		        }
                 PVStructure pvStructure = monitorElement.getPVStructure();
-                monitorLocal.pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet, false);
+                monitorLocal.pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet);
                 bitSetUtil.compress(changedBitSet, pvStructure);
                 bitSetUtil.compress(overrunBitSet, pvStructure);
                 BitSet ebs = monitorElement.getChangedBitSet();
@@ -602,7 +542,7 @@ public class MonitorFactory {
                 return true;
 		    }
 		    /* (non-Javadoc)
-             * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#getChangedBitSet()
+             * @see org.epics.pvioc.monitor.MonitorFactory.ElementQueue#getChangedBitSet()
              */
             @Override
             public BitSet getChangedBitSet() {
@@ -629,7 +569,7 @@ public class MonitorFactory {
 		    }
 		}
 		
-		private static class PeriodicNoQueue implements QueueImpl,Timer.TimerCallback {
+		private static class PeriodicSingleElementQueue implements ElementQueue,Timer.TimerCallback {
 		    private MonitorImpl monitorLocal = null;
 		    private MonitorElement monitorElement = null;
 		    private boolean gotMonitor = false;
@@ -668,7 +608,7 @@ public class MonitorFactory {
 		        return true;
 		    }
 		    /* (non-Javadoc)
-             * @see org.epics.pvioc.monitor.MonitorFactory.QueueImpl#getChangedBitSet()
+             * @see org.epics.pvioc.monitor.MonitorFactory.ElementQueue#getChangedBitSet()
              */
             @Override
             public BitSet getChangedBitSet() {
@@ -677,19 +617,24 @@ public class MonitorFactory {
 		    @Override
 		    public MonitorElement poll() {
 		        if(!gotMonitor) return null;
-		        PVStructure pvStructure = monitorElement.getPVStructure();
-                monitorLocal.pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet, true);
-                bitSetUtil.compress(changedBitSet, pvStructure);
-                bitSetUtil.compress(overrunBitSet, pvStructure);
-                BitSet ebs = monitorElement.getChangedBitSet();
-                ebs.clear();
-                ebs.or(changedBitSet);
-                ebs = monitorElement.getOverrunBitSet();
-                ebs.clear();
-                ebs.or(overrunBitSet);
-                changedBitSet.clear();
-                overrunBitSet.clear();
-                return monitorElement;
+		        monitorLocal.pvRecord.lock();
+		        try {
+		            PVStructure pvStructure = monitorElement.getPVStructure();
+		            monitorLocal.pvCopy.updateCopyFromBitSet(pvStructure, changedBitSet);
+		            bitSetUtil.compress(changedBitSet, pvStructure);
+		            bitSetUtil.compress(overrunBitSet, pvStructure);
+		            BitSet ebs = monitorElement.getChangedBitSet();
+		            ebs.clear();
+		            ebs.or(changedBitSet);
+		            ebs = monitorElement.getOverrunBitSet();
+		            ebs.clear();
+		            ebs.or(overrunBitSet);
+		            changedBitSet.clear();
+		            overrunBitSet.clear();
+		        } finally {
+		            monitorLocal.pvRecord.unlock();
+		        }
+		        return monitorElement;
 		    }
 		    @Override
 		    public void release(MonitorElement monitorElement) {

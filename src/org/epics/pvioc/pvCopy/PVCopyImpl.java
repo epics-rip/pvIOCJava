@@ -243,94 +243,84 @@ class PVCopyImpl {
          * @see org.epics.pvdata.pvCopy.PVCopy#initCopy(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
          */
         @Override
-        public void initCopy(PVStructure copyPVStructure, BitSet bitSet, boolean lockRecord) {
+        public void initCopy(PVStructure copyPVStructure, BitSet bitSet) {
             bitSet.clear();
             bitSet.set(0);
-            updateCopyFromBitSet(copyPVStructure,bitSet,lockRecord);
+            pvRecord.lock();
+            try {
+                updateCopyFromBitSet(copyPVStructure,bitSet);
+            } finally {
+                pvRecord.unlock();
+            }
         }
         /* (non-Javadoc)
-         * @see org.epics.pvdata.pvCopy.PVCopy#updateCopySetBitSet(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet, boolean)
+         * @see org.epics.pvioc.pvCopy.PVCopy#updateCopySetBitSet(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
          */
         @Override
-        public void updateCopySetBitSet(PVStructure copyPVStructure,BitSet bitSet, boolean lockRecord)
+        public void updateCopySetBitSet(PVStructure copyPVStructure,BitSet bitSet)
         {
-            if(lockRecord) pvRecord.lock();
-            try {
-                if(headNode.isStructure) {
-                    updateStructureNodeSetBitSet(copyPVStructure,(StructureNode)headNode,bitSet);
-                } else {
-                    RecordNode recordNode = (RecordNode)headNode;
-                    PVRecordField pvRecordField= recordNode.recordPVField;
-                    PVField copyPVField = copyPVStructure;
-                    PVField[] pvCopyFields = copyPVStructure.getPVFields();
-                    if(pvCopyFields.length==1) {
-                        copyPVField = pvCopyFields[0];
-                    }
-                    PVField  pvField = pvRecordField.getPVField();
-                    if(pvField.getField().getType()==Type.structure) {
-                        updateSubFieldSetBitSet(copyPVField,pvRecordField,bitSet);
-                        return;
-                    }
-                    if(pvCopyFields.length!=1) {
-                        throw new IllegalStateException("Logic error");
-                    }
-                    boolean isEqual = copyPVField.equals(pvField);
-                    if(!isEqual) {
-                        convert.copy(pvField, copyPVField);
-                        bitSet.set(copyPVField.getFieldOffset());
-                    }
+            if(headNode.isStructure) {
+                updateStructureNodeSetBitSet(copyPVStructure,(StructureNode)headNode,bitSet);
+            } else {
+                RecordNode recordNode = (RecordNode)headNode;
+                PVRecordField pvRecordField= recordNode.recordPVField;
+                PVField copyPVField = copyPVStructure;
+                PVField[] pvCopyFields = copyPVStructure.getPVFields();
+                if(pvCopyFields.length==1) {
+                    copyPVField = pvCopyFields[0];
                 }
-            } finally {
-                if(lockRecord) pvRecord.unlock();
+                PVField  pvField = pvRecordField.getPVField();
+                if(pvField.getField().getType()==Type.structure) {
+                    updateSubFieldSetBitSet(copyPVField,pvRecordField,bitSet);
+                    return;
+                }
+                if(pvCopyFields.length!=1) {
+                    throw new IllegalStateException("Logic error");
+                }
+                boolean isEqual = copyPVField.equals(pvField);
+                if(!isEqual) {
+                    convert.copy(pvField, copyPVField);
+                    bitSet.set(copyPVField.getFieldOffset());
+                }
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.pvdata.pvCopy.PVCopy#updateCopyFromBitSet(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet, boolean)
+         * @see org.epics.pvdata.pvCopy.PVCopy#updateCopyFromBitSet(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
          */
         @Override
-        public void updateCopyFromBitSet(PVStructure copyPVStructure,BitSet bitSet, boolean lockRecord) {
+        public void updateCopyFromBitSet(PVStructure copyPVStructure,BitSet bitSet) {
             boolean doAll = bitSet.get(0);
-            if(lockRecord) pvRecord.lock();
-            try {
-                if(headNode.isStructure) {
-                    updateStructureNodeFromBitSet(copyPVStructure,(StructureNode)headNode,bitSet, true,doAll);
+            if(headNode.isStructure) {
+                updateStructureNodeFromBitSet(copyPVStructure,(StructureNode)headNode,bitSet, true,doAll);
+            } else {
+                RecordNode recordNode = (RecordNode)headNode;
+                PVField[] pvCopyFields = copyPVStructure.getPVFields();
+                if(pvCopyFields.length==1) {
+                    updateSubFieldFromBitSet(pvCopyFields[0],recordNode.recordPVField,bitSet,true,doAll);
                 } else {
-                    RecordNode recordNode = (RecordNode)headNode;
-                    PVField[] pvCopyFields = copyPVStructure.getPVFields();
-                    if(pvCopyFields.length==1) {
-                        updateSubFieldFromBitSet(pvCopyFields[0],recordNode.recordPVField,bitSet,true,doAll);
-                    } else {
-                        updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet, true,doAll);
-                    }
+                    updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet, true,doAll);
                 }
-            } finally {
-                if(lockRecord) pvRecord.unlock();
             }
         }
         /* (non-Javadoc)
-         * @see org.epics.pvdata.pvCopy.PVCopy#updateRecord(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet, boolean)
+         * @see org.epics.pvdata.pvCopy.PVCopy#updateRecord(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
          */
         @Override
-        public void updateRecord(PVStructure copyPVStructure, BitSet bitSet,boolean lockRecord) {
+        public void updateRecord(PVStructure copyPVStructure, BitSet bitSet) {
             boolean doAll = bitSet.get(0);
-            if(lockRecord) pvRecord.lock();
-            try {
-                pvRecord.beginGroupPut();
-                if(headNode.isStructure) {
-                    updateStructureNodeFromBitSet(copyPVStructure,(StructureNode)headNode,bitSet, false,doAll);
+            pvRecord.beginGroupPut();
+            if(headNode.isStructure) {
+                updateStructureNodeFromBitSet(copyPVStructure,(StructureNode)headNode,bitSet, false,doAll);
+            } else {
+                RecordNode recordNode = (RecordNode)headNode;
+                PVField[] pvCopyFields = copyPVStructure.getPVFields();
+                if(pvCopyFields.length==1) {
+                    updateSubFieldFromBitSet(pvCopyFields[0],recordNode.recordPVField,bitSet,false,doAll);
                 } else {
-                    RecordNode recordNode = (RecordNode)headNode;
-                    PVField[] pvCopyFields = copyPVStructure.getPVFields();
-                    if(pvCopyFields.length==1) {
-                        updateSubFieldFromBitSet(pvCopyFields[0],recordNode.recordPVField,bitSet,false,doAll);
-                    } else {
-                        updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet,false,doAll);
-                    }
+                    updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet,false,doAll);
                 }
-                pvRecord.endGroupPut();
-            } finally {
-                if(lockRecord) pvRecord.unlock();
             }
+            pvRecord.endGroupPut();
         }
          
         /* (non-Javadoc)

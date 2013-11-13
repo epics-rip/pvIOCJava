@@ -78,9 +78,9 @@ System.out.println(pvPutStructure);
         PVStructure pvGetStructure = pvGetCopy.createPVStructure();
 System.out.println(pvGetStructure);
         BitSet putBitSet = new BitSet(pvPutStructure.getNumberFields());
-        pvPutCopy.initCopy(pvPutStructure, putBitSet, true);
+        pvPutCopy.initCopy(pvPutStructure, putBitSet);
         BitSet getBitSet = new BitSet(pvGetStructure.getNumberFields());
-        pvGetCopy.initCopy(pvGetStructure, getBitSet, true);
+        pvGetCopy.initCopy(pvGetStructure, getBitSet);
         
     }
     /* (non-Javadoc)

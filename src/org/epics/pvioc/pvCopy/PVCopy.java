@@ -68,32 +68,28 @@ public interface PVCopy {
      * The bitSet will have offset 0 set to 1 and all other bits set to 0. 
      * @param copyPVStructure The PVStructure.
      * @param bitSet The bitSet for PVStructure.
-     * @param lockRecord lock the record while initializing.
      */
-    void initCopy(PVStructure copyPVStructure, BitSet bitSet, boolean lockRecord);
+    void initCopy(PVStructure copyPVStructure, BitSet bitSet);
     /**
      * Update PVStructure from PVRecord. The BitSet shows which fields in PVStructure have changed.
      * @param copyPVStructure The PVStructure.
      * @param bitSet The BitSet which shows the fields that were modified.
-     * @param lockRecord lock the record while updating.
      */
-    void updateCopySetBitSet(PVStructure copyPVStructure,BitSet bitSet,boolean lockRecord);
+    void updateCopySetBitSet(PVStructure copyPVStructure,BitSet bitSet);
     /**
      * Update PVStructure from the bitSet. Thus each PVField of PVStructure for which
      * bitSet.get(pvField.getOffset) is true is updated with the data from the PVRecord.
      * @param copyPVStructure The PVStructure.
      * @param bitSet The bitSet which shows which fields should be updated.
-     * @param lockRecord Should the pvRecord be locked while updating.
      */
-    void updateCopyFromBitSet(PVStructure copyPVStructure,BitSet bitSet,boolean lockRecord);
+    void updateCopyFromBitSet(PVStructure copyPVStructure,BitSet bitSet);
     /**
      * Update the fields in PVRecord with data from PVStructure. Only fields
      * that have the offset in bitSet set to true are modified.
      * @param copyPVStructure The PVStructure.
      * @param bitSet The offsets within PVStructure that have new data.
-     * @param lockRecord lock the record while updating.
      */
-    void updateRecord(PVStructure copyPVStructure,BitSet bitSet,boolean lockRecord);
+    void updateRecord(PVStructure copyPVStructure,BitSet bitSet);
     /**
      * Create a PVCopyMonitor.
      * @param pvCopyMonitorRequester The PVCopyMonitorRequester.

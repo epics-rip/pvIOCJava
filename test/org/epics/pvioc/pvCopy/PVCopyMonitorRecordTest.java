@@ -74,7 +74,7 @@ public class PVCopyMonitorRecordTest extends TestCase {
         PVDouble pvCopyPowerValue = (PVDouble)pvCopyStructure.getSubField("power.value");
         changeBitSet = new BitSet(pvCopyStructure.getNumberFields());
         overrunBitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, changeBitSet, true);
+        pvCopy.initCopy(pvCopyStructure, changeBitSet);
         CopyMonitorRequester copyMonitorRequester = new CopyMonitorRequester(pvCopy);
         copyMonitorRequester.startMonitoring(changeBitSet, overrunBitSet);
         // must flush initial

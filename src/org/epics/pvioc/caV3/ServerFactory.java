@@ -297,7 +297,12 @@ public class ServerFactory {
             pvCopyStructure = pvCopy.createPVStructure();
             copyBitSet = new BitSet(pvCopyStructure.getNumberFields());
             copyBitSet.set(0);
-            pvCopy.updateCopyFromBitSet(pvCopyStructure, copyBitSet, true);
+            pvRecord.lock();
+            try {
+                pvCopy.updateCopyFromBitSet(pvCopyStructure, copyBitSet);
+            } finally{
+                pvRecord.unlock();
+            }
             PVField[] pvFields = pvCopyStructure.getPVFields();
             for(int i=0; i<pvFields.length; i++) {
                 PVField pvField = pvFields[i];
@@ -411,7 +416,7 @@ public class ServerFactory {
                 }
                 return CAStatus.NORMAL;
             }
-            pvCopy.initCopy(pvCopyStructure, copyBitSet, true);
+            pvCopy.initCopy(pvCopyStructure, copyBitSet);
             getData(dbr);
             return CAStatus.NORMAL;
         }
@@ -453,7 +458,12 @@ public class ServerFactory {
             }
             copyBitSet.clear();
             putValueField(dbr);
-            pvCopy.updateRecord(pvCopyStructure, copyBitSet, true);
+            pvRecord.lock();
+            try {
+                pvCopy.updateRecord(pvCopyStructure, copyBitSet);
+            } finally {
+                pvRecord.unlock();
+            }
             return CAStatus.NORMAL;
         }
 
@@ -463,7 +473,7 @@ public class ServerFactory {
         @Override
         public void recordProcessComplete() {
             if(getProcessActive) {
-            	pvCopy.initCopy(pvCopyStructure, copyBitSet, true);
+            	pvCopy.initCopy(pvCopyStructure, copyBitSet);
                 getData(dbr);
                 dbr = null;
                 getProcessActive = false;
@@ -503,7 +513,7 @@ public class ServerFactory {
         		try {
         			putValueField(dbr);
         			copyBitSet.clear();
-        			pvCopy.updateRecord(pvCopyStructure, copyBitSet, true);
+        			pvCopy.updateRecord(pvCopyStructure, copyBitSet);
         		} finally {
         			pvRecord.unlock();
         		}
@@ -570,7 +580,7 @@ public class ServerFactory {
         @Override
         public void dataChanged() {
             DBR dbr = AbstractCASResponseHandler.createDBRforReading(this);
-            pvCopy.initCopy(monitorPVStructure,monitorChangeBitSet, true);
+            pvCopy.initCopy(monitorPVStructure,monitorChangeBitSet);
             getData(dbr,monitorPVStructure);
             eventCallback.postEvent(Monitor.VALUE|Monitor.LOG, dbr);
             monitorChangeBitSet.clear();

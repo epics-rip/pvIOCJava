@@ -138,7 +138,7 @@ public class PVCopyTest extends TestCase {
         pvCopyStructure = pvCopy.createPVStructure();
 //System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         int offsetRecord = pvCopy.getCopyOffset(pvRecord.findPVRecordField(pvTimeStamp));
 //System.out.println("timeStamp offsetRecord " + offsetRecord);
         int offCopy = pvCopyStructure.getSubField("timeStamp").getFieldOffset();
@@ -183,7 +183,7 @@ public class PVCopyTest extends TestCase {
 //System.out.printf("pvCopy%s",pvCopy.dump());
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         PVRecordStructure recordPVStructure = pvRecord.getPVRecordStructure();
         PVStructure pvrs = recordPVStructure.getPVStructure();
@@ -197,12 +197,16 @@ public class PVCopyTest extends TestCase {
         recordPVField = pvCopy.getRecordPVField(offset);
         assertTrue(recordPVField!=null);
         assertTrue(recordPVField.getFullFieldName().equals("power.value"));
-        pvCopy.updateCopyFromBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopyFromBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
 //System.out.printf("bitSet %s%n",bitSet.toString());
         pvDouble = (PVDouble)pvCopyStructure.getSubField("value");
         pvDouble.put(2.0);
         bitSet.set(0);
-        pvCopy.updateRecord(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateRecord(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         pvDouble = (PVDouble)pvrf;
         double value = pvDouble.get();
 //System.out.printf("value %f%n",value);
@@ -217,7 +221,7 @@ public class PVCopyTest extends TestCase {
 //System.out.printf("pvCopy%s",pvCopy.dump());
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         PVInt pvSeverity = pvRecord.getPVRecordStructure().getPVStructure().getIntField("current.alarm.severity");
         assertTrue(pvSeverity!=null);
@@ -229,7 +233,9 @@ public class PVCopyTest extends TestCase {
             severity = 0;
         }
         pvSeverity.put(severity);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
 //System.out.printf("bitSet %s%n",bitSet.toString());
         assertTrue(bitSet.length()!=0);
         pvSeverity = pvCopyStructure.getIntField("severity");
@@ -243,7 +249,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         request = "alarm,timeStamp,power.value[xxx=yyy]";
@@ -253,7 +259,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         pvDouble = pvCopyStructure.getDoubleField("value");
         assertTrue(pvDouble!=null);
@@ -269,7 +275,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
 
         request = "field(alarm,timeStamp,current.value)";
@@ -279,7 +285,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         PVDouble pvValue = pvCopyStructure.getDoubleField("value");
         assertTrue(pvValue!=null);
@@ -291,7 +297,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s",pvCopyStructure);
         
         request = "field(alarm,timeStamp,power{value,alarm},"
@@ -302,7 +308,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         pvRecord = master.findRecord("powerSupplyArray");
@@ -316,7 +322,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         pvRecord = master.findRecord("powerSupplyArray");
@@ -327,7 +333,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         System.out.printf("%npvCopyStructure%n%s%n",pvCopyStructure);
     }
     
@@ -358,7 +364,7 @@ public class PVCopyTest extends TestCase {
         pvCopyStructure = pvCopy.createPVStructure();
 //System.out.println(pvCopyStructure);
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
 //System.out.println(pvCopyStructure.toString());
     }
     
@@ -421,7 +427,7 @@ public class PVCopyTest extends TestCase {
         pvFromCopy = pvCopyStructure.getSubField(offset);
         assertTrue(pvInRecord==pvFromRecord);
         assertTrue(pvFromCopy.getFieldName().equals("message"));
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         bitSet.clear();
         pvCopyPowerValue = pvCopyStructure.getSubField("power.value");  
         pvCopyTimeStamp = pvCopyStructure.getSubField("timeStamp");
@@ -431,7 +437,9 @@ public class PVCopyTest extends TestCase {
         pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         pvRecordNanoSeconds.put(1000);
         pvRecordUserTag.put(1);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         bitSetUtil.compress(bitSet, pvCopyStructure);
         showModified("update nanoSeconds " + pvCopyTimeStamp.toString(),pvCopyStructure,bitSet);
         bitSet.clear();
@@ -439,7 +447,9 @@ public class PVCopyTest extends TestCase {
         pvRecordSeconds.put(20000);
         pvRecordNanoSeconds.put(2000);
         pvRecordUserTag.put(2);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         bitSetUtil.compress(bitSet, pvCopyStructure);
         showModified("update value and timeStamp " + pvCopyPowerValue.toString() + " " + pvCopyTimeStamp.toString(),pvCopyStructure,bitSet);
         bitSet.clear();
@@ -469,7 +479,7 @@ public class PVCopyTest extends TestCase {
         pvFromCopy = pvCopyStructure.getSubField(offset);
         assertTrue(pvInRecord==pvFromRecord);
         assertTrue(pvFromCopy.getFieldName().equals("message"));
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
 //System.out.println(pvCopyStructure);
 //System.out.println(pvRecord.getPVRecordStructure().getPVField());
         bitSet.clear();
@@ -489,7 +499,9 @@ public class PVCopyTest extends TestCase {
         pvCopyCurrentValue = pvCopyStructure.getSubField("current.value"); 
         pvRecordNanoSeconds.put(1000);
         pvRecordUserTag.put(1);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         bitSetUtil.compress(bitSet, pvCopyStructure);
         showModified("update nanoSeconds " + pvCopyTimeStamp.toString(),pvCopyStructure,bitSet);
         bitSet.clear();
@@ -498,7 +510,9 @@ public class PVCopyTest extends TestCase {
         pvRecordSeconds.put(40000);
         pvRecordNanoSeconds.put(4000);
         pvRecordUserTag.put(4);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         assertTrue(bitSet.get(pvCopyPowerValue.getFieldOffset()));
         assertFalse(bitSet.get(pvCopyPower.getFieldOffset()));
         assertTrue(bitSet.get(pvCopySeconds.getFieldOffset()));
@@ -523,7 +537,7 @@ public class PVCopyTest extends TestCase {
         pvCopy = PVCopyFactory.create(pvRecord, empty,null);
         pvCopyStructure = pvCopy.createPVStructure();
         bitSet = new BitSet(pvCopyStructure.getNumberFields());
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
 //System.out.println(pvCopyStructure);
 //System.out.println(pvRecord.getPVRecordStructure().getPVField());
 //System.out.println(pvRecord.getPVRecordStructure().getPVField().getField());
@@ -539,7 +553,9 @@ public class PVCopyTest extends TestCase {
         pvRecordNanoSeconds.put(6000);
         pvRecordUserTag.put(6);
         compareCopyWithRecord("after change record ",pvCopyStructure,pvCopy);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         compareCopyWithRecord("after updateCopy",pvCopyStructure,pvCopy);
         pvCopySeconds = (PVLong)pvCopyStructure.getSubField("timeStamp.secondsPastEpoch");
         pvCopyNanoSeconds = (PVInt)pvCopyStructure.getSubField("timeStamp.nanoSeconds");
@@ -557,7 +573,9 @@ public class PVCopyTest extends TestCase {
 //System.out.println(pvCopyStructure);
 //System.out.println("pvRecord");
 //System.out.println(pvRecord.getPVRecordStructure().getPVField());
-        pvCopy.updateRecord(pvCopyStructure, bitSet,true);
+        pvRecord.lock();
+        pvCopy.updateRecord(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         compareCopyWithRecord("after updateRecord",pvCopyStructure,pvCopy);
         
         System.out.printf("%npowerSupplyArray: value alarm and timeStamp."
@@ -595,7 +613,7 @@ public class PVCopyTest extends TestCase {
         pvFromCopy = pvCopyStructure.getSubField(offset);
         assertTrue(pvInRecord==pvFromRecord);
         assertTrue(pvFromCopy.getFieldName().equals("message"));
-        pvCopy.initCopy(pvCopyStructure, bitSet, true);
+        pvCopy.initCopy(pvCopyStructure, bitSet);
         bitSet.clear();
         pvCopyPowerValue = pvCopyStructure.getSubField("supply.value");
         assertTrue(pvCopyPowerValue!=null);
@@ -606,7 +624,9 @@ public class PVCopyTest extends TestCase {
         pvRecordPowerValue = (PVDouble)pvStructure.getSubField("supply.0.power.value");
         pvRecordNanoSeconds.put(1000);
         pvRecordUserTag.put(1);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet, true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         bitSetUtil.compress(bitSet, pvCopyStructure);
         showModified("update nanoSeconds " + pvCopyTimeStamp.toString(),pvCopyStructure,bitSet);
         bitSet.clear();
@@ -614,7 +634,9 @@ public class PVCopyTest extends TestCase {
         pvRecordSeconds.put(20000);
         pvRecordNanoSeconds.put(2000);
         pvRecordUserTag.put(2);
-        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet,true);
+        pvRecord.lock();
+        pvCopy.updateCopySetBitSet(pvCopyStructure, bitSet);
+        pvRecord.unlock();
         bitSetUtil.compress(bitSet, pvCopyStructure);
         showModified("update value and timeStamp " + pvCopyPowerValue.toString() + " " + pvCopyTimeStamp.toString(),pvCopyStructure,bitSet);
 

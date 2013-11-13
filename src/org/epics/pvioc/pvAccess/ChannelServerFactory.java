@@ -887,7 +887,7 @@ public class ChannelServerFactory  {
             }
             
             private void getData() {
-                pvCopy.updateCopySetBitSet(pvStructure, bitSet, false);
+                pvCopy.updateCopySetBitSet(pvStructure, bitSet);
                 if(firstTime) {
                     bitSet.clear();
                     bitSet.set(0);
@@ -1063,13 +1063,13 @@ public class ChannelServerFactory  {
             }
             
             private void putData() {
-               pvCopy.updateRecord(pvStructure, bitSet, false);
+               pvCopy.updateRecord(pvStructure, bitSet);
             }
             
             private void getData() {
                 bitSet.clear();
                 bitSet.set(0);
-                pvCopy.updateCopyFromBitSet(pvStructure, bitSet, false);
+                pvCopy.updateCopyFromBitSet(pvStructure, bitSet);
              }
 			@Override
 			public void lock() {
@@ -1099,9 +1099,9 @@ public class ChannelServerFactory  {
                 this.pvGetStructure = pvGetStructure;
                 this.pvGetCopy = pvGetCopy;
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
-                pvPutCopy.initCopy(pvPutStructure, putBitSet, true);
+                pvPutCopy.initCopy(pvPutStructure, putBitSet);
                 getBitSet = new BitSet(pvGetStructure.getNumberFields());
-                pvGetCopy.initCopy(pvGetStructure, getBitSet, true);
+                pvGetCopy.initCopy(pvGetStructure, getBitSet);
                 Status status = okStatus;
                 recordProcess = channelImpl.getPVRecord().getRecordProcess();
                 if(process) {
@@ -1272,17 +1272,17 @@ public class ChannelServerFactory  {
             private void putData() {
                 putBitSet.clear();
                 putBitSet.set(0);
-                pvPutCopy.updateRecord(pvPutStructure, putBitSet, false);
+                pvPutCopy.updateRecord(pvPutStructure, putBitSet);
             }
             
             private void getData() {
-                pvGetCopy.updateCopySetBitSet(pvGetStructure, getBitSet, false);
+                pvGetCopy.updateCopySetBitSet(pvGetStructure, getBitSet);
                 getBitSet.clear();
                 getBitSet.set(0);
             }
             
             private void getPutData() {
-                pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet, false);
+                pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet);
                 putBitSet.clear();
                 putBitSet.set(0);
             }
