@@ -7,7 +7,7 @@ package org.epics.pvioc.monitor;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.monitor.Monitor;
 import org.epics.pvdata.monitor.MonitorElement;
@@ -38,6 +38,7 @@ import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
 public class MonitorTest extends TestCase {
     private static PVDatabase master = PVDatabaseFactory.getMaster();
     private static final Requester requester = new RequesterImpl();
+    private static final CreateRequest createRequest = CreateRequest.create();
     
     private static class RequesterImpl implements Requester {
 		@Override
@@ -77,9 +78,11 @@ public class MonitorTest extends TestCase {
          PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
          String request = "record[queueSize=1]field(value)";
  //System.out.println("pvRecord " + pvRecord.getPVRecordStructure().getPVField());
-         PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
- System.out.println("request:" + request);
- System.out.println("pvRequest:" + pvRequest);
+         PVStructure pvRequest = createRequest.createRequest(request);
+         if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+         assert(pvRequest!=null);
+// System.out.println("request:" + request);
+// System.out.println("pvRequest:" + pvRequest);
          MonitorRequesterImpl monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);
          MonitorElement monitorElement = monitorRequester.poll();
          assertTrue(monitorElement!=null);
@@ -104,8 +107,10 @@ public class MonitorTest extends TestCase {
 //System.out.println("pvCopy " + pvCopy);
          
          request = "record[queueSize=1]field(value,timeStamp)";
-         //System.out.println("pvRecord " + pvRecord.getPVRecordStructure().getPVField());
-         pvRequest = CreateRequestFactory.createRequest(request,requester);
+//System.out.println("pvRecord " + pvRecord.getPVRecordStructure().getPVField());
+         pvRequest = createRequest.createRequest(request);
+         if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+         assert(pvRequest!=null);
 //System.out.println("request:" + request);
 //System.out.println("pvRequest:" + pvRequest);
          monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);
@@ -161,7 +166,9 @@ public class MonitorTest extends TestCase {
         PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "record[queueSize=1]field(alarm,timeStamp[algorithm=onChange,causeMonitor=true],power.value)";
-        PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
+        PVStructure pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assert(pvRequest!=null);
 //System.out.println("request:" + request);
 //System.out.println("pvRequest:" + pvRequest);
         MonitorRequesterImpl monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);
@@ -217,7 +224,9 @@ public class MonitorTest extends TestCase {
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "alarm,timeStamp,power.value";
 //System.out.println("pvRecord " + pvRecord);
-        PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
+        PVStructure pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assert(pvRequest!=null);
 //System.out.println("request:" + request);
 //System.out.println("pvRequest:" + pvRequest);
         MonitorRequesterImpl monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);
@@ -309,7 +318,9 @@ public class MonitorTest extends TestCase {
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "alarm,timeStamp,power.value";
 //System.out.println("pvRecord " + pvRecord);
-        PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
+        PVStructure pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assert(pvRequest!=null);
 //System.out.println("request:" + request);
 //System.out.println("pvRequest:" + pvRequest);
         MonitorRequesterImpl monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);
@@ -400,7 +411,9 @@ public class MonitorTest extends TestCase {
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "alarm,timeStamp,power.value";
 //System.out.println("pvRecord " + pvRecord);
-        PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
+        PVStructure pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assert(pvRequest!=null);
 //System.out.println("request:" + request);
 //System.out.println("pvRequest:" + pvRequest);
         MonitorRequesterImpl monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);
@@ -491,7 +504,9 @@ public class MonitorTest extends TestCase {
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "record[periodicRate=.2]field(alarm,timeStamp,power.value)";
 //System.out.println("pvRecord " + pvRecord);
-        PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
+        PVStructure pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assert(pvRequest!=null);
 //System.out.println("request:" + request);
 //System.out.println("pvRequest:" + pvRequest);
         MonitorRequesterImpl monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);

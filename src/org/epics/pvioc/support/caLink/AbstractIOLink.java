@@ -5,7 +5,7 @@
  */
 package org.epics.pvioc.support.caLink;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
@@ -81,26 +81,30 @@ abstract class AbstractIOLink extends AbstractLink {
      */
     @Override
     public void start(AfterStart afterStart) {
-        if(!super.checkSupportState(SupportState.readyForStart,null)) return;
-        if(pvRequest==null) {
-        	String request = requestPVString.get();
-            if(request==null || request.length()==0) {
-                pvRequest = CreateRequestFactory.createRequest("field(value)",this);
-            } else {
-            	int index = request.indexOf("field(");
-            	if(index<0) {
-            		int indRecord = request.indexOf("record[");
-            		if(indRecord<0) {
-            			request = "field(" + request + ")";
-            		} else {
-            			request = request + "field(value)";
-            		}
-            	}
-                pvRequest = CreateRequestFactory.createRequest(request,this);
-            }
-        }
-        if(pvRequest==null) return;
-        super.start(afterStart);
+    	if(!super.checkSupportState(SupportState.readyForStart,null)) return;
+    	CreateRequest createRequest = CreateRequest.create();
+    	if(pvRequest==null) {
+    		String request = requestPVString.get();
+    		if(request==null || request.length()==0) {
+    			pvRequest = createRequest.createRequest("field(value)");
+    		} else {
+    			int index = request.indexOf("field(");
+    			if(index<0) {
+    				int indRecord = request.indexOf("record[");
+    				if(indRecord<0) {
+    					request = "field(" + request + ")";
+    				} else {
+    					request = request + "field(value)";
+    				}
+    			}
+    			pvRequest = createRequest.createRequest(request);
+    		}
+    	}
+    	if(pvRequest==null) {
+    		message(createRequest.getMessage(),MessageType.error);
+    		return;
+    	}
+    	super.start(afterStart);
     }
     
     protected boolean setLinkPVStructure(PVStructure linkPVStructure) {

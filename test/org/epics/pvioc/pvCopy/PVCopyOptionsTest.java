@@ -7,7 +7,7 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
@@ -29,6 +29,7 @@ import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
 public class PVCopyOptionsTest extends TestCase {
     private final static PVDatabase master = PVDatabaseFactory.getMaster();
     private final static Requester requester = new RequesterImpl();
+    private static final CreateRequest createRequest = CreateRequest.create();
    
     
     private static class RequesterImpl implements Requester {
@@ -49,7 +50,7 @@ public class PVCopyOptionsTest extends TestCase {
         XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/test/org/epics/pvioc/pvCopy/powerSupply.xml", iocRequester);
         PVReplaceFactory.replace(master);
         PVRecord pvRecord = master.findRecord("powerSupply");
-System.out.println(pvRecord.getPVRecordStructure().getPVStructure().toString());
+//System.out.println(pvRecord.getPVRecordStructure().getPVStructure().toString());
         PVStructure pvRequest = null;
         // definitions for PVCopy
         PVCopy pvCopy = null;
@@ -59,24 +60,25 @@ System.out.println(pvRecord.getPVRecordStructure().getPVStructure().toString());
                 + "field(timeStamp[algorithm=onChange,causeMonitor=false],power{value[algorithm=onChange,causeMonitor=true],alarm},"
                 + "current{value,alarm},voltage{value,alarm})";
 //System.out.println("request " + request);
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
-System.out.println("pvRequest " + pvRequest);
+//System.out.println("pvRequest " + pvRequest);
         PVStructure pvOptions = (PVStructure)pvRequest.getSubField("record._options");
         assertTrue(pvOptions!=null);
-System.out.println("options " + pvOptions);
+//System.out.println("options " + pvOptions);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();
         PVField pvField = pvCopyStructure.getSubField("timeStamp");
         int offset = pvField.getFieldOffset();
         pvOptions = pvCopy.getOptions(pvCopyStructure, offset);
         assertTrue(pvOptions!=null);
-System.out.println("options " + pvOptions);
+//System.out.println("options " + pvOptions);
         pvField = pvCopyStructure.getSubField("power.value");
         offset = pvField.getFieldOffset();
         pvOptions = pvCopy.getOptions(pvCopyStructure, offset);
         assertTrue(pvOptions!=null);
-System.out.println("options " + pvOptions);
+//System.out.println("options " + pvOptions);
     }
     /* (non-Javadoc)
      * @see junit.framework.TestCase#tearDown()

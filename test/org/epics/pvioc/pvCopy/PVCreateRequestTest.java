@@ -7,7 +7,7 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Requester;
@@ -22,6 +22,7 @@ import org.epics.pvdata.pv.Requester;
  */
 public class PVCreateRequestTest extends TestCase {
     private static final Requester requester = new RequesterImpl();
+    private static final CreateRequest createRequest = CreateRequest.create();
     
     private static class RequesterImpl implements Requester {
 		@Override
@@ -40,41 +41,50 @@ public class PVCreateRequestTest extends TestCase {
      */
     public static void testCreateRequest() {
     	String request = "";
-        PVStructure pvRequest = CreateRequestFactory.createRequest(request,requester);
+        PVStructure pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "alarm,timeStamp,power.value";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "record[process=true]field(alarm,timeStamp,power.value)";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "record[process=true]field(alarm,timeStamp[algorithm=onChange,causeMonitor=false],power{value,alarm})";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "record[process=true,xxx=yyy]field(alarm,timeStamp[shareData=true],power.value)";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "record[process=true,xxx=yyy]"
         	+ "putField(power.value)"
         	+ "getField(alarm,timeStamp,power{value,alarm},"
         	+ "current{value,alarm},voltage{value,alarm})";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "field(alarm,timeStamp,supply{" 
                 + "0{voltage.value,current.value,power.value},"
                 + "1{voltage.value,current.value,power.value}"
                 + "})";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "field(alarm,timeStamp,voltage{value},power{value},current{value,alarm})";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "record[process=true,xxx=yyy]"
         	+ "putField(power.value)"
@@ -83,16 +93,19 @@ public class PVCreateRequestTest extends TestCase {
         	+ "ps0{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}},"
         	+ "ps1{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}}"
         	+ ")";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "a{b{c{d}}}";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
-        assertFalse(pvRequest==null);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
+        assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
         request = "record[process=true,xxx=yyy]field(alarm,timeStamp[shareData=true],power.value";
         System.out.printf("%nError Expected for next call!!%n");
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest==null);
         request = "record[process=true,xxx=yyy]"
                 + "putField(power.value)"
@@ -102,7 +115,8 @@ public class PVCreateRequestTest extends TestCase {
                 + "ps1{alarm,timeStamp,power{value,alarm},current{value,alarm},voltage{value,alarm}"
                 + ")";
         System.out.printf("%nError Expected for next call!!%n");
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest==null);
     }
 }

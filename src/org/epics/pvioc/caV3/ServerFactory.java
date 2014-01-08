@@ -47,7 +47,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.misc.RunnableReady;
@@ -289,7 +289,11 @@ public class ServerFactory {
             } else {
                 request = "field(" + options + ")";
             }
-            PVStructure pvRequest = CreateRequestFactory.createRequest(request,this);
+            CreateRequest createRequest = CreateRequest.create();
+            PVStructure pvRequest = createRequest.createRequest(request);
+            if(pvRequest==null) {
+            	message(createRequest.getMessage(), MessageType.error);
+            }
             pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
             if(pvCopy==null) {
                 throw new CAStatusException(CAStatus.DEFUNCT, "illegal request. Could not create pvCopy");

@@ -5,7 +5,7 @@
  */
 package org.epics.pvioc.support.caLink;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.misc.Executor;
 import org.epics.pvdata.misc.ExecutorFactory;
 import org.epics.pvdata.misc.ExecutorNode;
@@ -13,6 +13,7 @@ import org.epics.pvdata.misc.ThreadPriority;
 import org.epics.pvdata.monitor.Monitor;
 import org.epics.pvdata.monitor.MonitorRequester;
 import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Structure;
 import org.epics.pvioc.database.PVRecordField;
@@ -49,11 +50,17 @@ implements MonitorRequester,Runnable,RecordProcessRequester
      */
     @Override
     public void start(AfterStart afterStart) {
-        super.start(afterStart);
-        if(super.getSupportState()!=SupportState.ready) return;
-        String request = "record[queueSize=2]field(timeStamp[algorithm=onChange,causeMonitor=true])";
-        pvRequest = CreateRequestFactory.createRequest(request,this);
-        processToken = recordProcess.requestProcessToken(this);
+    	super.start(afterStart);
+    	if(super.getSupportState()!=SupportState.ready) return;
+    	CreateRequest createRequest = CreateRequest.create();
+    	String request = "record[queueSize=2]field(timeStamp[algorithm=onChange,causeMonitor=true])";
+    	PVStructure pvRequest = createRequest.createRequest(request);
+    	if(pvRequest==null) {
+    		pvStructure.message(createRequest.getMessage(), MessageType.error);
+    		super.stop();
+    		return;
+    	}
+    	processToken = recordProcess.requestProcessToken(this);
     	if(processToken==null) {
     		pvStructure.message("can not process",MessageType.warning);
     		super.stop();

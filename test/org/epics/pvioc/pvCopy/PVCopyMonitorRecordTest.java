@@ -7,9 +7,8 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.misc.BitSet;
-import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVDouble;
 import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVLong;
@@ -31,20 +30,6 @@ import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
  */
 public class PVCopyMonitorRecordTest extends TestCase {
     private final static PVDatabase master = PVDatabaseFactory.getMaster();
-    private final static Requester requester = new RequesterImpl();
-   
-    
-    private static class RequesterImpl implements Requester {
-		@Override
-		public String getRequesterName() {
-			return "pvCopyTest";
-		}
-		@Override
-		public void message(String message, MessageType messageType) {
-		    System.out.printf("message %s messageType %s%n",message,messageType.name());
-			
-		}
-    }
     
     public static void testCopyMonitor() {
         Requester iocRequester = new RequesterForTesting("accessTest");
@@ -63,7 +48,7 @@ public class PVCopyMonitorRecordTest extends TestCase {
         BitSet changeBitSet = null;
         BitSet overrunBitSet = null;
         String request = "field()";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = CreateRequest.create().createRequest(request);
 //System.out.println("pvRequest " + pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");

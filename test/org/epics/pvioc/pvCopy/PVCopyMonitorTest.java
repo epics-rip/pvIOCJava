@@ -7,7 +7,7 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVDouble;
@@ -32,6 +32,7 @@ import org.epics.pvioc.xml.XMLToPVDatabaseFactory;
 public class PVCopyMonitorTest extends TestCase {
     private final static PVDatabase master = PVDatabaseFactory.getMaster();
     private final static Requester requester = new RequesterImpl();
+    private static final CreateRequest createRequest = CreateRequest.create();
    
     
     private static class RequesterImpl implements Requester {
@@ -68,7 +69,8 @@ public class PVCopyMonitorTest extends TestCase {
               + " Note that PVRecord.power does NOT have an alarm field.%n");
         String request = "field(alarm,timeStamp,power{value,alarm},"
                 + "current{value,alarm},voltage{value,alarm})";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
         pvCopyStructure = pvCopy.createPVStructure();

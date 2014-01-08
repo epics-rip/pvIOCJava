@@ -7,7 +7,7 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequestFactory;
+import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.BitSet;
@@ -47,6 +47,7 @@ public class PVCopyTest extends TestCase {
     private final static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
     private final static BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
     private final static Requester requester = new RequesterImpl();
+    private static final CreateRequest createRequest = CreateRequest.create();
     private final static Convert convert = ConvertFactory.getConvert();
    
     
@@ -88,13 +89,15 @@ public class PVCopyTest extends TestCase {
         pvRecord = master.findRecord("powerSupply");
         assertTrue(pvRecord!=null);
         request = "xxx";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
 //System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
         assertTrue(pvCopy==null);
         request = "xxx{yyy[zzz=nnn]}";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
 //System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -129,7 +132,8 @@ public class PVCopyTest extends TestCase {
 
         
         request = "timeStamp[causeMonitor=true]";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
 //System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -175,7 +179,8 @@ public class PVCopyTest extends TestCase {
         assertTrue(pvRecord!=null);
         
         request = "power.value";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -213,7 +218,8 @@ public class PVCopyTest extends TestCase {
         assertTrue(value==2.0);
         
         request = "current.alarm.severity";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -243,7 +249,8 @@ public class PVCopyTest extends TestCase {
         assertTrue(severity==pvSeverity.get());
         
         request = "alarm,timeStamp,power.value";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -253,7 +260,8 @@ public class PVCopyTest extends TestCase {
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
         
         request = "alarm,timeStamp,power.value[xxx=yyy]";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -269,7 +277,8 @@ public class PVCopyTest extends TestCase {
         assertTrue(pvOptions!=null);
         
         request = "xxx,yyy{zzz,vvv},alarm,timeStamp,power.value";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -279,7 +288,8 @@ public class PVCopyTest extends TestCase {
         System.out.printf("pvCopyStructure%n%s%n",pvCopyStructure);
 
         request = "field(alarm,timeStamp,current.value)";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
@@ -291,7 +301,8 @@ public class PVCopyTest extends TestCase {
         assertTrue(pvValue!=null);
         
         request = "field(alarm,timeStamp,power.value,current.value,voltage.value)";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
@@ -302,7 +313,8 @@ public class PVCopyTest extends TestCase {
         
         request = "field(alarm,timeStamp,power{value,alarm},"
                 + "current{value,alarm},voltage{value,alarm})";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
@@ -316,7 +328,8 @@ public class PVCopyTest extends TestCase {
            + "0{voltage.value,current.value,power.value},"
            + "1{voltage.value,current.value,power.value}"
            + "})";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
@@ -327,7 +340,8 @@ public class PVCopyTest extends TestCase {
         
         pvRecord = master.findRecord("powerSupplyArray");
         request = "field(alarm,timeStamp,supply.0.current.value)";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.printf("%nrequest %s%npvRequest%n%s%n",request,pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
@@ -356,7 +370,8 @@ public class PVCopyTest extends TestCase {
         for(int i=0; i<len; i++) values[i] = i*10.0;
         pvDoubleArray.put(0, len, values, 0);
         request = "value[shareData=true]";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
 //System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
@@ -399,7 +414,8 @@ public class PVCopyTest extends TestCase {
         PVRecord pvRecord = master.findRecord("powerSupply");
 //System.out.println(pvRecord);
         String request = "alarm,timeStamp,current,voltage,power";
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
         PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,null);
@@ -459,7 +475,8 @@ public class PVCopyTest extends TestCase {
         request = "field(alarm,timeStamp,power{value,alarm},"
                 + "current{value,alarm},voltage{value,alarm})";
 //System.out.println("request " + request);
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
 //System.out.println(pvRequest);
         assertTrue(pvRequest!=null);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
@@ -585,7 +602,8 @@ public class PVCopyTest extends TestCase {
 //System.out.println("pvStructure " + pvStructure);
         request = "supply{0{power.value,alarm}},timeStamp";
 //System.out.println("request " + request);
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
 //System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,null);
 //System.out.println(pvCopy.dump());
@@ -642,7 +660,8 @@ public class PVCopyTest extends TestCase {
 
         request = "supply.0.current{value,alarm},timeStamp";
 //System.out.println("request " + request);
-        pvRequest = CreateRequestFactory.createRequest(request,requester);
+        pvRequest = createRequest.createRequest(request);
+        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         System.out.println("pvRequest " + pvRequest);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,null);
 //System.out.println(pvCopy.dump());
