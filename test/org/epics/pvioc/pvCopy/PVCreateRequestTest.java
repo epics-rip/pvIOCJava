@@ -50,7 +50,7 @@ public class PVCreateRequestTest extends TestCase {
         if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
         System.out.printf("request %s%n%s%n",request,pvRequest.toString());
-        request = "record[process=true]field(alarm,timeStamp,power.value)";
+        request = "record[process = true] field(alarm, timeStamp, power.value)";
         pvRequest = createRequest.createRequest(request);
         if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
         assertTrue(pvRequest!=null);
