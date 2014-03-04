@@ -428,6 +428,9 @@ class PVCopyImpl {
                 String fieldName = copyPVField.getFieldName();
                 
                 PVStructure requestPVStructure = (PVStructure)pvFromRequest.getSubField(fieldName);
+                PVStructure pvSubFieldOptions = null;
+                pvField = requestPVStructure.getSubField("_options");
+                if(pvField!=null) pvSubFieldOptions = (PVStructure)pvField;
                 PVRecordField pvRecordField = null;
                 PVRecordField[] pvRecordFields = pvRecordStructure.getPVRecordFields();
                 for(int j=0; i<pvRecordFields.length; j++ ) {
@@ -437,14 +440,14 @@ class PVCopyImpl {
                     }
                 }
                 int numberRequest = requestPVStructure.getPVFields().length;
-                if(requestPVStructure.getSubField("_options")!=null) numberRequest--;
+                if(pvSubFieldOptions!=null) numberRequest--;
                 if(numberRequest>0) {
                     nodeList.add(createStructureNodes(
                             (PVRecordStructure)pvRecordField,requestPVStructure,(PVStructure)copyPVField));
                     continue;
                 }
                 RecordNode recordNode = new RecordNode();
-                recordNode.options = pvOptions;
+                recordNode.options = pvSubFieldOptions;
                 recordNode.isStructure = false;
                 recordNode.recordPVField = pvRecordField;
                 recordNode.nfields = copyPVField.getNumberFields();

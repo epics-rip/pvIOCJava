@@ -87,36 +87,17 @@ public class MonitorFactory {
     private static final Status okStatus = statusCreate.getStatusOK();
     private static final Status failedToCreateMonitorStatus = statusCreate.createStatus(StatusType.FATAL, "failed to create monitor", null);
     private static final Status wasDestroyedStatus = statusCreate.createStatus(StatusType.ERROR,"was destroyed",null);
-    private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-    private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
 	private static final LinkedList<MonitorAlgorithmCreate> monitorAlgorithmCreateList = monitorAlgorithmCreateListCreate.create();
 	private static final BitSetUtil bitSetUtil = BitSetUtilFactory.getCompressBitSet();
 	private static final Timer timer = TimerFactory.create("periodicMonitor", ThreadPriority.high);
-	private static PVStructure pvTimeStampRequest;
-	private static MonitorAlgorithmCreate algorithmOnChangeCreate;
 	private static MonitorAlgorithmCreate algorithmDeadband;
 	
 	static {
 		AlgorithmOnChangeFactory.register();
 		AlgorithmDeadbandFactory.register();
-		String[] fieldNames = new String[2];
-		Field[] fields = new Field[2];
-		fieldNames[0] = "algorithm";
-		fieldNames[1] = "causeMonitor";
-		fields[0] = fieldCreate.createScalar(ScalarType.pvString);
-		fields[1] = fieldCreate.createScalar(ScalarType.pvBoolean);
-		Structure structure = fieldCreate.createStructure(fieldNames, fields);
-		pvTimeStampRequest = pvDataCreate.createPVStructure(structure);
-		PVString pvAlgorithm = pvTimeStampRequest.getStringField(fieldNames[0]);
-		PVBoolean pvCauseMonitor = pvTimeStampRequest.getBooleanField(fieldNames[1]);
-		pvAlgorithm.put("onChange");
-		pvCauseMonitor.put(false);
 		LinkedListNode<MonitorAlgorithmCreate> node = monitorAlgorithmCreateList.getHead();
 		while(node!=null) {
 			MonitorAlgorithmCreate algorithmCreate = node.getObject();
-			if(algorithmCreate.getAlgorithmName().equals("onChange")) {
-				algorithmOnChangeCreate = algorithmCreate;
-			}
 			if(algorithmCreate.getAlgorithmName().equals("deadband")) {
 				algorithmDeadband = algorithmCreate;
 			}
@@ -343,7 +324,6 @@ public class MonitorFactory {
 			notMonitoredBitSet.clear();
 			boolean result = initField(pvStructure,pvStructure);
 			if(result) {
-				initTimeStamp(pvStructure);
 				initNumericFields(pvStructure);
 				notMonitoredBitSet.flip(0, notMonitoredBitSet.size());
 				monitorRequester.monitorConnect(okStatus,this, pvCopy.getStructure());
@@ -402,35 +382,6 @@ public class MonitorFactory {
 			LinkedListNode<MonitorFieldNode> listNode1 = MonitorFieldNodeListCreate.createNode(node);
 			monitorFieldList.addTail(listNode1);
 			return true;
-		}
-		
-		private void initTimeStamp(PVStructure pvStructure ) {
-			PVField pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField("timeStamp");
-			if(pvField==null) return;
-			int bitOffset = pvCopy.getCopyOffset(pvRecord.findPVRecordField(pvField));
-			if(bitOffset<0) return;
-			LinkedListNode<MonitorFieldNode> listNode = monitorFieldList.getHead();
-			while(listNode!=null) {
-				MonitorFieldNode monitorFieldNode = listNode.getObject();
-				if(monitorFieldNode.bitOffset==bitOffset) return;
-				listNode = monitorFieldList.getNext(listNode);
-			}
-			PVRecordField pvRecordField = pvRecord.findPVRecordField(pvField);
-			MonitorAlgorithm monitorAlgorithm = algorithmOnChangeCreate.create(pvRecord,monitorRequester,pvRecordField,pvTimeStampRequest);
-			if(monitorAlgorithm==null) return;
-			PVTimeStamp pvTimeStamp = PVTimeStampFactory.create();
-            PVField pvCopyField = null;
-            if(pvTimeStamp.attach(pvStructure)) {
-                pvCopyField= pvStructure;
-            } else {
-                pvCopyField = pvStructure.getSubField("timeStamp");
-            }
-            if(pvCopyField==null) return;
-			MonitorFieldNode node = new MonitorFieldNode(monitorAlgorithm,bitOffset);
-			listNode = MonitorFieldNodeListCreate.createNode(node);
-			monitorFieldList.addTail(listNode);
-			int numBits = pvCopyField.getNumberFields();
-			notMonitoredBitSet.set(bitOffset, bitOffset+numBits);
 		}
 		
 		private void initNumericFields(PVStructure pvStructure) {

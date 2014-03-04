@@ -273,7 +273,7 @@ public class PVCopyTest extends TestCase {
         PVStructure pvOptions = pvCopy.getOptions(pvCopyStructure,pvDouble.getFieldOffset());
 //System.out.println("pvOptions");
 //System.out.println(pvOptions);
-        assertTrue(pvOptions!=null);
+        assertTrue(pvOptions==null);
         
         request = "xxx,yyy{zzz,vvv},alarm,timeStamp,power.value";
         pvRequest = createRequest.createRequest(request);

@@ -68,6 +68,7 @@ public class PVCopyOptionsTest extends TestCase {
         assertTrue(pvOptions!=null);
 //System.out.println("options " + pvOptions);
         pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+//System.out.println(pvCopy.dump());
         pvCopyStructure = pvCopy.createPVStructure();
         PVField pvField = pvCopyStructure.getSubField("timeStamp");
         int offset = pvField.getFieldOffset();

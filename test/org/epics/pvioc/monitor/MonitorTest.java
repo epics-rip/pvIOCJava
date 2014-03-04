@@ -59,7 +59,6 @@ public class MonitorTest extends TestCase {
         XMLToPVDatabaseFactory.convert(master,"${JAVAIOC}/test/org/epics/pvioc/monitor/power.xml", iocRequester);
         PVReplaceFactory.replace(master);
         simpleTest();
-        timeStampTest();
         queueTest();
         deadbandTest();
         deadbandPercentTest();
@@ -156,63 +155,6 @@ public class MonitorTest extends TestCase {
          System.out.println("pvCopy " + pvCopy);
      }
     
-    public static void timeStampTest() {
-        System.out.printf("%n****timeStamp Test****%n");
-        PVRecord pvRecord = master.findRecord("powerWithoutDeadband");
-//System.out.println(pvRecord);
-        PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
-        PVLong pvRecordSeconds = (PVLong)pvStructure.getSubField("timeStamp.secondsPastEpoch");
-        PVInt pvRecordNanoSeconds = (PVInt)pvStructure.getSubField("timeStamp.nanoSeconds");
-        PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
-        PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
-        String request = "record[queueSize=1]field(alarm,timeStamp[algorithm=onChange,causeMonitor=true],power.value)";
-        PVStructure pvRequest = createRequest.createRequest(request);
-        if(pvRequest==null) requester.message(createRequest.getMessage(), MessageType.error);
-        assert(pvRequest!=null);
-//System.out.println("request:" + request);
-//System.out.println("pvRequest:" + pvRequest);
-        MonitorRequesterImpl monitorRequester = new  MonitorRequesterImpl(pvRecord,pvRequest);
-        MonitorElement monitorElement = monitorRequester.poll();
-        assertTrue(monitorElement!=null);
-        PVStructure pvCopy = monitorElement.getPVStructure();
-        PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
-        int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
-        BitSet change = monitorElement.getChangedBitSet();
-        BitSet overrun = monitorElement.getOverrunBitSet();
-//System.out.println("pvCopy " + pvCopy);
-//System.out.println("change " + change);
-//System.out.println("overrun " + overrun);
-        assertTrue(change.get(0));
-        assertTrue(overrun.isEmpty());
-        change.clear(0);
-        assertTrue(change.isEmpty());
-        monitorRequester.release();
-        pvRecord.beginGroupPut();
-        pvRecordSeconds.put(5);
-        pvRecordNanoSeconds.put(0);
-        pvRecordUserTag.put(1);
-        pvRecord.endGroupPut();
-        monitorElement = monitorRequester.poll();
-        assertTrue(monitorElement!=null);
-        pvCopy = monitorElement.getPVStructure();
-        change = monitorElement.getChangedBitSet();
-        overrun = monitorElement.getOverrunBitSet();
-//System.out.println("change " + change);
-//System.out.println("overrun " + overrun);
-        assertTrue(change.get(timeStampOffset));
-        change.clear(timeStampOffset);
-        assertTrue(change.isEmpty());
-        assertTrue(overrun.isEmpty());
-//System.out.println(pvRecordPowerValue);
-//System.out.println(pvValue);
-        assertTrue(pvRecordPowerValue.get()==pvValue.get());
-        monitorRequester.release();
-        monitorElement = monitorRequester.poll();
-        assertTrue(monitorElement==null);
-        monitorRequester.destroy();
-    }
-    
     public static void queueTest() {
         System.out.printf("%n****Queue Test****%n");
         // definitions for request structure to pass to PVCopyFactory
@@ -237,8 +179,9 @@ public class MonitorTest extends TestCase {
         BitSet overrun = monitorElement.getOverrunBitSet();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
-        int valueOffset = pvValue.getFieldOffset();
+        PVDouble pvValue = pvCopy.getDoubleField("power.value");
+        // since power has single field the structure offset will show change instead of value.
+        int valueOffset = pvCopy.getSubField("power").getFieldOffset();
 //System.out.println("pvCopy " + pvCopy);
 //System.out.println("change " + change);
 //System.out.println("overrun " + overrun);
@@ -256,11 +199,12 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
 //System.out.println("overrun " + overrun);
+//System.out.println("pvCopy " + pvCopy);
         assertTrue(change.get(timeStampOffset));
         change.clear(timeStampOffset);
         assertTrue(change.get(valueOffset));
@@ -277,9 +221,10 @@ public class MonitorTest extends TestCase {
         pvCopy = monitorElement.getPVStructure();
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
 //System.out.println("change " + change);
 //System.out.println("overrun " + overrun);
+//System.out.println("pvCopy " + pvCopy);
         assertTrue(change.get(valueOffset));
         change.clear(valueOffset);
         assertTrue(change.isEmpty());
@@ -288,7 +233,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -331,8 +276,9 @@ public class MonitorTest extends TestCase {
         BitSet overrun = monitorElement.getOverrunBitSet();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
-        int valueOffset = pvValue.getFieldOffset();
+        PVDouble pvValue = pvCopy.getDoubleField("power.value");
+        // since power has single field the structure offset will show change instead of value.
+        int valueOffset = pvCopy.getSubField("power").getFieldOffset();
 //System.out.println("pvCopy " + pvCopy);
 //System.out.println("change " + change);
 //System.out.println("overrun " + overrun);
@@ -350,7 +296,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -371,7 +317,7 @@ public class MonitorTest extends TestCase {
         pvRecordPowerValue.put(6.0);
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -384,7 +330,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -424,8 +370,9 @@ public class MonitorTest extends TestCase {
         BitSet overrun = monitorElement.getOverrunBitSet();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
-        int valueOffset = pvValue.getFieldOffset();
+        PVDouble pvValue = pvCopy.getDoubleField("power.value");
+        // since power has single field the structure offset will show change instead of value.
+        int valueOffset = pvCopy.getSubField("power").getFieldOffset();
 //System.out.println("pvCopy " + pvCopy);
 //System.out.println("change " + change);
 //System.out.println("overrun " + overrun);
@@ -443,7 +390,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -464,7 +411,7 @@ public class MonitorTest extends TestCase {
         pvRecordPowerValue.put(6.0);
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -477,7 +424,7 @@ public class MonitorTest extends TestCase {
         monitorElement = monitorRequester.poll();
         assertTrue(monitorElement!=null);
         pvCopy = monitorElement.getPVStructure();
-        pvValue = pvCopy.getDoubleField("value");
+        pvValue = pvCopy.getDoubleField("power.value");
         change = monitorElement.getChangedBitSet();
         overrun = monitorElement.getOverrunBitSet();
 //System.out.println("change " + change);
@@ -515,8 +462,9 @@ public class MonitorTest extends TestCase {
         PVStructure pvCopy = monitorElement.getPVStructure();
         PVStructure pvTimeStamp = pvCopy.getStructureField("timeStamp");
         int timeStampOffset = pvTimeStamp.getFieldOffset();
-        PVDouble pvValue = pvCopy.getDoubleField("value");
-        int valueOffset = pvValue.getFieldOffset();
+        PVDouble pvValue = pvCopy.getDoubleField("power.value");
+        // since power has single field the structure offset will show change instead of value.
+        int valueOffset = pvCopy.getSubField("power").getFieldOffset();
         BitSet change = monitorElement.getChangedBitSet();
         BitSet overrun = monitorElement.getOverrunBitSet();
 //System.out.println("pvCopy " + pvCopy);
