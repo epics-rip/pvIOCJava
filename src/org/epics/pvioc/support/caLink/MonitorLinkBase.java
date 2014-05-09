@@ -157,6 +157,10 @@ implements MonitorRequester,Runnable,RecordProcessRequester
             message("createMonitor failed " + status.getMessage(),MessageType.error);
             return;
         }
+        if(!super.findPVFields(structure)) {
+            monitor.destroy();
+            return;
+        }
         this.monitor = monitor;
         pvRecord.lock();
         try {
@@ -248,17 +252,8 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     		return;
     	}
     	PVStructure monitorStructure = monitorElement.getPVStructure();
-    	if(super.linkPVFields==null) {
-    		if(!super.setLinkPVStructure(monitorStructure)) {
-    		    monitor.release(monitorElement);
-    	        monitorElement = null;
-    			monitor.destroy();
-    			return;
-    		}
-    	} else {
-    		super.linkPVStructure = monitorStructure;
-    		super.linkPVFields = monitorStructure.getPVFields();
-    	}
+    	PVStructure linkPVStructure = monitorElement.getPVStructure();
+    	PVField[] linkPVFields = linkPVStructure.getPVFields();
     	BitSet changeBitSet = monitorElement.getChangedBitSet();
     	BitSet overrunBitSet = monitorElement.getOverrunBitSet();
     	boolean allSet = changeBitSet.get(0);

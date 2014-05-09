@@ -10,7 +10,7 @@ import org.epics.pvaccess.client.ChannelGetRequester;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
-import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.*;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
@@ -40,6 +40,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     private boolean isReady = false;
     private ChannelGet channelGet = null;
    
+    private PVStructure linkPVStructure = null;
     private BitSet bitSet = null;
     
     private SupportProcessRequester supportProcessRequester = null;
@@ -72,19 +73,18 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      * @see org.epics.pvaccess.client.ChannelGetRequester#channelGetConnect(Status, org.epics.pvaccess.client.ChannelGet, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
      */
     @Override
-    public void channelGetConnect(Status status, ChannelGet channelGet,PVStructure pvStructure, BitSet bitSet) {
+    public void channelGetConnect(Status status, ChannelGet channelGet,Structure structure) {
         pvRecord.lock();
         try {
             if(!status.isSuccess()) {
                 message("createChannelGet failed " + status.getMessage(),MessageType.error);
                 return;
             }
-            if(!super.setLinkPVStructure(pvStructure)) {
+            if(!super.findPVFields(structure)) {
                 channelGet.destroy();
                 return;
             }
             this.channelGet = channelGet;
-            this.bitSet = bitSet;
             isReady = true;
         } finally {
             pvRecord.unlock();
@@ -111,14 +111,16 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      */
     @Override
     public void processCallback() {
-        channelGet.get(false);
+        channelGet.get();
     }
     /* (non-Javadoc)
      * @see org.epics.pvaccess.client.ChannelGetRequester#getDone(Status)
      */
     @Override
-    public void getDone(Status success) {
+    public void getDone(Status success, ChannelGet channelGet, PVStructure pvStructure, BitSet bitSet) {
         requestResult = (success.isOK() ? RequestResult.success : RequestResult.failure);
+        this.linkPVStructure = pvStructure;
+        this.bitSet = bitSet;
         recordProcess.processContinue(this);
     }
     /* (non-Javadoc)
@@ -126,6 +128,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
      */
     public void processContinue() {
         boolean allSet = bitSet.get(0);
+        PVField[] linkPVFields = linkPVStructure.getPVFields();
         for(int i=0; i< linkPVFields.length; i++) {
             if(i==indexAlarmLinkField) {
                 alarmSupport.setAlarm(pvAlarmMessage.get(),
@@ -136,6 +139,8 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
                 copyChanged(linkPVFields[i],pvFields[i]);
             }
         }
+        linkPVStructure = null;
+        bitSet = null;
         supportProcessRequester.supportProcessDone(requestResult);
     }
     

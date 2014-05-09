@@ -9,7 +9,7 @@ import org.epics.pvaccess.client.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
-import org.epics.pvdata.pv.Convert;
+import org.epics.pvdata.pv.*;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVInt;
@@ -38,8 +38,9 @@ abstract class AbstractIOLink extends AbstractLink {
      * pvRequest is passed to one of the channel.createXXX methods.
      */
     protected PVStructure pvRequest = null;
-    protected PVStructure linkPVStructure = null;
-    protected PVField[] linkPVFields = null;
+    /**
+     * pvFields are the fields in PVRecord
+     */
     protected PVField[] pvFields = null;
     /**
      * If alarm is a requested field this is the index.
@@ -107,12 +108,13 @@ abstract class AbstractIOLink extends AbstractLink {
     	super.start(afterStart);
     }
     
-    protected boolean setLinkPVStructure(PVStructure linkPVStructure) {
-        PVField[] linkPVFields = linkPVStructure.getPVFields();
-        pvFields = new PVField[linkPVFields.length];
-        for(int i=0; i<linkPVFields.length; i++) {
-            PVField pvLinkField = linkPVFields[i];
-            String fieldName = pvLinkField.getFieldName();
+    protected boolean findPVFields(Structure structure) {
+        Field[] fields = structure.getFields();
+        String[] names = structure.getFieldNames();
+        pvFields = new PVField[fields.length];
+        for(int i=0; i<fields.length; i++) {
+            Field field = fields[i];
+            String fieldName = names[i];
             PVField pvField = null;
             PVStructure pvParent = super.pvStructure;
             while(pvParent!=null) {
@@ -138,10 +140,14 @@ abstract class AbstractIOLink extends AbstractLink {
                 return false;
             }
             if(fieldName.equals("alarm") && alarmSupport!=null) {
-                PVStructure pvStructure = (PVStructure)pvLinkField;
-                pvAlarmMessage = pvStructure.getStringField("message");
-                pvAlarmSeverity = pvStructure.getIntField("severity");
-                if(pvAlarmMessage==null || pvAlarmSeverity==null) {
+                Structure struct = (Structure)field;
+                String[] subnames = struct.getFieldNames();
+                int found=0;
+                for(int j=0; i<subnames.length; ++i) {
+                    if(subnames[j].equals("message")) ++j;
+                    if(subnames[j].equals("severity")) ++j;
+                }
+                if(found!=2) {
                     String message = "link field does not have alarm info";
                     if(alarmSupport!=null) {
                         alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
@@ -151,8 +157,8 @@ abstract class AbstractIOLink extends AbstractLink {
                 }
                 indexAlarmLinkField = i;
             } else {
-                if(!convert.isCopyCompatible(pvLinkField.getField(), pvField.getField())) {
-                    String message = "pvLinkField " + pvLinkField;
+                if(!convert.isCopyCompatible(field, pvField.getField())) {
+                    String message = "pvLinkField " + names[i];
                     message += " pvField " + pvField;
                     message += "field " + fieldName +" is not copy compatible with link field";
                     if(alarmSupport!=null) {
@@ -164,8 +170,6 @@ abstract class AbstractIOLink extends AbstractLink {
             }
             pvFields[i] = pvField;
         }
-        this.linkPVStructure = linkPVStructure;
-        this.linkPVFields = linkPVFields;
         return true;
     }
     /* (non-Javadoc)
@@ -176,8 +180,6 @@ abstract class AbstractIOLink extends AbstractLink {
         pvAlarmSeverity = null;
         pvAlarmMessage = null;
         indexAlarmLinkField = -1;
-        linkPVFields = null;
-        linkPVStructure = null;
         pvRequest = null;
         super.uninitialize();
     }
