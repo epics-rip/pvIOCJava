@@ -39,7 +39,7 @@ import org.epics.pvaccess.*;
  *     -server serverFile
  *             A server is specified in the serverFile
  *     -rpcService rpcServiceFile
- *             List of "serviceName XXXService" pairs
+ *             List of "serviceName,XXXService" pairs
  *     -run
  *             Starts the JavaIOC as RPCServer
  *            
