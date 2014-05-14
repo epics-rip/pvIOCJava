@@ -5,7 +5,7 @@
  */
 package org.epics.pvioc.support.caLink;
 
-import org.epics.pvaccess.client.CreateRequest;
+import org.epics.pvdata.copy.CreateRequest;
 import org.epics.pvdata.misc.Executor;
 import org.epics.pvdata.misc.ExecutorFactory;
 import org.epics.pvdata.misc.ExecutorNode;

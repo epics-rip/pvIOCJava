@@ -7,7 +7,7 @@ package org.epics.pvioc.monitor;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequest;
+import org.epics.pvdata.copy.CreateRequest;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.monitor.Monitor;
 import org.epics.pvdata.monitor.MonitorElement;

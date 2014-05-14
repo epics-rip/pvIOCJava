@@ -11,9 +11,6 @@ import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
 import org.epics.pvdata.pv.*;
-import org.epics.pvdata.pv.PVField;
-import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.Status;
 import org.epics.pvioc.database.PVRecordField;
 import org.epics.pvioc.support.ProcessCallbackRequester;
 import org.epics.pvioc.support.ProcessContinueRequester;
@@ -42,6 +39,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
    
     private PVStructure linkPVStructure = null;
     private BitSet bitSet = null;
+    
     
     private SupportProcessRequester supportProcessRequester = null;
     private RequestResult requestResult;   
@@ -119,7 +117,7 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
     @Override
     public void getDone(Status success, ChannelGet channelGet, PVStructure pvStructure, BitSet bitSet) {
         requestResult = (success.isOK() ? RequestResult.success : RequestResult.failure);
-        this.linkPVStructure = pvStructure;
+        linkPVStructure = pvStructure;
         this.bitSet = bitSet;
         recordProcess.processContinue(this);
     }
@@ -131,6 +129,8 @@ implements ProcessCallbackRequester,ChannelGetRequester,ProcessContinueRequester
         PVField[] linkPVFields = linkPVStructure.getPVFields();
         for(int i=0; i< linkPVFields.length; i++) {
             if(i==indexAlarmLinkField) {
+                PVString pvAlarmMessage = linkPVStructure.getSubField(PVString.class,"alarm.message");
+                PVInt pvAlarmSeverity = linkPVStructure.getSubField(PVInt.class,"alarm.severity");
                 alarmSupport.setAlarm(pvAlarmMessage.get(),
                     AlarmSeverity.getSeverity(pvAlarmSeverity.get()),AlarmStatus.DB);
             } else if(allSet){

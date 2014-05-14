@@ -5,7 +5,7 @@
  */
 package org.epics.pvioc.support.caLink;
 
-import org.epics.pvaccess.client.CreateRequest;
+import org.epics.pvdata.copy.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
@@ -46,14 +46,6 @@ abstract class AbstractIOLink extends AbstractLink {
      * If alarm is a requested field this is the index.
      */
     protected int indexAlarmLinkField = -1;;
-    /**
-     * If alarm is a request the interface for the alarm message.
-     */
-    protected PVString pvAlarmMessage = null;
-    /**
-     * If alarm is a request the interface for the alarm severity index.
-     */
-    protected PVInt pvAlarmSeverity = null;
    
     /**
      * Constructor.
@@ -143,11 +135,12 @@ abstract class AbstractIOLink extends AbstractLink {
                 Structure struct = (Structure)field;
                 String[] subnames = struct.getFieldNames();
                 int found=0;
-                for(int j=0; i<subnames.length; ++i) {
-                    if(subnames[j].equals("message")) ++j;
-                    if(subnames[j].equals("severity")) ++j;
+                for(int j=0; j<subnames.length; ++j) {
+                    if(subnames[j].equals("message")) ++found;
+                    if(subnames[j].equals("severity")) ++found;
+                    if(subnames[j].equals("status")) ++found;
                 }
-                if(found!=2) {
+                if(found!=3) {
                     String message = "link field does not have alarm info";
                     if(alarmSupport!=null) {
                         alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
@@ -177,8 +170,6 @@ abstract class AbstractIOLink extends AbstractLink {
      */
     public void uninitialize() {
         requestPVString = null;
-        pvAlarmSeverity = null;
-        pvAlarmMessage = null;
         indexAlarmLinkField = -1;
         pvRequest = null;
         super.uninitialize();

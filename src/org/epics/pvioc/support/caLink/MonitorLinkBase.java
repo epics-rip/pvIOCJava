@@ -18,6 +18,8 @@ import org.epics.pvdata.property.AlarmStatus;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVField;
+import org.epics.pvdata.pv.PVInt;
+import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Structure;
@@ -251,7 +253,6 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     		alarmSupport.setAlarm("connection lost", AlarmSeverity.INVALID,AlarmStatus.DB);
     		return;
     	}
-    	PVStructure monitorStructure = monitorElement.getPVStructure();
     	PVStructure linkPVStructure = monitorElement.getPVStructure();
     	PVField[] linkPVFields = linkPVStructure.getPVFields();
     	BitSet changeBitSet = monitorElement.getChangedBitSet();
@@ -259,8 +260,8 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	boolean allSet = changeBitSet.get(0);
     	for(int i=0; i< linkPVFields.length; i++) {
     		if(i==indexAlarmLinkField) {
-    			super.pvAlarmMessage = monitorStructure.getStringField("alarm.message");
-    			super.pvAlarmSeverity = monitorStructure.getIntField("alarm.severity");
+    		    PVString pvAlarmMessage = linkPVStructure.getSubField(PVString.class,"alarm.message");
+                PVInt pvAlarmSeverity = linkPVStructure.getSubField(PVInt.class,"alarm.severity");
     			alarmSupport.setAlarm(pvAlarmMessage.get(),
     					AlarmSeverity.getSeverity(pvAlarmSeverity.get()),AlarmStatus.DB);
     		} else {

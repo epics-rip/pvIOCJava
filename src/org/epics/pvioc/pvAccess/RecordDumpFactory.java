@@ -43,7 +43,7 @@ public class RecordDumpFactory {
 		 * @see org.epics.pvaccess.server.rpc.RPCService#request(org.epics.pvdata.pv.PVStructure)
 		 */
 		@Override
-		public PVStructure request(PVStructure pvArgument) throws PVAException
+		public PVStructure request(PVStructure pvArgument) throws RPCRequestException
 		{
 		    if(pvArgument==null || pvArgument.getNumberFields()==0) {
 		        throw new RPCRequestException(Status.StatusType.ERROR,"illegal argument");

@@ -945,7 +945,7 @@ public class ChannelServerFactory  {
                 synchronized(channelImpl.channelPutList) {
                     channelImpl.channelPutList.add(this);
                 }
-                channelPutRequester.channelPutConnect(status, this, pvStructure.getStructure());
+                channelPutRequester.channelPutConnect(status, this, pvCopy.getStructure());
             }
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
             private final ChannelImpl channelImpl;
@@ -995,6 +995,8 @@ public class ChannelServerFactory  {
              */
             @Override
             public void put(PVStructure pvPutStructure, BitSet bitSet) {
+System.out.println("put " + pvPutStructure);
+System.out.println(bitSet);
                 if(isDestroyed.get()) {
                     channelPutRequester.putDone(requestDestroyedStatus,this);
                     return;
@@ -1073,14 +1075,16 @@ public class ChannelServerFactory  {
                 }
                 pvRecord.lock();
                 try {
+                    pvStructure = pvCopy.createPVStructure();
+                    bitSet = new BitSet(pvStructure.getNumberFields());
+                    pvCopy.initCopy(pvStructure, bitSet);
                     getData();
                 } finally {
                     pvRecord.unlock();
                 }
-                PVStructure pvStructure = pvCopy.createPVStructure();
-                BitSet bitSet = new BitSet(pvStructure.getNumberFields());
-                pvCopy.initCopy(pvStructure, bitSet);
                 channelPutRequester.getDone(okStatus,this,pvStructure,bitSet);
+                pvStructure = null;
+                bitSet = null;
                 return;
             }
             /* (non-Javadoc)
@@ -1148,13 +1152,12 @@ public class ChannelServerFactory  {
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
             private final ChannelImpl channelImpl;
             private ChannelPutGetRequester channelPutGetRequester;
-            
             private final PVCopy pvPutCopy;
             private final PVCopy pvGetCopy;
-            private final RecordProcess recordProcess;
-            private final ProcessToken processToken;
             private final PVStructure pvGetStructure;
             private final BitSet getBitSet;
+            private final RecordProcess recordProcess;
+            private final ProcessToken processToken;
             private PVStructure pvPutStructure = null;
             private BitSet putBitSet = null;
             private Status status = null;
@@ -1217,8 +1220,7 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-                
-                channelPutGetRequester.putGetDone(status,this,pvPutStructure,bitSet);
+                channelPutGetRequester.putGetDone(status,this,pvGetStructure,getBitSet);
             }
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#becomeProcessor()
@@ -1248,7 +1250,7 @@ public class ChannelServerFactory  {
             @Override
             public void recordProcessComplete() {
                 recordProcess.setInactive(processToken);
-                channelPutGetRequester.putGetDone(status,this,pvPutStructure,putBitSet);
+                channelPutGetRequester.putGetDone(status,this,pvGetStructure,getBitSet);
             }
             /* (non-Javadoc)
              * @see org.epics.pvaccess.server.ChannelProcessorRequester#recordProcessResult(org.epics.pvdata.pv.Status)
@@ -1322,6 +1324,8 @@ public class ChannelServerFactory  {
             
             private void putData() {
                 pvPutCopy.updateRecord(pvPutStructure, putBitSet);
+                pvPutStructure = null;
+                putBitSet = null;
             }
             
             private void getData() {
@@ -1334,6 +1338,8 @@ public class ChannelServerFactory  {
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
                 putBitSet.clear();
                 pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet);
+                pvPutStructure = null;
+                putBitSet = null;
                
             }
 			@Override
@@ -1404,7 +1410,6 @@ public class ChannelServerFactory  {
                 }
             }
 
-            
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelArray#getArray(int, int, int)
              */
@@ -1423,21 +1428,21 @@ public class ChannelServerFactory  {
                 }
                 Status status = okStatus;
                 if(stride!=1) status = strideNotSupportedStatus;
-                channelArrayRequester.getArrayDone(status,this,pvArray);
+                channelArrayRequester.getArrayDone(status,this,pvCopy);
             }
+           
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelArray#putArray(boolean, int, int)
+             * @see org.epics.pvaccess.client.ChannelArray#putArray(org.epics.pvdata.pv.PVArray, int, int, int)
              */
-            @Override
             public void putArray(PVArray putArray,int offset, int count,int stride) {
                 if(isDestroyed.get()) {
                 	channelArrayRequester.putArrayDone(requestDestroyedStatus,this);
                 	return;
                 }
-                if(count<=0) count = pvCopy.getLength();
+                if(count<=0) count = pvArray.getLength();
                 pvRecord.lock();
                 try {
-                    convert.copyScalarArray(pvCopy, 0, (PVScalarArray)putArray, offset, count);
+                    convert.copyScalarArray((PVScalarArray)putArray, 0, pvArray, offset, count);
                 } finally  {
                     pvRecord.unlock();
                 }
@@ -1561,13 +1566,13 @@ public class ChannelServerFactory  {
                 }
                 Status status = okStatus;
                 if(offset !=0 || count!= 0 || stride !=1) status = offsetCountStrideNotSupportedStatus;
-                channelArrayRequester.getArrayDone(status,this,pvArray);
+                channelArrayRequester.getArrayDone(status,this,pvCopy);
             }
             
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelArray#putArray(org.epics.pvdata.pv.PVArray, int, int, int)
              */
-            public void putArray(PVArray pvArray, int offset, int count, int stride) {
+            public void putArray(PVArray pvCopy, int offset, int count, int stride) {
                 if(isDestroyed.get()) {
                 	channelArrayRequester.putArrayDone(requestDestroyedStatus,this);
                 	return;
@@ -1575,7 +1580,7 @@ public class ChannelServerFactory  {
                 if(count<=0) count = pvCopy.getLength();
                 pvRecord.lock();
                 try {
-                	convert.copyStructureArray(pvCopy, (PVStructureArray)pvArray);
+                	convert.copyStructureArray((PVStructureArray)pvCopy, pvArray);
                 } finally  {
                     pvRecord.unlock();
                 }
@@ -1589,7 +1594,7 @@ public class ChannelServerFactory  {
              */
             public void getLength()
             {
-                
+                channelArrayRequester.getLengthDone(okStatus, this, pvArray.getLength(), pvArray.getCapacity());
             }
             
 			/* (non-Javadoc)

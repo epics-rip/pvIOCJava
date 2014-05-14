@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<database>
+<import name = "org.epics.pvioc.*" />
+<import name = "org.epics.pvdata.*" />
+<include addPath = "${JAVAIOC}/xmltest/powerSupply" />
+<include href = "psSimple.xml" />
+-->
+<include removePath = "${JAVAIOC}/xmltest/powerSupply" />
+
+</database>
