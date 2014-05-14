@@ -26,18 +26,14 @@ import org.epics.pvioc.database.PVRecord;
  * @author mrk
  *
  */
-public class RecordDumpFactory {
+public class RecordDumpService {
   
-    public  RecordDumpFactory(String recordName) throws PVAException
-    {
-        server.registerService(recordName, service);
-        server.run(0);
+    public static void start(String serviceName,RPCServer rpcServer) {
+        RPCService service = new RecordDump();
+        rpcServer.registerService(serviceName, service);
     }
     
-    private RPCServer server = new RPCServer();
-    private RPCServiceImpl service = new RPCServiceImpl();
-    
-    private static class RPCServiceImpl implements RPCService
+    private static class RecordDump implements RPCService
     {
 		/* (non-Javadoc)
 		 * @see org.epics.pvaccess.server.rpc.RPCService#request(org.epics.pvdata.pv.PVStructure)
