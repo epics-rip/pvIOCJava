@@ -5,7 +5,6 @@
  */
 package org.epics.pvioc.pvAccess;
 
-import org.epics.pvaccess.PVAException;
 import org.epics.pvaccess.server.rpc.RPCRequestException;
 import org.epics.pvaccess.server.rpc.RPCServer;
 import org.epics.pvaccess.server.rpc.RPCService;

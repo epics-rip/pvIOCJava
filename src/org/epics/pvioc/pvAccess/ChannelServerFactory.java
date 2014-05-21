@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.epics.pvaccess.client.AccessRights;
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvaccess.client.ChannelAccessFactory;
+import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelArray;
 import org.epics.pvaccess.client.ChannelArrayRequester;
 import org.epics.pvaccess.client.ChannelFind;
@@ -123,7 +123,7 @@ public class ChannelServerFactory  {
             if (singleImplementation==null) {
                 singleImplementation = new ChannelServerLocal();
                 channelFind = new ChannelFindLocal();
-                ChannelAccessFactory.registerChannelProviderFactory(
+                ChannelProviderRegistryFactory.registerChannelProviderFactory(
                 		new ChannelProviderFactory() {
 							
 							@Override
@@ -1294,6 +1294,7 @@ System.out.println(bitSet);
              */
             @Override
             public void getPut() {
+System.out.println("ChannelPutGet::getPut");
                 if(isDestroyed.get()) {
                     channelPutGetRequester.getPutDone(requestDestroyedStatus,this,null,null);
                     return;
@@ -1304,6 +1305,7 @@ System.out.println(bitSet);
                 } finally {
                     pvRecord.unlock();
                 }
+System.out.println("ChannelPutGet::getPut calling channelPutGetRequester.getPutDone");
                 channelPutGetRequester.getPutDone(okStatus,this,pvPutStructure,putBitSet);
                 
             }

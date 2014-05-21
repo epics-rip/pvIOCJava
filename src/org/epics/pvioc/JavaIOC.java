@@ -40,6 +40,8 @@ import org.epics.pvaccess.*;
  *             A server is specified in the serverFile
  *     -rpcService rpcServiceFile
  *             List of "serviceName,XXXService" pairs
+ *     -pvRecord pvRecordFile
+ *             List of "recordName,XXXRecord pairs
  *     -run
  *             Starts the JavaIOC as RPCServer
  *            
@@ -51,7 +53,8 @@ public class JavaIOC {
         structure,
         record,
         server,
-        rpcService
+        rpcService,
+        pvRecord
     }
 
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
@@ -70,6 +73,7 @@ public class JavaIOC {
         int nextArg = 0;
         State state = null;
         String rpcServiceFile = null;
+        String pvRecordFile = null;
         while(nextArg<args.length) {
             String arg = args[nextArg++];
             if(arg.charAt(0) == '-') {
@@ -92,6 +96,8 @@ public class JavaIOC {
                     state = State.record;
                 } else if(arg.equals("rpcService")){
                     state = State.rpcService;
+                } else if(arg.equals("pvRecord")){
+                    state = State.pvRecord;
                 } else if(arg.equals("run")) {
                 	runForever = true;
                 } else if(arg.equals("server")) {
@@ -109,6 +115,8 @@ public class JavaIOC {
                 startServer(arg);
             } else if(state==State.rpcService) {
                 rpcServiceFile = arg;
+            } else if(state==State.pvRecord) {
+                pvRecordFile = arg;
             } else {
                 System.err.println("unknown arg: " + arg);
                 usage();
@@ -116,9 +124,10 @@ public class JavaIOC {
             }
             if (runForever) {
                 RPCServer rpcServer = new RPCServer();
-                startRPCServices(rpcServer,rpcServiceFile);
+                System.out.println(startRPCServices(rpcServer,rpcServiceFile));
+                startPVRecords(pvRecordFile);
                 try {
-                rpcServer.run(0);
+                    rpcServer.run(0);
                 } catch (PVAException xx) {
                     throw new RuntimeException("RPCServer exception", xx);
                 }
@@ -134,15 +143,79 @@ public class JavaIOC {
                 + " -dumpRecords"
                 + " -server file"
                 + " -rpcService file"
+                + " -pvRecord file"
                 + " -run ");
     }
     
-    static void printError(String message) {
-        System.err.println(message);
+    static void printError(String channel, String factory,String message) {
+        System.err.println("channel "+ channel + " factory " + factory + " " + message);
     }
     
-    static void startRPCServices(RPCServer rpcServer,String fileName) {
+    static void printError(String factory,String message) {
+        System.err.println("factory " + factory + " " + message);
+    }
+    
+    static void startPVRecords(String fileName) {
         if(fileName==null) return; 
+        System.out.println("starting PVRecords fileName " + fileName);
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(fileName));
+            String inLine = null;
+            while((inLine = in.readLine()) !=null) {
+                int comma = inLine.indexOf(',');
+                String recordName = inLine.substring(0,comma);
+                String factoryName = inLine.substring(comma+1);
+                System.out.println("starting record factoryName " + factoryName);
+                Class<?> startClass;
+                Method method = null;
+                try {
+                    startClass = Class.forName(factoryName);
+                }catch (ClassNotFoundException e) {
+                    printError(recordName,factoryName,"record factory "
+                            + e.getLocalizedMessage()
+                            + " class not found");
+                    continue;
+                }
+                try {
+                    method = startClass.getMethod("start",String.class);
+                } catch (NoSuchMethodException e) {
+                    printError(recordName,factoryName,"record factory "
+                            + e.getLocalizedMessage()
+                            + " method start not found");
+                    continue;
+                }
+                if(!Modifier.isStatic(method.getModifiers())) {
+                    printError(recordName,factoryName,"record factory "
+                            + factoryName
+                            + " start is not a static method ");
+                    continue;
+                }
+                try {
+                    method.invoke(null,recordName );
+                } catch(IllegalAccessException e) {
+                    printError(recordName,factoryName,"record start IllegalAccessException "
+                            + e.getLocalizedMessage());
+                    continue;
+                } catch(IllegalArgumentException e) {
+                    printError(recordName,factoryName,"record start IllegalArgumentException "
+                            + e.getLocalizedMessage());
+                    continue;
+                } catch(InvocationTargetException e) {
+                    printError(recordName,factoryName,"record start InvocationTargetException "
+                            + e.getLocalizedMessage());
+                    continue;
+                }
+            }
+            in.close();
+        } catch (IOException e) {
+            System.err.println("PVRecords error " + e.getMessage());
+            return;
+        }
+    }
+    
+    static String startRPCServices(RPCServer rpcServer,String fileName) {
+        String rtnValue = "";
+        if(fileName==null) return rtnValue; 
         System.out.println("starting RPCServices fileName " + fileName);
         try {
             BufferedReader in = new BufferedReader(new FileReader(fileName));
@@ -151,14 +224,13 @@ public class JavaIOC {
                 int comma = inLine.indexOf(',');
                 String serviceName = inLine.substring(0,comma);
                 String factoryName = inLine.substring(comma+1);
-System.out.println("|"+ serviceName + "|" + factoryName + "|");
                 System.out.println("starting service factoryName " + factoryName);
                 Class<?> startClass;
                 Method method = null;
                 try {
                     startClass = Class.forName(factoryName);
                 }catch (ClassNotFoundException e) {
-                    printError("server factory "
+                    printError(serviceName,factoryName,"server factory "
                             + e.getLocalizedMessage()
                             + " class not found");
                     continue;
@@ -166,13 +238,13 @@ System.out.println("|"+ serviceName + "|" + factoryName + "|");
                 try {
                     method = startClass.getMethod("start",String.class,RPCServer.class);
                 } catch (NoSuchMethodException e) {
-                    printError("server factory "
+                    printError(serviceName,factoryName,"server factory "
                             + e.getLocalizedMessage()
                             + " method start not found");
                     continue;
                 }
                 if(!Modifier.isStatic(method.getModifiers())) {
-                    printError("server factory "
+                    printError(serviceName,factoryName,"server factory "
                             + factoryName
                             + " start is not a static method ");
                     continue;
@@ -180,24 +252,27 @@ System.out.println("|"+ serviceName + "|" + factoryName + "|");
                 try {
                     method.invoke(null,serviceName,rpcServer );
                 } catch(IllegalAccessException e) {
-                    printError("server start IllegalAccessException "
+                    printError(serviceName,factoryName,"server start IllegalAccessException "
                             + e.getLocalizedMessage());
                     continue;
                 } catch(IllegalArgumentException e) {
-                    printError("server start IllegalArgumentException "
+                    printError(serviceName,factoryName,"server start IllegalArgumentException "
                             + e.getLocalizedMessage());
                     continue;
                 } catch(InvocationTargetException e) {
-                    printError("server start InvocationTargetException "
+                    printError(serviceName,factoryName,"server start InvocationTargetException "
                             + e.getLocalizedMessage());
                     continue;
                 }
+                if(rtnValue.length()>0) rtnValue += "\n";
+                rtnValue += serviceName + " " + factoryName;
             }
             in.close();
         } catch (IOException e) {
             System.err.println("startServer error " + e.getMessage());
-            return;
+            return rtnValue;
         }
+        return rtnValue;
     }
     
     static void startServer(String fileName) {
@@ -212,7 +287,7 @@ System.out.println("|"+ serviceName + "|" + factoryName + "|");
                 try {
                     startClass = Class.forName(factoryName);
                 }catch (ClassNotFoundException e) {
-                    printError("server factory "
+                    printError(factoryName,"server factory "
                             + e.getLocalizedMessage()
                             + " class not found");
                     continue;
@@ -220,13 +295,13 @@ System.out.println("|"+ serviceName + "|" + factoryName + "|");
                 try {
                     method = startClass.getDeclaredMethod("start", (Class[])null);
                 } catch (NoSuchMethodException e) {
-                    printError("server factory "
+                    printError(factoryName,"server factory "
                             + e.getLocalizedMessage()
                             + " method start not found");
                     continue;
                 }
                 if(!Modifier.isStatic(method.getModifiers())) {
-                    printError("server factory "
+                    printError(factoryName,"server factory "
                             + factoryName
                             + " start is not a static method ");
                     continue;
@@ -234,15 +309,15 @@ System.out.println("|"+ serviceName + "|" + factoryName + "|");
                 try {
                     method.invoke(null, new Object[0]);
                 } catch(IllegalAccessException e) {
-                    printError("server start IllegalAccessException "
+                    printError(factoryName,"server start IllegalAccessException "
                             + e.getLocalizedMessage());
                     continue;
                 } catch(IllegalArgumentException e) {
-                    printError("server start IllegalArgumentException "
+                    printError(factoryName,"server start IllegalArgumentException "
                             + e.getLocalizedMessage());
                     continue;
                 } catch(InvocationTargetException e) {
-                    printError("server start InvocationTargetException "
+                    printError(factoryName,"server start InvocationTargetException "
                             + e.getLocalizedMessage());
                     continue;
                 }

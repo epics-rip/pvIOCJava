@@ -9,9 +9,6 @@
 <record recordName = "${IOCNAME}recordRemovePGRPC" extends = "recordRemove" />
 <record recordName = "${IOCNAME}addRecordsPGRPC" extends = "addRecords" />
 <record recordName = "${IOCNAME}supportStateSetPGRPC" extends = "supportStateSet" />
-<record recordName = "${IOCNAME}recordDumpRPC">
-   <scalar name = "factoryRPC" scalarType = "string">org.epics.pvioc.support.rpc.RecordDumpFactory</scalar>
-</record>
 <record recordName = "${IOCNAME}recordListener">
    <scalar name = "value" scalarType = "string" >
         <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.databaseListenerFactory</auxInfo>

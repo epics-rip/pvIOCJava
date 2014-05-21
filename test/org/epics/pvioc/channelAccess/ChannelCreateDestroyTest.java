@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvaccess.client.ChannelAccessFactory;
+import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvdata.pv.MessageType;
@@ -113,7 +113,7 @@ public class ChannelCreateDestroyTest extends TestCase {
 	 */
 	@Override
 	protected void setUp() throws Exception {
-		provider = ChannelAccessFactory.getChannelAccess().getProvider("local");
+		provider = ChannelProviderRegistryFactory.getChannelProviderRegistry().getProvider("local");
 	}
 
 	/* (non-Javadoc)
