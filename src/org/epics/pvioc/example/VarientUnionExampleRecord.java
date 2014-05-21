@@ -3,7 +3,7 @@
  * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.pvioc.pvAccess;
+package org.epics.pvioc.example;
 
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.factory.FieldFactory;
@@ -30,7 +30,7 @@ import org.epics.pvioc.util.RequestResult;
  * @author mrk
  *
  */
-public class UnionExampleRecord {
+public class VarientUnionExampleRecord {
     private static final Convert convert = ConvertFactory.getConvert();
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
   

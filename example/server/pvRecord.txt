@@ -1,0 +1,2 @@
+variantUnion,org.epics.pvioc.example.VarientUnionExampleRecord
+regularUnion,org.epics.pvioc.example.RegularUnionExampleRecord
