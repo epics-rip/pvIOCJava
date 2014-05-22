@@ -479,7 +479,6 @@ public class ChannelServerFactory  {
             	return null;
             }
             boolean process = getProcess(pvRequest,true);
-
             PVField pvField = pvRequest.getSubField("putField");
             if(pvField==null || pvField.getField().getType()!=Type.structure) {
             	channelPutGetRequester.message("pvRequest does not have a putField request structure", MessageType.error);
@@ -995,8 +994,6 @@ public class ChannelServerFactory  {
              */
             @Override
             public void put(PVStructure pvPutStructure, BitSet bitSet) {
-System.out.println("put " + pvPutStructure);
-System.out.println(bitSet);
                 if(isDestroyed.get()) {
                     channelPutRequester.putDone(requestDestroyedStatus,this);
                     return;
@@ -1158,9 +1155,9 @@ System.out.println(bitSet);
             private final BitSet getBitSet;
             private final RecordProcess recordProcess;
             private final ProcessToken processToken;
+            private Status status;
             private PVStructure pvPutStructure = null;
             private BitSet putBitSet = null;
-            private Status status = null;
             
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelRequest#getChannel()
@@ -1294,7 +1291,6 @@ System.out.println(bitSet);
              */
             @Override
             public void getPut() {
-System.out.println("ChannelPutGet::getPut");
                 if(isDestroyed.get()) {
                     channelPutGetRequester.getPutDone(requestDestroyedStatus,this,null,null);
                     return;
@@ -1305,7 +1301,6 @@ System.out.println("ChannelPutGet::getPut");
                 } finally {
                     pvRecord.unlock();
                 }
-System.out.println("ChannelPutGet::getPut calling channelPutGetRequester.getPutDone");
                 channelPutGetRequester.getPutDone(okStatus,this,pvPutStructure,putBitSet);
                 
             }
@@ -1340,9 +1335,6 @@ System.out.println("ChannelPutGet::getPut calling channelPutGetRequester.getPutD
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
                 putBitSet.clear();
                 pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet);
-                pvPutStructure = null;
-                putBitSet = null;
-               
             }
 			@Override
 			public void lock() {
