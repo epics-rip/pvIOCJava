@@ -101,12 +101,12 @@ public class ChannelServerFactory  {
    private static class ChannelFindLocal implements ChannelFind {
         
         private ChannelFindLocal() {
-        }
+        }   
         /* (non-Javadoc)
-         * @see org.epics.pvaccess.client.ChannelFind#cancelChannelFind()
+         * @see org.epics.pvaccess.client.ChannelFind#cancel()
          */
         @Override
-        public void cancelChannelFind() {}
+        public void cancel() {}
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.ChannelFind#getChannelProvider()
          */
@@ -1217,6 +1217,8 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
+System.out.println(pvPutStructure);
+System.out.println(putBitSet);
                 channelPutGetRequester.putGetDone(status,this,pvGetStructure,getBitSet);
             }
             /* (non-Javadoc)
@@ -1334,7 +1336,10 @@ public class ChannelServerFactory  {
                 pvPutStructure = pvPutCopy.createPVStructure();
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
                 putBitSet.clear();
-                pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet);
+                putBitSet.set(0);
+                pvPutCopy.updateCopyFromBitSet(pvPutStructure, putBitSet);
+System.out.println(pvPutStructure);
+System.out.println(putBitSet);
             }
 			@Override
 			public void lock() {

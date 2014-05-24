@@ -251,8 +251,7 @@ class PVCopyImpl {
                 updateCopyFromBitSet(copyPVStructure,bitSet);
             } finally {
                 pvRecord.unlock();
-            }
-        }
+            }        }
         /* (non-Javadoc)
          * @see org.epics.pvioc.pvCopy.PVCopy#updateCopySetBitSet(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
          */
@@ -265,17 +264,10 @@ class PVCopyImpl {
                 RecordNode recordNode = (RecordNode)headNode;
                 PVRecordField pvRecordField= recordNode.recordPVField;
                 PVField copyPVField = copyPVStructure;
-                PVField[] pvCopyFields = copyPVStructure.getPVFields();
-                if(pvCopyFields.length==1) {
-                    copyPVField = pvCopyFields[0];
-                }
                 PVField  pvField = pvRecordField.getPVField();
                 if(pvField.getField().getType()==Type.structure) {
                     updateSubFieldSetBitSet(copyPVField,pvRecordField,bitSet);
                     return;
-                }
-                if(pvCopyFields.length!=1) {
-                    throw new IllegalStateException("Logic error");
                 }
                 boolean isEqual = copyPVField.equals(pvField);
                 if(!isEqual) {
@@ -294,12 +286,7 @@ class PVCopyImpl {
                 updateStructureNodeFromBitSet(copyPVStructure,(StructureNode)headNode,bitSet, true,doAll);
             } else {
                 RecordNode recordNode = (RecordNode)headNode;
-                PVField[] pvCopyFields = copyPVStructure.getPVFields();
-                if(pvCopyFields.length==1) {
-                    updateSubFieldFromBitSet(pvCopyFields[0],recordNode.recordPVField,bitSet,true,doAll);
-                } else {
-                    updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet, true,doAll);
-                }
+                updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet, true,doAll);
             }
         }
         /* (non-Javadoc)
@@ -313,12 +300,7 @@ class PVCopyImpl {
                 updateStructureNodeFromBitSet(copyPVStructure,(StructureNode)headNode,bitSet, false,doAll);
             } else {
                 RecordNode recordNode = (RecordNode)headNode;
-                PVField[] pvCopyFields = copyPVStructure.getPVFields();
-                if(pvCopyFields.length==1) {
-                    updateSubFieldFromBitSet(pvCopyFields[0],recordNode.recordPVField,bitSet,false,doAll);
-                } else {
-                    updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet,false,doAll);
-                }
+                updateSubFieldFromBitSet(copyPVStructure,recordNode.recordPVField,bitSet,false,doAll);
             }
             pvRecord.endGroupPut();
         }
@@ -542,15 +524,7 @@ class PVCopyImpl {
                 PVStructure pvCopyStructure = (PVStructure)pvCopy;
                 PVField[] pvCopyFields = pvCopyStructure.getPVFields();
                 if(pvRecordField.getPVField().getField().getType()!=Type.structure) {
-                    if(pvCopyFields.length!=1) {
-                        throw new IllegalStateException("Logic error");
-                    }
-                    if(toCopy) {
-                        convert.copy(pvRecordField.getPVField(), pvCopyFields[0]);
-                    } else {
-                        convert.copy(pvCopyFields[0], pvRecordField.getPVField());
-                    }
-                    return;
+                    throw new IllegalStateException("Logic error");
                 }
                 PVRecordStructure pvRecordStructure = (PVRecordStructure)pvRecordField;
                 PVRecordField[] pvRecordFields = pvRecordStructure.getPVRecordFields();

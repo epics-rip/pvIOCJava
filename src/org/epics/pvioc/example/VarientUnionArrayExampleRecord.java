@@ -10,15 +10,15 @@ import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvioc.database.BasePVRecord;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
-import org.epics.pvioc.support.AbstractSupport;
+import org.epics.pvioc.support.*;
 import org.epics.pvioc.support.RecordProcess;
 import org.epics.pvioc.support.RecordProcessFactory;
 import org.epics.pvioc.support.SupportProcessRequester;
+import org.epics.pvioc.support.basic.GenericFactory;
 import org.epics.pvioc.util.RequestResult;
 
 /**
@@ -28,24 +28,18 @@ import org.epics.pvioc.util.RequestResult;
  * @author mrk
  *
  */
-public class RegularUnionExampleRecord {
+public class VarientUnionArrayExampleRecord {
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
   
     public static void start(String recordName) {
-        Field[] unionFields = new Field[2];
-        String[] unionFieldNames = new String[2];
-        unionFieldNames[0] = "string"; 
-        unionFieldNames[1] = "stringArray"; 
-        unionFields[0] = fieldCreate.createScalar(ScalarType.pvString);
-        unionFields[1] = fieldCreate.createScalarArray(ScalarType.pvString);
         Field[] fields = new Field[1];
         String[] fieldNames = new String[1];
-        fields[0] = fieldCreate.createUnion(unionFieldNames,unionFields);
+        fields[0] = fieldCreate.createVariantUnionArray();
         fieldNames[0] = "value";
         PVStructure pvStructure = PVDataFactory.getPVDataCreate().createPVStructure(
                 fieldCreate.createStructure(fieldNames, fields));
         PVRecord pvRecord = new BasePVRecord(recordName,pvStructure);
-        UnionSupport support = new UnionSupport("unionEcho",pvRecord);
+        Support support = GenericFactory.create(pvRecord.getPVRecordStructure());
         pvRecord.getPVRecordStructure().setSupport(support);
         RecordProcess recordProcess = RecordProcessFactory.createRecordProcess(pvRecord);
         recordProcess.initialize();
@@ -54,18 +48,4 @@ public class RegularUnionExampleRecord {
         pvDatabase.addRecord(pvRecord);
     }
     
-    public static class UnionSupport extends AbstractSupport {
-        
-        UnionSupport(String supportName,PVRecord pvRecord)
-        {
-            super(supportName,pvRecord.getPVRecordStructure());
-        }
-        
-        /* (non-Javadoc)
-         * @see org.epics.pvioc.support.AbstractSupport#process(org.epics.pvioc.support.SupportProcessRequester)
-         */
-        public void process(SupportProcessRequester supportProcessRequester) {
-            supportProcessRequester.supportProcessDone(RequestResult.success);
-        } 
-    }
 }

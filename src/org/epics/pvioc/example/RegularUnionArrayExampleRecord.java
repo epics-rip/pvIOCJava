@@ -28,7 +28,7 @@ import org.epics.pvioc.util.RequestResult;
  * @author mrk
  *
  */
-public class RegularUnionExampleRecord {
+public class RegularUnionArrayExampleRecord {
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
   
     public static void start(String recordName) {
@@ -40,7 +40,7 @@ public class RegularUnionExampleRecord {
         unionFields[1] = fieldCreate.createScalarArray(ScalarType.pvString);
         Field[] fields = new Field[1];
         String[] fieldNames = new String[1];
-        fields[0] = fieldCreate.createUnion(unionFieldNames,unionFields);
+        fields[0] = fieldCreate.createUnionArray(fieldCreate.createUnion(unionFieldNames, unionFields));
         fieldNames[0] = "value";
         PVStructure pvStructure = PVDataFactory.getPVDataCreate().createPVStructure(
                 fieldCreate.createStructure(fieldNames, fields));
@@ -55,10 +55,11 @@ public class RegularUnionExampleRecord {
     }
     
     public static class UnionSupport extends AbstractSupport {
-        
+                
         UnionSupport(String supportName,PVRecord pvRecord)
         {
             super(supportName,pvRecord.getPVRecordStructure());
+            
         }
         
         /* (non-Javadoc)

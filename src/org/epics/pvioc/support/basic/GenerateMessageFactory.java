@@ -51,7 +51,6 @@ public class GenerateMessageFactory {
     
     private static class GenerateMessage extends AbstractSupport
     {
-        private StringBuilder builder = new StringBuilder();
         private TimeStamp timeStamp = TimeStampFactory.create();
         private static final String supportName = "org.epics.pvioc.generateMessage";
         private PVString pvValue = null;
