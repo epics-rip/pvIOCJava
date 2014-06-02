@@ -3,7 +3,7 @@
  * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.pvioc.pvCopy;
+package org.epics.pvioc.pvAccess;
 
 /**
  * Interface implemented by the requester of a PVCopyMonitor.

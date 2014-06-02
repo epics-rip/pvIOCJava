@@ -3,9 +3,9 @@
  * EPICS pvData is distributed subject to a Software License Agreement found
  * in file LICENSE that is included with this distribution.
  */
-package org.epics.pvioc.pvCopy;
+package org.epics.pvioc.pvAccess;
 
-import org.epics.pvdata.misc.BitSet;
+import org.epics.pvdata.monitor.MonitorElement;
 
 
 /**
@@ -24,23 +24,20 @@ import org.epics.pvdata.misc.BitSet;
 public interface PVCopyMonitor {
     /**
      * Start monitoring.
-     * @param changeBitSet The initial changeBitSet.
-     * @param overrunBitSet The overrun bitSet.
      */
-    void startMonitoring(BitSet changeBitSet, BitSet overrunBitSet);
+    void startMonitoring();
     /**
      * Stop monitoring.
      */
     void stopMonitoring();
     /**
-     * The bitSets are replaced by the new bitSets.
-     * Note that a client needs just two instances of the bitSets and can just cycle between the
-     * two sets.
-     * Even if the PVStructure is shared this method is important since the caller will not miss data changes.
-     * @param newChangeBitSet The new changeBitSet.
-     * @param newOverrunBitSet The new overrun bitSert.
-     * @param lockRecord This should be true unless the caller knows that the record is
-     * already locked.
+     * Set monitor element.
+     * @param monitorElement
      */
-    void switchBitSets(BitSet newChangeBitSet,BitSet newOverrunBitSet, boolean lockRecord);
+    void setMonitorElement(MonitorElement monitorElement);
+    /**
+     * Done with monitor element.
+     * @param monitorElement
+     */
+    void monitorDone(MonitorElement monitorElement);
 }
