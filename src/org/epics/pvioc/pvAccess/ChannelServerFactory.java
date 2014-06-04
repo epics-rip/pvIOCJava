@@ -91,6 +91,7 @@ public class ChannelServerFactory  {
     private static final Status cannotProcessErrorStatus = statusCreate.createStatus(StatusType.ERROR, "can not process", null);
     private static final Status cannotProcessWarningStatus = statusCreate.createStatus(StatusType.WARNING, "can not process", null);
     private static final Status subFieldNotArrayStatus = statusCreate.createStatus(StatusType.ERROR, "subField is not an array", null);
+    private static final Status subFieldNotSupportedArrayStatus = statusCreate.createStatus(StatusType.ERROR, "subField is not a supported array type", null);
     private static final Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
     private static final Status requestDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "request destroyed", null);
     private static final Status illegalRequestStatus = statusCreate.createStatus(StatusType.ERROR, "illegal pvRequest", null);
@@ -496,13 +497,16 @@ public class ChannelServerFactory  {
             	PVStructureArray pvCopy = pvDataCreate.createPVStructureArray(pvArray.getStructureArray());
             	return new ChannelStructureArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
             }
-            if(pvField.getField().getType()!=Type.scalarArray) {
-                channelArrayRequester.channelArrayConnect(subFieldNotArrayStatus, null, null);
-                return null;
+            if(pvField.getField().getType()==Type.scalarArray) {
+                PVScalarArray pvArray = (PVScalarArray)pvField;
+                PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(pvArray.getScalarArray().getElementType());
+                return new ChannelScalarArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
             }
-            PVScalarArray pvArray = (PVScalarArray)pvField;
-            PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(pvArray.getScalarArray().getElementType());
-            return new ChannelScalarArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
+            if(pvField.getField().getType()==Type.unionArray) {
+                channelArrayRequester.channelArrayConnect(subFieldNotSupportedArrayStatus, null, null);
+            }
+            channelArrayRequester.channelArrayConnect(subFieldNotArrayStatus, null, null);
+            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#getAccessRights(org.epics.pvdata.pv.PVField)
@@ -1117,8 +1121,6 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-System.out.println(pvPutStructure);
-System.out.println(putBitSet);
                 channelPutGetRequester.putGetDone(status,this,pvGetStructure,getBitSet);
             }
             /* (non-Javadoc)
@@ -1235,23 +1237,17 @@ System.out.println(putBitSet);
             private void getPutData() {
                 pvPutStructure = pvPutCopy.createPVStructure();
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
-                putBitSet.clear();
-                putBitSet.set(0);
-                pvPutCopy.updateCopyFromBitSet(pvPutStructure, putBitSet);
-System.out.println(pvPutStructure);
-System.out.println(putBitSet);
+                pvPutCopy.intCopy(pvPutStructure, putBitSet);
             }
-			@Override
-			public void lock() {
-				pvRecord.lock();
-			}
-			@Override
-			public void unlock() {
-				pvRecord.unlock();
-			}
+            @Override
+            public void lock() {
+                pvRecord.lock();
+            }
+            @Override
+            public void unlock() {
+               pvRecord.unlock();
+            }
         }
-        
-
         
         private static class ChannelScalarArrayImpl implements ChannelArray {
             private ChannelScalarArrayImpl(ChannelImpl channelImpl,
@@ -1331,7 +1327,7 @@ System.out.println(putBitSet);
                 	channelArrayRequester.putArrayDone(requestDestroyedStatus,this);
                 	return;
                 }
-                if(count<=0) count = pvArray.getLength();
+                if(count<=0) count = pvArray.getLength() - offset;
                 pvRecord.lock();
                 try {
                     convert.copyScalarArray((PVScalarArray)putArray, 0, pvArray, offset, count);
@@ -1364,11 +1360,11 @@ System.out.println(putBitSet);
 				}
 				pvRecord.lock();
                 try {
-                    if(length>=0) {
-                    	if(pvArray.getLength()!=length) pvArray.setLength(length);
-                    }
                     if(capacity>=0) {
                     	if(pvArray.getCapacity()!=capacity) pvArray.setCapacity(capacity);
+                    }
+                    if(length>=0) {
+                    	if(pvArray.getLength()!=length) pvArray.setLength(length);
                     }
                 } finally  {
                     pvRecord.unlock();
