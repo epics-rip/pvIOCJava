@@ -1237,7 +1237,7 @@ public class ChannelServerFactory  {
             private void getPutData() {
                 pvPutStructure = pvPutCopy.createPVStructure();
                 putBitSet = new BitSet(pvPutStructure.getNumberFields());
-                pvPutCopy.intCopy(pvPutStructure, putBitSet);
+                pvPutCopy.initCopy(pvPutStructure, putBitSet);
             }
             @Override
             public void lock() {
