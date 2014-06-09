@@ -4,12 +4,16 @@
  */
 package org.epics.pvioc.pvAccess;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.pvaccess.client.AccessRights;
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.client.Channel.ConnectionState;
+import org.epics.pvaccess.client.ChannelListRequester;
 import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelArray;
 import org.epics.pvaccess.client.ChannelArrayRequester;
@@ -182,6 +186,14 @@ public class ChannelServerFactory  {
             }
             boolean wasFound = ((pvRecord==null) ? false : true);
             channelFindRequester.channelFindResult(okStatus, channelFind, wasFound);
+            return channelFind;
+        }
+        @Override
+        public ChannelFind channelList(ChannelListRequester channelListRequester) {
+        	if (channelListRequester == null)
+        		throw new IllegalArgumentException("null channelListRequester");
+        	Set<String> channelNamesSet = new HashSet<String>(Arrays.asList(pvDatabase.getRecordNames()));
+            channelListRequester.channelListResult(okStatus, channelFind, channelNamesSet, false);
             return channelFind;
         }
         @Override
