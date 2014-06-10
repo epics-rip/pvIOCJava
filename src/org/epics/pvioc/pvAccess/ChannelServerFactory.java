@@ -1355,9 +1355,18 @@ public class ChannelServerFactory  {
 			 * @see org.epics.pvaccess.client.ChannelArray#getLength()
 			 */
 			@Override
-            public void getLength() {
-			    channelArrayRequester.getLengthDone(okStatus, this, pvArray.getLength(), pvArray.getCapacity());
-            }
+			public void getLength() {
+			    int length = 0;
+			    int capacity = 0; 
+			    pvRecord.lock();
+			    try {
+			        length = pvArray.getLength();
+			        capacity = pvArray.getCapacity();
+			    } finally {
+			        pvRecord.unlock();
+			    }
+			    channelArrayRequester.getLengthDone(okStatus, this,length,capacity);
+			}
             /* (non-Javadoc)
 			 * @see org.epics.pvaccess.client.ChannelArray#setLength(int, int)
 			 */
