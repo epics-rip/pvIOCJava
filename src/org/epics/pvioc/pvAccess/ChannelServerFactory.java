@@ -1496,7 +1496,16 @@ public class ChannelServerFactory  {
              */
             public void getLength()
             {
-                channelArrayRequester.getLengthDone(okStatus, this, pvArray.getLength(), pvArray.getCapacity());
+               int length = 0;
+               int capacity = 0;
+               pvRecord.lock();
+               try {
+                   length = pvArray.getLength();
+                   capacity = pvArray.getCapacity();
+               }finally  {
+                   pvRecord.unlock();
+               }
+               channelArrayRequester.getLengthDone(okStatus, this,length,capacity);
             }
             
 			/* (non-Javadoc)
