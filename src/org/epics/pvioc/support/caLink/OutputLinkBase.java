@@ -14,6 +14,7 @@ import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
+import org.epics.pvdata.pv.Structure;
 import org.epics.pvioc.database.PVRecordField;
 import org.epics.pvioc.support.ProcessCallbackRequester;
 import org.epics.pvioc.support.ProcessContinueRequester;
@@ -42,6 +43,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
     private RequestResult requestResult = null;   
     private boolean isReady = false;
     private ChannelPut channelPut = null;
+    private PVStructure linkPVStructure = null;
     protected BitSet bitSet = null;
     /* (non-Javadoc)
      * @see org.epics.pvioc.support.ca.AbstractLinkSupport#connectionChange(boolean)
@@ -71,19 +73,20 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
      * @see org.epics.pvaccess.client.ChannelPutRequester#channelPutConnect(Status,org.epics.pvaccess.client.ChannelPut, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
      */
     @Override
-    public void channelPutConnect(Status status, ChannelPut channelPut,PVStructure pvStructure, BitSet bitSet) {
+    public void channelPutConnect(Status status, ChannelPut channelPut,Structure structure) {
         pvRecord.lock();
         try {
             if(!status.isSuccess()) {
                 message("createChannelPut failed " + status.getMessage(),MessageType.error);
                 return;
             }
-            if(!super.setLinkPVStructure(pvStructure)) {
+            if(!super.findPVFields(structure)) {
                 channelPut.destroy();
                 return;
             }
+            linkPVStructure = pvDataCreate.createPVStructure(structure);
+            bitSet = new BitSet(linkPVStructure.getNumberFields());
             this.channelPut = channelPut;
-            this.bitSet = bitSet;
             isReady = true;
         } finally {
             pvRecord.unlock();
@@ -102,6 +105,7 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
+        PVField[] linkPVFields = linkPVStructure.getPVFields();
         for(int i=0; i< linkPVFields.length; i++) {
             if(i==indexAlarmLinkField) continue;
             PVField pvFrom = pvFields[i];
@@ -119,18 +123,20 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
      */
     @Override
     public void processCallback() {
-        channelPut.put(false);  
+        channelPut.put(linkPVStructure,bitSet);  
     }
     /* (non-Javadoc)
      * @see org.epics.pvaccess.client.ChannelPutRequester#getDone(Status)
      */
     @Override
-    public void getDone(Status success) {/*nothing to do*/}
+    public void getDone(Status success, ChannelPut channelPut, PVStructure pvStructure, BitSet bitSet)
+    {
+    }
     /* (non-Javadoc)
      * @see org.epics.pvaccess.client.ChannelPutRequester#putDone(Status)
      */
     @Override
-    public void putDone(Status success) {
+    public void putDone(Status success, ChannelPut channelPut) {
         requestResult = (success.isOK() ? RequestResult.success : RequestResult.failure);
         recordProcess.processContinue(this);
     }

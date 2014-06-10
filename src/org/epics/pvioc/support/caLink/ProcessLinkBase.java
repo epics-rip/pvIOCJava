@@ -113,13 +113,13 @@ implements ProcessCallbackRequester,ProcessContinueRequester, ChannelProcessRequ
      */
     @Override
     public void processCallback() {
-        channelProcess.process(false);
+        channelProcess.process();
     }
     /* (non-Javadoc)
      * @see org.epics.pvaccess.client.ChannelProcessRequester#processDone(boolean)
      */
     @Override
-    public void processDone(Status success) {
+    public void processDone(Status success, ChannelProcess channelProcess) {
         this.success = success.isOK();
         recordProcess.processContinue(this);
     }

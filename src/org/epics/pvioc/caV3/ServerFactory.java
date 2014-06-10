@@ -47,13 +47,15 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
-import org.epics.pvaccess.client.CreateRequest;
+import org.epics.pvdata.copy.CreateRequest;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.misc.RunnableReady;
 import org.epics.pvdata.misc.ThreadCreate;
 import org.epics.pvdata.misc.ThreadCreateFactory;
 import org.epics.pvdata.misc.ThreadReady;
+import org.epics.pvdata.monitor.MonitorElement;
+import org.epics.pvdata.monitor.MonitorQueueFactory;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.PVTimeStamp;
 import org.epics.pvdata.property.PVTimeStampFactory;
@@ -83,10 +85,8 @@ import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.database.PVRecordClient;
-import org.epics.pvioc.pvCopy.PVCopy;
-import org.epics.pvioc.pvCopy.PVCopyFactory;
-import org.epics.pvioc.pvCopy.PVCopyMonitor;
-import org.epics.pvioc.pvCopy.PVCopyMonitorRequester;
+import org.epics.pvdata.copy.*;
+import org.epics.pvioc.pvAccess.*;
 import org.epics.pvioc.support.ProcessToken;
 import org.epics.pvioc.support.RecordProcess;
 import org.epics.pvioc.support.RecordProcessRequester;
@@ -294,7 +294,7 @@ public class ServerFactory {
             if(pvRequest==null) {
             	message(createRequest.getMessage(), MessageType.error);
             }
-            pvCopy = PVCopyFactory.create(pvRecord, pvRequest, "");
+            pvCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest, "");
             if(pvCopy==null) {
                 throw new CAStatusException(CAStatus.DEFUNCT, "illegal request. Could not create pvCopy");
             }
@@ -464,7 +464,7 @@ public class ServerFactory {
             putValueField(dbr);
             pvRecord.lock();
             try {
-                pvCopy.updateRecord(pvCopyStructure, copyBitSet);
+                pvCopy.updateMaster(pvCopyStructure, copyBitSet);
             } finally {
                 pvRecord.unlock();
             }
@@ -517,7 +517,7 @@ public class ServerFactory {
         		try {
         			putValueField(dbr);
         			copyBitSet.clear();
-        			pvCopy.updateRecord(pvCopyStructure, copyBitSet);
+        			pvCopy.updateMaster(pvCopyStructure, copyBitSet);
         		} finally {
         			pvRecord.unlock();
         		}
@@ -564,18 +564,20 @@ public class ServerFactory {
         @Override
         public void interestRegister() {
         	if(isDestroyed) return;
-        	PVCopyMonitor pvCopyMonitor = null;
+        	
             synchronized(this) {
                 if(this.pvCopyMonitor!=null) {
                     throw new IllegalStateException("interestRegister but already monitoring");
                 }
-                this.pvCopyMonitor = pvCopyMonitor = pvCopy.createPVCopyMonitor(this);
+                this.pvCopyMonitor = PVCopyMonitorFactory.create(this, pvRecord, pvCopy);
             }
             monitorPVStructure = pvCopy.createPVStructure();
             monitorChangeBitSet = new BitSet(monitorPVStructure.getNumberFields());
             monitorOverrunBitSet = new BitSet(monitorPVStructure.getNumberFields());
             super.interestRegister();
-            pvCopyMonitor.startMonitoring(monitorChangeBitSet,monitorOverrunBitSet);
+            MonitorElement monitorElement = MonitorQueueFactory.createMonitorElement(pvCopyStructure);
+            pvCopyMonitor.setMonitorElement(monitorElement);
+            pvCopyMonitor.startMonitoring();
         }
 
         /* (non-Javadoc)

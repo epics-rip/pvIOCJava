@@ -1,0 +1,1 @@
+recordDumpRPC,org.epics.pvioc.pvAccess.RecordDumpService

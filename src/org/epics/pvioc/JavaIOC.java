@@ -20,6 +20,8 @@ import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.install.Install;
 import org.epics.pvioc.install.InstallFactory;
+import org.epics.pvaccess.server.rpc.*;
+import org.epics.pvaccess.*;
 /**
  * The main program to start a JavaIOC.
  * The program is started with a command line of
@@ -35,18 +37,24 @@ import org.epics.pvioc.install.InstallFactory;
  *     -dumpRecords
  *             Dump all record instances in the master database
  *     -server serverFile
- *             JavaIOC the server specified in the serverFile
+ *             A server is specified in the serverFile
+ *     -rpcService rpcServiceFile
+ *             List of "serviceName,XXXService" pairs
+ *     -pvRecord pvRecordFile
+ *             List of "recordName,XXXRecord pairs
  *     -run
- *             Starts the JavaIOC as a standalone process.
+ *             Starts the JavaIOC as RPCServer
  *            
  * @author mrk
  *
  */
 public class JavaIOC {
     private enum State {
-        structures,
-        records,
-        servers
+        structure,
+        record,
+        server,
+        rpcService,
+        pvRecord
     }
 
     private static final PVDatabase masterPVDatabase = PVDatabaseFactory.getMaster();
@@ -64,6 +72,8 @@ public class JavaIOC {
         Requester iocRequester = new Listener();
         int nextArg = 0;
         State state = null;
+        String rpcServiceFile = null;
+        String pvRecordFile = null;
         while(nextArg<args.length) {
             String arg = args[nextArg++];
             if(arg.charAt(0) == '-') {
@@ -81,37 +91,45 @@ public class JavaIOC {
                 } else if(arg.equals("dumpRecords")) {
                     dumpRecords();
                 } else if(arg.equals("structures")){
-                    state = State.structures;
+                    state = State.structure;
                 } else if(arg.equals("records")){
-                    state = State.records;
+                    state = State.record;
+                } else if(arg.equals("rpcService")){
+                    state = State.rpcService;
+                } else if(arg.equals("pvRecord")){
+                    state = State.pvRecord;
                 } else if(arg.equals("run")) {
                 	runForever = true;
                 } else if(arg.equals("server")) {
-                    state = State.servers;
+                    state = State.server;
                 } else {
                     System.err.println("unknown arg: " + arg);
                     usage();
                     return;
                 }
-            } else if(state==State.structures){
+            } else if(state==State.structure){
                 parseStructures(arg,iocRequester);
-            } else if(state==State.records){
+            } else if(state==State.record){
                 parseRecords(arg,iocRequester);
-            } else if(state==State.servers) {
+            } else if(state==State.server) {
                 startServer(arg);
+            } else if(state==State.rpcService) {
+                rpcServiceFile = arg;
+            } else if(state==State.pvRecord) {
+                pvRecordFile = arg;
             } else {
                 System.err.println("unknown arg: " + arg);
                 usage();
                 return;
             }
             if (runForever) {
-                while(true) {
-                	try{
-                        Thread.sleep(1000000);
-                    } catch (InterruptedException e) {
-                    	return;
-                    }
-                	
+                RPCServer rpcServer = new RPCServer();
+                System.out.println(startRPCServices(rpcServer,rpcServiceFile));
+                startPVRecords(pvRecordFile);
+                try {
+                    rpcServer.run(0);
+                } catch (PVAException xx) {
+                    throw new RuntimeException("RPCServer exception", xx);
                 }
             }
         }
@@ -124,11 +142,137 @@ public class JavaIOC {
                 + " -dumpStructures"
                 + " -dumpRecords"
                 + " -server file"
+                + " -rpcService file"
+                + " -pvRecord file"
                 + " -run ");
     }
     
-    static void printError(String message) {
-        System.err.println(message);
+    static void printError(String channel, String factory,String message) {
+        System.err.println("channel "+ channel + " factory " + factory + " " + message);
+    }
+    
+    static void printError(String factory,String message) {
+        System.err.println("factory " + factory + " " + message);
+    }
+    
+    static void startPVRecords(String fileName) {
+        if(fileName==null) return; 
+        System.out.println("starting PVRecords fileName " + fileName);
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(fileName));
+            String inLine = null;
+            while((inLine = in.readLine()) !=null) {
+                int comma = inLine.indexOf(',');
+                String recordName = inLine.substring(0,comma);
+                String factoryName = inLine.substring(comma+1);
+                System.out.println("starting record factoryName " + factoryName);
+                Class<?> startClass;
+                Method method = null;
+                try {
+                    startClass = Class.forName(factoryName);
+                }catch (ClassNotFoundException e) {
+                    printError(recordName,factoryName,"record factory "
+                            + e.getLocalizedMessage()
+                            + " class not found");
+                    continue;
+                }
+                try {
+                    method = startClass.getMethod("start",String.class);
+                } catch (NoSuchMethodException e) {
+                    printError(recordName,factoryName,"record factory "
+                            + e.getLocalizedMessage()
+                            + " method start not found");
+                    continue;
+                }
+                if(!Modifier.isStatic(method.getModifiers())) {
+                    printError(recordName,factoryName,"record factory "
+                            + factoryName
+                            + " start is not a static method ");
+                    continue;
+                }
+                try {
+                    method.invoke(null,recordName );
+                } catch(IllegalAccessException e) {
+                    printError(recordName,factoryName,"record start IllegalAccessException "
+                            + e.getLocalizedMessage());
+                    continue;
+                } catch(IllegalArgumentException e) {
+                    printError(recordName,factoryName,"record start IllegalArgumentException "
+                            + e.getLocalizedMessage());
+                    continue;
+                } catch(InvocationTargetException e) {
+                    printError(recordName,factoryName,"record start InvocationTargetException "
+                            + e.getLocalizedMessage());
+                    continue;
+                }
+            }
+            in.close();
+        } catch (IOException e) {
+            System.err.println("PVRecords error " + e.getMessage());
+            return;
+        }
+    }
+    
+    static String startRPCServices(RPCServer rpcServer,String fileName) {
+        String rtnValue = "";
+        if(fileName==null) return rtnValue; 
+        System.out.println("starting RPCServices fileName " + fileName);
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(fileName));
+            String inLine = null;
+            while((inLine = in.readLine()) !=null) {
+                int comma = inLine.indexOf(',');
+                String serviceName = inLine.substring(0,comma);
+                String factoryName = inLine.substring(comma+1);
+                System.out.println("starting service factoryName " + factoryName);
+                Class<?> startClass;
+                Method method = null;
+                try {
+                    startClass = Class.forName(factoryName);
+                }catch (ClassNotFoundException e) {
+                    printError(serviceName,factoryName,"server factory "
+                            + e.getLocalizedMessage()
+                            + " class not found");
+                    continue;
+                }
+                try {
+                    method = startClass.getMethod("start",String.class,RPCServer.class);
+                } catch (NoSuchMethodException e) {
+                    printError(serviceName,factoryName,"server factory "
+                            + e.getLocalizedMessage()
+                            + " method start not found");
+                    continue;
+                }
+                if(!Modifier.isStatic(method.getModifiers())) {
+                    printError(serviceName,factoryName,"server factory "
+                            + factoryName
+                            + " start is not a static method ");
+                    continue;
+                }
+                try {
+                    method.invoke(null,serviceName,rpcServer );
+                } catch(IllegalAccessException e) {
+                    printError(serviceName,factoryName,"server start IllegalAccessException "
+                            + e.getLocalizedMessage());
+                    continue;
+                } catch(IllegalArgumentException e) {
+                    printError(serviceName,factoryName,"server start IllegalArgumentException "
+                            + e.getLocalizedMessage());
+                    continue;
+                } catch(InvocationTargetException e) {
+                    printError(serviceName,factoryName,"server start InvocationTargetException "
+                            + e.getLocalizedMessage());
+                    continue;
+                }
+                if(rtnValue.length()>0) rtnValue += "\n";
+                rtnValue += serviceName + " " + factoryName;
+            }
+            in.close();
+        } catch (IOException e) {
+            System.err.println("startServer error " + e.getMessage());
+            return rtnValue;
+        }
+        return rtnValue;
     }
     
     static void startServer(String fileName) {
@@ -143,7 +287,7 @@ public class JavaIOC {
                 try {
                     startClass = Class.forName(factoryName);
                 }catch (ClassNotFoundException e) {
-                    printError("server factory "
+                    printError(factoryName,"server factory "
                             + e.getLocalizedMessage()
                             + " class not found");
                     continue;
@@ -151,13 +295,13 @@ public class JavaIOC {
                 try {
                     method = startClass.getDeclaredMethod("start", (Class[])null);
                 } catch (NoSuchMethodException e) {
-                    printError("server factory "
+                    printError(factoryName,"server factory "
                             + e.getLocalizedMessage()
                             + " method start not found");
                     continue;
                 }
                 if(!Modifier.isStatic(method.getModifiers())) {
-                    printError("server factory "
+                    printError(factoryName,"server factory "
                             + factoryName
                             + " start is not a static method ");
                     continue;
@@ -165,15 +309,15 @@ public class JavaIOC {
                 try {
                     method.invoke(null, new Object[0]);
                 } catch(IllegalAccessException e) {
-                    printError("server start IllegalAccessException "
+                    printError(factoryName,"server start IllegalAccessException "
                             + e.getLocalizedMessage());
                     continue;
                 } catch(IllegalArgumentException e) {
-                    printError("server start IllegalArgumentException "
+                    printError(factoryName,"server start IllegalArgumentException "
                             + e.getLocalizedMessage());
                     continue;
                 } catch(InvocationTargetException e) {
-                    printError("server start InvocationTargetException "
+                    printError(factoryName,"server start InvocationTargetException "
                             + e.getLocalizedMessage());
                     continue;
                 }

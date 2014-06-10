@@ -4,16 +4,17 @@
  */
 package org.epics.pvioc.pvAccess;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.epics.pvaccess.client.AccessRights;
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvaccess.client.ChannelAccessFactory;
+import org.epics.pvaccess.client.ChannelListRequester;
+import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelArray;
 import org.epics.pvaccess.client.ChannelArrayRequester;
 import org.epics.pvaccess.client.ChannelFind;
@@ -40,6 +41,7 @@ import org.epics.pvdata.monitor.Monitor;
 import org.epics.pvdata.monitor.MonitorRequester;
 import org.epics.pvdata.pv.Convert;
 import org.epics.pvdata.pv.MessageType;
+import org.epics.pvdata.pv.PVArray;
 import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVDataCreate;
 import org.epics.pvdata.pv.PVField;
@@ -53,17 +55,17 @@ import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.StatusCreate;
 import org.epics.pvdata.pv.Type;
+import org.epics.pvdata.copy.*;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.database.PVRecordClient;
-import org.epics.pvioc.monitor.MonitorFactory;
-import org.epics.pvioc.pvCopy.PVCopy;
-import org.epics.pvioc.pvCopy.PVCopyFactory;
+
 import org.epics.pvioc.support.ProcessToken;
 import org.epics.pvioc.support.RecordProcess;
 import org.epics.pvioc.support.RecordProcessRequester;
 import org.epics.pvioc.util.RequestResult;
+import org.epics.pvioc.monitor.*;
 
 /**
  * Factory and implementation of local channel access, i.e. channel access that
@@ -86,26 +88,30 @@ public class ChannelServerFactory  {
     private static final StatusCreate statusCreate = StatusFactory.getStatusCreate();
     private static final Status okStatus = statusCreate.getStatusOK();
     private static final Status notFoundStatus = statusCreate.createStatus(StatusType.ERROR, "channel not found", null);
+    private static final Status strideNotSupportedStatus = statusCreate.createStatus(StatusType.WARNING, "stride not supported", null);
+    private static final Status offsetCountStrideNotSupportedStatus = statusCreate.createStatus(StatusType.WARNING, "ioffset, count, and stride not supported", null);
     private static final Status capacityImmutableStatus = statusCreate.createStatus(StatusType.ERROR, "capacity is immutable", null);
     private static final Status subFieldDoesNotExistStatus = statusCreate.createStatus(StatusType.ERROR, "subField does not exist", null);
     private static final Status cannotProcessErrorStatus = statusCreate.createStatus(StatusType.ERROR, "can not process", null);
     private static final Status cannotProcessWarningStatus = statusCreate.createStatus(StatusType.WARNING, "can not process", null);
     private static final Status subFieldNotArrayStatus = statusCreate.createStatus(StatusType.ERROR, "subField is not an array", null);
+    private static final Status subFieldNotSupportedArrayStatus = statusCreate.createStatus(StatusType.ERROR, "subField is not a supported array type", null);
     private static final Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
     private static final Status requestDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "request destroyed", null);
     private static final Status illegalRequestStatus = statusCreate.createStatus(StatusType.ERROR, "illegal pvRequest", null);
+    private static final Status notImplementedStatus = statusCreate.createStatus(StatusType.ERROR, "not implemented", null);
     private static ChannelFind channelFind = null;
     private static LinkedList<Channel> channelList = new LinkedList<Channel>();
    
    private static class ChannelFindLocal implements ChannelFind {
         
         private ChannelFindLocal() {
-        }
+        }   
         /* (non-Javadoc)
-         * @see org.epics.pvaccess.client.ChannelFind#cancelChannelFind()
+         * @see org.epics.pvaccess.client.ChannelFind#cancel()
          */
         @Override
-        public void cancelChannelFind() {}
+        public void cancel() {}
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.ChannelFind#getChannelProvider()
          */
@@ -122,7 +128,7 @@ public class ChannelServerFactory  {
             if (singleImplementation==null) {
                 singleImplementation = new ChannelServerLocal();
                 channelFind = new ChannelFindLocal();
-                ChannelAccessFactory.registerChannelProviderFactory(
+                ChannelProviderRegistryFactory.registerChannelProviderFactory(
                 		new ChannelProviderFactory() {
 							
 							@Override
@@ -183,6 +189,14 @@ public class ChannelServerFactory  {
             return channelFind;
         }
         @Override
+        public ChannelFind channelList(ChannelListRequester channelListRequester) {
+        	if (channelListRequester == null)
+        		throw new IllegalArgumentException("null channelListRequester");
+        	Set<String> channelNamesSet = new HashSet<String>(Arrays.asList(pvDatabase.getRecordNames()));
+            channelListRequester.channelListResult(okStatus, channelFind, channelNamesSet, false);
+            return channelFind;
+        }
+        @Override
 		public Channel createChannel(String channelName,
 				ChannelRequester channelRequester, short priority,
 				String address) {
@@ -228,13 +242,6 @@ public class ChannelServerFactory  {
         private final PVRecord pvRecord;
         private final ChannelRequester channelRequester;
         private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
-        private LinkedList<ChannelProcess> channelProcessList = new LinkedList<ChannelProcess>();
-        private LinkedList<ChannelGet> channelGetList = new LinkedList<ChannelGet>();
-        private LinkedList<ChannelPut> channelPutList = new LinkedList<ChannelPut>();
-        private LinkedList<ChannelPutGet> channelPutGetList = new LinkedList<ChannelPutGet>();
-        private LinkedList<ChannelRPC> channelRPCList = new LinkedList<ChannelRPC>();
-        private LinkedList<ChannelArray> channelArrayList = new LinkedList<ChannelArray>();
-        
         
         private ChannelImpl(ChannelProvider provider,PVRecord pvRecord,ChannelRequester channelRequester)
         {
@@ -274,76 +281,6 @@ public class ChannelServerFactory  {
         public void destroy() {
             if(!isDestroyed.compareAndSet(false, true)) return;
             pvRecord.unregisterClient(this);
-            while(true) {
-                ChannelProcess channelProcess = null;
-                synchronized(channelProcessList) {
-                    if(channelProcessList.size()>0) {
-                        channelProcess = channelProcessList.get(channelProcessList.size()-1);
-                    } else {
-                        break;
-                    }
-                }
-                channelProcess.destroy();
-            }
-            while(true) {
-                ChannelGet channelGet = null;
-                synchronized(channelGetList) {
-                    if(channelGetList.size()>0) {
-                        channelGet = channelGetList.get(channelGetList.size()-1);
-                    } else {
-                        break;
-                    }
-                }
-                channelGet.destroy();
-            }
-            while(true) {
-                ChannelPut channelPut = null;
-                synchronized(channelPutList) {
-                    if(channelPutList.size()>0) {
-                        channelPut = channelPutList.get(channelPutList.size()-1);
-                    } else {
-                        break;
-                    }
-                }
-                channelPut.destroy();
-            }
-            while(true) {
-                ChannelPutGet channelPutGet = null;
-                synchronized(channelPutGetList) {
-                    if(channelPutGetList.size()>0) {
-                        channelPutGet = channelPutGetList.get(channelPutGetList.size()-1);
-                    } else {
-                        break;
-                    }
-                }
-                channelPutGet.destroy();
-            }
-            while(true) {
-                ChannelRPC channelRPC = null;
-                synchronized(channelRPCList) {
-                    if(channelRPCList.size()>0) {
-                        channelRPC = channelRPCList.get(channelRPCList.size()-1);
-                    } else {
-                        break;
-                    }
-                }
-                channelRPC.destroy();
-            }
-            while(true) {
-                ChannelArray channelArray = null;
-                synchronized(channelArrayList) {
-                    if(channelArrayList.size()>0) {
-                    	channelArray = channelArrayList.get(channelArrayList.size()-1);
-                    } else {
-                        break;
-                    }
-                }
-                channelArray.destroy();
-            }
-            synchronized(channelList) {
-                channelList.remove(this);
-            }
-            channelRequester.channelStateChange(this, ConnectionState.DESTROYED);
         }
         /* (non-Javadoc)
          * @see org.epics.pvdata.pv.PVRecordClient#detach(org.epics.pvdata.pv.PVRecord)
@@ -407,9 +344,6 @@ public class ChannelServerFactory  {
             }
             ChannelProcessImpl channelProcess = new ChannelProcessImpl(this,channelProcessRequester);
             if(channelProcess.canProcess()) {
-                synchronized(channelProcessList) {
-                    channelProcessList.add(channelProcess);           
-                }
                 channelProcessRequester.channelProcessConnect(okStatus, channelProcess);
                 return channelProcess;
             } else {
@@ -429,12 +363,12 @@ public class ChannelServerFactory  {
         	if (pvRequest == null)
         		throw new IllegalArgumentException("null pvRequest");
             if(isDestroyed.get()) {
-            	channelGetRequester.channelGetConnect(channelDestroyedStatus, null, null, null);
+            	channelGetRequester.channelGetConnect(channelDestroyedStatus, null, null);
             	return null;
             }
-            PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
+            PVCopy pvCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest,"");
             if(pvCopy==null) {
-                channelGetRequester.channelGetConnect(illegalRequestStatus, null, null, null);
+                channelGetRequester.channelGetConnect(illegalRequestStatus, null, null);
                 return null;
             }
             PVStructure pvStructure = pvCopy.createPVStructure();
@@ -451,16 +385,15 @@ public class ChannelServerFactory  {
         	if (pvRequest == null)
         		throw new IllegalArgumentException("null pvRequest");
             if(isDestroyed.get()) {
-            	channelPutRequester.channelPutConnect(channelDestroyedStatus, null, null, null);
+            	channelPutRequester.channelPutConnect(channelDestroyedStatus, null, null);
             	return null;
             }
-        	PVCopy pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"");
+        	PVCopy pvCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest,"");
         	if(pvCopy==null) {
-                channelPutRequester.channelPutConnect(illegalRequestStatus, null, null, null);
+                channelPutRequester.channelPutConnect(illegalRequestStatus, null, null);
                 return null;
         	}
-            PVStructure pvStructure = pvCopy.createPVStructure();
-            return new ChannelPutImpl(this,channelPutRequester,pvStructure,pvCopy,getProcess(pvRequest,true));
+            return new ChannelPutImpl(this,channelPutRequester,pvCopy,getProcess(pvRequest,true));
         }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#createChannelPutGet(org.epics.pvaccess.client.ChannelPutGetRequester, org.epics.pvdata.pv.PVStructure, boolean, org.epics.pvdata.pv.PVStructure, boolean, boolean, org.epics.pvdata.pv.PVStructure)
@@ -479,7 +412,6 @@ public class ChannelServerFactory  {
             	return null;
             }
             boolean process = getProcess(pvRequest,true);
-
             PVField pvField = pvRequest.getSubField("putField");
             if(pvField==null || pvField.getField().getType()!=Type.structure) {
             	channelPutGetRequester.message("pvRequest does not have a putField request structure", MessageType.error);
@@ -487,7 +419,7 @@ public class ChannelServerFactory  {
             	channelPutGetRequester.channelPutGetConnect(illegalRequestStatus, null, null, null);
             	return null;
             }
-        	PVCopy pvPutCopy = PVCopyFactory.create(pvRecord, pvRequest, "putField");
+        	PVCopy pvPutCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest, "putField");
         	if(pvPutCopy==null) {
                 channelPutGetRequester.channelPutGetConnect(illegalRequestStatus, null, null, null);
                 return null;
@@ -499,14 +431,13 @@ public class ChannelServerFactory  {
             	channelPutGetRequester.channelPutGetConnect(illegalRequestStatus, null, null, null);
             	return null;
             }
-        	PVCopy pvGetCopy = PVCopyFactory.create(pvRecord, pvRequest, "getField");
+        	PVCopy pvGetCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest, "getField");
         	if(pvGetCopy==null) {
                 channelPutGetRequester.channelPutGetConnect(illegalRequestStatus, null, null, null);
                 return null;
             }
-        	PVStructure pvPutStructure = pvPutCopy.createPVStructure();
-            PVStructure pvGetStructure = pvGetCopy.createPVStructure();
-            return new ChannelPutGetImpl(this,channelPutGetRequester,pvPutStructure,pvPutCopy,pvGetStructure,pvGetCopy,process);
+        	
+            return new ChannelPutGetImpl(this,channelPutGetRequester,pvPutCopy,pvGetCopy,process);
         }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#createChannelRPC(org.epics.pvaccess.client.ChannelRPCRequester, org.epics.pvdata.pv.PVStructure)
@@ -515,18 +446,8 @@ public class ChannelServerFactory  {
 		public ChannelRPC createChannelRPC(
 				ChannelRPCRequester channelRPCRequester, PVStructure pvRequest)
         {
-        	if (channelRPCRequester == null)
-        		throw new IllegalArgumentException("null channelRPCRequester");
-        	if (pvRequest == null)
-        		throw new IllegalArgumentException("null pvRequest");
-        	if(isDestroyed.get()) {
-        		channelRPCRequester.channelRPCConnect(channelDestroyedStatus, null);
-        		return null;
-        	}
-        	ChannelRPCImpl channelRPCImpl = new ChannelRPCImpl(this,pvRecord,channelRPCRequester,pvRequest);
-        	boolean isOK = channelRPCImpl.init();
-        	if(!isOK) return null;
-        	return channelRPCImpl;
+            channelRPCRequester.channelRPCConnect(notImplementedStatus,null);
+            return null;
         }
 		/* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#createMonitor(org.epics.pvdata.monitor.MonitorRequester, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.pv.PVStructure)
@@ -544,7 +465,8 @@ public class ChannelServerFactory  {
             	monitorRequester.monitorConnect(channelDestroyedStatus, null, null);
             	return null;
             }
-            return MonitorFactory.create(pvRecord, monitorRequester, pvRequest);
+            return MonitorFactory.create(pvRecord,monitorRequester, pvRequest);
+            
         }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#createChannelArray(org.epics.pvaccess.client.ChannelArrayRequester, java.lang.String, org.epics.pvdata.pv.PVStructure)
@@ -587,13 +509,16 @@ public class ChannelServerFactory  {
             	PVStructureArray pvCopy = pvDataCreate.createPVStructureArray(pvArray.getStructureArray());
             	return new ChannelStructureArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
             }
-            if(pvField.getField().getType()!=Type.scalarArray) {
-                channelArrayRequester.channelArrayConnect(subFieldNotArrayStatus, null, null);
-                return null;
+            if(pvField.getField().getType()==Type.scalarArray) {
+                PVScalarArray pvArray = (PVScalarArray)pvField;
+                PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(pvArray.getScalarArray().getElementType());
+                return new ChannelScalarArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
             }
-            PVScalarArray pvArray = (PVScalarArray)pvField;
-            PVScalarArray pvCopy = pvDataCreate.createPVScalarArray(pvArray.getScalarArray().getElementType());
-            return new ChannelScalarArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
+            if(pvField.getField().getType()==Type.unionArray) {
+                channelArrayRequester.channelArrayConnect(subFieldNotSupportedArrayStatus, null, null);
+            }
+            channelArrayRequester.channelArrayConnect(subFieldNotArrayStatus, null, null);
+            return null;
         }
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.Channel#getAccessRights(org.epics.pvdata.pv.PVField)
@@ -666,7 +591,20 @@ public class ChannelServerFactory  {
             private final RecordProcess recordProcess;
             private final ProcessToken processToken;
             private Status status= null;
-            private boolean lastRequest = false;
+            
+            @Override
+            public Channel getChannel() {
+                return channelImpl;
+            }
+
+            @Override
+            public void cancel() {
+                destroy();
+            }
+
+            @Override
+            public void lastRequest() {}
+
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelProcess#destroy()
              */
@@ -676,21 +614,17 @@ public class ChannelServerFactory  {
                 if(processToken!=null) {
                 	recordProcess.releaseProcessToken(processToken);
                 }
-                synchronized(channelImpl.channelProcessList) {
-                    channelImpl.channelProcessList.remove(this);
-                }
             }
             
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelProcess#process(boolean)
              */
             @Override
-            public void process(boolean lastRequest) {
+            public void process() {
                 if(isDestroyed.get()) {
-                    channelProcessRequester.processDone(requestDestroyedStatus);
+                    channelProcessRequester.processDone(requestDestroyedStatus,this);
                     return;
                 }
-                this.lastRequest = lastRequest;
                 recordProcess.queueProcessRequest(processToken);
             }
            
@@ -707,16 +641,14 @@ public class ChannelServerFactory  {
             @Override
 			public void canNotProcess(String reason) {
             	message(reason,MessageType.error);
-            	channelProcessRequester.processDone(cannotProcessErrorStatus);
-                if(lastRequest) destroy();
+            	channelProcessRequester.processDone(cannotProcessErrorStatus,this);
 			}
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#recordProcessComplete()
              */
             @Override
             public void recordProcessComplete() {
-                channelProcessRequester.processDone(status);
-                if(lastRequest) destroy();
+                channelProcessRequester.processDone(status,this);
             }
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#lostRightToProcess()
@@ -774,10 +706,7 @@ public class ChannelServerFactory  {
                 } else {
                 	processToken = null;
                 }
-                synchronized(channelImpl.channelGetList) {
-                    channelImpl.channelGetList.add(this);
-                }
-                channelGetRequester.channelGetConnect(status, this, pvStructure,bitSet);
+                channelGetRequester.channelGetConnect(status, this, pvStructure.getStructure());
             }
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
             private final ChannelImpl channelImpl;
@@ -790,6 +719,27 @@ public class ChannelServerFactory  {
             private boolean firstTime = true;
             private Status status = null;
             private boolean lastRequest = false;
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#getChannel()
+             */
+            @Override
+            public Channel getChannel() {
+                return channelImpl;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#cancel()
+             */
+            @Override
+            public void cancel() {
+                destroy();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#lastRequest()
+             */
+            @Override
+            public void lastRequest() {}
+            
             /* (non-Javadoc)
              * @see org.epics.pvdata.misc.Destroyable#destroy()
              */
@@ -799,20 +749,16 @@ public class ChannelServerFactory  {
                 if(processToken!=null) {
                 	recordProcess.releaseProcessToken(processToken);
                 }
-                synchronized(channelImpl.channelGetList) {
-                    channelImpl.channelGetList.remove(this);
-                }
             }
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelGet#get()
              */
             @Override
-            public void get(boolean lastRequest) {
+            public void get() {
                 if(isDestroyed.get()) {
-                    channelGetRequester.getDone(requestDestroyedStatus);
+                    channelGetRequester.getDone(requestDestroyedStatus,this,null,null);
                     return;
                 }
-                this.lastRequest = lastRequest;
                 bitSet.clear();
                 if(processToken!=null) {
                 	recordProcess.queueProcessRequest(processToken);
@@ -824,7 +770,7 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-                channelGetRequester.getDone(okStatus);
+                channelGetRequester.getDone(okStatus,this,pvStructure,bitSet);
             }
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#becomeProcessor()
@@ -839,7 +785,7 @@ public class ChannelServerFactory  {
             @Override
 			public void canNotProcess(String reason) {
             	message(reason,MessageType.error);
-            	channelGetRequester.getDone(cannotProcessErrorStatus);
+            	channelGetRequester.getDone(cannotProcessErrorStatus,this,null,null);
                 if(lastRequest) destroy();
 			}
             /* (non-Javadoc)
@@ -848,7 +794,7 @@ public class ChannelServerFactory  {
             @Override
             public void recordProcessComplete() {
             	recordProcess.setInactive(processToken);
-                channelGetRequester.getDone(status);
+                channelGetRequester.getDone(status,this,pvStructure,bitSet);
                 if(lastRequest) destroy();
             }
             /* (non-Javadoc)
@@ -909,15 +855,12 @@ public class ChannelServerFactory  {
             private ChannelPutImpl(
                     ChannelImpl channelImpl,
                     ChannelPutRequester channelPutRequester,
-                    PVStructure pvStructure,
                     PVCopy pvCopy,
                     boolean process)
             {
                 this.channelImpl = channelImpl;
                 this.channelPutRequester = channelPutRequester;
-                this.pvStructure = pvStructure;
                 this.pvCopy = pvCopy;
-                bitSet = new BitSet(pvStructure.getNumberFields());
                 Status status = okStatus;
                 recordProcess = channelImpl.getPVRecord().getRecordProcess();
                 if(process) {
@@ -926,23 +869,38 @@ public class ChannelServerFactory  {
                 } else {
                 	processToken = null;
                 }
-                synchronized(channelImpl.channelPutList) {
-                    channelImpl.channelPutList.add(this);
-                }
-                channelPutRequester.channelPutConnect(status, this, pvStructure,bitSet);
+                channelPutRequester.channelPutConnect(status, this, pvCopy.getStructure());
             }
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
             private final ChannelImpl channelImpl;
             private final ChannelPutRequester channelPutRequester;
-            private final PVStructure pvStructure;
             private final PVCopy pvCopy;
-            private final BitSet bitSet;
             private final RecordProcess recordProcess;
             private final ProcessToken processToken;
-            private Status status = null;
-            private volatile boolean lastRequest = false;
+            private PVStructure pvStructure = null;
+            private BitSet bitSet = null;
+            private Status status = null;            
             
-           
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#getChannel()
+             */
+            @Override
+            public Channel getChannel() {
+                return channelImpl;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#cancel()
+             */
+            @Override
+            public void cancel() {
+                destroy();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#lastRequest()
+             */
+            @Override
+            public void lastRequest() {}
+            
             
             /* (non-Javadoc)
              * @see org.epics.pvdata.misc.Destroyable#destroy()
@@ -952,22 +910,21 @@ public class ChannelServerFactory  {
                 if(processToken!=null) {
                 	recordProcess.releaseProcessToken(processToken);
                 }
-                synchronized(channelImpl.channelPutList) {
-                    channelImpl.channelPutList.remove(this);
-                }
             }
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelPut#put(boolean)
+             * @see org.epics.pvaccess.client.ChannelPut#put(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
              */
-            public void put(boolean lastRequest) {
+            @Override
+            public void put(PVStructure pvPutStructure, BitSet bitSet) {
                 if(isDestroyed.get()) {
-                    channelPutRequester.putDone(requestDestroyedStatus);
+                    channelPutRequester.putDone(requestDestroyedStatus,this);
                     return;
                 }
                 status = okStatus;
-                this.lastRequest = lastRequest;
+                this.pvStructure = pvPutStructure;
+                this.bitSet = bitSet;
                 if(processToken!=null) {
-                	recordProcess.queueProcessRequest(processToken);
+                    recordProcess.queueProcessRequest(processToken);
                     return;
                 }
                 pvRecord.lock();
@@ -976,9 +933,8 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-                channelPutRequester.putDone(status);
-                return;
-            } 
+                channelPutRequester.putDone(status,this);
+            }
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#becomeProcessor()
              */
@@ -999,16 +955,14 @@ public class ChannelServerFactory  {
             @Override
 			public void canNotProcess(String reason) {
             	message(reason,MessageType.error);
-            	channelPutRequester.putDone(cannotProcessErrorStatus);
-                if(lastRequest) destroy();
+            	channelPutRequester.putDone(cannotProcessErrorStatus,this);
 			}
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#recordProcessComplete()
              */
             @Override
             public void recordProcessComplete() {
-                channelPutRequester.putDone(status);
-                if(lastRequest) destroy();
+                channelPutRequester.putDone(status,this);
             }
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#recordProcessResult(org.epics.pvioc.util.RequestResult)
@@ -1035,16 +989,21 @@ public class ChannelServerFactory  {
             @Override
             public void get() {
                 if(isDestroyed.get()) {
-                    channelPutRequester.getDone(requestDestroyedStatus);
+                    channelPutRequester.getDone(requestDestroyedStatus,this,null,null);
                     return;
                 }
                 pvRecord.lock();
                 try {
+                    pvStructure = pvCopy.createPVStructure();
+                    bitSet = new BitSet(pvStructure.getNumberFields());
+                    pvCopy.initCopy(pvStructure, bitSet);
                     getData();
                 } finally {
                     pvRecord.unlock();
                 }
-                channelPutRequester.getDone(okStatus);
+                channelPutRequester.getDone(okStatus,this,pvStructure,bitSet);
+                pvStructure = null;
+                bitSet = null;
                 return;
             }
             /* (non-Javadoc)
@@ -1063,7 +1022,7 @@ public class ChannelServerFactory  {
             }
             
             private void putData() {
-               pvCopy.updateRecord(pvStructure, bitSet);
+               pvCopy.updateMaster(pvStructure, bitSet);
             }
             
             private void getData() {
@@ -1086,22 +1045,16 @@ public class ChannelServerFactory  {
             private ChannelPutGetImpl(
                     ChannelImpl channelImpl,
                     ChannelPutGetRequester channelPutGetRequester,
-                    PVStructure pvPutStructure,
                     PVCopy pvPutCopy,
-                    PVStructure pvGetStructure,
                     PVCopy pvGetCopy,
                     boolean process)
             {
                 this.channelImpl = channelImpl;
                 this.channelPutGetRequester = channelPutGetRequester;
-                this.pvPutStructure = pvPutStructure;
                 this.pvPutCopy = pvPutCopy;
-                this.pvGetStructure = pvGetStructure;
                 this.pvGetCopy = pvGetCopy;
-                putBitSet = new BitSet(pvPutStructure.getNumberFields());
-                pvPutCopy.initCopy(pvPutStructure, putBitSet);
+                pvGetStructure = pvGetCopy.createPVStructure();
                 getBitSet = new BitSet(pvGetStructure.getNumberFields());
-                pvGetCopy.initCopy(pvGetStructure, getBitSet);
                 Status status = okStatus;
                 recordProcess = channelImpl.getPVRecord().getRecordProcess();
                 if(process) {
@@ -1110,24 +1063,40 @@ public class ChannelServerFactory  {
                 } else {
                 	processToken = null;
                 }
-                synchronized(channelImpl.channelPutGetList) {
-                    channelImpl.channelPutGetList.add(this);
-                }
-                channelPutGetRequester.channelPutGetConnect(status, this, pvPutStructure,pvGetStructure);
+                channelPutGetRequester.channelPutGetConnect(status, this,pvPutCopy.getStructure(),pvGetCopy.getStructure());
             }
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
             private final ChannelImpl channelImpl;
             private ChannelPutGetRequester channelPutGetRequester;
-            private final PVStructure pvPutStructure;
             private final PVCopy pvPutCopy;
-            private final PVStructure pvGetStructure;
             private final PVCopy pvGetCopy;
-            private final BitSet putBitSet;
+            private final PVStructure pvGetStructure;
             private final BitSet getBitSet;
             private final RecordProcess recordProcess;
             private final ProcessToken processToken;
-            private Status status = null;
-            private boolean lastRequest = false;
+            private Status status;
+            private PVStructure pvPutStructure = null;
+            private BitSet putBitSet = null;
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#getChannel()
+             */
+            @Override
+            public Channel getChannel() {
+                return channelImpl;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#cancel()
+             */
+            @Override
+            public void cancel() {
+                destroy();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#lastRequest()
+             */
+            @Override
+            public void lastRequest() {}
             
             /* (non-Javadoc)
              * @see org.epics.pvdata.misc.Destroyable#destroy()
@@ -1138,22 +1107,21 @@ public class ChannelServerFactory  {
                 if(processToken!=null) {
                 	recordProcess.releaseProcessToken(processToken);
                 }
-                synchronized(channelImpl.channelPutGetList) {
-                    channelImpl.channelPutGetList.remove(this);
-                }
             }
+            
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelPutGet#putGet(boolean)
+             * @see org.epics.pvaccess.client.ChannelPutGet#putGet(org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
              */
             @Override
-            public void putGet(boolean lastRequest)
+            public void putGet(PVStructure pvPutStructure, BitSet bitSet)
             {
                 if(isDestroyed.get()) {
-                    channelPutGetRequester.putGetDone(requestDestroyedStatus);
+                    channelPutGetRequester.putGetDone(requestDestroyedStatus,this,null,null);
                     return;
                 }
                 status = okStatus;
-                this.lastRequest = lastRequest;
+                this.pvPutStructure = pvPutStructure;
+                this.putBitSet = bitSet;
                 if(processToken!=null) {
                 	recordProcess.queueProcessRequest(processToken);
                     return;
@@ -1165,7 +1133,7 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-                channelPutGetRequester.putGetDone(status);
+                channelPutGetRequester.putGetDone(status,this,pvGetStructure,getBitSet);
             }
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#becomeProcessor()
@@ -1187,8 +1155,7 @@ public class ChannelServerFactory  {
 			public void canNotProcess(String reason) {
             	getData();
             	message(reason,MessageType.error);
-            	channelPutGetRequester.putGetDone(cannotProcessErrorStatus);
-                if(lastRequest) destroy();
+            	channelPutGetRequester.putGetDone(cannotProcessErrorStatus,this,null,null);
 			}
             /* (non-Javadoc)
              * @see org.epics.pvioc.support.RecordProcessRequester#recordProcessComplete()
@@ -1196,8 +1163,7 @@ public class ChannelServerFactory  {
             @Override
             public void recordProcessComplete() {
                 recordProcess.setInactive(processToken);
-                channelPutGetRequester.putGetDone(status);
-                if(lastRequest) destroy();
+                channelPutGetRequester.putGetDone(status,this,pvGetStructure,getBitSet);
             }
             /* (non-Javadoc)
              * @see org.epics.pvaccess.server.ChannelProcessorRequester#recordProcessResult(org.epics.pvdata.pv.Status)
@@ -1225,7 +1191,7 @@ public class ChannelServerFactory  {
             @Override
             public void getGet() {
                 if(isDestroyed.get()) {
-                    channelPutGetRequester.getGetDone(requestDestroyedStatus);
+                    channelPutGetRequester.getGetDone(requestDestroyedStatus,this,null,null);
                     return;
                 }
                 pvRecord.lock();
@@ -1234,7 +1200,7 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-                channelPutGetRequester.getGetDone(okStatus);
+                channelPutGetRequester.getGetDone(okStatus,this,pvGetStructure,getBitSet);
             }
             /* (non-Javadoc)
              * @see org.epics.pvaccess.client.ChannelPutGet#getPut()
@@ -1242,7 +1208,7 @@ public class ChannelServerFactory  {
             @Override
             public void getPut() {
                 if(isDestroyed.get()) {
-                    channelPutGetRequester.getPutDone(requestDestroyedStatus);
+                    channelPutGetRequester.getPutDone(requestDestroyedStatus,this,null,null);
                     return;
                 }
                 pvRecord.lock();
@@ -1251,7 +1217,7 @@ public class ChannelServerFactory  {
                 } finally {
                     pvRecord.unlock();
                 }
-                channelPutGetRequester.getPutDone(okStatus);
+                channelPutGetRequester.getPutDone(okStatus,this,pvPutStructure,putBitSet);
                 
             }
             /* (non-Javadoc)
@@ -1270,150 +1236,29 @@ public class ChannelServerFactory  {
             }
             
             private void putData() {
-                putBitSet.clear();
-                putBitSet.set(0);
-                pvPutCopy.updateRecord(pvPutStructure, putBitSet);
+                pvPutCopy.updateMaster(pvPutStructure, putBitSet);
+                pvPutStructure = null;
+                putBitSet = null;
             }
             
             private void getData() {
-                pvGetCopy.updateCopySetBitSet(pvGetStructure, getBitSet);
                 getBitSet.clear();
-                getBitSet.set(0);
+                pvGetCopy.updateCopySetBitSet(pvGetStructure, getBitSet);
             }
             
             private void getPutData() {
-                pvPutCopy.updateCopySetBitSet(pvPutStructure, putBitSet);
-                putBitSet.clear();
-                putBitSet.set(0);
+                pvPutStructure = pvPutCopy.createPVStructure();
+                putBitSet = new BitSet(pvPutStructure.getNumberFields());
+                pvPutCopy.initCopy(pvPutStructure, putBitSet);
             }
-			@Override
-			public void lock() {
-				pvRecord.lock();
-			}
-			@Override
-			public void unlock() {
-				pvRecord.unlock();
-			}
-        }
-        
-        private class ChannelRPCImpl implements ChannelRPC
-        {
-        	
-			private ChannelRPCImpl(ChannelImpl channelImpl,PVRecord pvRecord,ChannelRPCRequester channelRPCRequester,PVStructure pvRequest)
-        	{
-        		this.channelImpl = channelImpl;
-        		this.pvRecord = pvRecord;
-        		this.channelRPCRequester = channelRPCRequester;
-        		this.pvRequest = pvRequest;
-        	}
-            
-			private boolean init() {
-            	PVString pvFactory = pvRecord.getPVRecordStructure().getPVStructure().getStringField("factoryRPC");
-            	if(pvFactory==null) 
-        		{
-                	String message = " factoryRPC subField not found";
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                    return false;
-        		}
-            	String factoryName = pvFactory.get();
-            	Class<?> supportClass;
-                server = null;
-                Method method = null;
-                try {
-                    supportClass = Class.forName(factoryName);
-                }catch (ClassNotFoundException e) {
-                	String message = " factory " + e.getLocalizedMessage() + " class not found";
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                    return false;
-                }
-               
-                try {
-                    method = supportClass.getDeclaredMethod("create");    
-                } catch (NoSuchMethodException e) {
-                	String message = " create " + e.getLocalizedMessage() + " no factory method";
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                    return false;
-                }
-                if(!Modifier.isStatic(method.getModifiers())) {
-                	String message = " create is not a static method ";
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                    return false;
-                }
-                try {
-                	server = (RPCServer)method.invoke(null);
-                } catch(IllegalAccessException e) {
-                	String message = "create invoke IllegalAccessException  ";
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                    return false;
-                } catch(IllegalArgumentException e) {
-                	String message = "create invoke IllegalArgumentException " + e.getLocalizedMessage();
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                    return false;
-                } catch(InvocationTargetException e) {
-                	String message = " create invoke InvocationTargetException " + e.getLocalizedMessage();
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                    return false;
-                }
-                if(server==null) {
-                	String message = " create server failed ";
-                	Status status = statusCreate.createStatus(StatusType.ERROR, message, null);
-                	channelRPCRequester.channelRPCConnect(status, null);
-                	return false;
-                }
-               
-                Status status =server.initialize(channelImpl, pvRecord, channelRPCRequester, pvRequest);
-                if(!status.isOK()) {
-                	channelRPCRequester.channelRPCConnect(status,null);
-                	return false;
-                }
-                synchronized(channelRPCList) {
-                	channelRPCList.add(this);
-                }
-                channelRPCRequester.channelRPCConnect(status, this);
-            	return true;
+            @Override
+            public void lock() {
+                pvRecord.lock();
             }
-            private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
-            private ChannelImpl channelImpl;
-            private PVRecord pvRecord;
-            private ChannelRPCRequester channelRPCRequester;
-            private PVStructure pvRequest;
-            
-            private RPCServer server = null;
-			/* (non-Javadoc)
-			 * @see org.epics.pvdata.misc.Destroyable#destroy()
-			 */
-			@Override
-			public void destroy() {
-				if(!isDestroyed.compareAndSet(false, true)) return;
-				if(server!=null) server.destroy();
-				synchronized(channelRPCList) {
-                	channelRPCList.remove(this);
-                }
-			}
-			/* (non-Javadoc)
-			 * @see org.epics.pvaccess.client.ChannelRPC#request(org.epics.pvdata.pv.PVStructure, boolean)
-			 */
-			@Override
-			public void request(PVStructure pvArgument, boolean lastRequest) {
-				server.request(pvArgument);
-				if(lastRequest) destroy();
-			}
-
-			@Override
-			public void lock() {
-				pvRecord.lock();
-			}
-			@Override
-			public void unlock() {
-				pvRecord.unlock();
-			}
+            @Override
+            public void unlock() {
+               pvRecord.unlock();
+            }
         }
         
         private static class ChannelScalarArrayImpl implements ChannelArray {
@@ -1426,11 +1271,7 @@ public class ChannelServerFactory  {
                 this.pvArray = pvArray;
                 this.pvCopy = pvCopy;
                 pvRecord = channelImpl.pvRecord;
-
-                synchronized(channelImpl.channelArrayList) {
-                    channelImpl.channelArrayList.add(this);
-                }
-                channelArrayRequester.channelArrayConnect(okStatus, this, pvCopy);
+                channelArrayRequester.channelArrayConnect(okStatus, this, pvArray.getArray());
             }
 
             private ChannelImpl channelImpl;
@@ -1439,23 +1280,42 @@ public class ChannelServerFactory  {
             private PVScalarArray pvCopy;
             private PVRecord pvRecord;
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
+            
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#getChannel()
+             */
+            @Override
+            public Channel getChannel() {
+                return channelImpl;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#cancel()
+             */
+            @Override
+            public void cancel() {
+                destroy();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#lastRequest()
+             */
+            @Override
+            public void lastRequest() {}
+            
             /* (non-Javadoc)
              * @see org.epics.pvdata.misc.Destroyable#destroy()
              */
             @Override
             public void destroy() {
                 if(!isDestroyed.compareAndSet(false, true)) return;
-                synchronized(channelImpl.channelArrayList) {
-                    channelImpl.channelArrayList.remove(this);
-                }
             }
+
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelArray#getArray(boolean, int, int)
+             * @see org.epics.pvaccess.client.ChannelArray#getArray(int, int, int)
              */
-            @Override
-            public void getArray(boolean lastRequest, int offset, int count) {
+            public void getArray(int offset, int count,int stride) {
                 if(isDestroyed.get()) {
-                	channelArrayRequester.getArrayDone(requestDestroyedStatus);
+                	channelArrayRequester.getArrayDone(requestDestroyedStatus,this,null);
                 	return;
                 }
                 if(count<=0) count = pvArray.getLength() - offset;
@@ -1466,55 +1326,73 @@ public class ChannelServerFactory  {
                 } finally  {
                     pvRecord.unlock();
                 }
-                channelArrayRequester.getArrayDone(okStatus);
-                if(lastRequest) destroy();
+                Status status = okStatus;
+                if(stride!=1) status = strideNotSupportedStatus;
+                channelArrayRequester.getArrayDone(status,this,pvCopy);
             }
+           
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelArray#putArray(boolean, int, int)
+             * @see org.epics.pvaccess.client.ChannelArray#putArray(org.epics.pvdata.pv.PVArray, int, int, int)
              */
-            @Override
-            public void putArray(boolean lastRequest, int offset, int count) {
+            public void putArray(PVArray putArray,int offset, int count,int stride) {
                 if(isDestroyed.get()) {
-                	channelArrayRequester.getArrayDone(requestDestroyedStatus);
+                	channelArrayRequester.putArrayDone(requestDestroyedStatus,this);
                 	return;
                 }
-                if(count<=0) count = pvCopy.getLength();
+                if(count<=0) count = pvArray.getLength() - offset;
                 pvRecord.lock();
                 try {
-                    convert.copyScalarArray(pvCopy, 0, pvArray, offset, count);
+                    convert.copyScalarArray((PVScalarArray)putArray, 0, pvArray, offset, count);
                 } finally  {
                     pvRecord.unlock();
                 }
-                channelArrayRequester.putArrayDone(okStatus);
-                if(lastRequest) destroy();
+                Status status = okStatus;
+                if(stride!=1) status = strideNotSupportedStatus;
+                channelArrayRequester.putArrayDone(status,this);
             }
+			
 			/* (non-Javadoc)
-			 * @see org.epics.pvaccess.client.ChannelArray#setLength(boolean, int, int)
+			 * @see org.epics.pvaccess.client.ChannelArray#getLength()
 			 */
 			@Override
-			public void setLength(boolean lastRequest, int length, int capacity) {
+			public void getLength() {
+			    int length = 0;
+			    int capacity = 0; 
+			    pvRecord.lock();
+			    try {
+			        length = pvArray.getLength();
+			        capacity = pvArray.getCapacity();
+			    } finally {
+			        pvRecord.unlock();
+			    }
+			    channelArrayRequester.getLengthDone(okStatus, this,length,capacity);
+			}
+            /* (non-Javadoc)
+			 * @see org.epics.pvaccess.client.ChannelArray#setLength(int, int)
+			 */
+			public void setLength(int length, int capacity) {
 				if(isDestroyed.get()) {
-                	channelArrayRequester.setLengthDone(requestDestroyedStatus);
+                	channelArrayRequester.setLengthDone(requestDestroyedStatus,this);
                 	return;
                 }
 				if(capacity>=0 && !pvArray.isCapacityMutable()) {
-					channelArrayRequester.setLengthDone(capacityImmutableStatus);
+					channelArrayRequester.setLengthDone(capacityImmutableStatus,this);
 					return;
 				}
 				pvRecord.lock();
                 try {
-                    if(length>=0) {
-                    	if(pvArray.getLength()!=length) pvArray.setLength(length);
-                    }
                     if(capacity>=0) {
                     	if(pvArray.getCapacity()!=capacity) pvArray.setCapacity(capacity);
+                    }
+                    if(length>=0) {
+                    	if(pvArray.getLength()!=length) pvArray.setLength(length);
                     }
                 } finally  {
                     pvRecord.unlock();
                 }
-                channelArrayRequester.setLengthDone(okStatus);
-                if(lastRequest) destroy();
+                channelArrayRequester.setLengthDone(okStatus,this);
 			}
+			
 			@Override
 			public void lock() {
 				pvRecord.lock();
@@ -1535,11 +1413,7 @@ public class ChannelServerFactory  {
                 this.pvArray = pvArray;
                 this.pvCopy = pvCopy;
                 pvRecord = channelImpl.pvRecord;
-
-                synchronized(channelImpl.channelArrayList) {
-                    channelImpl.channelArrayList.add(this);
-                }
-                channelArrayRequester.channelArrayConnect(okStatus, this, pvCopy);
+                channelArrayRequester.channelArrayConnect(okStatus, this, pvArray.getArray());
             }
 
             private ChannelImpl channelImpl;
@@ -1548,23 +1422,41 @@ public class ChannelServerFactory  {
             private PVStructureArray pvCopy;
             private PVRecord pvRecord;
             private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#getChannel()
+             */
+            @Override
+            public Channel getChannel() {
+                return channelImpl;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#cancel()
+             */
+            @Override
+            public void cancel() {
+                destroy();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#lastRequest()
+             */
+            @Override
+            public void lastRequest() {}
+            
             /* (non-Javadoc)
              * @see org.epics.pvdata.misc.Destroyable#destroy()
              */
             @Override
             public void destroy() {
                 if(!isDestroyed.compareAndSet(false, true)) return;
-                synchronized(channelImpl.channelArrayList) {
-                    channelImpl.channelArrayList.remove(this);
-                }
             }
+           
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelArray#getArray(boolean, int, int)
+             * @see org.epics.pvaccess.client.ChannelArray#getArray(int, int, int)
              */
-            @Override
-            public void getArray(boolean lastRequest, int offset, int count) {
+            public void getArray(int offset, int count,int stride) {
                 if(isDestroyed.get()) {
-                	channelArrayRequester.getArrayDone(requestDestroyedStatus);
+                	channelArrayRequester.getArrayDone(requestDestroyedStatus,this,null);
                 	return;
                 }
                 if(count<=0) count = pvArray.getLength();
@@ -1574,39 +1466,49 @@ public class ChannelServerFactory  {
                 } finally  {
                     pvRecord.unlock();
                 }
-                channelArrayRequester.getArrayDone(okStatus);
-                if(lastRequest) destroy();
+                Status status = okStatus;
+                if(offset !=0 || count!= 0 || stride !=1) status = offsetCountStrideNotSupportedStatus;
+                channelArrayRequester.getArrayDone(status,this,pvCopy);
             }
+            
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelArray#putArray(boolean, int, int)
+             * @see org.epics.pvaccess.client.ChannelArray#putArray(org.epics.pvdata.pv.PVArray, int, int, int)
              */
-            @Override
-            public void putArray(boolean lastRequest, int offset, int count) {
+            public void putArray(PVArray pvCopy, int offset, int count, int stride) {
                 if(isDestroyed.get()) {
-                	channelArrayRequester.getArrayDone(requestDestroyedStatus);
+                	channelArrayRequester.putArrayDone(requestDestroyedStatus,this);
                 	return;
                 }
                 if(count<=0) count = pvCopy.getLength();
                 pvRecord.lock();
                 try {
-                	convert.copyStructureArray(pvCopy, pvArray);
+                	convert.copyStructureArray((PVStructureArray)pvCopy, pvArray);
                 } finally  {
                     pvRecord.unlock();
                 }
-                channelArrayRequester.putArrayDone(okStatus);
-                if(lastRequest) destroy();
+                Status status = okStatus;
+                if(offset !=0 || count!= 0 || stride !=1) status = offsetCountStrideNotSupportedStatus;
+                channelArrayRequester.putArrayDone(status,this);
             }
+			
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelArray#getLength()
+             */
+            public void getLength()
+            {
+                channelArrayRequester.getLengthDone(okStatus, this, pvArray.getLength(), pvArray.getCapacity());
+            }
+            
 			/* (non-Javadoc)
-			 * @see org.epics.pvaccess.client.ChannelArray#setLength(boolean, int, int)
+			 * @see org.epics.pvaccess.client.ChannelArray#setLength(int, int)
 			 */
-			@Override
-			public void setLength(boolean lastRequest, int length, int capacity) {
+			public void setLength(int length, int capacity) {
 				if(isDestroyed.get()) {
-                	channelArrayRequester.setLengthDone(requestDestroyedStatus);
+                	channelArrayRequester.setLengthDone(requestDestroyedStatus,this);
                 	return;
                 }
 				if(capacity>=0 && !pvArray.isCapacityMutable()) {
-					channelArrayRequester.setLengthDone(capacityImmutableStatus);
+					channelArrayRequester.setLengthDone(capacityImmutableStatus,this);
 					return;
 				}
 				pvRecord.lock();
@@ -1620,13 +1522,18 @@ public class ChannelServerFactory  {
                 } finally  {
                     pvRecord.unlock();
                 }
-                channelArrayRequester.setLengthDone(okStatus);
-                if(lastRequest) destroy();
+                channelArrayRequester.setLengthDone(okStatus,this);
 			}
+			/* (non-Javadoc)
+			 * @see org.epics.pvaccess.client.Lockable#lock()
+			 */
 			@Override
 			public void lock() {
 				pvRecord.lock();
 			}
+			/* (non-Javadoc)
+			 * @see org.epics.pvaccess.client.Lockable#unlock()
+			 */
 			@Override
 			public void unlock() {
 				pvRecord.unlock();

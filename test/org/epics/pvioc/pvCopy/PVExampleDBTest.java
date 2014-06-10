@@ -7,7 +7,8 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequest;
+import org.epics.pvdata.copy.CreateRequest;
+import org.epics.pvdata.copy.*;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVStructure;
@@ -72,9 +73,9 @@ System.out.println(pvRecord);
 System.out.println(pvRequest);
         assertTrue(pvRequest!=null);
         System.out.println("pvRequest " + pvRequest);
-        PVCopy pvPutCopy = PVCopyFactory.create(pvRecord, pvRequest, "putField");
+        PVCopy pvPutCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest, "putField");
 System.out.println(pvPutCopy.dump());
-        PVCopy pvGetCopy = PVCopyFactory.create(pvRecord, pvRequest, "getField");
+        PVCopy pvGetCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest, "getField");
 System.out.println(pvGetCopy.dump());
         PVStructure pvPutStructure = pvPutCopy.createPVStructure();
 System.out.println(pvPutStructure);

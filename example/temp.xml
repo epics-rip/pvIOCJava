@@ -27,16 +27,6 @@
          <scalar name = "expression">(value+inc)&lt;=max ? value+inc : min</scalar>
        </structure>
     </structure>
-    <structure name = "link" extends = "generic" >
-        <structure name = "0" extends = "dbOutputLink">
-            <scalar name = "wait" scalarType = "boolean" >true</scalar>
-             <scalar name = "pvname">counterOutput</scalar>
-             <scalar name = "process">true</scalar>
-        </structure>
-        <structure name = "1" extends = "dbProcessLink">
-            <scalar name = "pvname">counterInput</scalar>
-        </structure>
-    </structure>
 </record>
 
 </database>

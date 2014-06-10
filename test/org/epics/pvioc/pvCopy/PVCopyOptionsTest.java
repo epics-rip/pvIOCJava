@@ -7,7 +7,9 @@ package org.epics.pvioc.pvCopy;
 
 import junit.framework.TestCase;
 
-import org.epics.pvaccess.client.CreateRequest;
+import org.epics.pvdata.copy.CreateRequest;
+import org.epics.pvdata.copy.PVCopy;
+import org.epics.pvdata.copy.PVCopyFactory;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
@@ -67,17 +69,17 @@ public class PVCopyOptionsTest extends TestCase {
         PVStructure pvOptions = (PVStructure)pvRequest.getSubField("record._options");
         assertTrue(pvOptions!=null);
 //System.out.println("options " + pvOptions);
-        pvCopy = PVCopyFactory.create(pvRecord, pvRequest,"field");
+        pvCopy = PVCopyFactory.create(pvRecord.getPVRecordStructure().getPVStructure(), pvRequest,"field");
 //System.out.println(pvCopy.dump());
         pvCopyStructure = pvCopy.createPVStructure();
         PVField pvField = pvCopyStructure.getSubField("timeStamp");
         int offset = pvField.getFieldOffset();
-        pvOptions = pvCopy.getOptions(pvCopyStructure, offset);
+        pvOptions = pvCopy.getOptions( offset);
         assertTrue(pvOptions!=null);
 //System.out.println("options " + pvOptions);
         pvField = pvCopyStructure.getSubField("power.value");
         offset = pvField.getFieldOffset();
-        pvOptions = pvCopy.getOptions(pvCopyStructure, offset);
+        pvOptions = pvCopy.getOptions(offset);
         assertTrue(pvOptions!=null);
 //System.out.println("options " + pvOptions);
     }

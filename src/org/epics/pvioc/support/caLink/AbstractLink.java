@@ -7,9 +7,9 @@ package org.epics.pvioc.support.caLink;
 
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvaccess.client.ChannelAccess;
-import org.epics.pvaccess.client.ChannelAccessFactory;
 import org.epics.pvaccess.client.ChannelProvider;
+import org.epics.pvaccess.client.ChannelProviderRegistry;
+import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.misc.ThreadPriority;
@@ -79,7 +79,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
      * The channel to which this link is connected.
      */
     protected Channel channel = null;
-    protected static final ChannelAccess channelAccess = ChannelAccessFactory.getChannelAccess();
+    protected static final ChannelProviderRegistry channelProviderRegistry = ChannelProviderRegistryFactory.getChannelProviderRegistry();
     protected ChannelProvider channelProvider = null;
     
     private AfterStartNode afterStartNode = AfterStartFactory.allocNode(this);
@@ -135,7 +135,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
     public void start(AfterStart afterStart) {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         String providerName = providerPV.get();
-        channelProvider = channelAccess.getProvider(providerName);
+        channelProvider = channelProviderRegistry.getProvider(providerName);
         if(channelProvider==null) {
             message("providerName " + providerName +  " not found",MessageType.error);
             return;
