@@ -10,6 +10,7 @@ import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVStructure;
+import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvioc.database.BasePVRecord;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
@@ -26,16 +27,23 @@ import org.epics.pvioc.support.basic.GenericFactory;
  * @author mrk
  *
  */
-public class VarientUnionArrayExampleRecord {
+public class StructureArrayExampleRecord {
     private static final FieldCreate fieldCreate = FieldFactory.getFieldCreate();
   
     public static void start(String recordName) {
-        Field[] fields = new Field[1];
-        String[] fieldNames = new String[1];
-        fields[0] = fieldCreate.createVariantUnionArray();
-        fieldNames[0] = "value";
+        Field[] fields = new Field[2];
+        String[] fieldNames = new String[2];
+        fields[0] = fieldCreate.createScalar(ScalarType.pvString);
+        fieldNames[0] = "name";
+        fields[1] = fieldCreate.createScalar(ScalarType.pvString);
+        fieldNames[1] = "value";
+      
+        Field[] topFields = new Field[1];
+        String[] topNames = new String[1];
+        topFields[0] = fieldCreate.createStructureArray(fieldCreate.createStructure(fieldNames, fields));
+        topNames[0] = "value";
         PVStructure pvStructure = PVDataFactory.getPVDataCreate().createPVStructure(
-                fieldCreate.createStructure(fieldNames, fields));
+                fieldCreate.createStructure(topNames, topFields));
         PVRecord pvRecord = new BasePVRecord(recordName,pvStructure);
         Support support = GenericFactory.create(pvRecord.getPVRecordStructure());
         pvRecord.getPVRecordStructure().setSupport(support);

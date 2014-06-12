@@ -55,6 +55,7 @@ import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.StatusCreate;
 import org.epics.pvdata.pv.Type;
+import org.epics.pvdata.pv.*;
 import org.epics.pvdata.copy.*;
 import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
@@ -89,13 +90,11 @@ public class ChannelServerFactory  {
     private static final Status okStatus = statusCreate.getStatusOK();
     private static final Status notFoundStatus = statusCreate.createStatus(StatusType.ERROR, "channel not found", null);
     private static final Status strideNotSupportedStatus = statusCreate.createStatus(StatusType.WARNING, "stride not supported", null);
-    private static final Status offsetCountStrideNotSupportedStatus = statusCreate.createStatus(StatusType.WARNING, "ioffset, count, and stride not supported", null);
     private static final Status capacityImmutableStatus = statusCreate.createStatus(StatusType.ERROR, "capacity is immutable", null);
     private static final Status subFieldDoesNotExistStatus = statusCreate.createStatus(StatusType.ERROR, "subField does not exist", null);
     private static final Status cannotProcessErrorStatus = statusCreate.createStatus(StatusType.ERROR, "can not process", null);
     private static final Status cannotProcessWarningStatus = statusCreate.createStatus(StatusType.WARNING, "can not process", null);
     private static final Status subFieldNotArrayStatus = statusCreate.createStatus(StatusType.ERROR, "subField is not an array", null);
-    private static final Status subFieldNotSupportedArrayStatus = statusCreate.createStatus(StatusType.ERROR, "subField is not a supported array type", null);
     private static final Status channelDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "channel destroyed", null);
     private static final Status requestDestroyedStatus = statusCreate.createStatus(StatusType.ERROR, "request destroyed", null);
     private static final Status illegalRequestStatus = statusCreate.createStatus(StatusType.ERROR, "illegal pvRequest", null);
@@ -515,7 +514,9 @@ public class ChannelServerFactory  {
                 return new ChannelScalarArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
             }
             if(pvField.getField().getType()==Type.unionArray) {
-                channelArrayRequester.channelArrayConnect(subFieldNotSupportedArrayStatus, null, null);
+                PVUnionArray pvArray = (PVUnionArray)pvField;
+                PVUnionArray pvCopy = pvDataCreate.createPVUnionArray(pvArray.getUnionArray());
+                return new ChannelUnionArrayImpl(this,channelArrayRequester,pvArray,pvCopy);
             }
             channelArrayRequester.channelArrayConnect(subFieldNotArrayStatus, null, null);
             return null;
@@ -1322,7 +1323,7 @@ public class ChannelServerFactory  {
                 pvRecord.lock();
                 try {
                     int len = convert.copyScalarArray(pvArray, offset, pvCopy, 0, count);
-                    if(!pvCopy.isImmutable()) pvCopy.setLength(len);
+                    if(len>0) pvCopy.setLength(len);
                 } finally  {
                     pvRecord.unlock();
                 }
@@ -1459,15 +1460,19 @@ public class ChannelServerFactory  {
                 	channelArrayRequester.getArrayDone(requestDestroyedStatus,this,null);
                 	return;
                 }
-                if(count<=0) count = pvArray.getLength();
                 pvRecord.lock();
                 try {
-                    convert.copyStructureArray(pvArray, pvCopy);
+                    if(count==0) count = pvArray.getLength() - offset;
+                    if(count>0) {
+                        int len = convert.copyStructureArray(pvArray,offset, pvCopy,0,count);
+                        if(len>0) pvCopy.setLength(len);
+                    }
+
                 } finally  {
                     pvRecord.unlock();
                 }
                 Status status = okStatus;
-                if(offset !=0 || count!= 0 || stride !=1) status = offsetCountStrideNotSupportedStatus;
+                if(stride!=1) status = strideNotSupportedStatus;
                 channelArrayRequester.getArrayDone(status,this,pvCopy);
             }
             
@@ -1479,15 +1484,14 @@ public class ChannelServerFactory  {
                 	channelArrayRequester.putArrayDone(requestDestroyedStatus,this);
                 	return;
                 }
-                if(count<=0) count = pvCopy.getLength();
                 pvRecord.lock();
                 try {
-                	convert.copyStructureArray((PVStructureArray)pvCopy, pvArray);
+                	convert.copyStructureArray((PVStructureArray)pvCopy,0 ,pvArray,offset,count);
                 } finally  {
                     pvRecord.unlock();
                 }
                 Status status = okStatus;
-                if(offset !=0 || count!= 0 || stride !=1) status = offsetCountStrideNotSupportedStatus;
+                if(stride!=1) status = strideNotSupportedStatus;
                 channelArrayRequester.putArrayDone(status,this);
             }
 			
@@ -1548,5 +1552,154 @@ public class ChannelServerFactory  {
 				pvRecord.unlock();
 			}
         }
+        
+        private static class ChannelUnionArrayImpl implements ChannelArray {
+            private ChannelUnionArrayImpl(ChannelImpl channelImpl,
+                    ChannelArrayRequester channelArrayRequester,
+                    PVUnionArray pvArray,PVUnionArray pvCopy)
+            {
+                this.channelImpl = channelImpl;
+                this.channelArrayRequester = channelArrayRequester;
+                this.pvArray = pvArray;
+                this.pvCopy = pvCopy;
+                pvRecord = channelImpl.pvRecord;
+                channelArrayRequester.channelArrayConnect(okStatus, this, pvArray.getArray());
+            }
+
+            private ChannelImpl channelImpl;
+            private ChannelArrayRequester channelArrayRequester;
+            private PVUnionArray pvArray;
+            private PVUnionArray pvCopy;
+            private PVRecord pvRecord;
+            private final AtomicBoolean isDestroyed = new AtomicBoolean(false);
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#getChannel()
+             */
+            @Override
+            public Channel getChannel() {
+                return channelImpl;
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#cancel()
+             */
+            @Override
+            public void cancel() {
+                destroy();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelRequest#lastRequest()
+             */
+            @Override
+            public void lastRequest() {}
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvdata.misc.Destroyable#destroy()
+             */
+            @Override
+            public void destroy() {
+                if(!isDestroyed.compareAndSet(false, true)) return;
+            }
+           
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelArray#getArray(int, int, int)
+             */
+            public void getArray(int offset, int count,int stride) {
+                if(isDestroyed.get()) {
+                    channelArrayRequester.getArrayDone(requestDestroyedStatus,this,null);
+                    return;
+                }
+                pvRecord.lock();
+                try {
+                    if(count==0) count = pvArray.getLength() - offset;
+                    if(count>0) {
+                        int len = convert.copyUnionArray(pvArray,offset, pvCopy,0,count);
+                        if(len>0) pvCopy.setLength(len);
+                    }
+                } finally  {
+                    pvRecord.unlock();
+                }
+                Status status = okStatus;
+                if(stride!=1) status = strideNotSupportedStatus;
+                channelArrayRequester.getArrayDone(status,this,pvCopy);
+            }
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelArray#putArray(org.epics.pvdata.pv.PVArray, int, int, int)
+             */
+            public void putArray(PVArray pvCopy, int offset, int count, int stride) {
+                if(isDestroyed.get()) {
+                    channelArrayRequester.putArrayDone(requestDestroyedStatus,this);
+                    return;
+                }
+                pvRecord.lock();
+                try {
+                    convert.copyUnionArray((PVUnionArray)pvCopy,0, pvArray,offset,count);
+                } finally  {
+                    pvRecord.unlock();
+                }
+                Status status = okStatus;
+                if(stride!=1) status = strideNotSupportedStatus;
+                channelArrayRequester.putArrayDone(status,this);
+            }
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelArray#getLength()
+             */
+            public void getLength()
+            {
+               int length = 0;
+               int capacity = 0;
+               pvRecord.lock();
+               try {
+                   length = pvArray.getLength();
+                   capacity = pvArray.getCapacity();
+               }finally  {
+                   pvRecord.unlock();
+               }
+               channelArrayRequester.getLengthDone(okStatus, this,length,capacity);
+            }
+            
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.ChannelArray#setLength(int, int)
+             */
+            public void setLength(int length, int capacity) {
+                if(isDestroyed.get()) {
+                    channelArrayRequester.setLengthDone(requestDestroyedStatus,this);
+                    return;
+                }
+                if(capacity>=0 && !pvArray.isCapacityMutable()) {
+                    channelArrayRequester.setLengthDone(capacityImmutableStatus,this);
+                    return;
+                }
+                pvRecord.lock();
+                try {
+                    if(length>=0) {
+                        if(pvArray.getLength()!=length) pvArray.setLength(length);
+                    }
+                    if(capacity>=0) {
+                        if(pvArray.getCapacity()!=capacity) pvArray.setCapacity(capacity);
+                    }
+                } finally  {
+                    pvRecord.unlock();
+                }
+                channelArrayRequester.setLengthDone(okStatus,this);
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.Lockable#lock()
+             */
+            @Override
+            public void lock() {
+                pvRecord.lock();
+            }
+            /* (non-Javadoc)
+             * @see org.epics.pvaccess.client.Lockable#unlock()
+             */
+            @Override
+            public void unlock() {
+                pvRecord.unlock();
+            }
+        }
+
     }
 }

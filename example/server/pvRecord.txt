@@ -2,3 +2,4 @@ variantUnion,org.epics.pvioc.example.VarientUnionExampleRecord
 regularUnion,org.epics.pvioc.example.RegularUnionExampleRecord
 variantUnionArray,org.epics.pvioc.example.VarientUnionArrayExampleRecord
 regularUnionArray,org.epics.pvioc.example.RegularUnionArrayExampleRecord
+structureArray,org.epics.pvioc.example.StructureArrayExampleRecord
