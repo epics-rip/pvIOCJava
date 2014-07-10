@@ -38,7 +38,7 @@
 <h1>EPICS pvIOCJava</h1>
 <!-- Maturity: Working Draft or Request for Comments, or Recommendation, and date. -->
 
-<h2 class="nocount">EPICS v4 Working Group, Working Draft, 04-Mar-2014</h2>
+<h2 class="nocount">EPICS v4 Working Group, Working Draft, 07-July-2014</h2>
 <dl>
   <dt>Latest version:</dt>
     <dd><a
@@ -55,7 +55,6 @@
   <dt>Editors:</dt>
     <dd>Marty Kraimer, BNL</dd>
 </dl>
-</div>
 
 <h2 class="nocount">Abstract</h2>
 
@@ -67,44 +66,9 @@ set of products:<br />
 
 <h2 class="nocount">Status of this Document</h2>
 
-<p>This is the 04-Mar-2014 version of the Java implementation of pvIOC. It is a
+<p>This is the 07-July-2014 version of the Java implementation of pvIOC. It is a
 complete implementation of pvIOC as currently defined.</p>
-<p>The primary changes for this version are:</p>
-<dl>
-   <dt>pvCopy</dt>
-     <dd>Previously structures with a single sub-field were "collapsed".
-      This is no longer done.
-     </dd>
-    <dt>monitor onChange for timeStamp</dt>
-      <dd>Previously if only the top level timeStamp changes then the default was to not
-     raise a monitor. This is no longer true. A client can provide options to get
-     the previous behavior.
-      </dd>
-</dl>
-<p><b>TODO</b></p>
-<dl>
-   <dt>xml</dt>
-     <dd>The sax xml parser should be changed so that it no longer
-     uses the pvData methods that should be removed.
-     This includes: PVAuxInfo, PVField::replacePVField,
-     PVStructure::appendPVField,
-    PVStructure::appendPVFields,
-    PVStructure::removePVField,
-    PVStructure::getExtendsStructureName, and
-    PVStructure::putExtendsStructureName.
-    This will also require changes in the pvDatabase and install.
-     </dd>
-    <dt>union</dt>
-     <dd>Prepare some test under xmltest that use the new union pvType.
-     Also change RecordDumpFactory,
-     which currently implements channelRPC,  so that it uses channelPutGet
-    with the result being a union.
-     </dd>
-    <dt>documantation</dt>
-    <dd>
-       This document requires more work to make it easier to understand.
-    </dd>
-</dl>
+</div>
 
 <div id="toc">
 <h2 class="nocount" style="page-break-before: always">Table of Contents</h2>
@@ -112,7 +76,6 @@ complete implementation of pvIOC as currently defined.</p>
 
 <div id="contents" class="contents">
 
-<div>
 <h2>Introduction</h2>
 
 <p>This product is available via an <a
@@ -222,7 +185,7 @@ of using <b>swtshell</b> itself. Please see it for getting started.</p>
 <p>
 <b>org.epics.pvioc.JavaIOC</b> is a Java main program that does the following:</p>
 <ul>
-  <li>Starts and instance of a pvIOC.</li>
+  <li>Starts an instance of a pvIOC.</li>
   <li>Reads and installs structures and records into the running pvIOC.</li>
   <li>Dumps the resulting structure and record definitions.</li>
   <li>Starts servers.</li>
@@ -244,6 +207,13 @@ of using <b>swtshell</b> itself. Please see it for getting started.</p>
   <li>-server <br />
     followed by a filenames. Each field is a list of servers to start.
   </li>
+  <li>-rpcService<br />
+    followed by a filename. The file ls a list of "serviceName,XXXService" pairs.
+   </li>
+  <li>-pvRecord<br/>
+    followed by a filename. The file ls a list of "recordName,XXXRecord pairs.
+     There is an example file in example/server/pvRecord.txt.
+  </li>
   <li>-run<br/>
      Run forever as a standalone process.</li>
 </ul>
@@ -262,7 +232,12 @@ JavaIOC:</p>
       structure definitions for the javaIOC. It also loads the xml definitions
       from pvData.</dd>
   <dt>example</dt>
-    <dd>This directory contains the example xml files.</dd>
+    <dd>This directory contains the example xml files.
+    It also has a subdirectory named server with a file named pvRecord.txt.
+    This has a file that can be used with the -pvRecord option for starting a JavaIOC.
+    It creates a set of records with no special support.
+     This all data changes are made by clients.
+    </dd>
   <dt>xmltest</dt>
     <dd>This directory has xml files for testing.</dd>
   <dt>service</dt>
@@ -1148,39 +1123,10 @@ pvIOCJava.</p>
 <p>NOTE: The environment variables IOCNAME, PVDATA, PVACCESS. and JAVAIOC
 should be defined.</p>
 
-<p>pvIOCJava is developed as part of an eclipse project. It uses two other
-eclipse projects: pvDataJava and pvAccessJava. One way to start it is to check
-out the eclipse projects and then run JavaIOC as a java application. The
-following assumes that you have eclipse installed and have imported pvIOCJava
-into a project named "pvIOCJava". In addition project pvDataJava and
-pvAccessJava must also exist as eclipse projects.</p>
+<p>How to run pvIOCJava was described in the "Getting Started"
+subsection of "Part I: pvIOCJava - Brief Description".
 
-<p>JavaIOC does the following:</p>
-<ul>
-  <li>Reads xml files containing structure and record definitions.</li>
-  <li>Dumps the resulting structure and record definitions.</li>
-  <li>Starts servers.</li>
-  <li>Starts running the javaIOC.</li>
-</ul>
 
-<p>The arguments to JavaIOC can be any combination of:</p>
-<ul>
-  <li>-structures<br />
-    followed by filenames of files containing XML structure definitions.</li>
-  <li>-records<br />
-    followed by filenames of files containing XML record definitions.</li>
-  <li>-dumpStructures<br />
-    dump the structure, create, and support definitions</li>
-  <li>-dumpRecords<br />
-    dump the record instances</li>
-  <li>-server 
-    <p>followed by filenames. Each field is a list of servers to start. See
-    javaIOC/server for a list of the server files supplied by javaIOC
-    itself.</p>
-  </li>
-  <li>-run<br />
-    Stop processing arguments and run forever.</li>
-</ul>
 
 <p>See the <b>swtshell</b> documentation for how to use JavaIOC.</p>
 
@@ -6092,7 +6038,6 @@ double</b> are common to both. A V3 <b>string</b> becomes a javaIOC
 <b>ENUM</b> becomes a javaIOC enumerated structure. V3 properties (status,
 severity, timeStamp, display limits, and control limits) become standard pvData
 structures (alarm, timeStamp, display, and control).</p>
-</div>
 </div>
 </body>
 </html>

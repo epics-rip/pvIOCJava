@@ -22,9 +22,7 @@ import org.epics.pvioc.support.SupportProcessRequester;
 import org.epics.pvioc.util.RequestResult;
 
 /**
- * channelRPC support for returning the PVStructure for a PVRecord or a PVStructure from a database.
- * It accepts an NTNameValue structure and returns the PVStructure. The names supported are: "database", "record", and "structure".
- * Exactly one of "record" and "structure" must be specified.
+ * Creates a record that has a value field that is a regular union array.
  * @author mrk
  *
  */

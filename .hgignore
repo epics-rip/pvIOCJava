@@ -4,3 +4,4 @@ target
 documentation/html
 syntax: regexp
 ^target$
+.classpath
