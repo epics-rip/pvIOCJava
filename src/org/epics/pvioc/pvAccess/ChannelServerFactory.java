@@ -90,7 +90,7 @@ public class ChannelServerFactory  {
     private static final Status okStatus = statusCreate.getStatusOK();
     private static final Status notFoundStatus = statusCreate.createStatus(StatusType.ERROR, "channel not found", null);
     private static final Status strideNotSupportedStatus = statusCreate.createStatus(StatusType.WARNING, "stride not supported", null);
-    private static final Status capacityImmutableStatus = statusCreate.createStatus(StatusType.ERROR, "capacity is immutable", null);
+    //private static final Status capacityImmutableStatus = statusCreate.createStatus(StatusType.ERROR, "capacity is immutable", null);
     private static final Status subFieldDoesNotExistStatus = statusCreate.createStatus(StatusType.ERROR, "subField does not exist", null);
     private static final Status cannotProcessErrorStatus = statusCreate.createStatus(StatusType.ERROR, "can not process", null);
     private static final Status cannotProcessWarningStatus = statusCreate.createStatus(StatusType.WARNING, "can not process", null);
@@ -1358,33 +1358,24 @@ public class ChannelServerFactory  {
 			@Override
 			public void getLength() {
 			    int length = 0;
-			    int capacity = 0; 
 			    pvRecord.lock();
 			    try {
 			        length = pvArray.getLength();
-			        capacity = pvArray.getCapacity();
 			    } finally {
 			        pvRecord.unlock();
 			    }
-			    channelArrayRequester.getLengthDone(okStatus, this,length,capacity);
+			    channelArrayRequester.getLengthDone(okStatus, this,length);
 			}
             /* (non-Javadoc)
-			 * @see org.epics.pvaccess.client.ChannelArray#setLength(int, int)
+			 * @see org.epics.pvaccess.client.ChannelArray#setLength(int)
 			 */
-			public void setLength(int length, int capacity) {
+			public void setLength(int length) {
 				if(isDestroyed.get()) {
                 	channelArrayRequester.setLengthDone(requestDestroyedStatus,this);
                 	return;
                 }
-				if(capacity>=0 && !pvArray.isCapacityMutable()) {
-					channelArrayRequester.setLengthDone(capacityImmutableStatus,this);
-					return;
-				}
 				pvRecord.lock();
                 try {
-                    if(capacity>=0) {
-                    	if(pvArray.getCapacity()!=capacity) pvArray.setCapacity(capacity);
-                    }
                     if(length>=0) {
                     	if(pvArray.getLength()!=length) pvArray.setLength(length);
                     }
@@ -1501,36 +1492,27 @@ public class ChannelServerFactory  {
             public void getLength()
             {
                int length = 0;
-               int capacity = 0;
                pvRecord.lock();
                try {
                    length = pvArray.getLength();
-                   capacity = pvArray.getCapacity();
                }finally  {
                    pvRecord.unlock();
                }
-               channelArrayRequester.getLengthDone(okStatus, this,length,capacity);
+               channelArrayRequester.getLengthDone(okStatus, this,length);
             }
             
 			/* (non-Javadoc)
-			 * @see org.epics.pvaccess.client.ChannelArray#setLength(int, int)
+			 * @see org.epics.pvaccess.client.ChannelArray#setLength(int)
 			 */
-			public void setLength(int length, int capacity) {
+			public void setLength(int length) {
 				if(isDestroyed.get()) {
                 	channelArrayRequester.setLengthDone(requestDestroyedStatus,this);
                 	return;
                 }
-				if(capacity>=0 && !pvArray.isCapacityMutable()) {
-					channelArrayRequester.setLengthDone(capacityImmutableStatus,this);
-					return;
-				}
 				pvRecord.lock();
                 try {
                     if(length>=0) {
                     	if(pvArray.getLength()!=length) pvArray.setLength(length);
-                    }
-                    if(capacity>=0) {
-                    	if(pvArray.getCapacity()!=capacity) pvArray.setCapacity(capacity);
                     }
                 } finally  {
                     pvRecord.unlock();
@@ -1649,36 +1631,27 @@ public class ChannelServerFactory  {
             public void getLength()
             {
                int length = 0;
-               int capacity = 0;
                pvRecord.lock();
                try {
                    length = pvArray.getLength();
-                   capacity = pvArray.getCapacity();
                }finally  {
                    pvRecord.unlock();
                }
-               channelArrayRequester.getLengthDone(okStatus, this,length,capacity);
+               channelArrayRequester.getLengthDone(okStatus, this,length);
             }
             
             /* (non-Javadoc)
-             * @see org.epics.pvaccess.client.ChannelArray#setLength(int, int)
+             * @see org.epics.pvaccess.client.ChannelArray#setLength(int)
              */
-            public void setLength(int length, int capacity) {
+            public void setLength(int length) {
                 if(isDestroyed.get()) {
                     channelArrayRequester.setLengthDone(requestDestroyedStatus,this);
-                    return;
-                }
-                if(capacity>=0 && !pvArray.isCapacityMutable()) {
-                    channelArrayRequester.setLengthDone(capacityImmutableStatus,this);
                     return;
                 }
                 pvRecord.lock();
                 try {
                     if(length>=0) {
                         if(pvArray.getLength()!=length) pvArray.setLength(length);
-                    }
-                    if(capacity>=0) {
-                        if(pvArray.getCapacity()!=capacity) pvArray.setCapacity(capacity);
                     }
                 } finally  {
                     pvRecord.unlock();
