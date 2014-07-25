@@ -140,7 +140,7 @@ abstract class AbstractLink extends AbstractSupport {
     public void message(String message,MessageType messageType) {
         pvRecord.lock();
         try {
-            pvDatabaseLink.message(pvRecordField.getFullName() + " " + message, messageType);
+            pvRecordField.message(pvRecordField.getFullName() + " " + message, messageType);
         } finally {
             pvRecord.unlock();
         }

@@ -71,7 +71,7 @@ public class BooleanAlarmFactory {
             PVStructure pvParent = pvStructure.getParent();
             PVField pvField = pvParent.getSubField("value");
             if(pvField==null) {
-                pvStructure.message("value not found", MessageType.error);
+                pvRecordStructure.message("value not found", MessageType.error);
                 return;
             }
             if(pvField.getField().getType()!=Type.scalar) {

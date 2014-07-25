@@ -46,11 +46,11 @@ public class IncrementalFactory {
     public static Support create(PVRecordField pvRecordField) {
     	PVField pvField = pvRecordField.getPVField();
         if(pvField.getField().getType()!=Type.scalar) {
-            pvField.message("type is not boolean", MessageType.error);
+            pvRecordField.message("Incremental: Type is not boolean", MessageType.error);
         }
         PVScalar pvScalar = (PVScalar)pvField;
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvBoolean) {
-            pvField.message("type is not boolean", MessageType.error);
+            pvRecordField.message("Incremental: Type is not boolean", MessageType.error);
         }
         return new IncrementalImpl(pvRecordField);
     }
@@ -61,6 +61,7 @@ public class IncrementalFactory {
     {
         private static String supportName = "org.epics.pvioc.incremental";
         private PVBoolean pvIncremental = null;
+        private PVRecordField pvRecordField = null;
         private PVScalar pvValue = null;
         private PVScalar pvDesiredValue = null;
         private PVScalar pvRateOfChange = null;
@@ -72,6 +73,7 @@ public class IncrementalFactory {
         
         private IncrementalImpl(PVRecordField pvRecordField) {
             super(supportName,pvRecordField);
+            this.pvRecordField = pvRecordField;
             pvIncremental = (PVBoolean)pvRecordField.getPVField();
         }
         /* (non-Javadoc)
@@ -83,20 +85,20 @@ public class IncrementalFactory {
             PVStructure parent = pvIncremental.getParent();
             PVField pvField = parent.getSubField("value");
             if(pvField==null || pvField.getField().getType()!=Type.scalar) {
-                parent.message("does not have a scalar field named value", MessageType.error);
+                pvRecordField.message("Incremental: Parent does not have a scalar field named value", MessageType.error);
                 return;
             }
             pvDesiredValue = (PVScalar)pvField;
             pvField = parent.getSubField("rateOfChange");
             if(pvField==null || pvField.getField().getType()!=Type.scalar) {
-                parent.message("does not have a scalar field named value", MessageType.error);
+                pvRecordField.message("Incremental: Parent does not have a scalar field named rateOfChange", MessageType.error);
                 return;
             }
             pvRateOfChange = (PVScalar)pvField;
             parent = parent.getParent();
             pvField = parent.getSubField("value");
             if(pvField==null || pvField.getField().getType()!=Type.scalar) {
-                parent.message("does not have a scalar field named value", MessageType.error);
+                pvRecordField.message("Incremental: Parent of parent does not have a scalar field named value", MessageType.error);
                 return;
             }
             pvValue = (PVScalar)pvField;

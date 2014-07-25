@@ -93,7 +93,7 @@ public class SupportStateSetFactory {
             if(pvRecordName==null) return;
             PVStructure pvStructure = pvSupportStateSet.getStructureField("argument.supportStateCommand");
             if(pvStructure==null) return;
-            if(!SupportStateCommand.checkSupportStateCommand(pvStructure)) return;
+            if(!SupportStateCommand.checkSupportStateCommand(pvRecordStructure,pvStructure)) return;
             supportStateRequestEnumerated.attach(pvStructure);
             pvMessage = pvSupportStateSet.getStringField("result.message");
             if(pvMessage==null) return;
@@ -102,7 +102,7 @@ public class SupportStateSetFactory {
             if(SupportState.isSupportStateStructure(pvStructure)==null) return;
             supportStateResultEnumerated.attach(pvStructure);
             if(!supportStateRequestEnumerated.isAttached()) {
-                pvStructure.message("result.supportState not an unumerated structure", MessageType.error);
+                pvRecordStructure.message("result.supportState not an unumerated structure", MessageType.error);
                 return;
             }                                   
             if(supportStateRequestEnumerated==null) return;
@@ -297,27 +297,22 @@ public class SupportStateSetFactory {
             private static final String[] supportStateCommandChoices = {
                 "initialize", "start", "stop", "uninitialize"
             };
-            /**
-             * Convenience method for code that accesses a supportStateCommand structure.
-             * @param pvField A field which is potentially a supportStateCommand structure.
-             * @return The Enumerated interface only if pvField has an Enumerated interface and defines
-             * the supportStateCommand choices.
-             */
-            public static boolean checkSupportStateCommand(PVField pvField) {
+            
+            public static boolean checkSupportStateCommand(PVRecordStructure pvRecordStructure,PVField pvField) {
                 if(!enumerated.attach(pvField)) {
-                    pvField.message("not an enumerated structure", MessageType.error);
+                    pvRecordStructure.message("not an enumerated structure", MessageType.error);
                     return false;
                 }
                 String[] choices = enumerated.getChoices();
                 int len = choices.length;
                 if(len!=supportStateCommandChoices.length) {
-                    pvField.message("not an supportStateCommand structure", MessageType.error);
+                    pvRecordStructure.message("not an supportStateCommand structure", MessageType.error);
                     return false;
                 }
                 
                 for (int i=0; i<len; i++) {
                     if(!choices[i].equals(supportStateCommandChoices[i])) {
-                        pvField.message("not an supportStateCommand structure", MessageType.error);
+                        pvRecordStructure.message("not an supportStateCommand structure", MessageType.error);
                         return false;
                     }
                 }

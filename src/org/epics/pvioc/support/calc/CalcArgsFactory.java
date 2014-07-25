@@ -91,13 +91,13 @@ public class CalcArgsFactory {
             for(int i=0; i< length; i++) {
                 PVField pvField = pvFields[i];
                 if(pvField.getField().getType()!=Type.structure) {
-                    pvField.message("CalcArgs requires this to be a calcArg structure", MessageType.error);
+                    pvRecordStructure.message("CalcArgs requires this to be a calcArg structure", MessageType.error);
                     return;
                 }
                 PVStructure pvStructure = (PVStructure)pvField;
                 valuePVFields[i] = pvStructure.getSubField("value");
                 if(valuePVFields[i]==null) {
-                    pvField.message("CalcArgs requires this to have a value field", MessageType.error);
+                    pvRecordStructure.message("CalcArgs requires this to have a value field", MessageType.error);
                     return;
                 }
                 argNames[i] = valuePVFields[i].getParent().getFieldName();

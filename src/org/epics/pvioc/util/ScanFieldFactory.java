@@ -45,43 +45,43 @@ public class ScanFieldFactory {
         }
         PVStructure priority = pvScan.getStructureField("priority");
         if(priority==null) {
-            pvScan.message("priority not found or is not a structure", MessageType.fatalError);
+            pvRecord.message("scan.priority not found or is not a structure", MessageType.fatalError);
             return null;
         }
         PVEnumerated enumerated = PVEnumeratedFactory.create();
         if(!enumerated.attach(priority)) {
-            priority.message("priority is not enumerated", MessageType.fatalError);
+            pvRecord.message("scan.priority is not enumerated", MessageType.fatalError);
             return null;
         }
         PVInt pvPriority = priority.getIntField("index");
         
         PVStructure type = pvScan.getStructureField("type");
         if(type==null) {
-            pvScan.message("type not found or is not a structure", MessageType.fatalError);
+            pvRecord.message("scan.type not found or is not a structure", MessageType.fatalError);
             return null;
         }
         if(!enumerated.attach(type)) {
-            type.message("type is not enumerated", MessageType.fatalError);
+            pvRecord.message("scan.type is not enumerated", MessageType.fatalError);
             return null;
         }
         PVInt pvType = type.getIntField("index");
         PVDouble pvRate = pvScan.getDoubleField("rate");
         if(pvRate==null) {
-            pvScan.message("rate field not found or is not a double", MessageType.fatalError);
+            pvRecord.message("scan.rate field not found or is not a double", MessageType.fatalError);
         }
         
         PVString pvEventName = pvScan.getStringField("eventName");
         if(pvRate==null) {
-            pvScan.message("eventName not found or is not a string", MessageType.fatalError);
+            pvRecord.message("scan.eventName not found or is not a string", MessageType.fatalError);
         }
         
         PVBoolean pvSingleProcessRequester = pvScan.getBooleanField("singleProcessRequester");
         if(pvSingleProcessRequester==null) {
-            pvScan.message("SingleProcessRequester not found or is not a boolean", MessageType.fatalError);
+            pvRecord.message("scan.singleProcessRequester not found or is not a boolean", MessageType.fatalError);
         }
         PVBoolean pvProcessAfterStart = pvScan.getBooleanField("processAfterStart");
         if(pvProcessAfterStart==null) {
-            pvScan.message("processAfterStart not found or is not a boolean", MessageType.fatalError);
+            pvRecord.message("scan.processAfterStart not found or is not a boolean", MessageType.fatalError);
         }
         return new ScanFieldInstance(pvScan,pvPriority,pvType,pvRate,pvEventName,pvSingleProcessRequester,pvProcessAfterStart);
     }

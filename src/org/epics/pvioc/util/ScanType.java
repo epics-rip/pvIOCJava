@@ -7,7 +7,6 @@ package org.epics.pvioc.util;
 
 import org.epics.pvdata.property.PVEnumerated;
 import org.epics.pvdata.property.PVEnumeratedFactory;
-import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVArray;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStringArray;
@@ -48,31 +47,19 @@ public enum ScanType {
      * the scanType choices.
      */
     public static PVEnumerated getScanType(PVField pvField) {
-        if(pvField.getField().getType()!=Type.structure) {
-            pvField.message("field is not a structure", MessageType.error);
-            return null;
-        }
+        if(pvField.getField().getType()!=Type.structure) return null;
         PVEnumerated enumerated = PVEnumeratedFactory.create();
-        if(!enumerated.attach(pvField)) {
-            pvField.message("interface Enumerated not found", MessageType.error);
-            return null;
-        }
+        if(!enumerated.attach(pvField)) return null;
         PVStructure pvStruct = (PVStructure)pvField;
         PVArray pvArray = pvStruct.getScalarArrayField("choices", ScalarType.pvString);
         PVStringArray pvChoices = (PVStringArray)pvArray;
         int len = pvChoices.getLength();
-        if(len!=scanTypeChoices.length) {
-            pvField.message("not an scanType structure", MessageType.error);
-            return null;
-        }
+        if(len!=scanTypeChoices.length) return null;
         StringArrayData data = new StringArrayData();
         pvChoices.get(0, len, data);
         String[] choices = data.data;
         for (int i=0; i<len; i++) {
-            if(!choices[i].equals(scanTypeChoices[i])) {
-                pvField.message("not an scanType structure", MessageType.error);
-                return null;
-            }
+            if(!choices[i].equals(scanTypeChoices[i])) return null;
         }
         pvChoices.setImmutable();
         return enumerated;

@@ -782,14 +782,14 @@ public class ServerFactory {
                             PVBoolean pvBoolean = (PVBoolean)pvField;
                             value[0] = (short)((pvBoolean.get()) ? 1 : 0);
                         } else {
-                            pvField.message("illegal enum", MessageType.error);
+                            throw new IllegalArgumentException("illegal enum");
                         }
                     } else {
                         if (valueIndex!=-1) {
                             PVInt pvInt = (PVInt)((PVStructure)pvField).getSubField(valueIndex);
                             value[0] = (short) pvInt.get();
                         } else {
-                            pvField.message("illegal enum", MessageType.error);
+                            throw new IllegalArgumentException("illegal enum");
                         }
                     }
                 } else if (dbrType == DBRType.BYTE) {
@@ -823,7 +823,7 @@ public class ServerFactory {
                         boolean[] bools = data.data;
                         System.arraycopy(bools, 0, value, 0, count);
                     } else {
-                        pvField.message("illegal enum", MessageType.error);
+                        throw new IllegalArgumentException("illegal enum");
                     }
                 } else if (dbrType == DBRType.BYTE) {
                     byte[] value = ((BYTE) dbr).getByteValue();
@@ -896,14 +896,14 @@ public class ServerFactory {
                             pvBoolean.put((value[0]==0) ? false : true);
                             copyBitSet.set(pvBoolean.getFieldOffset());
                         } else {
-                            valuePVField.message("illegal enum", MessageType.error);
+                            throw new IllegalArgumentException("illegal enum");
                         }
                     } else {                               
                         if (valueIndexPV != null)  {
                             valueIndexPV.put(value[0]);
                             copyBitSet.set(valueIndexPV.getFieldOffset());
                         } else {
-                            valuePVField.message("illegal enum",MessageType.error);
+                            throw new IllegalArgumentException("illegal enum");
                         }
                     }
                 } else if (dbrType == DBRType.BYTE) {
@@ -943,7 +943,7 @@ public class ServerFactory {
                         }
                         pvBooleanArray.put(0, dbrCount, bools, 0);
                     } else {
-                        valuePVField.message("illegal enum", MessageType.error);
+                        throw new IllegalArgumentException("illegal enum");
                     }
                 } else if (dbrType == DBRType.BYTE) {
                     byte[] value = ((BYTE) dbr).getByteValue();

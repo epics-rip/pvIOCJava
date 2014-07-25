@@ -57,15 +57,15 @@ public class ControlLimitFactory {
         PVField pvLow = pvParent.getSubField("control.limitLow");
         PVField pvHigh = pvParent.getSubField("control.limitHigh");
         if(pvLow==null || pvHigh==null) {
-            pvParent.message("replacePVField missing or invalid control structure", MessageType.error);
+            pvRecordField.message("replacePVField missing or invalid control structure", MessageType.error);
             return;
         }
         if(pvLow.getField().getType()!=Type.scalar) {
-            pvLow.message("is not a scalar", MessageType.error);
+            pvRecordField.message("limitLow is not a scalar", MessageType.error);
             return;
         }
         if(pvHigh.getField().getType()!=Type.scalar) {
-            pvLow.message("is not a scalar", MessageType.error);
+            pvRecordField.message("limitHigh is not a scalar", MessageType.error);
             return;
         }
         new ControlLimitImpl(pvRecordField,(PVScalar)pvLow,(PVScalar)pvHigh);
@@ -120,7 +120,7 @@ public class ControlLimitFactory {
             if(alarmSupport==null) {
                 alarmSupport = AlarmSupportFactory.findAlarmSupport(pvRecordField);
                 if(alarmSupport==null) {
-                    valuePVField.message("ControlLimit: no alarmSupport", MessageType.warning);
+                    pvRecordField.message("ControlLimit: no alarmSupport", MessageType.warning);
                 }
             }
             String message = null;
@@ -132,7 +132,7 @@ public class ControlLimitFactory {
             if(alarmSupport!=null) {
                 alarmSupport.setAlarm(message, AlarmSeverity.MINOR,AlarmStatus.RECORD);
             } else {
-                valuePVField.message(message, MessageType.warning);
+                pvRecordField.message(message, MessageType.warning);
             }
         }
         

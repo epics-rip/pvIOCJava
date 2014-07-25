@@ -34,16 +34,16 @@ public class GenerateMessageFactory {
     public static Support create(PVRecordField pvRecordField) {
         PVField pvField = pvRecordField.getPVField();
         if(!pvField.getFieldName().equals("value")) {
-            pvField.message("illegal field name. Must be value", MessageType.error);
+            pvRecordField.message("GenerateMessage: Illegal field name. Must be value", MessageType.error);
             return null;
         }
         if(pvField.getField().getType()!=Type.scalar) {
-            pvField.message("illegal field type. Must be scalar string", MessageType.error);
+            pvRecordField.message("GenerateMessage: Illegal field type. Must be scalar string", MessageType.error);
             return null;
         }
         PVScalar pvScalar = (PVScalar)pvField;
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvField.message("illegal field type. Must be scalar string", MessageType.error);
+            pvRecordField.message("GenerateMessage: Illegal field type. Must be scalar string", MessageType.error);
             return null;
         }
         return new GenerateMessage(pvRecordField);
@@ -53,10 +53,12 @@ public class GenerateMessageFactory {
     {
         private TimeStamp timeStamp = TimeStampFactory.create();
         private static final String supportName = "org.epics.pvioc.generateMessage";
+        private PVRecordField pvRecordField = null;
         private PVString pvValue = null;
 
         private GenerateMessage(PVRecordField pvRecordField) {
             super(supportName,pvRecordField);
+            this.pvRecordField = pvRecordField;
             pvValue = (PVString)pvRecordField.getPVField();
         }
         /* (non-Javadoc)
@@ -87,7 +89,7 @@ public class GenerateMessageFactory {
             long milliPastEpoch = timeStamp.getMilliSeconds();
             Date date = new Date(milliPastEpoch);
             String value = String.format("%tF %tT.%tL %s",date,date,date,pvValue.get());
-            pvValue.message(value, MessageType.info);
+            pvRecordField.message(value, MessageType.info);
             supportProcessRequester.supportProcessDone(RequestResult.success);
         }
     }

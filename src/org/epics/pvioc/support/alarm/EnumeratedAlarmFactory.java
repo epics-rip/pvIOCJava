@@ -71,7 +71,7 @@ public class EnumeratedAlarmFactory {
             if(pvStruct==null) return;
             PVEnumerated enumerated = PVEnumeratedFactory.create();
             if(!enumerated.attach(pvStruct)) {
-                pvStruct.message(" is not an enumerated structure", MessageType.error);
+                pvRecordStructure.message(" is not an enumerated structure", MessageType.error);
                 return;
             }
             pvValue = pvStruct.getIntField("index");

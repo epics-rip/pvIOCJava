@@ -55,17 +55,17 @@ public class PVReplaceFactory {
         PVScalar pvScalar = pvAuxInfo.getInfo("pvReplaceFactory");
         while(pvScalar!=null) {
             if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-                pvField.message(pvRecordField.getFullName() + " PVReplaceFactory: pvScalar " + pvScalar.toString() + " is not a string", MessageType.error);
+                pvRecordField.message(pvRecordField.getFullName() + " PVReplaceFactory: pvScalar " + pvScalar.toString() + " is not a string", MessageType.error);
                 break;
             }
             String factoryName = ((PVString)pvScalar).get();
             PVStructure factory = pvDatabase.findStructure(factoryName);
             if(factory==null) {
-                pvField.message(pvRecordField.getFullName() + " PVReplaceFactory: factory " + factoryName + " not found", MessageType.error);
+                pvRecordField.message(pvRecordField.getFullName() + " PVReplaceFactory: factory " + factoryName + " not found", MessageType.error);
                 break;
             }
-            if(!replace(pvRecord,pvField,factory)) {
-                pvField.message(pvRecordField.getFullName() + " PVReplaceFactory: replace failed", MessageType.error);
+            if(!replace(pvRecord,pvRecordField,pvField,factory)) {
+                pvRecordField.message(pvRecordField.getFullName() + " PVReplaceFactory: replace failed", MessageType.error);
             }
             break;
         }
@@ -81,10 +81,10 @@ public class PVReplaceFactory {
         }
     }
     
-    private static boolean replace(PVRecord pvRecord,PVField pvField,PVStructure factory) {
+    private static boolean replace(PVRecord pvRecord,PVRecordField pvRecordField,PVField pvField,PVStructure factory) {
         PVString pvString = factory.getStringField("pvReplaceFactory");
         if(pvString==null) {
-            pvField.message("PVReplaceFactory structure " + factory.toString() + " is not a pvReplaceFactory", MessageType.error);
+            pvRecordField.message("PVReplaceFactory structure " + factory.toString() + " is not a pvReplaceFactory", MessageType.error);
             return false;
         }
         String factoryName = pvString.get();
@@ -93,7 +93,7 @@ public class PVReplaceFactory {
         try {
             supportClass = Class.forName(factoryName);
         }catch (ClassNotFoundException e) {
-           pvField.message("PVReplaceFactory ClassNotFoundException factory " + factoryName 
+           pvRecordField.message("PVReplaceFactory ClassNotFoundException factory " + factoryName 
             + " " + e.getLocalizedMessage(),MessageType.error);
            return false;
         }
@@ -104,7 +104,7 @@ public class PVReplaceFactory {
         		argumentClass = Class.forName("org.epics.pvdata.pv.PVField");
         		isPVData = true;
         	} catch (ClassNotFoundException e) {
-        		pvField.message("PVReplaceFactory ClassNotFoundException factory " + factoryName 
+        		pvRecordField.message("PVReplaceFactory ClassNotFoundException factory " + factoryName 
         				+ " " + e.getLocalizedMessage(),MessageType.error);
         		return false;
         	}
@@ -113,23 +113,23 @@ public class PVReplaceFactory {
         		argumentClass = Class.forName("org.epics.pvioc.database.PVRecordField");
         		isPVData = false;
         	} catch (ClassNotFoundException e) {
-        		pvField.message("PVReplaceFactory ClassNotFoundException factory " + factoryName 
+        		pvRecordField.message("PVReplaceFactory ClassNotFoundException factory " + factoryName 
         				+ " " + e.getLocalizedMessage(),MessageType.error);
         		return false;
         	}
         } else {
-        	pvField.message("PVReplaceFactory unknown factoryName " + factoryName, MessageType.error);
+        	pvRecordField.message("PVReplaceFactory unknown factoryName " + factoryName, MessageType.error);
         	return false;
         }
         try {
             method = supportClass.getDeclaredMethod("replacePVField",argumentClass);
         } catch (NoSuchMethodException e) {
-            pvField.message("PVReplaceFactory NoSuchMethodException factory " + factoryName 
+            pvRecordField.message("PVReplaceFactory NoSuchMethodException factory " + factoryName 
                     + " " + e.getLocalizedMessage(),MessageType.error);
                     return false;
         }
         if(!Modifier.isStatic(method.getModifiers())) {
-            pvField.message("PVReplaceFactory factory " + factoryName 
+            pvRecordField.message("PVReplaceFactory factory " + factoryName 
             + " create is not a static method ",MessageType.error);
             return false;
         }
@@ -137,20 +137,19 @@ public class PVReplaceFactory {
         	if(isPVData) {
             method.invoke(null,pvField);
         	} else {
-        		PVRecordField pvRecordField = pvRecord.findPVRecordField(pvField);
         		method.invoke(null, pvRecordField);
         	}
             return true;
         } catch(IllegalAccessException e) {
-            pvField.message("PVReplaceFactory IllegalAccessException factory " + factoryName 
+            pvRecordField.message("PVReplaceFactory IllegalAccessException factory " + factoryName 
             + " " + e.getLocalizedMessage(),MessageType.error);
             return false;
         } catch(IllegalArgumentException e) {
-            pvField.message("PVReplaceFactory IllegalArgumentException factory " + factoryName 
+            pvRecordField.message("PVReplaceFactory IllegalArgumentException factory " + factoryName 
             + " " + e.getLocalizedMessage(),MessageType.error);
             return false;
         } catch(InvocationTargetException e) {
-            pvField.message("PVReplaceFactory InvocationTargetException factory " + factoryName 
+            pvRecordField.message("PVReplaceFactory InvocationTargetException factory " + factoryName 
             + " " + e.getLocalizedMessage(),MessageType.error);
         }
         return false;

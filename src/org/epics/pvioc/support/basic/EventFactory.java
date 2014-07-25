@@ -39,12 +39,12 @@ public class EventFactory {
     public static Support create(PVRecordField pvRecordField) {
     	PVField pvField = pvRecordField.getPVField();
         if(pvField.getField().getType()!=Type.scalar) {
-            pvField.message("illegal field type. Must be string", MessageType.error);
+            pvRecordField.message("Event: Illegal field type. Must be string", MessageType.error);
             return null;
         }
         PVScalar pvScalar = (PVScalar)pvField;
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvField.message("illegal field type. Must be string", MessageType.error);
+            pvRecordField.message("Event: Illegal field type. Must be string", MessageType.error);
             return null;
         }
         return new EventImpl(pvRecordField);

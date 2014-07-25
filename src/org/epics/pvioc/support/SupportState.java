@@ -91,7 +91,6 @@ public enum SupportState {
             }
             return pvStructure;
         }
-        pvField.message(pvField.getFieldName() + " is not a SupportState enumerated structure", MessageType.error);
         return null;
     }
 }

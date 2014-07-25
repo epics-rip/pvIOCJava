@@ -40,6 +40,7 @@ public class DelayFactory {
     {
         private static final String supportName = "org.epics.pvioc.delay";
         private Timer.TimerNode timerNode = TimerFactory.createNode(this);
+        private PVRecordStructure pvRecordStructure = null;
         private PVStructure pvStructure = null;
         private RecordProcess recordProcess = null;
         private PVDouble minAccess = null;
@@ -50,6 +51,7 @@ public class DelayFactory {
 
         private DelayImpl(PVRecordStructure pvRecordStructure) {
             super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
             pvStructure = pvRecordStructure.getPVStructure();
         }
         /* (non-Javadoc)
@@ -140,7 +142,7 @@ public class DelayFactory {
          * @see org.epics.pvdata.misc.Timer.TimerCallback#timerStopped()
          */
         public void timerStopped() {
-            pvStructure.message("Why was timerStopped called", MessageType.error);
+            pvRecordStructure.message("Why was timerStopped called", MessageType.error);
         }
         
     }

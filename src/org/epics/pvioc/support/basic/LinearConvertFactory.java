@@ -39,16 +39,16 @@ public class LinearConvertFactory {
         PVAuxInfo pvAuxInfo = pvStructure.getPVAuxInfo();
         PVScalar pvScalar = pvAuxInfo.getInfo("supportFactory");
         if(pvScalar==null) {
-            pvStructure.message("no pvAuxInfo with name support. Why??", MessageType.error);
+            pvRecordStructure.message("LinearConvert: no pvAuxInfo with name support. Why??", MessageType.error);
             return null;
         }
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvStructure.message("pvAuxInfo for support is not a string. Why??", MessageType.error);
+            pvRecordStructure.message("LinearConvert: pvAuxInfo for support is not a string. Why??", MessageType.error);
             return null;
         }
         String supportName = ((PVString)pvScalar).get();
         if(supportName==null) {
-            pvStructure.message("supportName is not defined", MessageType.error);
+            pvRecordStructure.message("LinearConvert: supportName is not defined", MessageType.error);
             return null;
         }
         if(supportName.equals(linearConvertInput)) {
@@ -57,7 +57,7 @@ public class LinearConvertFactory {
         if(supportName.equals(linearConvertOutput)) {
             return new LinearConvertOutput(pvRecordStructure);
         }
-        pvStructure.message("no support for " + supportName,MessageType.error);
+        pvRecordStructure.message("LinearConvert: no support for " + supportName,MessageType.error);
         return null;
     }
 
@@ -66,7 +66,7 @@ public class LinearConvertFactory {
     
     private static abstract class LinearConvertBase extends AbstractSupport
     {
-        
+        protected PVRecordStructure pvRecordStructure = null;
         protected PVStructure pvStructure = null;
         protected PVDouble pvValue = null;
         protected PVInt pvRawValue = null;
@@ -84,6 +84,7 @@ public class LinearConvertFactory {
         
         protected LinearConvertBase(String supportName,PVRecordStructure pvRecordStructure) {
             super(supportName,pvRecordStructure);
+            this.pvRecordStructure = pvRecordStructure;
             pvStructure = pvRecordStructure.getPVStructure();
         }
         /* (non-Javadoc)
@@ -156,16 +157,16 @@ public class LinearConvertFactory {
         private PVDouble getDouble(PVStructure parent,String fieldName) {
             PVField pvField = parent.getSubField(fieldName);
             if(pvField==null) {
-                parent.message("does not have field " + fieldName, MessageType.error);
+                pvRecordStructure.message("LinearConvert: parent does not have field " + fieldName, MessageType.error);
                 return null;
             }
             if(pvField.getField().getType()!=Type.scalar) {
-                pvField.message("type is not double", MessageType.error);
+                pvRecordStructure.message("LinearConvert: value type is not scalar", MessageType.error);
                 return null;
             }
             PVScalar pvScalar = (PVScalar)pvField;
             if(pvScalar.getScalar().getScalarType()!=ScalarType.pvDouble) {
-                super.message("parent of parent value field does not have type int", MessageType.error);
+                super.message("LinearConvert: parent of parent value field does not have type double", MessageType.error);
                 return null;
             }
             return (PVDouble)pvField;
@@ -174,16 +175,16 @@ public class LinearConvertFactory {
         private PVInt getInt(PVStructure parent,String fieldName) {
             PVField pvField = parent.getSubField(fieldName);
             if(pvField==null) {
-                parent.message("does not have field " + fieldName, MessageType.error);
+                pvRecordStructure.message("LinearConvert: parent does not have field " + fieldName, MessageType.error);
                 return null;
             }
             if(pvField.getField().getType()!=Type.scalar) {
-                pvField.message("type is not double", MessageType.error);
+                pvRecordStructure.message("LinearConvert: value type is not scalar", MessageType.error);
                 return null;
             }
             PVScalar pvScalar = (PVScalar)pvField;
             if(pvScalar.getScalar().getScalarType()!=ScalarType.pvInt) {
-                super.message("parent of parent value field does not have type int", MessageType.error);
+                super.message("LinearConvert: parent of parent value field does not have type int", MessageType.error);
                 return null;
             }
             return (PVInt)pvField;

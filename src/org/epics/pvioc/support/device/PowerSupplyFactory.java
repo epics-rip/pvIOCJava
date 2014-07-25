@@ -61,29 +61,29 @@ public class PowerSupplyFactory {
             pvRecordField.message("no parent of the parent", MessageType.fatalError);
             return null;
         }
-        PVDouble pvCurrent = getPVDouble(pvParent,"current.value");
+        PVDouble pvCurrent = getPVDouble(pvRecordField,pvParent,"current.value");
         if(pvCurrent==null) return null;
-        PVDouble pvVoltage = getPVDouble(pvParent,"voltage.value");
+        PVDouble pvVoltage = getPVDouble(pvRecordField,pvParent,"voltage.value");
         if(pvVoltage==null) return null;
-        PVDouble pvPower = getPVDouble(pvParent,"power.value");
+        PVDouble pvPower = getPVDouble(pvRecordField,pvParent,"power.value");
         if(pvPower==null) return null;
        
         return new PowerSupplyCurrentImpl(pvRecordField,pvCurrent,pvVoltage,pvPower);
     }
     
-    private static PVDouble getPVDouble(PVStructure pvParent,String fieldName) {
+    private static PVDouble getPVDouble(PVRecordField pvRecordField,PVStructure pvParent,String fieldName) {
         PVField pvField = pvParent.getSubField(fieldName);
         if(pvField==null) {
-            pvParent.message(fieldName + " does not exist", MessageType.fatalError);
+            pvRecordField.message("PowerSupply: " + fieldName + " does not exist", MessageType.fatalError);
             return null;
         }
         if(pvField.getField().getType()!=Type.scalar) {
-            pvParent.message(fieldName + " is not a double", MessageType.fatalError);
+            pvRecordField.message("PowerSupply: " + fieldName + " is not a double", MessageType.fatalError);
             return null;
         }
         PVScalar pvScalar = (PVScalar)pvField;
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvDouble) {
-            pvParent.message(fieldName + " is not a double", MessageType.fatalError);
+            pvRecordField.message("PowerSupply: " + fieldName + " is not a double", MessageType.fatalError);
             return null;
         }
         return (PVDouble)pvField;

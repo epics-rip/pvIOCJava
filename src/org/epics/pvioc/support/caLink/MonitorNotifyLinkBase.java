@@ -56,13 +56,13 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	String request = "record[queueSize=2]field(timeStamp[algorithm=onChange,causeMonitor=true])";
     	PVStructure pvRequest = createRequest.createRequest(request);
     	if(pvRequest==null) {
-    		pvStructure.message(createRequest.getMessage(), MessageType.error);
+    	    pvRecordField.message(createRequest.getMessage(), MessageType.error);
     		super.stop();
     		return;
     	}
     	processToken = recordProcess.requestProcessToken(this);
     	if(processToken==null) {
-    		pvStructure.message("can not process",MessageType.warning);
+    	    pvRecordField.message("can not process",MessageType.warning);
     		super.stop();
     	}
     }

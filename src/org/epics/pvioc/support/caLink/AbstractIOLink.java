@@ -65,7 +65,7 @@ abstract class AbstractIOLink extends AbstractLink {
         if(!super.checkSupportState(SupportState.readyForStart,null)) return;
         requestPVString = pvStructure.getStringField("request");
         if(requestPVString==null) {
-            pvStructure.message("request is invalid scalarType", MessageType.error);
+            pvRecordField.message("request is invalid scalarType", MessageType.error);
             super.uninitialize();
             return;
         }

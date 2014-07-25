@@ -88,7 +88,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
         if(process) {
         	processToken = recordProcess.requestProcessToken(this);
         	if(processToken==null) {
-        		pvStructure.message("can not process",MessageType.warning);
+        	    pvRecordField.message("can not process",MessageType.warning);
                 this.process = false;
         	}
         }

@@ -114,12 +114,12 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
         recordProcess = pvRecord.getRecordProcess();
         PVField pvAlarm = pvStructure.getSubField("alarm");
         if(pvAlarm==null) {
-            pvStructure.message("alarm not found", MessageType.error);
+            pvRecordField.message("alarm not found", MessageType.error);
             return;
         }
         alarmSupport = AlarmSupportFactory.getAlarmSupport(pvRecord.findPVRecordField(pvAlarm));
         if(alarmSupport==null) {
-            pvStructure.message("alarm does not have alarmSupport", MessageType.error);
+            pvRecordField.message("alarm does not have alarmSupport", MessageType.error);
             return;
         }
         providerPV = pvStructure.getStringField("providerName");
@@ -191,7 +191,7 @@ abstract class AbstractLink extends AbstractSupport implements AfterStartRequest
     public void message(String message,MessageType messageType) {
         pvRecord.lock();
         try {
-            pvStructure.message(pvRecordField.getFullName() + " " + message, messageType);
+            pvRecordField.message(pvRecordField.getFullName() + " " + message, messageType);
         } finally {
             pvRecord.unlock();
         }

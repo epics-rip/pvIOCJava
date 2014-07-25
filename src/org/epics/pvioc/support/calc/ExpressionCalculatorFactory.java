@@ -99,7 +99,7 @@ public abstract class ExpressionCalculatorFactory  {
                 return;
             }
             if(pvValue.getField().getType()!=Type.scalar) {
-                pvValue.message("ExpressionCalculator requires this field to be a scalar", MessageType.error);
+                pvRecordStructure.message("ExpressionCalculator requires value field to be a scalar", MessageType.error);
                 return;
             }
             this.pvValue = (PVScalar)pvValue;
@@ -421,19 +421,19 @@ public abstract class ExpressionCalculatorFactory  {
                     if(token.type==TokenType.leftParen) numLeftParan++;
                     if(token.type==TokenType.rightParen) numRightParan++;
                     if(numRightParan>numLeftParan) {
-                        pvExpression.message("parse failure mismatched parentheses ", MessageType.error);
+                        pvRecordStructure.message("parse failure mismatched parentheses|" + pvExpression.toString() + "|", MessageType.error);
                         return null;
                     }
                 }
                 if(numLeftParan!=numRightParan) {
-                    pvExpression.message("parse failure mismatched parentheses ", MessageType.error);
+                    pvRecordStructure.message("parse failure mismatched parentheses " + pvExpression.toString() + "|", MessageType.error);
                     return null;
                 }
                 if(!createTokenListWithPrecedence()) return null;
                 if(dumpTokenList)printTokenList("after createTokenListWithPrecedence");
                 Expression expression = createExpression();
                 if(dumpExpression) {
-                    pvExpression.message("after parse expression is",MessageType.info);
+                    pvRecordStructure.message("after parse expression is " + pvExpression.toString() + "|",MessageType.info);
                     printExpression(expression,"");
                 }
                 return expression;
@@ -512,7 +512,7 @@ public abstract class ExpressionCalculatorFactory  {
                                     }
                                 }
                                 if(functionName==null) {
-                                    pvExpression.message("parse failure unknown function at " + expression.substring(next), MessageType.error);
+                                    pvRecordStructure.message("parse failure unknown function at " + expression.substring(next), MessageType.error);
                                     return false;
                                 }
                                 if(functionName.equals("PI") || functionName.equals("E")) {
@@ -526,13 +526,13 @@ public abstract class ExpressionCalculatorFactory  {
                             token.type = TokenType.binaryOperator;
 
                         } else {
-                            pvExpression.message("parse failure at " + expression.substring(next), MessageType.error);
+                            pvRecordStructure.message("parse failure at " + expression.substring(next), MessageType.error);
                             printTokenList("after parse failure");
                             return false;
                         }
                     }
                     if(value.length()==0) {
-                        pvExpression.message("zero length string caused parse failure at " + expression.substring(next), MessageType.error);
+                        pvRecordStructure.message("zero length string caused parse failure at " + expression.substring(next), MessageType.error);
                         return false;
                     }
                     token.value = value;
@@ -750,7 +750,7 @@ public abstract class ExpressionCalculatorFactory  {
             private boolean createTokenListWithPrecedence() {
                 int length = tokenList.size();
                 if(length==0) {
-                    pvExpression.message("parse failure expression has no tokens", MessageType.error);
+                    pvRecordStructure.message("parse failure expression has no tokens |" + pvExpression.toString() + "|", MessageType.error);
                     return false;
                 }
                 Token token = tokenList.get(0);
@@ -894,7 +894,7 @@ public abstract class ExpressionCalculatorFactory  {
                     }
                     if(type==TokenType.rightParen) {
                         if(parenDepth<=0) {
-                            pvExpression.message("parse failure bad expression ", MessageType.error);
+                            pvRecordStructure.message("parse failure bad expression |" + pvExpression.toString() + "|", MessageType.error);
                             return -1;
                         }
                         parenDepth--; next++;
@@ -908,7 +908,7 @@ public abstract class ExpressionCalculatorFactory  {
                     break;
                 }
                 if(next>=length) {
-                    pvExpression.message("parse failure bad expression ", MessageType.error);
+                    pvRecordStructure.message("parse failure bad expression |" + pvExpression.toString() + "|", MessageType.error);
                     return -1;
                 }
                 token = new Token();
@@ -946,7 +946,7 @@ public abstract class ExpressionCalculatorFactory  {
                     if(parenDepth>0) {
                         prev--; continue;
                     }
-                    pvExpression.message("parse failure bad expression ", MessageType.error);
+                    pvRecordStructure.message("parse failure bad expression |" + pvExpression.toString() + "|", MessageType.error);
                     return -1;
                 }
                 int next = offset + 1;
@@ -964,7 +964,7 @@ public abstract class ExpressionCalculatorFactory  {
                     }
                     if(type==TokenType.rightParen) {
                         if(parenDepth==0) {
-                            pvExpression.message("parse failure bad expression ", MessageType.error);
+                            pvRecordStructure.message("parse failure bad expression |" + pvExpression.toString() + "|", MessageType.error);
                             return -1;
                         }
                         parenDepth--;
@@ -976,7 +976,7 @@ public abstract class ExpressionCalculatorFactory  {
                     if(parenDepth>0) {
                         next++; continue;
                     }
-                    pvExpression.message("parse failure bad expression ", MessageType.error);
+                    pvRecordStructure.message("parse failure bad expression |" + pvExpression.toString() + "|", MessageType.error);
                     return -1;
                 }
                 TokenType beforePrevType = null;
@@ -1055,7 +1055,7 @@ public abstract class ExpressionCalculatorFactory  {
                     tokenList.add(next+1 , newToken);
                     return 1;
                 }
-                pvExpression.message("parse failure bad expression ", MessageType.error);
+                pvRecordStructure.message("parse failure bad expression |" + pvExpression.toString() + "|", MessageType.error);
                 return -1;
             }
 
@@ -1113,14 +1113,14 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 boolean ok = true;
                 if(infixExpStack.size()!=0) {
-                    pvExpression.message("logic error infixExpStack not empty",MessageType.error);
+                    pvRecordStructure.message("logic error infixExpStack not empty |" + pvExpression.toString() + "|",MessageType.error);
                     printTokenList("tokenList");
                     printExpStack("infixExpStack",infixExpStack);
                     printExpStack("expStack",expStack);
                     ok = false;
                 }
                 if(expStack.size()!=1) {
-                    pvExpression.message("logic error expStack should only have one element",MessageType.error);
+                    pvRecordStructure.message("logic error expStack should only have one element |" + pvExpression.toString() + "|",MessageType.error);
                     printTokenList("tokenList");
                     printExpStack("infixExpStack",infixExpStack);
                     printExpStack("expStack",expStack);
@@ -1149,7 +1149,7 @@ public abstract class ExpressionCalculatorFactory  {
                         return false;
                     }
                     if(pvField.getField().getType()!=Type.scalar) {
-                        pvStructure.message("ExpressionCalculator requires this to be a scalar", MessageType.error);
+                        pvRecordStructure.message("ExpressionCalculator requires variable " + name +" to be a scalar ", MessageType.error);
                         return false;
                     }
                     exp.pvResult = (PVScalar)pvField;
@@ -1177,7 +1177,7 @@ public abstract class ExpressionCalculatorFactory  {
                         try {
                             scalar = Long.decode(value.substring(0, length-1));
                         } catch (NumberFormatException e) {
-                            pvStructure.message(e.getMessage(), MessageType.error);
+                            pvRecordStructure.message(e.getMessage(), MessageType.error);
                             return false;
                         }
                         PVLong pv = (PVLong)pvScalar;
@@ -1187,7 +1187,7 @@ public abstract class ExpressionCalculatorFactory  {
                         try {
                             scalar = Long.decode(value);
                         } catch (NumberFormatException e) {
-                            pvStructure.message(e.getMessage(), MessageType.error);
+                            pvRecordStructure.message(e.getMessage(), MessageType.error);
                             return false;
                         }
                         PVInt pv = (PVInt)pvScalar;
@@ -1250,7 +1250,7 @@ public abstract class ExpressionCalculatorFactory  {
                         }
                     }
                     if(functionSemantics==null) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                                 "unsupported Math function " + functionName,
                                 MessageType.error);
                         return false;
@@ -1262,7 +1262,7 @@ public abstract class ExpressionCalculatorFactory  {
                     while(--iarg>=0) {
                         exp.expressionArguments[iarg] = expStack.pop();
                     }
-                    funcExp.operator = MathFactory.create(pvStructure,funcExp);
+                    funcExp.operator = MathFactory.create(pvRecordStructure,funcExp);
                     if(!funcExp.operator.createPVResult()) return false;
                     expStack.push(exp);
                     return true;
@@ -1271,7 +1271,7 @@ public abstract class ExpressionCalculatorFactory  {
                     OperatorExpression opExp = (OperatorExpression)exp;
                     int size = expStack.size();
                     if(size<1) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                                 " nargs " + size + " illegal for unaryOperator",
                                 MessageType.error);
                         return false;
@@ -1317,14 +1317,14 @@ public abstract class ExpressionCalculatorFactory  {
                         }
                     }
                     if(opExp.operationSemantics==null) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                             "unsupported unary operation " + token.value,
                             MessageType.error);
                         return false;
                     }
-                    opExp.operator = OperatorFactory.create(pvStructure, opExp);
+                    opExp.operator = OperatorFactory.create(pvRecordStructure, opExp);
                     if(opExp.operator==null) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                                 "unsupported unary operation " + token.value,
                                 MessageType.error);
                             return false;
@@ -1337,7 +1337,7 @@ public abstract class ExpressionCalculatorFactory  {
                     OperatorExpression opExp = (OperatorExpression)exp;
                     int size = expStack.size();
                     if(size<2) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                                 " nargs " + size + " illegal for binaryOperator",
                                 MessageType.error);
                         return false;
@@ -1384,14 +1384,14 @@ public abstract class ExpressionCalculatorFactory  {
                         }
                     }
                     if(opExp.operationSemantics==null) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                             "unsupported unary operation " + token.value,
                             MessageType.error);
                         return false;
                     }
-                    opExp.operator = OperatorFactory.create(pvStructure, opExp);
+                    opExp.operator = OperatorFactory.create(pvRecordStructure, opExp);
                     if(opExp.operator==null) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                                 "unsupported unary operation " + token.value,
                                 MessageType.error);
                             return false;
@@ -1404,7 +1404,7 @@ public abstract class ExpressionCalculatorFactory  {
                     OperatorExpression opExp = (OperatorExpression)exp;
                     int size = expStack.size();
                     if(size<3) {
-                        pvStructure.message(
+                        pvRecordStructure.message(
                                 " nargs " + size + " illegal for ternaryOperator",
                                 MessageType.error);
                         return false;
@@ -1417,14 +1417,14 @@ public abstract class ExpressionCalculatorFactory  {
                     ScalarType arg1Type = exp.expressionArguments[1].pvResult.getScalar().getScalarType();
                     ScalarType arg2Type = exp.expressionArguments[2].pvResult.getScalar().getScalarType();
                     if(arg0Type!=ScalarType.pvBoolean) {
-                        pvStructure.message("arg0 must be boolean",MessageType.error);
+                        pvRecordStructure.message("arg0 must be boolean",MessageType.error);
                         return false;
                     }
                     if(arg1Type!=arg2Type) {
-                        pvStructure.message("arg1 and arg2 must be same type",MessageType.error);
+                        pvRecordStructure.message("arg1 and arg2 must be same type",MessageType.error);
                         return false;
                     }
-                    opExp.operator = new TernaryIf(pvStructure,opExp);
+                    opExp.operator = new TernaryIf(pvRecordStructure,opExp);
                     if(!opExp.operator.createPVResult()) return false;
                     expStack.push(exp);
                     return true;
@@ -1542,7 +1542,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         private static class OperatorFactory {
             static Operator create(
-                    PVStructure parent,
+                    PVRecordStructure parent,
                     OperatorExpression operatorExpression)
             {
                 OperationSemantics operationSemantics = operatorExpression.operationSemantics;
@@ -1611,7 +1611,7 @@ public abstract class ExpressionCalculatorFactory  {
         static class UnaryPlus implements Operator {
             
             private OperatorExpression operatorExpression;
-            UnaryPlus(PVStructure parent,OperatorExpression operatorExpression) {
+            UnaryPlus(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.operatorExpression = operatorExpression;
             }
             /* (non-Javadoc)
@@ -1632,14 +1632,14 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class UnaryMinus implements Operator {
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private OperatorExpression operatorExpression;
             private PVScalar argPV;
             
             private PVScalar resultPV;
             private ScalarType resultType;
             
-            UnaryMinus(PVStructure parent,OperatorExpression operatorExpression) {
+            UnaryMinus(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 argPV = operatorExpression.expressionArguments[0].pvResult;
@@ -1690,14 +1690,14 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class BitwiseComplement implements Operator {
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private OperatorExpression operatorExpression;
             private PVScalar argPV;
             
             private PVScalar resultPV;
             private ScalarType resultType;
             
-            BitwiseComplement(PVStructure parent,OperatorExpression operatorExpression) {
+            BitwiseComplement(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 argPV = operatorExpression.expressionArguments[0].pvResult;
@@ -1745,13 +1745,13 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class BooleanNot implements Operator {
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private OperatorExpression operatorExpression;
             private PVScalar pvField = null;
             private PVBoolean argPV = null;
             private PVBoolean resultPV = null;
             
-            BooleanNot(PVStructure parent,OperatorExpression operatorExpression) {
+            BooleanNot(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 pvField = operatorExpression.expressionArguments[0].pvResult;
@@ -1783,7 +1783,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         abstract static class NumericBinaryBase implements Operator {
-            protected PVStructure parent;
+            protected PVRecordStructure parent;
             protected OperationSemantics operationSemantics;
             protected OperatorExpression operatorExpression;
 
@@ -1797,7 +1797,7 @@ public abstract class ExpressionCalculatorFactory  {
             protected ScalarType resultType;
 
 
-            NumericBinaryBase(PVStructure parent,OperatorExpression operatorExpression) {
+            NumericBinaryBase(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 operationSemantics = operatorExpression.operationSemantics;
@@ -1841,7 +1841,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class Multiplication extends NumericBinaryBase {
             
-            Multiplication(PVStructure parent,OperatorExpression operatorExpression) {
+            Multiplication(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             /* (non-Javadoc)
@@ -1900,7 +1900,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class Division extends NumericBinaryBase {
            
-            Division(PVStructure parent,OperatorExpression operatorExpression) {
+            Division(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
                
             }
@@ -1961,7 +1961,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class Remainder extends NumericBinaryBase {
            
-            Remainder(PVStructure parent,OperatorExpression operatorExpression) {
+            Remainder(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             /* (non-Javadoc)
@@ -2020,7 +2020,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class Plus extends NumericBinaryBase {
 
-            Plus(PVStructure parent,OperatorExpression operatorExpression) {
+            Plus(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             /* (non-Javadoc)
@@ -2079,7 +2079,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class Minus extends NumericBinaryBase  {
            
-            Minus(PVStructure parent,OperatorExpression operatorExpression) {
+            Minus(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             /* (non-Javadoc)
@@ -2143,7 +2143,7 @@ public abstract class ExpressionCalculatorFactory  {
             private PVScalar arg1PV;
             private PVString resultPV;
 
-            StringPlus(PVStructure parent,OperatorExpression operatorExpression) {
+            StringPlus(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.operatorExpression = operatorExpression;
             }
             /* (non-Javadoc)
@@ -2168,7 +2168,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class ShiftBase implements Operator {
-            protected PVStructure parent;
+            protected PVRecordStructure parent;
             protected OperatorExpression operatorExpression;
             protected OperationSemantics operationSemantics;
             
@@ -2177,7 +2177,7 @@ public abstract class ExpressionCalculatorFactory  {
             protected PVScalar resultPV;
             protected ScalarType resultType;
 
-            ShiftBase(PVStructure parent,OperatorExpression operatorExpression) {
+            ShiftBase(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 operationSemantics = operatorExpression.operationSemantics;
@@ -2213,7 +2213,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class LeftShift extends ShiftBase {
-            LeftShift(PVStructure parent,OperatorExpression operatorExpression) {
+            LeftShift(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2249,7 +2249,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class RightShiftSignExtended extends ShiftBase {
-            RightShiftSignExtended(PVStructure parent,OperatorExpression operatorExpression) {
+            RightShiftSignExtended(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2285,7 +2285,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class RightShiftZeroExtended extends ShiftBase  {
-            RightShiftZeroExtended(PVStructure parent,OperatorExpression operatorExpression) {
+            RightShiftZeroExtended(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2323,7 +2323,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class Relational implements Operator {
-            protected PVStructure parent;
+            protected PVRecordStructure parent;
             protected OperationSemantics operationSemantics;
             protected OperatorExpression operatorExpression;
 
@@ -2332,7 +2332,7 @@ public abstract class ExpressionCalculatorFactory  {
             protected PVScalar arg1PV;
             protected PVBoolean resultPV;
 
-            Relational(PVStructure parent,OperatorExpression operatorExpression) {
+            Relational(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 operationSemantics = operatorExpression.operationSemantics;
@@ -2371,7 +2371,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class LessThan extends Relational {
 
-            LessThan(PVStructure parent,OperatorExpression operatorExpression) {
+            LessThan(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2429,7 +2429,7 @@ public abstract class ExpressionCalculatorFactory  {
 
         static class LessThanEqual extends Relational {
 
-            LessThanEqual(PVStructure parent,OperatorExpression operatorExpression) {
+            LessThanEqual(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2487,7 +2487,7 @@ public abstract class ExpressionCalculatorFactory  {
 
         static class GreaterThan extends Relational {
 
-            GreaterThan(PVStructure parent,OperatorExpression operatorExpression) {
+            GreaterThan(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2545,7 +2545,7 @@ public abstract class ExpressionCalculatorFactory  {
 
         static class GreaterThanEqual extends Relational {
 
-            GreaterThanEqual(PVStructure parent,OperatorExpression operatorExpression) {
+            GreaterThanEqual(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2603,7 +2603,7 @@ public abstract class ExpressionCalculatorFactory  {
 
         static class EqualEqual extends Relational {
 
-            EqualEqual(PVStructure parent,OperatorExpression operatorExpression) {
+            EqualEqual(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2673,7 +2673,7 @@ public abstract class ExpressionCalculatorFactory  {
 
         static class NotEqual extends Relational {
 
-            NotEqual(PVStructure parent,OperatorExpression operatorExpression) {
+            NotEqual(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2730,7 +2730,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class BitwiseBase implements Operator {
-            protected PVStructure parent;
+            protected PVRecordStructure parent;
             protected OperationSemantics operationSemantics;
             protected OperatorExpression operatorExpression;
             
@@ -2739,7 +2739,7 @@ public abstract class ExpressionCalculatorFactory  {
             protected PVScalar resultPV;
             protected ScalarType resultType;
 
-            BitwiseBase(PVStructure parent,OperatorExpression operatorExpression) {
+            BitwiseBase(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 operationSemantics = operatorExpression.operationSemantics;
@@ -2780,7 +2780,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class BitwiseAnd extends BitwiseBase {
 
-            BitwiseAnd(PVStructure parent,OperatorExpression operatorExpression) {
+            BitwiseAnd(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2822,7 +2822,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class BitwiseXOR extends BitwiseBase {
 
-            BitwiseXOR(PVStructure parent,OperatorExpression operatorExpression) {
+            BitwiseXOR(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2864,7 +2864,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class BitwiseOr extends BitwiseBase {
 
-            BitwiseOr(PVStructure parent,OperatorExpression operatorExpression) {
+            BitwiseOr(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2905,7 +2905,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class BooleanBase implements Operator {
-            protected PVStructure parent;
+            protected PVRecordStructure parent;
             protected OperationSemantics operationSemantics;
             protected OperatorExpression operatorExpression;
             
@@ -2913,7 +2913,7 @@ public abstract class ExpressionCalculatorFactory  {
             protected PVBoolean arg1PV;
             protected PVBoolean resultPV;
 
-            BooleanBase(PVStructure parent,OperatorExpression operatorExpression) {
+            BooleanBase(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 operationSemantics = operatorExpression.operationSemantics;
@@ -2965,7 +2965,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class BooleanAnd extends BooleanBase {
-            BooleanAnd(PVStructure parent,OperatorExpression operatorExpression) {
+            BooleanAnd(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2974,7 +2974,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class BooleanXOR extends BooleanBase {
-            BooleanXOR(PVStructure parent,OperatorExpression operatorExpression) {
+            BooleanXOR(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2983,7 +2983,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class BooleanOr extends BooleanBase {
-            BooleanOr(PVStructure parent,OperatorExpression operatorExpression) {
+            BooleanOr(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -2992,7 +2992,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class ConditionalAnd extends BooleanBase {
-            ConditionalAnd(PVStructure parent,OperatorExpression operatorExpression) {
+            ConditionalAnd(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -3008,7 +3008,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class ConditionalOr extends BooleanBase {
-            ConditionalOr(PVStructure parent,OperatorExpression operatorExpression) {
+            ConditionalOr(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 super(parent,operatorExpression);
             }
             public void compute() {
@@ -3025,7 +3025,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class TernaryIf implements Operator {
-            private PVStructure parent = null;
+            private PVRecordStructure parent = null;
             private OperationSemantics operationSemantics;
             private OperatorExpression operatorExpression;
             private PVBoolean ifPV;
@@ -3034,7 +3034,7 @@ public abstract class ExpressionCalculatorFactory  {
             private Operator ifOperator;
             private Operator[] argOperators = new Operator[2];
 
-            TernaryIf(PVStructure parent,OperatorExpression operatorExpression) {
+            TernaryIf(PVRecordStructure parent,OperatorExpression operatorExpression) {
                 this.parent = parent;
                 this.operatorExpression = operatorExpression;
                 operationSemantics = operatorExpression.operationSemantics;
@@ -3093,7 +3093,7 @@ public abstract class ExpressionCalculatorFactory  {
         
         private static class MathFactory {
             static Operator create(
-                    PVStructure parent,
+                    PVRecordStructure parent,
                     MathFunctionExpression mathFunctionExpression)
             {
                 MathFunction function = mathFunctionExpression.functionSemantics.mathFunction;
@@ -3136,13 +3136,13 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class MathDoubleOneArg implements Operator {
-            protected PVStructure parent = null;
+            protected PVRecordStructure parent = null;
             protected MathFunctionExpression mathFunctionExpression = null;
             protected PVDouble pvArg;
             protected PVDouble pvResult;
             
 
-            MathDoubleOneArg(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathDoubleOneArg(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3154,7 +3154,7 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 PVScalar pvField = mathFunctionExpression.expressionArguments[0].pvResult; 
                 if(pvField.getScalar().getScalarType()!=ScalarType.pvDouble) {
-                   pvField.message("arg type must be double", MessageType.error);
+                   parent.message("arg type must be double", MessageType.error);
                    return false;
                 }
                 pvArg = (PVDouble)pvField;
@@ -3167,14 +3167,14 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         abstract static class MathDoubleTwoArg implements Operator {
-            protected PVStructure parent = null;
+            protected PVRecordStructure parent = null;
             protected MathFunctionExpression mathFunctionExpression = null;
             protected PVDouble pvArg0;
             protected PVDouble pvArg1;
             protected PVDouble pvResult;
             
 
-            MathDoubleTwoArg(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathDoubleTwoArg(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3186,13 +3186,13 @@ public abstract class ExpressionCalculatorFactory  {
                 }
                 PVScalar pvScalar = mathFunctionExpression.expressionArguments[0].pvResult;
                 if(pvScalar.getScalar().getScalarType()!=ScalarType.pvDouble) {
-                   pvScalar.message("arg type must be double", MessageType.error);
+                   parent.message("arg type must be double", MessageType.error);
                    return false;
                 }
                 pvArg0 = (PVDouble)pvScalar;
                 pvScalar = mathFunctionExpression.expressionArguments[1].pvResult;
                 if(pvScalar.getScalar().getScalarType()!=ScalarType.pvDouble) {
-                   pvScalar.message("arg type must be double", MessageType.error);
+                   parent.message("arg type must be double", MessageType.error);
                    return false;
                 }
                 pvArg1 = (PVDouble)pvScalar;
@@ -3208,12 +3208,12 @@ public abstract class ExpressionCalculatorFactory  {
         
         static class MathAbs implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private PVScalar pvArg;
             private PVScalar pvResult;
             private ScalarType scalarType;
             
-            MathAbs(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathAbs(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3226,7 +3226,7 @@ public abstract class ExpressionCalculatorFactory  {
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 scalarType = pvArg.getScalar().getScalarType();
                 if(scalarType!=ScalarType.pvInt && scalarType!=ScalarType.pvLong && scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
-                    pvArg.message("illegal arg type", MessageType.error);
+                    parent.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 pvResult = pvDataCreate.createPVScalar(scalarType);
@@ -3254,7 +3254,7 @@ public abstract class ExpressionCalculatorFactory  {
         }
         
         static class MathAcos extends MathDoubleOneArg {
-            MathAcos(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathAcos(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3263,7 +3263,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathAsin extends MathDoubleOneArg {
-            MathAsin(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathAsin(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3272,7 +3272,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathAtan extends MathDoubleOneArg {
-            MathAtan(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathAtan(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3281,7 +3281,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathAtan2 extends MathDoubleTwoArg {
-            MathAtan2(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathAtan2(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3290,7 +3290,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCbrt extends MathDoubleOneArg {
-            MathCbrt(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathCbrt(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3299,7 +3299,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCeil extends MathDoubleOneArg {
-            MathCeil(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathCeil(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3308,7 +3308,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCos extends MathDoubleOneArg {
-            MathCos(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathCos(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3317,7 +3317,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathCosh extends MathDoubleOneArg {
-            MathCosh(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathCosh(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3326,7 +3326,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathExp extends MathDoubleOneArg {
-            MathExp(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathExp(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3335,7 +3335,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathExpm1 extends MathDoubleOneArg {
-            MathExpm1(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathExpm1(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3344,7 +3344,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathFloor extends MathDoubleOneArg {
-            MathFloor(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathFloor(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3353,7 +3353,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathHypot extends MathDoubleTwoArg {
-            MathHypot(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathHypot(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3362,7 +3362,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathIEEEremainder extends MathDoubleTwoArg {
-            MathIEEEremainder(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathIEEEremainder(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3371,7 +3371,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathLog extends MathDoubleOneArg {
-            MathLog(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathLog(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3380,7 +3380,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathLog10 extends MathDoubleOneArg {
-            MathLog10(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathLog10(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3389,7 +3389,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathLog1p extends MathDoubleOneArg {
-            MathLog1p(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathLog1p(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3399,13 +3399,13 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathMax implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private PVScalar pv0Arg;
             private PVScalar pv1Arg;
             private PVScalar pvResult;
             private ScalarType scalarType;
             
-            MathMax(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathMax(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3418,13 +3418,13 @@ public abstract class ExpressionCalculatorFactory  {
                 pv0Arg = mathFunctionExpression.expressionArguments[0].pvResult;;
                 ScalarType scalarType = pv0Arg.getScalar().getScalarType();
                 if(scalarType!=ScalarType.pvInt && scalarType!=ScalarType.pvLong && scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
-                    pv0Arg.message("illegal arg type", MessageType.error);
+                    parent.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 this.scalarType = scalarType;
                 pv1Arg = mathFunctionExpression.expressionArguments[1].pvResult;
                 if(!pv1Arg.getScalar().getScalarType().isNumeric()) {
-                    pv1Arg.message("illegal arg type", MessageType.error);
+                    parent.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 pvResult = pvDataCreate.createPVScalar(this.scalarType);
@@ -3451,13 +3451,13 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathMin implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private PVScalar pv0Arg;
             private PVScalar pv1Arg;
             private PVScalar pvResult;
             private ScalarType scalarType;
             
-            MathMin(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathMin(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3470,14 +3470,14 @@ public abstract class ExpressionCalculatorFactory  {
                 pv0Arg = mathFunctionExpression.expressionArguments[0].pvResult;
                 ScalarType scalarType = pv0Arg.getScalar().getScalarType();
                 if(scalarType!=ScalarType.pvInt && scalarType!=ScalarType.pvLong && scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
-                    pv0Arg.message("illegal arg type", MessageType.error);
+                    parent.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 this.scalarType = scalarType;
                 pv1Arg = mathFunctionExpression.expressionArguments[1].pvResult;
                 scalarType = pv1Arg.getScalar().getScalarType();
                 if(scalarType!=this.scalarType) {
-                    pv1Arg.message("arg1 type must be the same as arg0", MessageType.error);
+                    parent.message("arg1 type must be the same as arg0", MessageType.error);
                     return false;
                 }
                 pvResult = pvDataCreate.createPVScalar(this.scalarType);
@@ -3503,7 +3503,7 @@ public abstract class ExpressionCalculatorFactory  {
             } 
         }
         static class MathPow extends MathDoubleTwoArg {
-            MathPow(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathPow(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3513,10 +3513,10 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathRandom implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private PVDouble pvResult;
             
-            MathRandom(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathRandom(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3535,7 +3535,7 @@ public abstract class ExpressionCalculatorFactory  {
             } 
         }
         static class MathRint extends MathDoubleOneArg {
-            MathRint(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathRint(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3545,12 +3545,12 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathRound implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private PVScalar pvArg;
             private PVScalar pvResult;
             private ScalarType argType;
             
-            MathRound(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathRound(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3563,7 +3563,7 @@ public abstract class ExpressionCalculatorFactory  {
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 argType = pvArg.getScalar().getScalarType();
                 if(argType!=ScalarType.pvFloat && argType!=ScalarType.pvDouble) {
-                    pvArg.message("illegal arg type", MessageType.error);
+                    parent.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 ScalarType resultType = (argType==ScalarType.pvFloat) ? ScalarType.pvInt : ScalarType.pvLong;
@@ -3586,12 +3586,12 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathSignum implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private PVScalar pvArg;
             private PVScalar pvResult;
             private ScalarType scalarType;
             
-            MathSignum(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathSignum(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3604,7 +3604,7 @@ public abstract class ExpressionCalculatorFactory  {
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 scalarType = pvArg.getScalar().getScalarType();
                 if(scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
-                    pvArg.message("illegal arg type", MessageType.error);
+                    parent.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 pvResult = pvDataCreate.createPVScalar(scalarType);
@@ -3625,7 +3625,7 @@ public abstract class ExpressionCalculatorFactory  {
             } 
         }
         static class MathSin extends MathDoubleOneArg {
-            MathSin(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathSin(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3634,7 +3634,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathSinh extends MathDoubleOneArg {
-            MathSinh(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathSinh(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3643,7 +3643,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathSqrt extends MathDoubleOneArg {
-            MathSqrt(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathSqrt(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3652,7 +3652,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathTan extends MathDoubleOneArg {
-            MathTan(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathTan(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3661,7 +3661,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathTanh extends MathDoubleOneArg {
-            MathTanh(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathTanh(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3670,7 +3670,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathToDegrees extends MathDoubleOneArg {
-            MathToDegrees(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathToDegrees(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3679,7 +3679,7 @@ public abstract class ExpressionCalculatorFactory  {
             }
         }
         static class MathToRadians extends MathDoubleOneArg {
-            MathToRadians (PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathToRadians (PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 super(parent,mathFunctionExpression);
             }
             public void compute() {
@@ -3689,12 +3689,12 @@ public abstract class ExpressionCalculatorFactory  {
         }
         static class MathUlp implements Operator {
             private MathFunctionExpression mathFunctionExpression;
-            private PVStructure parent;
+            private PVRecordStructure parent;
             private PVScalar pvArg;
             private PVScalar pvResult;
             private ScalarType scalarType;
             
-            MathUlp(PVStructure parent,MathFunctionExpression mathFunctionExpression) {
+            MathUlp(PVRecordStructure parent,MathFunctionExpression mathFunctionExpression) {
                 this.parent = parent;
                 this.mathFunctionExpression = mathFunctionExpression;
             }
@@ -3707,7 +3707,7 @@ public abstract class ExpressionCalculatorFactory  {
                 pvArg = mathFunctionExpression.expressionArguments[0].pvResult;
                 scalarType = pvArg.getScalar().getScalarType();
                 if(scalarType!=ScalarType.pvFloat && scalarType!=ScalarType.pvDouble) {
-                    pvArg.message("illegal arg type", MessageType.error);
+                    parent.message("illegal arg type", MessageType.error);
                     return false;
                 }
                 pvResult = pvDataCreate.createPVScalar(scalarType);

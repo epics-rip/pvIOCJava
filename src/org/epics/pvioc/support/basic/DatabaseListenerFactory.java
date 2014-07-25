@@ -40,16 +40,16 @@ public class DatabaseListenerFactory {
     public static Support create(PVRecordField pvRecordField) {
         PVField pvField = pvRecordField.getPVField();
         if(!pvField.getFieldName().equals("value")) {
-            pvField.message("illegal field name. Must be value", MessageType.error);
+            pvRecordField.message("DatabaseListener: Illegal field name. Must be value", MessageType.error);
             return null;
         }
         if(pvField.getField().getType()!=Type.scalar) {
-            pvField.message("illegal field type. Must be scalar string", MessageType.error);
+            pvRecordField.message("DatabaseListener: Illegal field type. Must be scalar string", MessageType.error);
             return null;
         }
         PVScalar pvScalar = (PVScalar)pvField;
         if(pvScalar.getScalar().getScalarType()!=ScalarType.pvString) {
-            pvField.message("illegal field type. Must be scalar string", MessageType.error);
+            pvRecordField.message("DatabaseListener: Illegal field type. Must be scalar string", MessageType.error);
             return null;
         }
         return new DatabaseListener(pvRecordField);
@@ -71,10 +71,6 @@ public class DatabaseListenerFactory {
             pvValue = (PVString)pvRecordField.getPVField();
             pvRecord = pvRecordField.getPVRecord();
         }
-        /* (non-Javadoc)
-         * @see org.epics.pvioc.support.Support#initialize(org.epics.pvioc.support.RecordProcess)
-         */
-        
         /* (non-Javadoc)
          * @see org.epics.pvioc.support.AbstractSupport#initialize(org.epics.pvioc.support.RecordSupport)
          */

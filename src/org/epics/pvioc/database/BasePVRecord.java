@@ -53,7 +53,6 @@ public class BasePVRecord implements PVRecord {
     	}
     	this.recordName = recordName;
     	pvRecordStructure = new BasePVRecordStructure(pvStructure,null,this);
-    	pvStructure.setRequester(this);
     }
     /* (non-Javadoc)
      * @see org.epics.pvioc.database.PVRecord#getRecordProcess()
@@ -92,9 +91,6 @@ public class BasePVRecord implements PVRecord {
     		PVRecordField pvrf = pvrss[i];
     	    pvf = pvrf.getPVField();
     	    offset = pvf.getFieldOffset();
-if(offset==0) {
-System.out.println("why is offset 0");
-}
     	    if(offset==desiredOffset) return pvrf;
     	    int nextOffset = pvf.getNextFieldOffset();
     	    if(nextOffset<=desiredOffset) continue;
@@ -115,12 +111,8 @@ System.out.println("why is offset 0");
     public String getRecordName() {
         return recordName;
     }
-    @Override
-    public String getRequesterName() {
-        return recordName;
-    }
     /* (non-Javadoc)
-     * @see org.epics.pvdata.factory.AbstractPVField#message(java.lang.String, org.epics.pvdata.pv.MessageType)
+     * @see org.epics.pvioc.database.PVRecord#message(java.lang.String, org.epics.pvdata.pv.MessageType)
      */
     public void message(String message, MessageType messageType) {
         if(message!=null && message.charAt(0)!='.') message = " " + message;
