@@ -82,25 +82,25 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
 		return pvField;
 	}
 
-	@Override
-	public void replacePVField(PVField newPVField) {
-	    String message = "";
-	    boolean ok = true;
-	    if(newPVField.getField().getType()==Type.structure) {
-	        ok = false;
-	        message += " illegal attempt to replace a structure field";
-	    }
-	    if(newPVField.getField()!=pvField.getField()) {
-	        ok = false;
-	        message += " attempt to replace a field but introspection interface not the same";
-	    }
-	    if(!ok) {
-	        throw new IllegalStateException(getFullName() + message);
-	    }
-	    parent.getPVStructure().replacePVField(pvField,newPVField);
-		pvField = newPVField;
-		pvField.setPostHandler(this);
-	}
+//	@Override
+//	public void replacePVField(PVField newPVField) {
+//	    String message = "";
+//	    boolean ok = true;
+//	    if(newPVField.getField().getType()==Type.structure) {
+//	        ok = false;
+//	        message += " illegal attempt to replace a structure field";
+//	    }
+//	    if(newPVField.getField()!=pvField.getField()) {
+//	        ok = false;
+//	        message += " attempt to replace a field but introspection interface not the same";
+//	    }
+//	    if(!ok) {
+//	        throw new IllegalStateException(getFullName() + message);
+//	    }
+//	    parent.getPVStructure().replacePVField(pvField,newPVField);
+//		pvField = newPVField;
+//		pvField.setPostHandler(this);
+//	}
 	/* (non-Javadoc)
 	 * @see org.epics.pvdata.pv.PVField#getPVRecord()
 	 */
@@ -108,14 +108,14 @@ public class BasePVRecordField implements PVRecordField, PostHandler{
 	public PVRecord getPVRecord() {
 		return pvRecord;
 	}
-	/* (non-Javadoc)
-	 * @see org.epics.pvioc.database.PVRecordField#renameField(java.lang.String)
-	 */
-	@Override
-	public void renameField(String newName) {
-		pvField.renameField(newName);
-		createNames();
-	}
+//	/* (non-Javadoc)
+//	 * @see org.epics.pvioc.database.PVRecordField#renameField(java.lang.String)
+//	 */
+//	@Override
+//	public void renameField(String newName) {
+//		pvField.renameField(newName);
+//		createNames();
+//	}
 	/* (non-Javadoc)
 	 * @see org.epics.pvdata.pv.PVField#addListener(org.epics.pvdata.pv.PVListener)
 	 */

@@ -3,11 +3,11 @@
 
 <record recordName = "processLink${num}">
     <structure name = "output" extends = "caProcessLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">simpleCounter${num}</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
 </record>
@@ -23,7 +23,7 @@
     </structure>
     <structure name = "output" extends = "caOutputLink">
         <scalar name = "wait" scalarType = "boolean">true</scalar>
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">enum${num}</scalar>
         <scalar name = "request">record[process=true]field(value.index)</scalar>
    </structure>
@@ -31,7 +31,7 @@
              <scalar name = "pvname">enumIn${num}</scalar>
         </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
 </record>
@@ -41,7 +41,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">enum${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
@@ -53,7 +53,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">enum${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm</scalar>
@@ -71,7 +71,7 @@
       </structure>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
 </record>
@@ -86,7 +86,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">byte${num}</scalar>
         <scalar name = "request">record[process=true]</scalar>
     </structure>
@@ -101,7 +101,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">byte${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
@@ -113,7 +113,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">byte${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
@@ -129,7 +129,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">short${num}</scalar>
         <scalar name = "request">record[process=true]</scalar>
     </structure>
@@ -144,7 +144,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">short${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
@@ -156,7 +156,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">short${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
@@ -172,7 +172,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">int${num}</scalar>
         <scalar name = "request">record[process=true]</scalar>
     </structure>
@@ -187,7 +187,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">int${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
@@ -199,7 +199,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">int${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
@@ -215,7 +215,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">long${num}</scalar>
         <scalar name = "request">record[process=true]</scalar>
     </structure>
@@ -230,7 +230,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">long${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
@@ -242,7 +242,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">long${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
@@ -260,7 +260,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">float${num}</scalar>
         <scalar name = "request">record[process=true]</scalar>
     </structure>
@@ -275,7 +275,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">float${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
@@ -287,7 +287,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">float${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
@@ -303,7 +303,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">double${num}</scalar>
         <scalar name = "request">record[process=true]</scalar>
     </structure>
@@ -318,7 +318,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">double${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
     </structure>
@@ -330,7 +330,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "display" extends = "display" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">double${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm,display</scalar>
@@ -347,7 +347,7 @@
         <scalar name = "process">true</scalar>
     </structure>
     <structure name = "output" extends = "caOutputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">string${num}</scalar>
         <scalar name = "request">record[process=true]</scalar>
     </structure>
@@ -361,7 +361,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caInputLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">string${num}</scalar>
         <scalar name = "request" scalarType = "string">value,alarm</scalar>
     </structure>
@@ -372,7 +372,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "caMonitorLink">
-        <scalar name = "providerName">pvAccess</scalar>
+        <scalar name = "providerName">pva</scalar>
         <scalar name = "pvname">string${num}</scalar>
         <scalar name = "process">true</scalar>
         <scalar name = "request" scalarType = "string">value,alarm</scalar>

@@ -10,7 +10,7 @@ import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
 import org.epics.pvdata.pv.Convert;
-import org.epics.pvdata.pv.Field;
+import org.epics.pvdata.pv.*;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVString;
@@ -43,10 +43,11 @@ abstract class AbstractIOLink extends AbstractLink {
      * pvFields are the fields in PVRecord
      */
     protected PVField[] pvFields = null;
+    protected String[] nameInRemote = null;
     /**
      * If alarm is a requested field this is the index.
      */
-    protected int indexAlarmLinkField = -1;;
+    protected int indexAlarmLinkField = -1;
    
     /**
      * Constructor.
@@ -103,36 +104,17 @@ abstract class AbstractIOLink extends AbstractLink {
     
     protected boolean findPVFields(Structure structure) {
         Field[] fields = structure.getFields();
-        String[] names = structure.getFieldNames();
+        String[] names = structure.getFieldNames();        
         pvFields = new PVField[fields.length];
+        nameInRemote = new String[fields.length];
         for(int i=0; i<fields.length; i++) {
             Field field = fields[i];
             String fieldName = names[i];
-            PVField pvField = null;
             PVStructure pvParent = super.pvStructure;
-            while(pvParent!=null) {
-                pvField = pvParent.getSubField(fieldName);
-                if(pvField!=null) break;
-                pvParent = pvParent.getParent();
-            }
-            if(pvField==null && fieldName.equals("index")) {
-            	// enumerated structure is a special case
-            	pvParent = super.pvStructure;
-                while(pvParent!=null) {
-                    pvField = pvParent.getSubField("value");
-                    if(pvField!=null) break;
-                    pvParent = pvParent.getParent();
-                }
-            }
-            if(pvField==null) {
-                String message = pvRecordField.getFullName() + " request for field " + fieldName + " is not a parent of this field";
-                if(alarmSupport!=null) {
-                    alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
-                }
-                super.message(message, MessageType.error);
-                return false;
-            }
+            PVField pvField = null;
             if(fieldName.equals("alarm") && alarmSupport!=null) {
+                // alarm is a special case
+                // look up parent tree for first alarm field
                 Structure struct = (Structure)field;
                 String[] subnames = struct.getFieldNames();
                 int found=0;
@@ -150,19 +132,72 @@ abstract class AbstractIOLink extends AbstractLink {
                     return false;
                 }
                 indexAlarmLinkField = i;
-            } else {
-                if(!convert.isCopyCompatible(field, pvField.getField())) {
-                    String message = "pvLinkField " + names[i];
-                    message += " pvField " + pvField;
-                    message += "field " + fieldName +" is not copy compatible with link field";
-                    if(alarmSupport!=null) {
-                        alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
-                    }
-                    super.message(message,MessageType.error);
-                    return false;
+                while(pvParent!=null) {
+                    pvField = pvParent.getSubField("alarm");
+                    if(pvField!=null) break;
+                    pvParent = pvParent.getParent();
                 }
+                if(pvField!=null) {
+                    pvFields[i] = pvField;
+                    nameInRemote[i] = "alarm";
+                    continue;
+                }
+                String message = pvRecordField.getFullName() + " request for alarm but no alarm in this record";
+                super.message(message, MessageType.error);
+                return false;
             }
-            pvFields[i] = pvField;
+            // look first for exact name match
+            while(pvParent!=null) {
+                pvField = pvParent.getSubField(fieldName);
+                if(pvField!=null) break;
+                pvParent = pvParent.getParent();
+            }
+            if(pvField!=null) {
+                // check for compatibility
+                if(convert.isCopyCompatible(field, pvField.getField())) {
+                    pvFields[i] = pvField;
+                    nameInRemote[i] = fieldName;
+                    continue;
+                }
+                pvField = null;
+            }
+            // look up parent tree for value field
+            pvParent = super.pvStructure;
+            while(pvParent!=null) {
+                pvField = pvParent.getSubField("value");
+                if(pvField!=null) break;
+                pvParent = pvParent.getParent();
+            }
+            if(pvField==null) {
+                String message = pvRecordField.getFullName() + " request " + requestPVString.get() + " is valid for this record";
+                if(alarmSupport!=null) {
+                    alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
+                }
+                super.message(message, MessageType.error);
+                return false;
+            }
+            // look for first compatible field in linked record that is compatible with pvField
+            nameInRemote[i] = fieldName;
+            pvFields[i] = null;
+            while(true) {
+                if(convert.isCopyCompatible(field, pvField.getField())) {
+                    pvFields[i] = pvField;
+                    break;
+                }
+                if(field.getType()!=Type.structure) break;
+                Structure struct = (Structure)field;
+                if(struct.getFields().length!=1) break;
+                field = struct.getField(0);
+                fieldName = struct.getFieldName(0);
+                nameInRemote[i] += "." + fieldName;
+            }
+            if(pvFields[i]!=null) continue;
+            String message = pvRecordField.getFullName() + " request " + requestPVString.get() + " is valid for this record";
+            if(alarmSupport!=null) {
+                alarmSupport.setAlarm(message, AlarmSeverity.INVALID,AlarmStatus.DB);
+            }
+            super.message(message, MessageType.error);
+            return false;
         }
         return true;
     }
@@ -173,6 +208,8 @@ abstract class AbstractIOLink extends AbstractLink {
         requestPVString = null;
         indexAlarmLinkField = -1;
         pvRequest = null;
+        pvFields = null;
+        nameInRemote = null;
         super.uninitialize();
     }
 }

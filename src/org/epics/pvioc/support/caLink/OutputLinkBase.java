@@ -15,6 +15,7 @@ import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Structure;
+import org.epics.pvdata.pv.*;
 import org.epics.pvioc.database.PVRecordField;
 import org.epics.pvioc.support.ProcessCallbackRequester;
 import org.epics.pvioc.support.ProcessContinueRequester;
@@ -105,11 +106,10 @@ implements ProcessCallbackRequester,ChannelPutRequester,ProcessContinueRequester
             supportProcessRequester.supportProcessDone(RequestResult.success);
             return;
         }
-        PVField[] linkPVFields = linkPVStructure.getPVFields();
-        for(int i=0; i< linkPVFields.length; i++) {
+        for(int i=0; i< pvFields.length; i++) {
             if(i==indexAlarmLinkField) continue;
             PVField pvFrom = pvFields[i];
-            PVField pvTo = linkPVFields[i];
+            PVField pvTo = linkPVStructure.getSubField(nameInRemote[i]);
             if(pvFrom.equals(pvTo)) continue;
             convert.copy(pvFrom, pvTo);
             bitSet.set(pvTo.getFieldOffset());

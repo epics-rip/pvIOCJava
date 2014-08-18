@@ -40,10 +40,12 @@
 
 <structure structureName = "calculation" >
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
+   <!-- If there are named arguments to calculation then the following must be defined
   <structure name = "calcArgs">
-     <!-- each field of calcArgs must be a calcArg structure -->
      <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
+     For each named argument there must be a calcArg structure .
   </structure>
+   -->
   <structure name = "calculator" extends = "expressionCalculator" />
   <structure name = "alarm" extends = "alarm" />
 </structure>

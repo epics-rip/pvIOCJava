@@ -66,13 +66,11 @@ public abstract class ExpressionCalculatorFactory  {
         private ExpressionCalculator(PVRecordStructure pvRecordStructure) {
             super(supportName,pvRecordStructure);
             this.pvRecordStructure = pvRecordStructure;
-            pvStructure = pvRecordStructure.getPVStructure();
         }
         
         private static final String supportName = "org.epics.pvioc.expressionCalculator";
         
         private final PVRecordStructure pvRecordStructure;
-        private final PVStructure pvStructure;
         private AlarmSupport alarmSupport = null;
         private PVScalar pvValue = null;
         private CalcArgs calcArgsSupport = null;
@@ -104,16 +102,14 @@ public abstract class ExpressionCalculatorFactory  {
             }
             this.pvValue = (PVScalar)pvValue;
             PVField pvField = pvParent.getSubField("calcArgs");
-            if(pvField==null) {
-                pvRecordStructure.message("calcArgs field not found", MessageType.error);
-                return;
+            if(pvField!=null) {
+                Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
+                if(!(support instanceof CalcArgs)) {
+                    pvRecordStructure.message("calcArgsSupport not found", MessageType.error);
+                    return;
+                }
+                calcArgsSupport = (CalcArgs)support;
             }
-            Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
-            if(!(support instanceof CalcArgs)) {
-                pvRecordStructure.message("calcArgsSupport not found", MessageType.error);
-                return;
-            }
-            calcArgsSupport = (CalcArgs)support;
             PVString pvExpression = pvRecordStructure.getPVStructure().getStringField("expression");
             if(pvExpression==null) return;
             Parse parse = new Parse(pvExpression);
@@ -1141,7 +1137,7 @@ public abstract class ExpressionCalculatorFactory  {
                     String name = token.value;
                     if(name.equals("value")) {
                         pvField = pvValue;
-                    } else {
+                    } else if(calcArgsSupport!=null){
                         pvField = calcArgsSupport.getPVField(name);
                     }
                     if(pvField==null) {

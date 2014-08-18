@@ -29,7 +29,6 @@
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
   <scalar name = "value" scalarType = "int" />
   <structure name = "alarm" extends = "alarm"/>
-  <structure name = "input" extends = "generic" />
   <structure name = "linearConvert" extends = "linearConvert">
     <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.linearConvertInputFactory</auxInfo>
   </structure>
@@ -39,7 +38,6 @@
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
   <scalar name = "value" scalarType = "int" />
   <structure name = "alarm" extends = "alarm"/>
-  <structure name = "input" extends = "generic" />
   <structure name = "linearConvert" extends = "linearConvert">
     <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.linearConvertOutputFactory</auxInfo>
   </structure>
@@ -49,7 +47,6 @@
   <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.genericFactory</auxInfo>
   <scalar name = "value" scalarType = "double" />
   <structure name = "alarm" extends = "alarm"/>
-  <structure name = "input" extends = "generic" />
   <scalar name = "incremental" scalarType = "boolean">
    <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.incrementalFactory</auxInfo>
   </scalar>

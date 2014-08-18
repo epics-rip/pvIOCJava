@@ -8,6 +8,7 @@
 </record>
 <include href = "checkInteger.xml" />
 
+
 <substitute fromTo = "checkRecord=basicMathShort,checkType=short,checkValue=10" />
 <record recordName = "${checkRecord}">
     <include href = "basicMathFields.xml" />
@@ -42,6 +43,7 @@
     <include href = "checkLink.xml" />
 </record>
 <include href = "checkReal.xml" />
+
 <!--
 -->
 

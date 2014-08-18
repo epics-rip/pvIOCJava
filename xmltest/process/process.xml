@@ -34,7 +34,7 @@
       </structure>
     </structure>
      <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
         <scalar name = "singleProcessRequester">true</scalar>
     </structure>
@@ -51,7 +51,7 @@
       </structure>
     </structure>
      <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
 </record>
@@ -66,7 +66,7 @@
       </structure>
     </structure>
      <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
      <structure name = "delay" extends = "delay"> 

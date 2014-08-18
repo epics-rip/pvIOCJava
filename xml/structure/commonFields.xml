@@ -6,7 +6,7 @@
 </structure>
 
 <structure structureName = "scanPriority" extends = "enumerated" >
-  <scalar name = "index">2</scalar>
+  <scalar name = "index">3</scalar>
   <array name = "choices" immutable = "true" >
       lowest,lower,low,middle,high,higher,highest</array>
 </structure>

@@ -5,7 +5,6 @@
  */
 package org.epics.pvioc.support.calc;
 
-import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Type;
@@ -29,9 +28,10 @@ public class CalcArgsFactory {
      * @return An interface to the support or null if the supportName was not "linkArray".
      */
     public static Support create(PVRecordStructure pvRecordStructure) {
-        return new CalcArgsImpl(pvRecordStructure);
+        CalcArgsImpl calcArgs = new CalcArgsImpl(pvRecordStructure);
+        calcArgs.init();
+        return calcArgs;
     }
-    
     
     private static class CalcArgsImpl extends AbstractSupport
     implements CalcArgs,SupportProcessRequester
@@ -54,12 +54,39 @@ public class CalcArgsFactory {
             processRequesterName = pvRecordStructure.getFullName();
         }
         
+        void init()
+        {
+            PVField[] pvFields = pvRecordStructure.getPVStructure().getPVFields();
+            int length = pvFields.length;
+            valuePVFields = new PVField[length];
+            argNames = new String[length];
+            supports = new Support[length];
+            for(int i=0; i< length; i++) {
+                PVField pvField = pvFields[i];
+                if(pvField.getField().getType()!=Type.structure) {
+                    throw new IllegalStateException("Illegal CalcArgs structure " + pvRecordStructure.getPVRecord());
+                }
+                PVStructure pvStructure = (PVStructure)pvField;
+                valuePVFields[i] = pvStructure.getSubField("value");
+                if(valuePVFields[i]==null) {
+                    throw new IllegalStateException("CalcArgs structure must have a value field" + pvRecordStructure.getPVRecord());
+                }
+                argNames[i] = valuePVFields[i].getParent().getFieldName();
+                Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
+                if(support==null) {
+                    supports[i] = null;
+                } else {
+                    supports[i] = support;
+                    ++numSupports;
+                }
+            }
+        }
         /* (non-Javadoc)
          * @see org.epics.pvioc.support.CalcArgArraySupport#getPVField(java.lang.String)
          */
         public PVField getPVField(String argName) {
-            if(super.getSupportState()==SupportState.readyForInitialize) {
-                throw new IllegalStateException("getPVField called but not initialized");
+            if(supports.length<1) {
+                throw new IllegalStateException("CalcArgs structure does not have a field " + argName + " in record " + pvRecordStructure.getPVRecord());
             }
             for(int i=0; i<argNames.length; i++) {
                 String name = argNames[i];
@@ -82,29 +109,9 @@ public class CalcArgsFactory {
         @Override
         public void initialize() {
             if(!super.checkSupportState(SupportState.readyForInitialize,supportName)) return;
-            PVField[] pvFields = pvRecordStructure.getPVStructure().getPVFields();
-            int length = pvFields.length;
-            valuePVFields = new PVField[length];
-            argNames = new String[length];
-            supports = new Support[length];
-            numSupports = 0;
-            for(int i=0; i< length; i++) {
-                PVField pvField = pvFields[i];
-                if(pvField.getField().getType()!=Type.structure) {
-                    pvRecordStructure.message("CalcArgs requires this to be a calcArg structure", MessageType.error);
-                    return;
-                }
-                PVStructure pvStructure = (PVStructure)pvField;
-                valuePVFields[i] = pvStructure.getSubField("value");
-                if(valuePVFields[i]==null) {
-                    pvRecordStructure.message("CalcArgs requires this to have a value field", MessageType.error);
-                    return;
-                }
-                argNames[i] = valuePVFields[i].getParent().getFieldName();
-                Support support = pvRecordStructure.getPVRecord().findPVRecordField(pvField).getSupport();
-                supports[i] = support;
-                if(support==null) continue;
-                numSupports++;
+            for(int i=0; i<supports.length; ++i) {
+                Support support = supports[i];
+                if(support == null) continue;
                 support.initialize();
                 if(support.getSupportState()!=SupportState.readyForStart) {
                     for(int j=0; j<i; j++) {

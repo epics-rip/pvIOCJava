@@ -8,6 +8,7 @@
     <scalar name = "value">1000</scalar>
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "min">
             <scalar name = "value" scalarType = "int" >0</scalar>
           </structure>
@@ -49,7 +50,7 @@
     <structure name = "alarm" extends = "alarm" />
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "voltage" extends = "generic">

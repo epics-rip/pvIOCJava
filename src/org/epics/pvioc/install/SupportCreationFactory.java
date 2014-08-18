@@ -116,6 +116,9 @@ public class SupportCreationFactory {
    
         private boolean createStructureSupport(PVRecordStructure pvRecordStructure) {
         	boolean result = SupportCreationFactory.createSupportPvt(requester,pvRecordStructure);
+if(!result) {
+System.out.println(pvRecordStructure.getPVStructure());
+}
             PVRecordField[] pvRecordFields = pvRecordStructure.getPVRecordFields();
             for(int i=0; i<pvRecordFields.length; i++) {
             	PVRecordField pvRecordField = pvRecordFields[i];
@@ -125,6 +128,9 @@ public class SupportCreationFactory {
                 } else {
                     if(!SupportCreationFactory.createSupportPvt(requester,pvRecordField)) result = false;
                 }
+if(!result){
+System.out.println(pvRecordField.getPVField());
+}
             }
             return result;
         }
@@ -164,7 +170,10 @@ public class SupportCreationFactory {
             return false;
         }
         PVString factoryNamePV = pvStructure.getStringField("supportFactory");
-        if(factoryNamePV==null) return false;
+        if(factoryNamePV==null) {
+            printError(requester,pvRecordField,"support " + supportName + " does not implement supportFactory");
+            return false;
+        }
         factoryName = factoryNamePV.get();
         if(factoryName==null) {
             printError(requester,pvRecordField,"support " + supportName + " does not define a factory name");

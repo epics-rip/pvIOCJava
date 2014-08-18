@@ -11,18 +11,18 @@
         <scalar name = "limitHigh">10.0</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "desired" extends = "incrementalDouble" >
-        <scalar name = "value">
-            <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
+        <scalar name = "value" >
+            <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
         </scalar>
         <scalar name = "rateOfChange">.2</scalar>
         <scalar name = "incremental">true</scalar>
-        <structure name = "control" extends = "control" >
-            <scalar name = "limitLow">0</scalar>
-            <scalar name = "limitHigh">8</scalar>
+        <structure name = "control"  >
+            <scalar name = "limitLow" scalarType = "double">0</scalar>
+            <scalar name = "limitHigh" scalarType = "double">8</scalar>
         </structure>
     </structure>
     <structure name = "output" extends = "linearConvertOutput">

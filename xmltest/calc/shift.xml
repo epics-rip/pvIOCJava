@@ -8,6 +8,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
      <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "int" >0x80000000</scalar>
           </structure>
@@ -41,6 +42,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "byte" >5</scalar>
           </structure>
@@ -65,6 +67,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "short" >5</scalar>
           </structure>
@@ -89,6 +92,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "int" >5</scalar>
           </structure>
@@ -113,6 +117,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "long" >5</scalar>
           </structure>
@@ -137,6 +142,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "byte" >0x80</scalar>
           </structure>
@@ -161,6 +167,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "byte" >0x80</scalar>
           </structure>
@@ -185,6 +192,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "short" >0x8000</scalar>
           </structure>
@@ -209,6 +217,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "short" >0x8000</scalar>
           </structure>
@@ -233,6 +242,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "int" >0x80000000</scalar>
           </structure>
@@ -257,6 +267,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "int" >0x80000000</scalar>
           </structure>
@@ -281,6 +292,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "long" >-1</scalar>
           </structure>
@@ -305,6 +317,7 @@
     <structure name = "timeStamp" extends = "timeStamp" />
      <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "a">
             <scalar name = "value" scalarType = "long" >-1</scalar>
           </structure>

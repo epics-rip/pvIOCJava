@@ -7,7 +7,7 @@
         false,true,false
     </array>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >

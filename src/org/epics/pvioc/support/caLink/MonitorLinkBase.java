@@ -15,6 +15,7 @@ import org.epics.pvdata.monitor.MonitorElement;
 import org.epics.pvdata.monitor.MonitorRequester;
 import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
+import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVField;
@@ -23,6 +24,7 @@ import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Structure;
+import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVRecordField;
 import org.epics.pvioc.install.AfterStart;
 import org.epics.pvioc.support.ProcessToken;
@@ -254,18 +256,18 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     		return;
     	}
     	PVStructure linkPVStructure = monitorElement.getPVStructure();
-    	PVField[] linkPVFields = linkPVStructure.getPVFields();
     	BitSet changeBitSet = monitorElement.getChangedBitSet();
     	BitSet overrunBitSet = monitorElement.getOverrunBitSet();
     	boolean allSet = changeBitSet.get(0);
-    	for(int i=0; i< linkPVFields.length; i++) {
+    	for(int i=0; i< pvFields.length; i++) {
     		if(i==indexAlarmLinkField) {
     		    PVString pvAlarmMessage = linkPVStructure.getSubField(PVString.class,"alarm.message");
                 PVInt pvAlarmSeverity = linkPVStructure.getSubField(PVInt.class,"alarm.severity");
     			alarmSupport.setAlarm(pvAlarmMessage.get(),
     					AlarmSeverity.getSeverity(pvAlarmSeverity.get()),AlarmStatus.DB);
     		} else {
-    			copyChanged(linkPVFields[i],pvFields[i],changeBitSet,allSet);
+    		    PVField pvFrom = linkPVStructure.getSubField(nameInRemote[i]);
+    			copyChanged(pvFrom,pvFields[i],changeBitSet,allSet);
     		}
     	}
     	if(overrun || overrunBitSet.nextSetBit(0)>=0) {
@@ -278,9 +280,22 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     	monitorElement = null;
     }
     
+    private void convertPVField(PVField pvFrom,PVField pvTo) {
+        if(pvTo.getField().getType()!=Type.structure&&pvFrom.getField().getType()==Type.structure) {
+            while(true) {
+                Field field = pvFrom.getField();
+                if(field.getType()!=Type.structure) break;
+                PVStructure pvStruct = (PVStructure)pvFrom;
+                if(pvStruct.getPVFields().length!=1) break;
+                pvFrom = pvStruct.getPVFields()[0];
+            }
+        }
+        convert.copy(pvFrom, pvTo);
+    }
+    
     private void copyChanged(PVField pvFrom,PVField pvTo,BitSet changeBitSet,boolean allSet) {
         if(allSet) {
-            convert.copy(pvFrom, pvTo);
+            convertPVField(pvFrom, pvTo);
             return;
         }
         int startFrom = pvFrom.getFieldOffset();
@@ -288,7 +303,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
         int nextSet = changeBitSet.nextSetBit(startFrom);
         if(nextSet<0) return;
         if(nextSet==startFrom) {
-            convert.copy(pvFrom, pvTo);
+            convertPVField(pvFrom, pvTo);
             return;
         }
         if(pvFrom.getNumberFields()==1) return;
@@ -296,7 +311,7 @@ implements MonitorRequester,Runnable,RecordProcessRequester
             PVField from = ((PVStructure)pvFrom).getSubField(nextSet);
             int nextTo = nextSet - startFrom + startTo;
             PVField to = ((PVStructure)pvTo).getSubField(nextTo);
-            convert.copy(from, to);
+            convertPVField(from, to);
             changeBitSet.clear(nextSet);
             nextSet = changeBitSet.nextSetBit(nextSet);
             if(nextSet<0) return;

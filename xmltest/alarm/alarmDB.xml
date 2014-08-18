@@ -12,11 +12,12 @@
         <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "min">
             <scalar name = "value" scalarType = "double" >0.0</scalar>
           </structure>
@@ -74,11 +75,12 @@
         <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "min">
             <scalar name = "value" scalarType = "double" >0.0</scalar>
           </structure>
@@ -135,11 +137,12 @@
         <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "min">
             <scalar name = "value" scalarType = "double" >0</scalar>
           </structure>
@@ -196,11 +199,12 @@
         <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "min">
             <scalar name = "value" scalarType = "double" >0</scalar>
           </structure>
@@ -257,11 +261,12 @@
         <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "min">
             <scalar name = "value" scalarType = "double" >0</scalar>
           </structure>
@@ -318,11 +323,12 @@
         <scalar name = "limitHigh">11</scalar>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >
        <structure name = "calcArgs">
+          <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.calcArgsFactory</auxInfo>
           <structure name = "min">
             <scalar name = "value" scalarType = "double" >0</scalar>
           </structure>

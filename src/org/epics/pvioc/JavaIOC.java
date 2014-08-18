@@ -330,16 +330,18 @@ public class JavaIOC {
     }
         
     static void dumpStructures() {
+        String[] names = masterPVDatabase.getStructureNames();
         PVStructure[] pvStructures = masterPVDatabase.getStructures();
-        if(pvStructures.length>0) System.out.printf("\n\nstructures");
-        for(PVStructure pvStructure : pvStructures) {
-            System.out.print(pvStructure.toString());
+        if(pvStructures.length>0) System.out.println("\n\nstructures");
+        for(int i=0; i<names.length; ++i) {
+            System.out.println(names[i]);
+            System.out.println(pvStructures[i]);
         }
     }
     
     static void dumpRecords() {
         PVRecord[] pvRecords = masterPVDatabase.getRecords();
-        if(pvRecords.length>0) System.out.printf("\n\nrecords");
+        if(pvRecords.length>0) System.out.println("\n\nrecords");
         for(PVRecord pvRecord : pvRecords) {
             System.out.print(pvRecord.toString());
         }

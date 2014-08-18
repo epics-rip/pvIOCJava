@@ -6,7 +6,7 @@
 <include href = "ai.xml" />
 <include href = "ao.xml" />
 <include href = "aoIncremental.xml" />
-<include removePath = "${JAVAIOC}/xmltest/analog" />
 <!--
 -->
+<include removePath = "${JAVAIOC}/xmltest/analog" />
 </database>

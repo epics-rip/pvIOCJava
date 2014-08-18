@@ -1,15 +1,48 @@
 TODO
 ===========
 
+unionArray
+----------
+
+Test did not work via swtshell.
+Probably a problem in swtshell but not sure.
+
+caV3
+------
+
+Something wrong
+
+xmltest/enumerated
+--------
+
+enumratedMonitorIndex does not print index=0.
+
+
+xmltest/process
+-------------
+
+For record counterSingleProcessRequesterFalseDelay when it is processed via swtshell the JavaIOC shows the message
+
+info  counterSingleProcessRequesterFalseDelay  active too long
+
+and the swtshell monitor stop updating and has to be stopped and started before it again updates.
+
+
+xmltest/structure
+--------------
+
+Errors when loading records
+
+xmltest/types
+-----------
+
+Errors when loadng records
+
+
 xml
 ------------
 
-The sax xml parser should be changed so that it no longer uses the pvData methods
-that should be removed.
-This includes: PVAuxInfo, PVField::replacePVField, PVStructure::appendPVField,
-PVStructure::appendPVFields, PVStructure::removePVField,
-PVStructure::getExtendsStructureName, and PVStructure::putExtendsStructureName.
-
+The sax xml parser should be changed so that it no longer uses the pvData PVAuxInfo.
 This will also require changes in database and install.
 
 
@@ -22,7 +55,7 @@ simple example server
 ---------------
 Make a simple example server that implements hello world just like pvDatabaseCPP
 Add a section near beginning of pvIOCJava.html describing the example.
-Als describe example/server/pvRecord.txt
+Also` describe example/server/pvRecord.txt
 
 
 pvIOCJava.html

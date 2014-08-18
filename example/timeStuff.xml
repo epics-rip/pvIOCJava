@@ -35,31 +35,31 @@
           <structure name = "interval">
               <structure name = "0" extends = "intAlarmInterval">
                   <scalar name = "value">2</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "index">2</scalar></structure>
                   <scalar name = "message">LOWLOW</scalar>
               </structure>
               <structure name = "1" extends = "intAlarmInterval">
                   <scalar name = "value">4</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "index">1</scalar></structure>
                   <scalar name = "message">LOW</scalar>
               </structure>
               <structure name = "2" extends = "intAlarmInterval">
                   <scalar name = "value">6</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "index">0</scalar></structure>
                   <scalar name = "message">none</scalar>
               </structure>
               <structure name = "3" extends = "intAlarmInterval">
                   <scalar name = "value">8</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "index">1</scalar></structure>
                   <scalar name = "message">HIGH</scalar>
               </structure>
               <structure name = "4" extends = "intAlarmInterval">
                   <scalar name = "value">10</scalar>
-                  <structure name = "severity"><scalar name = "choice">major</scalar></structure>
+                  <structure name = "severity"><scalar name = "index">2</scalar></structure>
                   <scalar name = "message">HIGHHIGH</scalar>
               </structure>
           </structure>
-          <structure name ="outOfRange"><scalar name = "choice">invalid</scalar></structure>
+          <structure name ="outOfRange"><scalar name = "index">3</scalar></structure>
     </structure> 
 </record>
 

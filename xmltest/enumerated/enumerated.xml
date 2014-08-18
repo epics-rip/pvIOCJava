@@ -11,9 +11,7 @@
       </structure>
     </structure>
     <structure name = "scan" extends = "scan" >
-        <structure name = "type">
-            <scalar name = "choice">periodic</scalar>
-        </structure> 
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">1.0</scalar>
         <scalar name = "processAfterStart">true</scalar>
     </structure>
@@ -88,5 +86,8 @@
         <scalar name = "process">true</scalar>
     </structure>
 </record>
+
+<!--
+-->
 
 </database>

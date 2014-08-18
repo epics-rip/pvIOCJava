@@ -38,11 +38,11 @@ public interface PVRecordField extends Requester{
 	 * @return The PVField interface.
 	 */
 	PVField getPVField();
-	/**
-	 * Replace the pvField.
-	 * @param pvField The new pvField;
-	 */
-	void replacePVField(PVField pvField);
+//	/**
+//	 * Replace the pvField.
+//	 * @param pvField The new pvField;
+//	 */
+//	void replacePVField(PVField pvField);
     /**
      * Get the fullFieldName, i.e. the complete hierarchy.
      * @return The name.
@@ -58,11 +58,11 @@ public interface PVRecordField extends Requester{
      * @return The record interface.
      */
     PVRecord getPVRecord();
-    /**
-     * Rename the fieldName of the Field interface.
-     * @param newName The new name for the field.
-     */
-    void renameField(String newName);
+//    /**
+//     * Rename the fieldName of the Field interface.
+//     * @param newName The new name for the field.
+//     */
+//    void renameField(String newName);
     /**
      * Add a listener to this field.
      * @param pvListener The pvListener to add to list for postPut notification.
