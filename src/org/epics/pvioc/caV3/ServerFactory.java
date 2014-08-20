@@ -48,6 +48,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
 import org.epics.pvdata.copy.CreateRequest;
+import org.epics.pvdata.copy.PVCopy;
+import org.epics.pvdata.copy.PVCopyFactory;
 import org.epics.pvdata.factory.ConvertFactory;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.misc.RunnableReady;
@@ -85,8 +87,9 @@ import org.epics.pvioc.database.PVDatabase;
 import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.database.PVRecordClient;
-import org.epics.pvdata.copy.*;
-import org.epics.pvioc.pvAccess.*;
+import org.epics.pvioc.pvAccess.PVCopyMonitor;
+import org.epics.pvioc.pvAccess.PVCopyMonitorFactory;
+import org.epics.pvioc.pvAccess.PVCopyMonitorRequester;
 import org.epics.pvioc.support.ProcessToken;
 import org.epics.pvioc.support.RecordProcess;
 import org.epics.pvioc.support.RecordProcessRequester;
@@ -839,7 +842,7 @@ public class ServerFactory {
             final long TS_EPOCH_SEC_PAST_1970=7305*86400;
             ((TIME)dbr).setTimeStamp(new gov.aps.jca.dbr.TimeStamp(
                 timeStamp.getSecondsPastEpoch()-TS_EPOCH_SEC_PAST_1970,
-                timeStamp.getNanoSeconds()));
+                timeStamp.getNanoseconds()));
         }
 
         private void getAlarmField(DBR dbr,PVStructure pvAlarm) {

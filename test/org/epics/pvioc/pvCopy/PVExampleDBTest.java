@@ -8,7 +8,8 @@ package org.epics.pvioc.pvCopy;
 import junit.framework.TestCase;
 
 import org.epics.pvdata.copy.CreateRequest;
-import org.epics.pvdata.copy.*;
+import org.epics.pvdata.copy.PVCopy;
+import org.epics.pvdata.copy.PVCopyFactory;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVStructure;

@@ -12,6 +12,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.epics.pvaccess.PVAException;
+import org.epics.pvaccess.server.rpc.RPCServer;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Requester;
@@ -20,8 +22,6 @@ import org.epics.pvioc.database.PVDatabaseFactory;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.install.Install;
 import org.epics.pvioc.install.InstallFactory;
-import org.epics.pvaccess.server.rpc.*;
-import org.epics.pvaccess.*;
 /**
  * The main program to start a JavaIOC.
  * The program is started with a command line of

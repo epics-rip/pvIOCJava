@@ -94,7 +94,7 @@ public class IntAlarmFactory {
             if(pvHighAlarmSeverity==null) return;
             pvHighAlarmLimit = pvStructure.getIntField("highAlarmLimit");
             if(pvHighAlarmLimit==null) return;                       
-            pvHystersis = pvStructure.getIntField("hystersis");
+            pvHystersis = pvStructure.getIntField("hysteresis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
         }

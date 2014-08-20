@@ -95,7 +95,7 @@ public class FloatAlarmFactory {
             if(pvHighAlarmSeverity==null) return;
             pvHighAlarmLimit = pvStructure.getFloatField("highAlarmLimit");
             if(pvHighAlarmLimit==null) return;                       
-            pvHystersis = pvStructure.getFloatField("hystersis");
+            pvHystersis = pvStructure.getFloatField("hysteresis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
 

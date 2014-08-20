@@ -531,14 +531,14 @@ public class RecordProcessFactory {
         public void setTimeStamp(TimeStamp timeStamp) {
             checkForIllegalRequest();
             if(trace) traceMessage("setTimeStamp");
-            this.timeStamp.put(timeStamp.getSecondsPastEpoch(),timeStamp.getNanoSeconds());
+            this.timeStamp.put(timeStamp.getSecondsPastEpoch(),timeStamp.getNanoseconds());
         }
         /* (non-Javadoc)
          * @see org.epics.pvioc.process.RecordProcessSupport#getTimeStamp(org.epics.pvioc.util.TimeStamp)
          */
         public void getTimeStamp(TimeStamp timeStamp) {
             checkForIllegalRequest();
-            timeStamp.put(this.timeStamp.getSecondsPastEpoch(), this.timeStamp.getNanoSeconds());
+            timeStamp.put(this.timeStamp.getSecondsPastEpoch(), this.timeStamp.getNanoseconds());
         }
         /* (non-Javadoc)
          * @see org.epics.pvioc.process.SupportProcessRequester#supportProcessDone(org.epics.pvioc.util.RequestResult)

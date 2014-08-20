@@ -96,7 +96,7 @@ public class DoubleAlarmFactory {
             if(pvHighAlarmSeverity==null) return;
             pvHighAlarmLimit = pvStructure.getDoubleField("highAlarmLimit");
             if(pvHighAlarmLimit==null) return;                       
-            pvHystersis = pvStructure.getDoubleField("hystersis");
+            pvHystersis = pvStructure.getDoubleField("hysteresis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
         }

@@ -95,7 +95,7 @@ public class LongAlarmFactory {
             if(pvHighAlarmSeverity==null) return;
             pvHighAlarmLimit = pvStructure.getLongField("highAlarmLimit");
             if(pvHighAlarmLimit==null) return;                       
-            pvHystersis = pvStructure.getLongField("hystersis");
+            pvHystersis = pvStructure.getLongField("hysteresis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
         }

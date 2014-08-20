@@ -72,7 +72,7 @@
         <scalar name = "highWarningSeverity">1</scalar>
         <scalar name = "highAlarmLimit">10</scalar>
         <scalar name = "highAlarmSeverity">2</scalar>
-        <scalar name = "hystersis">0.1</scalar>
+        <scalar name = "hysteresis">0.1</scalar>
     </structure> 
 </record>
 

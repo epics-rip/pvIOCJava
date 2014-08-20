@@ -6,6 +6,8 @@
  */
 package org.epics.pvioc.monitor;
 
+import org.epics.pvdata.copy.PVCopy;
+import org.epics.pvdata.copy.PVCopyFactory;
 import org.epics.pvdata.factory.StatusFactory;
 import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.misc.BitSetUtil;
@@ -32,10 +34,11 @@ import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.StatusCreate;
 import org.epics.pvdata.pv.Type;
-import org.epics.pvdata.copy.*;
 import org.epics.pvioc.database.PVRecord;
 import org.epics.pvioc.database.PVRecordField;
-import org.epics.pvioc.pvAccess.*;
+import org.epics.pvioc.pvAccess.PVCopyMonitor;
+import org.epics.pvioc.pvAccess.PVCopyMonitorFactory;
+import org.epics.pvioc.pvAccess.PVCopyMonitorRequester;
 
 
 /**

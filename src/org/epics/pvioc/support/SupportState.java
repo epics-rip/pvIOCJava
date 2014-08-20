@@ -5,7 +5,6 @@
  */
 package org.epics.pvioc.support;
 
-import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVScalar;
 import org.epics.pvdata.pv.PVScalarArray;

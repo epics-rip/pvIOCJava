@@ -73,7 +73,7 @@ public class MonitorTest extends TestCase {
          PVByte pvValue = pvStructure.getByteField("value");
          assertTrue(pvValue!=null);
          PVLong pvRecordSeconds = (PVLong)pvStructure.getSubField("timeStamp.secondsPastEpoch");
-         PVInt pvRecordNanoSeconds = (PVInt)pvStructure.getSubField("timeStamp.nanoSeconds");
+         PVInt pvRecordNanoseconds = (PVInt)pvStructure.getSubField("timeStamp.nanoseconds");
          PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
          String request = "record[queueSize=1]field(value)";
  //System.out.println("pvRecord " + pvRecord.getPVRecordStructure().getPVField());
@@ -130,7 +130,7 @@ public class MonitorTest extends TestCase {
          pvRecord.beginGroupPut();
          pvValue.put((byte)10);
          pvRecordSeconds.put(100000L);
-         pvRecordNanoSeconds.put(1000000000);
+         pvRecordNanoseconds.put(1000000000);
          pvRecordUserTag.put(1);
          pvRecord.endGroupPut();
          monitorElement = monitorRequester.poll();
@@ -161,7 +161,7 @@ public class MonitorTest extends TestCase {
         PVRecord pvRecord = master.findRecord("powerWithoutDeadband");
         PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         PVLong pvRecordSeconds = (PVLong)pvStructure.getSubField("timeStamp.secondsPastEpoch");
-        PVInt pvRecordNanoSeconds = (PVInt)pvStructure.getSubField("timeStamp.nanoSeconds");
+        PVInt pvRecordNanoseconds = (PVInt)pvStructure.getSubField("timeStamp.nanoseconds");
         PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "record[queueSize=2]field(alarm,timeStamp,power.value)";
@@ -192,7 +192,7 @@ public class MonitorTest extends TestCase {
         monitorRequester.release();
         pvRecord.beginGroupPut();
         pvRecordSeconds.put(5);
-        pvRecordNanoSeconds.put(0);
+        pvRecordNanoseconds.put(0);
         pvRecordUserTag.put(1);
         pvRecordPowerValue.put(5.0);
         pvRecord.endGroupPut();
@@ -258,7 +258,7 @@ public class MonitorTest extends TestCase {
         PVRecord pvRecord = master.findRecord("powerWithDeadband");
         PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         PVLong pvRecordSeconds = (PVLong)pvStructure.getSubField("timeStamp.secondsPastEpoch");
-        PVInt pvRecordNanoSeconds = (PVInt)pvStructure.getSubField("timeStamp.nanoSeconds");
+        PVInt pvRecordNanoseconds = (PVInt)pvStructure.getSubField("timeStamp.nanoseconds");
         PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "alarm,timeStamp,power.value";
@@ -289,7 +289,7 @@ public class MonitorTest extends TestCase {
         monitorRequester.release();
         pvRecord.beginGroupPut();
         pvRecordSeconds.put(5);
-        pvRecordNanoSeconds.put(0);
+        pvRecordNanoseconds.put(0);
         pvRecordUserTag.put(1);
         pvRecordPowerValue.put(5.0);
         pvRecord.endGroupPut();
@@ -352,7 +352,7 @@ public class MonitorTest extends TestCase {
         PVRecord pvRecord = master.findRecord("powerWithDeadbandPercent");
         PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         PVLong pvRecordSeconds = (PVLong)pvStructure.getSubField("timeStamp.secondsPastEpoch");
-        PVInt pvRecordNanoSeconds = (PVInt)pvStructure.getSubField("timeStamp.nanoSeconds");
+        PVInt pvRecordNanoseconds = (PVInt)pvStructure.getSubField("timeStamp.nanoseconds");
         PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "alarm,timeStamp,power.value";
@@ -383,7 +383,7 @@ public class MonitorTest extends TestCase {
         monitorRequester.release();
         pvRecord.beginGroupPut();
         pvRecordSeconds.put(5);
-        pvRecordNanoSeconds.put(0);
+        pvRecordNanoseconds.put(0);
         pvRecordUserTag.put(1);
         pvRecordPowerValue.put(5.0);
         pvRecord.endGroupPut();
@@ -446,7 +446,7 @@ public class MonitorTest extends TestCase {
         PVRecord pvRecord = master.findRecord("powerWithoutDeadband");
         PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         PVLong pvRecordSeconds = (PVLong)pvStructure.getSubField("timeStamp.secondsPastEpoch");
-        PVInt pvRecordNanoSeconds = (PVInt)pvStructure.getSubField("timeStamp.nanoSeconds");
+        PVInt pvRecordNanoseconds = (PVInt)pvStructure.getSubField("timeStamp.nanoseconds");
         PVInt pvRecordUserTag = (PVInt)pvStructure.getSubField("timeStamp.userTag");
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         String request = "record[periodicRate=.2]field(alarm,timeStamp,power.value)";
@@ -477,7 +477,7 @@ public class MonitorTest extends TestCase {
         monitorRequester.release();
         pvRecord.beginGroupPut();
         pvRecordSeconds.put(5);
-        pvRecordNanoSeconds.put(0);
+        pvRecordNanoseconds.put(0);
         pvRecordUserTag.put(1);
         pvRecordPowerValue.put(5.0);
         pvRecord.endGroupPut();

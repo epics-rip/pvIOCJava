@@ -96,7 +96,7 @@ public class ShortAlarmFactory {
             if(pvHighAlarmSeverity==null) return;
             pvHighAlarmLimit = pvStructure.getShortField("highAlarmLimit");
             if(pvHighAlarmLimit==null) return;                       
-            pvHystersis = pvStructure.getShortField("hystersis");
+            pvHystersis = pvStructure.getShortField("hysteresis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
         }

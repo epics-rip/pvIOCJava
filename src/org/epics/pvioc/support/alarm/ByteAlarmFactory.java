@@ -98,7 +98,7 @@ public class ByteAlarmFactory {
             if(pvHighAlarmSeverity==null) return;
             pvHighAlarmLimit = pvStructure.getByteField("highAlarmLimit");
             if(pvHighAlarmLimit==null) return;                       
-            pvHystersis = pvStructure.getByteField("hystersis");
+            pvHystersis = pvStructure.getByteField("hysteresis");
             if(pvHystersis==null) return;
             setSupportState(supportState);
         }

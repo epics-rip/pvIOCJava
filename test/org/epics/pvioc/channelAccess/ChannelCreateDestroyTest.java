@@ -10,8 +10,8 @@ import junit.framework.TestCase;
 
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelProvider;
+import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.Requester;

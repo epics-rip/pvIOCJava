@@ -46,7 +46,7 @@ public class PVCopyMonitorRecordTest extends TestCase {
         PVRecord pvRecord = master.findRecord("powerSupply");
         PVStructure pvStructure = pvRecord.getPVRecordStructure().getPVStructure();
         PVLong pvRecordSeconds = (PVLong)pvStructure.getSubField("timeStamp.secondsPastEpoch");
-        PVInt pvRecordNanoSeconds = (PVInt)pvStructure.getSubField("timeStamp.nanoSeconds");
+        PVInt pvRecordNanoseconds = (PVInt)pvStructure.getSubField("timeStamp.nanoseconds");
         PVDouble pvRecordPowerValue = (PVDouble)pvStructure.getSubField("power.value");
         PVStructure pvRequest = null;
         // definitions for PVCopy
@@ -60,7 +60,7 @@ public class PVCopyMonitorRecordTest extends TestCase {
         pvCopyStructure = pvCopy.createPVStructure();
 //System.out.println("pvCopyStructure " + pvCopyStructure);
         PVLong pvCopySeconds = (PVLong)pvCopyStructure.getSubField("timeStamp.secondsPastEpoch");
-        PVInt pvCopyNanoSeconds = (PVInt)pvCopyStructure.getSubField("timeStamp.nanoSeconds");
+        PVInt pvCopyNanoseconds = (PVInt)pvCopyStructure.getSubField("timeStamp.nanoseconds");
         PVDouble pvCopyPowerValue = (PVDouble)pvCopyStructure.getSubField("power.value");
         MonitorElement monitorElement = MonitorQueueFactory.createMonitorElement(pvCopyStructure);
         BitSet changedBitSet = monitorElement.getChangedBitSet();
@@ -76,13 +76,13 @@ public class PVCopyMonitorRecordTest extends TestCase {
         overrunBitSet.clear();
         pvRecord.beginGroupPut();
         assertFalse(changedBitSet.get(pvCopySeconds.getFieldOffset()));
-        assertFalse(changedBitSet.get(pvCopyNanoSeconds.getFieldOffset()));
+        assertFalse(changedBitSet.get(pvCopyNanoseconds.getFieldOffset()));
         assertFalse(changedBitSet.get(pvCopyPowerValue.getFieldOffset()));
         pvRecordSeconds.put(5000);
-        pvRecordNanoSeconds.put(6000);
+        pvRecordNanoseconds.put(6000);
         pvRecordPowerValue.put(1.56);
         assertTrue(changedBitSet.get(pvCopySeconds.getFieldOffset()));
-        assertTrue(changedBitSet.get(pvCopyNanoSeconds.getFieldOffset()));
+        assertTrue(changedBitSet.get(pvCopyNanoseconds.getFieldOffset()));
         assertTrue(changedBitSet.get(pvCopyPowerValue.getFieldOffset()));
         assertFalse(overrunBitSet.get(pvCopyPowerValue.getFieldOffset()));
         pvRecordPowerValue.put(2.0);

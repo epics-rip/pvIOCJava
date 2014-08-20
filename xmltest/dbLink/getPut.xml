@@ -50,7 +50,7 @@
         <scalar name = "highWarningSeverity">1</scalar>
         <scalar name = "highAlarmLimit">10</scalar>
         <scalar name = "highAlarmSeverity">2</scalar>
-        <scalar name = "hystersis">0.3</scalar>
+        <scalar name = "hysteresis">0.3</scalar>
     </structure> 
     <structure name = "delay" extends = "delay"> 
          <scalar name = "min">.1</scalar>

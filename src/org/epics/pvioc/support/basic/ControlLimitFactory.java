@@ -16,7 +16,7 @@ import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Type;
 import org.epics.pvioc.database.PVRecordField;
 import org.epics.pvioc.support.AbstractSupport;
-import org.epics.pvioc.support.*;
+import org.epics.pvioc.support.Support;
 import org.epics.pvioc.support.SupportProcessRequester;
 import org.epics.pvioc.support.alarm.AlarmSupport;
 import org.epics.pvioc.support.alarm.AlarmSupportFactory;
