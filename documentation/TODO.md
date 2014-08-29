@@ -1,11 +1,6 @@
 TODO
 ===========
 
-unionArray
-----------
-
-Test did not work via swtshell.
-Probably a problem in swtshell but not sure.
 
 caV3
 ------

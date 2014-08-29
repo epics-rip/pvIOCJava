@@ -498,6 +498,9 @@ public class ChannelServerFactory  {
                 if(pvFields.length!=1) break;
                 pvField = pvFields[0];
             }
+            if(fieldName.startsWith("field.")) {
+                fieldName = fieldName.substring(6);
+            }
             pvField = pvRecord.getPVRecordStructure().getPVStructure().getSubField(fieldName);
             if(pvField==null) {
                 channelArrayRequester.channelArrayConnect(illegalRequestStatus, null, null);
