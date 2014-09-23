@@ -267,6 +267,18 @@ implements MonitorRequester,Runnable,RecordProcessRequester
     					AlarmSeverity.getSeverity(pvAlarmSeverity.get()),AlarmStatus.DB);
     		} else {
     		    PVField pvFrom = linkPVStructure.getSubField(nameInRemote[i]);
+    		    int fromOffset = pvFrom.getFieldOffset();
+    		    // if any parent bitSet is set then also set pvFrom bitSet
+    		    if(!changeBitSet.get(fromOffset)) {
+    		        PVStructure pvParent = pvFrom.getParent();
+    		        while(pvParent!=null) {
+    		            if(changeBitSet.get(pvParent.getFieldOffset())) {
+    		                changeBitSet.set(fromOffset);
+    		                break;
+    		            }
+    		            pvParent = pvParent.getParent();
+    		        }
+    		    }
     			copyChanged(pvFrom,pvFields[i],changeBitSet,allSet);
     		}
     	}

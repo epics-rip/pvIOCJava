@@ -2,27 +2,6 @@ TODO
 ===========
 
 
-caV3
-------
-
-Something wrong
-
-xmltest/enumerated
---------
-
-enumratedMonitorIndex does not print index=0.
-
-
-xmltest/process
--------------
-
-For record counterSingleProcessRequesterFalseDelay when it is processed via swtshell the JavaIOC shows the message
-
-info  counterSingleProcessRequesterFalseDelay  active too long
-
-and the swtshell monitor stop updating and has to be stopped and started before it again updates.
-
-
 xmltest/structure
 --------------
 
