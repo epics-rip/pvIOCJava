@@ -16,92 +16,57 @@
 </record>
 
 <record recordName = "byte" >
-    <scalar name = "value" scalarType = "byte">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
-        1
-    </scalar>
+    <scalar name = "value" scalarType = "byte"> 1 </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "limitLow">0</scalar>
         <scalar name = "limitHigh">10</scalar>
-    </structure>
-    <structure name = "control" extends = "control" >
-        <scalar name = "limitLow">1</scalar>
-        <scalar name = "limitHigh">9</scalar>
     </structure>
 </record>
 
 <record recordName = "short" >
-    <scalar name = "value" scalarType = "short">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
-        1
-    </scalar>
+    <scalar name = "value" scalarType = "short"> 1 </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "limitLow">0</scalar>
         <scalar name = "limitHigh">10</scalar>
-    </structure>
-    <structure name = "control" extends = "control" >
-        <scalar name = "limitLow">1</scalar>
-        <scalar name = "limitHigh">9</scalar>
     </structure>
 </record>
 
 <record recordName = "int" >
-    <scalar name = "value" scalarType = "int">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
-        1
-    </scalar>
+    <scalar name = "value" scalarType = "int"> 1 </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "limitLow">0</scalar>
         <scalar name = "limitHigh">10</scalar>
-    </structure>
-    <structure name = "control" extends = "control" >
-        <scalar name = "limitLow">1</scalar>
-        <scalar name = "limitHigh">9</scalar>
     </structure>
 </record>
 
 <record recordName = "long" >
-    <scalar name = "value" scalarType = "long">
-        <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
-        1
-    </scalar>
+    <scalar name = "value" scalarType = "long"> 1 </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "limitLow">0</scalar>
         <scalar name = "limitHigh">10</scalar>
-    </structure>
-    <structure name = "control" extends = "control" >
-        <scalar name = "limitLow">1</scalar>
-        <scalar name = "limitHigh">9</scalar>
     </structure>
 </record>
 
 <record recordName = "float" >
-    <scalar name = "value" scalarType = "float">
-    <auxInfo name = "pvReplaceFactory" scalarType = "string">org.epics.pvioc.controlLimitFactory</auxInfo>
-        1
-    </scalar>
+    <scalar name = "value" scalarType = "float"> 1 </scalar>
     <structure name = "timeStamp" extends = "timeStamp" />
     <structure name = "alarm" extends = "alarm" />
     <structure name = "display" extends = "display" >
         <scalar name = "units">volts</scalar>
         <scalar name = "limitLow">0</scalar>
         <scalar name = "limitHigh">10</scalar>
-    </structure>
-    <structure name = "control" extends = "control" >
-        <scalar name = "limitLow">1</scalar>
-        <scalar name = "limitHigh">9</scalar>
     </structure>
 </record>
 

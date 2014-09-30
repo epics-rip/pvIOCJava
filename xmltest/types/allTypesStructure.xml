@@ -4,7 +4,7 @@
 <import name = "org.epics.pvioc.*" />
 <structure structureName = "allTypes">
   <auxInfo name = "support" scalarType = "string">
-      generic
+      org.epics.pvioc.genericFactory
   </auxInfo>
   <scalar name = "boolean" scalarType = "boolean">true</scalar>
   <scalar name = "byte" scalarType = "byte">0xff</scalar>

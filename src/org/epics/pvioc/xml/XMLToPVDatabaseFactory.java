@@ -138,6 +138,7 @@ public class XMLToPVDatabaseFactory {
           //following for PVStructureArray
             PVStructureArray pvStructureArray = null;
             PVStructure[] pvStructures = new PVStructure[1];
+            TreeMap<String,PVField> pvInitialValueSave;
         }
         
         
@@ -469,6 +470,13 @@ public class XMLToPVDatabaseFactory {
             for(String fullFieldName:pvInitialValue.keySet()) {
                 PVField pvFrom = pvInitialValue.get(fullFieldName);
                 PVField pvTo = pvStructure.getSubField(fullFieldName);
+//if(pvFrom==null || pvTo==null) {
+//System.out.println("pvFrom " + pvFrom + " pvTo " + pvTo);
+//System.out.println("fullFieldName  " +fullFieldName + " pvStructure" );
+//System.out.println(pvStructure);
+//System.out.println(pvStructure.getStructure());
+//iocxmlReader.message("putValues",MessageType.warning);
+//}
                 convert.copy(pvFrom,pvTo);
             }
             pvInitialValue.clear();
@@ -973,6 +981,7 @@ public class XMLToPVDatabaseFactory {
                 iocxmlReader.message("name not defined",MessageType.fatalError);
                 throw new IllegalStateException("illegal syntax");
             }
+        	structureState.fieldName = fieldName;
         	PVField pvField = null;
             if(pvStructure!=null) {
                 String fullFieldName = structureState.fullFieldName;
@@ -1027,18 +1036,36 @@ public class XMLToPVDatabaseFactory {
         	structureStack.push(structureState);
         	structureState = new StructureState();
         	structureState.prevState = state;
+        	structureState.fieldName = fieldName;
         	structureState.pvStructureArray = pvStructureArray;
+        	structureState.structure = pvStructureArray.getStructureArray().getStructure();
+        	structureState.pvInitialValueSave = pvInitialValue;
+        	pvInitialValue = new TreeMap<String,PVField>();
             state = State.structureArray;
         }
         
         private void endStructureArray(String name)
         {
+            String fullFieldName = structureStack.lastElement().fullFieldName;
+            if(fullFieldName.length()<1) {
+                fullFieldName = structureState.fieldName;
+            } else {
+                fullFieldName = fullFieldName + "." + structureState.fieldName;
+            }
+            pvInitialValue = structureState.pvInitialValueSave;
+            pvInitialValue.put(fullFieldName,structureState.pvStructureArray);
             if(pvListener!=null) pvListener.endStructure();
+            StructureArray structureArray = structureState.pvStructureArray.getStructureArray();
+            String fieldName = structureState.fieldName;
             state = structureState.prevState;
             structureState = structureStack.pop();
+            if(pvStructure==null && structureState.structure.getField(fieldName)==null) {
+                structureState.structure = fieldCreate.appendField(structureState.structure, fieldName, structureArray);
+            }
         }
         
         private void startStructureArrayElement() {
+            // each structureArray element is a new top level PVStructure
         	PVStructure pvStructure = pvDataCreate.createPVStructure(structureState.pvStructureArray.getStructureArray().getStructure());
         	structureState.pvStructures[0] = pvStructure;
         	state = State.structureArrayElement;
@@ -1046,6 +1073,8 @@ public class XMLToPVDatabaseFactory {
         
         private void endStructureArrayElement() {
         	PVStructureArray pvStructureArray = structureState.pvStructureArray;
+        	putValues(structureState.pvStructures[0]);
+            pvInitialValue.clear();
         	pvStructureArray.put(pvStructureArray.getLength(), 1, structureState.pvStructures, 0);
         	state = State.structureArray;
         }

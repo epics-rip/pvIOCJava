@@ -7,5 +7,7 @@
 <include href = "array.xml" />
 <include href = "counter.xml" />
 <include href = "event.xml" />
+<!--
+-->
 <include removePath = "${JAVAIOC}/example" />
 </database>

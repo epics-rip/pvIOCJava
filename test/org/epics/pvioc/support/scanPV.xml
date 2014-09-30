@@ -4,7 +4,7 @@
 <import name = "org.epics.pvdata.*" />
 <record recordName = "counterPush" extends = "generic">
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">0.2</scalar>
     </structure>
     <scalar name = "value" scalarType = "double" />
@@ -83,7 +83,7 @@
        eventOne
     </scalar>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">periodic</scalar></structure>
+        <structure name = "type"> <scalar name = "index">2</scalar> </structure>
         <scalar name = "rate">0.1</scalar>
     </structure>
 </record>
@@ -96,7 +96,7 @@
       </structure>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">event</scalar></structure>
+        <structure name = "type"> <scalar name = "index">1</scalar> </structure>
         <scalar name = "eventName">eventOne</scalar>
     </structure>
 </record>
@@ -108,9 +108,9 @@
       </structure>
     </structure>
     <structure name = "scan" extends = "scan">
-        <structure name = "type"><scalar name = "choice">event</scalar></structure>
+        <structure name = "type"> <scalar name = "index">1</scalar> </structure>
         <scalar name = "eventName">eventOne</scalar>
-        <structure name = "priority"><scalar name = "choice">middle</scalar></structure>
+        <structure name = "priority"><scalar name = "index">3</scalar></structure>
     </structure>
 </record>
 

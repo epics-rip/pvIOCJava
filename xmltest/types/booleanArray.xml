@@ -11,7 +11,7 @@
         <scalar name = "rate">1.0</scalar>
     </structure>
     <structure name = "input" extends = "calculation" >
-      <structure name = "calculator" extends = "generic">
+      <structure name = "calculator">
           <auxInfo name = "supportFactory" scalarType = "string">org.epics.pvioc.booleanArrayToggleCalculatorFactory</auxInfo>
       </structure>
     </structure>

@@ -4,13 +4,13 @@
 <import name = "org.epics.pvdata.*" />
 <include addPath = "${JAVAIOC}/xmltest/types" />
 <include href = "dataOnly.xml" />
+<!--
+-->
 <include href = "array.xml" />
 <include href = "booleanArray.xml" />
 <include href = "string.xml" />
 <include href = "scalar.xml" />
-<!--
 
--->
 <include removePath = "${JAVAIOC}/xmltest/types" />
 
 </database>
