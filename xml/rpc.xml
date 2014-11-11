@@ -2,7 +2,6 @@
 <database>
 <import name = "org.epics.pvioc.*" />
 <import name = "org.epics.pvdata.*" />
-<record recordName = "${IOCNAME}recordListPGRPC" extends = "recordList" />
 <record recordName = "${IOCNAME}structureListPGRPC" extends = "structureList" />
 <record recordName = "${IOCNAME}iocShowPGRPC" extends = "iocShow" />
 <record recordName = "${IOCNAME}recordShowPGRPC" extends = "recordShow" />
