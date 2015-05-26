@@ -1,6 +1,11 @@
 TODO
 ===========
 
+MonitorFactory and PVCopyMonitorFactory
+---------------
+
+These have race conditions.
+Look at code in pvDatabaseCPP for how to correct problems.
 
 xmltest/structure
 --------------
